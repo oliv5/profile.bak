@@ -25,3 +25,11 @@ function git-import() {
 function git-meld() {
   meld "$2" "$5"
 }
+
+function git-amendemail() {
+  git filter-branch --env-filter "if [ \"\$GIT_AUTHOR_EMAIL\" = \"$1\" ]; then GIT_AUTHOR_EMAIL=\"$2\"; fi; export GIT_AUTHOR_EMAIL" "${@:3}"
+}
+
+function git-amendauthor() {
+  git filter-branch --env-filter "if [ \"\$GIT_AUTHOR_NAME\" = \"$1\" ]; then GIT_AUTHOR_NAME=\"$2\"; fi; export GIT_AUTHOR_NAME" "${@:3}"
+}
