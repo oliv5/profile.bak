@@ -1,1 +1,8 @@
 *
+!.gitignore.d
+!bin/profile
+!bin/sshpack
+!.vimrc
+!.vim
+!.config/vcsh
+!.config/geany

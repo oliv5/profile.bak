@@ -1,0 +1,28 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=2347
+
+[GitHub]
+
+The latest dev version of Trinity and screenshots can be downloaded from GitHub Homepage:
+
+https://github.com/wesleyche/Trinity
+
+[Introduction]
+
+The Trinity plugin manages Source Explorer, Taglist and NERD Tree, and build them as a great IDE which works like the "Source Insignt".
+
+[Features]
+
+1\ Automatic Display of Declarations in the Context Window on the bottom in the (G)VIM window using the script named 'Source Explorer(srcexpl.vim)' :
+http://www.vim.org/scripts/script.php?script_id=2179
+
+2\ Symbol Windows For Each File on the left in the (G)VIM window (G)VIM using the script named 'taglist.vim':
+http://www.vim.org/scripts/script.php?script_id=273
+
+3\ Quick Access to All Files on the right in the (G)VIM window using the script named 'The NERD tree(NERD_tree.vim)':
+http://www.vim.org/scripts/script.php?script_id=1658
+
+4\ You can change various options of each plugin in trinity.vim according to you request.
+
+[Declaration]
+
+In order to build such an IDE that implement the main functions(function list, definition and context explorer, file brower), I had modified the source code of 'NERD_tree.zip 2.13.0'. You would note the comments which begin with 'Wenlong Che add/delete for trinity.vim' in the NERD_tree.vim.
