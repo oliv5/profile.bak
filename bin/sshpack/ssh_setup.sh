@@ -12,10 +12,10 @@ read -p "User: " HTTPUSER
 trap "stty echo" SIGINT; stty -echo
 read -p "Password: " HTTPPASSWD
 stty echo; trap "" SIGINT
-wget --user="${HTTPUSER}" --password="${HTTPPASSWD}" "$@" http://olivkta.free.fr/private/bin/sshpack_cfg.7z
+wget --user="${HTTPUSER}" --password="${HTTPPASSWD}" "$@" http://olivkta.free.fr/private/bin/sshpack.7z
 
-# Install .sshpack
-7z x sshpack_cfg.7z
+# Install sshpack
+7z x sshpack.7z
 
-# Delete .sshpack archive
-rm sshpack_cfg.7z
+# Delete sshpack archive
+rm sshpack.7z
