@@ -1,5 +1,5 @@
 #!/bin/sh
-SVN_BACKUP=".backup"
+SVN_BACKUP=".svnbackup"
 
 # Environment
 export SVN_EDITOR=vim

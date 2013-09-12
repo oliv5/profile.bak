@@ -27,6 +27,7 @@ alias b='cdb'
 alias ba='cdb'
 alias bb='cdb;cdb'
 alias bbb='cdb;cdb;cdb'
+alias back='cdb'
 
 # Alias pgrep/pkill
 alias pgrep='pgrep -l'
