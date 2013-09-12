@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Check prerequisites
-command -v git 2>&1 >/dev/null || echo "Git missing, cannot go on..." && exit 1
+command -v git 2>&1 >/dev/null || (echo "Git missing, cannot go on..." && exit 1)
 
 # Goto home directory
 cd $HOME
