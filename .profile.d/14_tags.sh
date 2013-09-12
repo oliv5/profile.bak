@@ -11,28 +11,22 @@ CSCOPE_PATH=".*\.c|.*\.h|.*\.cc"
 
 # Make ctags
 function mkctags() {
-  DIR="${1:-.}"
-  if [ -d "${DIR}" ]; then
-    echo "Make tags in $(readlink -f $DIR) ${@:2}"
-    export CTAGS_DB="${DIR}/tags"
-    #rm "${CTAGS_DB}" 2>/dev/null
-    ctags $CTAGS_OPTS -f "${CTAGS_DB}" "${DIR}" "${@:2}"
-    echo "done"
-  fi
+  DIR=$(readlink -f "${1:-$PWD}")
+  ${QUIET} echo "Make tags in $DIR"
+  export CTAGS_DB="${DIR}/tags"
+  #rm "${CTAGS_DB}" 2>/dev/null
+  ctags $CTAGS_OPTS -f "${CTAGS_DB}" "${DIR}" "${@:2}"
 }
 
 # Make cscope db
 function mkcscope() {
   DIR=$(readlink -f "${1:-$PWD}")
-  if [ -d "$DIR" ]; then
-    echo "Make cscope in $DIR ${@:2}"
-    export CSCOPE_FILES="$DIR/cscope.files"
-    export CSCOPE_DB="$DIR/cscope.out"
-    #rm "$CSCOPE_DB" 2>/dev/null
-    find "$DIR" "${@:2}" -regextype "posix-egrep" -regex "$CSCOPE_PATH" > "$CSCOPE_FILES"
-    cscope $CSCOPE_OPTS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
-    echo "done"
-  fi
+  ${QUIET} echo -n "Make cscope in $DIR"
+  export CSCOPE_FILES="$DIR/cscope.files"
+  export CSCOPE_DB="$DIR/cscope.out"
+  #rm "$CSCOPE_DB" 2>/dev/null
+  find "$DIR" "${@:2}" -regextype "posix-egrep" -regex "$CSCOPE_PATH" > "$CSCOPE_FILES"
+  cscope $CSCOPE_OPTS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
 }
 
 # Make tags and cscope db
@@ -43,13 +37,17 @@ function mkalltags() {
 
 # Clean ctags
 function rmctags() {
-  rm -v "${CTAGS_DB:-tags}"
+  DIR=$(readlink -f "${1:-$PWD}")
+  ${QUIET} echo -n "Remove tags from $DIR"
+  rm -v "${DIR}/tags"
   unset CTAGS_DB
 }
 
 # Clean cscope db
 function rmcscope() {
-  FILE="${CSCOPE_DB:-cscope}"
+  DIR=$(readlink -f "${1:-$PWD}")
+  ${QUIET} echo -n "Remove cscope from $DIR"
+  FILE="${DIR}/cscope"
   rm -v "${FILE}"
   rm -v "${FILE}.in"
   rm -v "${FILE}.po"

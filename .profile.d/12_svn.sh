@@ -1,4 +1,5 @@
 #!/bin/sh
+SVN_BACKUP=".backup"
 
 # Environment
 export SVN_EDITOR=vim
@@ -50,10 +51,13 @@ function svn-merge() {
   fi
 }
 
-# Strong revert
-function svn-revert() {
+# Clean repo, remove unversionned files
+function svn-clean() {
+  # Confirmation
+  echo -n "We are going to remove unversioned files. Go on? (y/n): "
+  read ANSWER; [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ] && exit 0
   # Set backup directory
-  DST="${SVN_ROOT:-./}/.backup"
+  DST="${SVN_ROOT:-./}/${SVN_BACKUP}"
   mkdir -p ${DST}
   # Backup
   svn-export HEAD HEAD "${DST}/backup_$(svn-date).7z"
@@ -65,10 +69,10 @@ function svn-revert() {
   svn up
 }
 
-# Clean repo, don't revert new/modified files
-function svn-clean() {
+# Revert modified files, don't change new files
+function svn-revert() {
   # Set backup directory
-  DST="${SVN_ROOT:-./}/.backup"
+  DST="${SVN_ROOT:-./}/${SVN_BACKUP}"
   mkdir -p ${DST}
   # Backup
   svn-export HEAD HEAD "${DST}/backup_$(svn-date).7z"
@@ -79,7 +83,7 @@ function svn-clean() {
 # Backup current changes
 function svn-export() {
   # Set backup directory
-  DST="${SVN_ROOT:-./}/.backup"
+  DST="${SVN_ROOT:-./}/${SVN_BACKUP}"
   mkdir -p ${DST}
   # Get revisions
   REV0=${1:-HEAD}
@@ -121,13 +125,12 @@ function svn-import() {
   # Check parameters
   [ -z "$1" ] && echo "Missing input archive..." && exit 1
   # Extract with full path
-  7z x "$1" -o ${SVN_ROOT:-./}
+  7z x "$1" -o"${SVN_ROOT:-./}"
 }
 
 # Suspend a CL
 function svn-suspend() {
-  svn-export
-  if [ $? -eq 0 ]; then
+  if svn-export; then
     svn revert -R .
     svn up
   fi
@@ -135,8 +138,7 @@ function svn-suspend() {
 
 # Resume a CL
 function svn-resume() {
-  svn diff --summarize --quiet
-  if [ $? -eq 0 ]; then
+  if svn diff --summarize --quiet; then
     svn-import "$1"
   else
     echo "Your repository has local changes. Cannot resume CL safely..."
