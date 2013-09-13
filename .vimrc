@@ -502,7 +502,6 @@ function! CleverTab()
   endif
 endfunction
 inoremap <C-space>  <C-R>=CleverTab()<CR>
-inoremap <Tab>      <C-R>=CleverTab()<CR>
 
 
 " *******************************************************
