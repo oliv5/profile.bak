@@ -9,8 +9,12 @@ ARCHIVE="$HOME/sshpack.7z"
 command -v ftp 2>&1 >/dev/null || (echo "Ftp missing, cannot go on..." && exit 1)
 command -v 7z 2>&1 >/dev/null || (echo "7z missing, cannot go on..." && exit 1)
 
+# Delete existing archive
+rm "${ARCHIVE}" 2>/dev/null
+
 # Compress profile
 7z a $OPTS_7Z -mhe=on -p "${ARCHIVE}" "$HOME/.sshpack" "$HOME/bin/sshpack"
+[ ! -f ${ARCHIVE} ] && exit 2
 
 # Push to server
 ftp -n -i -d <<END_SCRIPT
@@ -18,9 +22,9 @@ ftp -n -i -d <<END_SCRIPT
   user ${FTPUSER}
   cd ${FTPPWD}
   bin
-  put "${ARCHIVE}"
+  put $(basename ${ARCHIVE})
   quit
 END_SCRIPT
 
-# Delete profile archive
+# Delete archive
 rm "${ARCHIVE}"

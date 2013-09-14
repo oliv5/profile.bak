@@ -8,11 +8,13 @@ command -v 7z 2>&1 >/dev/null || (echo "7z missing, cannot go on..." && exit 1)
 cd $HOME
 
 # Download .sshpack
+echo "Sshpack download via HTTP"
 read -p "User: " HTTPUSER
 trap "stty echo" SIGINT; stty -echo
-read -p "Password: " HTTPPASSWD
+read -p "Passwd: " HTTPPASSWD
 stty echo; trap "" SIGINT
 wget --user="${HTTPUSER}" --password="${HTTPPASSWD}" "$@" http://olivkta.free.fr/private/bin/sshpack.7z
+[ -f sshpack.7z ] || exit 2
 
 # Install sshpack
 7z x sshpack.7z
@@ -21,4 +23,4 @@ wget --user="${HTTPUSER}" --password="${HTTPPASSWD}" "$@" http://olivkta.free.fr
 rm sshpack.7z
 
 # Set permissions on .sshpack
-chmod 700 .sshpack/
+chmod 700 -R .sshpack/

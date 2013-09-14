@@ -4,6 +4,7 @@
 #  $(which meld) "$@" &
 #}
 
+alias rdiff='ddiff'
 function ddiff() {
   diff -rq "$@" | grep -vE ".svn|.git"
 }

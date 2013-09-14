@@ -7,5 +7,6 @@ function ssh-source() {
 }
 
 # Main
-export SSHPACK_PATH="${ENV_PATH}"
+export SSHPACK_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export PATH="$PATH:$SSHPACK_PATH"
 ssh-source
