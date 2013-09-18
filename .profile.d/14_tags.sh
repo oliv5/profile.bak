@@ -15,7 +15,7 @@ function mkctags() {
   ${QUIET} echo "Make tags in $DIR"
   export CTAGS_DB="${DIR}/tags"
   #rm "${CTAGS_DB}" 2>/dev/null
-  ctags $CTAGS_OPTS -f "${CTAGS_DB}" "${DIR}" "${@:2}"
+  ctags $CTAGS_OPTS -f "${CTAGS_DB}" "${DIR}"
 }
 
 # Make cscope db
@@ -23,16 +23,18 @@ function mkcscope() {
   DIR=$(readlink -f "${1:-$PWD}")
   ${QUIET} echo -n "Make cscope in $DIR"
   export CSCOPE_FILES="$DIR/cscope.files"
-  export CSCOPE_DB="$DIR/cscope.out"
+  export CSCOPE_DB="$DIR/cscope"
   #rm "$CSCOPE_DB" 2>/dev/null
-  find "$DIR" "${@:2}" -regextype "posix-egrep" -regex "$CSCOPE_PATH" > "$CSCOPE_FILES"
+  set -f
+  find "$DIR" -regextype "posix-egrep" ${@:2} -regex "$CSCOPE_PATH" > "$CSCOPE_FILES"
+  set +f
   cscope $CSCOPE_OPTS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
 }
 
 # Make tags and cscope db
 function mkalltags() {
-  mkctags "$@"
-  mkcscope "$@"
+  mkctags "$1"
+  mkcscope "$1" ${@:2}
 }
 
 # Clean ctags
