@@ -16,7 +16,7 @@ cd ${HOME}
 rm "${ARCHIVE}" 2>/dev/null
 
 # Compress profile
-7z a $OPTS_7Z -mhe=on -p "${ARCHIVE}" "$HOME/.sshpack" "$HOME/bin/sshpack"
+7z a $OPTS_7Z -mhe=on -p "${ARCHIVE}" "$HOME/sshpack"
 [ ! -f ${ARCHIVE} ] && exit 2
 
 # Push to server

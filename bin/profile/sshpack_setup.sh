@@ -23,6 +23,6 @@ wget --user="${HTTPUSER}" --password="${HTTPPASSWD}" "$@" http://olivkta.free.fr
 rm sshpack.7z
 
 # Set permissions on .sshpack
-find .sshpack/ -type d -execdir chmod 700 {} \;
-find .sshpack/ -type f -execdir chmod 600 {} \;
-find .sshpack/ -type f -name "*.sh" -execdir chmod +x {} \;
+find sshpack/ -type d -execdir chmod 700 {} \;
+find sshpack/ -type f -execdir chmod 600 {} \;
+find sshpack/ -type f -name "*.sh" -execdir chmod +x {} \;

@@ -51,6 +51,26 @@ function svn-merge() {
   fi
 }
 
+# Get svn repository path
+function svn-repo() {
+  svn info "$@" | grep "Repository Root:" | grep -oh 'svn.*'
+}
+
+# Get svn repository tree name
+function svn-tree() {
+  svn info "$@" | grep "Repository Root:" | grep -oh '[^/]*$'
+}
+
+# Get svn repository revision
+function svn-rev() {
+  svn info "$@" | grep "Revision:" | grep -oh '[0-9]\+'
+}
+
+# Check svn repository existenz
+function svn-exists() {
+  svn info "$@" > /dev/null
+}
+
 # Clean repo, remove unversionned files
 function svn-clean() {
   # Confirmation
@@ -74,6 +94,8 @@ function svn-revert() {
   # Set backup directory
   DST="${SVN_ROOT:-./}/${SVN_BACKUP}"
   mkdir -p ${DST}
+  # Check we are in a repository
+  svn-exists || return
   # Backup
   svn-export HEAD HEAD "${DST}/backup_$(svn-date).7z"
   # Remove files not in SVN
@@ -88,13 +110,15 @@ function svn-export() {
   # Get revisions
   REV0=${1:-HEAD}
   REV1=${2:-HEAD}
+  # Check we are in a repository
+  svn-exists || return
   # Get archive path, if not specified
   ARCHIVE="$3"
   if [ -z "$ARCHIVE" ]; then
-    REPO=$(svn info | grep "Repository Root:" | grep -oh '[^/]*$')
+    REPO=$(svn-tree)
     if [ "$REV0" == "HEAD" ]; then
       # Export changes made upon HEAD
-      REV=$(svn info | grep "Revision:" | awk '{print $2;}')
+      REV=$(svn-rev)
       ARCHIVE="${DST}/${REPO}_r${REV}_$(svn-date).7z"
     else
       # Export changes between the 2 revisions
@@ -124,6 +148,8 @@ function svn-export() {
 function svn-import() {
   # Check parameters
   [ -z "$1" ] && echo "Missing input archive..." && exit 1
+  # Check we are in a repository
+  svn-exists || return
   # Extract with full path
   7z x "$1" -o"${SVN_ROOT:-./}"
 }
@@ -143,6 +169,20 @@ function svn-resume() {
   else
     echo "Your repository has local changes. Cannot resume CL safely..."
   fi
+}
+
+# Extract a CL and compare with current repo
+svn-compare() {
+  # Check parameters
+  [ -z "$1" ] && echo "Missing input archive..." && exit 1
+  # Check we are in a repository
+  svn-exists || return
+  # Extract the CL in /tmp
+  TEMP="$(mktemp -d)"
+  ARCHIVE="${SVN_ROOT:-./}/${SVN_BACKUP}/$1"
+  7z x "$ARCHIVE" -o"$TEMP/"
+  # Compare with repository
+  meld "${2:-.}" "$TEMP"
 }
 
 # Amend a log message
