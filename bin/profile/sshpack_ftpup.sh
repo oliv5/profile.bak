@@ -2,7 +2,7 @@
 OPTS_7Z="-t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off"
 FTPHOST="ftpperso.free.fr"
 FTPUSER="olivkta"
-FTPPWD="/private/bin"
+FTPPWD="/private/bin/sshpack"
 ARCHIVE="$HOME/sshpack.7z"
 
 # Check prerequisites
