@@ -5,6 +5,7 @@ command -v git 2>&1 >/dev/null || (echo "Git missing, cannot go on..." && exit 1
 
 # Goto home directory
 cd $HOME
+mkdir bin 2>/dev/null
 
 # Download and install vcsh if not already there
 if ! command -v vcsh >/dev/null 2>&1; then
