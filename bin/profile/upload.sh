@@ -1,11 +1,11 @@
 #!/bin/sh
+DBG=""
 FILE="${1:?Please specify the file to upload}"
 URL="${2:?Please specify the URL to upload to}"
-URL_UPLOAD_SCRIPT="${3}${FILE}"
 PROTO="${URL%://*}"
-PATH="${URL#*//}"
-SERVER="${PATH%%/*}"
-SUBPATH="${PATH#*/}"
+LONGPATH="${URL#*//}"
+SERVER="${LONGPATH%%/*}"
+SUBPATH="${LONGPATH#*/}"
 SUBDIR="${SUBPATH%/*}"
 SUBFILE="${SUBPATH##*/}"
 
@@ -27,24 +27,24 @@ if [ -z "$TOOL" ]; then
 fi
 
 # Get Usename & password
-echo "Protocol: $PROTO"
+echo "Server: $PROTO://$SERVER"
 read -p "User: " ACCOUNT
 trap "stty echo; trap '' SIGINT" SIGINT; stty -echo
-read -p "Password: " PASSWD
+read -p "Password: " PASSWD; echo
 stty echo; trap "" SIGINT
 
 # Proceed with file transfer
 case $TOOL in
 	curl)
 		if [ "$PROTO" == "ftp" ]; then
-			curl -u $ACCOUNT:$PASSWD -T "$FILE" "$URL" ;;
+			${DBG} curl -v -u $ACCOUNT:$PASSWD -T "$FILE" "$URL"
 		else
-			curl -u $ACCOUNT:$PASSWD "$URL_UPLOAD_SCRIPT" ;;
-		fi
+			${DBG} curl -v -u $ACCOUNT:$PASSWD "$URL"
+		fi;;
 	wget)
-		wget --user="$ACCOUNT" --password="$PASSWD" "$URL_UPLOAD_SCRIPT" ;;
+		${DBG} wget --user="$ACCOUNT" --password="$PASSWD" "$URL" ;;
 	ftp)
-		ftp -n -i -d <<END_SCRIPT
+		${DBG} ftp -n -i -d <<END_SCRIPT
 			open ${SERVER}
 			user ${ACCOUNT}
 			cd ${SUBDIR}

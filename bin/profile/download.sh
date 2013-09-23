@@ -1,9 +1,10 @@
 #!/bin/sh
+DBG=""
 URL="${1:?Please specify the URL to download}"
 PROTO="${URL%://*}"
-PATH="${URL##*//}"
-SERVER="${PATH%%/*}"
-SUBPATH="${PATH#*/}"
+LONGPATH="${URL##*//}"
+SERVER="${LONGPATH%%/*}"
+SUBPATH="${LONGPATH#*/}"
 
 # Find the file transfer tool
 if [ "$PROTO" == "ftp" ]; then
@@ -26,17 +27,17 @@ fi
 echo "Protocol: $PROTO"
 read -p "User: " ACCOUNT
 trap "stty echo; trap '' SIGINT" SIGINT; stty -echo
-read -p "Password: " PASSWD
+read -p "Password: " PASSWD; echo
 stty echo; trap "" SIGINT
 
 # Proceed with file transfer
 case $TOOL in
 	curl)
-		curl -u $ACCOUNT:$PASSWD -O "$URL" ;;
+		${DBG} curl -v -u $ACCOUNT:$PASSWD -O "$URL" ;;
 	wget)
-		wget --user="$ACCOUNT" --password="$PASSWD" "$URL" ;;
+		${DBG} wget --user="$ACCOUNT" --password="$PASSWD" "$URL" ;;
 	ftp)
-		ftp -n -i -d <<END_SCRIPT
+		${DBG} ftp -n -i -d <<END_SCRIPT
 			open ${SERVER}
 			user ${ACCOUNT}
 			bin
