@@ -2,6 +2,8 @@
 DBG=""
 FILE="${1:?Please specify the file to upload}"
 URL="${2:?Please specify the URL to upload to}"
+ACCOUNT="$3"
+PASSWD="$4"
 PROTO="${URL%://*}"
 LONGPATH="${URL#*//}"
 SERVER="${LONGPATH%%/*}"
@@ -28,18 +30,26 @@ fi
 
 # Get Usename & password
 echo "Server: $PROTO://$SERVER"
-read -p "User: " ACCOUNT
-trap "stty echo; trap '' SIGINT" SIGINT; stty -echo
-read -p "Password: " PASSWD; echo
-stty echo; trap "" SIGINT
+if [ -z "$ACCOUNT" ]; then
+	read -p "User: " ACCOUNT
+else
+	echo "User: $ACCOUNT"
+fi
+if [ -z "$PASSWD" ]; then
+	trap "stty echo; trap '' SIGINT" SIGINT; stty -echo
+	read -p "Password: " PASSWD; echo
+	stty echo; trap "" SIGINT
+else
+	echo "Password already known"
+fi
 
 # Proceed with file transfer
 case $TOOL in
 	curl)
 		if [ "$PROTO" == "ftp" ]; then
-			${DBG} curl -v -u $ACCOUNT:$PASSWD -T "$FILE" "$URL"
+			${DBG} curl -u $ACCOUNT:$PASSWD -T "$FILE" "$URL"
 		else
-			${DBG} curl -v -u $ACCOUNT:$PASSWD "$URL"
+			${DBG} curl -u $ACCOUNT:$PASSWD "$URL"
 		fi;;
 	wget)
 		${DBG} wget --user="$ACCOUNT" --password="$PASSWD" "$URL" ;;

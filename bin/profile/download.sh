@@ -1,6 +1,8 @@
 #!/bin/sh
 DBG=""
 URL="${1:?Please specify the URL to download}"
+ACCOUNT="$2"
+PASSWD="$3"
 PROTO="${URL%://*}"
 LONGPATH="${URL##*//}"
 SERVER="${LONGPATH%%/*}"
@@ -24,16 +26,24 @@ if [ -z "$TOOL" ]; then
 fi
 
 # Get Usename & password
-echo "Protocol: $PROTO"
-read -p "User: " ACCOUNT
-trap "stty echo; trap '' SIGINT" SIGINT; stty -echo
-read -p "Password: " PASSWD; echo
-stty echo; trap "" SIGINT
+echo "Server: $PROTO://$SERVER"
+if [ -z "$ACCOUNT" ]; then
+	read -p "User: " ACCOUNT
+else
+	echo "User: $ACCOUNT"
+fi
+if [ -z "$PASSWD" ]; then
+	trap "stty echo; trap '' SIGINT" SIGINT; stty -echo
+	read -p "Password: " PASSWD; echo
+	stty echo; trap "" SIGINT
+else
+	echo "Password already known"
+fi
 
 # Proceed with file transfer
 case $TOOL in
 	curl)
-		${DBG} curl -v -u $ACCOUNT:$PASSWD -O "$URL" ;;
+		${DBG} curl -u $ACCOUNT:$PASSWD -O "$URL" ;;
 	wget)
 		${DBG} wget --user="$ACCOUNT" --password="$PASSWD" "$URL" ;;
 	ftp)
