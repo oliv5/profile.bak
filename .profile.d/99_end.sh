@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Call env external profile script
-if [ -x ~/.localerc ]; then
+if [ -f ~/.localerc ]; then
   source ~/.localerc
 fi
 

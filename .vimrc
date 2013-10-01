@@ -38,6 +38,7 @@ endif
 
 " User commands check
 if !has("user_commands") && !exists("g:reload_vimrc")
+  " Reload .vimrc silently (removes autocommands errors)
   let g:reload_vimrc = 1
   silent! source $MYVIMRC
   finish
@@ -676,6 +677,8 @@ function! s:IdeToggle()
   let s:vimrc_ideOn = !s:vimrc_ideOn
   if s:vimrc_ideOn == 1
     call s:IdeEnable()
+    MBEClose
+    MBEOpen
   else
     call s:IdeDisable()
   endif
@@ -904,91 +907,6 @@ set tags=tags;${TAG_ROOT:-.}/
 " Definition mapping
 Map <C-d><C-v> <C-]>
 
-" Rebuild tag file
-let s:vimrc_updateTagsCmd = "ctags --fields=+iaS --extra=+q --sort=foldcase -R ."
-map <leader>t :call <SID>Vimrc_UpdateTags()<CR>
-
-" Update tags file with the 'ctags' utility
-function! s:Vimrc_UpdateTags() abort
-  " Go to the current work directory
-  silent! exe "cd " . expand('%:p:h')
-  " Get the amount of all files named 'tags'
-  let l:tmp = len(tagfiles())
-  " No tags file or not found one
-  if l:tmp == 0
-
-    " Ask user if or not create a tags file
-    echohl Question
-      call inputsave()
-      let l:tmp = input("\nTags: "
-        \ . "The 'tags' file was not found in your PATH.\n"
-        \ . "Create one in the current directory now? (y)es/(n)o? ")
-      call inputrestore()
-    echohl None
-    echo "\n"
-
-    " Yes
-    if l:tmp == "y" || l:tmp == "yes"
-
-      " Tell user where we create a tags file
-      echohl Question
-        echo "Tags: Creating 'tags' file in (". expand('%:p:h') . ")"
-      echohl None
-      " Call the external 'ctags' utility program
-      exe "!" . s:vimrc_updateTagsCmd
-      " Rejudge the tags file if existed
-      if !filereadable("tags")
-        " Tell them what happened
-        echohl ErrorMsg
-          echo "Tags: Execute 'ctags' utility program failed"
-        echohl None
-        return -1
-      endif
-
-    " No
-    else
-      return -2
-    endif
-
-  " More than one tags file
-  elseif l:tmp > 1
-    echohl ErrorMsg
-      echo "Tags: More than one tags file in your PATH"
-    echohl None
-    return -3
-
-  " Found one successfully
-  else
-
-    " Is the tags file in the current directory ?
-    if tagfiles()[0] ==# "tags"
-      " Prompt the current work directory
-      echohl Question
-        echo "Tags: Updating 'tags' file in (". expand('%:p:h') . ")"
-      echohl None
-      " Call the external 'ctags' utility program
-      exe "!" . s:vimrc_updateTagsCmd
-    " Up to other directories
-    else
-      " Prompt the whole path of the tags file
-      echohl Question
-        echo "Tags: Updating 'tags' file in (". tagfiles()[0][:-6] . ")"
-      echohl None
-      " Store the current word directory at first
-      let l:tmp = getcwd()
-      " Go to the directory that contains the old tags file
-      silent! exe "cd " . tagfiles()[0][:-5]
-      " Call the external 'ctags' utility program
-      exe "!" . s:vimrc_updateTagsCmd
-       " Go back to the original work directory
-       silent! exe "cd " . l:tmp
-    endif
-
-  endif
-  return 0
-endfunction
-
-
 " *******************************************************
 " * Alignment function
 " *******************************************************
@@ -997,11 +915,11 @@ map <leader>= :call <SID>Vimrc_AlignAssignments()<CR>
 
 " Alignement function
 function! s:Vimrc_AlignAssignments ()
-  "Patterns needed to locate assignment operators...
+  " Patterns needed to locate assignment operators...
   let ASSIGN_OP   = '[-+*/%|&]\?=\@<!=[=~]\@!'
   let ASSIGN_LINE = '^\(.\{-}\)\s*\(' . ASSIGN_OP . '\)'
 
-  "Locate block of code to be considered (same indentation, no blanks)
+  " Locate block of code to be considered (same indentation, no blanks)
   let indent_pat = '^' . matchstr(getline('.'), '^\s*') . '\S'
   let firstline  = search('^\%('. indent_pat . '\)\@!','bnW') + 1
   let lastline   = search('^\%('. indent_pat . '\)\@!', 'nW') - 1
@@ -1009,14 +927,14 @@ function! s:Vimrc_AlignAssignments ()
     let lastline = line('$')
   endif
 
-  "Find the column at which the operators should be aligned...
+  " Find the column at which the operators should be aligned...
   let max_align_col = 0
   let max_op_width  = 0
   for linetext in getline(firstline, lastline)
-    "Does this line have an assignment in it?
+    " Does this line have an assignment in it?
     let left_width = match(linetext, '\s*' . ASSIGN_OP)
 
-    "If so, track the maximal assignment column and operator width...
+    " If so, track the maximal assignment column and operator width...
     if left_width >= 0
       let max_align_col = max([max_align_col, left_width])
       let op_width      = strlen(matchstr(linetext, ASSIGN_OP))
@@ -1024,7 +942,7 @@ function! s:Vimrc_AlignAssignments ()
      endif
   endfor
 
-  "Code needed to reformat lines so as to align operators...
+  " Code needed to reformat lines so as to align operators...
   let FORMATTER = '\=printf("%-*s%*s", max_align_col, submatch(1),
   \                                    max_op_width,  submatch(2))'
 

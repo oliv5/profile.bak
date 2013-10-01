@@ -6,7 +6,7 @@ export PATH="${PATH//\~/${HOME}}"
 export PATH="${PATH//.:/}"
 
 # Call env external profile script
-if [ -x ~/.localrc ]; then
+if [ -f ~/.localrc ]; then
   source ~/.localrc
 fi
 
