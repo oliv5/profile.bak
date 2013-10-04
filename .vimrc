@@ -437,10 +437,10 @@ Noremap <C-Down>  <C-W>W
 "noremap <C-L> <C-w>l<C-w>\|
 
 " Exit to normal when changing windows
-"augroup exittonormal
-"  autocmd!
-"  autocmd WinEnter * stopinsert
-"augroup END
+augroup exittonormal
+  autocmd!
+  autocmd WinEnter * stopinsert
+augroup END
 
 
 " *******************************************************
