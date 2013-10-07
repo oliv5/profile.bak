@@ -51,6 +51,14 @@ function svn-merge() {
   fi
 }
 
+# Commit a list of file
+function svn-ci() {
+  # Create a CL from the filelist
+  CL="CL$(svn-date)"
+  svn cl "$CL" "$@"
+  svn ci --cl "$CL"
+}
+
 # Get svn repository path
 function svn-repo() {
   svn info "$@" | grep "Repository Root:" | grep -oh 'svn.*'
