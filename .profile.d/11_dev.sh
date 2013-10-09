@@ -23,7 +23,7 @@ function py()    { _gg "${1}" ${CASE} "${@:3}" "${2:-.}/*.py"; }
 function mk()    { _gg "${1}" ${CASE} "${@:3}" "${2:-.}/*.mk|Makefile"; }
 function shell() { _gg "${1}" ${CASE} "${@:3}" "${2:-.}/*.sh"; }
 function ref()   { _gg "${1}" ${CASE} "${@:3}" "${2:-.}/*.c|*.cpp|*.cc|*.h|*.hpp|*.py|*.mk|Makefile|*.sh"; }
-function vhd()   { _gg "${1}" ${CASE} "${@:3}" "${2:-.}/*.vhd|*.v"; }
+function v()     { _gg "${1}" ${CASE} "${@:3}" "${2:-.}/*.vhd|*.v"; }
 alias ih='CASE=-i h'
 alias ic='CASE=-i c'
 alias ihc='CASE=-i hc'
@@ -31,7 +31,7 @@ alias ipy='CASE=-i py'
 alias imk='CASE=-i mk'
 alias ishell='CASE=-i shell'
 alias iref='CASE=-i ref'
-alias ivhd='CASE=-i vhd'
+alias iv='CASE=-i v'
 
 # Prototype search helper
 function proto() {
