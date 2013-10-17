@@ -6,7 +6,7 @@ export SVN_EDITOR=vim
 
 # Aliases
 alias salias='alias | grep -re " s..\?="'
-alias ss='svn st | grep -E "^(A|\~|D|M|R|\!|---) | sort"'
+alias ss='svn st | grep -E "^(A|\~|D|M|R|C|\!|---) | sort"'
 alias sa='svn st | grep -E "^(A|---) | sort"'
 alias sc='svn st | grep -E "^(C|---) | sort"'
 alias sn='svn st | grep -E "^(\?|\~|---) | sort"'

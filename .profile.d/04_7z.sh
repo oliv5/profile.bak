@@ -18,3 +18,11 @@ function 7ztx() {
     7za x -so $i.tar.7z | tar xf -
   done
 }
+
+# 7z compress directory
+function 7zd() {
+  for DIR in "$@"; do
+    FILE="$(basename $DIR)"
+    7z a ${OPTS_7Z} "${FILE}.7z" "$DIR"
+  done
+}

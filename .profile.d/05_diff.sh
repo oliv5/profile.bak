@@ -14,7 +14,7 @@ function cdiff() {
 }
 
 function qdiff() {
-  if [ $(cdiff "$1" "$2") -gt 10 ]; then
+  if [ $(cdiff "$1" "$2") -gt 1 ]; then
     meld "$@"
   else
     diff "$@"

@@ -724,6 +724,9 @@ if !exists('g:loaded_taglist')
   let g:Tlist_Show_One_File = 1         " Always display one file tags
   let g:Tlist_Display_Tag_Scope = 0     " Display tag scope (function/constants/variables)
   let g:Tlist_Use_SingleClick = 1       " Single click instead of double
+  
+  " Autocommand
+  autocmd BufWritePost *.c,*.cc,*.cpp,*.py,*.mk,Makefile :TlistUpdate
 
   " Toggle ON/OFF
   nmap <localleader>t   :Tlist<CR>
