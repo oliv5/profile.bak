@@ -16,7 +16,7 @@ alias gg='_gg'
 alias igg='NAME=iname _gg'
 function _gg() {
   set -f
-  NAME=${NAME:-name} _ff "${!#}" -type f | xargs grep -E -n --color "${@:1:$(($#-1))}"
+  NAME=${NAME:-name} _ff "${!#}" -type f -print0 | xargs -0 grep -E -n --color "${@:1:$(($#-1))}"
   set +f
 }
 
