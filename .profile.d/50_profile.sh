@@ -39,6 +39,7 @@ alias fo='ffo'
 
 # Alias misc
 alias g='geany'
+alias e='gvim'
 alias gv='gvim'
 alias hi='history'
 alias mo='mimeopen'
