@@ -15,7 +15,6 @@
 !/.config/geany
 !/.config/geany/filedefs
 !/.config/geany/filedefs/filetypes.README
-!/.config/geany/geany.conf
 !/.config/geany/keybindings.conf
 !/.config/geany/plugins
 !/.config/geany/plugins/saveactions
