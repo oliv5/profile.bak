@@ -207,3 +207,24 @@ function svn-get() {
 function svn-config() {
   vi "${HOME}/.subversion/config"
 }
+
+# Print the history of a file
+function svn-history() {
+  url=${1:?Please specify a file name}
+  svn log -q $url | grep -E -e "^r[[:digit:]]+" -o | cut -c2- | sort -n | {
+    # First revision as full text
+    echo
+    read r
+    svn log -r$r $url@HEAD
+    svn cat -r$r $url@HEAD
+    echo
+    # Remaining revisions as differences to previous revision
+    while read r
+    do
+      echo
+      svn log -r$r $url@HEAD
+      svn diff -c$r $url@HEAD
+      echo
+    done
+  }
+}

@@ -330,11 +330,11 @@ nnoremap <leader><F3> :set invhls hls?<CR>
 " Search & replace
 Noremap  <C-F>   /
 Noremap  <C-A-F> yiw<C-O>/<C-R>"
-Noremap  <C-H>   yiw<C-O>:%s/<C-R>"//gc<left><left><left>
-Noremap  <C-A-H> yiw<C-O>:%s/<C-R>"/<C-R>"/gc<left><left><left>
+Noremap  <C-H>   yiw<C-O>:%s/<C-R>"//c<left><left>
+Noremap  <C-A-H> yiw<C-O>:%s/<C-R>"/<C-R>"/c<left><left>
 vnoremap <C-F>   "+y:/<C-R>"
-vnoremap <C-H>   "+y:%s/<C-R>"/<C-R>"/gc<left><left><left>
-vnoremap <C-A-H> "+y:%s/<C-R>"//gc<left><left><left>
+vnoremap <C-H>   "+y:%s/<C-R>"/<C-R>"/c<left><left>
+vnoremap <C-A-H> "+y:%s/<C-R>"//c<left><left>
 
 " F3 for search (n and N)
 Map  <F3>       n
