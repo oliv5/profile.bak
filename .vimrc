@@ -782,7 +782,7 @@ if !exists('g:loaded_minibufexplorer')
   let g:miniBufExplBuffersNeeded = 2
   let g:miniBufExplUseSingleClick = 1
   let g:miniBufExplCycleArround = 1
-  let g:miniBufExplShowBufNumbers = 0
+  let g:miniBufExplShowBufNumbers = 1
   let g:miniBufExplAutoStart = 1
   let g:miniBufExplAutoUpdate = 1
   let g:miniBufExplSplitToEdge = 1

@@ -1,5 +1,4 @@
 #!/bin/sh
-SVN_BACKUP=".svnbackup"
 
 # Environment
 export SVN_EDITOR=vim
@@ -17,6 +16,14 @@ alias sl='svn ls --depth infinity'
 alias sdd='svn diff'
 alias sdm='svn-meld'
 alias sds='svn diff --summarize'
+
+# Returns backup directory
+function svn-getbackup() {
+  ROOT="${SVN_ROOT:-$PWD}"
+  DST=$(readlink -m "${ROOT}/../$(basename $ROOT).svnbackup")
+  mkdir -p ${DST}
+  echo ${DST}
+}
 
 # Retrieve date
 function svn-date() {
@@ -37,7 +44,7 @@ function svn-meld() {
 function svn-merge() {
   if [ -z "$1" ]; then
     export -f svn-merge
-    svn-st "^C" | xargs sh -c 'svn-merge "$@"' _
+    svn-st "^C" | xargs sh -c '[ $# -gt 0 ] && svn-merge "$@"' _
   else
     for file in "$@"; do
       if [ -f ${file}.working ]; then 
@@ -85,8 +92,7 @@ function svn-clean() {
   echo -n "We are going to remove unversioned files. Go on? (y/n): "
   read ANSWER; [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ] && exit 0
   # Set backup directory
-  DST="${SVN_ROOT:-./}/${SVN_BACKUP}"
-  mkdir -p ${DST}
+  DST="$(svn-getbackup)"
   # Backup
   svn-export HEAD HEAD "${DST}/backup_$(svn-date).7z"
   # Remove files not in SVN
@@ -100,8 +106,7 @@ function svn-clean() {
 # Revert modified files, don't change new files
 function svn-revert() {
   # Set backup directory
-  DST="${SVN_ROOT:-./}/${SVN_BACKUP}"
-  mkdir -p ${DST}
+  DST="$(svn-getbackup)"
   # Check we are in a repository
   svn-exists || return
   # Backup
@@ -113,8 +118,7 @@ function svn-revert() {
 # Backup current changes
 function svn-export() {
   # Set backup directory
-  DST="${SVN_ROOT:-./}/${SVN_BACKUP}"
-  mkdir -p ${DST}
+  DST="$(svn-getbackup)"
   # Get revisions
   REV0=${1:-HEAD}
   REV1=${2:-HEAD}
@@ -180,14 +184,14 @@ function svn-resume() {
 }
 
 # Extract a CL and compare with current repo
-svn-compare() {
+function svn-compare() {
   # Check parameters
   [ -z "$1" ] && echo "Missing input archive..." && exit 1
   # Check we are in a repository
   svn-exists || return
   # Extract the CL in /tmp
   TEMP="$(mktemp -d)"
-  ARCHIVE="${SVN_ROOT:-./}/${SVN_BACKUP}/$1"
+  ARCHIVE="$(svn-getbackup)/$1"
   7z x "$ARCHIVE" -o"$TEMP/"
   # Compare with repository
   meld "${2:-.}" "$TEMP"
