@@ -21,7 +21,7 @@ function mkctags() {
 # Make cscope db
 function mkcscope() {
   DIR=$(readlink -f "${1:-$PWD}")
-  ${QUIET} echo -n "Make cscope in $DIR"
+  ${QUIET} echo "Make cscope in $DIR"
   export CSCOPE_FILES="$DIR/cscope.files"
   export CSCOPE_DB="$DIR/cscope"
   #rm "$CSCOPE_DB" 2>/dev/null
@@ -32,7 +32,7 @@ function mkcscope() {
 }
 
 # Make tags and cscope db
-function mkalltags() {
+function mktags() {
   mkctags "$1"
   mkcscope "$1" ${@:2}
 }
@@ -40,7 +40,7 @@ function mkalltags() {
 # Clean ctags
 function rmctags() {
   DIR=$(readlink -f "${1:-$PWD}")
-  ${QUIET} echo -n "Remove tags from $DIR"
+  ${QUIET} echo "Remove tags from $DIR"
   rm -v "${DIR}/tags"
   unset CTAGS_DB
 }
@@ -48,7 +48,7 @@ function rmctags() {
 # Clean cscope db
 function rmcscope() {
   DIR=$(readlink -f "${1:-$PWD}")
-  ${QUIET} echo -n "Remove cscope from $DIR"
+  ${QUIET} echo "Remove cscope from $DIR"
   FILE="${DIR}/cscope"
   rm -v "${FILE}"
   rm -v "${FILE}.in"
@@ -57,7 +57,7 @@ function rmcscope() {
 }
 
 # Clean tags and cscope db
-function rmalltags() {
+function rmtags() {
   rmctags
   rmcscope
 }
