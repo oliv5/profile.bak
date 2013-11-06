@@ -61,6 +61,7 @@ let maplocalleader = ","    " Local leader key
 set nobackup                " No backup
 set noswapfile              " No swap
 set noerrorbells            " No bells (!!)
+set shell=/bin/bash         " Force bash shell
 
 " Force write with sudo after opening the file
 cmap w!! w !sudo tee % >/dev/null
@@ -486,23 +487,23 @@ Map <F1>    :help<space>
 " *******************************************************
 " * Omnicompletion
 " *******************************************************
-filetype plugin on
-set omnifunc=syntaxcomplete#Complete
-inoremap <C-space> <C-x><C-o>
+"filetype plugin on
+"set omnifunc=syntaxcomplete#Complete
+"inoremap <C-space> <C-x><C-o>
 
-function! CleverTab()
-  if pumvisible()
-    return "\<C-N>"
-  endif
-  if strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
-    return "\<Tab>"
-  elseif exists('&omnifunc') && &omnifunc != ''
-    return "\<C-X>\<C-O>"
-  else
-    return "\<C-N>"
-  endif
-endfunction
-inoremap <C-space>  <C-R>=CleverTab()<CR>
+"function! CleverTab()
+"  if pumvisible()
+"    return "\<C-N>"
+"  endif
+"  if strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
+"    return "\<Tab>"
+"  elseif exists('&omnifunc') && &omnifunc != ''
+"    return "\<C-X>\<C-O>"
+"  else
+"    return "\<C-N>"
+"  endif
+"endfunction
+"inoremap <C-space>  <C-R>=CleverTab()<CR>
 
 
 " *******************************************************

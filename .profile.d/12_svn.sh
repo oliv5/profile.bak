@@ -20,7 +20,7 @@ alias sds='svn diff --summarize'
 # Returns backup directory
 function svn-getbackup() {
   ROOT="${SVN_ROOT:-$PWD}"
-  DST=$(readlink -m "${ROOT}/../$(basename $ROOT).svnbackup")
+  DST=$(readlink -m "${ROOT}/../.svnbackup_$(basename $(svn-url))")
   mkdir -p ${DST}
   echo ${DST}
 }
@@ -71,9 +71,9 @@ function svn-repo() {
   svn info "$@" | grep "Repository Root:" | grep -oh 'svn.*'
 }
 
-# Get svn repository tree name
-function svn-tree() {
-  svn info "$@" | grep "Repository Root:" | grep -oh '[^/]*$'
+# Get svn url name
+function svn-url() {
+  svn info "$@" | grep "URL:" | grep -oh 'svn.*'
 }
 
 # Get svn repository revision
@@ -127,7 +127,7 @@ function svn-export() {
   # Get archive path, if not specified
   ARCHIVE="$3"
   if [ -z "$ARCHIVE" ]; then
-    REPO=$(svn-tree)
+    REPO=$(basename $(svn-repo))
     if [ "$REV0" == "HEAD" ]; then
       # Export changes made upon HEAD
       REV=$(svn-rev)
