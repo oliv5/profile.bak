@@ -2,8 +2,8 @@
 # Note: this file must be independant, it can be sourced by external scripts
 
 # Ctags settings
-#CTAGS_OPTS="--c++-kinds=+p --fields=+iaS --extra=+q --sort=foldcase -R" # Include header in list
-CTAGS_OPTS="--fields=+iaS --extra=+q --sort=foldcase -R"
+CTAGS_OPTS="-R --c++-kinds=+p --fields=+iaS --extra=+q --sort=foldcase"
+#CTAGS_OPTS="-R --fields=+iaS --extra=+q --sort=foldcase"
 
 # Cscope default settings
 CSCOPE_OPTS="-bqkv"
