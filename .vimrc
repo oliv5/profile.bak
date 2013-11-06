@@ -487,10 +487,22 @@ Map <F1>    :help<space>
 " *******************************************************
 " * Omnicompletion
 " *******************************************************
+" Enable OmniCppComplete
+"set omnifunc=cppcomplete#CompleteCPP
 "filetype plugin on
-"set omnifunc=syntaxcomplete#Complete
-"inoremap <C-space> <C-x><C-o>
 
+" Enable vim completion
+set omnifunc=syntaxcomplete#Complete
+filetype plugin on
+
+" Set completion options
+set completeopt=longest,menuone
+
+" Map basic key to omnicompletion
+inoremap <C-space> <C-x><C-o>
+
+" Advanced key mapping to omnicompletion
+"inoremap <C-space> <C-R>=CleverTab()<CR>
 "function! CleverTab()
 "  if pumvisible()
 "    return "\<C-N>"
@@ -503,15 +515,16 @@ Map <F1>    :help<space>
 "    return "\<C-N>"
 "  endif
 "endfunction
-"inoremap <C-space>  <C-R>=CleverTab()<CR>
 
 
 " *******************************************************
 " * Plugin general management
 " *******************************************************
 " Start plugin pathogen
+filetype off                " force reloading *after* pathogen loaded
 runtime bundle/pathogen/autoload/pathogen.vim
 execute pathogen#infect()
+filetype plugin indent on   " enable detection, plugins and indenting in one step
 
 " Reload the configuration of some plugins
 " Disable the others
