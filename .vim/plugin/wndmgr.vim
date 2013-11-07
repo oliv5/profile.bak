@@ -10,7 +10,7 @@ if !exists('g:wndmgr_pluginList')
       \ "_NERD_tree_",
       \ "__Tag_List__",
       \ "Source_Explorer",
-      \ ".vimprojects",
+      \ "\.vimprojects",
   \ ]
 endif
 
@@ -19,7 +19,8 @@ function! g:wndmgr_GetEditWnd(start)
   for idx in (range(a:start, winnr("$")))
     for item in g:wndmgr_pluginList
       "echo "[Wndmgr_GetEditWnd]" bufname(winbufnr(idx)) "==" item
-      if bufname(winbufnr(idx)) ==# item
+      "if bufname(winbufnr(idx)) ==# item
+      if !empty(matchstr(bufname(winbufnr(idx)), item))
         let item = -1
         break
       endif
@@ -85,4 +86,16 @@ function! g:wndmgr_UpdateSrcExplWindow()
     endif
     silent! exe l:rtn . "wincmd w"
   endtry
+endfunction
+
+" Find and resize/locate window
+function! g:wndmgr_ExecOnWindow(title, cmd, args)
+  for l:idx in (range(1, winnr("$")))
+    if !empty(matchstr(bufname(winbufnr(l:idx)), a:title))
+      silent! exe l:idx . "wincmd " . "w"
+      silent! exe a:args . "wincmd " . a:cmd
+      "echom "Execute " . a:title . " " . winnr() . ": " . a:args. " wincmd " . a:cmd
+      break
+    endif
+  endfor
 endfunction

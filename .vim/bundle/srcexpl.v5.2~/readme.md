@@ -67,12 +67,13 @@ let g:SrcExpl_jumpKey = "<ENTER>"
 " // Set "Space" key for back from the definition context 
 let g:SrcExpl_gobackKey = "<SPACE>" 
 
-" // In order to avoid conflicts, the Source Explorer should know what plugins
-" // except itself are using buffers. And you need add their buffer names into
-" // below listaccording to the command ":buffers!"
+" // In order to Avoid conflicts, the Source Explorer should know what plugins 
+" // are using buffers. And you need add their bufname into the list below 
+" // according to the command ":buffers!" 
 let g:SrcExpl_pluginList = [ 
         \ "__Tag_List__", 
-        \ "_NERD_tree_" 
+        \ "_NERD_tree_", 
+        \ "Source_Explorer" 
     \ ] 
 
 " // Enable/Disable the local definition searching, and note that this is not 
@@ -100,16 +101,11 @@ let g:SrcExpl_nextDefKey = "<F4>"
 Changelog
 =========
 ```vim
-5.3
-- Fix a bug when operating the Quickfix window after closing the Source Explorer window.
-- Handle the case when the cursor is located at the Quickfix window as same as other
-  external plugins.
-
 5.2
-- Add the fast way for displaying the previous or next definition in the jump list.
-  The new feature is similar with the commands called cprev and cnext for operating
-  the Quickfix list. You can add below config lines in your .vimrc or just update your
-  Trinity to v2.1.
+- Add the fast way for displaying the previous or next definition in
+the jump list. The new feature is similar with the commands called cprev
+and cnext for operating the Quickfix list. You can add below config lines in
+your .vimrc or just update your Trinity to v2.1.
     1. " // Set "<F3>" key for displaying the previous definition in the jump list 
        let g:SrcExpl_prevDefKey = "<F3>" 
     2. " // Set "<F4>" key for displaying the next definition in the jump list 
@@ -118,9 +114,10 @@ Changelog
 
 5.1
 - Added two APIs for serving other plugins:
-    1. SrcExpl_GetWin(), getting the Source Explorer window number for those plugins
-       based on multiple windows.
-    2. SrcExpl_GetVer(), getting the Source Explorer version for the forward compatibility.
+    1. SrcExpl_GetWin(), getting the Source Explorer window number for those
+    plugins based on multiple windows.
+    2. SrcExpl_GetVer(), getting the Source Explorer version for the forward
+    compatibility.
 - Added debug/logging functions for the internal development.
 
 5.0

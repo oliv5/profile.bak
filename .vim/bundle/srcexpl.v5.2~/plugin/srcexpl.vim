@@ -8,8 +8,8 @@
 "              Jonathan Lai <laiks.jonathan@gmail.com>                         "
 " Homepage:    http://www.vim.org/scripts/script.php?script_id=2179            "
 " GitHub:      https://github.com/wesleyche/SrcExpl                            "
-" Version:     5.3                                                             "
-" Last Change: September 10th, 2013                                            "
+" Version:     5.2                                                             "
+" Last Change: March 25th, 2013                                                "
 " Licence:     This program is free software; you can redistribute it and / or "
 "              modify it under the terms of the GNU General Public License as  "
 "              published by the Free Software Foundation; either version 2, or "
@@ -38,7 +38,7 @@
 " |~ \___________\||~           .-------------. |            |~ \____________\||
 " |~               |~           \______________\|            |~                |
 " +-__Tag_List__---+-demo.c----------------------------------+-_NERD_tree_-----+
-" |Source Explorer v5.3           .-----------------.                          |
+" |Source Explorer v5.2           .-----------------.                          |
 " |~                              | Source Explorer |\                         |
 " |~                              .-----------------. |                        |
 " |~                              \__________________\|                        |
@@ -65,12 +65,13 @@
 " // Set "Space" key for back from the definition context                      "
 " let g:SrcExpl_gobackKey = "<SPACE>"
 "                                                                              "
-" // In order to avoid conflicts, the Source Explorer should know what plugins "
-" // except itself are using buffers. And you need add their buffer names into "
-" // below listaccording to the command ":buffers!"                            "
+" // In order to Avoid conflicts, the Source Explorer should know what plugins "
+" // are using buffers. And you need add their buffer names into below list    "
+" // according to the command ":buffers!"                                      "
 " let g:SrcExpl_pluginList = [
 "         \ "__Tag_List__",
-"         \ "_NERD_tree_"
+"         \ "_NERD_tree_",
+"         \ "Source_Explorer"
 "     \ ]
 "                                                                              "
 " // Enable/Disable the local definition searching, and note that this is not  "
@@ -166,7 +167,8 @@ endif
 if !exists('g:SrcExpl_pluginList')
     let g:SrcExpl_pluginList = [
             \ "__Tag_List__",
-            \ "_NERD_tree_"
+            \ "_NERD_tree_",
+            \ "Source_Explorer"
         \ ]
 endif
 
@@ -214,7 +216,7 @@ let g:SrcExpl_markList = []
 let s:SrcExpl_pluginName = 'Source Explorer'
 
 " Plugin version
-let s:SrcExpl_pluginVer = 5.3
+let s:SrcExpl_pluginVer = 5.2
 
 " Buffer name
 let s:SrcExpl_bufName = 'Source_Explorer'
@@ -470,10 +472,12 @@ function! g:SrcExpl_Refresh()
     endif
 
     " Avoid errors of multi-buffers
-    if &modified
-        call <SID>SrcExpl_ReportErr("This modified file is not saved")
-        return -3
-    endif
+    " OLA **
+    "if &modified
+    "    call <SID>SrcExpl_ReportErr("This modified file is not saved")
+    "    return -3
+    "endif
+    " OLA **
 
     " Get the edit window number
     let s:SrcExpl_editWin = winnr()
@@ -800,11 +804,6 @@ function! <SID>SrcExpl_AdaptPlugins()
         endif
     endfor
 
-    " Aslo filter the Quickfix window
-    if &buftype ==# "quickfix"
-        return 0
-    endif
-
     " Safe
     return 0
 
@@ -920,16 +919,16 @@ function! <SID>SrcExpl_SelToJump(dir)
     endif
 
     " Traverse the prompt string until get the file path
-    while !((l:list[l:index] == ']')
-      \ && (l:list[l:index + 1] == ':'))
+    while !((l:list[l:index] == ']') &&
+        \ (l:list[l:index + 1] == ':'))
         let l:index += 1
     endwhile
     " Offset
     let l:index += 3
 
     " Get the whole file path of the exact definition
-    while !((l:list[l:index] == ' ')
-      \ && (l:list[l:index + 1] == '['))
+    while !((l:list[l:index] == ' ') &&
+        \ (l:list[l:index + 1] == '['))
         let l:fpath = l:fpath . l:list[l:index]
         let l:index += 1
     endwhile
@@ -937,8 +936,8 @@ function! <SID>SrcExpl_SelToJump(dir)
     let l:index += 2
 
     " Traverse the prompt string until get the symbol
-    while !((l:list[l:index] == ']')
-      \ && (l:list[l:index + 1] == ':'))
+    while !((l:list[l:index] == ']') &&
+        \ (l:list[l:index + 1] == ':'))
         let l:index += 1
     endwhile
     " Offset
@@ -1336,21 +1335,16 @@ function! <SID>SrcExpl_GetEditWin()
                 let l:j += 1
             endif
         endfor
-
+        " We've found one
         if j >= len(g:SrcExpl_pluginList)
-          \ && getbufvar(winbufnr(l:i), '&buftype') !=# "quickfix"
-            " We've found one
             return l:i
         else
             let l:i += 1
-        endif
-
-        if l:i > winnr("$")
-            " Not found
-            return -1
-        else
-            " Try the next one
             let l:j = 0
+        endif
+        " Not found finally
+        if l:i > winnr("$")
+            return -1
         endif
     endwhile
 
@@ -1464,10 +1458,10 @@ function! <SID>SrcExpl_Init()
     " Not found
     if l:tmp < 0
         " Can not find the edit window
-        call <SID>SrcExpl_ReportErr("Edit Window Not Found")
+        call <SID>SrcExpl_ReportErr("Can not Found the edit window")
         return -1
     endif
-    " Jump to the edit window
+    " Jump to that
     silent! exe l:tmp . "wincmd w"
 
     if g:SrcExpl_isUpdateTags != 0
@@ -1550,10 +1544,10 @@ function! <SID>SrcExpl_Close()
             call <SID>SrcExpl_ReportErr("Not support multiple tab pages")
             return -1
         endif
-        " Do the cleaning work
-        call <SID>SrcExpl_CleanUp()
         " Close the window
         call <SID>SrcExpl_WinClose()
+        " Do the cleaning work
+        call <SID>SrcExpl_CleanUp()
         " We change the flag to false
         let s:SrcExpl_isRunning = 0
     else

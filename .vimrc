@@ -622,10 +622,17 @@ elseif $VIM_IDE == 4
 
   " IDE with Project, Taglist, SrcExplorer
   function! s:IdeEnable()
+    SrcExpl
     TlistOpen
     Project
-    SrcExpl
-    call g:wndmgr_UpdateSrcExplWindow()
+    "call g:wndmgr_ExecOnWindow("__Tag_List__","H","")
+    "call g:wndmgr_ExecOnWindow("\.vimprojects","L","")
+    "call g:wndmgr_ExecOnWindow("Source_Explorer","J","")
+    call g:wndmgr_ExecOnWindow("__Tag_List__","|",g:Tlist_WinWidth)
+    call g:wndmgr_ExecOnWindow("\.vimprojects","|",g:proj_window_width)
+    call g:wndmgr_ExecOnWindow("Source_Explorer","_",g:SrcExpl_winHeight)
+    call g:wndmgr_JumpEditWnd()
+    call g:wndmgr_ExecOnWindow("Source_Explorer","_",g:SrcExpl_winHeight)
   endfunction
 
   function! s:IdeDisable()
@@ -754,15 +761,15 @@ endif
 if !exists('g:loaded_srcexpl')
   " Options
   let g:SrcExpl_winHeight = 8         " Set the height of Source Explorer window
-  let g:SrcExpl_refreshTime = 1       " Set 1 ms for refreshing the Source Explorer
+  let g:SrcExpl_refreshTime = 100     " Set 100 ms for refreshing the Source Explorer
   let g:SrcExpl_jumpKey = "<ENTER>"   " Set "Enter" key to jump into the exact definition context
   let g:SrcExpl_gobackKey = "<BACKSPACE>" " Set "Space" key for back from the definition context
-  let g:SrcExpl_searchLocalDef = 1    " Enable/Disable the local definition searching
+  let g:SrcExpl_searchLocalDef = 0    " Enable/Disable the local definition searching
   let g:SrcExpl_isUpdateTags = 0      " Tag update on file opening
   let g:SrcExpl_updateTagsCmd = ""    " Tag updatecommand
   let g:SrcExpl_updateTagsKey = ""    " Tag update key
-  let g:SrcExpl_prevDefKey = ""       " Show prev definition in jump list
-  let g:SrcExpl_nextDefKey = ""       " Show next definition in jump list
+  let g:SrcExpl_prevDefKey = "<F6>"   " Show prev definition in jump list
+  let g:SrcExpl_nextDefKey = "<F7>"   " Show next definition in jump list
   let g:SrcExpl_pluginList = g:wndmgr_pluginList " Plugin names that are using buffers
 
   " Toggle ON/OFF
