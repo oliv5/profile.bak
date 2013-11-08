@@ -127,7 +127,7 @@ function svn-export() {
   # Get archive path, if not specified
   ARCHIVE="$3"
   if [ -z "$ARCHIVE" ]; then
-    REPO=$(basename $(svn-repo))
+    REPO=$(basename $(svn-repo)_$(basename $(svn-url)))
     if [ "$REV0" == "HEAD" ]; then
       # Export changes made upon HEAD
       REV=$(svn-rev)
