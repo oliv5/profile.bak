@@ -499,22 +499,22 @@ filetype plugin on
 set completeopt=longest,menuone
 
 " Map basic key to omnicompletion
-inoremap <C-space> <C-x><C-o>
+"inoremap <C-space> <C-x><C-o>
 
 " Advanced key mapping to omnicompletion
-"inoremap <C-space> <C-R>=CleverTab()<CR>
-"function! CleverTab()
-"  if pumvisible()
-"    return "\<C-N>"
-"  endif
-"  if strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
-"    return "\<Tab>"
-"  elseif exists('&omnifunc') && &omnifunc != ''
-"    return "\<C-X>\<C-O>"
-"  else
-"    return "\<C-N>"
-"  endif
-"endfunction
+inoremap <C-space> <C-R>=CleverTab()<CR>
+function! CleverTab()
+  if pumvisible()
+    return "\<C-N>"
+  endif
+  if strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
+    return "\<Tab>"
+  elseif exists('&omnifunc') && &omnifunc != ''
+    return "\<C-X>\<C-O>"
+  else
+    return "\<C-N>"
+  endif
+endfunction
 
 
 " *******************************************************
@@ -527,13 +527,16 @@ execute pathogen#infect()
 filetype plugin indent on   " enable detection, plugins and indenting in one step
 
 " Reload the configuration of some plugins
-" Disable the others
 if exists('g:loaded_minibufexplorer')
   unlet g:loaded_minibufexplorer
 endif
 if exists('g:loaded_yaifa')
   unlet g:loaded_yaifa
 endif
+if exists('g:loaded_cctree')
+  unlet g:loaded_cctree
+endif
+" Disable the following plugins
 let g:loaded_project = 1
 let g:loaded_taglist = 1
 let g:loaded_srcexpl = 1
@@ -899,6 +902,25 @@ if !exists('g:loaded_yankring')
   let g:yankring_paste_v_akey = ""
   let g:yankring_replace_n_pkey = ""
   let g:yankring_replace_n_nkey = ""
+endif
+
+
+" *******************************************************
+" * CCTree plugin
+" *******************************************************
+if !exists('g:loaded_cctree')
+  " Options
+  let g:CCTreeCscopeDb = "$CSCOPE_DB"
+  let g:CCTreeDisplayMode = 2
+  
+  " Key mappings
+  let g:CCTreeKeyTraceForwardTree = '<F10>' 
+  let g:CCTreeKeyTraceReverseTree = '<F11>' 
+  let g:CCTreeKeyToggleWindow = '<F12>' 
+  
+  " Autocommands
+  autocmd VimEnter * if filereadable('$CSCOPE_DB') | CCTreeLoadDB $CSCOPE_DB | endif
+  autocmd VimEnter * if filereadable('xref.out') | CCTreeLoadXRefDbFromDisk xref.out | endif
 endif
 
 
