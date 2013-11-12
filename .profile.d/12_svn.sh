@@ -17,12 +17,18 @@ alias sdd='svn diff'
 alias sdm='svn-meld'
 alias sds='svn diff --summarize'
 
-# Returns backup directory
-function svn-getbackup() {
+# Build a unique backup directory for this repo
+function svn-bckdir() {
   ROOT="${SVN_ROOT:-$PWD}"
-  DST=$(readlink -m "${ROOT}/../.svnbackup_$(basename $(svn-url))")
+  DST="${ROOT}/../${1:+$1_}$(basename $(svn-url))${2:+_$2}"
+  DST=$(readlink -m "$DST")
   mkdir -p ${DST}
   echo ${DST}
+}
+
+# Return a unique backup filename for this repo
+function svn-bckname() {
+  echo "${1:+$1_}$(basename $(svn-repo)_$(basename $(svn-url)))${2:+_$2}"
 }
 
 # Retrieve date
@@ -92,7 +98,7 @@ function svn-clean() {
   echo -n "We are going to remove unversioned files. Go on? (y/n): "
   read ANSWER; [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ] && exit 0
   # Set backup directory
-  DST="$(svn-getbackup)"
+  DST="$(svn-bckdir .svnbackup)"
   # Backup
   svn-export HEAD HEAD "${DST}/backup_$(svn-date).7z"
   # Remove files not in SVN
@@ -106,7 +112,7 @@ function svn-clean() {
 # Revert modified files, don't change new files
 function svn-revert() {
   # Set backup directory
-  DST="$(svn-getbackup)"
+  DST="$(svn-bckdir .svnbackup)"
   # Check we are in a repository
   svn-exists || return
   # Backup
@@ -118,7 +124,7 @@ function svn-revert() {
 # Backup current changes
 function svn-export() {
   # Set backup directory
-  DST="$(svn-getbackup)"
+  DST="$(svn-bckdir .svnbackup)"
   # Get revisions
   REV0=${1:-HEAD}
   REV1=${2:-HEAD}
@@ -127,7 +133,8 @@ function svn-export() {
   # Get archive path, if not specified
   ARCHIVE="$3"
   if [ -z "$ARCHIVE" ]; then
-    REPO=$(basename $(svn-repo)_$(basename $(svn-url)))
+    #REPO=$(basename $(svn-repo)_$(basename $(svn-url)))
+    REPO="$(svn-bckname)"
     if [ "$REV0" == "HEAD" ]; then
       # Export changes made upon HEAD
       REV=$(svn-rev)
@@ -168,9 +175,8 @@ function svn-import() {
 
 # Suspend a CL
 function svn-suspend() {
-  if svn-export; then
+  if svn-export HEAD HEAD $(svn-bkpname "suspend" ""); then
     svn revert -R .
-    svn up
   fi
 }
 
@@ -191,7 +197,7 @@ function svn-compare() {
   svn-exists || return
   # Extract the CL in /tmp
   TEMP="$(mktemp -d)"
-  ARCHIVE="$(svn-getbackup)/$1"
+  ARCHIVE="$(svn-bckdir .svnbackup)/$1"
   7z x "$ARCHIVE" -o"$TEMP/"
   # Compare with repository
   meld "${2:-.}" "$TEMP"
@@ -214,7 +220,7 @@ function svn-config() {
 
 # Print the history of a file
 function svn-history() {
-  url=${1:?Please specify a file name}
+  url="${1:?Please specify a file name}"
   svn log -q $url | grep -E -e "^r[[:digit:]]+" -o | cut -c2- | sort -n | {
     # First revision as full text
     echo
