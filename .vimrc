@@ -765,14 +765,14 @@ if !exists('g:loaded_srcexpl')
   " Options
   let g:SrcExpl_winHeight = 8         " Set the height of Source Explorer window
   let g:SrcExpl_refreshTime = 100     " Set 100 ms for refreshing the Source Explorer
-  let g:SrcExpl_jumpKey = "<ENTER>"   " Set "Enter" key to jump into the exact definition context
-  let g:SrcExpl_gobackKey = "<BACKSPACE>" " Set "Space" key for back from the definition context
+  let g:SrcExpl_jumpKey = "<ENTER>"       " Set key to jump into the exact definition context
+  let g:SrcExpl_gobackKey = "<BACKSPACE>" " Set key for back from the definition context
   let g:SrcExpl_searchLocalDef = 0    " Enable/Disable the local definition searching
   let g:SrcExpl_isUpdateTags = 0      " Tag update on file opening
-  let g:SrcExpl_updateTagsCmd = ""    " Tag updatecommand
+  let g:SrcExpl_updateTagsCmd = ""    " Tag update command
   let g:SrcExpl_updateTagsKey = ""    " Tag update key
   let g:SrcExpl_prevDefKey = "<F6>"   " Show prev definition in jump list
-  let g:SrcExpl_nextDefKey = "<F7>"   " Show next definition in jump list
+  let g:SrcExpl_nextDefKey = "<S-F6>" " Show next definition in jump list
   let g:SrcExpl_pluginList = g:wndmgr_pluginList " Plugin names that are using buffers
 
   " Toggle ON/OFF
