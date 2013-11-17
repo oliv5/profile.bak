@@ -26,3 +26,11 @@ function toUpper()
 {
   echo "${@}" | tr "[:lower:]" "[:upper:]"
 }
+
+# Get password
+function getpwd() {
+	trap "stty echo; trap '' SIGINT" SIGINT; stty -echo
+	read -p "${1:-Password: }" PASSWD; echo
+	stty echo; trap "" SIGINT
+    echo $PASSWD
+}
