@@ -61,6 +61,7 @@ let maplocalleader = ","    " Local leader key
 set nobackup                " No backup
 set noswapfile              " No swap
 set noerrorbells            " No bells (!!)
+set novisualbell            " No visual bells too
 set shell=/bin/bash         " Force bash shell
 
 " Force write with sudo after opening the file
@@ -767,7 +768,7 @@ if !exists('g:loaded_srcexpl')
   let g:SrcExpl_refreshTime = 100     " Set 100 ms for refreshing the Source Explorer
   let g:SrcExpl_jumpKey = "<ENTER>"       " Set key to jump into the exact definition context
   let g:SrcExpl_gobackKey = "<BACKSPACE>" " Set key for back from the definition context
-  let g:SrcExpl_searchLocalDef = 0    " Enable/Disable the local definition searching
+  let g:SrcExpl_searchLocalDef = 0    " Enable/Disable the local definition searching (Warning: side effect Ctrl-O/I stop working)
   let g:SrcExpl_isUpdateTags = 0      " Tag update on file opening
   let g:SrcExpl_updateTagsCmd = ""    " Tag update command
   let g:SrcExpl_updateTagsKey = ""    " Tag update key

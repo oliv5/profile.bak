@@ -55,9 +55,9 @@ else
 	echo "User: $ACCOUNT"
 fi
 if [ -z "$PASSWD" ]; then
-	trap "stty echo; trap '' SIGINT" SIGINT; stty -echo
+	trap "stty echo; trap SIGINT" SIGINT; stty -echo
 	read -p "Password: " PASSWD; echo
-	stty echo; trap "" SIGINT
+	stty echo; trap SIGINT
 else
 	echo "Password already known"
 fi
