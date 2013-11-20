@@ -4,19 +4,24 @@
 #  $(which meld) "$@" &
 #}
 
-alias rdiff='ddiff'
 function ddiff() {
   diff -rq "$@" | grep -vE ".svn|.git"
 }
 
 function cdiff() {
+  diff -U 0 "$1" "$2" | grep ^+ | wc -l
+}
+
+function cbdiff() {
   diff -U 0 "$1" "$2" | grep ^@ | wc -l
 }
 
-function qdiff() {
-  if [ $(cdiff "$1" "$2") -gt 1 ]; then
-    meld "$@"
-  else
-    diff "$@"
-  fi
+function ndiff() {
+  true ${1:?Please specify input file 1} ${2:?Please specify input file 2} ${3:?Please specify the character range a-b} 
+  diff <(cut -b $3 "$1")  <(cut -b $3 "$2")
+}
+
+function ndiffm() {
+  true ${1:?Please specify input file 1} ${2:?Please specify input file 2} ${3:?Please specify the character range a-b} 
+  meld <(cut -b $3 "$1")  <(cut -b $3 "$2")
 }

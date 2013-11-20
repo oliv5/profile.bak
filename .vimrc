@@ -742,16 +742,16 @@ if !exists('g:loaded_taglist')
   endif
   let g:Tlist_WinWidth = 22             " Set the window width
   let g:Tlist_Sort_Type = "order"       " Sort by the "order" or "name"
-  let g:Tlist_Compact_Format = 1        " Do not display the help info
+  let g:Tlist_Compact_Format = 1        " Display the help info
   let g:Tlist_Exit_OnlyWindow = 1       " If you are the last, kill yourself
-  let g:Tlist_File_Fold_Auto_Close = 1  " Do not close tags for other files
-  let g:Tlist_Enable_Fold_Column = 0    " Do not show folding tree
+  let g:Tlist_File_Fold_Auto_Close = 1  " Close tags for other files
+  let g:Tlist_Enable_Fold_Column = 0    " Show folding tree
   let g:Tlist_Show_One_File = 1         " Always display one file tags
   let g:Tlist_Display_Tag_Scope = 0     " Display tag scope (function/constants/variables)
   let g:Tlist_Use_SingleClick = 1       " Single click instead of double
   
-  " Autocommand
-  autocmd BufWritePost *.c,*.cc,*.cpp,*.py,*.mk,Makefile :TlistUpdate
+  " Autoload autocommand (may not be necessary)
+  " autocmd BufWritePost *.c,*.cc,*.cpp,*.py,*.mk,Makefile :TlistUpdate
 
   " Toggle ON/OFF
   nmap <localleader>t   :Tlist<CR>
