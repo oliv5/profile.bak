@@ -375,8 +375,11 @@ noremap <C-p> <NOP>
 Noremap  <C-g> :
 
 " Prev/next cursor location
+" Note: <C-[> is Esc
 Noremap <A-Left>  <C-O>
 Noremap <A-Right> <C-I>
+vnoremap <A-Left>  <C-[><C-O>
+vnoremap <A-Right> <C-[><C-I>
 
 " Map F2 to set/jump to marks
 if !exists("g:vimrc_mark")

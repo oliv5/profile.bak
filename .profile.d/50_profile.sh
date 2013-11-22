@@ -33,6 +33,7 @@ alias back='cdb'
 alias pgrep='pgrep -l'
 alias psf='ps -faux'
 alias psd='ps -def'
+alias psg='ps -def | grep -i'
 
 # Alias search & open
 alias fo='ffo'

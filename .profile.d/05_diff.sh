@@ -12,16 +12,16 @@ function cdiff() {
   diff -U 0 "$1" "$2" | grep ^+ | wc -l
 }
 
-function cbdiff() {
+function cdiffb() {
   diff -U 0 "$1" "$2" | grep ^@ | wc -l
 }
 
-function ndiff() {
+function rdiff() {
   true ${1:?Please specify input file 1} ${2:?Please specify input file 2} ${3:?Please specify the character range a-b} 
   diff <(cut -b $3 "$1")  <(cut -b $3 "$2")
 }
 
-function ndiffm() {
+function rdiffm() {
   true ${1:?Please specify input file 1} ${2:?Please specify input file 2} ${3:?Please specify the character range a-b} 
   meld <(cut -b $3 "$1")  <(cut -b $3 "$2")
 }
