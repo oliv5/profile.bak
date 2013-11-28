@@ -116,7 +116,7 @@ function svn-revert() {
   # Check we are in a repository
   svn-exists || return
   # Backup
-  svn-export HEAD HEAD "${DST}/backup_$(svn-date).7z"
+  svn-export HEAD HEAD "${DST}/revert_$(svn-date).7z"
   # Remove files not in SVN
   svn-st "^(\?|\I)" | xargs rm -rv
 }
