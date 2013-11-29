@@ -55,10 +55,14 @@ function svn-merge() {
     for file in "$@"; do
       if [ -f ${file}.working ]; then 
         right="$(ls -1 ${file}.*-right.* | sort -r | head -1)"
-        meld ${right} ${file} ${file}.working 2>/dev/null
+        meld "${right}" "${file}" "${file}.working" 2>/dev/null
+        echo -n "Mark the conflict as resolved? (y/n): "
+        read ANSWER; [ "$ANSWER" == "y" -a "$ANSWER" == "Y" ] && svn resolved "${file}"
       else
         rev="$(ls -1 ${file}.r* | sort -r | head -1)"
-        meld ${rev} ${file} ${file}.mine 2>/dev/null
+        meld "${rev}" "${file}" "${file}.mine" 2>/dev/null
+        echo -n "Mark the conflict as resolved? (y/n): "
+        read ANSWER; [ "$ANSWER" == "y" -a "$ANSWER" == "Y" ] && svn resolved "${file}"
       fi
     done
   fi
@@ -95,21 +99,23 @@ function svn-exists() {
 # Clean repo, remove unversionned files
 function svn-clean() {
   # Confirmation
-  echo -n "We are going to remove unversioned files. Go on? (y/n): "
-  read ANSWER; [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ] && exit 0
+  if [ "$1" != "-y" ]; then
+    echo -n "Remove unversioned files? (y/n): "
+    read ANSWER; [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ] && return 0
+  fi
   # Set backup directory
   DST="$(svn-bckdir .svnbackup)"
+  # Check we are in a repository
+  svn-exists || return
+  # Get archive path, if not specified
+  ARCHIVE="${DST}/${REPO}_r$(svn-rev)_$(svn-date).7z"
   # Backup
-  svn-export HEAD HEAD "${DST}/backup_$(svn-date).7z"
+  svn-st "^(\?|\I)" | 7z a $OPTS_7Z "$ARCHIVE"
   # Remove files not in SVN
   svn-st "^(\?|\I)" | xargs rm -rv
-  # Revert local modifications
-  svn revert -R .
-  # Final update
-  svn up
 }
 
-# Revert modified files, don't change new files
+# Revert modified files, don't change unversionned files
 function svn-revert() {
   # Set backup directory
   DST="$(svn-bckdir .svnbackup)"
@@ -117,8 +123,22 @@ function svn-revert() {
   svn-exists || return
   # Backup
   svn-export HEAD HEAD "${DST}/revert_$(svn-date).7z"
-  # Remove files not in SVN
-  svn-st "^(\?|\I)" | xargs rm -rv
+  # Revert local modifications
+  svn revert -R . ${1:+--cl $1}
+}
+
+# Rollback to a previous revision, don't change unversionned files
+function svn-rollback() {
+  # Get target revision number
+  REV=${1:?Please enter a revision number}
+  # Set backup directory
+  DST="$(svn-bckdir .svnbackup)"
+  # Check we are in a repository
+  svn-exists || return
+  # Backup
+  svn-export HEAD $REV "${DST}/rollback_$(svn-date).7z"
+  # Rollback (svn merge back)
+  svn merge -r HEAD:$REV .
 }
 
 # Backup current changes
