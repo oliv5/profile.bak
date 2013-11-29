@@ -5,12 +5,13 @@ export SVN_EDITOR=vim
 
 # Aliases
 alias salias='alias | grep -re " s..\?="'
-alias ss='svn st | grep -E "^(A|\~|D|M|R|C|\!|---) | sort"'
-alias sa='svn st | grep -E "^(A|---) | sort"'
-alias sc='svn st | grep -E "^(C|---) | sort"'
-alias sn='svn st | grep -E "^(\?|\~|---) | sort"'
-alias sm='svn st | grep -E "^(M|R|---) | sort"'
-alias sd='svn st | grep -E "^D | sort"'
+alias ss='svn st | grep -E "^(A|\~|D|M|R|C|\!|---)" | sort'
+alias sa='svn st | grep -E "^(A|---)" | sort'
+alias sc='svn st | grep -E "^(C|---)" | sort'
+alias sn='svn st | grep -E "^(\?|\~|---)" | sort'
+alias sm='svn st | grep -E "^(M|R|---)" | sort'
+alias sd='svn st | grep -E "^D" | sort'
+alias su='svn st | grep -E "^[^\?]" | sort'
 alias st='svn st | sort'
 alias sl='svn ls --depth infinity'
 alias sdd='svn diff'
@@ -53,17 +54,16 @@ function svn-merge() {
     svn-st "^C" | xargs sh -c '[ $# -gt 0 ] && svn-merge "$@"' _
   else
     for file in "$@"; do
+      echo "Processing file ${file}"
       if [ -f ${file}.working ]; then 
         right="$(ls -1 ${file}.*-right.* | sort -r | head -1)"
         meld "${right}" "${file}" "${file}.working" 2>/dev/null
-        echo -n "Mark the conflict as resolved? (y/n): "
-        read ANSWER; [ "$ANSWER" == "y" -a "$ANSWER" == "Y" ] && svn resolved "${file}"
       else
         rev="$(ls -1 ${file}.r* | sort -r | head -1)"
         meld "${rev}" "${file}" "${file}.mine" 2>/dev/null
-        echo -n "Mark the conflict as resolved? (y/n): "
-        read ANSWER; [ "$ANSWER" == "y" -a "$ANSWER" == "Y" ] && svn resolved "${file}"
       fi
+      echo -n "Mark the conflict as resolved? (y/n): "
+      read ANSWER; [ "$ANSWER" == "y" -o "$ANSWER" == "Y" ] && svn resolved "${file}"
     done
   fi
 }
@@ -107,10 +107,9 @@ function svn-clean() {
   DST="$(svn-bckdir .svnbackup)"
   # Check we are in a repository
   svn-exists || return
-  # Get archive path, if not specified
-  ARCHIVE="${DST}/${REPO}_r$(svn-rev)_$(svn-date).7z"
   # Backup
-  svn-st "^(\?|\I)" | 7z a $OPTS_7Z "$ARCHIVE"
+  svn-st "^(\?|\I)" | xargs 7z a $OPTS_7Z "${DST}/clean_r$(svn-rev)_$(svn-date).7z"
+  echo
   # Remove files not in SVN
   svn-st "^(\?|\I)" | xargs rm -rv
 }
@@ -122,7 +121,7 @@ function svn-revert() {
   # Check we are in a repository
   svn-exists || return
   # Backup
-  svn-export HEAD HEAD "${DST}/revert_$(svn-date).7z"
+  svn-export HEAD HEAD "${DST}/revert_r$(svn-rev)_$(svn-date).7z"
   # Revert local modifications
   svn revert -R . ${1:+--cl $1}
 }
@@ -136,7 +135,7 @@ function svn-rollback() {
   # Check we are in a repository
   svn-exists || return
   # Backup
-  svn-export HEAD $REV "${DST}/rollback_$(svn-date).7z"
+  svn-export HEAD $REV "${DST}/rollback_r${REV}_$(svn-date).7z"
   # Rollback (svn merge back)
   svn merge -r HEAD:$REV .
 }
@@ -195,14 +194,14 @@ function svn-import() {
 
 # Suspend a CL
 function svn-suspend() {
-  if svn-export HEAD HEAD $(svn-bkpname "suspend" ""); then
+  if svn-export HEAD HEAD $(svn-bckname "suspend" ""); then
     svn revert -R .
   fi
 }
 
 # Resume a CL
 function svn-resume() {
-  if svn diff --summarize --quiet; then
+  if ! svn-modified; then
     svn-import "$1"
   else
     echo "Your repository has local changes. Cannot resume CL safely..."
@@ -233,6 +232,11 @@ function svn-get() {
   svn export "$@" "./$(filename $1)"
 }
 
+# Tells when repo has been modified
+function svn-modified() {
+  [ $(svn st | grep -E "^[^\?]" | wc -l) -gt 0 ]
+}
+
 # Edit svn global config
 function svn-config() {
   vi "${HOME}/.subversion/config"
@@ -257,4 +261,22 @@ function svn-history() {
       echo
     done
   }
+}
+
+# Show log in a range of revisions
+function svn-log() {
+  # Get revisions
+  REV0=${1:-HEAD}
+  REV1=${2:-HEAD}
+  # Show log
+  svn log --verbose -r ${REV0}:${REV1} ${@:3}
+}
+
+# List changed files in a range of revisions
+function svn-list() {
+  # Get revisions
+  REV0=${1:-HEAD}
+  REV1=${2:-HEAD}
+  # Show file list
+  svn diff --summarize -r ${REV0}:${REV1} ${@:3}
 }
