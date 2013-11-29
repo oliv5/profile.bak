@@ -413,8 +413,8 @@ Noremap  <C-Tab>  :tabp<CR>
 " Tab enter handler
 "augroup tabenter
 "  autocmd!
-"  autocmd TabEnter *.c,*.h,*.cc,*.hpp,*.cpp,*.slang,*.phyton,*.make call IdeEnable()
-"  autocmd TabLeave *.c,*.h,*.cc,*.hpp,*.cpp,*.slang,*.phyton,*.make call IdeDisable()
+"  autocmd TabEnter *.c,*.h,*.cc,*.hpp,*.cpp,*.slang,*.phyton,*.make call IdeEnable_0()
+"  autocmd TabLeave *.c,*.h,*.cc,*.hpp,*.cpp,*.slang,*.phyton,*.make call IdeDisable_0()
 "augroup END
 
 
@@ -572,13 +572,13 @@ if $VIM_IDE == 1
   unlet g:ccvext_version
 
   " IDE with Project, Taglist, CCVext
-  function! s:IdeEnable()
+  function! s:IdeEnable_0()
     Project
     TlistOpen
     CCVEenQuickSnippet
   endfunction
 
-  function! s:IdeDisable()
+  function! s:IdeDisable_0()
     ProjectClose
     TlistClose
     CCVEdiQuickSnippet
@@ -591,14 +591,14 @@ elseif $VIM_IDE == 2
   unlet g:loaded_srcexpl
 
   " IDE with Taglist, SrcExplorer
-  function! s:IdeEnable()
+  function! s:IdeEnable_0()
     let g:Tlist_Use_Right_Window = 0
     TlistOpen
     SrcExpl
     call g:wndmgr_UpdateSrcExplWindow()
   endfunction
 
-  function! s:IdeDisable()
+  function! s:IdeDisable_0()
     TlistClose
     SrcExplClose
   endfunction
@@ -610,12 +610,12 @@ elseif $VIM_IDE == 3
   unlet g:loaded_taglist
 
   " IDE with Project, Taglist
-  function! s:IdeEnable()
+  function! s:IdeEnable_0()
     Project
     TlistOpen
   endfunction
 
-  function! s:IdeDisable()
+  function! s:IdeDisable_0()
     ProjectClose
     TlistClose
   endfunction
@@ -628,7 +628,7 @@ elseif $VIM_IDE == 4
   unlet g:loaded_srcexpl
 
   " IDE with Project, Taglist, SrcExplorer
-  function! s:IdeEnable()
+  function! s:IdeEnable_0()
     SrcExpl
     TlistOpen
     Project
@@ -642,7 +642,7 @@ elseif $VIM_IDE == 4
     call g:wndmgr_ExecOnWindow("Source_Explorer","_",g:SrcExpl_winHeight)
   endfunction
 
-  function! s:IdeDisable()
+  function! s:IdeDisable_0()
     TlistClose
     ProjectClose
     SrcExplClose
@@ -656,7 +656,7 @@ elseif $VIM_IDE == 5
   unlet g:loaded_srcexpl
 
   " IDE with NERDTree, Taglist, SrcExplorer
-  function! s:IdeEnable()
+  function! s:IdeEnable_0()
     let g:Tlist_Use_Right_Window = 0
     TlistOpen
     NERDTree
@@ -664,7 +664,7 @@ elseif $VIM_IDE == 5
     call g:wndmgr_UpdateSrcExplWindow()
   endfunction
 
-  function! s:IdeDisable()
+  function! s:IdeDisable_0()
     TlistClose
     NERDTreeClose
     SrcExplClose
@@ -679,43 +679,45 @@ else
   unlet g:loaded_trinity
 
   " IDE with Trinity: NERDTree, Taglist, SrcExplorer
-  function! s:IdeEnable()
+  function! s:IdeEnable_0()
     TrinityToggleTagList
     TrinityToggleSourceExplorer
     TrinityUpdateWindow
   endfunction
 
-  function! s:IdeDisable()
+  function! s:IdeDisable_0()
     TrinityToggleTagList
     TrinityToggleSourceExplorer
     TrinityUpdateWindow
   endfunction
 endif
 
-" IDE toggle key
-Noremap <F8>    :call <SID>IdeToggle()<CR>
-
-" IDE commands
-command! -nargs=0 -bar IdeEnable  call <SID>IdeEnable()
-command! -nargs=0 -bar IdeDisable call <SID>IdeDisable()
-command! -nargs=0 -bar IdeToggle  call <SID>IdeToggle()
-
 " IDE toggle function
-function! s:IdeToggle()
-  let s:vimrc_ideOn = !s:vimrc_ideOn
-  if s:vimrc_ideOn == 1
-    call s:IdeEnable()
+function! s:IdeToggle_0()
+  let s:vimrc_ideOn_0 = !s:vimrc_ideOn_0
+  if s:vimrc_ideOn_0 == 1
+    call s:IdeEnable_0()
     MBEClose
     MBEOpen
   else
-    call s:IdeDisable()
+    call s:IdeDisable_0()
   endif
 endfunction
 
 " IDE toggle flag
-if !exists('s:vimrc_ideOn')
-  let s:vimrc_ideOn = 0
+if !exists('s:vimrc_ideOn_0')
+  let s:vimrc_ideOn_0 = 0
 endif
+
+" IDE commands
+command! -nargs=0 -bar IdeEnable0  call <SID>IdeEnable_0()
+command! -nargs=0 -bar IdeDisable0 call <SID>IdeDisable_0()
+command! -nargs=0 -bar IdeToggle0  call <SID>IdeToggle_0()
+
+" IDE toggle keys
+Noremap <F12>    :call <SID>IdeToggle_0()<CR>
+Noremap <F11>    :vsp<CR>
+Noremap <F10>    :sp<CR>
 
 
 " *******************************************************

@@ -37,7 +37,7 @@ function _hh()
   OUT="${@: -2:1}"
   echo "Replace '$IN' by '$OUT' in files '${!#}' from directory '$DIR'?"
   echo "Press enter or Ctrl-C" ; read
-  NAME=${NAME:-name} _ff "${!#}" -type f $EXCLUDE -execdir sed $SEDOPT "s/$IN/$OUT/g" {} \;
+  NAME=${NAME:-name} _ff "${!#}" -type f $EXCLUDE -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
   set +f
   trap SIGINT
 }
