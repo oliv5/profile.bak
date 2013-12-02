@@ -537,9 +537,6 @@ endif
 if exists('g:loaded_yaifa')
   unlet g:loaded_yaifa
 endif
-if exists('g:loaded_cctree')
-  unlet g:loaded_cctree
-endif
 " Disable the following plugins
 let g:loaded_project = 1
 let g:loaded_taglist = 1
@@ -548,6 +545,7 @@ let g:loaded_nerd_tree = 1
 let g:loaded_trinity = 1
 let g:ccvext_version = 1
 let g:loaded_yankring = 1
+let g:loaded_cctree = 1
 
 " Plugins which open window
 let g:wndmgr_pluginList = [
@@ -576,6 +574,8 @@ if $VIM_IDE == 1
     Project
     TlistOpen
     CCVEenQuickSnippet
+    MBEClose
+    MBEOpen
   endfunction
 
   function! s:IdeDisable_0()
@@ -596,6 +596,8 @@ elseif $VIM_IDE == 2
     TlistOpen
     SrcExpl
     call g:wndmgr_UpdateSrcExplWindow()
+    MBEClose
+    MBEOpen
   endfunction
 
   function! s:IdeDisable_0()
@@ -613,6 +615,8 @@ elseif $VIM_IDE == 3
   function! s:IdeEnable_0()
     Project
     TlistOpen
+    MBEClose
+    MBEOpen
   endfunction
 
   function! s:IdeDisable_0()
@@ -640,6 +644,8 @@ elseif $VIM_IDE == 4
     call g:wndmgr_ExecOnWindow("Source_Explorer","_",g:SrcExpl_winHeight)
     call g:wndmgr_JumpEditWnd()
     call g:wndmgr_ExecOnWindow("Source_Explorer","_",g:SrcExpl_winHeight)
+    MBEClose
+    MBEOpen
   endfunction
 
   function! s:IdeDisable_0()
@@ -662,6 +668,8 @@ elseif $VIM_IDE == 5
     NERDTree
     SrcExpl
     call g:wndmgr_UpdateSrcExplWindow()
+    MBEClose
+    MBEOpen
   endfunction
 
   function! s:IdeDisable_0()
@@ -683,6 +691,8 @@ else
     TrinityToggleTagList
     TrinityToggleSourceExplorer
     TrinityUpdateWindow
+    MBEClose
+    MBEOpen
   endfunction
 
   function! s:IdeDisable_0()
@@ -692,32 +702,71 @@ else
   endfunction
 endif
 
-" IDE toggle function
+
+" Vertical split IDE
+function! s:IdeEnable_1()
+  :vsp
+endfunction
+
+function! s:IdeDisable_1()
+  :wincmd c
+endfunction
+
+" Horizontal split IDE
+function! s:IdeEnable_2()
+  :sp
+endfunction
+
+function! s:IdeDisable_2()
+  :wincmd c
+endfunction
+
+
+" IDE toggle functions
 function! s:IdeToggle_0()
   let s:vimrc_ideOn_0 = !s:vimrc_ideOn_0
   if s:vimrc_ideOn_0 == 1
     call s:IdeEnable_0()
-    MBEClose
-    MBEOpen
   else
     call s:IdeDisable_0()
   endif
 endfunction
 
-" IDE toggle flag
+function! s:IdeToggle_1()
+  let s:vimrc_ideOn_1 = !s:vimrc_ideOn_1
+  if s:vimrc_ideOn_1 == 1
+    call s:IdeEnable_1()
+  else
+    call s:IdeDisable_1()
+  endif
+endfunction
+
+function! s:IdeToggle_2()
+  let s:vimrc_ideOn_2 = !s:vimrc_ideOn_2
+  if s:vimrc_ideOn_2 == 1
+    call s:IdeEnable_2()
+  else
+    call s:IdeDisable_2()
+  endif
+endfunction
+
+
+" IDE toggle flags
 if !exists('s:vimrc_ideOn_0')
   let s:vimrc_ideOn_0 = 0
 endif
+if !exists('s:vimrc_ideOn_1')
+  let s:vimrc_ideOn_1 = 0
+endif
+if !exists('s:vimrc_ideOn_2')
+  let s:vimrc_ideOn_2 = 0
+endif
 
-" IDE commands
-command! -nargs=0 -bar IdeEnable0  call <SID>IdeEnable_0()
-command! -nargs=0 -bar IdeDisable0 call <SID>IdeDisable_0()
-command! -nargs=0 -bar IdeToggle0  call <SID>IdeToggle_0()
 
 " IDE toggle keys
 Noremap <F12>    :call <SID>IdeToggle_0()<CR>
-Noremap <F11>    :vsp<CR>
-Noremap <F10>    :sp<CR>
+Noremap <F11>    :call <SID>IdeToggle_1()<CR>
+Noremap <F10>    :call <SID>IdeToggle_2()<CR>
 
 
 " *******************************************************

@@ -54,6 +54,8 @@
 !/.profile.d/disabled
 !/.profile.d/disabled/01_asciiart.sh
 !/.profile.d/disabled/13_search2.sh
+!/.profile.d/test
+!/.profile.d/test/trap_test.sh
 !/.vim
 !/.vim/archive
 !/.vim/archive/buftabs.0.18.vim.tar.bz2
