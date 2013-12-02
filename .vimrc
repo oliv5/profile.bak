@@ -341,9 +341,7 @@ vnoremap <C-A-H> "+y:%s/<C-R>"//c<left><left>
 " F3 for search (n and N)
 Map  <F3>       n
 Map  <S-F3>     N
-Map  <C-F3>     N
 cmap <F3>       <NOP>
-vmap <C-F3>     <F3>N
 vmap <S-F3>     <F3>N
 vnoremap <silent> <F3> :<C-u>
   \let old_reg=getreg('"')<Bar>
