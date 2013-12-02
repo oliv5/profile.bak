@@ -40,17 +40,69 @@ function git-resume() {
   fi
 }
 
-# Revert to a given CL
+# Hard revert to a given CL
 function git-revert() {
   git reset --hard ${1:-HEAD} "${@:2}"
+}
+
+# Soft revert to a given CL, won't change modified files
+function git-rollback() {
+  git reset ${1:-HEAD} "${@:2}"
 }
 
 # Clean repo back to given CL
 # remove unversionned files
 function git-clean() {
   # Confirmation
-  echo -n "We are going to remove unversioned files. Go on? (y/n): "
-  read ANSWER; [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ] && exit 0
+  if [ "$1" != "-y" ]; then
+    echo -n "Remove unversioned files? (y/n): "
+    read ANSWER; [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ] && return 0
+  fi
   # Clean repository
   git clean "$@"
+}
+
+# List files
+function git-ls() {
+  git ls-tree -r ${1:-master} --name-only ${2:+| grep -F "$2"}
+}
+
+# Check commit existenz
+function git-commit-exists() {
+  git rev-parse --verify "${1:?Please enter a commit hash...}" 2>/dev/null
+}
+
+# Amend author/committer names & emails
+function git-amend-names() {
+  # Identify who/what the amend is about
+  AUTHOR_1="${1%%:*}"
+  AUTHOR_2="${1##*:}"
+  AUTHOR_EMAIL_1="${2%%:*}"
+  AUTHOR_EMAIL_2="${2##*:}"
+  COMMITTER_1="${3%%:*}"
+  COMMITTER_2="${3##*:}"
+  COMMITTER_EMAIL_1="${4%%:*}"
+  COMMITTER_EMAIL_2="${4##*:}"
+  # Display what is going to be done
+  echo "Replace author name '$AUTHOR_1' by '$AUTHOR_2'"
+  echo "Replace author email '$AUTHOR_EMAIL_1' by '$AUTHOR_EMAIL_2'"
+  echo "Replace committer name '$COMMITTER_1' by '$COMMITTER_2'"
+  echo "Replace committer email '$COMMITTER_EMAIL_1' by '$COMMITTER_EMAIL_2'"
+  # Write the script
+  SCRIPT='
+    if [ -z "$AUTHOR_1" -o "$GIT_AUTHOR_NAME" = "$AUTHOR_1" ]; then
+      if [ -z "$AUTHOR_EMAIL_1" -o "$GIT_AUTHOR_NAME" = "$AUTHOR_EMAIL_1" ]; then
+        if [ -z "$COMMITTER_1" -o "$GIT_AUTHOR_NAME" = "$COMMITTER_1" ]; then
+          if [ -z "$COMMITTER_EMAIL_1" -o "$GIT_AUTHOR_NAME" = "$COMMITTER_EMAIL_1" ]; then
+            [ "$GIT_AUTHOR_NAME" = "$AUTHOR_1" ] && export GIT_AUTHOR_NAME="$AUTHOR_2"
+            [ "$GIT_AUTHOR_EMAIL" = "$AUTHOR_EMAIL_1" ] && export GIT_AUTHOR_EMAIL="$AUTHOR_EMAIL_2"
+            [ "$GIT_COMMITTER_NAME" = "$COMMITTER_1" ] && export GIT_COMMITTER_NAME="$COMMITTER_2"
+            [ "$GIT_COMMITTER_EMAIL" = "$COMMITTER_EMAIL_1" ] && export GIT_COMMITTER_EMAIL="$COMMITTER_EMAIL_2"
+          fi
+        fi
+      fi
+    fi
+  '
+  # Execute the script
+  git filter-branch --env-filter "$SCRIPT"
 }

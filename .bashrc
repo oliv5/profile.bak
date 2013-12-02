@@ -102,15 +102,6 @@ fi
 # Personnal section
 ######################################
 
-# Set load flag
-export ENV_CNT=$(expr ${ENV_CNT:-0} + 1)
-export ENV_BASHRC=$ENV_CNT
-
-# Load .profile
-if [ -f "$HOME/.profile" ]; then
-  . "$HOME/.profile"
-fi
-
 # Language selection functions
 function lang_fr() {
   export LANGUAGE="fr:en"
@@ -129,5 +120,16 @@ function profile {
     fi
   done
 }
+
+# Set load flag
+export ENV_CNT=$(expr ${ENV_CNT:-0} + 1)
+export ENV_BASHRC=$ENV_CNT
+
+# Load .profile
+if [ -f "$HOME/.profile" ]; then
+  . "$HOME/.profile"
+fi
+
+# Load profile.d scripts
 unalias profile 2>/dev/null
 profile

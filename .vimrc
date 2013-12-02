@@ -824,8 +824,8 @@ if !exists('g:loaded_srcexpl')
   let g:SrcExpl_isUpdateTags = 0      " Tag update on file opening
   let g:SrcExpl_updateTagsCmd = ""    " Tag update command
   let g:SrcExpl_updateTagsKey = ""    " Tag update key
-  let g:SrcExpl_prevDefKey = "<F6>"   " Show prev definition in jump list
-  let g:SrcExpl_nextDefKey = "<S-F6>" " Show next definition in jump list
+  let g:SrcExpl_prevDefKey = "<F7>"   " Show prev definition in jump list
+  let g:SrcExpl_nextDefKey = "<F6>"   " Show next definition in jump list
   let g:SrcExpl_pluginList = g:wndmgr_pluginList " Plugin names that are using buffers
 
   " Toggle ON/OFF
