@@ -1,3 +1,65 @@
+" Check if this is a plugin windows
+function! g:wndmgr_IsPluginWnd(wndidx)
+  for plugin in g:wndmgr_pluginList
+    "echo "[wndmgr_IsPluginWnd]" bufname(winbufnr(a:wndidx)) "==" plugin
+    "if bufname(winbufnr(a:wndidx)) ==# plugin
+    if !empty(matchstr(bufname(winbufnr(a:wndidx)), plugin))
+      return 1
+    endif
+  endfor
+  return 0
+endfunction
+
+" Check if this is an edit window (non-plugin & modifiable)
+function! g:wndmgr_IsEditWnd(wndidx)
+  let res = 0
+  if a:wndidx < winnr() && !g:wndmgr_IsPluginWnd(a:wndidx)
+    echo "[wndmgr_IsEditWnd] check window: '" . bufname(winbufnr(a:wndidx)) . "' (" . a:wndidx . ")"
+    " Jump to that window
+    "silent! exec a:wndidx . "wincmd w"
+    " Check if modifiable
+    if &modifiable
+      res = 1
+    endif
+    " Jump back
+    "silent! exec "wincmd W"
+  endif
+  return res
+endfunction
+
+" Jump to the edit window, avoiding plugins windows
+function! g:wndmgr_JumpEditWnd_2()
+  " Check the previous window is editable
+  "silent! exec "wincmd W"
+  "if g:wndmgr_IsEditWnd(bufwinnr(bufname("%")))
+  "  return
+  "endif
+  " Loop through all windows
+  for wndidx in (range(1, winnr("$")))
+    if g:wndmgr_IsEditWnd(wndidx)
+      " Jump to that window
+      silent! exec wndidx . "wincmd w"
+      return
+    endif
+  endfor
+  " not found: split
+  silent! exec ":vsplit"
+endfunction
+
+
+
+finish
+
+
+
+
+
+
+
+
+
+
+
 " *******************************************************
 " * Omnifunc
 " *******************************************************

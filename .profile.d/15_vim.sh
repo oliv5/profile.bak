@@ -3,7 +3,7 @@
 # Vim
 export GVIM="$(which gvim)"
 [ -z "$VIM_USETABS" ] && export VIM_USETABS=""
-[ -z "$VIM_IDE" ] && export VIM_IDE=3
+[ -z "$VIM_IDE" ] && export VIM_IDE=4
 
 # Terminal settings
 export COLORTERM="xterm" # backspace bug in vim
