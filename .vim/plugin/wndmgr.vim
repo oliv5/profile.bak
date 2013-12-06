@@ -14,42 +14,49 @@ if !exists('g:wndmgr_pluginList')
   \ ]
 endif
 
-" Get the edit window number, avoiding plugins windows
-function! g:wndmgr_GetEditWnd(start)
-  for idx in (range(a:start, winnr("$")))
+" Check if this is a plugin windows
+function! g:wndmgr_IsPluginWnd(wndidx)
+    let name = bufname(winbufnr(a:wndidx))
+    " Parse the list of plugins
     for item in g:wndmgr_pluginList
-      "echo "[Wndmgr_GetEditWnd]" bufname(winbufnr(idx)) "==" item
-      "if bufname(winbufnr(idx)) ==# item
-      if !empty(matchstr(bufname(winbufnr(idx)), item))
-        let item = -1
-        break
-      endif
+        "if name ==# item
+        if !empty(matchstr(name, item))
+            return 1
+        endif
     endfor
-    if item != -1
-      "echo "[Wndmgr_GetEditWnd] Selected window:" bufname(winbufnr(idx))
-      return idx
+    " Not a plugin window
+    return 0
+endfunction
+
+" Check if this is an edit window (non-plugin & modifiable)
+function! g:wndmgr_JumpEditWndById(wndidx)
+  if a:wndidx<winnr('$') && !g:wndmgr_IsPluginWnd(a:wndidx)
+    " Jump to that window
+    silent! exec a:wndidx . "wincmd w"
+    " Check if modifiable & not quickfix
+    if &modifiable && &buftype!=#"quickfix"
+      "echo "[wndmgr_IsEditWnd]" bufname(winbufnr(a:wndidx)) "(" . a:wndidx . ")"
+      return 1
+    else
+      " Jump back
+      silent! "wincmd W"
     endif
-  endfor
-  return -1
+  endif
+  return 0
 endfunction
 
 " Jump to the edit window, avoiding plugins windows
 function! g:wndmgr_JumpEditWnd()
-  let idx = 0
-  while idx >= 0
-    " Get the edit window number
-    let idx = g:wndmgr_GetEditWnd(idx+1)
-    if idx >= 0
-      " Jump to that window
-      silent! exec idx . "wincmd w"
-      " Stop if modifiable, otherwise search again from next window
-      if &modifiable == 1
-        return
-      endif
+  " Check the previous window is editable
+  if g:wndmgr_JumpEditWndById(winnr("#"))
+    return
+  endif
+  " Loop through all windows
+  for wndidx in (range(1, winnr("$")))
+    if g:wndmgr_JumpEditWndById(wndidx)
+      return
     endif
-  endwhile
-  " not found: split
-  silent! exec ":split"
+  endfor
 endfunction
 
 " Update SrcExplorer window

@@ -420,10 +420,13 @@ Noremap  <C-Tab>  :tabp<CR>
 " * Window management
 " *******************************************************
 " Open/close window : standard mappings <C-w>...
-
 " Prev/next window (Ctrl-w/W)
-Noremap <C-Up>    <C-W>w
-Noremap <C-Down>  <C-W>W
+
+" Go up/down/left/right window
+Noremap <C-Up>      :wincmd k<CR>
+Noremap <C-Down>    :wincmd j<CR>
+Noremap <C-Left>    :wincmd h<CR>
+Noremap <C-Right>   :wincmd l<CR>
 
 " Resize current window by +/- 5
 " Same as 5<C-w>+  5<C-w>-  5<C-w>>  5<C-w><
@@ -461,8 +464,8 @@ endif
 " Prev/next buffer
 map  <C-b><C-n>     :bn<CR>
 map  <C-b><C-p>     :bp<CR>
-Noremap <C-Right>   :bn<CR>
-Noremap <C-Left>    :bp<CR>
+Noremap <A-Down>    :bp<CR>
+Noremap <A-Up>      :bn<CR>
 if !exists("s:vimrc_useTabs")
   Noremap <C-Tab>   :bn<CR>
   Noremap <C-S-Tab> :bp<CR>
@@ -894,8 +897,8 @@ if !exists('g:loaded_minibufexplorer')
   endif
 
   " Cycle through buffers
-  Map <C-Left>  :MBEbb<CR>
-  Map <C-Right> :MBEbf<CR>
+  Map <A-Down>  :MBEbb<CR>
+  Map <A-Up>    :MBEbf<CR>
   if !exists("s:vimrc_useTabs")
     Noremap <C-Tab>      :MBEbb<CR>
     Noremap <C-S-Tab>    :MBEbf<CR>
@@ -1013,6 +1016,7 @@ set tags=tags;${TAG_ROOT:-.}/
 
 " Definition mapping
 Map <C-d><C-v> <C-]>
+
 
 " *******************************************************
 " * Alignment function

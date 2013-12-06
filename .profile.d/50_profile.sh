@@ -44,3 +44,4 @@ alias e='gvim'
 alias gv='gvim'
 alias hi='history'
 alias mo='mimeopen'
+

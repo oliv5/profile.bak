@@ -54,3 +54,8 @@ function def
   # Now search
   ref "$pattern"
 }
+
+# Hexdump to txt 32 bits
+function bin2hex32() {
+  hexdump $@ -ve '1/4 "0x%.8x\n"'
+}

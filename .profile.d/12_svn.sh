@@ -5,14 +5,13 @@ export SVN_EDITOR=vim
 
 # Aliases
 alias salias='alias | grep -re " s..\?="'
-alias ss='svn st | grep -E "^(A|\~|D|M|R|C|\!|---)" | sort'
-alias sa='svn st | grep -E "^(A|---)" | sort'
-alias sc='svn st | grep -E "^(C|---)" | sort'
-alias sn='svn st | grep -E "^(\?|\~|---)" | sort'
-alias sm='svn st | grep -E "^(M|R|---)" | sort'
-alias sd='svn st | grep -E "^D" | sort'
-#alias su='svn st | grep -E "^[^\?]" | sort'
-alias st='svn st | sort'
+alias ss='svn st | grep -E "^(A|\~|D|M|R|C|\!|---)"'
+alias sa='svn st | grep -E "^(A|---)"'
+alias sc='svn st | grep -E "^(C|---)"'
+alias sn='svn st | grep -E "^(\?|\~|---)"'
+alias sm='svn st | grep -E "^(M|R|---)"'
+alias sd='svn st | grep -E "^D"'
+alias st='svn st'
 alias sl='svn ls --depth infinity'
 alias sdd='svn diff'
 alias sdm='svn-meld'
@@ -70,7 +69,6 @@ function svn-merge() {
 
 # Commit a list of file
 function svn-ci() {
-  # Create a CL from the filelist
   CL="CL$(svn-date)"
   svn cl "$CL" "$@"
   svn ci --cl "$CL"
@@ -89,6 +87,12 @@ function svn-url() {
 # Get svn repository revision
 function svn-rev() {
   svn info "$@" | grep "Revision:" | grep -oh '[0-9]\+'
+}
+
+# Create a changelist
+function svn-cl() {
+  CL="CL$(svn-date)"
+  svn cl "$CL" "$@"
 }
 
 # Check svn repository existenz

@@ -1,54 +1,148 @@
+" SrcExpl_AdaptPlugins() {{{
+" The Source Explorer window will not work when the cursor on the
+" window of other plugins, such as 'Taglist', 'NERD tree' etc.
+
+function! <SID>SrcExpl_AdaptPlugins()
+
+    " Traversal the list of other plugins
+    for item in g:SrcExpl_pluginList
+        " If they acted as a split window
+        if bufname("%") ==# item
+            " Just avoid this operation
+            return -1
+        endif
+    endfor
+
+    " Aslo filter the Quickfix window
+    if &buftype ==# "quickfix"
+        return 0
+    endif
+
+    " Safe
+    return 0
+
+endfunction " }}}
+
+
+" SrcExpl_SetMarkList() {{{
+
+" Set a new mark for back to the previous position
+
+function! <SID>SrcExpl_SetMarkList()
+
+    " Add one new mark into the tail of Mark List
+    call add(g:SrcExpl_markList, [expand("%:p"), line("."), col(".")])
+
+endfunction " }}}
+
+" SrcExpl_GetMarkList() {{{
+
+" Get the mark for back to the previous position
+
+function! <SID>SrcExpl_GetMarkList()
+
+    " If or not the mark list is empty
+    if !len(g:SrcExpl_markList)
+        call <SID>SrcExpl_ReportErr("Mark stack is empty")
+        return -1
+    endif
+
+    " Avoid the same situation
+    if get(g:SrcExpl_markList, -1)[0] == expand("%:p")
+      \ && get(g:SrcExpl_markList, -1)[1] == line(".")
+      \ && get(g:SrcExpl_markList, -1)[2] == col(".")
+        " Remove the latest mark
+        call remove(g:SrcExpl_markList, -1)
+        " Get the latest mark again
+        return <SID>SrcExpl_GetMarkList()
+    endif
+
+    " Load the buffer content into the edit window
+    exe "edit " . get(g:SrcExpl_markList, -1)[0]
+    " Jump to the context position of that symbol
+    call cursor(get(g:SrcExpl_markList, -1)[1], get(g:SrcExpl_markList, -1)[2])
+    " Remove the latest mark now
+    call remove(g:SrcExpl_markList, -1)
+
+    return 0
+
+endfunction " }}}
+
+
+
+
+finish
+
 " Check if this is a plugin windows
-function! g:wndmgr_IsPluginWnd(wndidx)
+function! g:wndmgr_IsPluginWnd_2(wndidx)
   for plugin in g:wndmgr_pluginList
-    "echo "[wndmgr_IsPluginWnd]" bufname(winbufnr(a:wndidx)) "==" plugin
     "if bufname(winbufnr(a:wndidx)) ==# plugin
     if !empty(matchstr(bufname(winbufnr(a:wndidx)), plugin))
+      "echo "[wndmgr_IsPluginWnd]" bufname(winbufnr(a:wndidx))
       return 1
     endif
   endfor
   return 0
 endfunction
 
+" Check if this is a plugin windows
+function! g:wndmgr_IsPluginWnd(wndidx)
+    let name = bufname(winbufnr(a:wndidx))
+    " Parse the list of plugins
+    for item in g:wndmgr_pluginList
+        if name ==# item
+            return 1
+        endif
+    endfor
+    " Not a plugin window
+    return 0
+endfunction
+
 " Check if this is an edit window (non-plugin & modifiable)
-function! g:wndmgr_IsEditWnd(wndidx)
-  let res = 0
-  if a:wndidx < winnr() && !g:wndmgr_IsPluginWnd(a:wndidx)
-    echo "[wndmgr_IsEditWnd] check window: '" . bufname(winbufnr(a:wndidx)) . "' (" . a:wndidx . ")"
+function! g:wndmgr_JumpEditWndById(wndidx)
+  if a:wndidx<winnr('$') && !g:wndmgr_IsPluginWnd(a:wndidx)
     " Jump to that window
-    "silent! exec a:wndidx . "wincmd w"
-    " Check if modifiable
-    if &modifiable
-      res = 1
+    silent! exec a:wndidx . "wincmd w"
+    " Check if modifiable & not quickfix
+    if &modifiable && &buftype!=#"quickfix"
+      "echo "[wndmgr_IsEditWnd]" bufname(winbufnr(a:wndidx)) "(" . a:wndidx . ")"
+      return 1
+    else
+      " Jump back
+      silent! "wincmd W"
     endif
-    " Jump back
-    "silent! exec "wincmd W"
   endif
-  return res
+  return 0
 endfunction
 
 " Jump to the edit window, avoiding plugins windows
-function! g:wndmgr_JumpEditWnd_2()
+function! g:wndmgr_JumpEditWnd()
   " Check the previous window is editable
-  "silent! exec "wincmd W"
-  "if g:wndmgr_IsEditWnd(bufwinnr(bufname("%")))
-  "  return
-  "endif
+  if g:wndmgr_JumpEditWndById(winnr("#"))
+    return
+  endif
   " Loop through all windows
   for wndidx in (range(1, winnr("$")))
-    if g:wndmgr_IsEditWnd(wndidx)
-      " Jump to that window
-      silent! exec wndidx . "wincmd w"
+    if g:wndmgr_JumpEditWndById(wndidx)
       return
     endif
   endfor
-  " not found: split
-  silent! exec ":vsplit"
 endfunction
 
-
-
 finish
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
