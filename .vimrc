@@ -293,7 +293,7 @@ endfunction
 
 " Show unwanted extra white space and tab characters
 let ewstHighlight = 0
-nnoremap <silent><leader>w      :let ewstHighlight = !ewstHighlight <BAR> 
+nnoremap <silent><leader>w      :let ewstHighlight = !ewstHighlight <BAR>
                                \:call <SID>SetEwstHighlight(ewstHighlight)<CR>
 function! s:SetEwstHighlight(switchOn)
   if a:switchOn == 1
@@ -645,14 +645,14 @@ elseif $VIM_IDE == 4
     SrcExpl
     TlistOpen
     Project
-    "call g:wndmgr_ExecOnWindow("__Tag_List__","H","")
-    "call g:wndmgr_ExecOnWindow("\.vimprojects","L","")
-    "call g:wndmgr_ExecOnWindow("Source_Explorer","J","")
-    call g:wndmgr_ExecOnWindow("__Tag_List__","|",g:Tlist_WinWidth)
-    call g:wndmgr_ExecOnWindow("\.vimprojects","|",g:proj_window_width)
-    call g:wndmgr_ExecOnWindow("Source_Explorer","_",g:SrcExpl_winHeight)
+    "call g:wndmgr_ExecWnd("__Tag_List__","H","")
+    "call g:wndmgr_ExecWnd("\.vimprojects","L","")
+    "call g:wndmgr_ExecWnd("Source_Explorer","J","")
+    call g:wndmgr_ExecWnd("__Tag_List__","|",g:Tlist_WinWidth)
+    call g:wndmgr_ExecWnd("\.vimprojects","|",g:proj_window_width)
+    call g:wndmgr_ExecWnd("Source_Explorer","_",g:SrcExpl_winHeight)
     call g:wndmgr_JumpEditWnd()
-    call g:wndmgr_ExecOnWindow("Source_Explorer","_",g:SrcExpl_winHeight)
+    call g:wndmgr_ExecWnd("Source_Explorer","_",g:SrcExpl_winHeight)
     MBEClose
     MBEOpen
   endfunction
@@ -812,7 +812,7 @@ if !exists('g:loaded_taglist')
   let g:Tlist_Show_One_File = 1         " Always display one file tags
   let g:Tlist_Display_Tag_Scope = 0     " Display tag scope (function/constants/variables)
   let g:Tlist_Use_SingleClick = 1       " Single click instead of double
-  
+
   " Autoload autocommand (may not be necessary)
   " autocmd BufWritePost *.c,*.cc,*.cpp,*.py,*.mk,Makefile :TlistUpdate
 
@@ -976,12 +976,12 @@ if !exists('g:loaded_cctree')
   " Options
   let g:CCTreeCscopeDb = "$CSCOPE_DB"
   let g:CCTreeDisplayMode = 2
-  
+
   " Key mappings
-  let g:CCTreeKeyTraceForwardTree = '<F10>' 
-  let g:CCTreeKeyTraceReverseTree = '<F11>' 
-  let g:CCTreeKeyToggleWindow = '<F12>' 
-  
+  let g:CCTreeKeyTraceForwardTree = '<F10>'
+  let g:CCTreeKeyTraceReverseTree = '<F11>'
+  let g:CCTreeKeyToggleWindow = '<F12>'
+
   " Autocommands
   autocmd VimEnter * if filereadable('$CSCOPE_DB') | CCTreeLoadDB $CSCOPE_DB | endif
   autocmd VimEnter * if filereadable('xref.out') | CCTreeLoadXRefDbFromDisk xref.out | endif

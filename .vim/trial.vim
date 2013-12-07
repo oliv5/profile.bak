@@ -1,77 +1,149 @@
-" SrcExpl_AdaptPlugins() {{{
-" The Source Explorer window will not work when the cursor on the
-" window of other plugins, such as 'Taglist', 'NERD tree' etc.
+" Create an empty wnd list
+if !exists('g:wndmgr_wndList')
+  let g:wndmgr_wndList = []
+endif
 
-function! <SID>SrcExpl_AdaptPlugins()
+" Set wnd list max size
+let g:wndmgr_wndListMaxSize = 5
 
-    " Traversal the list of other plugins
-    for item in g:SrcExpl_pluginList
-        " If they acted as a split window
-        if bufname("%") ==# item
-            " Just avoid this operation
-            return -1
-        endif
-    endfor
+" Window manager autocommands
+" Then we set the routine function when the event happens
+augroup wndmgr_autoCmd
+    autocmd!
+    au! WinEnter * nested call g:wndmgr_PushWndList()
+augroup end
 
-    " Aslo filter the Quickfix window
-    if &buftype ==# "quickfix"
-        return 0
-    endif
-
-    " Safe
-    return 0
-
-endfunction " }}}
-
-
-" SrcExpl_SetMarkList() {{{
-
-" Set a new mark for back to the previous position
-
-function! <SID>SrcExpl_SetMarkList()
-
-    " Add one new mark into the tail of Mark List
-    call add(g:SrcExpl_markList, [expand("%:p"), line("."), col(".")])
-
-endfunction " }}}
-
-" SrcExpl_GetMarkList() {{{
-
-" Get the mark for back to the previous position
-
-function! <SID>SrcExpl_GetMarkList()
-
-    " If or not the mark list is empty
-    if !len(g:SrcExpl_markList)
-        call <SID>SrcExpl_ReportErr("Mark stack is empty")
+" Avoid other plugin windows
+" From plugin Source Explorer
+function! g:wndmgr_AvoidPluginWnd()
+    " Search the bufname in the plugin list (pattern matching, not "==#")
+    if match(g:wndmgr_pluginList, bufname("%"))
         return -1
     endif
-
-    " Avoid the same situation
-    if get(g:SrcExpl_markList, -1)[0] == expand("%:p")
-      \ && get(g:SrcExpl_markList, -1)[1] == line(".")
-      \ && get(g:SrcExpl_markList, -1)[2] == col(".")
-        " Remove the latest mark
-        call remove(g:SrcExpl_markList, -1)
-        " Get the latest mark again
-        return <SID>SrcExpl_GetMarkList()
+    " Also filter the Quickfix window
+    if &buftype ==# "quickfix"
+        return -1
     endif
-
-    " Load the buffer content into the edit window
-    exe "edit " . get(g:SrcExpl_markList, -1)[0]
-    " Jump to the context position of that symbol
-    call cursor(get(g:SrcExpl_markList, -1)[1], get(g:SrcExpl_markList, -1)[2])
-    " Remove the latest mark now
-    call remove(g:SrcExpl_markList, -1)
-
+    " Safe
     return 0
+endfunction
 
-endfunction " }}}
+
+" Set a new mark for back to the previous position
+function! g:wndmgr_PushWndList()
+    " Push a new mark into the list when window is valid
+    if !g:wndmgr_AvoidPluginWnd()
+        call add(g:wndmgr_wndList, winnr())
+        " Limit list size
+        if len(g:wndmgr_wndList) > g:wndmgr_wndListMaxSize
+            call remove(g:wndmgr_wndList, 0)
+        endif
+    endif
+endfunction
+
+" Pop few windows, returns the first one (or the current one when empty)
+function! g:wndmgr_PopWndList(num_wnd)
+    " Pop & return few windows
+    if len(g:wndmgr_wndList) >= a:num_wnd
+        return remove(g:wndmgr_wndList, -a:num_wnd, -1)[0]
+    endif
+    " Not enough windows, don't modify the list
+    " Return the current window
+    return winnr()
+endfunction
+
+" Jump to the edit window, avoiding plugins windows
+function! g:wndmgr_JumpEditWnd()
+    exe g:wndmgr_PopWndList(2) "wincmd w"
+endfunction
+
+
+finish
+
+
+
+
+
+
+
+" Create an empty Wnd list
+if !exists('g:wndmgr_wndList')
+  let g:wndmgr_wndList = []
+endif
+" Wnd list max size
+let g:wndmgr_wndListMaxSize = 5
+
+" Window manager autocommands
+" Then we set the routine function when the event happens
+augroup wndmgr_autoCmd
+    autocmd!
+    au! WinEnter * nested call g:wndmgr_PushWndList()
+augroup end
+
+" Avoid other plugin windows
+" From plugin Source Explorer
+function! g:wndmgr_AvoidPluginWnd()
+    " Search the bufname in the plugin list (pattern matching, not "==#")
+    if match(g:wndmgr_pluginList, bufname("%"))
+        return -1
+    endif
+    " Also filter the Quickfix window
+    if &buftype ==# "quickfix"
+        return -1
+    endif
+    " Safe
+    return 0
+endfunction
+
+
+" Set a new mark for back to the previous position
+function! g:wndmgr_PushWndList()
+    " Push a new mark into the list when window is valid
+    if !g:wndmgr_AvoidPluginWnd()
+        call add(g:wndmgr_wndList, winnr())
+        " Limit list size
+        if len(g:wndmgr_wndList) > g:wndmgr_wndListMaxSize
+            call remove(g:wndmgr_wndList, 0)
+        endif
+        return 0
+    endif
+    return -1
+endfunction
+
+" Pop few windows, returns the first one (or the current one when empty)
+function! g:wndmgr_PopWndList(num_wnd)
+    if len(g:wndmgr_wndList) >= a:num_wnd
+        " Pop & return some windows
+        return remove(g:wndmgr_wndList, -a:num_wnd, -1)[0]
+    endif
+    " Nothing to remove, tell we are in the current window
+    return winnr()
+endfunction
+
+" Jump to the edit window, avoiding plugins windows
+function! g:wndmgr_JumpEditWnd()
+    let num_wnd = 1
+    " Remove the current window from the list
+    " If we are into it
+    if winnr() == g:wndmgr_wndList[-1]
+      let num_wnd = num_wnd + 1
+    endif
+    "echo g:wndmgr_PopWndList(num_wnd)
+    exe g:wndmgr_PopWndList(num_wnd) "wincmd w"
+    "echo g:wndmgr_wndList
+    "remove(g:wndmgr_wndList, -1)
+endfunction
+
+
+
 
 
 
 
 finish
+
+
+
 
 " Check if this is a plugin windows
 function! g:wndmgr_IsPluginWnd_2(wndidx)
@@ -606,3 +678,149 @@ endfunction
 "  au! WinEnter * nested CCTreeLoadDB
 "  au! CursorHold * nested call CCTreeTraceSymbol('p')
 "augroup end
+if exists('loaded_wndmgr')
+  finish
+endif
+let loaded_wndmgr = 1
+
+" Plugins which open window
+if !exists('g:wndmgr_pluginList')
+  let g:wndmgr_pluginList = [
+      \ "-MiniBufExplorer-",
+      \ "_NERD_tree_",
+      \ "__Tag_List__",
+      \ "Source_Explorer",
+      \ "\.vimprojects",
+  \ ]
+endif
+
+<<<<<<< HEAD
+" Get the edit window number, avoiding plugins windows
+function! g:wndmgr_GetEditWnd(start)
+  for idx in (range(a:start, winnr("$")))
+    for item in g:wndmgr_pluginList
+      "echo "[Wndmgr_GetEditWnd]" bufname(winbufnr(idx)) "==" item
+      "if bufname(winbufnr(idx)) ==# item
+      if !empty(matchstr(bufname(winbufnr(idx)), item))
+        let item = -1
+        break
+      endif
+    endfor
+    if item != -1
+      "echo "[Wndmgr_GetEditWnd] Selected window:" bufname(winbufnr(idx))
+      return idx
+    endif
+  endfor
+  return -1
+=======
+" Check if this is a plugin windows
+function! g:wndmgr_IsPluginWnd(wndidx)
+    let name = bufname(winbufnr(a:wndidx))
+    " Parse the list of plugins
+    for item in g:wndmgr_pluginList
+        "if name ==# item
+        if !empty(matchstr(name, item))
+            return 1
+        endif
+    endfor
+    " Not a plugin window
+    return 0
+endfunction
+
+" Check if this is an edit window (non-plugin & modifiable)
+function! g:wndmgr_JumpEditWndById(wndidx)
+  if a:wndidx<winnr('$') && !g:wndmgr_IsPluginWnd(a:wndidx)
+    " Jump to that window
+    silent! exec a:wndidx . "wincmd w"
+    " Check if modifiable & not quickfix
+    if &modifiable && &buftype!=#"quickfix"
+      "echo "[wndmgr_IsEditWnd]" bufname(winbufnr(a:wndidx)) "(" . a:wndidx . ")"
+      return 1
+    else
+      " Jump back
+      silent! "wincmd W"
+    endif
+  endif
+  return 0
+>>>>>>> 45cac51a08740a8dc3172f34b99c1567d1e0350b
+endfunction
+
+" Jump to the edit window, avoiding plugins windows
+function! g:wndmgr_JumpEditWnd()
+<<<<<<< HEAD
+  let idx = 0
+  while idx >= 0
+    " Get the edit window number
+    let idx = g:wndmgr_GetEditWnd(idx+1)
+    if idx >= 0
+      " Jump to that window
+      silent! exec idx . "wincmd w"
+      " Stop if modifiable, otherwise search again from next window
+      if &modifiable == 1
+        return
+      endif
+    endif
+  endwhile
+  " not found: split
+  silent! exec ":split"
+=======
+  " Check the previous window is editable
+  if g:wndmgr_JumpEditWndById(winnr("#"))
+    return
+  endif
+  " Loop through all windows
+  for wndidx in (range(1, winnr("$")))
+    if g:wndmgr_JumpEditWndById(wndidx)
+      return
+    endif
+  endfor
+>>>>>>> 45cac51a08740a8dc3172f34b99c1567d1e0350b
+endfunction
+
+" Update SrcExplorer window
+function! g:wndmgr_UpdateSrcExplWindow()
+  let l:source_explorer_winnr = 0
+  try
+    " For Named Buffer Version
+    let l:source_explorer_winnr = g:SrcExpl_GetWin()
+  catch
+  finally
+    " For Preview Window Version
+    if l:source_explorer_winnr == 0
+      let l:i = 1
+      while 1
+        if bufname(winbufnr(l:i)) ==# s:source_explorer_title
+              \ || getwinvar(l:i, '&previewwindow')
+          let l:source_explorer_winnr = l:i
+          break
+        endif
+        let l:i += 1
+        if l:i > winnr("$")
+          break
+        endif
+      endwhile
+    endif
+    if l:source_explorer_winnr > 0
+      silent! exe l:source_explorer_winnr . "wincmd " . "w"
+      silent! exe "wincmd " . "J"
+      silent! exe g:SrcExpl_winHeight . " wincmd " . "_"
+    endif
+    let l:rtn = g:wndmgr_GetEditWnd(0)
+    if l:rtn < 0
+      return
+    endif
+    silent! exe l:rtn . "wincmd w"
+  endtry
+endfunction
+
+" Find and resize/locate window
+function! g:wndmgr_ExecOnWindow(title, cmd, args)
+  for l:idx in (range(1, winnr("$")))
+    if !empty(matchstr(bufname(winbufnr(l:idx)), a:title))
+      silent! exe l:idx . "wincmd " . "w"
+      silent! exe a:args . "wincmd " . a:cmd
+      "echom "Execute " . a:title . " " . winnr() . ": " . a:args. " wincmd " . a:cmd
+      break
+    endif
+  endfor
+endfunction
