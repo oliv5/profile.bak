@@ -19,8 +19,9 @@ alias sds='svn diff --summarize'
 
 # Build a unique backup directory for this repo
 function svn-bckdir() {
-  ROOT="${SVN_ROOT:-$PWD}"
-  DST="${ROOT}/../${1:+$1_}$(basename $(svn-url))${2:+_$2}"
+  #ROOT="${SVN_ROOT:-$PWD}"
+  #DST="${ROOT}/../${1:+$1_}$(basename $(svn-url))${2:+_$2}"
+  DST="$(svn-root)/${1:+$1_}$(basename $PWD)${2:+_$2}"
   DST=$(readlink -m "$DST")
   mkdir -p ${DST}
   echo ${DST}
@@ -82,6 +83,11 @@ function svn-repo() {
 # Get svn url name
 function svn-url() {
   svn info "$@" | grep "URL:" | grep -oh 'svn.*'
+}
+
+# Get svn current root
+function svn-root() {
+  echo "${PWD}$(sed -e "s;$(svn-repo);;" -e "s;/[^\/]*;/..;g" <<< $(svn-url))"
 }
 
 # Get svn repository revision
@@ -193,7 +199,7 @@ function svn-import() {
   # Check we are in a repository
   svn-exists || return
   # Extract with full path
-  7z x "$1" -o"${SVN_ROOT:-./}"
+  7z x "$1" -o"${2:-./}"
 }
 
 # Suspend a CL
