@@ -7,7 +7,7 @@ export PATH="${PATH//.:/}"
 
 # Call env external profile script
 if [ -f ~/.localrc ]; then
-  source ~/.localrc
+    source ~/.localrc
 fi
 
 # Use vim as editor
@@ -34,6 +34,11 @@ alias pgrep='pgrep -l'
 alias psf='ps -faux'
 alias psd='ps -def'
 alias psg='ps -def | grep -i'
+function pid() {
+    for NAME in "$@"; do
+        ps -C "$@" -o pid=
+    done
+}
 
 # Alias search & open
 alias fo='ffo'
@@ -44,4 +49,5 @@ alias e='gvim'
 alias gv='gvim'
 alias hi='history'
 alias mo='mimeopen'
-
+alias o='mimeopen'
+alias oo='openoffice.org'

@@ -51,7 +51,7 @@ function svn-meld() {
 function svn-merge() {
   if [ -z "$1" ]; then
     export -f svn-merge
-    svn-st "^C" | xargs sh -c '[ $# -gt 0 ] && svn-merge "$@"' _
+    svn-st "^C" | xargs --no-run-if-empty sh -c '[ $# -gt 0 ] && svn-merge "$@"' _
   else
     for file in "$@"; do
       echo "Processing file ${file}"
@@ -118,10 +118,10 @@ function svn-clean() {
   # Check we are in a repository
   svn-exists || return
   # Backup
-  svn-st "^(\?|\I)" | xargs 7z a $OPTS_7Z "${DST}/clean_r$(svn-rev)_$(svn-date).7z"
+  svn-st "^(\?|\I)" | xargs --no-run-if-empty 7z a $OPTS_7Z "${DST}/clean_r$(svn-rev)_$(svn-date).7z"
   echo
   # Remove files not in SVN
-  svn-st "^(\?|\I)" | xargs rm -rv
+  svn-st "^(\?|\I)" | xargs --no-run-if-empty rm -rv
 }
 
 # Revert modified files, don't change unversionned files
@@ -177,11 +177,11 @@ function svn-export() {
   if [ ! -f $ARCHIVE ]; then
     if [ "$REV0" == "HEAD" ]; then
       # Export changes made upon HEAD
-      svn-st "^(A|D|M|R|\~|\!)" | xargs 7z a $OPTS_7Z "$ARCHIVE"
+      svn-st "^(A|D|M|R|\~|\!)" | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
       RESULT=$?
     else
       # Export changes between the 2 revisions
-      svn diff --summarize -r ${REV0}:${REV1} | awk '{ print $2 }' | xargs 7z a $OPTS_7Z "$ARCHIVE"
+      svn diff --summarize -r ${REV0}:${REV1} | awk '{ print $2 }' | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
       RESULT=$?
     fi
   else

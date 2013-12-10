@@ -835,9 +835,13 @@ if !exists('g:loaded_srcexpl')
   let g:SrcExpl_isUpdateTags = 0      " Tag update on file opening
   let g:SrcExpl_updateTagsCmd = ""    " Tag update command
   let g:SrcExpl_updateTagsKey = ""    " Tag update key
-  let g:SrcExpl_prevDefKey = "<F7>"   " Show prev definition in jump list
+  let g:SrcExpl_prevDefKey = "<S-F6>" " Show prev definition in jump list
   let g:SrcExpl_nextDefKey = "<F6>"   " Show next definition in jump list
   let g:SrcExpl_pluginList = g:wndmgr_pluginList " Plugin names that are using buffers
+
+  " Additionnal key maps
+  Noremap  <C-F6>   <C-O>
+  vnoremap <C-F6>   <C-[><C-O>
 
   " Toggle ON/OFF
   nmap <localleader>s   :SrcExpl<CR>
@@ -1012,7 +1016,7 @@ map <leader>h :call <SID>HexaToggle()<CR>
 " * Tags
 " *******************************************************
 " Set tags root
-set tags=tags;${TAG_ROOT:-.}/
+set tags=tags,tags.*;${TAG_ROOT:-.}/
 
 " Definition mapping
 Map <C-d><C-v> <C-]>
