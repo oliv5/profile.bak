@@ -51,16 +51,22 @@ function svn-meld() {
 function svn-merge() {
   if [ -z "$1" ]; then
     export -f svn-merge
-    svn-st "^C" | xargs --no-run-if-empty sh -c '[ $# -gt 0 ] && svn-merge "$@"' _
+    svn-st "^C" | xargs --no-run-if-empty sh -c 'svn-merge "$@"' _
   else
     for file in "$@"; do
       echo "Processing file ${file}"
       if [ -f ${file}.working ]; then 
-        right="$(ls -1 ${file}.*-right.* | sort -r | head -1)"
-        meld "${right}" "${file}" "${file}.working" 2>/dev/null
+        CNT=$(ls -1 ${file}.*-right.* | wc -l)
+        for LINE in $(seq $CNT); do
+          right="$(ls -1 ${file}.*-right.* | sort -r | sed -n ${LINE}p)"
+          meld "${right}" "${file}" "${file}.working" 2>/dev/null
+        done
       else
-        rev="$(ls -1 ${file}.r* | sort -r | head -1)"
-        meld "${rev}" "${file}" "${file}.mine" 2>/dev/null
+        CNT=$(ls -1 ${file}.r* | wc -l)
+        for LINE in $(seq $CNT); do
+          rev="$(ls -1 ${file}.r* | sort -r | sed -n ${LINE}p)"
+          meld "${rev}" "${file}" "${file}.mine" 2>/dev/null
+        done
       fi
       echo -n "Mark the conflict as resolved? (y/n): "
       read ANSWER; [ "$ANSWER" == "y" -o "$ANSWER" == "Y" ] && svn resolved "${file}"

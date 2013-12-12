@@ -32,7 +32,7 @@ function mkcscope() {
   # Get options
   CSCOPE_OPTS="$CSCOPE_OPTS $3"
   export CSCOPE_FILES="$DST/cscope.files"
-  export CSCOPE_DB="$DST/cscope"
+  export CSCOPE_DB="$DST/cscope.out"
   # Build tag file
   set -f
   ${QUIET} echo "Make cscope in $DST from $SRC"
@@ -60,7 +60,7 @@ function rmcscope() {
   DIR=$(readlink -f "${1:-$PWD}")
   ${QUIET} echo "Remove cscope from $DIR"
   FILE="${DIR}/cscope"
-  rm -v "${FILE}" "${FILE}.files" "${FILE}.in" "${FILE}.po"
+  rm -v "${FILE}.out" "${FILE}.files" "${FILE}.in" "${FILE}.po"
   unset CSCOPE_FILES CSCOPE_DB
 }
 

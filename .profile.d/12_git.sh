@@ -3,6 +3,11 @@
 export GIT_EDITOR="vim"
 export GIT_PAGER="cat"
 
+# alias
+alias gs='git status'
+alias gd='git diff'
+alias gdm='git difftool -y -t meld'
+
 # Meld called by git
 function git-meld() {
   meld "$2" "$5"
@@ -105,4 +110,11 @@ function git-amend-names() {
   '
   # Execute the script
   git filter-branch --env-filter "$SCRIPT"
+}
+
+# Git commit
+function git-ci() {
+  git reset HEAD
+  git add "$@"
+  git commit
 }

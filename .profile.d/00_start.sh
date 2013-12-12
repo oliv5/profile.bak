@@ -38,3 +38,7 @@ function die () {
   printf '%s%s\n' "${3:+(line $3) }" "${1:-Unknown error. abort...}"
   [[ $- == *i* ]] && return ${2:--1} || exit ${2:--1}
 }
+
+# Exports
+export -f addpath
+export -f die

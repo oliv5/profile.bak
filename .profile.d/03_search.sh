@@ -17,11 +17,7 @@ function _ff() {
 alias gg='_gg'
 alias igg='NAME=iname _gg'
 function _gg() {
-  trap "set +f; trap SIGINT" SIGINT
-  set -f
   NAME=${NAME:-name} _ff "${!#}" -type f -print0 | xargs -0 grep -E -n --color "${@:1:$(($#-1))}"
-  set +f
-  trap SIGINT
 }
 
 # Safe search & replace
@@ -29,8 +25,6 @@ alias hh='_hh'
 alias ihh='NAME=iname _hh'
 function _hh()
 {
-  trap "set +f; trap SIGINT" SIGINT
-  set -f
   EXCLUDE="$FIND_EXCLUDE -not -type l -and -not -path '*obj*'"
   SEDOPT="${@:1:$(($#-3))}"
   IN="${@: -3:1}"; IN="${IN//\//\/}"
@@ -38,8 +32,6 @@ function _hh()
   echo "Replace '$IN' by '$OUT' in files '${!#}' from directory '$DIR'?"
   echo "Press enter or Ctrl-C" ; read
   NAME=${NAME:-name} _ff "${!#}" -type f $EXCLUDE -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
-  set +f
-  trap SIGINT
 }
 
 # Find and open files functions

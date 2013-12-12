@@ -303,7 +303,6 @@ function! s:SetEwstHighlight(switchOn)
     " Show trailing spaces and spaces before a tab
     syn match ExtraWhitespace /\s\+$\| \+\ze\t/
     if &expandtab==0
-      :echom "toto"
       " Show spaces wrongly used for indenting
       " Show tabs that are not at the start of a line
       syn match ExtraTabs /^\t*\zs \+\|[^\t]\zs\t\+/
@@ -583,8 +582,6 @@ if $VIM_IDE == 1
     Project
     TlistOpen
     CCVEenQuickSnippet
-    MBEClose
-    MBEOpen
   endfunction
 
   function! s:IdeDisable_0()
@@ -605,8 +602,6 @@ elseif $VIM_IDE == 2
     TlistOpen
     SrcExpl
     call g:wndmgr_UpdateSrcExplWindow()
-    MBEClose
-    MBEOpen
   endfunction
 
   function! s:IdeDisable_0()
@@ -624,8 +619,6 @@ elseif $VIM_IDE == 3
   function! s:IdeEnable_0()
     Project
     TlistOpen
-    MBEClose
-    MBEOpen
   endfunction
 
   function! s:IdeDisable_0()
@@ -653,8 +646,6 @@ elseif $VIM_IDE == 4
     call g:wndmgr_ExecWnd("Source_Explorer","_",g:SrcExpl_winHeight)
     call g:wndmgr_JumpEditWnd()
     call g:wndmgr_ExecWnd("Source_Explorer","_",g:SrcExpl_winHeight)
-    MBEClose
-    MBEOpen
   endfunction
 
   function! s:IdeDisable_0()
@@ -677,8 +668,6 @@ elseif $VIM_IDE == 5
     NERDTree
     SrcExpl
     call g:wndmgr_UpdateSrcExplWindow()
-    MBEClose
-    MBEOpen
   endfunction
 
   function! s:IdeDisable_0()
@@ -700,8 +689,6 @@ else
     TrinityToggleTagList
     TrinityToggleSourceExplorer
     TrinityUpdateWindow
-    MBEClose
-    MBEOpen
   endfunction
 
   function! s:IdeDisable_0()
@@ -739,6 +726,8 @@ function! s:IdeToggle_0()
   else
     call s:IdeDisable_0()
   endif
+  MBEToggle
+  MBEToggle
 endfunction
 
 function! s:IdeToggle_1()
