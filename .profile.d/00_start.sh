@@ -42,3 +42,6 @@ function die () {
 # Exports
 export -f addpath
 export -f die
+
+#alias
+alias end='return 0 2>/dev/null || exit 0'
