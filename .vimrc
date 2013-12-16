@@ -195,17 +195,14 @@ set statusline+=%c,%l/%L\ %P
 " *******************************************************
 " * Text Formatting
 " *******************************************************
-set nowrap            " No wrap lines
 set guioptions+=rb    " Right/bottom scroll bars enabled
+set formatoptions-=t  " Do not format text as it is typed
 
 set tabstop=4         " Indents of 4
 set shiftwidth=4      " Indents of 4
 set shiftround        " Indents are copied down lines
 set expandtab         " Expand tabs
 set autoindent        " Auto-indent
-
-set formatoptions-=t  " Do not format text as it is typed
-set textwidth=300     " Wrap text after this limit
 
 set comments-=s1:/*,mb:*,ex:*/    " Get rid of the default style of C comments
 set comments+=s:/*,mb:**,ex:*/    " Define new comment style starting with '**'
@@ -231,6 +228,16 @@ autocmd! FileType python set noexpandtab tabstop=4 smartindent
 
 " Makefile: no tab to space, tab width 4 chars
 autocmd! FileType make set noexpandtab shiftwidth=4
+
+" Word/line wrap options
+set nowrap              " No wrap by default
+nnoremap <localleader>w  :set invwrap<CR>
+"nnoremap <localleader>w  :exec &wrap?'set nowrap':'set wrap linebreak nolist'<CR>
+
+" Show all characters
+set nolist              " Do not show alla characters by default
+nnoremap <localleader>c  :set invlist<CR>
+"nnoremap <localleader>c  :exec &list?'set nolist':'set list'<CR>
 
 
 " *******************************************************
@@ -293,8 +300,10 @@ endfunction
 
 " Show unwanted extra white space and tab characters
 let ewstHighlight = 0
-nnoremap <silent><leader>w      :let ewstHighlight = !ewstHighlight <BAR>
-                               \:call <SID>SetEwstHighlight(ewstHighlight)<CR>
+nnoremap <silent><localleader>v  :
+  \let ewstHighlight = !ewstHighlight <BAR>
+  \call <SID>SetEwstHighlight(ewstHighlight)<CR>
+
 function! s:SetEwstHighlight(switchOn)
   if a:switchOn == 1
     " Set color
@@ -326,7 +335,7 @@ set incsearch       " Show the `best match so far' when search is typed
 set gdefault        " Assume /g flag is on (replace all)
 
 " Toggle search highlighting
-nnoremap <leader><F3> :set invhls hls?<CR>
+nnoremap <localleader><F3> :set invhls hls?<CR>
 
 " Search & replace
 Noremap  <C-F>   /
@@ -779,8 +788,8 @@ if !exists('g:loaded_project')
   let g:proj_window_pos = 'L'
 
   " Toggle ON/OFF
-  nmap <leader>p  :Project<CR>
-  nmap <leader>pp <Plug>ToggleProject
+  nmap <localleader>p  :Project<CR>
+  nmap <localleader>pp <Plug>ToggleProject
 endif
 
 
@@ -939,10 +948,12 @@ endif
 if !exists('g:loaded_yaifa')
   " Options
   let g:yaifa_max_lines=4096
+  " Map Yaifa
+  nmap <localleader><tab>   :call YAIFA()<CR>
   " Call it now
-  if exists("*YAIFA")
-    call YAIFA()
-  endif
+  "if exists("*YAIFA")
+  "  call YAIFA()
+  "endif
 endif
 
 
