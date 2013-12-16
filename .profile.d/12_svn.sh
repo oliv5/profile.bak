@@ -19,9 +19,8 @@ alias sds='svn diff --summarize'
 
 # Build a unique backup directory for this repo
 function svn-bckdir() {
-  DST=$(readlink -m "$PWD")
-  DST="$(svn-root)/${1:+$1_}$(basename $DST)${2:+_$2}"
-  DST=$(readlink -m "$DST")
+  DST=$(basename "$(readlink -m "$PWD")")
+  DST=$(readlink -m "$(svn-root)/${1:-.svnbackup}_$DST${2:+_$2}")
   mkdir -p "${DST}"
   echo "${DST}"
 }
@@ -38,7 +37,7 @@ function svn-bckpath() {
 
 # Retrieve date
 function svn-date() {
-  date +%Y%m%d_%H%M%S
+  date +%Y%m%d-%H%M%S
 }
 
 # Get svn repository path
@@ -123,12 +122,12 @@ function svn-clean() {
     echo -n "Remove unversioned files? (y/n): "
     read ANSWER; [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ] && return 0
   fi
-  # Set backup directory
-  DST="$(svn-bckdir .svnbackup)"
   # Check we are in a repository
   svn-exists || return
+  # Set backup directory
+  DST="$(svn-bckdir)"
   # Backup
-  svn-st "^(\?|\I)" | xargs --no-run-if-empty 7z a $OPTS_7Z "${DST}/clean_r$(svn-rev)_$(svn-date).7z"
+  svn-st "^(\?|\I)" | xargs --no-run-if-empty 7z a $OPTS_7Z "${DST}/clean_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z"
   echo
   # Remove files not in SVN
   svn-st "^(\?|\I)" | xargs --no-run-if-empty rm -rv
@@ -136,12 +135,12 @@ function svn-clean() {
 
 # Revert modified files, don't change unversionned files
 function svn-revert() {
-  # Set backup directory
-  DST="$(svn-bckdir .svnbackup)"
   # Check we are in a repository
   svn-exists || return
+  # Set backup directory
+  DST="$(svn-bckdir)"
   # Backup
-  svn-export HEAD HEAD "${DST}/revert_r$(svn-rev)_$(svn-date).7z"
+  svn-export HEAD HEAD "${DST}/revert_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z"
   # Revert local modifications
   svn revert -R . ${1:+--cl $1}
 }
@@ -150,36 +149,35 @@ function svn-revert() {
 function svn-rollback() {
   # Get target revision number
   REV=${1:?Please enter a revision number}
-  # Set backup directory
-  DST="$(svn-bckdir .svnbackup)"
   # Check we are in a repository
   svn-exists || return
+  # Set backup directory
+  DST="$(svn-bckdir)"
   # Backup
-  svn-export HEAD $REV "${DST}/rollback_r${REV}_$(svn-date).7z"
+  svn-export HEAD $REV "${DST}/rollback_$(svn-bckname)_r${REV}_$(svn-date).7z"
   # Rollback (svn merge back)
   svn merge -r HEAD:$REV .
 }
 
 # Backup current changes
 function svn-export() {
+  # Check we are in a repository
+  svn-exists || return
   # Set backup directory
-  DST="$(svn-bckdir .svnbackup)"
+  DST="$(svn-bckdir)"
   # Get revisions
   REV0=${1:-HEAD}
   REV1=${2:-HEAD}
-  # Check we are in a repository
-  svn-exists || return
   # Get archive path, if not specified
   ARCHIVE="$3"
   if [ -z "$ARCHIVE" ]; then
-    REPO="$(svn-bckname 'export')"
     if [ "$REV0" == "HEAD" ]; then
       # Export changes made upon HEAD
-      REV=$(svn-rev)
-      ARCHIVE="${DST}/${REPO}_r${REV}_$(svn-date).7z"
+      REV="$(svn-rev)"
+      ARCHIVE="${DST}/export_$(svn-bckname)_r${REV}_$(svn-date).7z"
     else
       # Export changes between the 2 revisions
-      ARCHIVE="${DST}/${REPO}_r${REV0}-${REV1}_$(svn-date).7z"
+      ARCHIVE="${DST}/export_$(svn-bckname)_r${REV0}-${REV1}_$(svn-date).7z"
     fi
   fi
   # Create archive, if not existing already
@@ -214,8 +212,9 @@ function svn-import() {
 # Suspend a CL
 function svn-suspend() {
   # Set backup directory
-  DST="$(svn-bckdir .svnbackup)"
-  if svn-export HEAD HEAD "${DST}/suspend_r$(svn-rev)_$(svn-date).7z"; then
+  DST="$(svn-bckdir)"
+  # Export & revert if succeed
+  if svn-export HEAD HEAD "${DST}/suspend_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z"; then
     svn revert -R .
   fi
 }
