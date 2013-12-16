@@ -19,22 +19,46 @@ alias sds='svn diff --summarize'
 
 # Build a unique backup directory for this repo
 function svn-bckdir() {
-  #ROOT="${SVN_ROOT:-$PWD}"
-  #DST="${ROOT}/../${1:+$1_}$(basename $(svn-url))${2:+_$2}"
-  DST="$(svn-root)/${1:+$1_}$(basename $PWD)${2:+_$2}"
+  DST=$(readlink -m "$PWD")
+  DST="$(svn-root)/${1:+$1_}$(basename $DST)${2:+_$2}"
   DST=$(readlink -m "$DST")
-  mkdir -p ${DST}
-  echo ${DST}
+  mkdir -p "${DST}"
+  echo "${DST}"
 }
 
-# Return a unique backup filename for this repo
+# Build a unique backup filename for this repo
 function svn-bckname() {
-  echo "${1:+$1_}$(basename $(svn-repo)_$(basename $(svn-url)))${2:+_$2}"
+  echo "${1:+$1_}$(basename $(svn-repo))_$(basename $(svn-url))${2:+_$2}"
+}
+
+# Build a unique backup filepath for this repo
+function svn-bckpath() {
+  echo $(svn-bckdir "$1" "$2")/$(svn-bckname "$3" "$4")
 }
 
 # Retrieve date
 function svn-date() {
   date +%Y%m%d_%H%M%S
+}
+
+# Get svn repository path
+function svn-repo() {
+  svn info "$@" | grep "Repository Root:" | grep -oh 'svn.*'
+}
+
+# Get svn url name
+function svn-url() {
+  svn info "$@" | grep "URL:" | grep -oh 'svn.*'
+}
+
+# Get svn current root
+function svn-root() {
+  echo "${PWD}$(sed -e "s;$(svn-repo);;" -e "s;/[^\/]*;/..;g" <<< $(svn-url))"
+}
+
+# Get svn repository revision
+function svn-rev() {
+  svn info "$@" | grep "Revision:" | grep -oh '[0-9]\+'
 }
 
 # Get status file list
@@ -79,26 +103,6 @@ function svn-ci() {
   CL="CL$(svn-date)"
   svn cl "$CL" "$@"
   svn ci --cl "$CL"
-}
-
-# Get svn repository path
-function svn-repo() {
-  svn info "$@" | grep "Repository Root:" | grep -oh 'svn.*'
-}
-
-# Get svn url name
-function svn-url() {
-  svn info "$@" | grep "URL:" | grep -oh 'svn.*'
-}
-
-# Get svn current root
-function svn-root() {
-  echo "${PWD}$(sed -e "s;$(svn-repo);;" -e "s;/[^\/]*;/..;g" <<< $(svn-url))"
-}
-
-# Get svn repository revision
-function svn-rev() {
-  svn info "$@" | grep "Revision:" | grep -oh '[0-9]\+'
 }
 
 # Create a changelist
@@ -168,8 +172,7 @@ function svn-export() {
   # Get archive path, if not specified
   ARCHIVE="$3"
   if [ -z "$ARCHIVE" ]; then
-    #REPO=$(basename $(svn-repo)_$(basename $(svn-url)))
-    REPO="$(svn-bckname)"
+    REPO="$(svn-bckname 'export')"
     if [ "$REV0" == "HEAD" ]; then
       # Export changes made upon HEAD
       REV=$(svn-rev)
@@ -210,7 +213,9 @@ function svn-import() {
 
 # Suspend a CL
 function svn-suspend() {
-  if svn-export HEAD HEAD $(svn-bckname "suspend" ""); then
+  # Set backup directory
+  DST="$(svn-bckdir .svnbackup)"
+  if svn-export HEAD HEAD "${DST}/suspend_r$(svn-rev)_$(svn-date).7z"; then
     svn revert -R .
   fi
 }
@@ -232,8 +237,7 @@ function svn-compare() {
   svn-exists || return
   # Extract the CL in /tmp
   TEMP="$(mktemp -d)"
-  ARCHIVE="$(svn-bckdir .svnbackup)/$1"
-  7z x "$ARCHIVE" -o"$TEMP/"
+  7z x "$1" -o"$TEMP/"
   # Compare with repository
   meld "${2:-.}" "$TEMP"
 }
