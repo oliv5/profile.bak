@@ -14,8 +14,9 @@ alias sd='svn st | grep -E "^D"'
 alias st='svn st'
 alias sl='svn ls --depth infinity'
 alias sdd='svn diff'
-alias sdm='svn-meld'
 alias sds='svn diff --summarize'
+alias sdm='svn diff --diff-cmd meld'
+alias svn-diffm='svn-diff --diff-cmd meld'
 
 # Build a unique backup directory for this repo
 function svn-bckdir() {
@@ -65,9 +66,11 @@ function svn-st() {
   svn st | grep -E "${1:-^[^ ]}" | cut -c 9-
 }
 
-# SVN diff with meld
-function svn-meld() {
-  svn diff --diff-cmd meld "$@"
+# Extract SVN revision from string rev0:rev1
+function svn-getrev() {
+  REV0="${1%%:*}"
+  REV1="${1##*:}"
+  echo "${REV0:-HEAD} ${REV1:-HEAD}"
 }
 
 # Merge 3-way
@@ -284,18 +287,17 @@ function svn-history() {
 
 # Show log in a range of revisions
 function svn-log() {
-  # Get revisions
-  REV0=${1:-HEAD}
-  REV1=${2:-HEAD}
-  # Show log
-  svn log --verbose -r ${REV0}:${REV1} ${@:3}
+  svn log --verbose ${1:+-r $1}${2:+:$2} ${@:3}
 }
 
-# List changed files in a range of revisions
-function svn-list() {
-  # Get revisions
-  REV0=${1:-HEAD}
-  REV1=${2:-HEAD}
-  # Show file list
-  svn diff --summarize -r ${REV0}:${REV1} ${@:3}
+# Display the changes in a file in a range of revisions
+# or list changed files in a range of revisions 
+function svn-diff() {
+  svn diff ${1:+-r $1}${2:+:$2} ${3:---summarize} ${@:4}
 }
+
+# Display content of a file
+function svn-cat () {
+  svn cat ${1:+-r $1}${2:+:$2} ${@:3}
+}
+

@@ -1,3 +1,5 @@
+let g:trial_plugin = 1
+
 " Create an empty wnd list
 if !exists('g:wndmgr_wndList')
   let g:wndmgr_wndList = []

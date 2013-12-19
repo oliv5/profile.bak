@@ -5,13 +5,7 @@ let loaded_wndmgr_jmp = 1
 
 " Plugins which open windows
 if !exists('g:wndmgr_pluginList')
-  let g:wndmgr_pluginList = [
-      \ "-MiniBufExplorer-",
-      \ "_NERD_tree_",
-      \ "__Tag_List__",
-      \ "Source_Explorer",
-      \ "\.vimprojects",
-  \ ]
+  let g:wndmgr_pluginList = []
 endif
 
 " Create an empty wnd list
@@ -42,9 +36,23 @@ function! g:wndmgr_AvoidPluginWnd()
     if &buftype ==# "quickfix"
         return -1
     endif
+    " Filter preview window
+    "if getwinvar(winnr("%"), "&pvw") == 1
+    if &previewwindow
+        return -3
+    endif
     " Search the bufname in the plugin list (pattern matching, not "==#")
-    if len(bufname("%")) && match(g:wndmgr_pluginList, bufname("%"))!=-1
-        return -2
+    "if len(bufname("%")) && match(g:wndmgr_pluginList, bufname("%"))!=-1
+    "    return -2
+    "endif
+    " Search the bufname in the plugin list (pattern matching, not "==#")
+    let buffer = bufname("%")
+    if len(buffer)
+        for pattern in g:wndmgr_pluginList
+            if match(buffer, pattern)!=-1
+                return -2
+            endif
+        endfor
     endif
     " Not a plugin
     return 0

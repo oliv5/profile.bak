@@ -47,6 +47,9 @@ if has("cscope")
 
     " show msg when any other cscope db added
     set cscopeverbose
+    
+    " limit directory depth displayed to 3
+    set cspc=3
 
 
     """"""""""""" My cscope/vim key mappings

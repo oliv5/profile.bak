@@ -63,6 +63,7 @@ set noswapfile              " No swap
 set noerrorbells            " No bells (!!)
 set novisualbell            " No visual bells too
 set shell=/bin/bash         " Force bash shell
+set updatetime=400          " Swap file write / event CursorHold delay (in ms)
 
 " Force write with sudo after opening the file
 cmap w!! w !sudo tee % >/dev/null
@@ -156,6 +157,7 @@ set nu                " Show line numbers
 set hidden            " Show hidden buffers & allow switching to modified buffer
 set switchbuf=useopen " Buffer switch use open windows instead of splitting/openning new window
 set noea              " No equalize windows
+set splitbelow        " Window split location. Also applied to :vsp & :sp
 
 " Remember all of these between sessions, but only 10 search terms; also
 " remember info for 10 files, but never any on removable disks, don't remember
@@ -419,8 +421,8 @@ Noremap  <C-Tab>  :tabp<CR>
 " Tab enter handler
 "augroup tabenter
 "  autocmd!
-"  autocmd TabEnter *.c,*.h,*.cc,*.hpp,*.cpp,*.slang,*.phyton,*.make call IdeEnable_0()
-"  autocmd TabLeave *.c,*.h,*.cc,*.hpp,*.cpp,*.slang,*.phyton,*.make call IdeDisable_0()
+"  autocmd TabEnter *.c,*.h,*.cc,*.hpp,*.cpp,*.slang,*.py,*.mk call IdeEnable_0()
+"  autocmd TabLeave *.c,*.h,*.cc,*.hpp,*.cpp,*.slang,*.py,*.mk call IdeDisable_0()
 "augroup END
 
 
@@ -500,9 +502,92 @@ Map <F1>    :help<space>
 " *******************************************************
 " * File browser netrw
 " *******************************************************
-let g:netrw_browse_split = 0
-"let g:netrw_browse_split = 4
-"let g:netrw_altv = 1
+" Options
+let g:netrw_browse_split = 0  " Use same window
+let g:netrw_altv = 0          " No vertical split
+let g:netrw_alto = 0          " No horizontal split
+let g:netrw_liststyle=3       " Tree mode
+let g:netrw_special_syntax= 1 " Show special files
+
+" Keymapping
+map <silent> <C-e> :call Vexplore()<CR>
+
+
+" *******************************************************
+" * Preview window
+" *******************************************************
+" Options
+set previewheight=8           " Preview window height
+
+" Open preview window
+function! s:OpenPreviewWnd()
+  pedit
+  au! CursorHold * nested call s:ShowPreviewTag()
+endfunction
+
+" Close preview window
+function! s:ClosePreviewWnd()
+  au! CursorHold *
+  pclose
+endfunction
+
+" Show the selected tag
+function! s:ShowPreviewTag()
+  if &previewwindow             " Skip the preview window itself
+    return
+  endif
+  let w = expand("<cword>")     " Get the word under cursor
+  if w =~ '\a'                  " If the word contains a letter
+    "try                         " Try displaying the matching tag
+    "   exe "ptag " . w
+    "catch
+    "  return
+    "endtry
+    
+        "silent! wincmd P            " Jump to the preview window
+        
+        " Try to tag the symbol again
+        let l:expr = '\<' . w . '\>' . '\C'
+        "let l:expr = '\\*' . w . '\\$'
+        "echo taglist(l:expr)
+
+        " We get the tag list of the expression
+        let l:list = taglist(l:expr)
+        "echo l:list
+        " Then get the length of taglist
+        let l:len = len(l:list)
+        if l:len == 0
+          return
+        endif
+        "let l:list = { l:list[0] }
+
+        " Get dictionary to load tag's file path and ex command
+        let l:dict = get(l:list, 0, {})
+
+"    call search("$", "b")
+"    let s:SrcExpl_symbol = substitute(s:SrcExpl_symbol,
+"        \ '\\', '\\\\', '')
+"    call search('\<' . s:SrcExpl_symbol . '\>' . '\C')
+
+        let w = l:dict['cmd']
+        echo "pedit " . w l:dict['filename']
+    
+    silent! wincmd P            " Jump to the preview window
+    if &previewwindow
+     match none                 " Delete existing highlight
+     if has("folding")
+       silent! .foldopen        " Skip closed fold
+     endif
+     " Find and highlight the selected tag
+     call search("$", "b")          " Search to end of previous line
+     let w = substitute(w, '\\', '\\\\', "")
+     call search('\<\V' . w . '\>') " Position cursor on match
+     hi previewWord term=bold ctermbg=blue guibg=blue
+     exe 'match previewWord "\%' . line(".") . 'l\%' . col(".") . 'c\k*"'
+     wincmd p                   " Back to old window
+    endif
+  endif
+endfunction
 
 
 " *******************************************************
@@ -566,11 +651,12 @@ let g:loaded_cctree = 1
 
 " Plugins which open window
 let g:wndmgr_pluginList = [
-    \ "-MiniBufExplorer-",
-    \ "_NERD_tree_",
-    \ "__Tag_List__",
-    \ "Source_Explorer",
-    \ ".vimprojects",
+      \ "-MiniBufExplorer-",
+      \ "_NERD_tree_",
+      \ "__Tag_List__",
+      \ "Source_Explorer",
+      \ "\.vimprojects",
+      \ "NetrwTreeListing .",
 \ ]
 
 
@@ -710,20 +796,18 @@ endif
 
 " Vertical split IDE
 function! s:IdeEnable_1()
-  :vsp
+  vsp
 endfunction
-
 function! s:IdeDisable_1()
-  :wincmd c
+  wincmd c
 endfunction
 
-" Horizontal split IDE
+" Preview window ON/OFF
 function! s:IdeEnable_2()
-  :sp
+  call s:OpenPreviewWnd()
 endfunction
-
 function! s:IdeDisable_2()
-  :wincmd c
+  call s:ClosePreviewWnd()
 endfunction
 
 
@@ -880,6 +964,7 @@ if !exists('g:loaded_minibufexplorer')
   let g:miniBufExplMinSize = 1
   let g:miniBufExplMaxSize = 3
   let g:miniBufExplSortBy = 'mru'
+  let g:miniBufExplBRSplit = 0
 
   " Colors
   hi MBENormal               guifg=#FFFFFF guibg=bg
