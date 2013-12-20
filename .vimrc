@@ -1101,10 +1101,11 @@ map <leader>h :call <SID>HexaToggle()<CR>
 " * Tags
 " *******************************************************
 " Set tags root
-set tags=tags,tags.*;${TAG_ROOT:-.}/
+set tags=./tags,tags,$TAGS_DB
 
 " Definition mapping
-Map <C-d><C-v> <C-]>
+Noremap <C-ENTER>  <C-]>
+Noremap <C-SPACE>  <C-T>
 
 
 " *******************************************************

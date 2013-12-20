@@ -9,6 +9,11 @@ if [ -x ~/.localsrc ]; then
   source ~/.localsrc
 fi
 
+# Export functions
+function export-functions() {
+  sed '/^[\s\t]*func/!d ; s/.*\s\(.\+\)(.*/\1/' "${1:?Please specify a shell script}" | xargs sh -c "export -f" >/dev/null
+}
+
 # Add to path function
 function addpath() {
   for DIR in "$@"; do

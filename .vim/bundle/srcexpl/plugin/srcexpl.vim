@@ -794,7 +794,10 @@ function! <SID>SrcExpl_AdaptPlugins()
     " Traversal the list of other plugins
     for item in g:SrcExpl_pluginList
         " If they acted as a split window
-        if bufname("%") ==# item
+        " OLA++
+        "if bufname("%") ==# item
+        if match(bufname("%"), item)!=-1
+        " OLA--
             " Just avoid this operation
             return -1
         endif
@@ -1180,6 +1183,13 @@ function! <SID>SrcExpl_TagSth(expr)
         let s:SrcExpl_status = 0
         return
     endif
+    
+    " OLA ++
+    if l:len > 1
+        let l:len = 1
+        let l:list = [ l:list[0] ]
+    endif
+    " OLA --
 
     " One tag
     if l:len == 1
@@ -1330,7 +1340,10 @@ function! <SID>SrcExpl_GetEditWin()
     while 1
         " Traverse the plugin list for each sub-window
         for item in g:SrcExpl_pluginList
-            if bufname(winbufnr(l:i)) ==# item
+            " OLA++
+            "if bufname(winbufnr(l:i)) ==# item
+            if match(bufname(winbufnr(l:i)), item)!=-1
+            " OLA--
                 break
             else
                 let l:j += 1
