@@ -4,6 +4,9 @@
 export ENV_CNT=$(expr ${ENV_CNT:-0} + 1)
 export ENV_PROFILE_D=$ENV_CNT
 
+#alias
+alias end='return 0 2>/dev/null || exit 0'
+
 # Call env external profile script
 if [ -x ~/.localsrc ]; then
   source ~/.localsrc
@@ -44,9 +47,11 @@ function die () {
   [[ $- == *i* ]] && return ${2:--1} || exit ${2:--1}
 }
 
-# Exports
-export -f addpath
-export -f die
+# List and export user functions
+function fct-ls() {
+  declare -F | cut -d" " -f3 | egrep -v "^_"
+}
 
-#alias
-alias end='return 0 2>/dev/null || exit 0'
+function fct-export() {
+  export -f $(fct-ls)
+}

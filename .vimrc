@@ -172,26 +172,35 @@ set viminfo=/10,'10,r/mnt/zip,r/mnt/floppy,f0,h,\"100,%20
 execute 'set listchars+=tab:' . nr2char(187) . nr2char(183)
 
 " Set vim to chdir for each file
-if exists('+autochdir')
-  set autochdir
-else
-  autocmd BufEnter * silent! lcd %:p:h:gs/ /\\ /
-endif
+"if exists('+autochdir')
+"  set autochdir
+"else
+"  autocmd BufEnter * silent! lcd %:p:h:gs/ /\\ /
+"endif
 
 " Tab name is the filename only
 if exists('+gtl')
   set gtl=%t
 endif
 
+" Gui options
+set guioptions-=T       " Remove toolbar
+
 
 " *******************************************************
 " * Statusline
 " *******************************************************
-set statusline=\ %F
-set statusline+=\ [%{strlen(&fenc)?&fenc:'none'},\ %{&ff}]%h%m%r
-set statusline+=\ [%{&expandtab==0?'tabs':'space'}]\ %y
-set statusline+=%=
-set statusline+=%c,%l/%L\ %P
+" Line text content
+setlocal statusline=\ %F
+setlocal statusline+=\ [%{strlen(&fenc)?&fenc:'none'},\ %{&ff}]%h%m%r
+setlocal statusline+=\ [%{&expandtab==0?'tabs':'space'}]\ %y
+setlocal statusline+=%=
+setlocal statusline+=%c,%l/%L\ %P
+
+" Line options
+set laststatus=0         " Disable bottom status line
+hi StatusLine ctermbg=NONE ctermfg=white
+"hi clear StatusLine
 
 
 " *******************************************************
@@ -508,6 +517,7 @@ let g:netrw_altv = 0          " No vertical split
 let g:netrw_alto = 0          " No horizontal split
 let g:netrw_liststyle=3       " Tree mode
 let g:netrw_special_syntax= 1 " Show special files
+let g:netrw_sort_sequence   = "[\/]$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$"
 
 " Keymapping
 map <silent> <C-e> :call Vexplore()<CR>
@@ -638,6 +648,9 @@ if exists('g:loaded_minibufexplorer')
 endif
 if exists('g:loaded_yaifa')
   unlet g:loaded_yaifa
+endif
+if exists('g:command_t_loaded')
+  unlet g:command_t_loaded
 endif
 " Disable the following plugins
 let g:loaded_project = 1
@@ -1035,10 +1048,10 @@ if !exists('g:loaded_yaifa')
   let g:yaifa_max_lines=4096
   " Map Yaifa
   nmap <localleader><tab>   :call YAIFA()<CR>
-  " Call it now
-  "if exists("*YAIFA")
-  "  call YAIFA()
-  "endif
+  " autocall when entering file
+  if exists("*YAIFA")
+    autocmd BufRead * silent! call YAIFA()
+  endif
 endif
 
 
@@ -1074,6 +1087,14 @@ if !exists('g:loaded_cctree')
   " Autocommands
   autocmd VimEnter * if filereadable('$CSCOPE_DB') | CCTreeLoadDB $CSCOPE_DB | endif
   autocmd VimEnter * if filereadable('xref.out') | CCTreeLoadXRefDbFromDisk xref.out | endif
+endif
+
+
+" *******************************************************
+" * Command-T plugin
+" *******************************************************
+if !exists('g:command_t_loaded')
+  Noremap <C-Space>     :CommandT<CR>
 endif
 
 
@@ -1154,3 +1175,11 @@ function! s:Vimrc_AlignAssignments ()
     call setline(linenum, newline)
   endfor
 endfunction
+
+
+" *******************************************************
+" * Load local configuration
+" *******************************************************
+if filereadable("~/.localvimrc")
+  source ~/.localvimrc
+endif
