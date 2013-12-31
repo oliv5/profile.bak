@@ -1,3 +1,87 @@
+
+
+finish
+
+
+" Show the selected tag
+function! s:ShowPreviewTag()
+  if &previewwindow             " Skip the preview window itself
+    return
+  endif
+  let w = expand("<cword>")     " Get the word under cursor
+  if w =~ '\a'                  " If the word contains a letter
+    "try                         " Try displaying the matching tag
+    "  exe "silent ptag" w
+    "catch
+    "  exe "silent pedit _no_definition"
+    "endtry
+    "return
+    
+    "silent! wincmd P            " Jump to the preview window
+        
+    " Try to tag the symbol again
+    let l:expr = '\<' . w . '\>' . '\C'
+
+    " Get the tag list
+    let l:list = taglist(l:expr)
+    
+    " Exit if found same tag
+    if l:list == s:old_tag
+      return
+    endif
+    
+    " Store the tag
+    let s:old_tag=l:list
+    
+    " Then get the length of taglist
+    let l:len = len(l:list)
+    if l:len == 0
+      exe "silent pedit _no_definition"
+      return
+    endif
+    "let l:list = { l:list[0] }
+
+    " Get dictionary to load tag's file path and ex command
+    let l:dict = get(l:list, 0, {})
+
+"    call search("$", "b")
+"    let s:SrcExpl_symbol = substitute(s:SrcExpl_symbol,
+"        \ '\\', '\\\\', '')
+"    call search('\<' . s:SrcExpl_symbol . '\>' . '\C')
+
+        "echo "pedit " . w l:dict['filename']
+        "echo "exec" "pedit" l:dict['filename']
+        exec "silent pedit" "+/".l:dict['name'] l:dict['filename']
+        "echo l:dict
+        "exec "silent ptag" l:dict['name']
+        "call search('\<' . l:dict['cmd'] . '\>' . '\C')
+        "call search(l:expr)
+        
+        
+        "return
+    
+    silent! wincmd P            " Jump to the preview window
+    if &previewwindow
+     match none                 " Delete existing highlight
+     if has("folding")
+       silent! .foldopen        " Skip closed fold
+     endif
+     " Find and highlight the selected tag
+     call search("$", "b")          " Search to end of previous line
+     let w = substitute(w, '\\', '\\\\', "")
+     call search('\<\V' . w . '\>') " Position cursor on match
+     hi previewWord term=bold ctermbg=blue guibg=blue
+     exe 'match previewWord "\%' . line(".") . 'l\%' . col(".") . 'c\k*"'
+     wincmd p                   " Back to old window
+    endif
+  endif
+endfunction
+
+
+
+finish
+
+
 let g:trial_plugin = 1
 
 " Create an empty wnd list

@@ -495,6 +495,17 @@ if bufname('%') == ''
   set bufhidden=wipe
 endif
 
+" Clear hidden read-only buffers
+func ClearHiddenRO() 
+    let i = 1 
+    while i <= bufnr('$') 
+        if buflisted(i) && getbufvar(i, '&readonly') && (bufwinnr(i) == -1) 
+            exe "bdel!" i 
+        endif 
+        let i += 1 
+    endwhile 
+endfunc
+
 
 " *******************************************************
 " * Function keys
@@ -541,61 +552,70 @@ function! s:ClosePreviewWnd()
   pclose
 endfunction
 
+let s:last_word = ""
+
 " Show the selected tag
 function! s:ShowPreviewTag()
   if &previewwindow             " Skip the preview window itself
     return
   endif
   let w = expand("<cword>")     " Get the word under cursor
+  if w == s:last_word
+    return
+  endif
+  let s:last_word = w
   if w =~ '\a'                  " If the word contains a letter
     "try                         " Try displaying the matching tag
-    "   exe "ptag " . w
+    "  exe "silent ptag" w
     "catch
-    "  return
+    "  exe "silent pedit _no_definition"
     "endtry
+    "return
     
-        "silent! wincmd P            " Jump to the preview window
-        
-        " Try to tag the symbol again
-        let l:expr = '\<' . w . '\>' . '\C'
-        "let l:expr = '\\*' . w . '\\$'
-        "echo taglist(l:expr)
-
-        " We get the tag list of the expression
-        let l:list = taglist(l:expr)
-        "echo l:list
-        " Then get the length of taglist
-        let l:len = len(l:list)
-        if l:len == 0
-          return
-        endif
-        "let l:list = { l:list[0] }
-
-        " Get dictionary to load tag's file path and ex command
-        let l:dict = get(l:list, 0, {})
-
-"    call search("$", "b")
-"    let s:SrcExpl_symbol = substitute(s:SrcExpl_symbol,
-"        \ '\\', '\\\\', '')
-"    call search('\<' . s:SrcExpl_symbol . '\>' . '\C')
-
-        let w = l:dict['cmd']
-        echo "pedit " . w l:dict['filename']
+    " Get the tag list
+    let l:list = taglist('\<' . w . '\>' . '\C')
     
-    silent! wincmd P            " Jump to the preview window
-    if &previewwindow
-     match none                 " Delete existing highlight
-     if has("folding")
-       silent! .foldopen        " Skip closed fold
-     endif
-     " Find and highlight the selected tag
-     call search("$", "b")          " Search to end of previous line
-     let w = substitute(w, '\\', '\\\\', "")
-     call search('\<\V' . w . '\>') " Position cursor on match
-     hi previewWord term=bold ctermbg=blue guibg=blue
-     exe 'match previewWord "\%' . line(".") . 'l\%' . col(".") . 'c\k*"'
-     wincmd p                   " Back to old window
+    " Exit if empty
+    if len(l:list) == 0
+      "pedit
+      "wincmd P
+      "if &previewwindow
+      "  enew
+      "endif
+      "wincmd p
+      return
     endif
+
+    " Get dictionary to load tag's file path and ex command
+    let l:dict = get(l:list, 0, {})
+
+    " Open preview window, goto tag
+    exec "silent pedit" "+/".l:dict['name'] l:dict['filename']
+
+    " Select preview window
+    wincmd P
+    
+    " Skip closed fold
+    if has("folding")
+      silent! .foldopen
+    endif
+    
+    " Delete existing highlight
+    match none
+    
+    " Search to end of previous line
+    call search("$", "b")
+    let w = substitute(w, '\\', '\\\\', "")
+    
+    " Position cursor on match
+    call search('\<\V' . w . '\>')
+    
+    " Set highlight
+    hi previewWord term=bold ctermbg=blue guibg=blue
+    exe 'match previewWord "\%' . line(".") . 'l\%' . col(".") . 'c\k*"'
+    
+    " Back to prev window
+    wincmd p
   endif
 endfunction
 
@@ -1094,7 +1114,11 @@ endif
 " * Command-T plugin
 " *******************************************************
 if !exists('g:command_t_loaded')
-  Noremap <C-Space>     :CommandT<CR>
+  " Options
+  let g:CommandTWildIgnore="*.o,*.obj,**/tmp/**"
+
+  " Key mapping
+  Noremap <C-o>     :CommandT<CR>
 endif
 
 
