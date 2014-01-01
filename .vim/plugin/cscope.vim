@@ -31,11 +31,11 @@ if has("cscope")
     """"""""""""" Standard cscope/vim boilerplate
 
     " use both cscope and ctag for 'ctrl-]', ':ta', and 'vim -t'
-    set cscopetag
+    "set cscopetag
 
     " check cscope for definition of a symbol before checking ctags: set to 1
     " if you want the reverse search order.
-    set csto=0
+    set csto=1
 
     " add any cscope database in the given environment variable
     if $CSCOPE_DB != ""
@@ -51,7 +51,7 @@ if has("cscope")
 
     " show msg when any other cscope db added
     set cscopeverbose
-    
+
     " limit directory depth displayed to 3
     set cspc=3
 

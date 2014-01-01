@@ -186,6 +186,12 @@ endif
 " Gui options
 set guioptions-=T       " Remove toolbar
 
+" Jump to the last cursor position
+autocmd BufReadPost *
+  \ if line("'\"") > 0 && line ("'\"") <= line("$") |
+  \   exe "normal! g'\"" |
+  \ endif
+
 
 " *******************************************************
 " * Statusline
@@ -198,9 +204,10 @@ setlocal statusline+=%=
 setlocal statusline+=%c,%l/%L\ %P
 
 " Line options
-set laststatus=0         " Disable bottom status line
-hi StatusLine ctermbg=NONE ctermfg=white
+"hi StatusLine ctermbg=NONE ctermfg=white
 "hi clear StatusLine
+"set laststatus=0         " Disable bottom status line
+set laststatus=2         " Always show status line
 
 
 " *******************************************************
@@ -496,14 +503,14 @@ if bufname('%') == ''
 endif
 
 " Clear hidden read-only buffers
-func ClearHiddenRO() 
-    let i = 1 
-    while i <= bufnr('$') 
-        if buflisted(i) && getbufvar(i, '&readonly') && (bufwinnr(i) == -1) 
-            exe "bdel!" i 
-        endif 
-        let i += 1 
-    endwhile 
+function! ClearHiddenRO()
+    let i = 1
+    while i <= bufnr('$')
+        if buflisted(i) && getbufvar(i, '&readonly') && (bufwinnr(i) == -1)
+            exe "bdel!" i
+        endif
+        let i += 1
+    endwhile
 endfunc
 
 
@@ -540,10 +547,18 @@ map <silent> <C-e> :call Vexplore()<CR>
 " Options
 set previewheight=8           " Preview window height
 
+" Variables
+let s:p_lastw = ""
+
+" Key mappings
+Noremap <F7>        :ptnext<CR>
+Noremap <S-F7>      :ptprevious<CR>
+Noremap <C-F7>      :pclose<CR>
+
 " Open preview window
 function! s:OpenPreviewWnd()
-  pedit
-  au! CursorHold * nested call s:ShowPreviewTag()
+  silent! pedit!
+  au! CursorHold * nested call s:ShowPreviewTag_2()
 endfunction
 
 " Close preview window
@@ -552,18 +567,16 @@ function! s:ClosePreviewWnd()
   pclose
 endfunction
 
-let s:last_word = ""
-
 " Show the selected tag
-function! s:ShowPreviewTag()
+function! s:ShowPreviewTag_1()
   if &previewwindow             " Skip the preview window itself
     return
   endif
   let w = expand("<cword>")     " Get the word under cursor
-  if w == s:last_word
+  if w == s:p_lastw             " Same word, skip all this
     return
   endif
-  let s:last_word = w
+  let s:p_lastw = w
   if w =~ '\a'                  " If the word contains a letter
     "try                         " Try displaying the matching tag
     "  exe "silent ptag" w
@@ -571,51 +584,72 @@ function! s:ShowPreviewTag()
     "  exe "silent pedit _no_definition"
     "endtry
     "return
-    
     " Get the tag list
     let l:list = taglist('\<' . w . '\>' . '\C')
-    
     " Exit if empty
     if len(l:list) == 0
-      "pedit
-      "wincmd P
-      "if &previewwindow
-      "  enew
-      "endif
-      "wincmd p
+      silent! pedit!
       return
     endif
-
     " Get dictionary to load tag's file path and ex command
     let l:dict = get(l:list, 0, {})
-
     " Open preview window, goto tag
     exec "silent pedit" "+/".l:dict['name'] l:dict['filename']
-
     " Select preview window
     wincmd P
-    
+    if ! &previewwindow
+      return
+    endif
     " Skip closed fold
     if has("folding")
       silent! .foldopen
     endif
-    
     " Delete existing highlight
     match none
-    
     " Search to end of previous line
     call search("$", "b")
-    let w = substitute(w, '\\', '\\\\', "")
-    
     " Position cursor on match
+    "let w = substitute(w, '\\', '\\\\', "")
     call search('\<\V' . w . '\>')
-    
     " Set highlight
     hi previewWord term=bold ctermbg=blue guibg=blue
     exe 'match previewWord "\%' . line(".") . 'l\%' . col(".") . 'c\k*"'
-    
     " Back to prev window
     wincmd p
+  endif
+endfunction
+
+function! s:ShowPreviewTag_2()
+  if &previewwindow             " don't do this in the preview window
+    return
+  endif
+  let w = expand("<cword>")     " get the word under cursor
+  if w =~ '\a'                  " if the word contains a letter
+    " Delete any existing highlight before showing another tag
+    silent! wincmd P            " jump to preview window
+    if &previewwindow           " if we really get there...
+      match none                " delete existing highlight
+      wincmd p                  " back to old window
+    endif
+    " Try displaying a matching tag for the word under the cursor
+    try
+       exe "ptag " . w
+    catch
+      return
+    endtry
+    silent! wincmd P            " jump to preview window
+    if &previewwindow           " if we really get there...
+     if has("folding")
+       silent! .foldopen        " don't want a closed fold
+     endif
+     call search("$", "b")      " to end of previous line
+     let w = substitute(w, '\\', '\\\\', "")
+     call search('\<\V' . w . '\>') " position cursor on match
+     " Add a match highlight to the word at this position
+     hi previewWord term=bold ctermbg=green guibg=green
+     exe 'match previewWord "\%' . line(".") . 'l\%' . col(".") . 'c\k*"'
+     wincmd p                  " back to old window
+    endif
   endif
 endfunction
 
@@ -826,6 +860,10 @@ else
   endfunction
 endif
 
+function! s:IdeToggle_0()
+  MBEClose
+  MBEOpen
+endfunction
 
 " Vertical split IDE
 function! s:IdeEnable_1()
@@ -835,62 +873,41 @@ function! s:IdeDisable_1()
   wincmd c
 endfunction
 
-" Preview window ON/OFF
+" Horizontal split IDE
 function! s:IdeEnable_2()
-  call s:OpenPreviewWnd()
+  sp
 endfunction
 function! s:IdeDisable_2()
+  wincmd c
+endfunction
+
+" Preview window ON/OFF
+function! s:IdeEnable_3()
+  call s:OpenPreviewWnd()
+endfunction
+function! s:IdeDisable_3()
   call s:ClosePreviewWnd()
 endfunction
 
-
 " IDE toggle functions
-function! s:IdeToggle_0()
-  let s:vimrc_ideOn_0 = !s:vimrc_ideOn_0
-  if s:vimrc_ideOn_0 == 1
-    call s:IdeEnable_0()
-  else
-    call s:IdeDisable_0()
-  endif
-  MBEToggle
-  MBEToggle
-endfunction
-
-function! s:IdeToggle_1()
-  let s:vimrc_ideOn_1 = !s:vimrc_ideOn_1
-  if s:vimrc_ideOn_1 == 1
-    call s:IdeEnable_1()
-  else
-    call s:IdeDisable_1()
+function! s:IdeToggle(index)
+  let s:vimrc_ideFlag[a:index] = !s:vimrc_ideFlag[a:index]
+  exec "call" (s:vimrc_ideFlag[a:index] ? "s:IdeEnable_" : "s:IdeDisable_").a:index."()"
+  if exists("*s:IdeToggle_".a:index)
+    exec "call s:IdeToggle_".a:index."()"
   endif
 endfunction
-
-function! s:IdeToggle_2()
-  let s:vimrc_ideOn_2 = !s:vimrc_ideOn_2
-  if s:vimrc_ideOn_2 == 1
-    call s:IdeEnable_2()
-  else
-    call s:IdeDisable_2()
-  endif
-endfunction
-
 
 " IDE toggle flags
-if !exists('s:vimrc_ideOn_0')
-  let s:vimrc_ideOn_0 = 0
+if !exists('s:vimrc_ideFlag')
+  let s:vimrc_ideFlag = [0,0,0,0]
 endif
-if !exists('s:vimrc_ideOn_1')
-  let s:vimrc_ideOn_1 = 0
-endif
-if !exists('s:vimrc_ideOn_2')
-  let s:vimrc_ideOn_2 = 0
-endif
-
 
 " IDE toggle keys
-Noremap <F12>    :call <SID>IdeToggle_0()<CR>
-Noremap <F11>    :call <SID>IdeToggle_1()<CR>
-Noremap <F10>    :call <SID>IdeToggle_2()<CR>
+Noremap <F9>     :call <SID>IdeToggle(1)<CR>
+Noremap <F10>    :call <SID>IdeToggle(2)<CR>
+Noremap <F11>    :call <SID>IdeToggle(3)<CR>
+Noremap <F12>    :call <SID>IdeToggle(0)<CR>
 
 
 " *******************************************************
@@ -1138,7 +1155,7 @@ function! s:HexaToggle()
   endif
 endfunction
 
-Map <F9>      :call <SID>HexaToggle()<CR>
+" Key mapping
 map <leader>h :call <SID>HexaToggle()<CR>
 
 
@@ -1148,7 +1165,7 @@ map <leader>h :call <SID>HexaToggle()<CR>
 " Set tags root
 set tags=./tags,tags,$TAGS_DB
 
-" Definition mapping
+" Key mapping
 Noremap <C-ENTER>  <C-]>
 Noremap <C-SPACE>  <C-T>
 
@@ -1199,6 +1216,13 @@ function! s:Vimrc_AlignAssignments ()
     call setline(linenum, newline)
   endfor
 endfunction
+
+
+" *******************************************************
+" * Miscellaneous
+" *******************************************************
+" Highlight VIM regex
+nnoremap <C-F1> yi":let @/ = @"<CR>
 
 
 " *******************************************************

@@ -1183,12 +1183,12 @@ function! <SID>SrcExpl_TagSth(expr)
         let s:SrcExpl_status = 0
         return
     endif
-    
+
     " OLA ++
-    if l:len > 1
-        let l:len = 1
-        let l:list = [ l:list[0] ]
-    endif
+    "if l:len > 1
+    "    let l:len = 1
+    "    let l:list = [ l:list[0] ]
+    "endif
     " OLA --
 
     " One tag
