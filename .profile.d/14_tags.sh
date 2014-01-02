@@ -5,7 +5,9 @@
 #CTAGS_OPTS="-R --c++-kinds=+p --fields=+iaS --extra=+q --sort=foldcase"
 #CTAGS_OPTS="-R --fields=+iaS --extra=+q --sort=foldcase"
 #CTAGS_OPTS="-R --sort=foldcase --c++-kinds=f --c-kinds=f"
-CTAGS_OPTS="-R --sort=foldcase --fields=+iaS --extra=+q --c++-kinds=f --c-kinds=f --exclude='.svn' --exclude='.git'"
+#CTAGS_OPTS="-R --sort=foldcase --fields=+iaS --extra=+q --c++-kinds=f --c-kinds=f --exclude='.svn' --exclude='.git'"
+#CTAGS_OPTS="-R --sort=foldcase --fields=+iaS --extra=+q --exclude='.svn' --exclude='.git'"
+CTAGS_OPTS="-R --sort=yes --fields=+iaS --extra=+q --exclude='.svn' --exclude='.git'"
 
 # Cscope default settings
 CSCOPE_OPTS="-bqkv"
@@ -58,7 +60,7 @@ function rmctags() {
 function rmcscope() {
   DIR="$(eval echo ${1:-$PWD})"
   FILE="${DIR}/cscope"
-  rm -v "${FILE}.out ${FILE}.po ${FILE}.in* ${FILE}.out*"
+  rm -v "${FILE}.out*"
 }
 
 # Clean tags and cscope db

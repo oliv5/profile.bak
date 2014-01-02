@@ -6,4 +6,5 @@ if [ -f ~/.localerc ]; then
 fi
 
 # Export user functions
-fct-export
+#fct-export
+export -f die

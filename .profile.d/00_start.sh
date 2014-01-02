@@ -12,13 +12,8 @@ if [ -x ~/.localsrc ]; then
   source ~/.localsrc
 fi
 
-# Export functions
-function export-functions() {
-  sed '/^[\s\t]*func/!d ; s/.*\s\(.\+\)(.*/\1/' "${1:?Please specify a shell script}" | xargs sh -c "export -f" >/dev/null
-}
-
 # Add to path function
-function addpath() {
+function path-add() {
   for DIR in "$@"; do
     if ! [[ $PATH =~ $DIR ]]; then
       export PATH="$PATH:$DIR"
@@ -27,8 +22,7 @@ function addpath() {
 }
 
 # Call stack
-function print-calltrace()
-{
+function print-callstack() {
   # skipping i=0 as this is print_call_trace itself
   for ((i = 1; i < ${#FUNCNAME[@]}; i++)); do
     echo -n  ${BASH_SOURCE[$i]}:${BASH_LINENO[$i-1]}:${FUNCNAME[$i]}"(): "
@@ -47,11 +41,19 @@ function die () {
   [[ $- == *i* ]] && return ${2:--1} || exit ${2:--1}
 }
 
-# List and export user functions
-function fct-ls() {
-  declare -F | cut -d" " -f3 | egrep -v "^_"
+# Export user functions from script
+function fct-export() {
+  for SCRIPT in $@; do
+    sed '/^[\s\t]*func/!d ; s/.*\s\(.\+\)(.*/\1/' "$1" | xargs sh -c "export -f" >/dev/null
+  done
 }
 
-function fct-export() {
+# Export all user functions
+function fct-export-all() {
   export -f $(fct-ls)
+}
+
+# List user functions
+function fct-ls() {
+  declare -F | cut -d" " -f3 | egrep -v "^_"
 }
