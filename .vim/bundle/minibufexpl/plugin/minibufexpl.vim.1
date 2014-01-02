@@ -591,7 +591,7 @@ function! <SID>StartExplorer(curBufNum)
     call <SID>DEBUG('Leaving StartExplorer()',10)
     return
   endif
-  
+
   " Save current window number and switch to previous
   " window before entering MBE window so that the later
   " `wincmd p` command will get into this window, then
@@ -1197,8 +1197,8 @@ function! <SID>ResizeWindow()
     let saved_ead = &ead
     let &ead = 'ver'
     "set equalalways
-    "set noequalalways
     let &ead = saved_ead
+    "set noequalalways
     " OLA **
 
   " Vertical Resize
@@ -1225,8 +1225,8 @@ function! <SID>ResizeWindow()
     let saved_ead = &ead
     let &ead = 'hor'
     "set equalalways
-    "set noequalalways
     let &ead = saved_ead
+    "set noequalalways
     " OLA **
 
   endif

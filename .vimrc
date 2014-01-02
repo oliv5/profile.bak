@@ -530,15 +530,35 @@ Map <F1>    :help<space>
 " * File browser netrw
 " *******************************************************
 " Options
-let g:netrw_browse_split = 0  " Use same window
-let g:netrw_altv = 0          " No vertical split
-let g:netrw_alto = 0          " No horizontal split
+let g:netrw_browse_split = 4  " Use prev window
+let g:netrw_altv = 1          " Vertical split right
+let g:netrw_alto = 1          " Horizontal split down
 let g:netrw_liststyle=3       " Tree mode
 let g:netrw_special_syntax= 1 " Show special files
 let g:netrw_sort_sequence   = "[\/]$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$"
+let g:netrw_winsize = 20      " Window size
+
+" Workaround
+set winfixwidth
+set winfixheight
 
 " Keymapping
-map <silent> <C-e> :call Vexplore()<CR>
+Noremap <silent> <C-e>   :Explore<CR>
+Noremap <silent> <C-A-e> :Vexplore<CR>
+
+" Open netrw window
+function! s:NetrwOpenWnd()
+  Vexplore
+  let s:netrw_buf_num = bufnr("%")
+endfunction
+
+" Close netrw window
+function! s:NetrwCloseWnd()
+  if exists("s:netrw_buf_num")
+    exec bufwinnr(s:netrw_buf_num) "wincmd c"
+    unlet s:netrw_buf_num
+  endif
+endfunction
 
 
 " *******************************************************
@@ -556,13 +576,13 @@ Noremap <S-F7>      :ptprevious<CR>
 Noremap <C-F7>      :pclose<CR>
 
 " Open preview window
-function! s:OpenPreviewWnd()
+function! s:PreviewOpenWnd()
   silent! pedit!
   au! CursorHold * nested call s:ShowPreviewTag_2()
 endfunction
 
 " Close preview window
-function! s:ClosePreviewWnd()
+function! s:PreviewCloseWnd()
   au! CursorHold *
   pclose
 endfunction
@@ -838,7 +858,7 @@ elseif $VIM_IDE == 5
     SrcExplClose
   endfunction
 
-else
+elseif $VIM_IDE == 6
 
   " Enable plugins
   unlet g:loaded_nerd_tree
@@ -858,6 +878,7 @@ else
     TrinityToggleSourceExplorer
     TrinityUpdateWindow
   endfunction
+
 endif
 
 function! s:IdeToggle_0()
@@ -881,12 +902,20 @@ function! s:IdeDisable_2()
   wincmd c
 endfunction
 
-" Preview window ON/OFF
+" Preview window ON/OFF + taglist + netrw
+silent! unlet g:loaded_taglist
 function! s:IdeEnable_3()
-  call s:OpenPreviewWnd()
+  let g:Tlist_Use_Right_Window = 0
+  call s:PreviewOpenWnd()
+  "call s:NetrwOpenWnd()
+  TlistOpen
+  MBEClose
+  MBEOpen
 endfunction
 function! s:IdeDisable_3()
-  call s:ClosePreviewWnd()
+  call s:PreviewCloseWnd()
+  "call s:NetrwCloseWnd()
+  TlistClose
 endfunction
 
 " IDE toggle functions
