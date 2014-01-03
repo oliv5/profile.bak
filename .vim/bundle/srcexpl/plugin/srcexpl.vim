@@ -887,32 +887,50 @@ function! <SID>SrcExpl_SelToJump(dir)
         call <SID>SrcExpl_WinGo()
     endif
 
+" OLA ++
+"    if a:dir == 1 " Pref def
+"        if line(".") <= 2 " Prompt
+"            let l:error = 1
+"            call cursor(1, 1)
+"            call <SID>SrcExpl_MatchExpr()
+"            call <SID>SrcExpl_ColorExpr()
+"        else " Jump list
+"            call cursor(line(".") - 1, 1)
+"            let l:list = getline(".")
+"       endif
+"    elseif a:dir == 2 " Next def
+"        let l:temp = line(".") + 1
+"        if line(".") == 1 " Prompt
+"            call cursor(l:temp, 1)
+"            let l:list = getline(".")
+"        else " Jump list
+"            call cursor(l:temp, 1)
+"            if l:temp == line(".")
+"                let l:list = getline(".")
+"            else " Exceed the defs' max
+"                let l:error = 2
+"            endif
+"        endif
+"    else " Normal click
+"        let l:list = getline(".")
+"    endif
+
     if a:dir == 1 " Pref def
-        if line(".") <= 2 " Prompt
-            let l:error = 1
-            call cursor(1, 1)
-            call <SID>SrcExpl_MatchExpr()
-            call <SID>SrcExpl_ColorExpr()
-        else " Jump list
-            call cursor(line(".") - 1, 1)
-            let l:list = getline(".")
+        if line(".") <= 2
+            let l:line = line('$')
+        else
+            let l:line = line('.') - 1
         endif
     elseif a:dir == 2 " Next def
-        let l:temp = line(".") + 1
-        if line(".") == 1 " Prompt
-            call cursor(l:temp, 1)
-            let l:list = getline(".")
-        else " Jump list
-            call cursor(l:temp, 1)
-            if l:temp == line(".")
-                let l:list = getline(".")
-            else " Exceed the defs' max
-                let l:error = 2
-            endif
+        if line(".") == line('$')
+            let l:line = 2
+        else
+            let l:line = line('.') + 1
         endif
-    else " Normal click
-        let l:list = getline(".")
     endif
+    call cursor(l:line, 1)
+    let l:list = getline(".")
+" OLA --
 
     if l:error != 0 " Invalid
         silent! exe s:SrcExpl_editWin . "wincmd w"

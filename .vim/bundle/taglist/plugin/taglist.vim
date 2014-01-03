@@ -1740,9 +1740,12 @@ function! s:Tlist_Window_Init()
         autocmd!
         " Display the tag prototype for the tag under the cursor.
         autocmd CursorHold __Tag_List__ call s:Tlist_Window_Show_Info()
+        " OLA++
         " Highlight the current tag periodically
-        autocmd CursorHold * silent call s:Tlist_Window_Highlight_Tag(
-                            \ fnamemodify(bufname('%'), ':p'), line('.'), 1, 0)
+        ""autocmd CursorHold * silent call s:Tlist_Window_Highlight_Tag(
+        ""                  \ fnamemodify(bufname('%'), ':p'), line('.'), 1, 0)
+        autocmd CursorHold * silent if !&previewwindow | call s:Tlist_Window_Highlight_Tag(fnamemodify(bufname('%'), ':p'), line('.'), 1, 0) | endif
+        " OLA --
 
         " Adjust the Vim window width when taglist window is closed
         autocmd BufUnload __Tag_List__ call s:Tlist_Post_Close_Cleanup()
@@ -2918,6 +2921,13 @@ function! s:Tlist_Refresh()
     if &buftype != ''
         return
     endif
+    
+    " OLA ++
+    " Skip preview window
+    if &previewwindow
+        return
+    endif
+    " OLA --
 
     let filename = fnamemodify(bufname('%'), ':p')
     let ftype = s:Tlist_Get_Buffer_Filetype('%')

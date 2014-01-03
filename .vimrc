@@ -1,4 +1,5 @@
-" Smylers's .vimrc
+" Notes {
+" Based on Smylers's .vimrc
 " 2000 Jun  1: for `Vim' 5.6
 "
 " Vim features
@@ -21,13 +22,12 @@
 " http://www.vim.org/scripts/script.php?script_id=273
 " http://www.vim.org/scripts/script.php?script_id=2179
 "
-" Notes
+" Hints
 " <C-C> goto normal mode
 " <C-O> stay in insert mode to execute a single cmd
-"
 
 " *******************************************************
-" * Global settings
+" } Prepare environment {
 " *******************************************************
 
 " Version check
@@ -55,6 +55,20 @@ if !exists("g:loaded_vimrc")
   omapc
 endif
 
+" Use before config
+if filereadable(expand("~/.vimrc.before"))
+    source ~/.vimrc.before
+endif
+
+" Use before local config
+if filereadable(expand("~/.vimrc.before.local"))
+    source ~/.vimrc.before.local
+endif
+
+
+" *******************************************************
+" } Global settings {
+" *******************************************************
 set path=.,,**              " Search path: recurse from current directory
 let mapleader = ";"         " Leader key
 let maplocalleader = ","    " Local leader key
@@ -70,7 +84,7 @@ cmap w!! w !sudo tee % >/dev/null
 
 
 " *******************************************************
-" * Source vimrc
+" } Source vimrc {
 " *******************************************************
 " Resource vimrc
 noremap  <leader>s :source $MYVIMRC<CR>
@@ -84,7 +98,7 @@ augroup END
 
 
 " *******************************************************
-" * Mapping functions
+" } Mapping functions {
 " *******************************************************
 function! Map(args)
   let args = matchlist(a:args,'\(<silent>\s\+\)\?\(.\{-}\)\s\+\(.*\)')
@@ -103,7 +117,7 @@ command! -nargs=1 Noremap    call Noremap(<f-args>)
 
 
 " *******************************************************
-" * Terminal Settings
+" } Terminal Settings {
 " *******************************************************
 " `XTerm', `RXVT', `Gnome Terminal', and `Konsole' all claim to be "xterm";
 " `KVT' claims to be "xterm-color":
@@ -135,7 +149,7 @@ endif
 
 
 " *******************************************************
-" * User Interface
+" } User Interface {
 " *******************************************************
 
 " Theme & color scheme
@@ -194,7 +208,7 @@ autocmd BufReadPost *
 
 
 " *******************************************************
-" * Statusline
+" } Statusline {
 " *******************************************************
 " Line text content
 setlocal statusline=\ %F
@@ -211,7 +225,7 @@ set laststatus=2         " Always show status line
 
 
 " *******************************************************
-" * Text Formatting
+" } Text Formatting {
 " *******************************************************
 set guioptions+=rb    " Right/bottom scroll bars enabled
 set formatoptions-=t  " Do not format text as it is typed
@@ -259,7 +273,7 @@ nnoremap <localleader>c  :set invlist<CR>
 
 
 " *******************************************************
-" * Mswin plugin - loaded soon to override its settings later
+" } Mswin plugin - loaded soon to override its settings later {
 " *******************************************************
 source ~/.vim/plugin/mswin.vim
 let g:skip_loading_mswin = 1
@@ -270,7 +284,7 @@ vmap <C-y>  <C-c><C-y>
 
 
 " *******************************************************
-" * Formatting
+" } Formatting {
 " *******************************************************
 " Indentation normal & visual modes
 noremap  <Tab>   >>
@@ -345,7 +359,7 @@ endfunction
 
 
 " *******************************************************
-" * Search & Replace
+" } Search & Replace {
 " *******************************************************
 set ignorecase      " Case-insensitive search
 set smartcase       " Unless search contain upper-case letters
@@ -382,7 +396,7 @@ Map <S-F4>      #
 
 
 " *******************************************************
-" * Cursor management
+" } Cursor management {
 " *******************************************************
 set whichwrap=h,l,~,[,]   " Wrap between lines for h, l, ~, cursor keys [ and ]
 set matchpairs+=<:>       " '%' bounce between brackets
@@ -415,7 +429,7 @@ Map <silent> <C-F2>   :exec printf("ma %c",      65 + g:vimrc_mark)             
 
 
 " *******************************************************
-" * Tab management
+" } Tab management {
 " *******************************************************
 " Enable/disable tabs
 if $VIM_USETABS != ""
@@ -443,7 +457,7 @@ Noremap  <C-Tab>  :tabp<CR>
 
 
 " *******************************************************
-" * Window management
+" } Window management {
 " *******************************************************
 " Open/close window : standard mappings <C-w>...
 " Prev/next window (Ctrl-w/W)
@@ -476,7 +490,7 @@ augroup END
 
 
 " *******************************************************
-" * Buffer management
+" } Buffer management {
 " *******************************************************
 " Open/close buffer (close=:bd or :bw)
 map <C-b><C-o>      :e<SPACE>
@@ -515,7 +529,7 @@ endfunc
 
 
 " *******************************************************
-" * Function keys
+" } Function keys {
 " *******************************************************
 " Fx keys in insert mode = normal mode
 for idx in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
@@ -523,16 +537,15 @@ for idx in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 endfor
 
 " Map F1 to the help
-Map <F1>    :help<space>
+Map <F1>    :vert help<space>
 
 
 " *******************************************************
-" * File browser netrw
+" } File browser netrw {
 " *******************************************************
 " Options
-let g:netrw_browse_split = 4  " Use prev window
+let g:netrw_browse_split = 0  " Use same(0)/prev(4) window
 let g:netrw_altv = 1          " Vertical split right
-let g:netrw_alto = 1          " Horizontal split down
 let g:netrw_liststyle=3       " Tree mode
 let g:netrw_special_syntax= 1 " Show special files
 let g:netrw_sort_sequence   = "[\/]$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$"
@@ -548,7 +561,7 @@ Noremap <silent> <C-A-e> :Vexplore<CR>
 
 " Open netrw window
 function! s:NetrwOpenWnd()
-  Vexplore
+  Vexplore!
   let s:netrw_buf_num = bufnr("%")
 endfunction
 
@@ -562,7 +575,7 @@ endfunction
 
 
 " *******************************************************
-" * Preview window
+" } Preview window {
 " *******************************************************
 " Options
 set previewheight=8           " Preview window height
@@ -570,15 +583,13 @@ set previewheight=8           " Preview window height
 " Variables
 let s:p_lastw = ""
 
-" Key mappings
-Noremap <F7>        :ptnext<CR>
-Noremap <S-F7>      :ptprevious<CR>
-Noremap <C-F7>      :pclose<CR>
-
 " Open preview window
 function! s:PreviewOpenWnd()
   silent! pedit!
-  au! CursorHold * nested call s:ShowPreviewTag_2()
+  au! CursorHold * nested call s:ShowPreviewTag_3()
+  Noremap <F6>   <silent>     :exec "try <bar> silent ptnext <bar> catch <bar> ptfirst <bar> endtry"<CR>
+  Noremap <S-F6> <silent>     :exec "try <bar> silent ptprevious <bar> catch <bar> ptlast <bar> endtry"<CR>
+  Noremap <C-F6> <silent>     :pclose<CR>
 endfunction
 
 " Close preview window
@@ -587,95 +598,43 @@ function! s:PreviewCloseWnd()
   pclose
 endfunction
 
-" Show the selected tag
-function! s:ShowPreviewTag_1()
-  if &previewwindow             " Skip the preview window itself
-    return
-  endif
-  let w = expand("<cword>")     " Get the word under cursor
-  if w == s:p_lastw             " Same word, skip all this
-    return
-  endif
-  let s:p_lastw = w
-  if w =~ '\a'                  " If the word contains a letter
-    "try                         " Try displaying the matching tag
-    "  exe "silent ptag" w
-    "catch
-    "  exe "silent pedit _no_definition"
-    "endtry
-    "return
-    " Get the tag list
-    let l:list = taglist('\<' . w . '\>' . '\C')
-    " Exit if empty
-    if len(l:list) == 0
-      silent! pedit!
-      return
-    endif
-    " Get dictionary to load tag's file path and ex command
-    let l:dict = get(l:list, 0, {})
-    " Open preview window, goto tag
-    exec "silent pedit" "+/".l:dict['name'] l:dict['filename']
-    " Select preview window
-    wincmd P
-    if ! &previewwindow
-      return
-    endif
-    " Skip closed fold
-    if has("folding")
-      silent! .foldopen
-    endif
-    " Delete existing highlight
-    match none
-    " Search to end of previous line
-    call search("$", "b")
-    " Position cursor on match
-    "let w = substitute(w, '\\', '\\\\', "")
-    call search('\<\V' . w . '\>')
-    " Set highlight
-    hi previewWord term=bold ctermbg=blue guibg=blue
-    exe 'match previewWord "\%' . line(".") . 'l\%' . col(".") . 'c\k*"'
-    " Back to prev window
-    wincmd p
-  endif
-endfunction
-
-function! s:ShowPreviewTag_2()
+function! s:PreviewShowTag()
   if &previewwindow             " don't do this in the preview window
     return
   endif
   let w = expand("<cword>")     " get the word under cursor
+  if w == s:p_lastw             " Same word, skip all this
+    return
+  endif
+  let s:p_lastw = w
   if w =~ '\a'                  " if the word contains a letter
-    " Delete any existing highlight before showing another tag
-    silent! wincmd P            " jump to preview window
-    if &previewwindow           " if we really get there...
-      match none                " delete existing highlight
-      wincmd p                  " back to old window
-    endif
     " Try displaying a matching tag for the word under the cursor
     try
-       exe "ptag " . w
-    catch
-      return
+      exec "silent! ptag " . w
     endtry
-    silent! wincmd P            " jump to preview window
-    if &previewwindow           " if we really get there...
-     if has("folding")
-       silent! .foldopen        " don't want a closed fold
-     endif
-     call search("$", "b")      " to end of previous line
-     let w = substitute(w, '\\', '\\\\', "")
-     call search('\<\V' . w . '\>') " position cursor on match
-     " Add a match highlight to the word at this position
-     hi previewWord term=bold ctermbg=green guibg=green
-     exe 'match previewWord "\%' . line(".") . 'l\%' . col(".") . 'c\k*"'
-     wincmd p                  " back to old window
+  endif
+endfunction
+
+function! s:PreviewHighlightTag(w)
+  silent! wincmd P            " jump to preview window
+  if &previewwindow           " if we really get there...
+    match none                " delete existing highlight
+    if has("folding")
+      silent! .foldopen        " don't want a closed fold
     endif
+    call search("$", "b")      " to end of previous line
+    let w = substitute(a:pattern, '\\', '\\\\', "")
+    call search('\<\V' . w . '\>') " position cursor on match
+    " Add a match highlight to the word at this position
+    hi previewWord term=bold ctermbg=blue guibg=blue
+    exe 'match previewWord "\%' . line(".") . 'l\%' . col(".") . 'c\k*"'
+    wincmd p                  " back to old window
   endif
 endfunction
 
 
 " *******************************************************
-" * Omnicompletion
+" } Omnicompletion {
 " *******************************************************
 " Enable OmniCppComplete
 "set omnifunc=cppcomplete#CompleteCPP
@@ -692,7 +651,7 @@ set completeopt=longest,menuone
 "inoremap <C-space> <C-x><C-o>
 
 " Advanced key mapping to omnicompletion
-inoremap <C-space> <C-R>=CleverTab()<CR>
+inoremap <C-space>  <C-R>=CleverTab()<CR>
 function! CleverTab()
   if pumvisible()
     return "\<C-N>"
@@ -708,7 +667,7 @@ endfunction
 
 
 " *******************************************************
-" * Plugin general management
+" } Plugin general management {
 " *******************************************************
 " Start plugin pathogen
 filetype off                " force reloading *after* pathogen loaded
@@ -723,9 +682,7 @@ endif
 if exists('g:loaded_yaifa')
   unlet g:loaded_yaifa
 endif
-if exists('g:command_t_loaded')
-  unlet g:command_t_loaded
-endif
+
 " Disable the following plugins
 let g:loaded_project = 1
 let g:loaded_taglist = 1
@@ -735,6 +692,7 @@ let g:loaded_trinity = 1
 let g:ccvext_version = 1
 let g:loaded_yankring = 1
 let g:loaded_cctree = 1
+let g:command_t_loaded = 1
 
 " Plugins which open window
 let g:wndmgr_pluginList = [
@@ -743,12 +701,12 @@ let g:wndmgr_pluginList = [
       \ "__Tag_List__",
       \ "Source_Explorer",
       \ "\.vimprojects",
-      \ "NetrwTreeListing .",
+      \ "NetrwTreeListing",
 \ ]
 
 
 " *******************************************************
-" * IDE management
+" } IDE management {
 " *******************************************************
 
 " Choose IDE type
@@ -826,8 +784,8 @@ elseif $VIM_IDE == 4
     call g:wndmgr_ExecWnd("__Tag_List__","|",g:Tlist_WinWidth)
     call g:wndmgr_ExecWnd("\.vimprojects","|",g:proj_window_width)
     call g:wndmgr_ExecWnd("Source_Explorer","_",g:SrcExpl_winHeight)
-    call g:wndmgr_JumpEditWnd()
-    call g:wndmgr_ExecWnd("Source_Explorer","_",g:SrcExpl_winHeight)
+    "call g:wndmgr_JumpEditWnd()
+    "call g:wndmgr_ExecWnd("Source_Explorer","_",g:SrcExpl_winHeight)
   endfunction
 
   function! s:IdeDisable_0()
@@ -933,14 +891,14 @@ if !exists('s:vimrc_ideFlag')
 endif
 
 " IDE toggle keys
-Noremap <F9>     :call <SID>IdeToggle(1)<CR>
-Noremap <F10>    :call <SID>IdeToggle(2)<CR>
-Noremap <F11>    :call <SID>IdeToggle(3)<CR>
-Noremap <F12>    :call <SID>IdeToggle(0)<CR>
+Noremap <F11>     :call <SID>IdeToggle(1)<CR>
+Noremap <S-F11>   :call <SID>IdeToggle(2)<CR>
+Noremap <S-F12>   :call <SID>IdeToggle(3)<CR>
+Noremap <F12>     :call <SID>IdeToggle(0)<CR>
 
 
 " *******************************************************
-" * Project plugin
+" } Project plugin {
 " *******************************************************
 if !exists('g:loaded_project')
   " Options
@@ -957,7 +915,7 @@ endif
 
 
 " *******************************************************
-" * Taglist plugin
+" } Taglist plugin {
 " *******************************************************
 if !exists('g:loaded_taglist')
   " Options
@@ -984,7 +942,7 @@ endif
 
 
 " *******************************************************
-" * SrcExplorer plugin
+" } SrcExplorer plugin {
 " *******************************************************
 if !exists('g:loaded_srcexpl')
   " Options
@@ -1011,7 +969,7 @@ endif
 
 
 " *******************************************************
-" * NERDTree plugin
+" } NERDTree plugin {
 " *******************************************************
 if !exists('g:loaded_nerd_tree')
   " Options
@@ -1027,7 +985,7 @@ endif
 
 
 " *******************************************************
-" * MiniBufExplorer plugin
+" } MiniBufExplorer plugin {
 " *******************************************************
 if !exists('g:loaded_minibufexplorer')
   " Options
@@ -1094,7 +1052,7 @@ endif
 
 
 " *******************************************************
-" * CCVext plugin
+" } CCVext plugin {
 " *******************************************************
 if !exists('g:ccvext_version')
   " Options
@@ -1107,7 +1065,7 @@ endif
 
 
 " *******************************************************
-" * Yaifa plugin
+" } Yaifa plugin {
 " *******************************************************
 if !exists('g:loaded_yaifa')
   " Options
@@ -1122,7 +1080,7 @@ endif
 
 
 " *******************************************************
-" * Yankring plugin
+" } Yankring plugin {
 " *******************************************************
 if !exists('g:loaded_yankring')
   " Options
@@ -1138,7 +1096,7 @@ endif
 
 
 " *******************************************************
-" * CCTree plugin
+" } CCTree plugin {
 " *******************************************************
 if !exists('g:loaded_cctree')
   " Options
@@ -1157,11 +1115,13 @@ endif
 
 
 " *******************************************************
-" * Command-T plugin
+" } Command-T plugin {
 " *******************************************************
 if !exists('g:command_t_loaded')
   " Options
   let g:CommandTWildIgnore="*.o,*.obj,**/tmp/**"
+  let g:CommandTMaxDepth = 8
+  let g:CommandTMaxCachedDirectories = 2
 
   " Key mapping
   Noremap <C-o>     :CommandT<CR>
@@ -1169,7 +1129,22 @@ endif
 
 
 " *******************************************************
-" * Hexadecimal display
+" } CTRLP plugin {
+" *******************************************************
+if !exists('g:loaded_ctrlp')
+  " Options
+  let g:ctrlp_map = '<C-o>'
+  let g:ctrlp_cmd = 'CtrlP'
+  let g:ctrlp_working_path_mode = '0'
+  let g:ctrlp_custom_ignore = {
+  \ 'dir':  '\v[\/](\.(git|hg|svn)|tmp)$',
+  \ 'file': '\v\.(exe|so|dll|o)$'
+  \ }
+endif
+
+
+" *******************************************************
+" } Hexadecimal display {
 " *******************************************************
 if !exists('g:vimrc_hexa')
   let g:vimrc_hexa=0
@@ -1189,18 +1164,28 @@ map <leader>h :call <SID>HexaToggle()<CR>
 
 
 " *******************************************************
-" * Tags
+" } Tags {
 " *******************************************************
 " Set tags root
 set tags=./tags,tags,$TAGS_DB
 
 " Key mapping
-Noremap <C-ENTER>  <C-]>
-Noremap <C-SPACE>  <C-T>
+Noremap <C-ENTER>   <C-]>
+Noremap <C-SPACE>   <C-T>
+Noremap <F7>        :exec "try <BAR> silent tnext <BAR> catch <BAR> tfirst <BAR> endtry"<CR>
+Noremap <S-F7>      :exec "try <BAR> silent tprevious <BAR> catch <BAR> tlast <BAR> endtry"<CR>
 
 
 " *******************************************************
-" * Alignment function
+" } Sessions {
+" *******************************************************
+" Key mapping
+Noremap <C-F9>      :exec "MBEClose" <BAR> mksession! ~/.vimsession <BAR> exec "MBEOpen"<CR>
+Noremap <F9>        :exec "MBEClose" <BAR> source! ~/.vimsession <BAR> exec "MBEOpen"<CR>
+
+
+" *******************************************************
+" } Alignment function {
 " *******************************************************
 " Mapping
 map <leader>= :call <SID>Vimrc_AlignAssignments()<CR>
@@ -1248,15 +1233,24 @@ endfunction
 
 
 " *******************************************************
-" * Miscellaneous
+" } Miscellaneous {
 " *******************************************************
 " Highlight VIM regex
 nnoremap <C-F1> yi":let @/ = @"<CR>
 
 
 " *******************************************************
-" * Load local configuration
+" } Environment conclusion {
 " *******************************************************
-if filereadable("~/.localvimrc")
-  source ~/.localvimrc
+
+" Use after local config
+if filereadable(expand("~/.vimrc.after.local"))
+    source ~/.vimrc..after.local
 endif
+
+" Use after config
+if filereadable(expand("~/.vimrc.after"))
+    source ~/.vimrc.after
+endif
+
+" }

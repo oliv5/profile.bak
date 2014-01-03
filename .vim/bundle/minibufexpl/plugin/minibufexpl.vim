@@ -468,6 +468,13 @@ endfunction
 
 function! <SID>BufAddHandler()
   call <SID>DEBUG('Entering BufAdd Handler', 10)
+  
+  " OLA ++
+  if &previewwindow
+    call <SID>DEBUG('Leaving BufAdd Handler', 10)
+    return
+  endif
+  " OLA --
 
   call <SID>ListAdd(s:BufList,str2nr(expand("<abuf>")))
   call <SID>ListAdd(s:MRUList,str2nr(expand("<abuf>")))
