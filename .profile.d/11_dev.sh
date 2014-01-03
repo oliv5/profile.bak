@@ -4,27 +4,19 @@
 # Remove the ":line" pattern from compiler & grep
 unalias ff  2>/dev/null
 function ff() {
-  set -f
-  NAME=name _ff "$(echo $1 | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1/g')" "${@:2}"
-  set +f
-}
-unalias iff 2>/dev/null
-function iff() {
-  set -f
-  NAME=iname _ff "$(echo $1 | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1/g')" "${@:2}"
-  set +f
+  _find "$(sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1/g' <<< $1)" -type f "${@:2}"
 }
 
 # Various dev search function helpers
-function h()     { _gg "${1}" ${CASE} "${@:3}" "${2:-.}/*.h|*.hpp"; }
-function c()     { _gg "${1}" ${CASE} "${@:3}" "${2:-.}/*.c|*.cpp|*.cc"; }
-function hc()    { _gg "${1}" ${CASE} "${@:3}" "${2:-.}/*.c|*.cpp|*.cc|*.h|*.hpp"; }
-function py()    { _gg "${1}" ${CASE} "${@:3}" "${2:-.}/*.py"; }
-function mk()    { _gg "${1}" ${CASE} "${@:3}" "${2:-.}/*.mk|Makefile"; }
-function shell() { _gg "${1}" ${CASE} "${@:3}" "${2:-.}/*.sh"; }
-function ref()   { _gg "${1}" ${CASE} "${@:3}" "${2:-.}/*.c|*.cpp|*.cc|*.h|*.hpp|*.py|*.mk|Makefile|*.sh|*.vhd|*.v"; }
-function v()     { _gg "${1}" ${CASE} "${@:3}" "${2:-.}/*.vhd|*.v"; }
-function xml()   { _gg "${1}" ${CASE} "${@:3}" "${2:-.}/*.xml"; }
+function h()     { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.h|*.hpp"; }
+function c()     { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.c|*.cpp|*.cc"; }
+function hc()    { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.c|*.cpp|*.cc|*.h|*.hpp"; }
+function py()    { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.py"; }
+function mk()    { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.mk|Makefile"; }
+function shell() { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.sh"; }
+function ref()   { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.c|*.cpp|*.cc|*.h|*.hpp|*.py|*.mk|Makefile|*.sh|*.vhd|*.v"; }
+function v()     { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.vhd|*.v"; }
+function xml()   { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.xml"; }
 alias ih='CASE=-i h'
 alias ic='CASE=-i c'
 alias ihc='CASE=-i hc'
