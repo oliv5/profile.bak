@@ -57,3 +57,8 @@ function fct-export-all() {
 function fct-ls() {
   declare -F | cut -d" " -f3 | egrep -v "^_"
 }
+
+# Get script directory
+function get-pwd() {
+  echo $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+}
