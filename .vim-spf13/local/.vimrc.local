@@ -198,6 +198,10 @@
     Noremap <C-Left>    :wincmd h<CR>
     Noremap <C-Right>   :wincmd l<CR>
 
+    " Easy keypress fix
+    map <C-w><C-w>      <C-w>w
+    map <C-w><C-c>      <C-w>c
+
     " Resize current window by +/- 5
     " Same as 5<C-w>+  5<C-w>-  5<C-w>>  5<C-w><
     "nnoremap <C-w><left>   :vertical resize -5<cr>
@@ -227,29 +231,20 @@
     map <C-b><C-c>      :bd<CR>
     Map <F5>            :e<CR>
     if !exists("s:vimrc_useTabs")
-        Map <C-F4>        :bd<CR>
+        Map <C-F4>      bp<bar>sp<bar>bn<bar>bd<CR>
     endif
 
     " Prev/next buffer
     map  <C-b><C-n>     :bn<CR>
     map  <C-b><C-p>     :bp<CR>
-    Noremap <A-Down>    :bp<CR>
+    map  <C-b>n         :bn<CR>
+    map  <C-b>p         :bp<CR>
     Noremap <A-Up>      :bn<CR>
+    Noremap <A-Down>    :bp<CR>
     if !exists("s:vimrc_useTabs")
         Noremap <C-Tab>   :bn<CR>
         Noremap <C-S-Tab> :bp<CR>
     endif
-
-    " Clear hidden read-only buffers
-    function! ClearHiddenRO()
-        let i = 1
-        while i <= bufnr('$')
-            if buflisted(i) && getbufvar(i, '&readonly') && (bufwinnr(i) == -1)
-                exe "bdel!" i
-            endif
-            let i += 1
-        endwhile
-    endfunc
 
 " }
 
@@ -286,27 +281,78 @@
 
 " }
 
+" File browser netrw {
+
+    " Options
+    let g:netrw_browse_split = 0  " Use same(0)/prev(4) window
+    let g:netrw_altv = 1          " Vertical split right
+    let g:netrw_liststyle=3       " Tree mode
+    let g:netrw_special_syntax= 1 " Show special files
+    let g:netrw_sort_sequence   = "[\/]$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$"
+    let g:netrw_winsize = 20      " Window size
+
+    " Workaround
+    set winfixwidth
+    set winfixheight
+
+    " Open netrw window
+    function! s:NetrwOpenWnd()
+        Vexplore!
+        let s:netrw_buf_num = bufnr("%")
+    endfunction
+
+    " Close netrw window
+    function! s:NetrwCloseWnd()
+        if exists("s:netrw_buf_num")
+            exec bufwinnr(s:netrw_buf_num) "wincmd c"
+            unlet s:netrw_buf_num
+        endif
+    endfunction
+
+    " Toggle netrw window
+    function! s:NetrwToggleWnd()
+        if exists("s:netrw_buf_num")
+            s:NetrwCloseWnd()
+        else
+            s:NetrwOpenWnd()
+        endif
+    endfunction
+
+    " Keymapping
+    Noremap <silent> <leader>ee     call s:NetrwToggleWnd():<CR>
+
+" }
+
 " Preview window {
 
     " Options
     set previewheight=8           " Preview window height
 
-    " Variables
-    let s:p_lastw = ""
-
     " Open preview window
     function! s:PreviewOpenWnd()
         silent! pedit!
-        au! CursorHold * nested call s:ShowPreviewTag_3()
-        Noremap <F6>   <silent>     :exec "try <bar> silent ptnext <bar> catch <bar> ptfirst <bar> endtry"<CR>
-        Noremap <S-F6> <silent>     :exec "try <bar> silent ptprevious <bar> catch <bar> ptlast <bar> endtry"<CR>
+        au! CursorHold * nested silent call s:PreviewShowTag()
+        Noremap <F6>   <silent>     :call s:PreviewShowNext()<CR>
+        Noremap <S-F6> <silent>     ::call s:PreviewShowPrev()<CR>
         Noremap <C-F6> <silent>     :pclose<CR>
+        let s:p_toggle = 1
+        let s:p_lastw = ""
     endfunction
 
     " Close preview window
     function! s:PreviewCloseWnd()
         au! CursorHold *
         pclose
+        unlet s:p_toggle
+    endfunction
+
+    " Toggle preview window
+    function! s:PreviewToggleWnd()
+        if exists('s:p_toggle')
+            s:PreviewCloseWnd()
+        else
+            s:PreviewOpenWnd()
+        endif
     endfunction
 
     function! s:PreviewShowTag()
@@ -322,8 +368,19 @@
             " Try displaying a matching tag for the word under the cursor
             try
                 exec "silent! ptag " . w
+                exec "wincmd P"
+                exec "wincmd J"
+                exec "wincmd p"
             endtry
         endif
+    endfunction
+
+    function! s:PreviewShowNext()
+        try | silent ptnext | catch | ptfirst | endtry
+    endfunction
+
+    function! s:PreviewShowPrev()
+        try | silent ptprevious | catch | ptlast | endtry
     endfunction
 
     function! s:PreviewHighlightTag(w)
@@ -343,19 +400,67 @@
         endif
     endfunction
 
+    " Keymapping
+    Noremap <silent> <leader>pp     call s:PreviewToggleWnd()<CR>
+
 " }
 
 " Yaifa plugin {
 
     if !exists('g:loaded_yaifa')
-      " Options
-      let g:yaifa_max_lines=4096
-      " Map Yaifa
-      nmap <localleader><tab>   :call YAIFA()<CR>
-      " autocall when entering file
-      if exists("*YAIFA")
-        autocmd BufRead * silent! call YAIFA()
-      endif
+        " Options
+        let g:yaifa_max_lines=4096
+        " Map Yaifa
+        nmap <localleader><tab>   :call YAIFA()<CR>
+        " autocall when entering file
+        if exists("*YAIFA")
+            autocmd BufRead * nested silent! call YAIFA()
+        endif
     endif
+
+" }
+
+" IDE management {
+
+    " IDE toggle functions
+    function! s:IdeToggle(index)
+        if a:index == 1
+            if exists('s:vimrc_ide_vsp')
+                unlet s:vimrc_ide_vsp
+                vsp
+            else
+                let s:vimrc_ide_vsp = 1
+                wincmd c
+            endif
+        elseif a:index == 2
+            if exists('s:vimrc_ide_sp')
+                unlet s:vimrc_ide_sp
+                sp
+            else
+                let s:vimrc_ide_sp = 1
+                wincmd c
+            endif
+        elseif a:index == 3
+            if exists('s:vimrc_ide_dev')
+                unlet s:vimrc_ide_dev
+                call s:PreviewCloseWnd()
+                TagbarClose
+                let g:NERDTreeQuitOnOpen=1
+                NERDTreeClose
+            else
+                let s:vimrc_ide_dev = 1
+                call s:PreviewOpenWnd()
+                TagbarOpen
+                let g:NERDTreeQuitOnOpen=0
+                NERDTreeMirrorOpen
+            endif
+        endif
+    endfunction
+
+    " Key mapping
+    Noremap <F11>     :call <SID>IdeToggle(1)<CR>
+    Noremap <S-F11>   :call <SID>IdeToggle(2)<CR>
+    Noremap <F12>     :call <SID>IdeToggle(3)<CR>
+    Noremap <S-F12>   :call <SID>IdeToggle(0)<CR>
 
 " }
