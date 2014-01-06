@@ -4,7 +4,7 @@
 # Remove the ":line" pattern from compiler & grep
 unalias ff  2>/dev/null
 function ff() {
-  _find "$(sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1/g' <<< $1)" -type f "${@:2}"
+  _find "$(sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1/g' <<< $1)" "${@:2}"
 }
 
 # Various dev search function helpers

@@ -9,18 +9,19 @@ function _find() {
   set +f
   trap SIGINT
 }
-function ff() { _find "$@" -type f ;}
-function fd() { _find "$@" -type d ;}
-alias f='_find'
+function ff() { _find "$@" ;}
+function fff() { _find "$@" -type f ;}
+function ffd() { _find "$@" -type d ;}
 alias iff='NAME=iname ff'
-alias ifd='NAME=iname fd'
+alias ifff='NAME=iname fff'
+alias iffd='NAME=iname ffd'
 
 # Search pattern functions
 function _fgrep() {
   NAME=${NAME:-name} _find "${!#}" -type f -print0 | xargs -0 grep -E -n --color "${@:1:$(($#-1))}"
 }
 alias gg='_fgrep'
-alias ig='NAME=iname gg'
+alias igg='NAME=iname gg'
 
 # Safe search & replace
 function _fsed()
@@ -34,4 +35,4 @@ function _fsed()
   NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
 }
 alias hh='_fsed'
-alias ih='NAME=iname hh'
+alias ihh='NAME=iname hh'
