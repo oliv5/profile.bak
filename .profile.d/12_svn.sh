@@ -17,6 +17,7 @@ alias sdd='svn diff'
 alias sds='svn diff --summarize'
 alias sdm='svn diff --diff-cmd meld'
 alias svn-diffm='svn-diff --diff-cmd meld'
+alias svn-resolve='svn-merge'
 
 # Build a unique backup directory for this repo
 function svn-bckdir() {

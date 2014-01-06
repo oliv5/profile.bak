@@ -118,3 +118,8 @@ function git-ci() {
   git add "$@"
   git commit
 }
+
+# Git history
+function git-history() {
+  git log -p "$@"
+}
