@@ -586,7 +586,7 @@ let s:p_lastw = ""
 " Open preview window
 function! s:PreviewOpenWnd()
   silent! pedit!
-  au! CursorHold * nested call s:ShowPreviewTag()
+  au! CursorHold * nested call s:PreviewShowTag()
   Noremap <F6>   <silent>     :exec "try <bar> silent ptnext <bar> catch <bar> ptfirst <bar> endtry"<CR>
   Noremap <S-F6> <silent>     :exec "try <bar> silent ptprevious <bar> catch <bar> ptlast <bar> endtry"<CR>
   Noremap <C-F6> <silent>     :pclose<CR>
