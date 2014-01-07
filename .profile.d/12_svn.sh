@@ -257,7 +257,8 @@ function svn-get() {
 
 # Tells when repo has been modified
 function svn-modified() {
-  [ $(svn st | grep -E "^[^\?]" | wc -l) -gt 0 ]
+  # Avoid ?, X, Performing status on external item at '...'
+  [ $(svn st | grep -E "^[^\?\X\P]" | wc -l) -gt 0 ]
 }
 
 # Edit svn global config
