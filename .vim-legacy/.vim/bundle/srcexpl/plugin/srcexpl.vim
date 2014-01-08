@@ -927,6 +927,8 @@ function! <SID>SrcExpl_SelToJump(dir)
         else
             let l:line = line('.') + 1
         endif
+    else
+        let l:line = line('.')
     endif
     call cursor(l:line, 1)
     let l:list = getline(".")
