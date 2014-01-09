@@ -77,7 +77,7 @@ set noswapfile              " No swap
 set noerrorbells            " No bells (!!)
 set novisualbell            " No visual bells too
 set shell=/bin/bash         " Force bash shell
-set updatetime=400          " Swap file write / event CursorHold delay (in ms)
+set updatetime=1000         " Swap file write / event CursorHold delay (in ms)
 
 " Force write with sudo after opening the file
 cmap w!! w !sudo tee % >/dev/null
@@ -185,12 +185,12 @@ set viminfo=/10,'10,r/mnt/zip,r/mnt/floppy,f0,h,\"100,%20
 " (Character 187 is a right double-chevron, and 183 a mid-dot.)
 execute 'set listchars+=tab:' . nr2char(187) . nr2char(183)
 
-" Set vim to chdir for each file
-"if exists('+autochdir')
-"  set autochdir
+" Change directory when changing buffers
+if exists('+autochdir')
+  set noautochdir
 "else
 "  autocmd BufEnter * silent! lcd %:p:h:gs/ /\\ /
-"endif
+endif
 
 " Tab name is the filename only
 if exists('+gtl')
@@ -954,8 +954,8 @@ if !exists('g:loaded_srcexpl')
   let g:SrcExpl_isUpdateTags = 0      " Tag update on file opening
   let g:SrcExpl_updateTagsCmd = ""    " Tag update command
   let g:SrcExpl_updateTagsKey = ""    " Tag update key
-  let g:SrcExpl_prevDefKey = "<S-F6>" " Show prev definition in jump list
-  let g:SrcExpl_nextDefKey = "<F6>"   " Show next definition in jump list
+  let g:SrcExpl_prevDefKey = "<S-F7>" " Show prev definition in jump list
+  let g:SrcExpl_nextDefKey = "<F7>"   " Show next definition in jump list
   let g:SrcExpl_pluginList = g:wndmgr_pluginList " Plugin names that are using buffers
 
   " Additionnal key maps
@@ -1170,10 +1170,10 @@ map <leader>h :call <SID>HexaToggle()<CR>
 set tags=./tags,tags,$TAGS_DB
 
 " Key mapping
-Noremap <C-ENTER>   <C-]>
-Noremap <C-SPACE>   <C-T>
-Noremap <F7>        :exec "try <BAR> silent tnext <BAR> catch <BAR> tfirst <BAR> endtry"<CR>
-Noremap <S-F7>      :exec "try <BAR> silent tprevious <BAR> catch <BAR> tlast <BAR> endtry"<CR>
+noremap <ENTER>   <C-]>
+noremap <SPACE>   <C-T>
+Noremap <F6>        :exec "try <BAR> silent tnext <BAR> catch <BAR> tfirst <BAR> endtry"<CR>
+Noremap <S-F6>      :exec "try <BAR> silent tprevious <BAR> catch <BAR> tlast <BAR> endtry"<CR>
 
 
 " *******************************************************
