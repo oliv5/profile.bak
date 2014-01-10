@@ -1,10 +1,11 @@
 #!/bin/sh
-DBG=echo
-VIMRC="spf13-vim/.vimrc.bundles"
+DBG=
+VIMRC=".vim-spf13/spf13-vim/.vimrc.bundles"
+DST=".vim-spf13/spf13-vim/.vim/bundle"
 
 function Bundle() {
-	PREFIX=$1
 	MODULE=$(basename "${1%.*}")
+	PREFIX="$DST/$MODULE"
 	REPO="${2:-https://github.com/$1}"
 	REFS="${3:-master}"
 	$DBG git remote add $MODULE "$REPO"
