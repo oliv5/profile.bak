@@ -40,7 +40,7 @@ function mkcscope() {
   find "$SRC" -regextype "posix-egrep" ${@:4} -regex "$CSCOPE_REGEX" -printf '"%p"\n' > "$CSCOPE_FILES"
   ${DBG} cscope $CSCOPE_OPTIONS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
   set +f
-  rm "$CSCOPE_FILES"
+  #rm "$CSCOPE_FILES"
   #echo $CSCOPE_DB
 }
 
@@ -60,7 +60,8 @@ function rmctags() {
 function rmcscope() {
   DIR="$(eval echo ${1:-$PWD})"
   FILE="${DIR}/cscope"
-  rm -v "${FILE}.out*"
+  rm -v "${FILE}.out"*
+  rm -v "${FILE}.files"
 }
 
 # Clean tags and cscope db

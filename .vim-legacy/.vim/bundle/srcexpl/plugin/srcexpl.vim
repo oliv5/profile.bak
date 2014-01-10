@@ -1476,8 +1476,11 @@ function! <SID>SrcExpl_Init()
     " The last symbol for exploring
     let s:SrcExpl_lastSymbol = ''
 
+    " OLA ++
     " Auto change current work directory
-    exe "set autochdir"
+    "exe "set autochdir"
+    exe "set noautochdir"
+    " OLA --
     " Let Vim find the possible tags file
     exe "set tags=tags;"
     " Set the actual update time according to user's requirement
