@@ -1,5 +1,5 @@
 " General {
-    set updatetime=400  " Swap file write / CursorHold  evt delay (in ms)
+    set updatetime=1000  " Swap file write / CursorHold  evt delay (in ms)
 " }
 " UI settings, theme & color scheme {
     if has('syntax')
@@ -275,9 +275,11 @@
 
     " Key mapping
     Noremap <C-ENTER>   <C-]>
+    noremap <ENTER>     <C-]>
     Noremap <C-SPACE>   <C-T>
-    Noremap <F7>        :exec "try <BAR> silent tnext <BAR> catch <BAR> tfirst <BAR> endtry"<CR>
-    Noremap <S-F7>      :exec "try <BAR> silent tprevious <BAR> catch <BAR> tlast <BAR> endtry"<CR>
+    noremap <SPACE>     <C-T>
+    Noremap <F6>        :exec "try <BAR> silent tnext <BAR> catch <BAR> tfirst <BAR> endtry"<CR>
+    Noremap <S-F6>      :exec "try <BAR> silent tprevious <BAR> catch <BAR> tlast <BAR> endtry"<CR>
 
 " }
 
