@@ -76,8 +76,8 @@ set nobackup                " No backup
 set noswapfile              " No swap
 set noerrorbells            " No bells (!!)
 set novisualbell            " No visual bells too
-set shell=/bin/bash         " Force bash shell
 set updatetime=1000         " Swap file write / event CursorHold delay (in ms)
+set shell=/bin/bash\ --rcfile\ ~/.bashrc\ -i    " Set shell, load user profile
 
 " Force write with sudo after opening the file
 cmap w!! w !sudo tee % >/dev/null
@@ -398,6 +398,21 @@ Map <S-F4>      #
 
 
 " *******************************************************
+" } Grep {
+" *******************************************************
+" Grep program
+set grepprg=ref\ $*
+
+" Key mappings
+"Noremap <silent> <F5>   :cn<CR>zv
+"Noremap <silent> <S-F5> :cp<CR>zv
+Noremap <silent> <F5>   :cn<CR>
+Noremap <silent> <S-F5> :cp<CR>
+Noremap <silent> <C-F5> :clist<CR>
+cnoreabbrev gg grep
+
+
+" *******************************************************
 " } Cursor management {
 " *******************************************************
 set whichwrap=h,l,~,[,]   " Wrap between lines for h, l, ~, cursor keys [ and ]
@@ -408,8 +423,12 @@ set matchpairs+=<:>       " '%' bounce between brackets
 set backspace=indent,eol,start
 
 " Disable default behaviour "Ctrl-n=j" and "Ctrl-p=k"
-noremap <C-n> <NOP>
-noremap <C-p> <NOP>
+if mapcheck("<C-n>") == ""
+  noremap <C-n> <NOP>
+endif
+if mapcheck("<C-p>") == ""
+  noremap <C-p> <NOP>
+endif
 
 " Goto line
 Noremap  <C-g> :
@@ -497,7 +516,6 @@ augroup END
 " Open/close buffer (close=:bd or :bw)
 map <C-b><C-o>      :e<SPACE>
 map <C-b><C-c>      :bd<CR>
-Map <F5>            :e<CR>
 if !exists("s:vimrc_useTabs")
   "Map <F4>          :e<SPACE>
   Map <C-F4>        :bd<CR>
