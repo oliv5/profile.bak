@@ -87,7 +87,7 @@ cmap w!! w !sudo tee % >/dev/null
 " } Source vimrc {
 " *******************************************************
 " Resource vimrc
-noremap  <leader>s :source $MYVIMRC<CR>
+noremap  <leader>s      :let g:reload_vimrc = 1 <BAR> source $MYVIMRC<CR>
 cnoreabbrev reload source $MYVIMRC
 
 " Auto source vimrc on change
@@ -233,8 +233,10 @@ set formatoptions-=t  " Do not format text as it is typed
 set tabstop=4         " Indents of 4
 set shiftwidth=4      " Indents of 4
 set shiftround        " Indents are copied down lines
-set expandtab         " Expand tabs
 set autoindent        " Auto-indent
+if !exists('g:reload_vimrc')
+  set expandtab       " Expand tabs to spaces
+endif
 
 set comments-=s1:/*,mb:*,ex:*/    " Get rid of the default style of C comments
 set comments+=s:/*,mb:**,ex:*/    " Define new comment style starting with '**'
@@ -545,7 +547,7 @@ Map <F1>    :vert help<space>
 " *******************************************************
 " Options
 let g:netrw_browse_split = 0  " Use same(0)/prev(4) window
-let g:netrw_altv = 1          " Vertical split right
+"let g:netrw_altv = 1          " Vertical split right
 let g:netrw_liststyle=3       " Tree mode
 let g:netrw_special_syntax= 1 " Show special files
 let g:netrw_sort_sequence   = "[\/]$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$"
@@ -578,14 +580,19 @@ endfunction
 " } Preview window {
 " *******************************************************
 " Options
-set previewheight=8           " Preview window height
+set previewheight=10          " Preview window height
 
 " Variables
 let s:p_lastw = ""
+let s:p_highlight = 0
+let s:p_center = 0
 
 " Open preview window
 function! s:PreviewOpenWnd()
   silent! pedit!
+  silent! wincmd P
+  silent! wincmd J
+  silent! wincmd p
   au! CursorHold * nested call s:PreviewShowTag()
   Noremap <F6>   <silent>     :exec "try <bar> silent ptnext <bar> catch <bar> ptfirst <bar> endtry"<CR>
   Noremap <S-F6> <silent>     :exec "try <bar> silent ptprevious <bar> catch <bar> ptlast <bar> endtry"<CR>
@@ -596,10 +603,20 @@ endfunction
 function! s:PreviewCloseWnd()
   au! CursorHold *
   pclose
+  let s:p_lastw = ""
+endfunction
+
+" Toggle preview window
+function! s:PreviewToggleWnd()
+  if s:p_lastw == ""
+    s:PreviewOpenWnd()
+  else
+    s:PreviewCloseWnd()
+  endif
 endfunction
 
 function! s:PreviewShowTag()
-  if &previewwindow             " don't do this in the preview window
+  if &previewwindow || ! &modifiable  " don't do this in the preview window
     return
   endif
   let w = expand("<cword>")     " get the word under cursor
@@ -611,11 +628,25 @@ function! s:PreviewShowTag()
     " Try displaying a matching tag for the word under the cursor
     try
       exec "silent! ptag " . w
+      if s:p_highlight
+        call s:PreviewHighlightTag(w)
+      endif
+      if s:p_center
+        call s:PreviewCenterTag()
+      endif
     endtry
   endif
 endfunction
 
-function! s:PreviewHighlightTag(w)
+function! s:PreviewCenterTag()
+  silent! wincmd P            " jump to preview window
+  if &previewwindow           " if we really get there...
+    normal! zz                " Center
+    wincmd p                  " back to old window
+  endif
+endfunction
+
+function! s:PreviewHighlightTag(pattern)
   silent! wincmd P            " jump to preview window
   if &previewwindow           " if we really get there...
     match none                " delete existing highlight
@@ -631,6 +662,11 @@ function! s:PreviewHighlightTag(w)
     wincmd p                  " back to old window
   endif
 endfunction
+
+" User commands
+command! -nargs=0 -bar Popen call s:PreviewOpenWnd()
+command! -nargs=0 -bar Pclose call s:PreviewCloseWnd()
+command! -nargs=0 -bar Ptoggle call s:PreviewToggleWnd()
 
 
 " *******************************************************
@@ -863,17 +899,19 @@ endfunction
 " Preview window ON/OFF + taglist + netrw
 silent! unlet g:loaded_taglist
 function! s:IdeEnable_3()
-  let g:Tlist_Use_Right_Window = 0
+  "let g:Tlist_Use_Right_Window = 0
   call s:PreviewOpenWnd()
   "call s:NetrwOpenWnd()
-  TlistOpen
+  "TlistOpen
+  TagbarOpen
   MBEClose
   MBEOpen
 endfunction
 function! s:IdeDisable_3()
   call s:PreviewCloseWnd()
   "call s:NetrwCloseWnd()
-  TlistClose
+  "TlistClose
+  TagbarClose
 endfunction
 
 " IDE toggle functions
@@ -1124,7 +1162,7 @@ if !exists('g:command_t_loaded')
   let g:CommandTMaxCachedDirectories = 2
 
   " Key mapping
-  Noremap <C-o>     :CommandT<CR>
+  Noremap <C-p>     :CommandT<CR>
 endif
 
 
@@ -1133,13 +1171,27 @@ endif
 " *******************************************************
 if !exists('g:loaded_ctrlp')
   " Options
-  let g:ctrlp_map = '<C-o>'
+  let g:ctrlp_map = '<C-p>'
   let g:ctrlp_cmd = 'CtrlP'
   let g:ctrlp_working_path_mode = '0'
   let g:ctrlp_custom_ignore = {
   \ 'dir':  '\v[\/](\.(git|hg|svn)|tmp)$',
   \ 'file': '\v\.(exe|so|dll|o)$'
   \ }
+endif
+
+
+" *******************************************************
+" } Tagbar plugin {
+" *******************************************************
+if !exists('g:loaded_tagbar')
+  " Options
+  let g:tagbar_autoshowtag = 1
+  let g:tagbar_left = 1
+  let g:tagbar_width = 25
+  " Toggle ON/OFF
+  nmap <localleader>t   :TagbarToggle<CR>
+  nmap <localleader>tt  :TagbarClose<CR>
 endif
 
 
@@ -1170,8 +1222,10 @@ map <leader>h :call <SID>HexaToggle()<CR>
 set tags=./tags,tags,$TAGS_DB
 
 " Key mapping
-noremap <ENTER>   <C-]>
-noremap <SPACE>   <C-T>
+noremap <ENTER>     <C-]>
+noremap <SPACE>     <C-T>
+noremap <C-ENTER>   <C-]>
+noremap <C-SPACE>   <C-T>
 Noremap <F6>        :exec "try <BAR> silent tnext <BAR> catch <BAR> tfirst <BAR> endtry"<CR>
 Noremap <S-F6>      :exec "try <BAR> silent tprevious <BAR> catch <BAR> tlast <BAR> endtry"<CR>
 

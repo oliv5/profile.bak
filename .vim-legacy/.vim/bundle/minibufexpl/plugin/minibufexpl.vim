@@ -1172,9 +1172,9 @@ function! <SID>ResizeWindow()
     endif
 
     " OLA++
-    "if g:miniBufExplSplitToEdge == 1
-    "  exec 'wincmd K'
-    "endif
+    if g:miniBufExplSplitToEdge == 1
+      exec 'wincmd K'
+    endif
     " OLA--
 
     " enforce max window height
