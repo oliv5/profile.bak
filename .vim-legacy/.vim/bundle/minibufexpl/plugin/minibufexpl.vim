@@ -598,7 +598,7 @@ function! <SID>StartExplorer(curBufNum)
     call <SID>DEBUG('Leaving StartExplorer()',10)
     return
   endif
-  
+
   " Save current window number and switch to previous
   " window before entering MBE window so that the later
   " `wincmd p` command will get into this window, then
@@ -1172,9 +1172,9 @@ function! <SID>ResizeWindow()
     endif
 
     " OLA++
-    if g:miniBufExplSplitToEdge == 1
-      exec 'wincmd K'
-    endif
+    "if g:miniBufExplSplitToEdge == 1
+    "  exec 'wincmd K'
+    "endif
     " OLA--
 
     " enforce max window height
@@ -1203,9 +1203,9 @@ function! <SID>ResizeWindow()
     " OLA **
     let saved_ead = &ead
     let &ead = 'ver'
-    "set equalalways
-    "set noequalalways
+    set equalalways
     let &ead = saved_ead
+    set noequalalways
     " OLA **
 
   " Vertical Resize
@@ -1231,9 +1231,9 @@ function! <SID>ResizeWindow()
     " OLA **
     let saved_ead = &ead
     let &ead = 'hor'
-    "set equalalways
-    "set noequalalways
+    set equalalways
     let &ead = saved_ead
+    set noequalalways
     " OLA **
 
   endif

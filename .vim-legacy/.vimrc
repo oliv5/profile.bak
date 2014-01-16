@@ -172,6 +172,7 @@ set hidden            " Show hidden buffers & allow switching to modified buffer
 set switchbuf=useopen " Buffer switch use open windows instead of splitting/openning new window
 set noea              " No equalize windows
 set splitbelow        " Window split location. Also applied to :vsp & :sp
+set splitright        " Window split location. Also applied to :vsp & :sp
 
 " Remember all of these between sessions, but only 10 search terms; also
 " remember info for 10 files, but never any on removable disks, don't remember
@@ -598,28 +599,44 @@ endfunction
 " } Preview window {
 " *******************************************************
 " Options
-set previewheight=10          " Preview window height
+set previewheight=12          " Preview window height
 
 " Variables
 let s:p_lastw = ""
 let s:p_highlight = 0
 let s:p_center = 0
 
+" Key mapping
+nmap <localleader>p   :Ptoggle<CR>
+nmap <localleader>pp  :Pclose<CR>
+
 " Open preview window
 function! s:PreviewOpenWnd()
-  silent! pedit!
-  silent! wincmd P
-  silent! wincmd J
-  silent! wincmd p
-  au! CursorHold * nested call s:PreviewShowTag()
-  Noremap <F6>   <silent>     :exec "try <bar> silent ptnext <bar> catch <bar> ptfirst <bar> endtry"<CR>
-  Noremap <S-F6> <silent>     :exec "try <bar> silent ptprevious <bar> catch <bar> ptlast <bar> endtry"<CR>
-  Noremap <C-F6> <silent>     :pclose<CR>
+  silent! execute "below pedit!"
+  wincmd P
+  if &previewwindow
+  "  wincmd J
+    set nonu
+    wincmd p
+  endif
+  augroup PreviewWnd
+    au!
+    au CursorHold * nested call s:PreviewShowTag()
+    au WinEnter *   nested if &previewwindow | set nomodifiable | endif
+    au BufEnter *   nested if &previewwindow | set nomodifiable | endif
+    au WinLeave *   nested if &previewwindow | set modifiable | endif
+    au BufLeave *   nested if &previewwindow | set modifiable | endif
+  augroup END
+  Noremap <silent><F6>     :exec "try <bar> silent ptnext <bar> catch <bar> silent ptfirst <bar> endtry"<CR>
+  Noremap <silent><S-F6>   :exec "try <bar> silent ptprevious <bar> catch <bar> silent ptlast <bar> endtry"<CR>
+  Noremap <C-F6>           :Pclose<CR>
 endfunction
 
 " Close preview window
 function! s:PreviewCloseWnd()
-  au! CursorHold *
+  augroup PreviewWnd
+    au!
+  augroup END
   pclose
   let s:p_lastw = ""
 endfunction
@@ -627,9 +644,9 @@ endfunction
 " Toggle preview window
 function! s:PreviewToggleWnd()
   if s:p_lastw == ""
-    s:PreviewOpenWnd()
+    call s:PreviewOpenWnd()
   else
-    s:PreviewCloseWnd()
+    call s:PreviewCloseWnd()
   endif
 endfunction
 
@@ -916,6 +933,7 @@ endfunction
 
 " Preview window ON/OFF + taglist + netrw
 silent! unlet g:loaded_taglist
+silent! unlet g:loaded_tagbar
 function! s:IdeEnable_3()
   "let g:Tlist_Use_Right_Window = 0
   call s:PreviewOpenWnd()
@@ -965,8 +983,8 @@ if !exists('g:loaded_project')
   let g:proj_window_pos = 'L'
 
   " Toggle ON/OFF
-  nmap <localleader>p  :Project<CR>
-  nmap <localleader>pp <Plug>ToggleProject
+  nmap <localleader>j  :Project<CR>
+  nmap <localleader>jj <Plug>ToggleProject
 endif
 
 
@@ -1204,9 +1222,13 @@ endif
 " *******************************************************
 if !exists('g:loaded_tagbar')
   " Options
-  let g:tagbar_autoshowtag = 1
   let g:tagbar_left = 1
   let g:tagbar_width = 25
+  let g:tagbar_autoshowtag = 0
+  let g:tagbar_expand = 1
+  let g:tagbar_indent = 1
+  let g:tagbar_show_linenumbers = 1
+  let g:tagbar_singleclick = 1
   " Toggle ON/OFF
   nmap <localleader>t   :TagbarToggle<CR>
   nmap <localleader>tt  :TagbarClose<CR>
