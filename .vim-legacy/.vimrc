@@ -405,11 +405,11 @@ Map <S-F4>      #
 set grepprg=ref\ $*
 
 " Key mappings
-"Noremap <silent> <F5>   :cn<CR>zv
-"Noremap <silent> <S-F5> :cp<CR>zv
-Noremap <silent> <F5>   :cn<CR>
-Noremap <silent> <S-F5> :cp<CR>
-Noremap <silent> <C-F5> :clist<CR>
+Noremap <silent> <F7>   :exec "try <BAR> silent cnext <BAR> catch <BAR> cfirst <BAR> endtry"<CR>
+Noremap <silent> <S-F7> :exec "try <BAR> silent cprev <BAR> catch <BAR> clast <BAR> endtry"<CR>
+Noremap <silent> <C-F7> :clist<CR>
+Noremap <C-F7>          :grep<SPACE>
+vnoremap <C-F7>         :"+y:grep<C-R>"
 cnoreabbrev gg grep
 
 
@@ -622,10 +622,10 @@ function! s:PreviewOpenWnd()
   augroup PreviewWnd
     au!
     au CursorHold * nested call s:PreviewShowTag()
-    au WinEnter *   nested if &previewwindow | set nomodifiable | endif
-    au BufEnter *   nested if &previewwindow | set nomodifiable | endif
-    au WinLeave *   nested if &previewwindow | set modifiable | endif
-    au BufLeave *   nested if &previewwindow | set modifiable | endif
+    "au WinEnter *   nested if &previewwindow | set nomodifiable | endif
+    "au BufEnter *   nested if &previewwindow | set nomodifiable | endif
+    "au WinLeave *   nested if &previewwindow | set modifiable | endif
+    "au BufLeave *   nested if &previewwindow | set modifiable | endif
   augroup END
   Noremap <silent><F6>     :exec "try <bar> silent ptnext <bar> catch <bar> silent ptfirst <bar> endtry"<CR>
   Noremap <silent><S-F6>   :exec "try <bar> silent ptprevious <bar> catch <bar> silent ptlast <bar> endtry"<CR>
@@ -762,7 +762,7 @@ let g:loaded_nerd_tree = 1
 let g:loaded_trinity = 1
 let g:ccvext_version = 1
 let g:loaded_yankring = 1
-let g:loaded_cctree = 1
+"let g:loaded_cctree = 1
 let g:command_t_loaded = 1
 
 " Plugins which open window
@@ -1028,8 +1028,8 @@ if !exists('g:loaded_srcexpl')
   let g:SrcExpl_isUpdateTags = 0      " Tag update on file opening
   let g:SrcExpl_updateTagsCmd = ""    " Tag update command
   let g:SrcExpl_updateTagsKey = ""    " Tag update key
-  let g:SrcExpl_prevDefKey = "<S-F7>" " Show prev definition in jump list
-  let g:SrcExpl_nextDefKey = "<F7>"   " Show next definition in jump list
+  let g:SrcExpl_prevDefKey = "<S-F6>" " Show prev definition in jump list
+  let g:SrcExpl_nextDefKey = "<F6>"   " Show next definition in jump list
   let g:SrcExpl_pluginList = g:wndmgr_pluginList " Plugin names that are using buffers
 
   " Additionnal key maps
@@ -1098,29 +1098,26 @@ if !exists('g:loaded_minibufexplorer')
   Map <A-Down>  :MBEbb<CR>
   Map <A-Up>    :MBEbf<CR>
   if !exists("s:vimrc_useTabs")
-    Noremap <C-Tab>      :MBEbb<CR>
-    Noremap <C-S-Tab>    :MBEbf<CR>
-    "Noremap <C-Tab>      :call <SID>MbeSwitch(1)<CR>
-    "Noremap <C-S-Tab>    :call <SID>MbeSwitch(0)<CR>
+    "Noremap <C-Tab>      :MBEbb<CR>
+    "Noremap <C-S-Tab>    :MBEbf<CR>
+    Noremap <C-Tab>      :call <SID>MbeSwitch(1)<CR>
+    Noremap <C-S-Tab>    :call <SID>MbeSwitch(0)<CR>
   endif
 
   " Switch between 2 buffers
-"  function! s:MbeSwitch(toggle)
-"    if a:toggle == 1
-"      let s:vimrc_mbeswitch = !s:vimrc_mbeswitch
-"      if s:vimrc_mbeswitch == 1
-"        MBEbf
-"      else
-"        MBEbb
-"      endif
-"    else
-"      let s:vimrc_mbeswitch = 0
-"      MBEbf
-"    endif
-"  endfunction
-"  if !exists('s:vimrc_mbeswitch')
-"    let s:vimrc_mbeswitch = 0
-"  endif
+  if !exists('s:vimrc_mbeswitch')
+    let s:vimrc_mbeswitch = 0
+  endif
+  function! s:MbeSwitch(toggle)
+    if a:toggle == 1
+      let s:vimrc_mbeswitch = !s:vimrc_mbeswitch
+    endif
+    if s:vimrc_mbeswitch == 1
+      MBEbf
+    else
+      MBEbb
+    endif
+  endfunction
 
 endif
 
@@ -1148,7 +1145,7 @@ if !exists('g:loaded_yaifa')
   nmap <localleader><tab>   :call YAIFA()<CR>
   " autocall when entering file
   if exists("*YAIFA")
-    autocmd BufRead * silent! call YAIFA()
+    autocmd! BufRead * silent! call YAIFA()
   endif
 endif
 
@@ -1178,13 +1175,13 @@ if !exists('g:loaded_cctree')
   let g:CCTreeDisplayMode = 2
 
   " Key mappings
-  let g:CCTreeKeyTraceForwardTree = '<F10>'
-  let g:CCTreeKeyTraceReverseTree = '<F11>'
-  let g:CCTreeKeyToggleWindow = '<F12>'
+  let g:CCTreeKeyTraceForwardTree = '<localleader>xf'
+  let g:CCTreeKeyTraceReverseTree = '<localleader>xc'
+  let g:CCTreeKeyToggleWindow = '<localleader>x'
 
   " Autocommands
-  autocmd VimEnter * if filereadable('$CSCOPE_DB') | CCTreeLoadDB $CSCOPE_DB | endif
-  autocmd VimEnter * if filereadable('xref.out') | CCTreeLoadXRefDbFromDisk xref.out | endif
+  autocmd! VimEnter * if filereadable('$CSCOPE_DB') | CCTreeLoadDB $CSCOPE_DB | endif
+  autocmd! VimEnter * if filereadable('xref.out') | CCTreeLoadXRefDbFromDisk xref.out | endif
 endif
 
 
@@ -1214,6 +1211,8 @@ if !exists('g:loaded_ctrlp')
   \ 'dir':  '\v[\/](\.(git|hg|svn)|tmp)$',
   \ 'file': '\v\.(exe|so|dll|o)$'
   \ }
+  " Key mapping
+  Noremap <C-o>     :CtrlPMRU<CR>
 endif
 
 
@@ -1263,19 +1262,18 @@ set tags=./tags,tags,$TAGS_DB
 
 " Key mapping
 noremap <ENTER>     <C-]>
-noremap <SPACE>     <C-T>
 noremap <C-ENTER>   <C-]>
-noremap <C-SPACE>   <C-T>
-Noremap <F6>        :exec "try <BAR> silent tnext <BAR> catch <BAR> tfirst <BAR> endtry"<CR>
-Noremap <S-F6>      :exec "try <BAR> silent tprevious <BAR> catch <BAR> tlast <BAR> endtry"<CR>
+noremap <SPACE>     <C-T>
+Noremap <silent><F5>    :exec "try <BAR> silent tnext <BAR> catch <BAR> tfirst <BAR> endtry"<CR>
+Noremap <silent><S-F5>  :exec "try <BAR> silent tprevious <BAR> catch <BAR> tlast <BAR> endtry"<CR>
 
 
 " *******************************************************
 " } Sessions {
 " *******************************************************
 " Key mapping
-Noremap <C-F9>      :exec "MBEClose" <BAR> mksession! ~/.vimsession <BAR> exec "MBEOpen"<CR>
-Noremap <F9>        :exec "MBEClose" <BAR> source! ~/.vimsession <BAR> exec "MBEOpen"<CR>
+Noremap <C-F9>      :mksession! ~/.vimsession <CR>
+Noremap <F9>        :source! ~/.vimsession<CR>
 
 
 " *******************************************************

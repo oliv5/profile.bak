@@ -469,13 +469,6 @@ endfunction
 function! <SID>BufAddHandler()
   call <SID>DEBUG('Entering BufAdd Handler', 10)
   
-  " OLA ++
-  if &previewwindow
-    call <SID>DEBUG('Leaving BufAdd Handler', 10)
-    return
-  endif
-  " OLA --
-
   call <SID>ListAdd(s:BufList,str2nr(expand("<abuf>")))
   call <SID>ListAdd(s:MRUList,str2nr(expand("<abuf>")))
 
@@ -617,11 +610,11 @@ function! <SID>StartExplorer(curBufNum)
     return
   endif
 
-  " OLA ++
+  " OLA
   " Disable mouse selection in MBE window
-  "noremap  <window><LeftDrag>  <LeftMouse>
-  "noremap! <window><LeftDrag>  <LeftMouse>
-  " OLA --
+  noremap  <window><LeftDrag>  <LeftMouse>
+  noremap! <window><LeftDrag>  <LeftMouse>
+  " OLA
 
   " Set filetype for MBE buffer
   set filetype=minibufexpl
@@ -1171,11 +1164,12 @@ function! <SID>ResizeWindow()
       setlocal nomodifiable
     endif
 
-    " OLA++
+    " OLA
+    " Side effect: can reduce other windows
     "if g:miniBufExplSplitToEdge == 1
     "  exec 'wincmd K'
     "endif
-    " OLA--
+    " OLA
 
     " enforce max window height
     if g:miniBufExplMaxSize != 0
@@ -1200,13 +1194,11 @@ function! <SID>ResizeWindow()
         exec 'resize '.l:height
     endif
 
-    " OLA **
     let saved_ead = &ead
     let &ead = 'ver'
     set equalalways
     let &ead = saved_ead
     set noequalalways
-    " OLA **
 
   " Vertical Resize
   else
@@ -1228,13 +1220,11 @@ function! <SID>ResizeWindow()
       exec 'vertical resize '.l:newWidth
     endif
 
-    " OLA **
     let saved_ead = &ead
     let &ead = 'hor'
     set equalalways
     let &ead = saved_ead
     set noequalalways
-    " OLA **
 
   endif
 
@@ -1767,13 +1757,13 @@ function! <SID>BuildBufferPathSignDict(bufnrs, ...)
             let s:bufPathSignDict[bufnr] = []
         endif
 
-        "" OLA++
+        "" OLA
         " Make sure each buffer has an entry in 's:bufPathDict'
         " If index is zero, we force re-initialize the entry
         if index == 0 || !has_key(s:bufPathDict, bufnr)
             let s:bufPathDict[bufnr] = []
         endif
-        "" OLA++
+        "" OLA
 
         " If some buffers' path does not have this index, we skip it
         if len(s:bufPathDict[bufnr]) < index
