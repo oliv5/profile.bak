@@ -10,7 +10,7 @@
 CTAGS_OPTS="-R --sort=yes --fields=+iaS --extra=+q --exclude='.svn' --exclude='.git'"
 
 # Cscope default settings
-CSCOPE_OPTS="-bqkv"
+CSCOPE_OPTS="-Rqb"
 CSCOPE_REGEX=".*\.c|.*\.h|.*\.cc|.*\.cpp|.*\.hpp"
 
 # Make ctags
