@@ -2,26 +2,6 @@
 " Based on Smylers's .vimrc
 " 2000 Jun  1: for `Vim' 5.6
 "
-" Vim features
-" http://vimdoc.sourceforge.net/htmldoc/map.html#map-which-keys
-" http://vim.wikia.com/wiki/Mapping_keys_in_Vim_-_Tutorial_(Part_1)
-" http://vim.wikia.com/wiki/Mapping_keys_in_Vim_-_Tutorial_(Part_2)
-" http://vim.wikia.com/wiki/Mapping_keys_in_Vim_-_Tutorial_(Part_3)
-" http://vim.wikia.com/wiki/Highlight_unwanted_spaces
-"
-" Plugins
-" http://www.stripey.com/vim/
-" http://vim.cybermirror.org/runtime/mswin.vim
-" https://github.com/fholgado/minibufexpl.vim
-"
-" Vim scripting
-" http://learnvimscriptthehardway.stevelosh.com/
-" http://www.ibm.com/developerworks/library/l-vim-script-1/
-" http://www.ibm.com/developerworks/library/l-vim-script-2/
-" http://www.vim.org/scripts/script.php?script_id=2347
-" http://www.vim.org/scripts/script.php?script_id=273
-" http://www.vim.org/scripts/script.php?script_id=2179
-"
 " Hints
 " <C-C> goto normal mode
 " <C-O> stay in insert mode to execute a single cmd
@@ -37,22 +17,11 @@ if v:version < 700
 endif
 
 " User commands check
-if !has("user_commands") && !exists("g:reload_vimrc")
+if !has("user_commands") && !exists("g:loaded_vimrc")
   " Reload .vimrc silently (removes autocommands errors)
-  let g:reload_vimrc = 1
+  let g:loaded_vimrc = 1
   silent! source $MYVIMRC
   finish
-endif
-
-" Cleanup environment once only
-if !exists("g:loaded_vimrc")
-  let g:loaded_vimrc = 1
-  autocmd!
-  mapc
-  imapc
-  cmapc
-  lmapc
-  omapc
 endif
 
 " Use before config
@@ -87,7 +56,7 @@ cmap w!! w !sudo tee % >/dev/null
 " } Source vimrc {
 " *******************************************************
 " Resource vimrc
-noremap  <leader>s      :let g:reload_vimrc = 1 <BAR> source $MYVIMRC<CR>
+noremap  <leader>s      :source $MYVIMRC<CR>
 cnoreabbrev reload source $MYVIMRC
 
 " Auto source vimrc on change
@@ -202,7 +171,7 @@ endif
 set guioptions-=T       " Remove toolbar
 
 " Jump to the last cursor position
-autocmd BufReadPost *
+autocmd! BufReadPost *
   \ if line("'\"") > 0 && line ("'\"") <= line("$") |
   \   exe "normal! g'\"" |
   \ endif
@@ -235,7 +204,7 @@ set tabstop=4         " Indents of 4
 set shiftwidth=4      " Indents of 4
 set shiftround        " Indents are copied down lines
 set autoindent        " Auto-indent
-if !exists('g:reload_vimrc')
+if !exists('g:loaded_vimrc')
   set expandtab       " Expand tabs to spaces
 endif
 
@@ -483,6 +452,9 @@ Noremap  <C-Tab>  :tabp<CR>
 " *******************************************************
 " Open/close window : standard mappings <C-w>...
 " Prev/next window (Ctrl-w/W)
+Noremap <F11>     :vsp<CR>
+Noremap <S-F11>   :sp<CR>
+Noremap <F12>     :wincmd c<CR>
 
 " Go up/down/left/right window
 Noremap <C-Up>      :wincmd k<CR>
@@ -602,9 +574,11 @@ endfunction
 set previewheight=12          " Preview window height
 
 " Variables
-let s:p_lastw = ""
-let s:p_highlight = 0
-let s:p_center = 0
+if !exists('g:loaded_vimrc')
+  let s:p_lastw = ""
+  let s:p_highlight = 0
+  let s:p_center = 0
+endif
 
 " Key mapping
 nmap <localleader>p   :Ptoggle<CR>
@@ -746,17 +720,10 @@ runtime bundle/pathogen/autoload/pathogen.vim
 execute pathogen#infect()
 filetype plugin indent on   " enable detection, plugins and indenting in one step
 
-" Reload the configuration of some plugins
-if exists('g:loaded_minibufexplorer')
-  unlet g:loaded_minibufexplorer
-endif
-if exists('g:loaded_yaifa')
-  unlet g:loaded_yaifa
-endif
-
 " Disable the following plugins
 let g:loaded_project = 1
 let g:loaded_taglist = 1
+let g:loaded_tagbar = 1
 let g:loaded_srcexpl = 1
 let g:loaded_nerd_tree = 1
 let g:loaded_trinity = 1
@@ -764,211 +731,8 @@ let g:ccvext_version = 1
 let g:loaded_yankring = 1
 "let g:loaded_cctree = 1
 let g:command_t_loaded = 1
-
-" Plugins which open window
-let g:wndmgr_pluginList = [
-      \ "-MiniBufExplorer-",
-      \ "_NERD_tree_",
-      \ "__Tag_List__",
-      \ "Source_Explorer",
-      \ "\.vimprojects",
-      \ "NetrwTreeListing",
-\ ]
-
-
-" *******************************************************
-" } IDE management {
-" *******************************************************
-
-" Choose IDE type
-if $VIM_IDE == 1
-
-  " Enable plugins
-  unlet g:loaded_project
-  unlet g:loaded_taglist
-  unlet g:ccvext_version
-
-  " IDE with Project, Taglist, CCVext
-  function! s:IdeEnable_0()
-    Project
-    TlistOpen
-    CCVEenQuickSnippet
-  endfunction
-
-  function! s:IdeDisable_0()
-    ProjectClose
-    TlistClose
-    CCVEdiQuickSnippet
-  endfunction
-
-elseif $VIM_IDE == 2
-
-  " Enable plugins
-  unlet g:loaded_taglist
-  unlet g:loaded_srcexpl
-
-  " IDE with Taglist, SrcExplorer
-  function! s:IdeEnable_0()
-    let g:Tlist_Use_Right_Window = 0
-    TlistOpen
-    SrcExpl
-    call g:wndmgr_UpdateSrcExplWindow()
-  endfunction
-
-  function! s:IdeDisable_0()
-    TlistClose
-    SrcExplClose
-  endfunction
-
-elseif $VIM_IDE == 3
-
-  " Enable plugins
-  unlet g:loaded_project
-  unlet g:loaded_taglist
-
-  " IDE with Project, Taglist
-  function! s:IdeEnable_0()
-    Project
-    TlistOpen
-  endfunction
-
-  function! s:IdeDisable_0()
-    ProjectClose
-    TlistClose
-  endfunction
-
-elseif $VIM_IDE == 4
-
-  " Enable plugins
-  unlet g:loaded_project
-  unlet g:loaded_taglist
-  unlet g:loaded_srcexpl
-
-  " IDE with Project, Taglist, SrcExplorer
-  function! s:IdeEnable_0()
-    SrcExpl
-    TlistOpen
-    Project
-    "call g:wndmgr_ExecWnd("__Tag_List__","H","")
-    "call g:wndmgr_ExecWnd("\.vimprojects","L","")
-    "call g:wndmgr_ExecWnd("Source_Explorer","J","")
-    call g:wndmgr_ExecWnd("__Tag_List__","|",g:Tlist_WinWidth)
-    call g:wndmgr_ExecWnd("\.vimprojects","|",g:proj_window_width)
-    call g:wndmgr_ExecWnd("Source_Explorer","_",g:SrcExpl_winHeight)
-    "call g:wndmgr_JumpEditWnd()
-    "call g:wndmgr_ExecWnd("Source_Explorer","_",g:SrcExpl_winHeight)
-  endfunction
-
-  function! s:IdeDisable_0()
-    TlistClose
-    ProjectClose
-    SrcExplClose
-  endfunction
-
-elseif $VIM_IDE == 5
-
-  " Enable plugins
-  unlet g:loaded_nerd_tree
-  unlet g:loaded_taglist
-  unlet g:loaded_srcexpl
-
-  " IDE with NERDTree, Taglist, SrcExplorer
-  function! s:IdeEnable_0()
-    let g:Tlist_Use_Right_Window = 0
-    TlistOpen
-    NERDTree
-    SrcExpl
-    call g:wndmgr_UpdateSrcExplWindow()
-  endfunction
-
-  function! s:IdeDisable_0()
-    TlistClose
-    NERDTreeClose
-    SrcExplClose
-  endfunction
-
-elseif $VIM_IDE == 6
-
-  " Enable plugins
-  unlet g:loaded_nerd_tree
-  unlet g:loaded_taglist
-  unlet g:loaded_srcexpl
-  unlet g:loaded_trinity
-
-  " IDE with Trinity: NERDTree, Taglist, SrcExplorer
-  function! s:IdeEnable_0()
-    TrinityToggleTagList
-    TrinityToggleSourceExplorer
-    TrinityUpdateWindow
-  endfunction
-
-  function! s:IdeDisable_0()
-    TrinityToggleTagList
-    TrinityToggleSourceExplorer
-    TrinityUpdateWindow
-  endfunction
-
-endif
-
-function! s:IdeToggle_0()
-  MBEClose
-  MBEOpen
-endfunction
-
-" Vertical split IDE
-function! s:IdeEnable_1()
-  vsp
-endfunction
-function! s:IdeDisable_1()
-  wincmd c
-endfunction
-
-" Horizontal split IDE
-function! s:IdeEnable_2()
-  sp
-endfunction
-function! s:IdeDisable_2()
-  wincmd c
-endfunction
-
-" Preview window ON/OFF + taglist + netrw
-silent! unlet g:loaded_taglist
-silent! unlet g:loaded_tagbar
-function! s:IdeEnable_3()
-  "let g:Tlist_Use_Right_Window = 0
-  call s:PreviewOpenWnd()
-  "call s:NetrwOpenWnd()
-  "TlistOpen
-  TagbarOpen
-  MBEClose
-  MBEOpen
-endfunction
-function! s:IdeDisable_3()
-  call s:PreviewCloseWnd()
-  "call s:NetrwCloseWnd()
-  "TlistClose
-  TagbarClose
-endfunction
-
-" IDE toggle functions
-function! s:IdeToggle(index)
-  let s:vimrc_ideFlag[a:index] = !s:vimrc_ideFlag[a:index]
-  exec "call" (s:vimrc_ideFlag[a:index] ? "s:IdeEnable_" : "s:IdeDisable_").a:index."()"
-  if exists("*s:IdeToggle_".a:index)
-    exec "call s:IdeToggle_".a:index."()"
-  endif
-endfunction
-
-" IDE toggle flags
-if !exists('s:vimrc_ideFlag')
-  let s:vimrc_ideFlag = [0,0,0,0]
-endif
-
-" IDE toggle keys
-Noremap <F11>     :call <SID>IdeToggle(1)<CR>
-Noremap <S-F11>   :call <SID>IdeToggle(2)<CR>
-Noremap <S-F12>   :call <SID>IdeToggle(3)<CR>
-Noremap <F12>     :call <SID>IdeToggle(0)<CR>
+"let g:loaded_minibufexplorer = 1
+"let g:loaded_yaifa = 1
 
 
 " *******************************************************
@@ -1177,7 +941,7 @@ if !exists('g:loaded_cctree')
   " Key mappings
   let g:CCTreeKeyTraceForwardTree = '<localleader>xf'
   let g:CCTreeKeyTraceReverseTree = '<localleader>xc'
-  let g:CCTreeKeyToggleWindow = '<localleader>x'
+  let g:CCTreeKeyToggleWindow = '<localleader>xx'
 
   " Autocommands
   autocmd! VimEnter * if filereadable('$CSCOPE_DB') | CCTreeLoadDB $CSCOPE_DB | endif
@@ -1325,24 +1089,20 @@ endfunction
 
 
 " *******************************************************
-" } Miscellaneous {
-" *******************************************************
-" Highlight VIM regex
-nnoremap <C-F1> yi":let @/ = @"<CR>
-
-
-" *******************************************************
 " } Environment conclusion {
 " *******************************************************
 
 " Use after local config
 if filereadable(expand("~/.vimrc.after.local"))
-    source ~/.vimrc..after.local
+    source ~/.vimrc.after.local
 endif
 
 " Use after config
 if filereadable(expand("~/.vimrc.after"))
     source ~/.vimrc.after
 endif
+
+" Load flag
+let g:loaded_vimrc = 1
 
 " }

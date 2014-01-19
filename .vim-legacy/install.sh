@@ -1,3 +1,7 @@
 #!/bin/bash
-rm ~/.vimrc*
-ln -s ~/.vim-legacy/.vim* ~/ -f
+SRC=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+DST=~
+TMP=$(mktemp -d)
+mv -v ~/.vimrc* "$TMP"
+mv -v ~/.vim "$TMP"
+ln -s $SRC/.vim* $DST/ -f
