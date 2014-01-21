@@ -59,12 +59,6 @@ cmap w!! w !sudo tee % >/dev/null
 noremap  <leader>s      :source $MYVIMRC<CR>
 cnoreabbrev reload source $MYVIMRC
 
-" Auto source vimrc on change
-augroup autoloadvimrc
-  autocmd!
-  autocmd BufWritePost $MYVIMRC source $MYVIMRC
-augroup END
-
 
 " *******************************************************
 " } Mapping functions {
@@ -343,17 +337,16 @@ nnoremap <localleader><F3> :set invhls hls?<CR>
 
 " Search & replace
 Noremap  <C-F>   /
-Noremap  <C-A-F> yiw<C-O>/<C-R>"
+"Noremap  <C-A-F> yiw<C-O>/<C-R>"
 Noremap  <C-H>   yiw<C-O>:%s/<C-R>"//c<left><left>
-Noremap  <C-A-H> yiw<C-O>:%s/<C-R>"/<C-R>"/c<left><left>
+"Noremap  <C-A-H> yiw<C-O>:%s/<C-R>"/<C-R>"/c<left><left>
 vnoremap <C-F>   "+y:/<C-R>"
 vnoremap <C-H>   "+y:%s/<C-R>"/<C-R>"/c<left><left>
-vnoremap <C-A-H> "+y:%s/<C-R>"//c<left><left>
+"vnoremap <C-A-H> "+y:%s/<C-R>"//c<left><left>
 
 " F3 for search (n and N)
 Map  <F3>       n
 Map  <S-F3>     N
-cmap <F3>       <NOP>
 vmap <S-F3>     <F3>N
 vnoremap <silent> <F3> :<C-u>
   \let old_reg=getreg('"')<Bar>
@@ -362,9 +355,18 @@ vnoremap <silent> <F3> :<C-u>
   \gV:call setreg('"', old_reg, old_regtype)<CR>
   \:set hls<CR>
 
-" F4 for select and search (* and #)
-Map <F4>        *
-Map <S-F4>      #
+" Alternative search
+map f       n
+map F       N
+vmap f      <F3>
+vmap F      <F3>N
+
+" F4 for select & search (* and #)
+Map <F4>    *
+Map <S-F4>  #
+
+" Alternative select & search
+map µ       #
 
 
 " *******************************************************
@@ -410,13 +412,45 @@ Noremap <A-Right> <C-I>
 vnoremap <A-Left>  <C-[><C-O>
 vnoremap <A-Right> <C-[><C-I>
 
+
+" *******************************************************
+" } Marks {
+" *******************************************************
+
 " Map F2 to set/jump to marks
-if !exists("g:vimrc_mark")
-  let g:vimrc_mark=0
+if !exists("s:mark_next")
+  let s:mark_cur=0
+  let s:mark_next=0
+  let s:mark_max=1
 endif
-Map <silent> <F2>     :exec printf("normal '%c", 65 + (g:vimrc_mark + 25) % 26) <BAR> let g:vimrc_mark=(g:vimrc_mark + 25) % 26<CR>
-Map <silent> <S-F2>   :exec printf("normal '%c", 65 + (g:vimrc_mark + 1)  % 26) <BAR> let g:vimrc_mark=(g:vimrc_mark + 1)  % 26<CR>
-Map <silent> <C-F2>   :exec printf("ma %c",      65 + g:vimrc_mark)             <BAR> let g:vimrc_mark=(g:vimrc_mark + 1)  % 26<CR>
+
+" Set a mark
+function! s:MarkSet()
+  exec printf("ma %c", 65 + s:mark_next)
+  let s:mark_cur=s:mark_next
+  let s:mark_next=(s:mark_next + 1) % 26
+  let s:mark_max=max([s:mark_next,s:mark_max])
+endfunction
+
+" Goto next mark
+function! s:MarkGotoNext()
+  let s:mark_cur=(s:mark_cur + 1) % s:mark_max
+  exec printf("normal '%c", 65 + s:mark_cur)
+endfunction
+
+" Goto prev mark
+function! s:MarkGotoPrev()
+  exec printf("normal '%c", 65 + s:mark_cur)
+  let s:mark_cur=(s:mark_cur + s:mark_max - 1) % s:mark_max
+endfunction
+
+" Mark key maps
+Map <silent> <F2>     :call <SID>MarkGotoPrev()<CR>
+Map <silent> <S-F2>   :call <SID>MarkGotoNext()<CR>
+Map <silent> <C-F2>   :call <SID>MarkSet()<CR>
+map <silent> m        <F2>
+map <silent> M        <S-F2>
+map <silent> <C-m>    <C-F2>
 
 
 " *******************************************************
@@ -429,22 +463,16 @@ if $VIM_USETABS != ""
 endif
 
 " Open/close tab
-Map  <C-t><C-t>   :tabnew<CR>:e<space>
-Map  <C-t><C-o>   :tabnew<CR>:e<space>
-Map  <C-t><C-c>   :close<CR>
-"Map <F4>          :tabnew<CR>:e<space>
-Map  <C-F4>       :close<CR>
+Map  <C-t>t   :tabnew<CR>:e<space>
+Map  <C-t>c   :close<CR>
+"Map <F4>     :tabnew<CR>:e<space>
+Map  <C-F4>   :close<CR>
 
 " Prev/next tab
-Noremap  <C-Tab>  :tabn<CR>
-Noremap  <C-Tab>  :tabp<CR>
-
-" Tab enter handler
-"augroup tabenter
-"  autocmd!
-"  autocmd TabEnter *.c,*.h,*.cc,*.hpp,*.cpp,*.slang,*.py,*.mk call IdeEnable_0()
-"  autocmd TabLeave *.c,*.h,*.cc,*.hpp,*.cpp,*.slang,*.py,*.mk call IdeDisable_0()
-"augroup END
+if exists('s:vimrc_useTabs')
+  Noremap  <C-Tab>  :tabn<CR>
+  Noremap  <C-Tab>  :tabp<CR>
+endif
 
 
 " *******************************************************
@@ -452,9 +480,6 @@ Noremap  <C-Tab>  :tabp<CR>
 " *******************************************************
 " Open/close window : standard mappings <C-w>...
 " Prev/next window (Ctrl-w/W)
-Noremap <F11>     :vsp<CR>
-Noremap <S-F11>   :sp<CR>
-Noremap <F12>     :wincmd c<CR>
 
 " Go up/down/left/right window
 Noremap <C-Up>      :wincmd k<CR>
@@ -471,10 +496,10 @@ Noremap <C-Right>   :wincmd l<CR>
 
 " Extend window through the splits...
 " Same as <C-w>_  <C-w>|
-"noremap <C-J> <C-w>j<C-w>_
-"noremap <C-K> <C-w>k<C-w>_
-"noremap <C-H> <C-w>h<C-w>\|
-"noremap <C-L> <C-w>l<C-w>\|
+"noremap <C-J>  <C-w>j<C-w>_
+"noremap <C-K>  <C-w>k<C-w>_
+"noremap <C-H>  <C-w>h<C-w>\|
+"noremap <C-L>  <C-w>l<C-w>\|
 
 " Exit to normal when changing windows
 augroup exittonormal
@@ -574,7 +599,7 @@ endfunction
 set previewheight=12          " Preview window height
 
 " Variables
-if !exists('g:loaded_vimrc')
+if !exists('s:p_lastw')
   let s:p_lastw = ""
   let s:p_highlight = 0
   let s:p_center = 0
@@ -601,8 +626,8 @@ function! s:PreviewOpenWnd()
     "au WinLeave *   nested if &previewwindow | set modifiable | endif
     "au BufLeave *   nested if &previewwindow | set modifiable | endif
   augroup END
-  Noremap <silent><F6>     :exec "try <bar> silent ptnext <bar> catch <bar> silent ptfirst <bar> endtry"<CR>
-  Noremap <silent><S-F6>   :exec "try <bar> silent ptprevious <bar> catch <bar> silent ptlast <bar> endtry"<CR>
+  Noremap <silent><F6>     :Pnext<CR>
+  Noremap <silent><S-F6>   :Pprev<CR>
   Noremap <C-F6>           :Pclose<CR>
 endfunction
 
@@ -647,6 +672,14 @@ function! s:PreviewShowTag()
   endif
 endfunction
 
+function! s:PreviewNextTag()
+  try | silent ptnext | catch | silent ptfirst | endtry
+endfunction
+
+function! s:PreviewPrevTag()
+  try | silent ptprevious | catch | silent ptlast | endtry
+endfunction
+
 function! s:PreviewCenterTag()
   silent! wincmd P            " jump to preview window
   if &previewwindow           " if we really get there...
@@ -673,9 +706,11 @@ function! s:PreviewHighlightTag(pattern)
 endfunction
 
 " User commands
-command! -nargs=0 -bar Popen call s:PreviewOpenWnd()
-command! -nargs=0 -bar Pclose call s:PreviewCloseWnd()
-command! -nargs=0 -bar Ptoggle call s:PreviewToggleWnd()
+command! -nargs=0 -bar Popen    call s:PreviewOpenWnd()
+command! -nargs=0 -bar Pclose   call s:PreviewCloseWnd()
+command! -nargs=0 -bar Ptoggle  call s:PreviewToggleWnd()
+command! -nargs=0 -bar Pnext    call s:PreviewNextTag()
+command! -nargs=0 -bar Pprev    call s:PreviewPrevTag()
 
 
 " *******************************************************
@@ -1024,12 +1059,28 @@ map <leader>h :call <SID>HexaToggle()<CR>
 " Set tags root
 set tags=./tags,tags,$TAGS_DB
 
+" Goto next tag (& loop)
+function! s:TagNextTag()
+  try | silent tnext | catch | silent tfirst | endtry
+endfunction
+
+" Goto prev tag (& loop)
+function! s:TagPrevTag()
+  try | silent tprevious | catch | silent tlast | endtry
+endfunction
+
+" User commands
+command! -nargs=0 -bar Tnext    call s:TagNextTag()
+command! -nargs=0 -bar Tprev    call s:TagPrevTag()
+
 " Key mapping
-noremap <ENTER>     <C-]>
-noremap <C-ENTER>   <C-]>
-noremap <SPACE>     <C-T>
-Noremap <silent><F5>    :exec "try <BAR> silent tnext <BAR> catch <BAR> tfirst <BAR> endtry"<CR>
-Noremap <silent><S-F5>  :exec "try <BAR> silent tprevious <BAR> catch <BAR> tlast <BAR> endtry"<CR>
+noremap <SPACE>         <C-]>
+noremap <C-SPACE>       <C-t>
+Noremap <silent><F5>    :Tnext<CR>
+Noremap <silent><S-F5>  :Tprev<CR>
+map t                   <F5>
+map T                   <S-F5>
+Noremap <C-t>           :exec "2tag" expand("<cword>")<CR>
 
 
 " *******************************************************
@@ -1089,8 +1140,21 @@ endfunction
 
 
 " *******************************************************
+" } Alignment function {
+" *******************************************************
+
+" Increment/decrement numbers
+Noremap <A-a>   <C-a>
+Noremap <A-A>   <C-x>
+
+
+" *******************************************************
 " } Environment conclusion {
 " *******************************************************
+
+" Security
+set secure
+set noexrc
 
 " Use after local config
 if filereadable(expand("~/.vimrc.after.local"))
