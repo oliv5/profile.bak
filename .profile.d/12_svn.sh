@@ -85,13 +85,13 @@ function svn-merge() {
       if [ -f ${file}.working ]; then 
         CNT=$(ls -1 ${file}.*-right.* | wc -l)
         for LINE in $(seq $CNT); do
-          right="$(ls -1 ${file}.*-right.* | sort -r | sed -n ${LINE}p)"
+          right="$(ls -1 ${file}.*-right.* | sort | sed -n ${LINE}p)"
           meld "${right}" "${file}" "${file}.working" 2>/dev/null
         done
       else
         CNT=$(ls -1 ${file}.r* | wc -l)
         for LINE in $(seq $CNT); do
-          rev="$(ls -1 ${file}.r* | sort -r | sed -n ${LINE}p)"
+          rev="$(ls -1 ${file}.r* | sort | sed -n ${LINE}p)"
           meld "${rev}" "${file}" "${file}.mine" 2>/dev/null
         done
       fi
@@ -269,7 +269,7 @@ function svn-config() {
 # Print the history of a file
 function svn-history() {
   url="${1:?Please specify a file name}"
-  svn log -q $url | grep -E -e "^r[[:digit:]]+" -o | cut -c2- | sort -n | {
+  svn log -q $url | grep -E -e "^r[[:digit:]]+" -o | cut -c2- | sort -rn | {
     # First revision as full text
     echo
     read r

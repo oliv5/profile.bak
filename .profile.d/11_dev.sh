@@ -14,9 +14,10 @@ function hc()    { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.c|*.cpp|*.cc|*.h|*.
 function py()    { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.py"; }
 function mk()    { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.mk|Makefile"; }
 function shell() { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.sh"; }
-function ref()   { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.c|*.cpp|*.cc|*.h|*.hpp|*.py|*.mk|Makefile|*.sh|*.vhd|*.v"; }
+function ref()   { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.c|*.cpp|*.cc|*.h|*.hpp|*.py|*.mk|Makefile|*.sh|*.vhd|*.v|*.inc|*.S"; }
 function v()     { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.vhd|*.v"; }
 function xml()   { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.xml"; }
+function asm()   { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.inc|*.S"; }
 alias ih='CASE=-i h'
 alias ic='CASE=-i c'
 alias ihc='CASE=-i hc'
@@ -25,6 +26,7 @@ alias imk='CASE=-i mk'
 alias ishell='CASE=-i shell'
 alias iref='CASE=-i ref'
 alias iv='CASE=-i v'
+alias iasm='CASE=-i asm'
 
 # Prototype search helper
 function proto() {

@@ -10,8 +10,8 @@ function _find() {
   trap SIGINT
 }
 function ff() { _find "$@" ;}
-function fff() { _find "$@" -type f ;}
-function ffd() { _find "$@" -type d ;}
+function fff() { _find "${@:-*}" -type f ;}
+function ffd() { _find "${@:-*}" -type d ;}
 alias iff='NAME=iname ff'
 alias ifff='NAME=iname fff'
 alias iffd='NAME=iname ffd'
