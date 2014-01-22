@@ -5,6 +5,10 @@
 " Hints
 " <C-C> goto normal mode
 " <C-O> stay in insert mode to execute a single cmd
+"
+" Toggle key maps: <localleader>
+" Action key maps: <leader>
+"
 
 " *******************************************************
 " } Prepare environment {
@@ -61,22 +65,35 @@ cnoreabbrev reload source $MYVIMRC
 
 
 " *******************************************************
-" } Mapping functions {
+" } Key mapping functions {
 " *******************************************************
+
+" Map for normal & insert modes
 function! Map(args)
   let args = matchlist(a:args,'\(<silent>\s\+\)\?\(.\{-}\)\s\+\(.*\)')
   execute 'map'  args[1] args[2] '<c-c>'.args[3]
   execute 'imap' args[1] args[2] '<c-o>'.args[3]
 endfunction
 
+" Noremap for normal & insert modes
 function! Noremap(args)
   let args = matchlist(a:args,'\(<silent>\s\+\)\?\(.\{-}\)\s\+\(.*\)')
   execute 'noremap'  args[1] args[2] '<c-c>'.args[3]
   execute 'inoremap' args[1] args[2] '<c-o>'.args[3]
 endfunction
 
+" Make an alternate key mapping
+function! AltMap(new,old)
+  execute 'nmap' a:new             '<' . a:old . '>'
+  execute 'nmap <S-' . a:new . '> <S-' . a:old . '>'
+  execute 'nmap <C-' . a:new . '> <C-' . a:old . '>'
+  execute 'nmap <A-' . a:new . '> <A-' . a:old . '>'
+endfunction
+
+" User commands
 command! -nargs=1 Map        call Map(<f-args>)
 command! -nargs=1 Noremap    call Noremap(<f-args>)
+command! -nargs=+ AltMap     call AltMap(<f-args>)
 
 
 " *******************************************************
@@ -130,19 +147,17 @@ set showmode          " Display current mode in the status line
 set showcmd           " Display partially-typed commands
 set mouse=a           " Enable mouse all the time
 set nomodeline        " Do not override this .vimrc
-set nu                " Show line numbers
+if !exists('g:loaded_vimrc')
+  set nu              " Show line numbers
+endif
 set hidden            " Show hidden buffers & allow switching to modified buffer
 set switchbuf=useopen " Buffer switch use open windows instead of splitting/openning new window
 set noea              " No equalize windows
 set splitbelow        " Window split location. Also applied to :vsp & :sp
 set splitright        " Window split location. Also applied to :vsp & :sp
 
-" Remember all of these between sessions, but only 10 search terms; also
-" remember info for 10 files, but never any on removable disks, don't remember
-" marks in files, don't rehighlight old search patterns, and only save up to
-" 100 lines of registers; including @10 in there should restrict input buffer
-" but it causes an error for me:
-" Also save buffer list
+" Save/restore sessions: 10 search items, 10 files not on removable disks
+" 100 lines of registers and 20 buffers
 set viminfo=/10,'10,r/mnt/zip,r/mnt/floppy,f0,h,\"100,%20
 
 " When using list, keep tabs at their full width and display `arrows':
@@ -156,11 +171,6 @@ if exists('+autochdir')
 "  autocmd BufEnter * silent! lcd %:p:h:gs/ /\\ /
 endif
 
-" Tab name is the filename only
-if exists('+gtl')
-  set gtl=%t
-endif
-
 " Gui options
 set guioptions-=T       " Remove toolbar
 
@@ -169,6 +179,9 @@ autocmd! BufReadPost *
   \ if line("'\"") > 0 && line ("'\"") <= line("$") |
   \   exe "normal! g'\"" |
   \ endif
+
+" Key maps
+map <localleader>n  :set nu!<CR>
 
 
 " *******************************************************
@@ -268,8 +281,12 @@ noremap Y y$
 " Word quote
 nnoremap <silent> <leader>" viw<esc>a"<esc>hbi"<esc>lel
 
+
+" *******************************************************
+" } Space to tabs / tab to spaces {
+" *******************************************************
+
 " Tab to space
-command! -range=% -nargs=0 Tab2Space call <SID>Tab2Space()
 function! s:Tab2Space() range
   let firstline = a:firstline == a:lastline ? 0 : a:firstline
   let lastline = a:firstline == a:lastline ? line('$') : a:lastline
@@ -277,7 +294,6 @@ function! s:Tab2Space() range
 endfunction
 
 " Space to tab
-command! -range=% -nargs=0 Space2Tab call <SID>Space2Tab()
 function! s:Space2Tab() range
   let firstline = a:firstline == a:lastline ? 0 : a:firstline
   let lastline = a:firstline == a:lastline ? line('$') : a:lastline
@@ -285,7 +301,6 @@ function! s:Space2Tab() range
 endfunction
 
 " Intelligent tab to spaces
-noremap <leader><Tab> :call <SID>Tabfix()<CR>
 function! s:Tabfix() abort
   if &expandtab==0
     call s:Tab2Space()
@@ -296,13 +311,26 @@ function! s:Tabfix() abort
   YAIFAMagic
 endfunction
 
-" Show unwanted extra white space and tab characters
-let ewstHighlight = 0
-nnoremap <silent><localleader>v  :
-  \let ewstHighlight = !ewstHighlight <BAR>
-  \call <SID>SetEwstHighlight(ewstHighlight)<CR>
+" User commands
+command! -range=% -nargs=0 Tab2Space call <SID>Tab2Space()
+command! -range=% -nargs=0 Space2Tab call <SID>Space2Tab()
+command! -range=% -nargs=0 Tabfix    call <SID>Tabfix()
 
-function! s:SetEwstHighlight(switchOn)
+" Key mapping
+noremap <leader><Tab> :call <SID>Tabfix()<CR>
+
+
+" *******************************************************
+" } Space & tabs highlight {
+" *******************************************************
+
+" Show unwanted extra white space and tab characters
+if !exists('s:spaceTabHighlight')
+  let s:spaceTabHighlight = 0
+endif
+
+" Highlight unwanted space and tabs
+function! s:SpaceTabHighlight(switchOn)
   if a:switchOn == 1
     " Set color
     hi ExtraWhitespace ctermbg=darkgreen guibg=darkgreen
@@ -323,6 +351,15 @@ function! s:SetEwstHighlight(switchOn)
   endif
 endfunction
 
+" Highlight unwanted space and tabs
+function! s:SpaceTabToggle()
+  let s:spaceTabHighlight = !s:spaceTabHighlight
+  call <SID>SpaceTabHighlight(s:spaceTabHighlight)
+endfunction
+
+" Key mapping
+map <silent><localleader>v  :call <SID>SpaceTabToggle()<CR>
+
 
 " *******************************************************
 " } Search & Replace {
@@ -333,7 +370,8 @@ set incsearch       " Show the `best match so far' when search is typed
 set gdefault        " Assume /g flag is on (replace all)
 
 " Toggle search highlighting
-nnoremap <localleader><F3> :set invhls hls?<CR>
+nnoremap <localleader><F3>  :set invhls hls?<CR>
+nnoremap <localleader>f     :set invhls hls?<CR>
 
 " Search & replace
 Noremap  <C-F>   /
@@ -348,18 +386,12 @@ vnoremap <C-H>   "+y:%s/<C-R>"/<C-R>"/c<left><left>
 Map  <F3>       n
 Map  <S-F3>     N
 vmap <S-F3>     <F3>N
-vnoremap <silent> <F3> :<C-u>
-  \let old_reg=getreg('"')<Bar>
-  \let old_regtype=getregtype('"')<CR>
-  \gvy:let @/=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR>
-  \gV:call setreg('"', old_reg, old_regtype)<CR>
-  \:set hls<CR>
+vnoremap <silent> <F3> :<C-u>call <SID>SearchHighlight()<CR>
 
 " Alternative search
-map f       n
-map F       N
-vmap f      <F3>
-vmap F      <F3>N
+AltMap f F3
+vmap   f <F3>
+vmap   F <S-F3>
 
 " F4 for select & search (* and #)
 Map <F4>    *
@@ -368,20 +400,61 @@ Map <S-F4>  #
 " Alternative select & search
 map µ       #
 
+" Highlight current selection
+function! s:SearchHighlight()
+  let old_reg=getreg('"')
+  let old_regtype=getregtype('"')
+  execute "normal! gvy"
+  let @/=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')
+  execute "normal! gV"
+  call setreg('"', old_reg, old_regtype)
+  set hls
+endfunction
+
 
 " *******************************************************
 " } Grep {
 " *******************************************************
 " Grep program
 set grepprg=ref\ $*
+"set grepprg=lid\ -Rgrep\ -s
+"set grepformat=%f:%l:%m
+
+" Grep
+function! s:Grep(expr)
+  execute "grep" a:expr
+endfunction
+
+" Count expression
+function! s:GrepCount(expr)
+  execute "!ref" a:expr "| wc -l"
+endfunction
+
+" Next grep
+function! s:GrepNext()
+  try | silent cnext | catch | silent! cfirst | endtry
+endfunction
+
+" Prev grep
+function! s:GrepPrev()
+  try | silent cprev | catch | silent! clast | endtry
+endfunction
 
 " Key mappings
-Noremap <silent> <F7>   :exec "try <BAR> silent cnext <BAR> catch <BAR> cfirst <BAR> endtry"<CR>
-Noremap <silent> <S-F7> :exec "try <BAR> silent cprev <BAR> catch <BAR> clast <BAR> endtry"<CR>
-Noremap <silent> <C-F7> :clist<CR>
-Noremap <C-F7>          :grep<SPACE>
-vnoremap <C-F7>         :"+y:grep<C-R>"
-cnoreabbrev gg grep
+Noremap <F7>   :GrepNext<CR>
+Noremap <S-F7> :GrepPrev<CR>
+Noremap <C-F7> :Grep<SPACE><C-r><C-w>
+Noremap <A-F7> :GrepCount<SPACE><C-r><C-w>
+cnoreabbrev gg Grep
+
+" Alternate key mappings
+AltMap g F7
+
+" User commands
+command! -nargs=1 -bar Grep      call <SID>Grep(<f-args>)
+command! -nargs=0 -bar GrepNext  call <SID>GrepNext()
+command! -nargs=0 -bar GrepPrev  call <SID>GrepPrev()
+command! -nargs=1 -bar GrepCount call <SID>GrepCount(<f-args>)
 
 
 " *******************************************************
@@ -403,7 +476,7 @@ if mapcheck("<C-p>") == ""
 endif
 
 " Goto line
-Noremap  <C-g> :
+Noremap  <C-b> :
 
 " Prev/next cursor location
 " Note: <C-[> is Esc
@@ -448,14 +521,17 @@ endfunction
 Map <silent> <F2>     :call <SID>MarkGotoPrev()<CR>
 Map <silent> <S-F2>   :call <SID>MarkGotoNext()<CR>
 Map <silent> <C-F2>   :call <SID>MarkSet()<CR>
-map <silent> m        <F2>
-map <silent> M        <S-F2>
-map <silent> <C-m>    <C-F2>
+AltMap m F2
 
 
 " *******************************************************
 " } Tab management {
 " *******************************************************
+" Tab name is the filename only
+if exists('+gtl')
+  set gtl=%t
+endif
+
 " Enable/disable tabs
 if $VIM_USETABS != ""
   let s:vimrc_useTabs = 1
@@ -470,8 +546,8 @@ Map  <C-F4>   :close<CR>
 
 " Prev/next tab
 if exists('s:vimrc_useTabs')
-  Noremap  <C-Tab>  :tabn<CR>
-  Noremap  <C-Tab>  :tabp<CR>
+  Noremap  <C-Tab>    :tabn<CR>
+  Noremap  <C-S-Tab>  :tabp<CR>
 endif
 
 
@@ -534,17 +610,6 @@ if bufname('%') == ''
   set bufhidden=wipe
 endif
 
-" Clear hidden read-only buffers
-function! ClearHiddenRO()
-    let i = 1
-    while i <= bufnr('$')
-        if buflisted(i) && getbufvar(i, '&readonly') && (bufwinnr(i) == -1)
-            exe "bdel!" i
-        endif
-        let i += 1
-    endwhile
-endfunc
-
 
 " *******************************************************
 " } Function keys {
@@ -559,37 +624,33 @@ Map <F1>    :vert help<space>
 
 
 " *******************************************************
-" } File browser netrw {
+" } Tags {
 " *******************************************************
-" Options
-let g:netrw_browse_split = 0  " Use same(0)/prev(4) window
-"let g:netrw_altv = 1          " Vertical split right
-let g:netrw_liststyle=3       " Tree mode
-let g:netrw_special_syntax= 1 " Show special files
-let g:netrw_sort_sequence   = "[\/]$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$"
-let g:netrw_winsize = 20      " Window size
+" Set tags root
+set tags=./tags,tags,$TAGS_DB
 
-" Workaround
-set winfixwidth
-set winfixheight
-
-" Keymapping
-Noremap <silent> <C-e>   :Explore<CR>
-Noremap <silent> <C-A-e> :Vexplore<CR>
-
-" Open netrw window
-function! s:NetrwOpenWnd()
-  Vexplore!
-  let s:netrw_buf_num = bufnr("%")
+" Goto next tag (& loop)
+function! s:TagNextTag()
+  try | silent tnext | catch | silent! tfirst | endtry
 endfunction
 
-" Close netrw window
-function! s:NetrwCloseWnd()
-  if exists("s:netrw_buf_num")
-    exec bufwinnr(s:netrw_buf_num) "wincmd c"
-    unlet s:netrw_buf_num
-  endif
+" Goto prev tag (& loop)
+function! s:TagPrevTag()
+  try | silent tprevious | catch | silent! tlast | endtry
 endfunction
+
+" User commands
+command! -nargs=0 -bar Tnext    call s:TagNextTag()
+command! -nargs=0 -bar Tprev    call s:TagPrevTag()
+
+" Key mapping
+noremap <SPACE>         <C-]>
+noremap <C-SPACE>       <C-t>
+Noremap <silent><F5>    :Tnext<CR>
+Noremap <silent><S-F5>  :Tprev<CR>
+map t                   <F5>
+map T                   <S-F5>
+Noremap <C-t>           <C-]>
 
 
 " *******************************************************
@@ -673,11 +734,11 @@ function! s:PreviewShowTag()
 endfunction
 
 function! s:PreviewNextTag()
-  try | silent ptnext | catch | silent ptfirst | endtry
+  try | silent ptnext | catch | silent! ptfirst | endtry
 endfunction
 
 function! s:PreviewPrevTag()
-  try | silent ptprevious | catch | silent ptlast | endtry
+  try | silent ptprevious | catch | silent! ptlast | endtry
 endfunction
 
 function! s:PreviewCenterTag()
@@ -711,6 +772,40 @@ command! -nargs=0 -bar Pclose   call s:PreviewCloseWnd()
 command! -nargs=0 -bar Ptoggle  call s:PreviewToggleWnd()
 command! -nargs=0 -bar Pnext    call s:PreviewNextTag()
 command! -nargs=0 -bar Pprev    call s:PreviewPrevTag()
+
+
+" *******************************************************
+" } File browser netrw {
+" *******************************************************
+" Options
+let g:netrw_browse_split = 0  " Use same(0)/prev(4) window
+"let g:netrw_altv = 1          " Vertical split right
+let g:netrw_liststyle=3       " Tree mode
+let g:netrw_special_syntax= 1 " Show special files
+let g:netrw_sort_sequence   = "[\/]$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$"
+let g:netrw_winsize = 20      " Window size
+
+" Workaround
+set winfixwidth
+set winfixheight
+
+" Keymapping
+Noremap <silent> <C-e>   :Explore<CR>
+Noremap <silent> <C-A-e> :Vexplore<CR>
+
+" Open netrw window
+function! s:NetrwOpenWnd()
+  Vexplore!
+  let s:netrw_buf_num = bufnr("%")
+endfunction
+
+" Close netrw window
+function! s:NetrwCloseWnd()
+  if exists("s:netrw_buf_num")
+    exec bufwinnr(s:netrw_buf_num) "wincmd c"
+    unlet s:netrw_buf_num
+  endif
+endfunction
 
 
 " *******************************************************
@@ -1051,36 +1146,6 @@ endfunction
 
 " Key mapping
 map <leader>h :call <SID>HexaToggle()<CR>
-
-
-" *******************************************************
-" } Tags {
-" *******************************************************
-" Set tags root
-set tags=./tags,tags,$TAGS_DB
-
-" Goto next tag (& loop)
-function! s:TagNextTag()
-  try | silent tnext | catch | silent tfirst | endtry
-endfunction
-
-" Goto prev tag (& loop)
-function! s:TagPrevTag()
-  try | silent tprevious | catch | silent tlast | endtry
-endfunction
-
-" User commands
-command! -nargs=0 -bar Tnext    call s:TagNextTag()
-command! -nargs=0 -bar Tprev    call s:TagPrevTag()
-
-" Key mapping
-noremap <SPACE>         <C-]>
-noremap <C-SPACE>       <C-t>
-Noremap <silent><F5>    :Tnext<CR>
-Noremap <silent><S-F5>  :Tprev<CR>
-map t                   <F5>
-map T                   <S-F5>
-Noremap <C-t>           :exec "2tag" expand("<cword>")<CR>
 
 
 " *******************************************************

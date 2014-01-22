@@ -44,10 +44,22 @@ function mkcscope() {
   #echo $CSCOPE_DB
 }
 
+# Make id-utils database
+function mkids() {
+  # Get directories
+  SRC="$(eval echo ${1:-$PWD})"
+  DST="$(eval echo ${2:-$PWD})"
+  # build db
+  pushd "$SRC" >/dev/null
+  mkid -o "$DST/ID"
+  popd >/dev/null
+}
+
 # Make tags and cscope db
 function mktags() {
   mkctags "$@"
   mkcscope "$@"
+  mkids "$@"
 }
 
 # Clean ctags
@@ -64,8 +76,16 @@ function rmcscope() {
   rm -v "${FILE}.files"
 }
 
+# Clean id-utils db
+function rmids() {
+  DIR="$(eval echo ${1:-$PWD})"
+  FILE="${DIR}/ID"
+  rm -v "${FILE}"
+}
+
 # Clean tags and cscope db
 function rmtags() {
   rmctags
   rmcscope
+  rmids
 }
