@@ -468,7 +468,7 @@ endfunction
 
 function! <SID>BufAddHandler()
   call <SID>DEBUG('Entering BufAdd Handler', 10)
-  
+
   call <SID>ListAdd(s:BufList,str2nr(expand("<abuf>")))
   call <SID>ListAdd(s:MRUList,str2nr(expand("<abuf>")))
 
@@ -1760,9 +1760,9 @@ function! <SID>BuildBufferPathSignDict(bufnrs, ...)
         "" OLA
         " Make sure each buffer has an entry in 's:bufPathDict'
         " If index is zero, we force re-initialize the entry
-        if index == 0 || !has_key(s:bufPathDict, bufnr)
-            let s:bufPathDict[bufnr] = []
-        endif
+        "if index == 0 || !has_key(s:bufPathDict, bufnr)
+        "    let s:bufPathDict[bufnr] = []
+        "endif
         "" OLA
 
         " If some buffers' path does not have this index, we skip it

@@ -68,32 +68,39 @@ cnoreabbrev reload source $MYVIMRC
 " } Key mapping functions {
 " *******************************************************
 
-" Map for normal & insert modes
-function! Map(args)
+" Map function keys (or Ctrl-X) in normal/visual & insert modes
+function! FnMap(args)
   let args = matchlist(a:args,'\(<silent>\s\+\)\?\(.\{-}\)\s\+\(.*\)')
   execute 'map'  args[1] args[2] '<c-c>'.args[3]
   execute 'imap' args[1] args[2] '<c-o>'.args[3]
 endfunction
 
-" Noremap for normal & insert modes
-function! Noremap(args)
+" Noremap function keys (or Ctrl-X) in normal/visual & insert modes
+function! FnNoremap(args)
   let args = matchlist(a:args,'\(<silent>\s\+\)\?\(.\{-}\)\s\+\(.*\)')
   execute 'noremap'  args[1] args[2] '<c-c>'.args[3]
   execute 'inoremap' args[1] args[2] '<c-o>'.args[3]
 endfunction
 
-" Make an alternate key mapping
-function! AltMap(new,old)
-  execute 'nmap' a:new             '<' . a:old . '>'
-  execute 'nmap <S-' . a:new . '> <S-' . a:old . '>'
-  execute 'nmap <C-' . a:new . '> <C-' . a:old . '>'
-  execute 'nmap <A-' . a:new . '> <A-' . a:old . '>'
+" Make an alternate mapping based on another
+function! DoAltNmap(new,old)
+  if !maparg(a:new,'n') && hasmapto(a:old,'n')
+    execute 'nmap' a:new a:old
+  endif
+endfunction
+
+" Make alternate key mappings based on another one
+function! AltNmap(new,old)
+  call DoAltNmap(a:new, a:old)
+  call DoAltNmap('<S-'.a:new.'>', '<S-'.a:old.'>')
+  call DoAltNmap('<C-'.a:new.'>', '<C-'.a:old.'>')
+  call DoAltNmap('<A-'.a:new.'>', '<A-'.a:old.'>')
 endfunction
 
 " User commands
-command! -nargs=1 Map        call Map(<f-args>)
-command! -nargs=1 Noremap    call Noremap(<f-args>)
-command! -nargs=+ AltMap     call AltMap(<f-args>)
+command! -nargs=1 FnMap      call FnMap(<f-args>)
+command! -nargs=1 FnNoremap  call FnNoremap(<f-args>)
+command! -nargs=+ AltNmap    call AltNmap(<f-args>)
 
 
 " *******************************************************
@@ -123,7 +130,6 @@ if &term =~ 'xterm'
   " The above won't work if an `XTerm' or `KVT' is started from within a `Gnome
   " Terminal' or an `RXVT': the $COLORTERM setting will propagate; it's always
   " OK with `Konsole' which explicitly sets $COLORTERM to "".
-
   endif
 endif
 
@@ -156,9 +162,15 @@ set noea              " No equalize windows
 set splitbelow        " Window split location. Also applied to :vsp & :sp
 set splitright        " Window split location. Also applied to :vsp & :sp
 
-" Save/restore sessions: 10 search items, 10 files not on removable disks
-" 100 lines of registers and 20 buffers
-set viminfo=/10,'10,r/mnt/zip,r/mnt/floppy,f0,h,\"100,%20
+" Save/restore part of edit session
+"  /10  :  search items
+"  '10  :  marks in 10 previously edited files
+"  r/mnt/zip,r/mnt/floppy : excluded locations
+"  "100 :  100 lines for each register
+"  :20  :  20 lines of command-line history
+"  %    :  buffer list
+"  n... :  viminfo file location
+set viminfo='10,\"100,:20,n~/.viminfo
 
 " When using list, keep tabs at their full width and display `arrows':
 " (Character 187 is a right double-chevron, and 183 a mid-dot.)
@@ -374,31 +386,27 @@ nnoremap <localleader><F3>  :set invhls hls?<CR>
 nnoremap <localleader>f     :set invhls hls?<CR>
 
 " Search & replace
-Noremap  <C-F>   /
-"Noremap  <C-A-F> yiw<C-O>/<C-R>"
-Noremap  <C-H>   yiw<C-O>:%s/<C-R>"//c<left><left>
-"Noremap  <C-A-H> yiw<C-O>:%s/<C-R>"/<C-R>"/c<left><left>
-vnoremap <C-F>   "+y:/<C-R>"
-vnoremap <C-H>   "+y:%s/<C-R>"/<C-R>"/c<left><left>
-"vnoremap <C-A-H> "+y:%s/<C-R>"//c<left><left>
+FnNoremap <C-F>     /
+FnNoremap <C-A-F>   yiw:/<C-R>"
+FnNoremap <C-H>     yiw:%s/<C-R>"//c<left><left>
+FnNoremap <C-A-H>   yiw:%s/<C-R>"/<C-R>"/c<left><left>
+vnoremap <C-F>      "+y:/<C-R>"
+vnoremap <C-H>      "+y:%s/<C-R>"/<C-R>"/c<left><left>
+vnoremap <C-A-H>    "+y:%s/<C-R>"//c<left><left>
 
 " F3 for search (n and N)
-Map  <F3>       n
-Map  <S-F3>     N
-vmap <S-F3>     <F3>N
-vnoremap <silent> <F3> :<C-u>call <SID>SearchHighlight()<CR>
+FnMap  <F3>         n
+FnMap  <S-F3>       N
+vmap <S-F3>         <F3>N
+vnoremap <silent>   <F3> :<C-u>call <SID>SearchHighlight()<CR>
 
 " Alternative search
-AltMap f F3
-vmap   f <F3>
-vmap   F <S-F3>
+AltNmap f F3
 
 " F4 for select & search (* and #)
-Map <F4>    *
-Map <S-F4>  #
-
-" Alternative select & search
-map µ       #
+FnMap <F4>      *
+FnMap <S-F4>    #
+nmap µ          #
 
 " Highlight current selection
 function! s:SearchHighlight()
@@ -441,14 +449,14 @@ function! s:GrepPrev()
 endfunction
 
 " Key mappings
-Noremap <F7>   :GrepNext<CR>
-Noremap <S-F7> :GrepPrev<CR>
-Noremap <C-F7> :Grep<SPACE><C-r><C-w>
-Noremap <A-F7> :GrepCount<SPACE><C-r><C-w>
+FnNoremap <F7>   :GrepNext<CR>
+FnNoremap <S-F7> :GrepPrev<CR>
+FnNoremap <C-F7> :Grep<SPACE><C-r><C-w>
+FnNoremap <A-F7> :GrepCount<SPACE><C-r><C-w>
 cnoreabbrev gg Grep
 
 " Alternate key mappings
-AltMap g F7
+AltNmap g F7
 
 " User commands
 command! -nargs=1 -bar Grep      call <SID>Grep(<f-args>)
@@ -476,12 +484,12 @@ if mapcheck("<C-p>") == ""
 endif
 
 " Goto line
-Noremap  <C-b> :
+FnNoremap  <C-b> :
 
 " Prev/next cursor location
 " Note: <C-[> is Esc
-Noremap <A-Left>  <C-O>
-Noremap <A-Right> <C-I>
+FnNoremap <A-Left>  <C-O>
+FnNoremap <A-Right> <C-I>
 vnoremap <A-Left>  <C-[><C-O>
 vnoremap <A-Right> <C-[><C-I>
 
@@ -518,10 +526,10 @@ function! s:MarkGotoPrev()
 endfunction
 
 " Mark key maps
-Map <silent> <F2>     :call <SID>MarkGotoPrev()<CR>
-Map <silent> <S-F2>   :call <SID>MarkGotoNext()<CR>
-Map <silent> <C-F2>   :call <SID>MarkSet()<CR>
-AltMap m F2
+FnMap <silent> <F2>     :call <SID>MarkGotoPrev()<CR>
+FnMap <silent> <S-F2>   :call <SID>MarkGotoNext()<CR>
+FnMap <silent> <C-F2>   :call <SID>MarkSet()<CR>
+AltNmap m F2
 
 
 " *******************************************************
@@ -539,15 +547,16 @@ if $VIM_USETABS != ""
 endif
 
 " Open/close tab
-Map  <C-t>t   :tabnew<CR>:e<space>
-Map  <C-t>c   :close<CR>
-"Map <F4>     :tabnew<CR>:e<space>
-Map  <C-F4>   :close<CR>
+FnMap  <C-t>t   :tabnew<CR>:e<space>
+FnMap  <C-t>c   :tabclose<CR>
 
 " Prev/next tab
 if exists('s:vimrc_useTabs')
-  Noremap  <C-Tab>    :tabn<CR>
-  Noremap  <C-S-Tab>  :tabp<CR>
+  FnNoremap  <C-Tab>    :tabn<CR>
+  FnNoremap  <C-S-Tab>  :tabp<CR>
+else
+  FnNoremap  <C-PgUp>   :tabn<CR>
+  FnNoremap  <C-PgDown> :tabp<CR>
 endif
 
 
@@ -558,10 +567,10 @@ endif
 " Prev/next window (Ctrl-w/W)
 
 " Go up/down/left/right window
-Noremap <C-Up>      :wincmd k<CR>
-Noremap <C-Down>    :wincmd j<CR>
-Noremap <C-Left>    :wincmd h<CR>
-Noremap <C-Right>   :wincmd l<CR>
+FnNoremap <C-Up>      :wincmd k<CR>
+FnNoremap <C-Down>    :wincmd j<CR>
+FnNoremap <C-Left>    :wincmd h<CR>
+FnNoremap <C-Right>   :wincmd l<CR>
 
 " Resize current window by +/- 5
 " Same as 5<C-w>+  5<C-w>-  5<C-w>>  5<C-w><
@@ -591,18 +600,18 @@ augroup END
 map <C-b><C-o>      :e<SPACE>
 map <C-b><C-c>      :bd<CR>
 if !exists("s:vimrc_useTabs")
-  "Map <F4>          :e<SPACE>
-  Map <C-F4>        :bd<CR>
+  "FnMap <F4>          :e<SPACE>
+  FnMap <C-F4>        :bd<CR>
 endif
 
 " Prev/next buffer
 map  <C-b><C-n>     :bn<CR>
 map  <C-b><C-p>     :bp<CR>
-Noremap <A-Down>    :bp<CR>
-Noremap <A-Up>      :bn<CR>
+FnNoremap <A-Down>    :bp<CR>
+FnNoremap <A-Up>      :bn<CR>
 if !exists("s:vimrc_useTabs")
-  Noremap <C-Tab>   :bn<CR>
-  Noremap <C-S-Tab> :bp<CR>
+  FnNoremap <C-Tab>   :bn<CR>
+  FnNoremap <C-S-Tab> :bp<CR>
 endif
 
 " Wide empty buffer at startup
@@ -620,7 +629,7 @@ for idx in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 endfor
 
 " Map F1 to the help
-Map <F1>    :vert help<space>
+FnMap <F1>    :vert help<space>
 
 
 " *******************************************************
@@ -644,13 +653,13 @@ command! -nargs=0 -bar Tnext    call s:TagNextTag()
 command! -nargs=0 -bar Tprev    call s:TagPrevTag()
 
 " Key mapping
-noremap <SPACE>         <C-]>
-noremap <C-SPACE>       <C-t>
-Noremap <silent><F5>    :Tnext<CR>
-Noremap <silent><S-F5>  :Tprev<CR>
-map t                   <F5>
-map T                   <S-F5>
-Noremap <C-t>           <C-]>
+noremap <SPACE>             <C-]>
+noremap <C-SPACE>           <C-t>
+FnNoremap <silent><F5>      :Tnext<CR>
+FnNoremap <silent><S-F5>    :Tprev<CR>
+FnNoremap <C-t>             <C-]>
+nmap t                      <F5>
+nmap T                      <S-F5>
 
 
 " *******************************************************
@@ -666,10 +675,6 @@ if !exists('s:p_lastw')
   let s:p_center = 0
 endif
 
-" Key mapping
-nmap <localleader>p   :Ptoggle<CR>
-nmap <localleader>pp  :Pclose<CR>
-
 " Open preview window
 function! s:PreviewOpenWnd()
   silent! execute "below pedit!"
@@ -682,14 +687,7 @@ function! s:PreviewOpenWnd()
   augroup PreviewWnd
     au!
     au CursorHold * nested call s:PreviewShowTag()
-    "au WinEnter *   nested if &previewwindow | set nomodifiable | endif
-    "au BufEnter *   nested if &previewwindow | set nomodifiable | endif
-    "au WinLeave *   nested if &previewwindow | set modifiable | endif
-    "au BufLeave *   nested if &previewwindow | set modifiable | endif
   augroup END
-  Noremap <silent><F6>     :Pnext<CR>
-  Noremap <silent><S-F6>   :Pprev<CR>
-  Noremap <C-F6>           :Pclose<CR>
 endfunction
 
 " Close preview window
@@ -773,6 +771,17 @@ command! -nargs=0 -bar Ptoggle  call s:PreviewToggleWnd()
 command! -nargs=0 -bar Pnext    call s:PreviewNextTag()
 command! -nargs=0 -bar Pprev    call s:PreviewPrevTag()
 
+" Key mapping
+FnNoremap <silent><F6>      :Pnext<CR>
+FnNoremap <silent><S-F6>    :Pprev<CR>
+FnNoremap <C-F6>            :Pclose<CR>
+nmap <localleader>p         :Ptoggle<CR>
+nmap <localleader>pp        :Pclose<CR>
+if mapcheck('t','n')!=''
+  nmap <silent>t            :if &previewwindow <BAR> Pnext <BAR> else <BAR> Tnext <BAR> endif<CR>
+  nmap <silent>T            :if &previewwindow <BAR> Pprev <BAR> else <BAR> Tprev <BAR> endif<CR>
+endif
+
 
 " *******************************************************
 " } File browser netrw {
@@ -790,8 +799,8 @@ set winfixwidth
 set winfixheight
 
 " Keymapping
-Noremap <silent> <C-e>   :Explore<CR>
-Noremap <silent> <C-A-e> :Vexplore<CR>
+FnNoremap <silent> <C-e>   :Explore<CR>
+FnNoremap <silent> <C-A-e> :Vexplore<CR>
 
 " Open netrw window
 function! s:NetrwOpenWnd()
@@ -822,12 +831,8 @@ filetype plugin on
 " Set completion options
 set completeopt=longest,menuone
 
-" Map basic key to omnicompletion
-"inoremap <C-space> <C-x><C-o>
-
 " Advanced key mapping to omnicompletion
-inoremap <C-space>  <C-R>=CleverTab()<CR>
-function! CleverTab()
+function! s:CleverTab()
   if pumvisible()
     return "\<C-N>"
   endif
@@ -839,6 +844,10 @@ function! CleverTab()
     return "\<C-N>"
   endif
 endfunction
+
+" Key mapping
+"inoremap <C-space>  <C-x><C-o>
+inoremap <C-space>  <C-R>=<SID>CleverTab()<CR>
 
 
 " *******************************************************
@@ -853,7 +862,7 @@ filetype plugin indent on   " enable detection, plugins and indenting in one ste
 " Disable the following plugins
 let g:loaded_project = 1
 let g:loaded_taglist = 1
-let g:loaded_tagbar = 1
+"let g:loaded_tagbar = 1
 let g:loaded_srcexpl = 1
 let g:loaded_nerd_tree = 1
 let g:loaded_trinity = 1
@@ -863,6 +872,7 @@ let g:loaded_yankring = 1
 let g:command_t_loaded = 1
 "let g:loaded_minibufexplorer = 1
 "let g:loaded_yaifa = 1
+"let g:loaded_ctrlp = 1
 
 
 " *******************************************************
@@ -927,7 +937,7 @@ if !exists('g:loaded_srcexpl')
   let g:SrcExpl_pluginList = g:wndmgr_pluginList " Plugin names that are using buffers
 
   " Additionnal key maps
-  Noremap  <C-F6>   <C-O>
+  FnNoremap  <C-F6>   <C-O>
   vnoremap <C-F6>   <C-[><C-O>
 
   " Toggle ON/OFF
@@ -980,22 +990,22 @@ if !exists('g:loaded_minibufexplorer')
   hi MBEVisibleActiveChanged guifg=#FF0000 guibg=bg
 
   " Toggle ON/OFF
-  map <localleader>m      :MBEToggle<CR>
+  map <localleader>m        :MBEToggle<CR>
 
   " Overwrite open/close key mapping
-  Map <C-b>c              :MBEbd<CR>
+  FnMap <C-b>c              :MBEbd<CR>
   if !exists("s:vimrc_useTabs")
-    Map <C-F4>            :MBEbd<CR>
+    FnMap <C-F4>            :MBEbd<CR>
   endif
 
   " Cycle through buffers
-  Map <A-Down>  :MBEbb<CR>
-  Map <A-Up>    :MBEbf<CR>
+  FnMap <A-Down>  :MBEbb<CR>
+  FnMap <A-Up>    :MBEbf<CR>
   if !exists("s:vimrc_useTabs")
-    "Noremap <C-Tab>      :MBEbb<CR>
-    "Noremap <C-S-Tab>    :MBEbf<CR>
-    Noremap <C-Tab>      :call <SID>MbeSwitch(1)<CR>
-    Noremap <C-S-Tab>    :call <SID>MbeSwitch(0)<CR>
+    "FnNoremap <C-Tab>      :MBEbb<CR>
+    "FnNoremap <C-S-Tab>    :MBEbf<CR>
+    FnNoremap <C-Tab>       :call <SID>MbeSwitch(1)<CR>
+    FnNoremap <C-S-Tab>     :call <SID>MbeSwitch(0)<CR>
   endif
 
   " Switch between 2 buffers
@@ -1065,17 +1075,24 @@ endif
 " *******************************************************
 if !exists('g:loaded_cctree')
   " Options
-  let g:CCTreeCscopeDb = "$CSCOPE_DB"
+  let g:CCTreeCscopeDb = "cscope.out, $CSCOPE_DB"
   let g:CCTreeDisplayMode = 2
+  let g:CCTreeRecursiveDepth = 3
+
+  " Add any cscope database in the given environment variable
+  for db in split(g:CCTreeCscopeDb)
+    if filereadable(db)
+      exec 'let g:CCTreeCscopeDb =' db
+      break
+    endif
+  endfor
 
   " Key mappings
+  let g:CCTreeKeyTraceReverseTree = '<localleader>x'
   let g:CCTreeKeyTraceForwardTree = '<localleader>xf'
-  let g:CCTreeKeyTraceReverseTree = '<localleader>xc'
   let g:CCTreeKeyToggleWindow = '<localleader>xx'
-
-  " Autocommands
-  autocmd! VimEnter * if filereadable('$CSCOPE_DB') | CCTreeLoadDB $CSCOPE_DB | endif
-  autocmd! VimEnter * if filereadable('xref.out') | CCTreeLoadXRefDbFromDisk xref.out | endif
+  nmap <localleader>xl      :if filereadable(g:CCTreeCscopeDb) <BAR> exec "CCTreeLoadDB" g:CCTreeCscopeDb <BAR> endif
+  "nmap <localleader>xl     :if filereadable('xref.out') <BAR> CCTreeLoadXRefDbFromDisk xref.out <BAR> endif
 endif
 
 
@@ -1089,7 +1106,7 @@ if !exists('g:command_t_loaded')
   let g:CommandTMaxCachedDirectories = 2
 
   " Key mapping
-  Noremap <C-p>     :CommandT<CR>
+  FnNoremap <C-p>     :CommandT<CR>
 endif
 
 
@@ -1106,7 +1123,7 @@ if !exists('g:loaded_ctrlp')
   \ 'file': '\v\.(exe|so|dll|o)$'
   \ }
   " Key mapping
-  Noremap <C-o>     :CtrlPMRU<CR>
+  FnNoremap <C-o>     :CtrlPMRU<CR>
 endif
 
 
@@ -1152,8 +1169,8 @@ map <leader>h :call <SID>HexaToggle()<CR>
 " } Sessions {
 " *******************************************************
 " Key mapping
-Noremap <C-F9>      :mksession! ~/.vimsession <CR>
-Noremap <F9>        :source! ~/.vimsession<CR>
+FnNoremap <C-F9>      :mksession! ~/.vimsession <CR>
+FnNoremap <F9>        :source! ~/.vimsession<CR>
 
 
 " *******************************************************
@@ -1209,8 +1226,8 @@ endfunction
 " *******************************************************
 
 " Increment/decrement numbers
-Noremap <A-a>   <C-a>
-Noremap <A-A>   <C-x>
+FnNoremap <A-a>   <C-a>
+FnNoremap <A-A>   <C-x>
 
 
 " *******************************************************
