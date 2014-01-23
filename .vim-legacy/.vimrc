@@ -587,10 +587,29 @@ FnNoremap <C-Right>   :wincmd l<CR>
 "noremap <C-L>  <C-w>l<C-w>\|
 
 " Exit to normal when changing windows
-augroup exittonormal
+augroup exit_to_normal
   autocmd!
   autocmd WinEnter * stopinsert
 augroup END
+
+" Toggles window max/equal
+function! s:WndToggleMax()
+  if exists('s:wndMaxFlag')
+    au! maxCurrWin
+    wincmd =
+    unlet s:wndMaxFlag
+  else
+    augroup maxCurrWin
+      au WinEnter * wincmd _ | wincmd |
+    augroup END
+    do maxCurrWin WinEnter
+    let s:wndMaxFlag=1
+  endif
+endfunction
+
+" Key maps
+nnoremap <localleader>w :call <SID>WndToggleMax()<CR>
+nnoremap <c-w>w :call <SID>WndToggleMax()<CR>
 
 
 " *******************************************************
