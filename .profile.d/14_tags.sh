@@ -7,11 +7,12 @@
 #CTAGS_OPTS="-R --sort=foldcase --c++-kinds=f --c-kinds=f"
 #CTAGS_OPTS="-R --sort=foldcase --fields=+iaS --extra=+q --c++-kinds=f --c-kinds=f --exclude='.svn' --exclude='.git'"
 #CTAGS_OPTS="-R --sort=foldcase --fields=+iaS --extra=+q --exclude='.svn' --exclude='.git'"
-CTAGS_OPTS="-R --sort=yes --fields=+iaS --extra=+q --exclude='.svn' --exclude='.git'"
+CTAGS_OPTS="-R --sort=yes --fields=+iaS --extra=+q --exclude='.svn' --exclude='.git' --exclude='tmp'"
 
 # Cscope default settings
 CSCOPE_OPTS="-Rqb"
 CSCOPE_REGEX=".*\.c|.*\.h|.*\.cc|.*\.cpp|.*\.hpp"
+CSCOPE_EXCLUDE="-not -path *.svn* -and -not -path *.git -and -not -path /tmp/"
 
 # Make ctags
 function mkctags() {
@@ -26,6 +27,19 @@ function mkctags() {
   #echo ${CTAGS_DB}
 }
 
+# Scan a new cscope directory
+function scancsdir() {
+  # Get directories
+  SRC="$(eval echo ${1:-$PWD})"
+  DST="$(eval echo ${2:-$PWD})"
+  # Get options
+  CSCOPE_FILES="$DST/cscope.files"
+  # Scan directory
+  set -f
+  find "$SRC" -regextype "posix-egrep" $CSCOPE_EXCLUDE ${@:3} -regex "$CSCOPE_REGEX" -printf '"%p"\n' >> "$CSCOPE_FILES"
+  set +f
+}
+
 # Make cscope db
 function mkcscope() {
   # Get directories
@@ -35,20 +49,20 @@ function mkcscope() {
   CSCOPE_OPTIONS="$CSCOPE_OPTS $3"
   CSCOPE_FILES="$DST/cscope.files"
   CSCOPE_DB="$DST/cscope.out"
+  # Build file list
+  if [ ! -e $CSCOPE_FILES ]; then
+    scancsdir "$SRC" "$DST" ${@:4}
+  fi
   # Build tag file
-  set -f
-  find "$SRC" -regextype "posix-egrep" ${@:4} -regex "$CSCOPE_REGEX" -printf '"%p"\n' > "$CSCOPE_FILES"
   ${DBG} cscope $CSCOPE_OPTIONS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
-  set +f
-  #rm "$CSCOPE_FILES"
   #echo $CSCOPE_DB
 }
 
 # Make id-utils database
 function mkids() {
   # Get directories
-  SRC="$(eval echo ${1:-$PWD})"
-  DST="$(eval echo ${2:-$PWD})"
+  SRC="$(eval readlink -f ${1:-$PWD})"
+  DST="$(eval readlink -f ${2:-$PWD})"
   # build db
   pushd "$SRC" >/dev/null
   mkid -o "$DST/ID"
