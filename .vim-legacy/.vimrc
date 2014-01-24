@@ -84,14 +84,14 @@ endfunction
 
 " Make an alternate mapping based on another
 function! DoAltNmap(new,old)
-  if !maparg(a:new,'n') && hasmapto(a:old,'n')
+  if empty(maparg(a:new,'n')) && !empty(maparg(a:old,'n'))
     execute 'nmap' a:new a:old
   endif
 endfunction
 
 " Make alternate key mappings based on another one
 function! AltNmap(new,old)
-  call DoAltNmap(a:new, a:old)
+  call DoAltNmap('<'.a:new.'>', '<'.a:old.'>')
   call DoAltNmap('<S-'.a:new.'>', '<S-'.a:old.'>')
   call DoAltNmap('<C-'.a:new.'>', '<C-'.a:old.'>')
   call DoAltNmap('<A-'.a:new.'>', '<A-'.a:old.'>')
@@ -609,7 +609,7 @@ endfunction
 
 " Key maps
 nnoremap <localleader>w :call <SID>WndToggleMax()<CR>
-nnoremap <c-w>w :call <SID>WndToggleMax()<CR>
+nnoremap <c-\<> :call <SID>WndToggleMax()<CR>
 
 
 " *******************************************************
@@ -672,13 +672,13 @@ command! -nargs=0 -bar Tnext    call s:TagNextTag()
 command! -nargs=0 -bar Tprev    call s:TagPrevTag()
 
 " Key mapping
-noremap <SPACE>             <C-]>
-noremap <C-SPACE>           <C-t>
+noremap <C-ENTER>           <C-]>
+noremap <c-SPACE>           <C-t>
 FnNoremap <silent><F5>      :Tnext<CR>
 FnNoremap <silent><S-F5>    :Tprev<CR>
-FnNoremap <C-t>             <C-]>
-nmap t                      <F5>
-nmap T                      <S-F5>
+FnNoremap <silent><C-F5>    <C-]>
+FnNoremap <silent><A-F5>    <C-t>
+AltNmap t F5
 
 
 " *******************************************************
