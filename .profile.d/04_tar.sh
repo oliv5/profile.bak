@@ -1,7 +1,7 @@
 #!/bin/sh
 
 function tgz() {
-  tar -cvzf "$1.tgz" "$@"
+  tar -cvzf "${1%*/}.tgz" "$@"
 }
 
 function untgz() {
