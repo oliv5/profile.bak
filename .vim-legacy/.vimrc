@@ -199,18 +199,31 @@ map <localleader>n  :set nu!<CR>
 " *******************************************************
 " } Statusline {
 " *******************************************************
-" Line text content
-setlocal statusline=\ %F
-setlocal statusline+=\ [%{strlen(&fenc)?&fenc:'none'},\ %{&ff}]%h%m%r
-setlocal statusline+=\ [%{&expandtab==0?'tabs':'space'}]\ %y
-setlocal statusline+=%=
-setlocal statusline+=%c,%l/%L\ %P
+" Set status line content
+function! s:CustomStatusLine()
+  setlocal statusline=\ %F
+  setlocal statusline+=\ [%{strlen(&fenc)?&fenc:'none'},\ %{&ff}]%h%m%r
+  setlocal statusline+=\ [%{&expandtab==0?'tabs':'space'}]\ %y
+  setlocal statusline+=%=
+  setlocal statusline+=%c,%l/%L\ %P
+endfunction
 
 " Line options
 "hi StatusLine ctermbg=NONE ctermfg=white
 "hi clear StatusLine
 "set laststatus=0         " Disable bottom status line
 set laststatus=2         " Always show status line
+
+" autocommand
+command! -range=% -nargs=0 CustomStatusLine call <SID>CustomStatusLine()
+
+" Key mapping
+noremap <localleader>s  call <SID>CustomStatusLine()<CR>
+
+" Set the status line once
+if !exists("g:loaded_vimrc")
+  CustomStatusLine
+endif
 
 
 " *******************************************************
@@ -381,6 +394,17 @@ set smartcase       " Unless search contain upper-case letters
 set incsearch       " Show the `best match so far' when search is typed
 set gdefault        " Assume /g flag is on (replace all)
 
+" Highlight current selection
+function! s:SearchHighlight()
+  let old_reg=getreg('"')
+  let old_regtype=getregtype('"')
+  execute "normal! gvy"
+  let @/=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')
+  execute "normal! gV"
+  call setreg('"', old_reg, old_regtype)
+  set hls
+endfunction
+
 " Toggle search highlighting
 nnoremap <localleader><F3>  :set invhls hls?<CR>
 nnoremap <localleader>f     :set invhls hls?<CR>
@@ -401,23 +425,13 @@ vmap <S-F3>         <F3>N
 vnoremap <silent>   <F3> :<C-u>call <SID>SearchHighlight()<CR>
 
 " Alternative search
-AltNmap f F3
+nmap <silent>f      n
+nmap <silent>F      N
 
 " F4 for select & search (* and #)
-FnMap <F4>      *
-FnMap <S-F4>    #
-nmap µ          #
-
-" Highlight current selection
-function! s:SearchHighlight()
-  let old_reg=getreg('"')
-  let old_regtype=getregtype('"')
-  execute "normal! gvy"
-  let @/=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')
-  execute "normal! gV"
-  call setreg('"', old_reg, old_regtype)
-  set hls
-endfunction
+FnMap <F4>          *
+FnMap <S-F4>        #
+nmap µ              #
 
 
 " *******************************************************
@@ -449,14 +463,17 @@ function! s:GrepPrev()
 endfunction
 
 " Key mappings
-FnNoremap <F7>   :GrepNext<CR>
-FnNoremap <S-F7> :GrepPrev<CR>
-FnNoremap <C-F7> :Grep<SPACE><C-r><C-w>
-FnNoremap <A-F7> :GrepCount<SPACE><C-r><C-w>
+FnNoremap <silent><F6>      :GrepNext<CR>
+FnNoremap <silent><S-F6>    :GrepPrev<CR>
+FnNoremap <C-F6>            :Grep<SPACE><C-r><C-w>
+FnNoremap <A-F6>            :GrepCount<SPACE><C-r><C-w>
 cnoreabbrev gg Grep
 
 " Alternate key mappings
-AltNmap g F7
+noremap <silent>g           :GrepNext<CR>
+noremap <silent>G           :GrepPrev<CR>
+noremap <C-g>               :Grep<SPACE><C-r><C-w>
+noremap <A-g>               :GrepCount<SPACE><C-r><C-w>
 
 " User commands
 command! -nargs=1 -bar Grep      call <SID>Grep(<f-args>)
@@ -498,7 +515,7 @@ vnoremap <A-Right> <C-[><C-I>
 " } Marks {
 " *******************************************************
 
-" Map F2 to set/jump to marks
+" Marks variables
 if !exists("s:mark_next")
   let s:mark_cur=0
   let s:mark_next=0
@@ -521,15 +538,18 @@ endfunction
 
 " Goto prev mark
 function! s:MarkGotoPrev()
-  exec printf("normal '%c", 65 + s:mark_cur)
   let s:mark_cur=(s:mark_cur + s:mark_max - 1) % s:mark_max
+  exec printf("normal '%c", 65 + s:mark_cur)
 endfunction
 
 " Mark key maps
 FnMap <silent> <F2>     :call <SID>MarkGotoPrev()<CR>
 FnMap <silent> <S-F2>   :call <SID>MarkGotoNext()<CR>
 FnMap <silent> <C-F2>   :call <SID>MarkSet()<CR>
-AltNmap m F2
+nmap <silent>m          :call <SID>MarkGotoPrev()<CR>
+nmap <silent>M          :call <SID>MarkGotoNext()<CR>
+nmap <silent><C-m>      :call <SID>MarkSet()<CR>
+nmap <silent><A-m>      :delmarks A-Z0-9<CR>
 
 
 " *******************************************************
@@ -673,12 +693,11 @@ command! -nargs=0 -bar Tprev    call s:TagPrevTag()
 
 " Key mapping
 noremap <C-ENTER>           <C-]>
-noremap <c-SPACE>           <C-t>
+noremap <C-SPACE>           <C-t>
 FnNoremap <silent><F5>      :Tnext<CR>
 FnNoremap <silent><S-F5>    :Tprev<CR>
-FnNoremap <silent><C-F5>    <C-]>
-FnNoremap <silent><A-F5>    <C-t>
-AltNmap t F5
+noremap <silent>t           :Tnext<CR>
+noremap <silent>T           :Tprev<CR>
 
 
 " *******************************************************
@@ -791,15 +810,16 @@ command! -nargs=0 -bar Pnext    call s:PreviewNextTag()
 command! -nargs=0 -bar Pprev    call s:PreviewPrevTag()
 
 " Key mapping
-FnNoremap <silent><F6>      :Pnext<CR>
-FnNoremap <silent><S-F6>    :Pprev<CR>
-FnNoremap <C-F6>            :Pclose<CR>
+FnNoremap <silent><C-F5>    :Pnext<CR>
+FnNoremap <silent><C-S-F5>  :Pprev<CR>
+noremap <silent><C-t>       :Pnext<CR>
+noremap <silent><C-A-T>     :Pprev<CR>
 nmap <localleader>p         :Ptoggle<CR>
 nmap <localleader>pp        :Pclose<CR>
-if mapcheck('t','n')!=''
-  nmap <silent>t            :if &previewwindow <BAR> Pnext <BAR> else <BAR> Tnext <BAR> endif<CR>
-  nmap <silent>T            :if &previewwindow <BAR> Pprev <BAR> else <BAR> Tprev <BAR> endif<CR>
-endif
+"if mapcheck('t','n')!=''
+"  nmap <silent>t            :if &previewwindow <BAR> Pnext <BAR> else <BAR> Tnext <BAR> endif<CR>
+"  nmap <silent>T            :if &previewwindow <BAR> Pprev <BAR> else <BAR> Tprev <BAR> endif<CR>
+"endif
 
 
 " *******************************************************
@@ -951,13 +971,9 @@ if !exists('g:loaded_srcexpl')
   let g:SrcExpl_isUpdateTags = 0      " Tag update on file opening
   let g:SrcExpl_updateTagsCmd = ""    " Tag update command
   let g:SrcExpl_updateTagsKey = ""    " Tag update key
-  let g:SrcExpl_prevDefKey = "<S-F6>" " Show prev definition in jump list
-  let g:SrcExpl_nextDefKey = "<F6>"   " Show next definition in jump list
+  let g:SrcExpl_prevDefKey = "<C-S-F5>" " Show prev definition in jump list
+  let g:SrcExpl_nextDefKey = "<C-F5>"   " Show next definition in jump list
   let g:SrcExpl_pluginList = g:wndmgr_pluginList " Plugin names that are using buffers
-
-  " Additionnal key maps
-  FnNoremap  <C-F6>   <C-O>
-  vnoremap <C-F6>   <C-[><C-O>
 
   " Toggle ON/OFF
   nmap <localleader>s   :SrcExpl<CR>

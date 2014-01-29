@@ -1154,11 +1154,11 @@ function! <SID>ResizeWindow()
       setlocal modifiable
 
       exec "setlocal textwidth=".l:width
-      normal gg
-      normal gq}
-      normal G
+      normal! gg
+      normal! gq}
+      normal! G
       let l:height = line('.')
-      normal gg
+      normal! gg
 
       " Prevent the buffer from being modified.
       setlocal nomodifiable
@@ -2179,7 +2179,7 @@ function! <SID>GetSelectedBuffer()
 
   let l:save_reg = @"
   let @" = ""
-  normal ""yi[
+  normal! ""yi[
   if @" != ""
     if !g:miniBufExplShowBufNumbers
       " This is a bit ugly, but it works, unless we come up with a
