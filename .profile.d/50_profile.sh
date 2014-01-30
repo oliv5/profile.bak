@@ -6,8 +6,8 @@ export PATH="${PATH//\~/${HOME}}"
 export PATH="${PATH//.:/}"
 
 # Call env external profile script
-if [ -f ~/.localrc ]; then
-    source ~/.localrc
+if [ -f ~/.profile.before ]; then
+    source ~/.profile.before
 fi
 
 # Use vim as editor

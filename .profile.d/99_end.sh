@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # Call env external profile script
-if [ -f ~/.localerc ]; then
-  source ~/.localerc
+if [ -f ~/.profile.after ]; then
+  source ~/.profile.after
 fi
 
 # Export user functions

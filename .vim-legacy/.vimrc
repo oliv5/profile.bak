@@ -21,9 +21,9 @@ if v:version < 700
 endif
 
 " User commands check
-if !has("user_commands") && !exists("g:loaded_vimrc")
+if !has("user_commands") && !exists("g:reload_vimrc")
   " Reload .vimrc silently (removes autocommands errors)
-  let g:loaded_vimrc = 1
+  let g:reload_vimrc = 1
   silent! source $MYVIMRC
   finish
 endif
@@ -161,6 +161,7 @@ set switchbuf=useopen " Buffer switch use open windows instead of splitting/open
 set noea              " No equalize windows
 set splitbelow        " Window split location. Also applied to :vsp & :sp
 set splitright        " Window split location. Also applied to :vsp & :sp
+set nofoldenable      " Disable folding
 
 " Save/restore part of edit session
 "  /10  :  search items
@@ -218,11 +219,11 @@ set laststatus=2         " Always show status line
 command! -range=% -nargs=0 CustomStatusLine call <SID>CustomStatusLine()
 
 " Key mapping
-noremap <localleader>s  call <SID>CustomStatusLine()<CR>
+noremap <localleader>s  :CustomStatusLine<CR>
 
 " Set the status line once
 if !exists("g:loaded_vimrc")
-  CustomStatusLine
+  call <SID>CustomStatusLine()
 endif
 
 
@@ -271,9 +272,33 @@ nnoremap <localleader>w  :set invwrap<CR>
 "nnoremap <localleader>w  :exec &wrap?'set nowrap':'set wrap linebreak nolist'<CR>
 
 " Show all characters
-set nolist              " Do not show alla characters by default
+set nolist              " Do not show all characters by default
 nnoremap <localleader>c  :set invlist<CR>
 "nnoremap <localleader>c  :exec &list?'set nolist':'set list'<CR>
+
+
+" *******************************************************
+" } Diff {
+" *******************************************************
+" Options
+set diffopt=vertical,filler,context:4
+
+" Color scheme
+highlight DiffAdd cterm=none ctermfg=bg ctermbg=Green gui=none guifg=bg guibg=Green
+highlight DiffDelete cterm=none ctermfg=bg ctermbg=Red gui=none guifg=bg guibg=Red
+highlight DiffChange cterm=none ctermfg=bg ctermbg=Yellow gui=none guifg=bg guibg=Yellow
+highlight DiffText cterm=none ctermfg=bg ctermbg=Magenta gui=none guifg=bg guibg=Magenta
+
+" Key mapping
+noremap <localleader>d      :diffthis<CR>
+noremap <localleader>dd     :diffthis<BAR>vsp<CR>
+noremap <localleader>ds     :diffsplit<SPACE>
+noremap <localleader>dc     :diffoff!<CR>
+noremap <localleader>du     :diffupdate<CR>
+FnNoremap <silent><F8>      [c
+FnNoremap <silent><S-F8>    ]c
+noremap <silent>h           [c<CR>
+noremap <silent>H           ]c<CR>
 
 
 " *******************************************************
@@ -392,7 +417,7 @@ map <silent><localleader>v  :call <SID>SpaceTabToggle()<CR>
 set ignorecase      " Case-insensitive search
 set smartcase       " Unless search contain upper-case letters
 set incsearch       " Show the `best match so far' when search is typed
-set gdefault        " Assume /g flag is on (replace all)
+"""set gdefault        " Assume /g flag is on (replace all)
 
 " Highlight current selection
 function! s:SearchHighlight()
@@ -472,7 +497,9 @@ cnoreabbrev gg Grep
 " Alternate key mappings
 noremap <silent>g           :GrepNext<CR>
 noremap <silent>G           :GrepPrev<CR>
-noremap <C-g>               :Grep<SPACE><C-r><C-w>
+noremap <C-g>               :Grep<SPACE>
+noremap <C-g><C-g>          :Grep<SPACE><C-r><C-w>
+vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
 noremap <A-g>               :GrepCount<SPACE><C-r><C-w>
 
 " User commands
@@ -533,13 +560,13 @@ endfunction
 " Goto next mark
 function! s:MarkGotoNext()
   let s:mark_cur=(s:mark_cur + 1) % s:mark_max
-  exec printf("normal '%c", 65 + s:mark_cur)
+  silent! exec printf("normal '%c", 65 + s:mark_cur)
 endfunction
 
 " Goto prev mark
 function! s:MarkGotoPrev()
   let s:mark_cur=(s:mark_cur + s:mark_max - 1) % s:mark_max
-  exec printf("normal '%c", 65 + s:mark_cur)
+  silent! exec printf("normal '%c", 65 + s:mark_cur)
 endfunction
 
 " Mark key maps
@@ -562,7 +589,7 @@ endif
 
 " Enable/disable tabs
 if $VIM_USETABS != ""
-  let s:vimrc_useTabs = 1
+  let g:vimrc_useTabs = 1
   set switchbuf=usetab,newtab  " Buffer switch
 endif
 
@@ -571,7 +598,7 @@ FnMap  <C-t>t   :tabnew<CR>:e<space>
 FnMap  <C-t>c   :tabclose<CR>
 
 " Prev/next tab
-if exists('s:vimrc_useTabs')
+if exists('g:vimrc_useTabs')
   FnNoremap  <C-Tab>    :tabn<CR>
   FnNoremap  <C-S-Tab>  :tabp<CR>
 else
@@ -636,11 +663,10 @@ nnoremap <c-\<> :call <SID>WndToggleMax()<CR>
 " } Buffer management {
 " *******************************************************
 " Open/close buffer (close=:bd or :bw)
-map <C-b><C-o>      :e<SPACE>
-map <C-b><C-c>      :bd<CR>
-if !exists("s:vimrc_useTabs")
-  "FnMap <F4>          :e<SPACE>
-  FnMap <C-F4>        :bd<CR>
+map <C-b>o          :e<SPACE>
+map <C-b>c          :bd<CR>
+if !exists("g:vimrc_useTabs") && !exists('g:loaded_minibufexplorer')
+  FnMap <C-F4>      :bd<CR>
 endif
 
 " Prev/next buffer
@@ -648,7 +674,7 @@ map  <C-b><C-n>     :bn<CR>
 map  <C-b><C-p>     :bp<CR>
 FnNoremap <A-Down>    :bp<CR>
 FnNoremap <A-Up>      :bn<CR>
-if !exists("s:vimrc_useTabs")
+if !exists("g:vimrc_useTabs")
   FnNoremap <C-Tab>   :bn<CR>
   FnNoremap <C-S-Tab> :bp<CR>
 endif
@@ -1029,14 +1055,14 @@ if !exists('g:loaded_minibufexplorer')
 
   " Overwrite open/close key mapping
   FnMap <C-b>c              :MBEbd<CR>
-  if !exists("s:vimrc_useTabs")
+  if !exists("g:vimrc_useTabs")
     FnMap <C-F4>            :MBEbd<CR>
   endif
 
   " Cycle through buffers
   FnMap <A-Down>  :MBEbb<CR>
   FnMap <A-Up>    :MBEbf<CR>
-  if !exists("s:vimrc_useTabs")
+  if !exists("g:vimrc_useTabs")
     "FnNoremap <C-Tab>      :MBEbb<CR>
     "FnNoremap <C-S-Tab>    :MBEbf<CR>
     FnNoremap <C-Tab>       :call <SID>MbeSwitch(1)<CR>

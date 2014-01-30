@@ -121,18 +121,20 @@ function svn-exists() {
 
 # Clean repo, remove unversionned files
 function svn-clean() {
-  # Confirmation
-  if [ "$1" != "-y" ]; then
-    echo -n "Remove unversioned files? (y/n): "
-    read ANSWER; [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ] && return 0
-  fi
   # Check we are in a repository
   svn-exists || return
-  # Set backup directory
-  DST="$(svn-bckdir)"
-  # Backup
-  svn-st "^(\?|\I)" | xargs --no-run-if-empty 7z a $OPTS_7Z "${DST}/clean_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z"
-  echo
+  # Confirmation
+  if [ "$1" != "-y" ]; then
+    echo -n "Backup unversioned files? (y/n): "
+    read ANSWER
+    if [ "$ANSWER" != "n" -a "$ANSWER" != "N" ]; then
+      # Set backup directory
+      DST="$(svn-bckdir)"
+      # Backup
+      svn-st "^(\?|\I)" | xargs --no-run-if-empty 7z a $OPTS_7Z "${DST}/clean_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z"
+      echo
+    fi
+  fi
   # Remove files not in SVN
   svn-st "^(\?|\I)" | xargs --no-run-if-empty rm -rv
 }
