@@ -105,14 +105,14 @@ if has("cscope")
     nnoremap <C-d><C-i> :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
     nnoremap <C-d><C-g> :cs find d <C-R>=expand("<cword>")<CR><CR>
 
-    vnoremap <C-d><C-r> "+y:cs find s "<C-R>""<CR>
-    vnoremap <C-d><C-d> "+y:cs find g "<C-R>""<CR>
-    vnoremap <C-d><C-c> "+y:cs find c "<C-R>""<CR>
-    vnoremap <C-d><C-t> "+y:cs find t "<C-R>""<CR>
-    vnoremap <C-d><C-e> "+y:cs find e "<C-R>""<CR>
-    vnoremap <C-d><C-f> "+y:cs find f "<C-R>""<CR>
-    vnoremap <C-d><C-i> "+y:cs find i "<C-R>""<CR>
-    vnoremap <C-d><C-g> "+y:cs find d "<C-R>""<CR>
+    vnoremap <C-d><C-r> "+y:cs find s <C-R>"<CR>
+    vnoremap <C-d><C-d> "+y:cs find g <C-R>"<CR>
+    vnoremap <C-d><C-c> "+y:cs find c <C-R>"<CR>
+    vnoremap <C-d><C-t> "+y:cs find t <C-R>"<CR>
+    vnoremap <C-d><C-e> "+y:cs find e <C-R>"<CR>
+    vnoremap <C-d><C-f> "+y:cs find f <C-R>"<CR>
+    vnoremap <C-d><C-i> "+y:cs find i <C-R>"<CR>
+    vnoremap <C-d><C-g> "+y:cs find d <C-R>"<CR>
 
     " Using 'CTRL-spacebar' (intepreted as CTRL-@ by vim) then a search type
     " makes the vim window split horizontally, with search result displayed in

@@ -297,8 +297,8 @@ noremap <localleader>dc     :diffoff!<CR>
 noremap <localleader>du     :diffupdate<CR>
 FnNoremap <silent><F8>      [c
 FnNoremap <silent><S-F8>    ]c
-noremap <silent>h           [c<CR>
-noremap <silent>H           ]c<CR>
+nnoremap <silent>h          [c<CR>
+nnoremap <silent>H          ]c<CR>
 
 
 " *******************************************************
@@ -316,9 +316,9 @@ vmap <C-y>  <C-c><C-y>
 " } Formatting {
 " *******************************************************
 " Indentation normal & visual modes
-noremap  <Tab>   >>
+nnoremap <Tab>   >>
 vnoremap <Tab>   >
-noremap  <S-Tab> <LT><LT>
+nnoremap <S-Tab> <LT><LT>
 vnoremap <S-Tab> <LT>
 
 " Identation insert mode
@@ -495,12 +495,12 @@ FnNoremap <A-F6>            :GrepCount<SPACE><C-r><C-w>
 cnoreabbrev gg Grep
 
 " Alternate key mappings
-noremap <silent>g           :GrepNext<CR>
-noremap <silent>G           :GrepPrev<CR>
-noremap <C-g>               :Grep<SPACE>
-noremap <C-g><C-g>          :Grep<SPACE><C-r><C-w>
-vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
-noremap <A-g>               :GrepCount<SPACE><C-r><C-w>
+nnoremap <silent>g          :GrepNext<CR>
+nnoremap <silent>G          :GrepPrev<CR>
+nnoremap <C-g>              :Grep<SPACE>
+nnoremap <C-g><C-g>         :Grep<SPACE><C-r><C-w>
+vnoremap <C-g>             "+y:Grep<SPACE><C-r>"
+nnoremap <A-g>              :GrepCount<SPACE><C-r><C-w>
 
 " User commands
 command! -nargs=1 -bar Grep      call <SID>Grep(<f-args>)
@@ -518,14 +518,6 @@ set matchpairs+=<:>       " '%' bounce between brackets
 " Backspace delete line breaks, over the start of the
 " current insertion, and over indentations
 set backspace=indent,eol,start
-
-" Disable default behaviour "Ctrl-n=j" and "Ctrl-p=k"
-if mapcheck("<C-n>") == ""
-  noremap <C-n> <NOP>
-endif
-if mapcheck("<C-p>") == ""
-  noremap <C-p> <NOP>
-endif
 
 " Goto line
 FnNoremap  <C-b> :
@@ -722,8 +714,8 @@ noremap <C-ENTER>           <C-]>
 noremap <C-SPACE>           <C-t>
 FnNoremap <silent><F5>      :Tnext<CR>
 FnNoremap <silent><S-F5>    :Tprev<CR>
-noremap <silent>t           :Tnext<CR>
-noremap <silent>T           :Tprev<CR>
+nnoremap <silent>t          :Tnext<CR>
+nnoremap <silent>T          :Tprev<CR>
 
 
 " *******************************************************
@@ -838,8 +830,8 @@ command! -nargs=0 -bar Pprev    call s:PreviewPrevTag()
 " Key mapping
 FnNoremap <silent><C-F5>    :Pnext<CR>
 FnNoremap <silent><C-S-F5>  :Pprev<CR>
-noremap <silent><C-t>       :Pnext<CR>
-noremap <silent><C-A-T>     :Pprev<CR>
+nnoremap <silent><C-t>      :Pnext<CR>
+nnoremap <silent><C-A-T>    :Pprev<CR>
 nmap <localleader>p         :Ptoggle<CR>
 nmap <localleader>pp        :Pclose<CR>
 "if mapcheck('t','n')!=''

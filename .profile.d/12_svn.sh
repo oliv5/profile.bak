@@ -190,7 +190,7 @@ function svn-export() {
   if [ ! -f $ARCHIVE ]; then
     if [ "$REV0" == "HEAD" ]; then
       # Export changes made upon HEAD
-      svn-st "^(A|D|M|R|\~|\!)" | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
+      svn-st "^(A|M|R|\~|\!)" | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
       RESULT=$?
     else
       # Export changes between the 2 revisions
