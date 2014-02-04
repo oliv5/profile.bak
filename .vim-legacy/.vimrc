@@ -202,11 +202,15 @@ map <localleader>n  :set nu!<CR>
 " *******************************************************
 " Set status line content
 function! s:CustomStatusLine()
-  setlocal statusline=\ %F
+  if exists('g:loaded_buftabs')
+    setlocal statusline=\ %{buftabs#statusline()}
+  else
+    setlocal statusline=\ %F
+  endif
+  setlocal statusline+=%=
   setlocal statusline+=\ [%{strlen(&fenc)?&fenc:'none'},\ %{&ff}]%h%m%r
   setlocal statusline+=\ [%{&expandtab==0?'tabs':'space'}]\ %y
-  setlocal statusline+=%=
-  setlocal statusline+=%c,%l/%L\ %P
+  setlocal statusline+=\ %c,%l/%L\ %P
 endfunction
 
 " Line options
@@ -927,9 +931,10 @@ let g:ccvext_version = 1
 let g:loaded_yankring = 1
 "let g:loaded_cctree = 1
 let g:command_t_loaded = 1
-"let g:loaded_minibufexplorer = 1
+let g:loaded_minibufexplorer = 1
 "let g:loaded_yaifa = 1
 "let g:loaded_ctrlp = 1
+"let g:loaded_buftabs = 1
 
 
 " *******************************************************
@@ -1195,6 +1200,17 @@ if !exists('g:loaded_tagbar')
   " Toggle ON/OFF
   nmap <localleader>t   :TagbarToggle<CR>
   nmap <localleader>tt  :TagbarClose<CR>
+endif
+
+
+" *******************************************************
+" } buftabs plugin {
+" *******************************************************
+if !exists('g:loaded_buftabs')
+  " Options
+  let g:buftabs_only_basename = 1
+  let g:buftabs_in_statusline = 1
+  let g:buftabs_active_highlight_group="Visual"
 endif
 
 
