@@ -198,40 +198,6 @@ map <localleader>n  :set nu!<CR>
 
 
 " *******************************************************
-" } Statusline {
-" *******************************************************
-" Set status line content
-function! s:CustomStatusLine()
-  if exists('g:loaded_buftabs')
-    setlocal statusline=\ %{buftabs#statusline()}
-  else
-    setlocal statusline=\ %F
-  endif
-  setlocal statusline+=%=
-  setlocal statusline+=\ [%{strlen(&fenc)?&fenc:'none'},\ %{&ff}]%h%m%r
-  setlocal statusline+=\ [%{&expandtab==0?'tabs':'space'}]\ %y
-  setlocal statusline+=\ %c,%l/%L\ %P
-endfunction
-
-" Line options
-"hi StatusLine ctermbg=NONE ctermfg=white
-"hi clear StatusLine
-"set laststatus=0         " Disable bottom status line
-set laststatus=2         " Always show status line
-
-" autocommand
-command! -range=% -nargs=0 CustomStatusLine call <SID>CustomStatusLine()
-
-" Key mapping
-noremap <localleader>s  :CustomStatusLine<CR>
-
-" Set the status line once
-if !exists("g:loaded_vimrc")
-  call <SID>CustomStatusLine()
-endif
-
-
-" *******************************************************
 " } Text Formatting {
 " *******************************************************
 set guioptions+=rb    " Right/bottom scroll bars enabled
@@ -282,6 +248,43 @@ nnoremap <localleader>c  :set invlist<CR>
 
 
 " *******************************************************
+" } Mswin plugin - loaded soon to override its settings later {
+" *******************************************************
+source ~/.vim/plugin/mswin.vim
+let g:skip_loading_mswin = 1
+
+" Additional key mapping
+vmap <C-z>  <C-c><C-z>
+vmap <C-y>  <C-c><C-y>
+
+
+" *******************************************************
+" } Plugin general management {
+" *******************************************************
+" Start plugin pathogen
+filetype off                " force reloading *after* pathogen loaded
+runtime bundle/pathogen/autoload/pathogen.vim
+execute pathogen#infect()
+filetype plugin indent on   " enable detection, plugins and indenting in one step
+
+" Disable the following plugins
+let g:loaded_project = 1
+let g:loaded_taglist = 1
+"let g:loaded_tagbar = 1
+let g:loaded_srcexpl = 1
+let g:loaded_nerd_tree = 1
+let g:loaded_trinity = 1
+let g:ccvext_version = 1
+let g:loaded_yankring = 1
+"let g:loaded_cctree = 1
+let g:command_t_loaded = 1
+let g:loaded_minibufexplorer = 1
+"let g:loaded_yaifa = 1
+"let g:loaded_ctrlp = 1
+"let g:loaded_buftabs = 1
+
+
+" *******************************************************
 " } Diff {
 " *******************************************************
 " Options
@@ -303,17 +306,6 @@ FnNoremap <silent><F8>      [c
 FnNoremap <silent><S-F8>    ]c
 nnoremap <silent>h          [c<CR>
 nnoremap <silent>H          ]c<CR>
-
-
-" *******************************************************
-" } Mswin plugin - loaded soon to override its settings later {
-" *******************************************************
-source ~/.vim/plugin/mswin.vim
-let g:skip_loading_mswin = 1
-
-" Additional key mapping
-vmap <C-z>  <C-c><C-z>
-vmap <C-y>  <C-c><C-y>
 
 
 " *******************************************************
@@ -694,6 +686,47 @@ FnMap <F1>    :vert help<space>
 
 
 " *******************************************************
+" } Statusline {
+" *******************************************************
+
+" Set status line content
+function! g:StatusLineCustom()
+  if has("statusline") 
+    if exists('g:loaded_buftabs')
+      setlocal statusline=\ %{buftabs#statusline(-45)}
+    else
+      setlocal statusline=\ %<%F
+    endif
+    setlocal statusline+=\ %=
+    setlocal statusline+=\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r
+    setlocal statusline+=\ [%{&expandtab==0?'tabs':'space'}]
+    setlocal statusline+=\ %y\ %c,%l/%L\ %P
+  endif
+endfunction
+
+" Hide status line
+function! g:StatusLineHide()
+    hi StatusLine ctermbg=NONE ctermfg=white
+    hi clear StatusLine
+    set laststatus=0
+endfunction
+
+" Line options
+set laststatus=2         " Always show status line
+
+" autocommand
+command! -range=% -nargs=0 StatusLineCustom call g:StatusLineCustom()
+
+" Key mapping
+noremap <silent><localleader>s      :StatusLineCustom<CR>
+
+" Set the status line once
+if !exists("g:loaded_vimrc")
+  call g:StatusLineCustom()
+endif
+
+
+" *******************************************************
 " } Tags {
 " *******************************************************
 " Set tags root
@@ -909,32 +942,6 @@ endfunction
 " Key mapping
 "inoremap <C-space>  <C-x><C-o>
 inoremap <C-space>  <C-R>=<SID>CleverTab()<CR>
-
-
-" *******************************************************
-" } Plugin general management {
-" *******************************************************
-" Start plugin pathogen
-filetype off                " force reloading *after* pathogen loaded
-runtime bundle/pathogen/autoload/pathogen.vim
-execute pathogen#infect()
-filetype plugin indent on   " enable detection, plugins and indenting in one step
-
-" Disable the following plugins
-let g:loaded_project = 1
-let g:loaded_taglist = 1
-"let g:loaded_tagbar = 1
-let g:loaded_srcexpl = 1
-let g:loaded_nerd_tree = 1
-let g:loaded_trinity = 1
-let g:ccvext_version = 1
-let g:loaded_yankring = 1
-"let g:loaded_cctree = 1
-let g:command_t_loaded = 1
-let g:loaded_minibufexplorer = 1
-"let g:loaded_yaifa = 1
-"let g:loaded_ctrlp = 1
-"let g:loaded_buftabs = 1
 
 
 " *******************************************************
@@ -1210,7 +1217,7 @@ if !exists('g:loaded_buftabs')
   " Options
   let g:buftabs_only_basename = 1
   let g:buftabs_in_statusline = 1
-  let g:buftabs_active_highlight_group="Visual"
+  "let g:buftabs_active_highlight_group="Visual"
 endif
 
 

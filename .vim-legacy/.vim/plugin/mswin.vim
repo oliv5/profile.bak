@@ -32,11 +32,11 @@ vnoremap <C-C> "+y
 vnoremap <C-Insert> "+y
 
 " CTRL-V and SHIFT-Insert are Paste
-map <C-V>   "+gP
-map <S-Insert>    "+gP
+noremap <C-V>   "+gP
+noremap <S-Insert>    "+gP
 
-cmap <C-V>    <C-R>+
-cmap <S-Insert>   <C-R>+
+cnoremap <C-V>    <C-R>+
+cnoremap <S-Insert>   <C-R>+
 
 " Pasting blockwise and linewise selections is not possible in Insert and
 " Visual mode without the +virtualedit feature.  They are pasted as if they
