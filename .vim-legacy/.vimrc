@@ -33,11 +33,6 @@ if filereadable(expand("~/.vimrc.before"))
     source ~/.vimrc.before
 endif
 
-" Use before local config
-if filereadable(expand("~/.vimrc.before.local"))
-    source ~/.vimrc.before.local
-endif
-
 
 " *******************************************************
 " } Global settings {
@@ -1306,19 +1301,14 @@ FnNoremap <A-A>   <C-x>
 " } Environment conclusion {
 " *******************************************************
 
-" Security
-set secure
-set noexrc
-
-" Use after local config
-if filereadable(expand("~/.vimrc.after.local"))
-    source ~/.vimrc.after.local
-endif
-
 " Use after config
 if filereadable(expand("~/.vimrc.after"))
     source ~/.vimrc.after
 endif
+
+" Security
+set secure
+set noexrc
 
 " Load flag
 let g:loaded_vimrc = 1
