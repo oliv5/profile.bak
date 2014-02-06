@@ -278,7 +278,7 @@ let g:ccvext_version = 1
 let g:loaded_yankring = 1
 "let g:loaded_cctree = 1
 let g:command_t_loaded = 1
-let g:loaded_minibufexplorer = 1
+"let g:loaded_minibufexplorer = 1
 "let g:loaded_yaifa = 1
 "let g:loaded_ctrlp = 1
 "let g:loaded_buftabs = 1
@@ -690,13 +690,9 @@ FnMap <F1>    :vert help<space>
 " *******************************************************
 
 " Set status line content
-function! g:StatusLineCustom()
-  if has("statusline") 
-    if exists('g:loaded_buftabs')
-      setlocal statusline=\ %{buftabs#statusline(-45)}
-    else
-      setlocal statusline=\ %<%F
-    endif
+function! s:StatusLineCustom()
+  if has("statusline")
+    setlocal statusline=\ %{exists('g:loaded_buftabs')?buftabs#statusline(-45):'%<%F'}
     setlocal statusline+=\ %=
     setlocal statusline+=\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r
     setlocal statusline+=\ [%{&expandtab==0?'tabs':'space'}]
@@ -705,7 +701,7 @@ function! g:StatusLineCustom()
 endfunction
 
 " Hide status line
-function! g:StatusLineHide()
+function! s:StatusLineHide()
     hi StatusLine ctermbg=NONE ctermfg=white
     hi clear StatusLine
     set laststatus=0
@@ -715,14 +711,14 @@ endfunction
 set laststatus=2         " Always show status line
 
 " autocommand
-command! -range=% -nargs=0 StatusLineCustom call g:StatusLineCustom()
+command! -range=% -nargs=0 StatusLineCustom call <SID>StatusLineCustom()
 
 " Key mapping
 noremap <silent><localleader>s      :StatusLineCustom<CR>
 
 " Set the status line once
 if !exists("g:loaded_vimrc")
-  call g:StatusLineCustom()
+  call <SID>StatusLineCustom()
 endif
 
 
