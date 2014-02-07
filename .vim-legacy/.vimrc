@@ -176,7 +176,7 @@ execute 'set listchars+=tab:' . nr2char(187) . nr2char(183)
 if exists('+autochdir')
   set noautochdir
 "else
-"  autocmd BufEnter * silent! lcd %:p:h:gs/ /\\ /
+"  autocmd! BufEnter * silent! lcd %:p:h:gs/ /\\ /
 endif
 
 " Gui options
@@ -618,8 +618,7 @@ FnNoremap <C-Right>   :wincmd l<CR>
 
 " Exit to normal when changing windows
 augroup exit_to_normal
-  autocmd!
-  autocmd WinEnter * stopinsert
+  autocmd! WinEnter * stopinsert
 augroup END
 
 " Toggles window max/equal
@@ -713,7 +712,7 @@ noremap <silent><localleader>s      :StatusLineCustom<CR>
 
 " Set the status line once
 if !exists("g:loaded_vimrc")
-  call <SID>StatusLineCustom()
+  autocmd! BufEnter * call <SID>StatusLineCustom()
 endif
 
 
@@ -971,7 +970,7 @@ if !exists('g:loaded_taglist')
   let g:Tlist_Use_SingleClick = 1       " Single click instead of double
 
   " Autoload autocommand (may not be necessary)
-  " autocmd BufWritePost *.c,*.cc,*.cpp,*.py,*.mk,Makefile :TlistUpdate
+  " autocmd! BufWritePost *.c,*.cc,*.cpp,*.py,*.mk,Makefile :TlistUpdate
 
   " Toggle ON/OFF
   nmap <localleader>t   :Tlist<CR>
@@ -1034,7 +1033,7 @@ if !exists('g:loaded_minibufexplorer')
   let g:miniBufExplTabWrap = 1
   let g:miniBufExplMinSize = 1
   let g:miniBufExplMaxSize = 3
-  let g:miniBufExplSortBy = 'number'
+  let g:miniBufExplSortBy = 'name'
   let g:miniBufExplBRSplit = 0
 
   " Colors
