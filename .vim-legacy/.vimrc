@@ -862,10 +862,10 @@ nnoremap <silent><C-t>      :Pnext<CR>
 nnoremap <silent><C-A-T>    :Pprev<CR>
 nmap <localleader>p         :Ptoggle<CR>
 nmap <localleader>pp        :Pclose<CR>
-"if mapcheck('t','n')!=''
-"  nmap <silent>t            :if &previewwindow <BAR> Pnext <BAR> else <BAR> Tnext <BAR> endif<CR>
-"  nmap <silent>T            :if &previewwindow <BAR> Pprev <BAR> else <BAR> Tprev <BAR> endif<CR>
-"endif
+execute "nmap <silent>t     :if &previewwindow <BAR> Pnext <BAR> else <BAR>"
+            \ substitute(mapcheck('t','n'),'<CR>\|:','','g') "<BAR> endif<CR>"
+execute "nmap <silent>T     :if &previewwindow <BAR> Pprev <BAR> else <BAR>"
+            \ substitute(mapcheck('T','n'),'<CR>\|:','','g') "<BAR> endif<CR>"
 
 
 " *******************************************************
@@ -1034,7 +1034,7 @@ if !exists('g:loaded_minibufexplorer')
   let g:miniBufExplTabWrap = 1
   let g:miniBufExplMinSize = 1
   let g:miniBufExplMaxSize = 3
-  let g:miniBufExplSortBy = 'mru'
+  let g:miniBufExplSortBy = 'number'
   let g:miniBufExplBRSplit = 0
 
   " Colors
