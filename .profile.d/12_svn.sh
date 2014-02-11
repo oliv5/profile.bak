@@ -64,7 +64,7 @@ function svn-rev() {
 
 # Get status file list
 function svn-st() {
-  svn st | grep -E "${1:-^[^ ]}" | cut -c 9-
+  svn st "${@:2}" | grep -E "${1:-^[^ ]}" | cut -c 9-
 }
 
 # Extract SVN revision from string rev0:rev1
@@ -186,11 +186,13 @@ function svn-export() {
       ARCHIVE="${DST}/export_$(svn-bckname)_r${REV0}-${REV1}_$(svn-date).7z"
     fi
   fi
+  # Get applicable files
+  FILES="${@:4}"
   # Create archive, if not existing already
   if [ ! -f $ARCHIVE ]; then
     if [ "$REV0" == "HEAD" ]; then
       # Export changes made upon HEAD
-      svn-st "^(A|M|R|\~|\!)" | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
+      svn-st "^(A|M|R|\~|\!)" $FILES | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
       RESULT=$?
     else
       # Export changes between the 2 revisions
@@ -220,8 +222,8 @@ function svn-suspend() {
   # Set backup directory
   DST="$(svn-bckdir)"
   # Export & revert if succeed
-  if svn-export HEAD HEAD "${DST}/suspend_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z"; then
-    svn revert -R .
+  if svn-export HEAD HEAD "${DST}/suspend_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z" "$@"; then
+    svn revert -R "${@:-.}"
   fi
 }
 
