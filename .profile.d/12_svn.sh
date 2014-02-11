@@ -196,7 +196,7 @@ function svn-export() {
       RESULT=$?
     else
       # Export changes between the 2 revisions
-      svn diff --summarize -r ${REV0}:${REV1} | awk '{ print $2 }' | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
+      svn diff --summarize -r ${REV0}:${REV1} $FILES | awk '{ print $2 }' | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
       RESULT=$?
     fi
   else
