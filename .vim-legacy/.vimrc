@@ -1099,7 +1099,7 @@ endif
 " *******************************************************
 if !exists('g:loaded_yaifa')
   " Options
-  let g:yaifa_max_lines=4096
+  let g:yaifa_max_lines=512
   " Map Yaifa
   nmap <localleader><tab>   :call YAIFA()<CR>
   " autocall when entering file
@@ -1194,6 +1194,7 @@ if !exists('g:loaded_tagbar')
   let g:tagbar_indent = 1
   let g:tagbar_show_linenumbers = 1
   let g:tagbar_singleclick = 1
+  let g:tagbar_sort = 0
   " Toggle ON/OFF
   nmap <localleader>t   :TagbarToggle<CR>
   nmap <localleader>tt  :TagbarClose<CR>

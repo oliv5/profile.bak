@@ -38,14 +38,14 @@ if has("cscope")
     set csto=1
 
     " add any cscope database in the given environment variable
-    if $CSCOPE_DB != ""
-        for db in split($CSCOPE_DB)
-            if filereadable(db)
-                exe "cs add" db
-            endif
-        endfor
+    for db in split($CSCOPE_DB)
+        if filereadable(db)
+            exe "cs add" db
+        endif
+    endfor
+
     " add any cscope database in current directory
-    elseif filereadable("cscope.out")
+    if filereadable("cscope.out")
         cs add cscope.out
     endif
 
