@@ -57,7 +57,8 @@ fi
 if [ -z "$PASSWD" ]; then
 	trap "stty echo; trap SIGINT" SIGINT; stty -echo
 	read -p "Password: " PASSWD; echo
-	stty echo; trap SIGINT
+	stty echo; trap - SIGINT
+	# Bash: "trap SIGINT"
 else
 	echo "Password already known"
 fi
