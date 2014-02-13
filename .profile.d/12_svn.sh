@@ -296,6 +296,11 @@ function svn-log() {
   svn log --verbose ${1:+-r $1}${2:+:$2} ${@:3}
 }
 
+# Show a short log
+function svn-shortlog() {
+  svn-log | grep -E "^[^ |\.]"
+}
+
 # Display the changes in a file in a range of revisions
 # or list changed files in a range of revisions 
 function svn-diff() {

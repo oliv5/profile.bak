@@ -15,9 +15,15 @@ function push() {
   eval "$1=(\"\${$1[@]}\" \"\${@:2}\")"
 }
 
-# Concat array removing holes
-# Call: pcat array
-function pcat() {
+# Add to fifo
+# Call: add array elem1 .. elemN
+function add() {
+  eval "$1=(\"\${@:2}\" \"\${$1[@]}\")"
+}
+
+# Pack array removing holes
+# Call: pack array
+function pack() {
   eval "$1=(\${$1[@]})"
 }
 
@@ -89,6 +95,14 @@ function pop() {
   pdelq $1
   #eval unset $1[\${#$1[@]}-1]
   #eval "$1=(\${$1[@]})"
+}
+
+# Pop 1 element from stack
+# Call: pop array var
+function popl() {
+  peek $1 PEEK
+  pdelq $1
+  echo $PEEK
 }
 
 # Pop n elements from stack

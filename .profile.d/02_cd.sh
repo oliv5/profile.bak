@@ -6,10 +6,10 @@ g_pwd_stack_maxsize=10
 alias scd='echo "PWD[${#g_pwd_stack[@]}]: ${g_pwd_stack[@]}"'
 alias cd='cda'
 
-# cd function
-function cdaa() { export PWD_0="${PWD}"; builtin cd "$@"; }
-function cda() { push g_pwd_stack ${PWD}; builtin cd "$@" || pdelq g_pwd_stack; pkeepq g_pwd_stack $g_pwd_stack_maxsize; }
+# First implementation cd/back functions
+function cda_old() { export PWD_0="$PWD"; builtin cd "$@"; }
+function cdb_old() { cd "$PWD_0"; }
 
-# back function
-function cdbb() { cd "${PWD_0}"; }
-function cdb()  { pop g_pwd_stack DIR 2>/dev/null; builtin cd "$DIR"; }
+# Stack based cd/back functions
+function cda()  { _PWD="$PWD"; builtin cd "$@" && push g_pwd_stack "$_PWD" && pkeepq g_pwd_stack $g_pwd_stack_maxsize; }
+function cdb()  { pop g_pwd_stack DIR 2>/dev/null && cd "$DIR" && pdelq g_pwd_stack; }
