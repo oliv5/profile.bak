@@ -33,7 +33,7 @@ function pdeln() {
   for i in $(seq $3 -1 $2); do
     eval unset $1[$i]
   done
-  pcat $1
+  pack $1
 }
 
 # Delete n elements from head

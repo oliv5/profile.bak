@@ -5,7 +5,7 @@ export GIT_PAGER="cat"
 
 # alias
 alias gs='git status'
-alias gd='git diff'
+alias gdd='git diff'
 alias gdm='git difftool -y -t meld --'
 
 # Meld called by git

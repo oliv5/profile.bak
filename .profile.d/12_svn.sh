@@ -22,7 +22,7 @@ alias svn-resolve='svn-merge'
 # Build a unique backup directory for this repo
 function svn-bckdir() {
   DST=$(basename "$(readlink -m "$PWD")")
-  DST=$(readlink -m "$(svn-root)/${1:-.svnbackup}_$DST${2:+_$2}")
+  DST=$(readlink -m "$(svn-root)/${1:-.svnbackup}/$DST${2:+_$2}")
   mkdir -p "${DST}"
   echo "${DST}"
 }

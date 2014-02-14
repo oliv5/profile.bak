@@ -18,7 +18,7 @@ alias iffd='NAME=iname ffd'
 
 # Search pattern functions
 function _fgrep() {
-  [ "$1" != "" ] && NAME=${NAME:-name} _find "${!#}" -type f -print0 | xargs -0 grep -n -E --color "${@:1:$(($#-1))}"
+  [ "$1" != "" ] && NAME=${NAME:-name} _find "${!#}" -type f -print0 | xargs -0 grep -n --color "${@:1:($#-1)}"
 }
 alias gg='_fgrep'
 alias igg='NAME=iname gg'

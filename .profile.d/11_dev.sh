@@ -8,6 +8,7 @@ function ff() {
 }
 
 # Various dev search function helpers
+#### DIR=.;OPT=; [ $# -gt 1 ] && DIR=${!#} && OPT=${@:2:($#-2)}; echo _fgrep "${1}" ${CASE} $OPT "${DIR}/*.h|*.hpp";
 function h()     { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.h|*.hpp"; }
 function c()     { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.c|*.cpp|*.cc"; }
 function hc()    { _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.c|*.cpp|*.cc|*.h|*.hpp"; }
