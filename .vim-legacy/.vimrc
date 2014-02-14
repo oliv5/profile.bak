@@ -510,8 +510,8 @@ set matchpairs+=<:>       " '%' bounce between brackets
 " current insertion, and over indentations
 set backspace=indent,eol,start
 
-" Goto line
-FnNoremap  <C-b> :
+" Jump to line
+FnNoremap  <C-j> :
 
 " Prev/next cursor location
 " Note: <C-[> is Esc
