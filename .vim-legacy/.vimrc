@@ -172,13 +172,6 @@ set viminfo='10,\"100,:20,n~/.viminfo
 " (Character 187 is a right double-chevron, and 183 a mid-dot.)
 execute 'set listchars+=tab:' . nr2char(187) . nr2char(183)
 
-" Change directory when changing buffers
-if exists('+autochdir')
-  set noautochdir
-"else
-"  autocmd! BufEnter * silent! lcd %:p:h:gs/ /\\ /
-endif
-
 " Gui options
 set guioptions-=T       " Remove toolbar
 
@@ -240,6 +233,25 @@ nnoremap <localleader>w  :set invwrap<CR>
 set nolist              " Do not show all characters by default
 nnoremap <localleader>c  :set invlist<CR>
 "nnoremap <localleader>c  :exec &list?'set nolist':'set list'<CR>
+
+
+" *******************************************************
+" } Directory management {
+" *******************************************************
+
+" Change directory when changing buffers
+if exists('+autochdir')
+  set noautochdir
+"else
+"  autocmd! BufEnter * silent! lcd %:p:h:gs/ /\\ /
+endif
+
+" Change global directory to the current directory of the current buffer
+nnoremap <leader>cd :cd %:p:h<CR>
+
+" Edit a file in the same directory as the current buffer.
+" This leaves the prompt open, allowing Tab expansion or manual completion.
+nnoremap <leader>e :e <C-R>=expand("%:p:h") . "/" <CR>
 
 
 " *******************************************************
@@ -408,7 +420,7 @@ map <silent><localleader>v  :call <SID>SpaceTabToggle()<CR>
 set ignorecase      " Case-insensitive search
 set smartcase       " Unless search contain upper-case letters
 set incsearch       " Show the `best match so far' when search is typed
-"""set gdefault        " Assume /g flag is on (replace all)
+set nogdefault      " Assume /g flag (replace all) is NOT set
 
 " Highlight current selection
 function! s:SearchHighlight()
@@ -428,7 +440,7 @@ nnoremap <localleader>f     :set invhls hls?<CR>
 " Search & replace
 FnNoremap <C-F>     /
 FnNoremap <C-A-F>   yiw:/<C-R>"
-FnNoremap <C-H>     yiw:%s/<C-R>"//c<left><left>
+FnNoremap <C-H>     :%s///c<left><left><left>
 FnNoremap <C-A-H>   yiw:%s/<C-R>"/<C-R>"/c<left><left>
 vnoremap <C-F>      "+y:/<C-R>"
 vnoremap <C-H>      "+y:%s/<C-R>"/<C-R>"/c<left><left>
@@ -685,7 +697,7 @@ FnMap <F1>    :vert help<space>
 
 " Set status line content
 function! s:StatusLineCustom()
-  if has("statusline")
+  if has("statusline") && &modifiable
     setlocal statusline=\ %{exists('g:loaded_buftabs')?buftabs#statusline(-45):'%<%F'}
     setlocal statusline+=\ %=
     setlocal statusline+=\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r
@@ -702,13 +714,13 @@ function! s:StatusLineHide()
 endfunction
 
 " Line options
-set laststatus=2         " Always show status line
+set laststatus=2                " Always show status line
 
 " autocommand
 command! -range=% -nargs=0 StatusLineCustom call <SID>StatusLineCustom()
 
 " Key mapping
-noremap <silent><localleader>s      :StatusLineCustom<CR>
+noremap <silent><localleader>s  :StatusLineCustom<CR>
 
 " Set the status line once
 if !exists("g:loaded_vimrc")
@@ -720,7 +732,7 @@ endif
 " } Tags {
 " *******************************************************
 " Set tags root
-set tags=./tags,tags,$TAGS_DB
+set tags=./tags,tags,$TAGS_DB;$HOME
 
 " Goto next tag (& loop)
 function! s:TagNextTag()
@@ -1213,6 +1225,25 @@ endif
 
 
 " *******************************************************
+" } DirDiff plugin {
+" *******************************************************
+" Options
+let g:DirDiffExcludes = "CVS,*.class,*.exe,.*.swp"  " Default exclude pattern
+let g:DirDiffIgnore = "Id:,Revision:,Date:"         " Default ignore pattern
+let g:DirDiffSort = 1                               " Sorts the diff lines
+let g:DirDiffWindowSize = 14                        " Diff window height
+let g:DirDiffIgnoreCase = 0                         " Ignore case during diff
+let g:DirDiffDynamicDiffText = 0                    " Dynamically figure out the diff text
+let g:DirDiffTextFiles = "Files "                   " Diff tool difference text
+let g:DirDiffTextAnd = " and "                      " Diff tool "and" text
+let g:DirDiffTextDiffer = " differ"                 " Diff tool "differ" text
+let g:DirDiffTextOnlyIn = "Only in "                " Diff tool "Only in" text
+
+" Key mapping
+nnoremap <silent><leader>d  :DirDiff\
+
+
+" *******************************************************
 " } Hexadecimal display {
 " *******************************************************
 if !exists('g:vimrc_hexa')
@@ -1289,7 +1320,7 @@ endfunction
 
 
 " *******************************************************
-" } Alignment function {
+" } Inline increment/decrement function {
 " *******************************************************
 
 " Increment/decrement numbers

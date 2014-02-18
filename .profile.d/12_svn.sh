@@ -21,10 +21,10 @@ alias svn-resolve='svn-merge'
 
 # Build a unique backup directory for this repo
 function svn-bckdir() {
-  DST=$(basename "$(readlink -m "$PWD")")
-  DST=$(readlink -m "$(svn-root)/${1:-.svnbackup}/$DST${2:+_$2}")
-  mkdir -p "${DST}"
-  echo "${DST}"
+  DIR=$(basename "$(readlink -m "$PWD")")
+  DIR=$(readlink -m "$(svn-root)/${1:-.svnbackup}/$DIR${2:+_$2}")
+  mkdir -p "${DIR}"
+  echo "${DIR}"
 }
 
 # Build a unique backup filename for this repo
@@ -124,14 +124,12 @@ function svn-clean() {
   # Check we are in a repository
   svn-exists || return
   # Confirmation
-  if [ "$1" != "-y" ]; then
+  if [ -z "$SVN_YES" ]; then
     echo -n "Backup unversioned files? (y/n): "
     read ANSWER
     if [ "$ANSWER" != "n" -a "$ANSWER" != "N" ]; then
-      # Set backup directory
-      DST="$(svn-bckdir)"
       # Backup
-      svn-st "^(\?|\I)" | xargs --no-run-if-empty 7z a $OPTS_7Z "${DST}/clean_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z"
+      svn-st "^(\?|\I)" | xargs --no-run-if-empty 7z a $OPTS_7Z "$(svn-bckdir)/clean_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z"
       echo
     fi
   fi
@@ -143,10 +141,8 @@ function svn-clean() {
 function svn-revert() {
   # Check we are in a repository
   svn-exists || return
-  # Set backup directory
-  DST="$(svn-bckdir)"
   # Backup
-  svn-export HEAD HEAD "${DST}/revert_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z"
+  svn-export HEAD HEAD "$(svn-bckdir)/revert_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z"
   # Revert local modifications
   svn revert -R . ${1:+--cl $1}
 }
@@ -157,10 +153,8 @@ function svn-rollback() {
   REV=${1:?Please enter a revision number}
   # Check we are in a repository
   svn-exists || return
-  # Set backup directory
-  DST="$(svn-bckdir)"
   # Backup
-  svn-export HEAD $REV "${DST}/rollback_$(svn-bckname)_r${REV}_$(svn-date).7z"
+  svn-export HEAD $REV "$(svn-bckdir)/rollback_$(svn-bckname)_r${REV}_$(svn-date).7z"
   # Rollback (svn merge back)
   svn merge -r HEAD:$REV .
 }
@@ -169,8 +163,6 @@ function svn-rollback() {
 function svn-export() {
   # Check we are in a repository
   svn-exists || return
-  # Set backup directory
-  DST="$(svn-bckdir)"
   # Get revisions
   REV0=${1:-HEAD}
   REV1=${2:-HEAD}
@@ -180,10 +172,10 @@ function svn-export() {
     if [ "$REV0" == "HEAD" ]; then
       # Export changes made upon HEAD
       REV="$(svn-rev)"
-      ARCHIVE="${DST}/export_$(svn-bckname)_r${REV}_$(svn-date).7z"
+      ARCHIVE="$(svn-bckdir)/export_$(svn-bckname)_r${REV}_$(svn-date).7z"
     else
       # Export changes between the 2 revisions
-      ARCHIVE="${DST}/export_$(svn-bckname)_r${REV0}-${REV1}_$(svn-date).7z"
+      ARCHIVE="$(svn-bckdir)/export_$(svn-bckname)_r${REV0}-${REV1}_$(svn-date).7z"
     fi
   fi
   # Get applicable files
@@ -219,21 +211,24 @@ function svn-import() {
 
 # Suspend a CL
 function svn-suspend() {
-  # Set backup directory
-  DST="$(svn-bckdir)"
   # Export & revert if succeed
-  if svn-export HEAD HEAD "${DST}/suspend_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z" "$@"; then
+  if svn-export HEAD HEAD "$(svn-bckdir)/suspend_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z" "$@"; then
     svn revert -R "${@:-.}"
   fi
 }
 
 # Resume a CL
 function svn-resume() {
-  if ! svn-modified; then
-    svn-import "$1"
-  else
-    echo "Your repository has local changes. Cannot resume CL safely..."
+  # Look for modified repo
+  if [ -z "$SVN_YES" -a svn-modified ]; then
+    echo -n "Your repository has local changes, proceed anyway? (y/n): "
+    read ANSWER
+    if [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ]; then
+      return
+    fi
   fi
+  # Import CL
+  svn-import "$1"
 }
 
 # Extract a CL and compare with current repo

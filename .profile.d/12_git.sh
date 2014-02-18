@@ -13,6 +13,12 @@ function git-meld() {
   meld "$2" "$5"
 }
 
+# Check if a repo has been modified
+function git-modified() {
+  ! git diff-index --quiet HEAD --
+}
+
+# Push changes onto stash
 function git-stash-push() {
   git stash save --include-untracked "stash-$(date +%Y%m%d-%H%M)${1:+_$1}" && git stash apply stash@{0}
 }
@@ -38,11 +44,16 @@ function git-suspend() {
 
 # Resume a CL
 function git-resume() {
-  if git diff-index --quiet HEAD --; then
-      git-import "$1"
-  else
-      echo "Your repository has local changes. Cannot resume CL safely..."
+  # Look for modified repo
+  if [ -z "$GIT_YES" -a git-modified ]; then
+    echo -n "Your repository has local changes, proceed anyway? (y/n): "
+    read ANSWER
+    if [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ]; then
+      return
+    fi
   fi
+  # Import CL
+  git-import "$1"
 }
 
 # Hard revert to a given CL
@@ -73,7 +84,7 @@ function git-ls() {
 }
 
 # Check commit existenz
-function git-commit-exists() {
+function git-exists() {
   git rev-parse --verify "${1:?Please enter a commit hash...}" 2>/dev/null
 }
 

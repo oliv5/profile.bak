@@ -237,7 +237,7 @@ function! Buftabs_show(deleted_buf)
 			endif
 				
 			let s:list = s:list . l:i . g:buftabs_separator
-			let s:list = s:list . l:name
+			let s:list = s:list . (strlen(l:name)>0 ? l:name : "unamed")
 
 			if getbufvar(l:i, "&modified") == 1
 				let s:list = s:list . g:buftabs_marker_modified
@@ -310,7 +310,7 @@ function! buftabs#statusline(...)
 	if width <= 0
 		let width = winwidth(0) + width
 	endif
- 	return strpart(s:list, max([0, start - width/2]), width)
+ 	return strpart(s:list, max([0, start - width/2]), width-3) . "..."
 endfunction
 
 
