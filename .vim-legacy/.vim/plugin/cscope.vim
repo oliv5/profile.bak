@@ -95,24 +95,23 @@ if has("cscope")
     " go back to where you were before the search.
     "
 
-    " OLA note: inverted d (inner calls) and g (global definition)
     nnoremap <C-d><C-r> :cs find s <C-R>=expand("<cword>")<CR><CR>
-    nnoremap <C-d><C-d> :cs find g <C-R>=expand("<cword>")<CR><CR>
+    nnoremap <C-d><C-d> :cs find d <C-R>=expand("<cword>")<CR><CR>
     nnoremap <C-d><C-c> :cs find c <C-R>=expand("<cword>")<CR><CR>
     nnoremap <C-d><C-t> :cs find t <C-R>=expand("<cword>")<CR><CR>
     nnoremap <C-d><C-e> :cs find e <C-R>=expand("<cword>")<CR><CR>
     nnoremap <C-d><C-f> :cs find f <C-R>=expand("<cfile>")<CR><CR>
     nnoremap <C-d><C-i> :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
-    nnoremap <C-d><C-g> :cs find d <C-R>=expand("<cword>")<CR><CR>
+    nnoremap <C-d><C-g> :cs find g <C-R>=expand("<cword>")<CR><CR>
 
     vnoremap <C-d><C-r> "+y:cs find s <C-R>"<CR>
-    vnoremap <C-d><C-d> "+y:cs find g <C-R>"<CR>
+    vnoremap <C-d><C-d> "+y:cs find d <C-R>"<CR>
     vnoremap <C-d><C-c> "+y:cs find c <C-R>"<CR>
     vnoremap <C-d><C-t> "+y:cs find t <C-R>"<CR>
     vnoremap <C-d><C-e> "+y:cs find e <C-R>"<CR>
     vnoremap <C-d><C-f> "+y:cs find f <C-R>"<CR>
     vnoremap <C-d><C-i> "+y:cs find i <C-R>"<CR>
-    vnoremap <C-d><C-g> "+y:cs find d <C-R>"<CR>
+    vnoremap <C-d><C-g> "+y:cs find g <C-R>"<CR>
 
     " Using 'CTRL-spacebar' (intepreted as CTRL-@ by vim) then a search type
     " makes the vim window split horizontally, with search result displayed in

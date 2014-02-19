@@ -310,7 +310,7 @@ function! buftabs#statusline(...)
 	if width <= 0
 		let width = winwidth(0) + width
 	endif
- 	return strpart(s:list, max([0, start - width/2]), width-3) . "..."
+ 	return strpart(s:list, max([0, start - width/2]), width-4) . "..."
 endfunction
 
 

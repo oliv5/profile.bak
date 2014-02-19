@@ -440,10 +440,10 @@ nnoremap <localleader>f     :set invhls hls?<CR>
 " Search & replace
 FnNoremap <C-F>     /
 FnNoremap <C-A-F>   yiw:/<C-R>"
-FnNoremap <C-H>     :%s///c<left><left><left>
-FnNoremap <C-A-H>   yiw:%s/<C-R>"/<C-R>"/c<left><left>
+FnNoremap <C-H>     :%s///cg<left><left><left><left>
+FnNoremap <C-A-H>   yiw:%s/<C-R>"/<C-R>"/cg<left><left><left>
 vnoremap <C-F>      "+y:/<C-R>"
-vnoremap <C-H>      "+y:%s/<C-R>"/<C-R>"/c<left><left>
+vnoremap <C-H>      "+y:%s/<C-R>"/<C-R>"/cg<left><left><left>
 vnoremap <C-A-H>    "+y:%s/<C-R>"//c<left><left>
 
 " F3 for search (n and N)
@@ -732,7 +732,8 @@ endif
 " } Tags {
 " *******************************************************
 " Set tags root
-set tags=./tags,tags,$TAGS_DB;$HOME
+"set tags=./tags,tags;$HOME
+set tags=./tags;$HOME
 
 " Goto next tag (& loop)
 function! s:TagNextTag()
@@ -1084,9 +1085,9 @@ if !exists('g:loaded_minibufexplorer')
       let s:vimrc_mbeswitch = !s:vimrc_mbeswitch
     endif
     if s:vimrc_mbeswitch == 1
-      MBEbf
-    else
       MBEbb
+    else
+      MBEbf
     endif
   endfunction
 
@@ -1220,6 +1221,9 @@ if !exists('g:loaded_buftabs')
   " Options
   let g:buftabs_only_basename = 1
   let g:buftabs_in_statusline = 1
+  "let g:buftabs_marker_start = '[['
+  "let g:buftabs_marker_end = ']]'
+  let g:buftabs_separator = ":"
   "let g:buftabs_active_highlight_group="Visual"
 endif
 
@@ -1241,6 +1245,15 @@ let g:DirDiffTextOnlyIn = "Only in "                " Diff tool "Only in" text
 
 " Key mapping
 nnoremap <silent><leader>d  :DirDiff\
+
+
+" *******************************************************
+" } Easytags plugin {
+" *******************************************************
+" Options
+let g:easytags_updatetime_min = 5000    " Wait for few ms before updating tags
+let g:easytags_dynamic_files = 1        " Use project tag file instead of ~/.vimtags
+let g:easytags_on_cursorhold = 0        " No update on cursor hold
 
 
 " *******************************************************
