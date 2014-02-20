@@ -87,16 +87,20 @@ snoremap <C-A> <C-C>gggH<C-O>G
 xnoremap <C-A> <C-C>ggVG
 
 " CTRL-Tab is Next window
+if 0
 noremap <C-Tab> <C-W>w
 inoremap <C-Tab> <C-O><C-W>w
 cnoremap <C-Tab> <C-C><C-W>w
 onoremap <C-Tab> <C-C><C-W>w
+endif
 
 " CTRL-F4 is Close window
+if 0
 noremap <C-F4> <C-W>c
 inoremap <C-F4> <C-O><C-W>c
 cnoremap <C-F4> <C-C><C-W>c
 onoremap <C-F4> <C-C><C-W>c
+endif
 
 " restore 'cpoptions'
 set cpo&
