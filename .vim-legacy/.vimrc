@@ -257,8 +257,8 @@ nnoremap <leader>e :e <C-R>=expand("%:p:h") . "/" <CR>
 " *******************************************************
 " } Mswin plugin - loaded soon to override its settings later {
 " *******************************************************
-source ~/.vim/plugin/mswin.vim
-let g:skip_loading_mswin = 1
+"source ~/.vim/plugin/mswin.vim
+"let g:skip_loading_mswin = 1
 
 " Additional key mapping
 vmap <C-z>  <C-c><C-z>
@@ -698,7 +698,11 @@ FnMap <F1>    :vert help<space>
 " Set status line content
 function! s:StatusLineCustom()
   if has("statusline") && &modifiable
-    setlocal statusline=\ %{exists('g:loaded_buftabs')?buftabs#statusline(-45):'%<%F'}
+    if exists('g:loaded_buftabs')
+      setlocal statusline=\ %{buftabs#statusline(-45)}
+    else
+      setlocal statusline=\ %<%F
+    endif
     setlocal statusline+=\ %=
     setlocal statusline+=\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r
     setlocal statusline+=\ [%{&expandtab==0?'tabs':'space'}]
@@ -912,6 +916,18 @@ function! s:NetrwCloseWnd()
     unlet s:netrw_buf_num
   endif
 endfunction
+
+
+" *******************************************************
+" } Cscope {
+" *******************************************************
+
+" Add any cscope database in the given environment variable
+"for db in add(split($CSCOPE_DB), "cscope.out")
+"  if filereadable(db)
+"    silent! exe "cs add" db
+"  endif
+"endfor
 
 
 " *******************************************************
@@ -1358,3 +1374,4 @@ set noexrc
 let g:loaded_vimrc = 1
 
 " }
+
