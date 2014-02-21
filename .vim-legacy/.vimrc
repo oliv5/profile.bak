@@ -922,12 +922,32 @@ endfunction
 " } Cscope {
 " *******************************************************
 
-" Add any cscope database in the given environment variable
-"for db in add(split($CSCOPE_DB), "cscope.out")
-"  if filereadable(db)
-"    silent! exe "cs add" db
-"  endif
-"endfor
+if has("cscope")
+  " Option
+  let g:cscope_db = "cscope.out"
+  
+  " Add any cscope database in the given environment variable
+  for db in add(split($CSCOPE_DB), g:cscope_db)
+    if filereadable(db)
+      silent! exe "cs add" db
+    endif
+  endfor
+  
+  " Find and load cscope database
+  function! LoadCscope()
+    let db = findfile(g:cscope_db, ".;")
+    if (!empty(db))
+      let path = strpart(db, 0, match(db, "/".g:cscope_db."$"))
+      set nocscopeverbose " suppress 'duplicate connection' error
+      silent! exe "cs add " . db . " " . path
+      set cscopeverbose
+    endif
+  endfunction
+
+  " Autocommand
+  autocmd! BufEnter /* call LoadCscope()
+
+endif
 
 
 " *******************************************************

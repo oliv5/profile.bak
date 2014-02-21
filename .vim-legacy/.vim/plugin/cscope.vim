@@ -40,6 +40,14 @@ if has("cscope")
     " show msg when any other cscope db added
     set cscopeverbose
 
+    " add any cscope database in current directory
+    "if filereadable("cscope.out")
+    "    silent! cs add cscope.out  
+    " else add the database pointed to by environment variable 
+    "elseif $CSCOPE_DB != ""
+    "    silent! cs add $CSCOPE_DB
+    "endif
+
     " limit directory depth displayed to 3
     set cspc=3
 
