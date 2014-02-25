@@ -318,12 +318,13 @@ endfunction
 " Hook to events to show buftabs at startup, when creating and when switching
 " buffers
 "
-
-autocmd VimEnter,BufNew,BufEnter,BufWritePost * call Buftabs_show(-1)
-autocmd BufDelete * call Buftabs_show(expand('<abuf>'))
-if version >= 700
-	autocmd InsertLeave,VimResized * call Buftabs_show(-1)
-end
+augroup buftabs
+	autocmd! VimEnter,BufNew,BufEnter,BufWritePost * call Buftabs_show(-1)
+	autocmd! BufDelete * call Buftabs_show(expand('<abuf>'))
+	if version >= 700
+		autocmd! InsertLeave,VimResized * call Buftabs_show(-1)
+	end
+augroup END
 
 " vi: ts=2 sw=2
 

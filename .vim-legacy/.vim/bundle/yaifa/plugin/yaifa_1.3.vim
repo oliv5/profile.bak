@@ -43,7 +43,7 @@ let s:swset = len(split(redir,"\n")) > 1
 
 if &expandtab
         let s:default_indent = 'space'
-        let s:default_tab_width = s:swset ? &sw : 2
+        let s:default_tab_width = s:swset ? &sw : 4
 else
         let s:default_indent = 'tab'
         let s:default_tab_width = s:swset ? &sw : 4

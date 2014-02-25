@@ -176,10 +176,12 @@ execute 'set listchars+=tab:' . nr2char(187) . nr2char(183)
 set guioptions-=T       " Remove toolbar
 
 " Jump to the last cursor position
-autocmd! BufReadPost *
-  \ if line("'\"") > 0 && line ("'\"") <= line("$") |
-  \   exe "normal! g'\"" |
-  \ endif
+augroup vimrc_lastpos
+  autocmd! BufReadPost *
+    \ if line("'\"") > 0 && line ("'\"") <= line("$") |
+    \   exe "normal! g'\"" |
+    \ endif
+augroup END
 
 " Key maps
 map <localleader>n  :set nu!<CR>
@@ -243,7 +245,9 @@ nnoremap <localleader>c  :set invlist<CR>
 if exists('+autochdir')
   set noautochdir
 "else
-"  autocmd! BufEnter * silent! lcd %:p:h:gs/ /\\ /
+"  augroup vimrc_autochdir
+"    autocmd! BufEnter * silent! lcd %:p:h:gs/ /\\ /
+"  augroup END
 endif
 
 " Change global directory to the current directory of the current buffer
@@ -288,7 +292,7 @@ let g:command_t_loaded = 1
 "let g:loaded_minibufexplorer = 1
 "let g:loaded_yaifa = 1
 "let g:loaded_ctrlp = 1
-"let g:loaded_buftabs = 1
+let g:loaded_buftabs = 2 " 2 = skip loading
 
 
 " *******************************************************
@@ -641,7 +645,7 @@ function! s:WndToggleMax()
     unlet s:wndMaxFlag
   else
     augroup maxCurrWin
-      au WinEnter * wincmd _ | wincmd |
+      au! WinEnter * wincmd _ | wincmd |
     augroup END
     do maxCurrWin WinEnter
     let s:wndMaxFlag=1
@@ -664,8 +668,8 @@ if !exists("g:vimrc_useTabs") && !exists('g:loaded_minibufexplorer')
 endif
 
 " Prev/next buffer
-map  <C-b><C-n>     :bn<CR>
-map  <C-b><C-p>     :bp<CR>
+map  <C-b><C-n>       :bn<CR>
+map  <C-b><C-p>       :bp<CR>
 FnNoremap <A-Down>    :bp<CR>
 FnNoremap <A-Up>      :bn<CR>
 if !exists("g:vimrc_useTabs")
@@ -698,7 +702,7 @@ FnMap <F1>    :vert help<space>
 " Set status line content
 function! s:StatusLineCustom()
   if has("statusline") && &modifiable
-    if exists('g:loaded_buftabs')
+    if exists('g:loaded_buftabs') && g:loaded_buftabs==1
       setlocal statusline=\ %{buftabs#statusline(-45)}
     else
       setlocal statusline=\ %<%F
@@ -727,8 +731,10 @@ command! -range=% -nargs=0 StatusLineCustom call <SID>StatusLineCustom()
 noremap <silent><localleader>s  :StatusLineCustom<CR>
 
 " Set the status line once
-if !exists("g:loaded_vimrc")
-  autocmd! BufEnter * call <SID>StatusLineCustom()
+if !exists("g:loaded_buftabs")
+  augroup buftabs
+    autocmd! WinEnter * call <SID>StatusLineCustom()
+  augroup END
 endif
 
 
@@ -785,8 +791,7 @@ function! s:PreviewOpenWnd()
     wincmd p
   endif
   augroup PreviewWnd
-    au!
-    au CursorHold * nested call s:PreviewShowTag()
+    au! CursorHold * nested call s:PreviewShowTag()
   augroup END
 endfunction
 
@@ -945,8 +950,9 @@ if has("cscope")
   endfunction
 
   " Autocommand
-  autocmd! BufEnter /* call LoadCscope()
-
+  augroup cscope
+    autocmd! BufEnter * call LoadCscope()
+  augroup END
 endif
 
 
@@ -1017,9 +1023,6 @@ if !exists('g:loaded_taglist')
   let g:Tlist_Show_One_File = 1         " Always display one file tags
   let g:Tlist_Display_Tag_Scope = 0     " Display tag scope (function/constants/variables)
   let g:Tlist_Use_SingleClick = 1       " Single click instead of double
-
-  " Autoload autocommand (may not be necessary)
-  " autocmd! BufWritePost *.c,*.cc,*.cpp,*.py,*.mk,Makefile :TlistUpdate
 
   " Toggle ON/OFF
   nmap <localleader>t   :Tlist<CR>
@@ -1153,7 +1156,9 @@ if !exists('g:loaded_yaifa')
   nmap <localleader><tab>   :call YAIFA()<CR>
   " autocall when entering file
   if exists("*YAIFA")
-    autocmd! BufRead * silent! call YAIFA()
+    augroup yaifa
+      autocmd! BufRead * silent! call YAIFA()
+    augroup END
   endif
 endif
 
