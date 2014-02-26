@@ -453,8 +453,10 @@ vnoremap <C-A-H>    "+y:%s/<C-R>"//c<left><left>
 " F3 for search (n and N)
 FnMap  <F3>         n
 FnMap  <S-F3>       N
+FnMap  <C-F3>       :nohl<CR>
 vmap <S-F3>         <F3>N
 vnoremap <silent>   <F3> :<C-u>call <SID>SearchHighlight()<CR>
+vnoremap <C-F3>     :nohl<CR>
 
 " Alternative search
 nmap <silent>f      n
@@ -731,11 +733,10 @@ command! -range=% -nargs=0 StatusLineCustom call <SID>StatusLineCustom()
 noremap <silent><localleader>s  :StatusLineCustom<CR>
 
 " Set the status line once
-if !exists("g:loaded_buftabs")
-  augroup buftabs
-    autocmd! WinEnter * call <SID>StatusLineCustom()
-  augroup END
-endif
+augroup buftabs
+  autocmd! WinEnter * call <SID>StatusLineCustom()
+  autocmd! VimEnter * call <SID>StatusLineCustom()
+augroup END
 
 
 " *******************************************************
