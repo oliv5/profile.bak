@@ -478,7 +478,7 @@ set grepprg=ref\ $*
 
 " Grep
 function! s:Grep(expr)
-  execute "grep" a:expr
+  execute "grep!" a:expr
 endfunction
 
 " Count expression
@@ -727,16 +727,17 @@ endfunction
 set laststatus=2                " Always show status line
 
 " autocommand
-command! -range=% -nargs=0 StatusLineCustom call <SID>StatusLineCustom()
+command! -range=% -nargs=0 StatusLineCustom call <SID>StatusLineCustom(<f-args>)
 
 " Key mapping
-noremap <silent><localleader>s  :StatusLineCustom<CR>
+noremap <silent><localleader>s  call <SID>StatusLineCustom()<CR>
 
 " Set the status line once
-augroup buftabs
-  autocmd! WinEnter * call <SID>StatusLineCustom()
-  autocmd! VimEnter * call <SID>StatusLineCustom()
-augroup END
+if !exists("g:loaded_vimrc")
+  call <SID>StatusLineCustom()
+  let local_stl=&statusline 
+  set statusline=%!local_stl
+endif
 
 
 " *******************************************************
@@ -933,19 +934,18 @@ if has("cscope")
   let g:cscope_db = "cscope.out"
   
   " Add any cscope database in the given environment variable
-  for db in add(split($CSCOPE_DB), g:cscope_db)
-    if filereadable(db)
-      silent! exe "cs add" db
-    endif
-  endfor
+  "for db in add(split($CSCOPE_DB), g:cscope_db)
+  "  if filereadable(db)
+  "    silent! exe "cs add" db
+  "  endif
+  "endfor
   
   " Find and load cscope database
   function! LoadCscope()
     let db = findfile(g:cscope_db, ".;")
-    if (!empty(db))
-      let path = strpart(db, 0, match(db, "/".g:cscope_db."$"))
+    if (!empty(db) && filereadable(db))
       set nocscopeverbose " suppress 'duplicate connection' error
-      silent! exe "cs add " . db . " " . path
+      silent! exe "cs add" db matchstr(db, ".*/") 
       set cscopeverbose
     endif
   endfunction
@@ -1086,7 +1086,7 @@ if !exists('g:loaded_minibufexplorer')
   let g:miniBufExplTabWrap = 1
   let g:miniBufExplMinSize = 1
   let g:miniBufExplMaxSize = 3
-  let g:miniBufExplSortBy = 'name'
+  let g:miniBufExplSortBy = 'number'
   let g:miniBufExplBRSplit = 0
 
   " Colors
@@ -1242,7 +1242,7 @@ endif
 " *******************************************************
 if !exists('g:loaded_tagbar')
   " Options
-  let g:tagbar_left = 1
+  let g:tagbar_left = 0
   let g:tagbar_width = 25
   let g:tagbar_autoshowtag = 0
   let g:tagbar_expand = 1

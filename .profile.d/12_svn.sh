@@ -101,11 +101,18 @@ function svn-merge() {
   fi
 }
 
-# Commit a list of file
+# Commit a list of files
 function svn-ci() {
   CL="CL$(svn-date)"
   svn cl "$CL" "$@"
   svn ci --cl "$CL"
+}
+
+# Make a dev commit of a list of files
+function svn-cid() {
+  CL="CL$(svn-date)"
+  svn cl "$CL" "$@"
+  svn ci --cl "$CL" -m "Development commit $(svn-date)"
 }
 
 # Create a changelist
