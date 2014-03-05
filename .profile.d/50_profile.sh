@@ -5,11 +5,6 @@
 export PATH="${PATH//\~/${HOME}}"
 export PATH="${PATH//.:/}"
 
-# Call env external profile script
-if [ -f ~/.profile.before ]; then
-    source ~/.profile.before
-fi
-
 # Use vim as editor
 [ -z "$EDITOR" ] && export EDITOR="$(which vi)"
 [ -z "$VISUAL" ] && export VISUAL="$(which vi)"
