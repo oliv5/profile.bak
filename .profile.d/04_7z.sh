@@ -27,7 +27,7 @@ function 7zdiff() {
   TMP=$(mktemp -d)
   for FILE in "$@"; do
     7z x "$FILE" -o"$TMP"
-    echo -e '\nDiff:'
+    echo -e '\nDiff list:'
     diffd "$TMP" . | grep -v "Only in ."
   done
 }

@@ -314,3 +314,7 @@ function svn-cat () {
   svn cat ${1:+-r $1}${2:+:$2} ${@:3}
 }
 
+# Diff an archive with current repo
+function svn-zipdiff() {
+  7zdiff "${1:?Please specify the archive to use}"
+}

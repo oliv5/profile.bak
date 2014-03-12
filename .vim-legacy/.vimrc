@@ -338,6 +338,10 @@ noremap Y y$
 " Word quote
 nnoremap <silent> <leader>" viw<esc>a"<esc>hbi"<esc>lel
 
+" Upper/lower case
+vnoremap <silent> <C-u>     U
+vnoremap <silent> <C-l>     L
+
 
 " *******************************************************
 " } Space to tabs / tab to spaces {
@@ -530,13 +534,14 @@ set backspace=indent,eol,start
 
 " Jump to line
 FnNoremap  <C-j> :
+vnoremap <C-j>  <C-c>:
 
 " Prev/next cursor location
-" Note: <C-[> is Esc
+" Note: <C-[> is Esc, <C-c> exits visual mode
 FnNoremap <A-Left>  <C-O>
 FnNoremap <A-Right> <C-I>
-vnoremap <A-Left>  <C-[><C-O>
-vnoremap <A-Right> <C-[><C-I>
+vnoremap <A-Left>  <C-c><C-O>
+vnoremap <A-Right> <C-c><C-I>
 
 
 " *******************************************************
@@ -701,8 +706,24 @@ FnMap <F1>    :vert help<space>
 " } Statusline {
 " *******************************************************
 
+" Returns "mixed" when indentation is mixed
+function! b:StatuslineWarning()
+  if !exists("b:statusline_tab_warning")
+    let tabs = search('^\t', 'nw') != 0
+    let spaces = search('^ ', 'nw') != 0
+    if tabs && spaces
+      let b:statusline_tab_warning =  '-mixed'
+    elseif (spaces && !&et) || (tabs && &et)
+      let b:statusline_tab_warning = '-error'
+    else
+      let b:statusline_tab_warning = ''
+    endif
+  endif
+  return b:statusline_tab_warning
+endfunction
+
 " Set status line content
-function! s:StatusLineCustom()
+function! s:StatuslineCustom()
   if has("statusline") && &modifiable
     if exists('g:loaded_buftabs') && g:loaded_buftabs==1
       setlocal statusline=\ %{buftabs#statusline(-45)}
@@ -711,7 +732,7 @@ function! s:StatusLineCustom()
     endif
     setlocal statusline+=\ %=
     setlocal statusline+=\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r
-    setlocal statusline+=\ [%{&expandtab==0?'tabs':'space'}]
+    setlocal statusline+=\ [%{&expandtab==0?'tabs':'space'}%{b:StatuslineWarning()}]
     setlocal statusline+=\ %y\ %c,%l/%L\ %P
   endif
 endfunction
@@ -726,17 +747,20 @@ endfunction
 " Line options
 set laststatus=2                " Always show status line
 
-" autocommand
-command! -range=% -nargs=0 StatusLineCustom call <SID>StatusLineCustom(<f-args>)
+" User command
+command! -range=% -nargs=0 StatuslineCustom call <SID>StatuslineCustom(<f-args>)
+
+" Update the warning flag
+autocmd cursorhold,bufwritepost * unlet! b:statusline_tab_warning
 
 " Key mapping
-noremap <silent><localleader>s  call <SID>StatusLineCustom()<CR>
+noremap <silent><localleader>s  call <SID>StatuslineCustom()<CR>
 
 " Set the status line once
 if !exists("g:loaded_vimrc")
-  call <SID>StatusLineCustom()
-  let local_stl=&statusline 
-  set statusline=%!local_stl
+  call <SID>StatuslineCustom()
+  "let local_stl=&statusline 
+  "set statusline=%!local_stl
 endif
 
 
@@ -1091,9 +1115,9 @@ if !exists('g:loaded_minibufexplorer')
 
   " Colors
   hi MBENormal               guifg=#FFFFFF guibg=bg
-  hi MBEChanged              guifg=#FFFFFF guibg=bg
+  hi MBEChanged              guifg='orange' guibg=bg
   hi MBEVisibleNormal        guifg=#FFFFFF guibg=bg
-  hi MBEVisibleChanged       guifg=#FFFFFF guibg=bg
+  hi MBEVisibleChanged       guifg='orange' guibg=bg
   hi MBEVisibleActiveNormal  guifg='cyan'  guibg=bg gui=bold,underline
   hi MBEVisibleActiveChanged guifg=#FF0000 guibg=bg
 
@@ -1293,8 +1317,11 @@ nnoremap <silent><leader>d  :DirDiff\
 " } Easytags plugin {
 " *******************************************************
 " Options
-let g:easytags_updatetime_min = 5000    " Wait for few ms before updating tags
 let g:easytags_dynamic_files = 1        " Use project tag file instead of ~/.vimtags
+let g:easytags_autorecurse = 0          " No recursion, update current file only
+let g:easytags_include_members = 1      " C++ include class members
+let g:easytags_events = ['BufWritePost']" Update tags on events
+let g:easytags_updatetime_min = 8000    " Wait for few ms before updating tags
 let g:easytags_on_cursorhold = 0        " No update on cursor hold
 
 
