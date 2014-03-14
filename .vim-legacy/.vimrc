@@ -202,7 +202,7 @@ execute 'set listchars+=tab:' . nr2char(187) . nr2char(183)
 set guioptions-=T       " Remove toolbar
 
 " Jump to the last cursor position
-augroup vimrc_lastpos
+augroup vimrc_cursor_lastpos
   autocmd! BufReadPost *
     \ if line("'\"") > 0 && line ("'\"") <= line("$") |
     \   exe "normal! g'\"" |
@@ -619,6 +619,16 @@ if exists('g:vimrc_useTabs')
 else
   FnNoremap  <C-PgUp>   :tabn<CR>
   FnNoremap  <C-PgDown> :tabp<CR>
+endif
+
+" Autocommands
+if exists('g:vimrc_useTabs')
+  if (&diff==0) " no in diff mode
+    " Open in tab allways
+    augroup vimrc_tab
+      autocmd! BufReadPost * tab ball
+    augroup END
+  endif
 endif
 
 
