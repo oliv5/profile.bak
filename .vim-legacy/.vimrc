@@ -722,18 +722,18 @@ function! b:StatuslineWarning()
   return b:statusline_tab_warning
 endfunction
 
-" Set status line content
-function! s:StatuslineCustom()
+" Set global status line content
+function! s:StatuslineGlobal()
   if has("statusline") && &modifiable
     if exists('g:loaded_buftabs') && g:loaded_buftabs==1
-      setlocal statusline=\ %{buftabs#statusline(-45)}
+      set statusline=\ %{buftabs#statusline(-45)}
     else
-      setlocal statusline=\ %<%F
+      set statusline=\ %<%F
     endif
-    setlocal statusline+=\ %=
-    setlocal statusline+=\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r
-    setlocal statusline+=\ [%{&expandtab==0?'tabs':'space'}%{b:StatuslineWarning()}]
-    setlocal statusline+=\ %y\ %c,%l/%L\ %P
+    set statusline+=\ %=
+    set statusline+=\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r
+    set statusline+=\ [%{&expandtab==0?'tabs':'space'}%{b:StatuslineWarning()}]
+    set statusline+=\ %y\ %c,%l/%L\ %P
   endif
 endfunction
 
@@ -748,19 +748,17 @@ endfunction
 set laststatus=2                " Always show status line
 
 " User command
-command! -range=% -nargs=0 StatuslineCustom call <SID>StatuslineCustom(<f-args>)
+command! -range=% -nargs=0 StatuslineGlobal call <SID>StatuslineGlobal(<f-args>)
 
 " Update the warning flag
 autocmd cursorhold,bufwritepost * unlet! b:statusline_tab_warning
 
 " Key mapping
-noremap <silent><localleader>s  call <SID>StatuslineCustom()<CR>
+noremap <silent><localleader>s  :call <SID>StatuslineGlobal()<CR>
 
 " Set the status line once
 if !exists("g:loaded_vimrc")
-  call <SID>StatuslineCustom()
-  "let local_stl=&statusline 
-  "set statusline=%!local_stl
+  call s:StatuslineGlobal()
 endif
 
 
