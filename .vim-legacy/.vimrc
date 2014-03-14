@@ -35,6 +35,32 @@ endif
 
 
 " *******************************************************
+" } Select options {
+" *******************************************************
+if $VIM_USETABS != ""
+  let g:vimrc_useTabs = 1
+  " Disable MBE plugin
+  let g:loaded_minibufexplorer = 1
+endif
+
+" Disable the following plugins
+let g:loaded_project = 1
+let g:loaded_taglist = 1
+"let g:loaded_tagbar = 1
+let g:loaded_srcexpl = 1
+let g:loaded_nerd_tree = 1
+let g:loaded_trinity = 1
+let g:ccvext_version = 1
+let g:loaded_yankring = 1
+"let g:loaded_cctree = 1
+let g:command_t_loaded = 1
+"let g:loaded_minibufexplorer = 1
+"let g:loaded_yaifa = 1
+"let g:loaded_ctrlp = 1
+let g:loaded_buftabs = 2 " 2 = skip loading
+
+
+" *******************************************************
 " } Global settings {
 " *******************************************************
 set path=.,,**              " Search path: recurse from current directory
@@ -49,14 +75,6 @@ set shell=/bin/bash\ --rcfile\ ~/.bashrc\ -i    " Set shell, load user profile
 
 " Force write with sudo after opening the file
 cmap w!! w !sudo tee % >/dev/null
-
-
-" *******************************************************
-" } Source vimrc {
-" *******************************************************
-" Resource vimrc
-noremap  <leader>s      :source $MYVIMRC<CR>
-cnoreabbrev reload source $MYVIMRC
 
 
 " *******************************************************
@@ -96,6 +114,14 @@ endfunction
 command! -nargs=1 FnMap      call FnMap(<f-args>)
 command! -nargs=1 FnNoremap  call FnNoremap(<f-args>)
 command! -nargs=+ AltNmap    call AltNmap(<f-args>)
+
+
+" *******************************************************
+" } Source vimrc {
+" *******************************************************
+" Resource vimrc
+noremap  <leader>s      :source $MYVIMRC<CR>
+cnoreabbrev reload source $MYVIMRC
 
 
 " *******************************************************
@@ -259,18 +285,7 @@ nnoremap <leader>e :e <C-R>=expand("%:p:h") . "/" <CR>
 
 
 " *******************************************************
-" } Mswin plugin - loaded soon to override its settings later {
-" *******************************************************
-"source ~/.vim/plugin/mswin.vim
-"let g:skip_loading_mswin = 1
-
-" Additional key mapping
-vmap <C-z>  <C-c><C-z>
-vmap <C-y>  <C-c><C-y>
-
-
-" *******************************************************
-" } Plugin general management {
+" } Load plugins {
 " *******************************************************
 " Start plugin pathogen
 filetype off                " force reloading *after* pathogen loaded
@@ -278,21 +293,14 @@ runtime bundle/pathogen/autoload/pathogen.vim
 execute pathogen#infect()
 filetype plugin indent on   " enable detection, plugins and indenting in one step
 
-" Disable the following plugins
-let g:loaded_project = 1
-let g:loaded_taglist = 1
-"let g:loaded_tagbar = 1
-let g:loaded_srcexpl = 1
-let g:loaded_nerd_tree = 1
-let g:loaded_trinity = 1
-let g:ccvext_version = 1
-let g:loaded_yankring = 1
-"let g:loaded_cctree = 1
-let g:command_t_loaded = 1
-"let g:loaded_minibufexplorer = 1
-"let g:loaded_yaifa = 1
-"let g:loaded_ctrlp = 1
-let g:loaded_buftabs = 2 " 2 = skip loading
+
+" *******************************************************
+" } Mswin plugin - its settings may be overriden afterwards {
+" *******************************************************
+
+" Additional key mapping
+vmap <C-z>  <C-c><C-z>
+vmap <C-y>  <C-c><C-y>
 
 
 " *******************************************************
@@ -588,20 +596,21 @@ nmap <silent><A-m>      :delmarks A-Z0-9<CR>
 " *******************************************************
 " } Tab management {
 " *******************************************************
-" Tab name is the filename only
-if exists('+gtl')
+
+" Options
+if exists('g:vimrc_useTabs')
+  silent! set switchbuf=usetab,newtab  " Buffer switch
+endif
+if exists('+gtl') " Tab name is the filename only
   set gtl=%t
 endif
 
-" Enable/disable tabs
-if $VIM_USETABS != ""
-  let g:vimrc_useTabs = 1
-  set switchbuf=usetab,newtab  " Buffer switch
-endif
-
 " Open/close tab
-FnMap  <C-t>t   :tabnew<CR>:e<space>
+FnMap  <C-t>t   :tabe<space>
 FnMap  <C-t>c   :tabclose<CR>
+if exists('g:vimrc_useTabs')
+  FnNoremap  <C-F4>     :tabclose<CR>
+endif
 
 " Prev/next tab
 if exists('g:vimrc_useTabs')
