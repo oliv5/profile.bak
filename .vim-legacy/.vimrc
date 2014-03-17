@@ -490,12 +490,18 @@ set grepprg=ref\ $*
 
 " Grep
 function! s:Grep(expr)
-  execute "grep!" a:expr
+  let l:old_dir=getcwd()
+  execute 'cd' s:FindTagsRoot()
+  execute 'grep!' a:expr
+  execute 'cd' l:old_dir
 endfunction
 
 " Count expression
 function! s:GrepCount(expr)
-  execute "!ref" a:expr "| wc -l"
+  let l:old_dir=getcwd()
+  execute 'cd' s:FindTagsRoot()
+  execute '!ref' a:expr '| wc -l'
+  execute 'cd' l:old_dir
 endfunction
 
 " Next grep
@@ -520,7 +526,7 @@ nnoremap <silent>g          :GrepNext<CR>
 nnoremap <silent>G          :GrepPrev<CR>
 nnoremap <C-g>              :Grep<SPACE>
 nnoremap <C-g><C-g>         :Grep<SPACE><C-r><C-w>
-vnoremap <C-g>             "+y:Grep<SPACE><C-r>"
+vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
 nnoremap <A-g>              :GrepCount<SPACE><C-r><C-w>
 
 " User commands
@@ -785,6 +791,7 @@ endif
 " } Tags {
 " *******************************************************
 " Set tags root
+let g:tags_db='tags'
 "set tags=./tags,tags;$HOME
 set tags=./tags;$HOME
 
@@ -796,6 +803,12 @@ endfunction
 " Goto prev tag (& loop)
 function! s:TagPrevTag()
   try | silent tprevious | catch | silent! tlast | endtry
+endfunction
+
+" Find tag root directory
+function! s:FindTagsRoot()
+  let db = findfile(g:tags_db, ".;")
+  return fnamemodify(db, ':p:h')
 endfunction
 
 " User commands
@@ -1334,12 +1347,14 @@ nnoremap <silent><leader>d  :DirDiff\
 " } Easytags plugin {
 " *******************************************************
 " Options
+let g:easytags_auto_update = 1          " Enable/disable tags auto-updating
 let g:easytags_dynamic_files = 1        " Use project tag file instead of ~/.vimtags
 let g:easytags_autorecurse = 0          " No recursion, update current file only
 let g:easytags_include_members = 1      " C++ include class members
-let g:easytags_events = ['BufWritePost']" Update tags on events
-let g:easytags_updatetime_min = 8000    " Wait for few ms before updating tags
-let g:easytags_on_cursorhold = 0        " No update on cursor hold
+"let g:easytags_events = ['BufWritePost']" Update tags on events
+let g:easytags_updatetime_min = 30000   " Wait for few ms before updating tags
+let g:easytags_updatetime_warn = 0      " Disable warning when update-time is low
+let g:easytags_on_cursorhold = 1        " Update on cursor hold
 
 
 " *******************************************************
