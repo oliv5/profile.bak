@@ -58,6 +58,7 @@ let g:command_t_loaded = 1
 "let g:loaded_yaifa = 1
 "let g:loaded_ctrlp = 1
 let g:loaded_buftabs = 2 " 2 = skip loading
+let g:loaded_easytags = 1
 
 
 " *******************************************************
@@ -491,7 +492,7 @@ set grepprg=ref\ $*
 " Grep
 function! s:Grep(expr)
   let l:old_dir=getcwd()
-  execute 'cd' s:FindTagsRoot()
+  execute 'cd' s:TagFindRoot()
   execute 'grep!' a:expr
   execute 'cd' l:old_dir
 endfunction
@@ -499,7 +500,7 @@ endfunction
 " Count expression
 function! s:GrepCount(expr)
   let l:old_dir=getcwd()
-  execute 'cd' s:FindTagsRoot()
+  execute 'cd' s:TagFindRoot()
   execute '!ref' a:expr '| wc -l'
   execute 'cd' l:old_dir
 endfunction
@@ -692,6 +693,23 @@ nnoremap <c-\<> :call <SID>WndToggleMax()<CR>
 " *******************************************************
 " } Buffer management {
 " *******************************************************
+
+" Close buffers with given extension
+function! s:BufClose(ext)
+  let last = bufnr('$') 
+  let idx = 1
+  while idx <= last
+    if bufexists(idx) && bufname(idx) =~ a:ext.'$'
+      execute 'bdelete' idx
+    endif 
+    let idx = idx + 1 
+  endwhile 
+endfunction
+
+" User commands
+"command! -nargs=1  BufClose  bufdo if expand("%:e")==?<f-args> <BAR> bunload <BAR> endif
+command! -nargs=1 BufClose  call s:BufClose(<f-args>)
+
 " Open/close buffer (close=:bd or :bw)
 map <C-b>o          :e<SPACE>
 map <C-b>c          :bd<CR>
@@ -806,7 +824,7 @@ function! s:TagPrevTag()
 endfunction
 
 " Find tag root directory
-function! s:FindTagsRoot()
+function! s:TagFindRoot()
   let db = findfile(g:tags_db, ".;")
   return fnamemodify(db, ':p:h')
 endfunction
@@ -1347,7 +1365,7 @@ nnoremap <silent><leader>d  :DirDiff\
 " } Easytags plugin {
 " *******************************************************
 " Options
-let g:easytags_auto_update = 1          " Enable/disable tags auto-updating
+let g:easytags_auto_update = 0          " Enable/disable tags auto-updating
 let g:easytags_dynamic_files = 1        " Use project tag file instead of ~/.vimtags
 let g:easytags_autorecurse = 0          " No recursion, update current file only
 let g:easytags_include_members = 1      " C++ include class members
