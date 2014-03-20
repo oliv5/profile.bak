@@ -30,3 +30,7 @@ function rdiffm() {
 function bdiff() {
   cmp -l ${1:?Please specify input file 1} ${2:?Please specify input file 2} | gawk '{printf "%08X %02X %02X\n", $1-'${3:-0}', strtonum(0$2), strtonum(0$3)}'
 }
+
+function mkbak() {
+  cp "${1:?Please specify input file 1}" "${1}.$(date +%Y%m%d-%H%M%S).bak"
+}
