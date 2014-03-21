@@ -16,7 +16,6 @@ alias sl='svn ls --depth infinity'
 alias sdd='svn diff'
 alias sds='svn diff --summarize'
 alias sdm='svn diff --diff-cmd meld'
-alias svn-diffm='svn-diff --diff-cmd meld'
 alias svn-resolve='svn-merge'
 
 # Build a unique backup directory for this repo
@@ -307,6 +306,9 @@ function svn-shortlog() {
 # or list changed files in a range of revisions 
 function svn-diff() {
   svn diff ${1:+-r $1}${2:+:$2} ${3:---summarize} ${@:4}
+}
+function svn-diffm() {
+  svn diff ${1:+-r $1}${2:+:$2} ${3:---summarize} ${@:4} --diff-cmd meld
 }
 
 # Display content of a file

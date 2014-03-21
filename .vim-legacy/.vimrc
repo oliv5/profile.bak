@@ -835,9 +835,11 @@ command! -nargs=0 -bar Tprev    call s:TagPrevTag()
 
 " Key mapping
 noremap <C-ENTER>           <C-]>
-noremap <C-SPACE>           <C-t>
+noremap <C-BACKSPACE>       <C-t>
+FnNoremap <silent><C-F5>    <C-]>
 FnNoremap <silent><F5>      :Tnext<CR>
 FnNoremap <silent><S-F5>    :Tprev<CR>
+FnNoremap <silent><C-t>     <C-]>
 nnoremap <silent>t          :Tnext<CR>
 nnoremap <silent>T          :Tprev<CR>
 
@@ -943,24 +945,34 @@ function! s:PreviewHighlightTag(pattern)
   endif
 endfunction
 
+" Remap Preview Window key
+function! s:PreviewRemap(mapfct, key, action)
+  if mapcheck(a:key,'n')==''
+    execute a:mapfct a:key a:action
+  else
+    execute a:mapfct a:key
+           \ ":if &previewwindow <BAR>" a:action "<BAR> else <BAR>"
+           \ substitute(mapcheck(a:key,'n'),'<CR>\|:','','g') "<BAR> endif<CR>"
+  endif
+endfunction
+
 " User commands
 command! -nargs=0 -bar Popen    call s:PreviewOpenWnd()
 command! -nargs=0 -bar Pclose   call s:PreviewCloseWnd()
 command! -nargs=0 -bar Ptoggle  call s:PreviewToggleWnd()
 command! -nargs=0 -bar Pnext    call s:PreviewNextTag()
 command! -nargs=0 -bar Pprev    call s:PreviewPrevTag()
+command! -nargs=0 -bar Ptag     call s:PreviewShowTag()
 
 " Key mapping
-FnNoremap <silent><C-F5>    :Pnext<CR>
-FnNoremap <silent><C-S-F5>  :Pprev<CR>
-nnoremap <silent><C-t>      :Pnext<CR>
-nnoremap <silent><C-A-T>    :Pprev<CR>
-nmap <localleader>p         :Ptoggle<CR>
-nmap <localleader>pp        :Pclose<CR>
-execute "nmap <silent>t     :if &previewwindow <BAR> Pnext <BAR> else <BAR>"
-            \ substitute(mapcheck('t','n'),'<CR>\|:','','g') "<BAR> endif<CR>"
-execute "nmap <silent>T     :if &previewwindow <BAR> Pprev <BAR> else <BAR>"
-            \ substitute(mapcheck('T','n'),'<CR>\|:','','g') "<BAR> endif<CR>"
+nmap <localleader>p          :Ptoggle<CR>
+nmap <localleader>pp         :Pclose<CR>
+call s:PreviewRemap('FnNoremap <silent>', '<C-F5>',  'Ptag')
+call s:PreviewRemap('FnNoremap <silent>', '<F5>',    'Pnext')
+call s:PreviewRemap('FnNoremap <silent>', '<S-F5>',  'Pprev')
+call s:PreviewRemap('FnNoremap <silent>', '<C-t>',   'Ptag')
+call s:PreviewRemap('nmap <silent>',      't',       'Pnext')
+call s:PreviewRemap('nmap <silent>',      'T',       'Pprev')
 
 
 " *******************************************************
