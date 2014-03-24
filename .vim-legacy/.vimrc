@@ -702,13 +702,28 @@ function! s:BufClose(ext)
     if bufexists(idx) && bufname(idx) =~ a:ext.'$'
       execute 'bdelete' idx
     endif 
-    let idx = idx + 1 
+    let idx = idx + 1
+  endwhile 
+endfunction
+
+" Cycle through each buffer, ask to close
+function! s:BufCloseAll(ask)
+  let last = bufnr('$') 
+  let idx = 1
+  while idx <= last
+    if bufexists(idx) && getbufvar(idx, '&modifiable')
+      if !a:ask || confirm("Close buffer '".bufname(idx)."'?", "&yes\n&no", 1)==1
+        execute 'bdelete' idx
+      endif
+    endif 
+    let idx = idx + 1
   endwhile 
 endfunction
 
 " User commands
 "command! -nargs=1  BufClose  bufdo if expand("%:e")==?<f-args> <BAR> bunload <BAR> endif
-command! -nargs=1 BufClose  call s:BufClose(<f-args>)
+command! -nargs=1 BufClose      call s:BufClose(<f-args>)
+command! -nargs=1 BufCloseAll   call s:BufCloseAll(<f-args>)
 
 " Open/close buffer (close=:bd or :bw)
 map <C-b>o          :e<SPACE>
