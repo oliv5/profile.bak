@@ -697,7 +697,7 @@ nnoremap <c-\<> :call <SID>WndToggleMax()<CR>
 " Close buffer
 function! s:BufClose(...)
   if exists(':Bdelete')
-    execute 'Bdelete' a:1
+    execute 'silent! Bdelete' a:1
   elseif exists(':MBEbd')
     execute 'MBEbd' a:1
   else
@@ -711,7 +711,7 @@ function! s:BufCloseByExt(ext)
   let idx = 1
   while idx <= last
     if bufexists(idx) && bufname(idx) =~ a:ext.'$'
-      BufClose idx
+      execute 'BufClose' idx
     endif 
     let idx = idx + 1
   endwhile
@@ -723,8 +723,8 @@ function! s:BufCloseAll(...)
   let idx = 1
   while idx <= last
     if bufexists(idx) && getbufvar(idx, '&modifiable')
-      if !a:0 || !a:1 || confirm("Close buffer '".bufname(idx)."'?", "&yes\n&no", 1)==1
-        BufClose idx
+      if (a:0 && !a:1) || confirm("Close buffer '".bufname(idx)."'?", "&yes\n&no", 1)==1
+        execute 'BufClose' idx
       endif
     endif
     let idx = idx + 1
