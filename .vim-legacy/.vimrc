@@ -59,6 +59,7 @@ let g:command_t_loaded = 1
 "let g:loaded_ctrlp = 1
 let g:loaded_buftabs = 2 " 2 = skip loading
 let g:loaded_easytags = 1
+let g:loaded_bbye = 1
 
 
 " *******************************************************
@@ -693,37 +694,47 @@ nnoremap <c-\<> :call <SID>WndToggleMax()<CR>
 " *******************************************************
 " } Buffer management {
 " *******************************************************
+" Close buffer
+function! s:BufClose(...)
+  if exists(':Bdelete')
+    execute 'Bdelete' a:1
+  elseif exists(':MBEbd')
+    execute 'MBEbd' a:1
+  else
+    bdelete a:1
+  endif
+endfunction
 
 " Close buffers with given extension
-function! s:BufClose(ext)
+function! s:BufCloseByExt(ext)
   let last = bufnr('$') 
   let idx = 1
   while idx <= last
     if bufexists(idx) && bufname(idx) =~ a:ext.'$'
-      execute 'bdelete' idx
+      BufClose idx
     endif 
     let idx = idx + 1
-  endwhile 
+  endwhile
 endfunction
 
 " Cycle through each buffer, ask to close
-function! s:BufCloseAll(ask)
+function! s:BufCloseAll(...)
   let last = bufnr('$') 
   let idx = 1
   while idx <= last
     if bufexists(idx) && getbufvar(idx, '&modifiable')
-      if !a:ask || confirm("Close buffer '".bufname(idx)."'?", "&yes\n&no", 1)==1
-        execute 'bdelete' idx
+      if !a:0 || !a:1 || confirm("Close buffer '".bufname(idx)."'?", "&yes\n&no", 1)==1
+        BufClose idx
       endif
-    endif 
+    endif
     let idx = idx + 1
   endwhile 
 endfunction
 
 " User commands
-"command! -nargs=1  BufClose  bufdo if expand("%:e")==?<f-args> <BAR> bunload <BAR> endif
-command! -nargs=1 BufClose      call s:BufClose(<f-args>)
-command! -nargs=1 BufCloseAll   call s:BufCloseAll(<f-args>)
+command! -nargs=? BufClose call s:BufClose(<f-args>)
+command! -nargs=1 BufCloseByExt call s:BufCloseByExt(<f-args>)
+command! -nargs=? BufCloseAll   call s:BufCloseAll(<f-args>)
 
 " Open/close buffer (close=:bd or :bw)
 map <C-b>o          :e<SPACE>
@@ -1400,6 +1411,17 @@ let g:easytags_include_members = 1      " C++ include class members
 let g:easytags_updatetime_min = 30000   " Wait for few ms before updating tags
 let g:easytags_updatetime_warn = 0      " Disable warning when update-time is low
 let g:easytags_on_cursorhold = 1        " Update on cursor hold
+
+
+" *******************************************************
+" } Bbye plugin {
+" *******************************************************
+" Key mapping
+:nnoremap <leader>q     :Bdelete<CR>
+:nnoremap <leader>Q     :bufdo :Bdelete<CR>
+if !exists("g:vimrc_useTabs") && !exists('g:loaded_minibufexplorer') && exists('g:loaded_bbye')
+  FnMap <C-F4>          :Bdelete<CR>
+endif
 
 
 " *******************************************************
