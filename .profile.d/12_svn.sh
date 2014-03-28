@@ -26,14 +26,14 @@ function svn-bckdir() {
   echo "${DIR}"
 }
 
-# Build a unique backup filename for this repo
+# Build a backup filename for this repo
 function svn-bckname() {
   echo "${1:+$1_}$(basename $(svn-repo))_$(basename $(svn-url))${2:+_$2}"
 }
 
-# Build a unique backup filepath for this repo
-function svn-bckpath() {
-  echo $(svn-bckdir "$1" "$2")/$(svn-bckname "$3" "$4")
+# Returns the last archive found based on given name
+function svn-archive() {
+  ls -t1 ${1:-$(svn-bckdir)/*} | head -n 1
 }
 
 # Retrieve date
@@ -318,5 +318,18 @@ function svn-cat () {
 
 # Diff an archive with current repo
 function svn-zipdiff() {
-  7zdiff "${1:?Please specify the archive to use}"
+  ARCHIVE="$1"
+  if [ -z "$ARCHIVE" ]; then
+    ARCHIVE="$(svn-archive)"
+  fi
+  7zdiff "$ARCHIVE"
+}
+
+# Meld an archive with current repo
+function svn-zipdiffm() {
+  ARCHIVE="$1"
+  if [ -z "$ARCHIVE" ]; then
+    ARCHIVE="$(svn-archive)"
+  fi
+  7zdiffm "$ARCHIVE"
 }

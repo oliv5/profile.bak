@@ -31,3 +31,12 @@ function 7zdiff() {
     diffd "$TMP" . | grep -v "Only in ."
   done
 }
+
+# 7z deflate and meld
+function 7zdiffm() {
+  TMP=$(mktemp -d)
+  for FILE in "$@"; do
+    7z x "$FILE" -o"$TMP"
+    meld "$TMP" .
+  done
+}

@@ -433,7 +433,7 @@ map <silent><localleader>v  :call <SID>SpaceTabToggle()<CR>
 
 
 " *******************************************************
-" } Search & Replace {
+" } Search {
 " *******************************************************
 set ignorecase      " Case-insensitive search
 set smartcase       " Unless search contain upper-case letters
@@ -458,11 +458,7 @@ nnoremap <localleader>f     :set invhls hls?<CR>
 " Search & replace
 FnNoremap <C-F>     /
 FnNoremap <C-A-F>   yiw:/<C-R>"
-FnNoremap <C-H>     :%s///cg<left><left><left><left>
-FnNoremap <C-A-H>   yiw:%s/<C-R>"/<C-R>"/cg<left><left><left>
 vnoremap <C-F>      "+y:/<C-R>"
-vnoremap <C-H>      "+y:%s/<C-R>"/<C-R>"/cg<left><left><left>
-vnoremap <C-A-H>    "+y:%s/<C-R>"//c<left><left>
 
 " F3 for search (n and N)
 FnMap  <F3>         n
@@ -483,6 +479,29 @@ nmap µ              #
 
 
 " *******************************************************
+" } Sed & replace {
+" *******************************************************
+" Sed (replace in files)
+function! s:Sed(...)
+  let dir='"' . s:TagFindRoot() . '/' . a:3 . '"'
+  execute '!_fsed' a:1 a:2 dir
+endfunction
+
+" User commands
+command! -nargs=* -bar Sed  call <SID>Sed(<f-args>)
+
+" Replace
+FnNoremap <C-H>     :%s///cg<left><left><left><left>
+"FnNoremap <C-A-H>   yiw:%s/<C-R>"/<C-R>"/cg<left><left><left>
+vnoremap  <C-H>     "+y:%s/<C-R>"/<C-R>"/cg<left><left><left>
+"vnoremap  <C-A-H>   "+y:%s/<C-R>"//cg<left><left>
+
+" Sed
+FnNoremap <C-A-H>   :Sed 
+vnoremap  <C-A-H>   "+y:Sed <C-R>" 
+
+
+" *******************************************************
 " } Grep {
 " *******************************************************
 " Grep program
@@ -492,18 +511,12 @@ set grepprg=ref\ $*
 
 " Grep
 function! s:Grep(expr)
-  let l:old_dir=getcwd()
-  execute 'cd' s:TagFindRoot()
-  execute 'grep!' a:expr
-  execute 'cd' l:old_dir
+  execute 'grep!' a:expr s:TagFindRoot()
 endfunction
 
 " Count expression
 function! s:GrepCount(expr)
-  let l:old_dir=getcwd()
-  execute 'cd' s:TagFindRoot()
-  execute '!ref' a:expr '| wc -l'
-  execute 'cd' l:old_dir
+  execute '!ref' a:expr s:TagFindRoot() '| wc -l'
 endfunction
 
 " Next grep
@@ -618,6 +631,7 @@ FnMap  <C-t>t   :tabe<space>
 FnMap  <C-t>c   :tabclose<CR>
 if exists('g:vimrc_useTabs')
   FnNoremap  <C-F4>     :tabclose<CR>
+  FnNoremap  <C-S-F4>   :tabdo tabclose<CR>
 endif
 
 " Prev/next tab
@@ -671,6 +685,23 @@ augroup exit_to_normal
   autocmd! WinEnter * stopinsert
 augroup END
 
+" Zoom In/out window
+function! s:ZoomWindow() abort
+  if exists('s:zw_restore')
+    execute s:zw_restore
+    unlet s:zw_restore
+    au! ZoomWindow
+  else
+    let s:zw_restore = winrestcmd()
+    "vert resize
+    wincmd _
+    wincmd |
+    augroup ZoomWindow
+      au! WinLeave * call s:ZoomWindow()
+    augroup END
+  endif
+endfunction
+
 " Toggles window max/equal
 function! s:WndToggleMax()
   if exists('s:wndMaxFlag')
@@ -687,8 +718,9 @@ function! s:WndToggleMax()
 endfunction
 
 " Key maps
-nnoremap <localleader>w :call <SID>WndToggleMax()<CR>
-nnoremap <c-\<> :call <SID>WndToggleMax()<CR>
+nnoremap <localleader>w     :call <SID>WndToggleMax()<CR>
+nnoremap <c-\<>             :call <SID>WndToggleMax()<CR>
+nnoremap x                  :call <SID>ZoomWindow()<CR>
 
 
 " *******************************************************
@@ -696,12 +728,16 @@ nnoremap <c-\<> :call <SID>WndToggleMax()<CR>
 " *******************************************************
 " Close buffer
 function! s:BufClose(...)
+  let idx=''
+  if a:0
+    let idx=a:1
+  endif
   if exists(':Bdelete')
-    execute 'silent! Bdelete' a:1
+    execute 'silent! Bdelete' idx
   elseif exists(':MBEbd')
-    execute 'MBEbd' a:1
+    execute 'MBEbd' idx
   else
-    bdelete a:1
+    bdelete idx
   endif
 endfunction
 
@@ -738,9 +774,11 @@ command! -nargs=? BufCloseAll   call s:BufCloseAll(<f-args>)
 
 " Open/close buffer (close=:bd or :bw)
 map <C-b>o          :e<SPACE>
-map <C-b>c          :bd<CR>
-if !exists("g:vimrc_useTabs") && !exists('g:loaded_minibufexplorer')
-  FnMap <C-F4>      :bd<CR>
+map <C-b>c          :BufClose<CR>
+map <C-q>           :BufClose<CR>
+if !exists("g:vimrc_useTabs")
+  FnMap <C-F4>      :BufClose<CR>
+  FnMap <C-S-F4>    :BufCloseAll 1<CR>
 endif
 
 " Prev/next buffer
@@ -868,6 +906,11 @@ FnNoremap <silent><S-F5>    :Tprev<CR>
 FnNoremap <silent><C-t>     <C-]>
 nnoremap <silent>t          :Tnext<CR>
 nnoremap <silent>T          :Tprev<CR>
+
+" Autochange directory to tag root
+"augroup vimrc_autochdir_tags
+"  autocmd! BufEnter * execute "lcd" s:TagFindRoot()
+"augroup END
 
 
 " *******************************************************
@@ -1212,9 +1255,6 @@ if !exists('g:loaded_minibufexplorer')
 
   " Overwrite open/close key mapping
   FnMap <C-b>c              :MBEbd<CR>
-  if !exists("g:vimrc_useTabs")
-    FnMap <C-F4>            :MBEbd<CR>
-  endif
 
   " Cycle through buffers
   FnMap <A-Down>  :MBEbb<CR>
@@ -1352,14 +1392,36 @@ endif
 " *******************************************************
 if !exists('g:loaded_tagbar')
   " Options
-  let g:tagbar_left = 0
-  let g:tagbar_width = 25
+  let g:tagbar_left = 1
+  let g:tagbar_width = 30
   let g:tagbar_autoshowtag = 0
   let g:tagbar_expand = 1
   let g:tagbar_indent = 1
-  let g:tagbar_show_linenumbers = 1
+  let g:tagbar_show_linenumbers = 0
   let g:tagbar_singleclick = 1
   let g:tagbar_sort = 0
+  
+  " VHDL support
+  let g:tagbar_type_vhdl = {
+    \ 'ctagstype': 'vhdl',
+    \ 'kinds' : [
+      \'d:prototypes',
+      \'b:package bodies',
+      \'e:entities',
+      \'a:architectures',
+      \'t:types',
+      \'p:processes',
+      \'f:functions',
+      \'r:procedures',
+      \'c:constants',
+      \'T:subtypes',
+      \'r:records',
+      \'C:components',
+      \'P:packages',
+      \'l:locals'
+    \]
+  \}
+  
   " Toggle ON/OFF
   nmap <localleader>t   :TagbarToggle<CR>
   nmap <localleader>tt  :TagbarClose<CR>
@@ -1383,44 +1445,37 @@ endif
 " *******************************************************
 " } DirDiff plugin {
 " *******************************************************
-" Options
-let g:DirDiffExcludes = "CVS,*.class,*.exe,.*.swp"  " Default exclude pattern
-let g:DirDiffIgnore = "Id:,Revision:,Date:"         " Default ignore pattern
-let g:DirDiffSort = 1                               " Sorts the diff lines
-let g:DirDiffWindowSize = 14                        " Diff window height
-let g:DirDiffIgnoreCase = 0                         " Ignore case during diff
-let g:DirDiffDynamicDiffText = 0                    " Dynamically figure out the diff text
-let g:DirDiffTextFiles = "Files "                   " Diff tool difference text
-let g:DirDiffTextAnd = " and "                      " Diff tool "and" text
-let g:DirDiffTextDiffer = " differ"                 " Diff tool "differ" text
-let g:DirDiffTextOnlyIn = "Only in "                " Diff tool "Only in" text
+if !exists('g:loaded_dirdiff')
+  " Options
+  let g:DirDiffExcludes = "CVS,*.class,*.exe,.*.swp"  " Default exclude pattern
+  let g:DirDiffIgnore = "Id:,Revision:,Date:"         " Default ignore pattern
+  let g:DirDiffSort = 1                               " Sorts the diff lines
+  let g:DirDiffWindowSize = 14                        " Diff window height
+  let g:DirDiffIgnoreCase = 0                         " Ignore case during diff
+  let g:DirDiffDynamicDiffText = 0                    " Dynamically figure out the diff text
+  let g:DirDiffTextFiles = "Files "                   " Diff tool difference text
+  let g:DirDiffTextAnd = " and "                      " Diff tool "and" text
+  let g:DirDiffTextDiffer = " differ"                 " Diff tool "differ" text
+  let g:DirDiffTextOnlyIn = "Only in "                " Diff tool "Only in" text
 
-" Key mapping
-nnoremap <silent><leader>d  :DirDiff\
+  " Key mapping
+  nnoremap <silent><leader>d  :DirDiff\
+endif
 
 
 " *******************************************************
 " } Easytags plugin {
 " *******************************************************
-" Options
-let g:easytags_auto_update = 0          " Enable/disable tags auto-updating
-let g:easytags_dynamic_files = 1        " Use project tag file instead of ~/.vimtags
-let g:easytags_autorecurse = 0          " No recursion, update current file only
-let g:easytags_include_members = 1      " C++ include class members
-"let g:easytags_events = ['BufWritePost']" Update tags on events
-let g:easytags_updatetime_min = 30000   " Wait for few ms before updating tags
-let g:easytags_updatetime_warn = 0      " Disable warning when update-time is low
-let g:easytags_on_cursorhold = 1        " Update on cursor hold
-
-
-" *******************************************************
-" } Bbye plugin {
-" *******************************************************
-" Key mapping
-:nnoremap <leader>q     :Bdelete<CR>
-:nnoremap <leader>Q     :bufdo :Bdelete<CR>
-if !exists("g:vimrc_useTabs") && !exists('g:loaded_minibufexplorer') && exists('g:loaded_bbye')
-  FnMap <C-F4>          :Bdelete<CR>
+if !exists('g:loaded_easytags')
+  " Options
+  let g:easytags_auto_update = 0          " Enable/disable tags auto-updating
+  let g:easytags_dynamic_files = 1        " Use project tag file instead of ~/.vimtags
+  let g:easytags_autorecurse = 0          " No recursion, update current file only
+  let g:easytags_include_members = 1      " C++ include class members
+  "let g:easytags_events = ['BufWritePost']" Update tags on events
+  let g:easytags_updatetime_min = 30000   " Wait for few ms before updating tags
+  let g:easytags_updatetime_warn = 0      " Disable warning when update-time is low
+  let g:easytags_on_cursorhold = 1        " Update on cursor hold
 endif
 
 
