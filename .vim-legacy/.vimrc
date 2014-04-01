@@ -270,13 +270,13 @@ nnoremap <localleader>c  :set invlist<CR>
 " *******************************************************
 
 " Change directory when changing buffers
-if exists('+autochdir')
-  set noautochdir
+"if exists('+autochdir')
+"  set autochdir
 "else
 "  augroup vimrc_autochdir
 "    autocmd! BufEnter * silent! lcd %:p:h:gs/ /\\ /
 "  augroup END
-endif
+"endif
 
 " Change global directory to the current directory of the current buffer
 nnoremap <leader>cd :cd %:p:h<CR>
@@ -908,9 +908,9 @@ nnoremap <silent>t          :Tnext<CR>
 nnoremap <silent>T          :Tprev<CR>
 
 " Autochange directory to tag root
-"augroup vimrc_autochdir_tags
-"  autocmd! BufEnter * execute "lcd" s:TagFindRoot()
-"augroup END
+augroup vimrc_tags_autochdir
+  autocmd! BufEnter * execute "lcd" s:TagFindRoot()
+augroup END
 
 
 " *******************************************************
@@ -1104,7 +1104,7 @@ if has("cscope")
   endfunction
 
   " Autocommand
-  augroup cscope
+  augroup vimrc_cscope
     autocmd! BufEnter * call LoadCscope()
   augroup END
 endif
