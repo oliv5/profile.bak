@@ -1,5 +1,24 @@
 #!/bin/sh
 
+# Processes
+alias pgrep='pgrep -l'
+alias psf='ps -faux'
+alias psd='ps -def'
+alias psg='ps -def | grep -i'
+
+function pid() {
+    for NAME in "$@"; do
+        ps -C "$@" -o pid=
+    done
+}
+
+function uid() {
+    for NAME in "$@"; do
+        ps -C "$@" -o user=
+    done
+}
+
+# System information
 function sys-iostat() {
 	iostat -x 2
 }
@@ -40,7 +59,12 @@ function swap-inst() {
 	top -d 0.5 -b -n2 | grep "Swap:" | tail -n 1 | awk '{print ($4*100/$2)}'
 }
 
-# alias
+# system information aliases
 alias cpu='cpu-inst'
 alias mem='mem-inst'
 alias swap='swap-inst'
+
+# Keyboad layout
+alias keyb-list='grep ^[^#] /etc/locale.gen'
+alias keyb-set='setxkbmap -layout'
+alias keyb-setfr='setxkbmap -layout fr'

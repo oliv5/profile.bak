@@ -162,7 +162,7 @@ endif
 " *******************************************************
 
 " Theme & color scheme
-if has('syntax') && (&t_Co > 2)
+if has('syntax') && (has("gui_running") || (&t_Co > 2))
   colorscheme torte   " Theme
   syntax on           " Syntax highlight
 endif
@@ -1049,7 +1049,7 @@ call s:PreviewRemap('nmap <silent>',      'T',       'Pprev')
 " *******************************************************
 " Options
 let g:netrw_browse_split = 0  " Use same(0)/prev(4) window
-"let g:netrw_altv = 1          " Vertical split right
+let g:netrw_altv = 1          " Vertical split right
 let g:netrw_liststyle=3       " Tree mode
 let g:netrw_special_syntax= 1 " Show special files
 let g:netrw_sort_sequence   = "[\/]$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$"

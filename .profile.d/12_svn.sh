@@ -275,12 +275,14 @@ function svn-config() {
 function svn-history() {
   url="${1:?Please specify a file name}"
   svn log -q $url | grep -E -e "^r[[:digit:]]+" -o | cut -c2- | sort -rn | {
-    # First revision as full text
-    echo
-    read r
-    svn log -r$r $url@HEAD
-    svn cat -r$r $url@HEAD
-    echo
+    if [ $# -gt 1 ]; then
+      # First revision as full text
+      echo
+      read r
+      svn log -r$r $url@HEAD
+      svn cat -r$r $url@HEAD
+      echo
+    fi
     # Remaining revisions as differences to previous revision
     while read r
     do

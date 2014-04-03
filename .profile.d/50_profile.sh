@@ -22,25 +22,14 @@ alias b='cdb'
 alias bb='cdb;cdb'
 alias bbb='cdb;cdb;cdb'
 
-# Alias pgrep/pkill
-alias pgrep='pgrep -l'
-alias psf='ps -faux'
-alias psd='ps -def'
-alias psg='ps -def | grep -i'
-function pid() {
-    for NAME in "$@"; do
-        ps -C "$@" -o pid=
-    done
-}
-
-# Alias search & open
-alias fo='ffo'
+# Editor aliases
+alias g='gedit'
+alias gv='gvim'
+alias e='gvim'
+alias es='ss | cut -c 9- | xargs gvim'
+alias eg='gs | cut -c 9- | xargs gvim'
 
 # Alias misc
-alias g='geany'
-alias e='gvim'
-alias gv='gvim'
 alias hi='history'
 alias mo='mimeopen'
-alias o='mimeopen'
-alias oo='openoffice.org'
+

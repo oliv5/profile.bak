@@ -5,7 +5,7 @@ FIND_EXCLUDE="-not -path *.svn* -and -not -path *.git"
 function _find() {
   trap "set +f; trap SIGINT" SIGINT
   set -f
-  find "$(dirname ${1:-.})" \( -${NAME:-name} $(sed -e 's/|/ -o -'${NAME:-name}' /g' <<< $(basename ${1:-*})) \) -and $FIND_EXCLUDE "${@:2}"
+  find -L "$(dirname ${1:-.})" \( -${NAME:-name} $(sed -e 's/|/ -o -'${NAME:-name}' /g' <<< $(basename ${1:-*})) \) -and $FIND_EXCLUDE "${@:2}"
   set +f
   trap SIGINT
 }
@@ -20,7 +20,7 @@ alias iffd='NAME=iname ffd'
 function _fgrep() {
   [ "$1" != "" ] && NAME=${NAME:-name} _find "${!#}" -type f -print0 | xargs -0 grep -n --color "${@:1:($#-1)}"
 }
-alias gg='_fgrep'
+alias gg='NAME=name _fgrep'
 alias igg='NAME=iname gg'
 
 # Safe search & replace
@@ -34,5 +34,5 @@ function _fsed()
   echo "Press enter or Ctrl-C" ; read
   NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
 }
-alias hh='_fsed'
+alias hh='NAME=name _fsed'
 alias ihh='NAME=iname hh'

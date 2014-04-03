@@ -5,7 +5,7 @@ function shutdown() {
 }
 
 function poweroff() {
-  shutdown
+  sudo $(which shutdown)
 }
 
 function reboot() {
