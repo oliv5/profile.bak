@@ -483,8 +483,12 @@ nmap µ              #
 " *******************************************************
 " Sed (replace in files)
 function! s:Sed(...)
-  let dir='"' . s:TagFindRoot() . '/' . a:3 . '"'
-  execute '!_fsed' a:1 a:2 dir
+  if a:0 >= 3
+    let dir='"' . s:TagFindRoot() . '/' . a:3 . '"'
+    execute '!_fsed' a:1 a:2 dir
+  else
+    echoerr "Usage: Sed pattern replace filetype"
+  endif
 endfunction
 
 " User commands
@@ -511,7 +515,7 @@ set grepprg=ref\ $*
 
 " Grep
 function! s:Grep(expr)
-  execute 'grep!' a:expr s:TagFindRoot()
+  execute 'grep! "' . a:expr . '"' s:TagFindRoot()
 endfunction
 
 " Count expression
@@ -537,10 +541,11 @@ FnNoremap <A-F6>            :GrepCount<SPACE><C-r><C-w>
 cnoreabbrev gg Grep
 
 " Alternate key mappings
+silent! unmap gx
 nnoremap <silent>g          :GrepNext<CR>
 nnoremap <silent>G          :GrepPrev<CR>
 nnoremap <C-g>              :Grep<SPACE>
-nnoremap <C-g><C-g>         :Grep<SPACE><C-r><C-w>
+"nnoremap <C-g><C-g>         :Grep<SPACE><C-r><C-w>
 vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
 nnoremap <A-g>              :GrepCount<SPACE><C-r><C-w>
 
@@ -1094,7 +1099,7 @@ if has("cscope")
   "endfor
   
   " Find and load cscope database
-  function! LoadCscope()
+  function! s:LoadCscope()
     let db = findfile(g:cscope_db, ".;")
     if (!empty(db) && filereadable(db))
       set nocscopeverbose " suppress 'duplicate connection' error
@@ -1103,10 +1108,13 @@ if has("cscope")
     endif
   endfunction
 
+  " Additionnal keymap
+  nnoremap <c-d>l  :call s:LoadCscope()
+
   " Autocommand
-  augroup vimrc_cscope
-    autocmd! BufEnter * call LoadCscope()
-  augroup END
+  "augroup vimrc_cscope
+  "  autocmd! BufEnter * call s:LoadCscope()
+  "augroup END
 endif
 
 
