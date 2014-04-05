@@ -501,8 +501,8 @@ vnoremap  <C-H>     "+y:%s/<C-R>"/<C-R>"/cg<left><left><left>
 "vnoremap  <C-A-H>   "+y:%s/<C-R>"//cg<left><left>
 
 " Sed
-FnNoremap <C-A-H>   :Sed 
-vnoremap  <C-A-H>   "+y:Sed <C-R>" 
+FnNoremap <C-A-H>   :Sed
+vnoremap  <C-A-H>   "+y:Sed <C-R>"
 
 
 " *******************************************************
@@ -550,7 +550,7 @@ vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
 nnoremap <A-g>              :GrepCount<SPACE><C-r><C-w>
 
 " User commands
-command! -nargs=1 -bar Grep      call <SID>Grep(<f-args>)
+command! -nargs=1 -bar Grep      call <SID>Grep(<q-args>)
 command! -nargs=0 -bar GrepNext  call <SID>GrepNext()
 command! -nargs=0 -bar GrepPrev  call <SID>GrepPrev()
 command! -nargs=1 -bar GrepCount call <SID>GrepCount(<f-args>)
@@ -748,19 +748,19 @@ endfunction
 
 " Close buffers with given extension
 function! s:BufCloseByExt(ext)
-  let last = bufnr('$') 
+  let last = bufnr('$')
   let idx = 1
   while idx <= last
     if bufexists(idx) && bufname(idx) =~ a:ext.'$'
       execute 'BufClose' idx
-    endif 
+    endif
     let idx = idx + 1
   endwhile
 endfunction
 
 " Cycle through each buffer, ask to close
 function! s:BufCloseAll(...)
-  let last = bufnr('$') 
+  let last = bufnr('$')
   let idx = 1
   while idx <= last
     if bufexists(idx) && getbufvar(idx, '&modifiable')
@@ -769,7 +769,7 @@ function! s:BufCloseAll(...)
       endif
     endif
     let idx = idx + 1
-  endwhile 
+  endwhile
 endfunction
 
 " User commands
@@ -1090,20 +1090,20 @@ endfunction
 if has("cscope")
   " Option
   let g:cscope_db = "cscope.out"
-  
+
   " Add any cscope database in the given environment variable
   "for db in add(split($CSCOPE_DB), g:cscope_db)
   "  if filereadable(db)
   "    silent! exe "cs add" db
   "  endif
   "endfor
-  
+
   " Find and load cscope database
   function! s:LoadCscope()
     let db = findfile(g:cscope_db, ".;")
     if (!empty(db) && filereadable(db))
       set nocscopeverbose " suppress 'duplicate connection' error
-      silent! exe "cs add" db matchstr(db, ".*/") 
+      silent! exe "cs add" db matchstr(db, ".*/")
       set cscopeverbose
     endif
   endfunction
@@ -1408,7 +1408,7 @@ if !exists('g:loaded_tagbar')
   let g:tagbar_show_linenumbers = 0
   let g:tagbar_singleclick = 1
   let g:tagbar_sort = 0
-  
+
   " VHDL support
   let g:tagbar_type_vhdl = {
     \ 'ctagstype': 'vhdl',
@@ -1429,7 +1429,7 @@ if !exists('g:loaded_tagbar')
       \'l:locals'
     \]
   \}
-  
+
   " Toggle ON/OFF
   nmap <localleader>t   :TagbarToggle<CR>
   nmap <localleader>tt  :TagbarClose<CR>
