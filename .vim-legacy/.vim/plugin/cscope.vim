@@ -91,7 +91,7 @@ if has("cscope")
     " go back to where you were before the search.
     "
 
-    nnoremap <C-d><C-r> :cs find s <C-R>=expand("<cword>")<CR><CR>
+    nnoremap <C-d><C-s> :cs find s <C-R>=expand("<cword>")<CR><CR>
     nnoremap <C-d><C-d> :cs find d <C-R>=expand("<cword>")<CR><CR>
     nnoremap <C-d><C-c> :cs find c <C-R>=expand("<cword>")<CR><CR>
     nnoremap <C-d><C-t> :cs find t <C-R>=expand("<cword>")<CR><CR>
@@ -100,7 +100,7 @@ if has("cscope")
     nnoremap <C-d><C-i> :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
     nnoremap <C-d><C-g> :cs find g <C-R>=expand("<cword>")<CR><CR>
 
-    vnoremap <C-d><C-r> "+y:cs find s <C-R>"<CR>
+    vnoremap <C-d><C-s> "+y:cs find s <C-R>"<CR>
     vnoremap <C-d><C-d> "+y:cs find d <C-R>"<CR>
     vnoremap <C-d><C-c> "+y:cs find c <C-R>"<CR>
     vnoremap <C-d><C-t> "+y:cs find t <C-R>"<CR>

@@ -269,17 +269,42 @@ nnoremap <localleader>c  :set invlist<CR>
 " } Directory management {
 " *******************************************************
 
-" Change directory when changing buffers
-"if exists('+autochdir')
-"  set autochdir
-"else
-"  augroup vimrc_autochdir
-"    autocmd! BufEnter * silent! lcd %:p:h:gs/ /\\ /
-"  augroup END
-"endif
+" Look for the best root directory
+function! s:FindRootDir()
+  " Ctags/cscope files
+  for file in [g:tags_db, g:cscope_db]
+    let file = findfile(file, ".;")
+	if (filereadable(file))
+      return fnamemodify(file, ':p:h')
+	endif
+  endfor
+  " SVN/GIT directory
+  for dir in ['.svn', '.git']
+    let _dir = finddir(dir, ".;", -1)
+    if (!empty(_dir))
+      return _dir[-1] . '/..'
+    endif
+  endfor
+  " No match
+  return ''
+endfunction
+
+" Directory autochange
+if 1
+  " Look for the best directory
+  autocmd! BufEnter * execute "lcd" s:FindRootDir()
+elseif exists('+autochdir')
+  " Automated directory change
+  set autochdir
+else
+  " Autocommand directory change
+  augroup vimrc_autochdir
+    autocmd! BufEnter * silent! lcd %:p:h:gs/ /\\ /
+  augroup END
+endif
 
 " Change global directory to the current directory of the current buffer
-nnoremap <leader>cd :cd %:p:h<CR>
+nnoremap <leader>c :cd %:p:h<CR>
 
 " Edit a file in the same directory as the current buffer.
 " This leaves the prompt open, allowing Tab expansion or manual completion.
@@ -484,8 +509,10 @@ nmap µ              #
 " Sed (replace in files)
 function! s:Sed(...)
   if a:0 >= 3
-    let dir='"' . s:TagFindRoot() . '/' . a:3 . '"'
-    execute '!_fsed' a:1 a:2 dir
+    let dir='"' . s:FindRootDir() . '/' . a:3 . '"'
+    let expr1 = substitute(a:1, '"', '\\"', "")
+    let expr2 = substitute(a:2, '"', '\\"', "")
+    execute '!_fsed' expr1 expr2 dir
   else
     echoerr "Usage: Sed pattern replace filetype"
   endif
@@ -515,12 +542,14 @@ set grepprg=ref\ $*
 
 " Grep
 function! s:Grep(expr)
-  execute 'grep! "' . a:expr . '"' s:TagFindRoot()
+  let expr = substitute(a:expr, '"', '\\"', "")
+  execute 'grep! "' . expr . '"' s:FindRootDir()
 endfunction
 
 " Count expression
 function! s:GrepCount(expr)
-  execute '!ref' a:expr s:TagFindRoot() '| wc -l'
+  let expr = substitute(a:expr, '"', '\\"', "")
+  execute '!ref' expr s:FindRootDir() '| wc -l'
 endfunction
 
 " Next grep
@@ -892,12 +921,6 @@ function! s:TagPrevTag()
   try | silent tprevious | catch | silent! tlast | endtry
 endfunction
 
-" Find tag root directory
-function! s:TagFindRoot()
-  let db = findfile(g:tags_db, ".;")
-  return fnamemodify(db, ':p:h')
-endfunction
-
 " User commands
 command! -nargs=0 -bar Tnext    call s:TagNextTag()
 command! -nargs=0 -bar Tprev    call s:TagPrevTag()
@@ -911,11 +934,6 @@ FnNoremap <silent><S-F5>    :Tprev<CR>
 FnNoremap <silent><C-t>     <C-]>
 nnoremap <silent>t          :Tnext<CR>
 nnoremap <silent>T          :Tprev<CR>
-
-" Autochange directory to tag root
-augroup vimrc_tags_autochdir
-  autocmd! BufEnter * execute "lcd" s:TagFindRoot()
-augroup END
 
 
 " *******************************************************
@@ -1089,7 +1107,7 @@ endfunction
 
 if has("cscope")
   " Option
-  let g:cscope_db = "cscope.out"
+  let g:cscope_db = !empty($CSCOPE_DB) ? $CSCOPE_DB : "cscope.out"
 
   " Add any cscope database in the given environment variable
   "for db in add(split($CSCOPE_DB), g:cscope_db)
@@ -1101,20 +1119,22 @@ if has("cscope")
   " Find and load cscope database
   function! s:LoadCscope()
     let db = findfile(g:cscope_db, ".;")
-    if (!empty(db) && filereadable(db))
+    if (filereadable(db))
       set nocscopeverbose " suppress 'duplicate connection' error
-      silent! exe "cs add" db matchstr(db, ".*/")
+      "silent! exe "cs add" db matchstr(db, ".*/")
+      exe "cs add" db matchstr(db, ".*/")
       set cscopeverbose
     endif
   endfunction
 
   " Additionnal keymap
-  nnoremap <c-d>l  :call s:LoadCscope()
+  nnoremap <c-d><c-l>  :call <SID>LoadCscope()<CR>
+  nnoremap <c-d>       <NOP>
 
   " Autocommand
-  "augroup vimrc_cscope
-  "  autocmd! BufEnter * call s:LoadCscope()
-  "augroup END
+  augroup vimrc_cscope
+    autocmd! BufReadPost * call s:LoadCscope()
+  augroup END
 endif
 
 
@@ -1314,11 +1334,9 @@ if !exists('g:loaded_yaifa')
   " Map Yaifa
   nmap <localleader><tab>   :call YAIFA()<CR>
   " autocall when entering file
-  if exists("*YAIFA")
-    augroup yaifa
-      autocmd! BufRead * silent! call YAIFA()
-    augroup END
-  endif
+  augroup YAIFA
+    autocmd! BufRead * silent! call YAIFA()
+  augroup END
 endif
 
 
