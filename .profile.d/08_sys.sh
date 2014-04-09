@@ -1,10 +1,10 @@
 #!/bin/sh
 
 # Processes
-alias pgrep='pgrep -l'
 alias psf='ps -faux'
-alias psd='ps -def'
-alias psg='ps -def | grep -i'
+alias psd='ps -ef'
+alias psg='ps -ef | grep -i'
+alias psu='ps -fu $USER'
 
 function pid() {
     for NAME in "$@"; do

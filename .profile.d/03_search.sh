@@ -32,7 +32,14 @@ function _fsed()
   OUT="${@: -2:1}";  OUT="${OUT//\//\/}"
   echo "Replace '$IN' by '$OUT' in files '${!#}'?"
   echo "Press enter or Ctrl-C" ; read
-  NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
+  # Sed in place with no output
+  #NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
+  # Sed in place with no output and backup
+  NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -exec cp -v {} {}_$(date +%Y%m%d-%H%M%S) \; -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
+  # Sed in place with display
+  #NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -execdir sed -i $SEDOPT -e "/$IN/{w /dev/stderr" -e "}" -e "s/$IN/$OUT/g" {} \;
+  # Sed with filename display
+  #NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -exec echo "Processing file {} ?" \; -exec bash -c read \; -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
 }
 alias hh='NAME=name _fsed'
 alias ihh='NAME=iname hh'
