@@ -243,16 +243,19 @@ set comments+=n::     " Define comment starting with ':'
 filetype on           " enable filetype detection:
 
 " C-like: automatic indentation
-autocmd! FileType c,cc,cpp,slang set cindent tabstop=4 expandtab
+"autocmd! FileType c,cc,cpp,slang set cindent tabstop=4 expandtab
+autocmd! FileType c,cc,cpp,slang set cindent
 
 " C: allow comments starting in the middle of a line
 autocmd! FileType c set formatoptions+=ro
 
 " Python: no tab to space, enable auto indentation
-autocmd! FileType python set noexpandtab tabstop=4 smartindent
+"autocmd! FileType python set noexpandtab tabstop=4 smartindent
+autocmd! FileType python set noexpandtab smartindent
 
 " Makefile: no tab to space, tab width 4 chars
-autocmd! FileType make set noexpandtab shiftwidth=4
+"autocmd! FileType make set noexpandtab shiftwidth=4
+autocmd! FileType make set noexpandtab
 
 " Word/line wrap options
 set nowrap              " No wrap by default
@@ -305,10 +308,6 @@ endif
 
 " Change global directory to the current directory of the current buffer
 nnoremap <leader>c :cd %:p:h<CR>
-
-" Edit a file in the same directory as the current buffer.
-" This leaves the prompt open, allowing Tab expansion or manual completion.
-nnoremap <leader>e :e <C-R>=expand("%:p:h") . "/" <CR>
 
 
 " *******************************************************
@@ -801,14 +800,56 @@ function! s:BufCloseAll(...)
   endwhile
 endfunction
 
+" Intelligent open related buffer
+function! s:BufSmartOpen()
+  for file in ['<cfile>', '%']
+    " Skip non-existent files
+    if !filereadable(expand(file))
+      continue
+    endif
+    " Search in the same directory
+    for ext in ['h','cc','c']
+      let open_file = expand(file.":r") . '.' . ext
+      if open_file!=?expand("%") && filereadable(open_file)
+        silent! execute ':e' open_file
+        return
+      endif
+    endfor
+    " Search with tags and cscope
+    let file = expand(file.":t:r")
+    for ext in ['h','cc','c']
+      let open_file = file . '.' . ext
+      if open_file!=?expand("%:t")
+        silent! execute "tag" open_file "| return"
+        if has('cscope')
+          execute "cs f f" open_file "| return"
+        endif
+      endif
+    endfor
+  endfor
+"    let cur_file=expand("%")
+"    for file in ['<cfile>', '%']
+"      for ext in ['cc','c','h']
+"        let open_file = expand(file.":r") . '.' . ext
+"        if filereadable(open_file) && open_file!=?cur_file
+"          silent! execute ':e' open_file
+"          return
+"        endif
+"      endfor
+"    endfor
+endfunction
+
 " User commands
 command! -nargs=? BufClose call s:BufClose(<f-args>)
 command! -nargs=1 BufCloseByExt call s:BufCloseByExt(<f-args>)
 command! -nargs=? BufCloseAll   call s:BufCloseAll(<f-args>)
+command! -nargs=0 BufSmartOpen  call s:BufSmartOpen()
 
 " Open/close buffer (close=:bd or :bw)
-map <C-b>o          :e<SPACE>
-map <C-b>c          :BufClose<CR>
+map <C-b>           :e <C-R>=expand("%:p:h") . "/" <CR>
+map <C-b><C-o>      :e<SPACE>
+map <C-b><C-b>      :BufSmartOpen<CR>
+map <C-b><C-c>      :BufClose<CR>
 map <C-q>           :BufClose<CR>
 if !exists("g:vimrc_useTabs")
   FnMap <C-F4>      :BufClose<CR>
@@ -850,10 +891,10 @@ FnMap <F1>    :vert help<space>
 " Returns "mixed" when indentation is mixed
 function! b:StatuslineWarning()
   if !exists("b:statusline_tab_warning")
-    let tabs = search('^\t', 'nw') != 0
-    let spaces = search('^ ', 'nw') != 0
+    let tabs = search('^\t', 'nw')
+    let spaces = search('^ \+[^\*]', 'nw')
     if tabs && spaces
-      let b:statusline_tab_warning =  '-mixed'
+      let b:statusline_tab_warning =  '-mixed '.(&et ? tabs : spaces)
     elseif (spaces && !&et) || (tabs && &et)
       let b:statusline_tab_warning = '-error'
     else
