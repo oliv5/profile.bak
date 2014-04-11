@@ -23,7 +23,7 @@ function mkctags() {
   CTAGS_OPTIONS="$CTAGS_OPTS $3"
   CTAGS_DB="${DST}/tags"
   # Build tag file
-  ${DBG} ctags $CTAGS_OPTIONS -f "${CTAGS_DB}" "${SRC}"
+  ${DBG} $(which ctags) $CTAGS_OPTIONS -f "${CTAGS_DB}" "${SRC}"
   #echo ${CTAGS_DB}
 }
 
@@ -54,7 +54,7 @@ function mkcscope() {
     scancsdir "$SRC" "$DST" ${@:4}
   fi
   # Build tag file
-  ${DBG} cscope $CSCOPE_OPTIONS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
+  ${DBG} $(which cscope) $CSCOPE_OPTIONS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
   #echo $CSCOPE_DB
 }
 

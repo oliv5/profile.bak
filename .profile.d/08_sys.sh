@@ -5,6 +5,8 @@ alias psf='ps -faux'
 alias psd='ps -ef'
 alias psg='ps -ef | grep -i'
 alias psu='ps -fu $USER'
+alias pg='pgrep -fl'
+alias pgu='pgrep -flu $(id -u $USER)'
 
 function pid() {
     for NAME in "$@"; do

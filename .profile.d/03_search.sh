@@ -30,7 +30,7 @@ function _fsed()
   SEDOPT="${@:1:$(($#-3))}"
   IN="${@: -3:1}"; IN="${IN//\//\/}"
   OUT="${@: -2:1}";  OUT="${OUT//\//\/}"
-  echo "Replace '$IN' by '$OUT' in files '${!#}'?"
+  echo "Replace '$IN' by '$OUT' in files '${!#}' (opts $SEDOPT) ?"
   echo "Press enter or Ctrl-C" ; read
   # Sed in place with no output
   #NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
