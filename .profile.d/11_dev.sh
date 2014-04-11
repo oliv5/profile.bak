@@ -8,17 +8,17 @@ function _ff() {
 }
 
 # Various dev search function helpers
-#### DIR=.;OPT=; [ $# -gt 1 ] && DIR=${!#} && OPT=${@:2:($#-2)}; echo _fgrep "${1}" ${CASE} $OPT "${DIR}/*.h|*.hpp";
-function h()     { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.h|*.hpp"; }
-function c()     { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.c|*.cpp|*.cc"; }
-function hc()    { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.c|*.cpp|*.cc|*.h|*.hpp"; }
+#### DIR=.;OPT=; [ $# -gt 1 ] && DIR=${!#} && OPT=${@:2:($#-2)}; echo _fgrep "${1}" ${CASE} $OPT "${DIR}/*.h;*.hpp";
+function h()     { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.h;*.hpp"; }
+function c()     { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.c;*.cpp;*.cc"; }
+function hc()    { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.c;*.cpp;*.cc;*.h;*.hpp"; }
 function py()    { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.py"; }
-function mk()    { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.mk|Makefile"; }
+function mk()    { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.mk;Makefile"; }
 function shell() { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.sh"; }
-function ref()   { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.c|*.cpp|*.cc|*.h|*.hpp|*.py|*.mk|Makefile|*.sh|*.vhd|*.v|*.inc|*.S"; }
-function v()     { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.vhd|*.v"; }
+function ref()   { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.c;*.cpp;*.cc;*.h;*.hpp;*.py;*.mk;Makefile;*.sh;*.vhd;*.v;*.inc;*.S"; }
+function v()     { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.vhd;*.v"; }
 function xml()   { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.xml"; }
-function asm()   { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.inc|*.S"; }
+function asm()   { NAME= _fgrep "${1}" ${CASE} "${@:3}" "${2:-.}/*.inc;*.S"; }
 alias ih='CASE=-i h'
 alias ic='CASE=-i c'
 alias ihc='CASE=-i hc'

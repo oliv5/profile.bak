@@ -5,7 +5,7 @@ FIND_EXCLUDE="-not -path *.svn* -and -not -path *.git"
 function _find() {
   trap "set +f; trap SIGINT" SIGINT
   set -f
-  find -L "$(dirname ${1:-.})" \( -${NAME:-name} $(sed -e 's/|/ -o -'${NAME:-name}' /g' <<< $(basename ${1:-*})) \) -and $FIND_EXCLUDE "${@:2}"
+  find -L "$(dirname ${1:-.})" \( -${NAME:-name} $(sed -e 's/;/ -o -'${NAME:-name}' /g' <<< $(basename ${1:-*})) \) -and $FIND_EXCLUDE "${@:2}"
   set +f
   trap SIGINT
 }
@@ -34,11 +34,11 @@ function _fsed()
   echo "Press enter or Ctrl-C" ; read
   # Sed in place with no output
   #NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
-  # Sed in place with no output and backup
-  NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -exec cp -v {} {}_$(date +%Y%m%d-%H%M%S) \; -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
   # Sed in place with display
   #NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -execdir sed -i $SEDOPT -e "/$IN/{w /dev/stderr" -e "}" -e "s/$IN/$OUT/g" {} \;
-  # Sed with filename display
+  # Sed in place with backup
+  NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -execdir sed -i_$(date +%Y%m%d-%H%M%S).bak $SEDOPT "s/$IN/$OUT/g" {} \;
+  # Sed with confirmation about all files
   #NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -exec echo "Processing file {} ?" \; -exec bash -c read \; -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
 }
 alias hh='NAME=name _fsed'
