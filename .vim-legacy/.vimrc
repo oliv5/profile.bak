@@ -801,42 +801,33 @@ function! s:BufCloseAll(...)
 endfunction
 
 " Intelligent open related buffer
+let s:vimrc_bufopenext = ['h','cc','c']
 function! s:BufSmartOpen()
   for file in ['<cfile>', '%']
     " Skip non-existent files
     if !filereadable(expand(file))
       continue
     endif
-    " Search in the same directory
-    for ext in ['h','cc','c']
+    " Try few extensions
+    for ext in s:vimrc_bufopenext
+      " Search in the same directory
       let open_file = expand(file.":r") . '.' . ext
       if open_file!=?expand("%") && filereadable(open_file)
-        silent! execute ':e' open_file
+        silent! execute ':e' fnameescape(open_file)
         return
       endif
-    endfor
-    " Search with tags and cscope
-    let file = expand(file.":t:r")
-    for ext in ['h','cc','c']
-      let open_file = file . '.' . ext
+      " Search with tags and cscope
+      let open_file = expand(file.":t:r") . '.' . ext
       if open_file!=?expand("%:t")
-        silent! execute "tag" open_file "| return"
+        silent! execute "tag" open_file | return
         if has('cscope')
-          execute "cs f f" open_file "| return"
+          set nocscopeverbose
+          execute "cs f f" open_file | return
+          set cscopeverbose
         endif
       endif
     endfor
   endfor
-"    let cur_file=expand("%")
-"    for file in ['<cfile>', '%']
-"      for ext in ['cc','c','h']
-"        let open_file = expand(file.":r") . '.' . ext
-"        if filereadable(open_file) && open_file!=?cur_file
-"          silent! execute ':e' open_file
-"          return
-"        endif
-"      endfor
-"    endfor
 endfunction
 
 " User commands
