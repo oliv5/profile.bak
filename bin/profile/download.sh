@@ -30,7 +30,7 @@ SUBPATH="${LONGPATH#*/}"
 
 # Find the file transfer tool
 if [ -z "$TOOL" ]; then
-	if [ "$PROTO" == "ftp" ]; then
+	if [ "$PROTO" = "ftp" ]; then
 		TOOLS="curl ftp"
 	else
 		TOOLS="curl wget"
@@ -55,10 +55,11 @@ else
 	echo "User: $ACCOUNT"
 fi
 if [ -z "$PASSWD" ]; then
-	trap "stty echo; trap SIGINT" SIGINT; stty -echo
+	trap "stty echo; trap '' INT" INT; stty -echo
+	#trap "stty echo; trap '' SIGINT" SIGINT; stty -echo
 	read -p "Password: " PASSWD; echo
-	stty echo; trap - SIGINT
-	# Bash: "trap SIGINT"
+	#stty echo; trap "" SIGINT
+	stty echo; trap INT
 else
 	echo "Password already known"
 fi

@@ -12,7 +12,7 @@ SUBDIR="${SUBPATH%/*}"
 SUBFILE="${SUBPATH##*/}"
 
 # Find the file transfer tool
-if [ "$PROTO" == "ftp" ]; then
+if [ "$PROTO" = "ftp" ]; then
 	TOOLS="curl ftp"
 else
 	TOOLS="curl wget"
@@ -36,9 +36,11 @@ else
 	echo "User: $ACCOUNT"
 fi
 if [ -z "$PASSWD" ]; then
-	trap "stty echo; trap '' SIGINT" SIGINT; stty -echo
+	trap "stty echo; trap '' INT" INT; stty -echo
+	#trap "stty echo; trap '' SIGINT" SIGINT; stty -echo
 	read -p "Password: " PASSWD; echo
-	stty echo; trap "" SIGINT
+	#stty echo; trap "" SIGINT
+	stty echo; trap INT
 else
 	echo "Password already known"
 fi
@@ -46,7 +48,7 @@ fi
 # Proceed with file transfer
 case $TOOL in
 	curl)
-		if [ "$PROTO" == "ftp" ]; then
+		if [ "$PROTO" = "ftp" ]; then
 			${DBG} curl -u $ACCOUNT:$PASSWD -T "$FILE" "$URL"
 		else
 			${DBG} curl -u $ACCOUNT:$PASSWD "$URL"
