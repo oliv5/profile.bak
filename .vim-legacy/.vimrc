@@ -277,9 +277,9 @@ function! s:FindRootDir()
   " Ctags/cscope files
   for file in [g:tags_db, g:cscope_db]
     let file = findfile(file, ".;")
-	if (filereadable(file))
+    if (filereadable(file))
       return fnamemodify(file, ':p:h')
-	endif
+    endif
   endfor
   " SVN/GIT directory
   for dir in ['.svn', '.git']
@@ -483,6 +483,7 @@ nnoremap <localleader>f     :set invhls hls?<CR>
 FnNoremap <C-F>     /
 FnNoremap <C-A-F>   yiw:/<C-R>"
 vnoremap <C-F>      "+y:/<C-R>"
+cnoremap <C-F>      <NOP> |" Disable command line window (use q: q/ q? instead)
 
 " F3 for search (n and N)
 FnMap  <F3>         n
@@ -503,32 +504,45 @@ nmap µ              #
 
 
 " *******************************************************
-" } Sed & replace {
+" } Find search {
 " *******************************************************
-" Sed (replace in files)
-function! s:Sed(...)
-  if a:0 >= 3
-    let dir='"' . s:FindRootDir() . '/' . a:3 . '"'
-    let expr1 = substitute(a:1, '"', '\\"', "")
-    let expr2 = substitute(a:2, '"', '\\"', "")
-    execute '!_fsed' expr1 expr2 dir
-  else
-    echoerr "Usage: Sed pattern replace filetype"
-  endif
+" Find files
+function! s:Find(files, ...)
+  let path='"' . s:FindRootDir() . '/' . a:files . '"'
+  execute '!_find' path join(a:000)
 endfunction
 
 " User commands
-command! -nargs=* -bar Sed  call <SID>Sed(<f-args>)
+command! -nargs=+ -bar Find  call <SID>Find(<f-args>)
 
-" Replace
+" Keymapping
+FnNoremap <C-A-H>   :Find 
+vnoremap  <C-A-H>   "+y:Find <C-R>"
+
+
+" *******************************************************
+" } Sed & replace {
+" *******************************************************
+" Sed (replace in files)
+function! s:Sed(pattern, replace, files, ...)
+  let path='"' . s:FindRootDir() . '/' . a:files . '"'
+  let expr1 = substitute(a:pattern, '"', '\\"', "")
+  let expr2 = substitute(a:replace, '"', '\\"', "")
+  execute '!_fsed' join(a:000) expr1 expr2 path
+endfunction
+
+" User commands
+command! -nargs=+ -bar Sed  call <SID>Sed(<f-args>)
+
+" Sed keymapping
+FnNoremap <C-A-H>   :Sed<SPACE>
+vnoremap  <C-A-H>   "+y:Sed <C-R>"
+
+" Replace keymapping
 FnNoremap <C-H>     :%s///cg<left><left><left><left>
 "FnNoremap <C-A-H>   yiw:%s/<C-R>"/<C-R>"/cg<left><left><left>
 vnoremap  <C-H>     "+y:%s/<C-R>"/<C-R>"/cg<left><left><left>
 "vnoremap  <C-A-H>   "+y:%s/<C-R>"//cg<left><left>
-
-" Sed
-FnNoremap <C-A-H>   :Sed
-vnoremap  <C-A-H>   "+y:Sed <C-R>"
 
 
 " *******************************************************
@@ -551,15 +565,11 @@ function! s:GrepCount(expr)
   execute '!ref' expr s:FindRootDir() '| wc -l'
 endfunction
 
-" Next grep
-function! s:GrepNext()
-  try | silent cnext | catch | silent! cfirst | endtry
-endfunction
-
-" Prev grep
-function! s:GrepPrev()
-  try | silent cprev | catch | silent! clast | endtry
-endfunction
+" User commands
+command! -nargs=1 -bar Grep      call <SID>Grep(<q-args>)
+command! -nargs=0 -bar GrepNext  call <SID>Cnext()
+command! -nargs=0 -bar GrepPrev  call <SID>Cprev()
+command! -nargs=1 -bar GrepCount call <SID>GrepCount(<f-args>)
 
 " Key mappings
 FnNoremap <silent><F6>      :GrepNext<CR>
@@ -576,12 +586,6 @@ nnoremap <C-g>              :Grep<SPACE>
 "nnoremap <C-g><C-g>         :Grep<SPACE><C-r><C-w>
 vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
 nnoremap <A-g>              :GrepCount<SPACE><C-r><C-w>
-
-" User commands
-command! -nargs=1 -bar Grep      call <SID>Grep(<q-args>)
-command! -nargs=0 -bar GrepNext  call <SID>GrepNext()
-command! -nargs=0 -bar GrepPrev  call <SID>GrepPrev()
-command! -nargs=1 -bar GrepCount call <SID>GrepCount(<f-args>)
 
 
 " *******************************************************
@@ -607,47 +611,6 @@ vnoremap <A-Right> <C-c><C-I>
 
 
 " *******************************************************
-" } Marks {
-" *******************************************************
-
-" Marks variables
-if !exists("s:mark_next")
-  let s:mark_cur=0
-  let s:mark_next=0
-  let s:mark_max=1
-endif
-
-" Set a mark
-function! s:MarkSet()
-  exec printf("ma %c", 65 + s:mark_next)
-  let s:mark_cur=s:mark_next
-  let s:mark_next=(s:mark_next + 1) % 26
-  let s:mark_max=max([s:mark_next,s:mark_max])
-endfunction
-
-" Goto next mark
-function! s:MarkGotoNext()
-  let s:mark_cur=(s:mark_cur + 1) % s:mark_max
-  silent! exec printf("normal '%c", 65 + s:mark_cur)
-endfunction
-
-" Goto prev mark
-function! s:MarkGotoPrev()
-  let s:mark_cur=(s:mark_cur + s:mark_max - 1) % s:mark_max
-  silent! exec printf("normal '%c", 65 + s:mark_cur)
-endfunction
-
-" Mark key maps
-FnMap <silent> <F2>     :call <SID>MarkGotoPrev()<CR>
-FnMap <silent> <S-F2>   :call <SID>MarkGotoNext()<CR>
-FnMap <silent> <C-F2>   :call <SID>MarkSet()<CR>
-nmap <silent>m          :call <SID>MarkGotoPrev()<CR>
-nmap <silent>M          :call <SID>MarkGotoNext()<CR>
-nmap <silent><C-m>      :call <SID>MarkSet()<CR>
-nmap <silent><A-m>      :delmarks A-Z0-9<CR>
-
-
-" *******************************************************
 " } Tab management {
 " *******************************************************
 
@@ -660,7 +623,7 @@ if exists('+gtl') " Tab name is the filename only
 endif
 
 " Open/close tab
-FnMap  <C-t>t   :tabe<space>
+FnMap  <C-t>t   :tabe<SPACE>
 FnMap  <C-t>c   :tabclose<CR>
 if exists('g:vimrc_useTabs')
   FnNoremap  <C-F4>     :tabclose<CR>
@@ -752,7 +715,7 @@ endfunction
 
 " Key maps
 nnoremap <localleader>w     :call <SID>WndToggleMax()<CR>
-nnoremap <c-\<>             :call <SID>WndToggleMax()<CR>
+nnoremap <localleader>x     :call <SID>ZoomWindow()<CR>
 nnoremap x                  :call <SID>ZoomWindow()<CR>
 
 
@@ -872,7 +835,7 @@ for idx in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 endfor
 
 " Map F1 to the help
-FnMap <F1>    :vert help<space>
+FnMap <F1>    :vert help<SPACE>
 
 
 " *******************************************************
@@ -936,6 +899,63 @@ endif
 
 
 " *******************************************************
+" } Marks {
+" *******************************************************
+
+" Marks variables
+if !exists("s:mark_next")
+  let s:mark_cur=0
+  let s:mark_next=0
+  let s:mark_max=1
+endif
+
+" Set a mark
+function! s:MarkSet()
+  if &bt!='quickfix' && !&pvw
+    exec printf("ma %c", 65 + s:mark_next)
+    let s:mark_cur=s:mark_next
+    let s:mark_next=(s:mark_next + 1) % 26
+    let s:mark_max=max([s:mark_next,s:mark_max])
+  else
+    execute "normal! \<ENTER>"
+  endif
+endfunction
+
+" Goto next mark
+function! s:MarkNext()
+  let s:mark_cur=(s:mark_cur + 1) % s:mark_max
+  silent! exec printf("normal '%c", 65 + s:mark_cur)
+endfunction
+
+" Goto prev mark
+function! s:MarkPrev()
+  let s:mark_cur=(s:mark_cur + s:mark_max - 1) % s:mark_max
+  silent! exec printf("normal '%c", 65 + s:mark_cur)
+endfunction
+
+" Reset all user marks
+function! s:MarkReset()
+  delmarks A-Z0-9
+endfunction
+
+" User commands
+command! -nargs=0 -bar Mset   call <SID>MarkSet()
+command! -nargs=0 -bar Mnext  call <SID>MarkNext()
+command! -nargs=0 -bar Mprev  call <SID>MarkPrev()
+command! -nargs=0 -bar Mreset call <SID>MarkReset()
+
+" Mark key maps
+FnMap <silent><F2>      :Mnext<CR>
+FnMap <silent><S-F2>    :Mprev<CR>
+FnMap <silent><C-F2>    :Mset<CR>
+FnMap <silent><A-F2>    :Mreset<CR>
+nmap <silent>m          :Mnext<CR>
+nmap <silent>M          :Mprev<CR>
+nmap <silent><C-m>      :Mset<CR>
+nmap <silent><A-m>      :Mreset<CR>
+
+
+" *******************************************************
 " } Tags {
 " *******************************************************
 " Set tags root
@@ -944,18 +964,18 @@ let g:tags_db='tags'
 set tags=./tags;$HOME
 
 " Goto next tag (& loop)
-function! s:TagNextTag()
+function! s:TagNext()
   try | silent tnext | catch | silent! tfirst | endtry
 endfunction
 
 " Goto prev tag (& loop)
-function! s:TagPrevTag()
+function! s:TagPrev()
   try | silent tprevious | catch | silent! tlast | endtry
 endfunction
 
 " User commands
-command! -nargs=0 -bar Tnext    call s:TagNextTag()
-command! -nargs=0 -bar Tprev    call s:TagPrevTag()
+command! -nargs=0 -bar Tnext    call s:TagNext()
+command! -nargs=0 -bar Tprev    call s:TagPrev()
 
 " Key mapping
 noremap <C-ENTER>           <C-]>
@@ -966,6 +986,78 @@ FnNoremap <silent><S-F5>    :Tprev<CR>
 FnNoremap <silent><C-t>     <C-]>
 nnoremap <silent>t          :Tnext<CR>
 nnoremap <silent>T          :Tprev<CR>
+
+
+" *******************************************************
+" } Quickfix window management {
+" *******************************************************
+
+" Quickfix toggle
+function! s:Ctoggle()
+  if exists('s:c_opened') | 
+    unlet s:c_opened
+    if has('quickfix')
+      cclose
+    endif
+  else
+    let s:c_opened=1
+    if has('quickfix')
+      bot copen
+    endif
+  endif
+endfunction
+
+" Quickfix next
+function! s:Cnext()
+  try | silent cnext | catch | silent! cfirst | endtry
+endfunction
+
+" Quickfix prev
+function! s:Cprev()
+  try | silent cprev | catch | silent! clast | endtry
+endfunction
+
+" User commands
+command! -nargs=0 -bar Ctoggle  call s:Ctoggle()
+command! -nargs=0 -bar Cnext    call s:Cnext()
+command! -nargs=0 -bar Cprev    call s:Cprev()
+
+" Keymapping
+nnoremap <localleader>c   :Ctoggle<CR>
+nnoremap c                :Cnext<CR>
+nnoremap C                :Cprev<CR>
+FnNoremap <C-SPACE>       :Ctoggle<CR>
+nnoremap <SPACE>          :Cnext<CR>
+nnoremap <S-SPACE>        :Cprev<CR>
+
+
+" *******************************************************
+" } Location window management {
+" *******************************************************
+" Location window toggle
+function! s:Ltoggle()
+  try | silent lclose | catch | silent! bot lopen | endtry
+endfunction
+
+" Location next
+function! s:Lnext()
+  try | silent lnext | catch | silent! lfirst | endtry
+endfunction
+
+" Location prev
+function! s:Lprev()
+  try | silent lprev | catch | silent! llast | endtry
+endfunction
+
+" User commands
+command! -nargs=0 -bar Ltoggle  call s:Ltoggle()
+command! -nargs=0 -bar Lnext    call s:Lnext()
+command! -nargs=0 -bar Lprev    call s:Lprev()
+
+" Keymapping
+nnoremap <localleader>l   :Ltoggle<CR>
+nnoremap l                :Lnext<CR>
+nnoremap L                :Lprev<CR>
 
 
 " *******************************************************
@@ -1014,7 +1106,7 @@ function! s:PreviewToggleWnd()
 endfunction
 
 function! s:PreviewShowTag()
-  if &previewwindow || ! &modifiable  " don't do this in the preview window
+  if &previewwindow             " don't do this in the preview window
     return
   endif
   let w = expand("<cword>")     " get the word under cursor
@@ -1090,7 +1182,6 @@ command! -nargs=0 -bar Ptag     call s:PreviewShowTag()
 
 " Key mapping
 nmap <localleader>p          :Ptoggle<CR>
-nmap <localleader>pp         :Pclose<CR>
 call s:PreviewRemap('FnNoremap <silent>', '<C-F5>',  'Ptag')
 call s:PreviewRemap('FnNoremap <silent>', '<F5>',    'Pnext')
 call s:PreviewRemap('FnNoremap <silent>', '<S-F5>',  'Pprev')
@@ -1152,10 +1243,10 @@ if has("cscope")
   function! s:LoadCscope()
     let db = findfile(g:cscope_db, ".;")
     if (filereadable(db))
-      set nocscopeverbose " suppress 'duplicate connection' error
-      "silent! exe "cs add" db matchstr(db, ".*/")
-      exe "cs add" db matchstr(db, ".*/")
-      set cscopeverbose
+      silent! exe "cs add" db matchstr(db, ".*/")
+      "set nocscopeverbose " suppress 'duplicate connection' error
+      "exe "cs add" db matchstr(db, ".*/")
+      "set cscopeverbose
     endif
   endfunction
 
@@ -1216,7 +1307,6 @@ if !exists('g:loaded_project')
 
   " Toggle ON/OFF
   nmap <localleader>j  :Project<CR>
-  nmap <localleader>jj <Plug>ToggleProject
 endif
 
 
