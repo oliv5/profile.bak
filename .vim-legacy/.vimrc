@@ -610,7 +610,7 @@ nnoremap <A-g>              :GrepCount<SPACE><C-r><C-w>
 cnoreabbrev make lmake
 
 " Fix make errors encoding
-function QfRemoveAnsiColor()
+function! QfRemoveAnsiColor()
   let qflist = getqflist()
   for i in qflist
     "let i.text = iconv(i.text, "cp936", "utf-8")
@@ -621,7 +621,7 @@ endfunction
 
 " Autocommands
 if has('quickfix')
-  au! QuickfixCmdPost make call QfRemoveAnsiColor()
+  autocmd! QuickfixCmdPost make call QfRemoveAnsiColor()
 endif
 
 
@@ -1007,31 +1007,35 @@ function! s:Wprefix(wnd)
   return a:wnd
 endfunction
 
-" Close window
-function! s:Wclose(wnd)
-  let prefix = s:Wprefix(a:wnd)
-  silent! execute prefix . "close"
-  "echo "Prefix" prefix
+" Toggle window, close current window or open the selected window
+function! s:Wtoggle(wnd)
+  let prefix = s:Wprefix("")
+  if empty(prefix)
+    try | silent execute a:wnd . "window" | catch | silent! execute a:wnd . "open" | endtry
+  else
+    silent! execute prefix . "close"
+  endif
+  "echo "Prefix" prefix a:wnd
 endfunction
 
 " Search next
 function! s:Wnext(wnd)
   let prefix = s:Wprefix(a:wnd)
   try | silent execute prefix . "next" | catch | silent! execute prefix . "first" | endtry
-  "echo "Prefix" prefix
+  "echo "Prefix" prefix a:wnd
 endfunction
 
 " Search prev
 function! s:Wprev(wnd)
   let prefix = s:Wprefix(a:wnd)
   try | silent execute prefix . "prev" | catch | silent! execute prefix . "last" | endtry
-  "echo "Prefix" prefix
+  "echo "Prefix" prefix a:wnd
 endfunction
 
 " Generic keymapping
-FnNoremap <C-SPACE>         :call <SID>Wclose("l")<CR>
-nnoremap <SPACE>            :call <SID>Wnext("l")<CR>
-nnoremap <S-SPACE>          :call <SID>Wprev("l")<CR>
+FnNoremap <silent><C-SPACE>     :call <SID>Wtoggle("l")<CR>
+nnoremap <silent><SPACE>        :call <SID>Wnext("l")<CR>
+nnoremap <silent><S-SPACE>      :call <SID>Wprev("l")<CR>
 
 
 " *******************************************************
