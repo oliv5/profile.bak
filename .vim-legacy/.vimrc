@@ -30,7 +30,7 @@ endif
 
 " Use before config
 if filereadable(expand("~/.vimrc.before"))
-    source ~/.vimrc.before
+  source ~/.vimrc.before
 endif
 
 
@@ -567,7 +567,7 @@ set grepprg=ref\ $*
 " Grep
 function! s:Grep(expr)
   let expr = substitute(a:expr, '"', '\\"', "")
-  execute 'grep! "' . expr . '"' s:FindRootDir()
+  execute 'lgrep! "' . expr . '"' s:FindRootDir()
 endfunction
 
 " Count expression
@@ -597,6 +597,32 @@ nnoremap <C-g>              :Grep<SPACE>
 "nnoremap <C-g><C-g>         :Grep<SPACE><C-r><C-w>
 vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
 nnoremap <A-g>              :GrepCount<SPACE><C-r><C-w>
+
+
+" *******************************************************
+" } Make {
+" *******************************************************
+" Make program
+"set makeprg=make\ $*
+"set makeformat=%f:%l:%m
+
+" Make abbrevation to use the location list
+cnoreabbrev make lmake
+
+" Fix make errors encoding
+function QfRemoveAnsiColor()
+  let qflist = getqflist()
+  for i in qflist
+    "let i.text = iconv(i.text, "cp936", "utf-8")
+    let i.text = substitute(i.text, "\e[\d+;\d+m", "", "g")
+   endfor
+   call setqflist(qflist)
+endfunction
+
+" Autocommands
+if has('quickfix')
+  au! QuickfixCmdPost make call QfRemoveAnsiColor()
+endif
 
 
 " *******************************************************
@@ -634,8 +660,9 @@ if exists('+gtl') " Tab name is the filename only
 endif
 
 " Open/close tab
-FnMap  <C-t>t   :tabe<SPACE>
-FnMap  <C-t>c   :tabclose<CR>
+FnMap  <C-t>            :tabnew<CR>
+FnMap  <C-t><C-t>       :tabe<SPACE>
+FnMap  <C-t><C-c>       :tabclose<CR>
 if exists('g:vimrc_useTabs')
   FnNoremap  <C-F4>     :tabclose<CR>
   FnNoremap  <C-S-F4>   :tabdo tabclose<CR>
@@ -811,8 +838,7 @@ command! -nargs=? BufCloseAll   call s:BufCloseAll(<f-args>)
 command! -nargs=0 BufSmartOpen  call s:BufSmartOpen()
 
 " Open/close buffer (close=:bd or :bw)
-map <C-b>           :e <C-R>=expand("%:p:h") . "/" <CR>
-map <C-b><C-o>      :e<SPACE>
+map <C-b>           :e<SPACE><C-R>=expand("%:p:h") . "/" <CR>
 map <C-b><C-b>      :BufSmartOpen<CR>
 map <C-b><C-c>      :BufClose<CR>
 map <C-q>           :BufClose<CR>
@@ -1003,9 +1029,9 @@ function! s:Wprev(wnd)
 endfunction
 
 " Generic keymapping
-FnNoremap <C-SPACE>       :call <SID>Wclose("c")<CR>
-nnoremap <SPACE>          :call <SID>Wnext("c")<CR>
-nnoremap <S-SPACE>        :call <SID>Wprev("c")<CR>
+FnNoremap <C-SPACE>         :call <SID>Wclose("l")<CR>
+nnoremap <SPACE>            :call <SID>Wnext("l")<CR>
+nnoremap <S-SPACE>          :call <SID>Wprev("l")<CR>
 
 
 " *******************************************************
@@ -1017,16 +1043,16 @@ let g:tags_db='tags'
 set tags=./tags;$HOME
 
 " User commands
+command! -nargs=0 -bar Ttag     execute 'ltag' expand('<cword>')
 command! -nargs=0 -bar Tnext    call s:Wnext('t')
 command! -nargs=0 -bar Tprev    call s:Wprev('t')
 
 " Key mapping
-noremap <C-ENTER>           <C-]>
+noremap <C-ENTER>           :Ttag<CR>
 noremap <C-BACKSPACE>       <C-t>
-FnNoremap <silent><C-F5>    <C-]>
+FnNoremap <silent><C-F5>    :Ttag<CR>
 FnNoremap <silent><F5>      :Tnext<CR>
 FnNoremap <silent><S-F5>    :Tprev<CR>
-FnNoremap <silent><C-t>     <C-]>
 nnoremap <silent>t          :Tnext<CR>
 nnoremap <silent>T          :Tprev<CR>
 
@@ -1658,11 +1684,8 @@ FnNoremap <F9>        :source! ~/.vimsession<CR>
 " *******************************************************
 " } Alignment function {
 " *******************************************************
-" Mapping
-map <leader>= :call <SID>Vimrc_AlignAssignments()<CR>
-
 " Alignement function
-function! s:Vimrc_AlignAssignments ()
+function! s:AlignStatement()
   " Patterns needed to locate assignment operators...
   let ASSIGN_OP   = '[-+*/%|&]\?=\@<!=[=~]\@!'
   let ASSIGN_LINE = '^\(.\{-}\)\s*\(' . ASSIGN_OP . '\)'
@@ -1702,6 +1725,12 @@ function! s:Vimrc_AlignAssignments ()
   endfor
 endfunction
 
+" User commands
+command! -nargs=0 -bar AlignStatement      :call <SID>AlignStatement()
+
+" Key mapping
+map <leader>=   :AlignStatement<CR>
+
 
 " *******************************************************
 " } Inline increment/decrement function {
@@ -1718,7 +1747,7 @@ FnNoremap <A-A>   <C-x>
 
 " Use after config
 if filereadable(expand("~/.vimrc.after"))
-    source ~/.vimrc.after
+  source ~/.vimrc.after
 endif
 
 " Security
