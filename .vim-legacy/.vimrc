@@ -991,19 +991,15 @@ nnoremap <silent>T          :Tprev<CR>
 " *******************************************************
 " } Quickfix window management {
 " *******************************************************
-
 " Quickfix toggle
 function! s:Ctoggle()
-  if exists('s:c_opened') | 
-    unlet s:c_opened
-    if has('quickfix')
-      cclose
-    endif
-  else
-    let s:c_opened=1
-    if has('quickfix')
-      bot copen
-    endif
+  if has('quickfix')
+    for idx in range(bufnr('$')+1)
+      if getbufvar(idx,'&buftype')==?"quickfix"
+        cclose | return
+      endif
+    endfor
+    bot cwindow
   endif
 endfunction
 
@@ -1030,13 +1026,25 @@ FnNoremap <C-SPACE>       :Ctoggle<CR>
 nnoremap <SPACE>          :Cnext<CR>
 nnoremap <S-SPACE>        :Cprev<CR>
 
+" Autocommands
+if has('quickfix')
+  autocmd! QuickFixCmdPost [^l]* nested bot cwindow
+endif
+
 
 " *******************************************************
 " } Location window management {
 " *******************************************************
 " Location window toggle
 function! s:Ltoggle()
-  try | silent lclose | catch | silent! bot lopen | endtry
+  if has('quickfix')
+    for idx in range(bufnr('$')+1)
+      if getbufvar(idx,'&buftype')==?"quickfix"
+        lclose | return
+      endif
+    endfor
+    bot lwindow
+  endif
 endfunction
 
 " Location next
@@ -1058,6 +1066,11 @@ command! -nargs=0 -bar Lprev    call s:Lprev()
 nnoremap <localleader>l   :Ltoggle<CR>
 nnoremap l                :Lnext<CR>
 nnoremap L                :Lprev<CR>
+
+" Autocommands
+if has('quickfix')
+  autocmd! QuickFixCmdPost l* nested bot lwindow
+endif
 
 
 " *******************************************************
