@@ -112,6 +112,17 @@ function! AltNmap(new,old)
   call DoAltNmap('<A-'.a:new.'>', '<A-'.a:old.'>')
 endfunction
 
+" Conditionnal key remapping
+function! s:CondRemap(mapfct, key, mode, condition, action)
+  if mapcheck(a:key,a:mode)==''
+    execute a:mapfct a:key a:action
+  else
+    execute a:mapfct a:key
+           \ ":if" a:condition "<BAR>" a:action "<BAR> else <BAR>"
+           \ substitute(mapcheck(a:key,a:mode),'<CR>\|:','','g') "<BAR> endif<CR>"
+  endif
+endfunction
+
 " User commands
 command! -nargs=1 FnMap      call FnMap(<f-args>)
 command! -nargs=1 FnNoremap  call FnNoremap(<f-args>)
@@ -516,7 +527,7 @@ endfunction
 command! -nargs=+ -bar Find  call <SID>Find(<f-args>)
 
 " Keymapping
-FnNoremap <C-A-H>   :Find 
+FnNoremap <C-A-H>   :Find
 vnoremap  <C-A-H>   "+y:Find <C-R>"
 
 
@@ -567,8 +578,8 @@ endfunction
 
 " User commands
 command! -nargs=1 -bar Grep      call <SID>Grep(<q-args>)
-command! -nargs=0 -bar GrepNext  call <SID>Cnext()
-command! -nargs=0 -bar GrepPrev  call <SID>Cprev()
+command! -nargs=0 -bar GrepNext  call <SID>Wnext('c')
+command! -nargs=0 -bar GrepPrev  call <SID>Wprev('c')
 command! -nargs=1 -bar GrepCount call <SID>GrepCount(<f-args>)
 
 " Key mappings
@@ -956,6 +967,48 @@ nmap <silent><A-m>      :Mreset<CR>
 
 
 " *******************************************************
+" } Generic window tag management {
+" *******************************************************
+" Change the action prefix depending on current window type
+function! s:Wprefix(wnd)
+  if &previewwindow
+    return (a:wnd==?'t' ? 'pt' : 'p')
+  elseif &buftype==?"quickfix"
+    "return (empty(bufname('Quickfix List')) ? 'l' : 'c')
+    let buffer_list = '' | redir =>> buffer_list | silent! ls | redir END
+    return (match(buffer_list, '[Quickfix List]')==-1 ? 'l' : 'c')
+  endif
+  return a:wnd
+endfunction
+
+" Close window
+function! s:Wclose(wnd)
+  let prefix = s:Wprefix(a:wnd)
+  silent! execute prefix . "close"
+  "echo "Prefix" prefix
+endfunction
+
+" Search next
+function! s:Wnext(wnd)
+  let prefix = s:Wprefix(a:wnd)
+  try | silent execute prefix . "next" | catch | silent! execute prefix . "first" | endtry
+  "echo "Prefix" prefix
+endfunction
+
+" Search prev
+function! s:Wprev(wnd)
+  let prefix = s:Wprefix(a:wnd)
+  try | silent execute prefix . "prev" | catch | silent! execute prefix . "last" | endtry
+  "echo "Prefix" prefix
+endfunction
+
+" Generic keymapping
+FnNoremap <C-SPACE>       :call <SID>Wclose("c")<CR>
+nnoremap <SPACE>          :call <SID>Wnext("c")<CR>
+nnoremap <S-SPACE>        :call <SID>Wprev("c")<CR>
+
+
+" *******************************************************
 " } Tags {
 " *******************************************************
 " Set tags root
@@ -963,19 +1016,9 @@ let g:tags_db='tags'
 "set tags=./tags,tags;$HOME
 set tags=./tags;$HOME
 
-" Goto next tag (& loop)
-function! s:TagNext()
-  try | silent tnext | catch | silent! tfirst | endtry
-endfunction
-
-" Goto prev tag (& loop)
-function! s:TagPrev()
-  try | silent tprevious | catch | silent! tlast | endtry
-endfunction
-
 " User commands
-command! -nargs=0 -bar Tnext    call s:TagNext()
-command! -nargs=0 -bar Tprev    call s:TagPrev()
+command! -nargs=0 -bar Tnext    call s:Wnext('t')
+command! -nargs=0 -bar Tprev    call s:Wprev('t')
 
 " Key mapping
 noremap <C-ENTER>           <C-]>
@@ -992,39 +1035,26 @@ nnoremap <silent>T          :Tprev<CR>
 " } Quickfix window management {
 " *******************************************************
 " Quickfix toggle
-function! s:Ctoggle()
+function! s:Qtoggle(wnd)
   if has('quickfix')
     for idx in range(bufnr('$')+1)
       if getbufvar(idx,'&buftype')==?"quickfix"
-        cclose | return
+        execute a:wnd . "close" | return
       endif
     endfor
-    bot cwindow
+    execute "bot" a:wnd . "window"
   endif
 endfunction
 
-" Quickfix next
-function! s:Cnext()
-  try | silent cnext | catch | silent! cfirst | endtry
-endfunction
-
-" Quickfix prev
-function! s:Cprev()
-  try | silent cprev | catch | silent! clast | endtry
-endfunction
-
 " User commands
-command! -nargs=0 -bar Ctoggle  call s:Ctoggle()
-command! -nargs=0 -bar Cnext    call s:Cnext()
-command! -nargs=0 -bar Cprev    call s:Cprev()
+command! -nargs=0 -bar Ctoggle  call s:Qtoggle('c')
+command! -nargs=0 -bar Cnext    call s:Wnext('c')
+command! -nargs=0 -bar Cprev    call s:Wprev('c')
 
 " Keymapping
 nnoremap <localleader>c   :Ctoggle<CR>
-nnoremap c                :Cnext<CR>
-nnoremap C                :Cprev<CR>
-FnNoremap <C-SPACE>       :Ctoggle<CR>
-nnoremap <SPACE>          :Cnext<CR>
-nnoremap <S-SPACE>        :Cprev<CR>
+nnoremap <silent>c        :Cnext<CR>
+nnoremap <silent>C        :Cprev<CR>
 
 " Autocommands
 if has('quickfix')
@@ -1035,37 +1065,16 @@ endif
 " *******************************************************
 " } Location window management {
 " *******************************************************
-" Location window toggle
-function! s:Ltoggle()
-  if has('quickfix')
-    for idx in range(bufnr('$')+1)
-      if getbufvar(idx,'&buftype')==?"quickfix"
-        lclose | return
-      endif
-    endfor
-    bot lwindow
-  endif
-endfunction
-
-" Location next
-function! s:Lnext()
-  try | silent lnext | catch | silent! lfirst | endtry
-endfunction
-
-" Location prev
-function! s:Lprev()
-  try | silent lprev | catch | silent! llast | endtry
-endfunction
 
 " User commands
-command! -nargs=0 -bar Ltoggle  call s:Ltoggle()
-command! -nargs=0 -bar Lnext    call s:Lnext()
-command! -nargs=0 -bar Lprev    call s:Lprev()
+command! -nargs=0 -bar Ltoggle  call s:Qtoggle('l')
+command! -nargs=0 -bar Lnext    call s:Wnext('l')
+command! -nargs=0 -bar Lprev    call s:Wprev('l')
 
 " Keymapping
 nnoremap <localleader>l   :Ltoggle<CR>
-nnoremap l                :Lnext<CR>
-nnoremap L                :Lprev<CR>
+nnoremap <silent>l        :Lnext<CR>
+nnoremap <silent>L        :Lprev<CR>
 
 " Autocommands
 if has('quickfix')
@@ -1095,6 +1104,7 @@ function! s:PreviewOpenWnd()
     set nonu
     wincmd p
   endif
+  let s:p_lastw = ""
   augroup PreviewWnd
     au! CursorHold * nested call s:PreviewShowTag()
   augroup END
@@ -1106,15 +1116,17 @@ function! s:PreviewCloseWnd()
     au!
   augroup END
   pclose
-  let s:p_lastw = ""
+  unlet s:p_lastw
 endfunction
 
 " Toggle preview window
 function! s:PreviewToggleWnd()
-  if s:p_lastw == ""
-    call s:PreviewOpenWnd()
-  else
+  silent! wincmd P
+  if &previewwindow
+    wincmd p
     call s:PreviewCloseWnd()
+  else
+    call s:PreviewOpenWnd()
   endif
 endfunction
 
@@ -1139,14 +1151,6 @@ function! s:PreviewShowTag()
       endif
     endtry
   endif
-endfunction
-
-function! s:PreviewNextTag()
-  try | silent ptnext | catch | silent! ptfirst | endtry
-endfunction
-
-function! s:PreviewPrevTag()
-  try | silent ptprevious | catch | silent! ptlast | endtry
 endfunction
 
 function! s:PreviewCenterTag()
@@ -1174,33 +1178,16 @@ function! s:PreviewHighlightTag(pattern)
   endif
 endfunction
 
-" Remap Preview Window key
-function! s:PreviewRemap(mapfct, key, action)
-  if mapcheck(a:key,'n')==''
-    execute a:mapfct a:key a:action
-  else
-    execute a:mapfct a:key
-           \ ":if &previewwindow <BAR>" a:action "<BAR> else <BAR>"
-           \ substitute(mapcheck(a:key,'n'),'<CR>\|:','','g') "<BAR> endif<CR>"
-  endif
-endfunction
-
 " User commands
 command! -nargs=0 -bar Popen    call s:PreviewOpenWnd()
 command! -nargs=0 -bar Pclose   call s:PreviewCloseWnd()
 command! -nargs=0 -bar Ptoggle  call s:PreviewToggleWnd()
-command! -nargs=0 -bar Pnext    call s:PreviewNextTag()
-command! -nargs=0 -bar Pprev    call s:PreviewPrevTag()
+command! -nargs=0 -bar Pnext    call s:Wnext('pt')
+command! -nargs=0 -bar Pprev    call s:Wprev('pt')
 command! -nargs=0 -bar Ptag     call s:PreviewShowTag()
 
 " Key mapping
-nmap <localleader>p          :Ptoggle<CR>
-call s:PreviewRemap('FnNoremap <silent>', '<C-F5>',  'Ptag')
-call s:PreviewRemap('FnNoremap <silent>', '<F5>',    'Pnext')
-call s:PreviewRemap('FnNoremap <silent>', '<S-F5>',  'Pprev')
-call s:PreviewRemap('FnNoremap <silent>', '<C-t>',   'Ptag')
-call s:PreviewRemap('nmap <silent>',      't',       'Pnext')
-call s:PreviewRemap('nmap <silent>',      'T',       'Pprev')
+nmap <localleader>p             :Ptoggle<CR>
 
 
 " *******************************************************
