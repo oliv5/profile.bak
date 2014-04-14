@@ -517,7 +517,7 @@ nmap µ              #
 " *******************************************************
 " } Find search {
 " *******************************************************
-" Find files
+" Find in files
 function! s:Find(files, ...)
   let path='"' . s:FindRootDir() . '/' . a:files . '"'
   execute '!_find' path join(a:000)
@@ -527,7 +527,7 @@ endfunction
 command! -nargs=+ -bar Find  call <SID>Find(<f-args>)
 
 " Keymapping
-FnNoremap <C-A-H>   :Find
+FnNoremap <C-A-H>   :Find<SPACE>
 vnoremap  <C-A-H>   "+y:Find <C-R>"
 
 
@@ -578,8 +578,8 @@ endfunction
 
 " User commands
 command! -nargs=1 -bar Grep      call <SID>Grep(<q-args>)
-command! -nargs=0 -bar GrepNext  call <SID>Wnext('c')
-command! -nargs=0 -bar GrepPrev  call <SID>Wprev('c')
+command! -nargs=0 -bar GrepNext  call <SID>Wnext('l')
+command! -nargs=0 -bar GrepPrev  call <SID>Wprev('l')
 command! -nargs=1 -bar GrepCount call <SID>GrepCount(<f-args>)
 
 " Key mappings
@@ -996,88 +996,60 @@ nmap <silent><A-m>      :Mreset<CR>
 " } Generic window tag management {
 " *******************************************************
 " Change the action prefix depending on current window type
-function! s:Wprefix(wnd)
-  if &previewwindow
-    return (a:wnd==?'t' ? 'pt' : 'p')
-  elseif &buftype==?"quickfix"
-    "return (empty(bufname('Quickfix List')) ? 'l' : 'c')
-    let buffer_list = '' | redir =>> buffer_list | silent! ls | redir END
-    return (match(buffer_list, '[Quickfix List]')==-1 ? 'l' : 'c')
-  endif
-  return a:wnd
+function! s:Wprefix(prefix)
+  return s:Tprefix(s:Qprefix(a:prefix))
 endfunction
 
 " Toggle window, close current window or open the selected window
-function! s:Wtoggle(wnd)
-  let prefix = s:Wprefix("")
-  if empty(prefix)
-    try | silent execute a:wnd . "window" | catch | silent! execute a:wnd . "open" | endtry
+function! s:Wtoggle(close_prefix, open_prefix)
+  if !empty(a:close_prefix)
+    silent! execute a:close_prefix . "close"
   else
-    silent! execute prefix . "close"
+    try
+      silent execute a:open_prefix . "window"
+    catch
+      silent! execute a:open_prefix . "open"
+    endtry
   endif
-  "echo "Prefix" prefix a:wnd
+  "echo "Prefix" a:open_prefix a:close_prefix
 endfunction
 
 " Search next
-function! s:Wnext(wnd)
-  let prefix = s:Wprefix(a:wnd)
-  try | silent execute prefix . "next" | catch | silent! execute prefix . "first" | endtry
-  "echo "Prefix" prefix a:wnd
+function! s:Wnext(prefix)
+  try | silent execute a:prefix . "next" | catch | silent! execute a:prefix . "first" | endtry
+  "echo "Prefix" a:prefix
 endfunction
 
 " Search prev
-function! s:Wprev(wnd)
-  let prefix = s:Wprefix(a:wnd)
-  try | silent execute prefix . "prev" | catch | silent! execute prefix . "last" | endtry
-  "echo "Prefix" prefix a:wnd
+function! s:Wprev(prefix)
+  try | silent execute a:prefix . "prev" | catch | silent! execute a:prefix . "last" | endtry
+  "echo "Prefix" a:prefix
 endfunction
 
 " Generic keymapping
-FnNoremap <silent><C-SPACE>     :call <SID>Wtoggle("l")<CR>
-nnoremap <silent><SPACE>        :call <SID>Wnext("l")<CR>
-nnoremap <silent><S-SPACE>      :call <SID>Wprev("l")<CR>
-
-
-" *******************************************************
-" } Tags {
-" *******************************************************
-" Set tags root
-let g:tags_db='tags'
-"set tags=./tags,tags;$HOME
-set tags=./tags;$HOME
-
-" User commands
-command! -nargs=0 -bar Ttag     execute 'ltag' expand('<cword>')
-command! -nargs=0 -bar Tnext    call s:Wnext('t')
-command! -nargs=0 -bar Tprev    call s:Wprev('t')
-
-" Key mapping
-noremap <C-ENTER>           :Ttag<CR>
-noremap <C-BACKSPACE>       <C-t>
-FnNoremap <silent><C-F5>    :Ttag<CR>
-FnNoremap <silent><F5>      :Tnext<CR>
-FnNoremap <silent><S-F5>    :Tprev<CR>
-nnoremap <silent>t          :Tnext<CR>
-nnoremap <silent>T          :Tprev<CR>
+FnNoremap <silent><C-SPACE>     :call <SID>Wtoggle(<SID>Wprefix(''),'l')<CR>
+nnoremap <silent><SPACE>        :call <SID>Wnext(<SID>Wprefix('l'))<CR>
+nnoremap <silent><S-SPACE>      :call <SID>Wprev(<SID>Wprefix('l'))<CR>
 
 
 " *******************************************************
 " } Quickfix window management {
 " *******************************************************
-" Quickfix toggle
-function! s:Qtoggle(wnd)
-  if has('quickfix')
-    for idx in range(bufnr('$')+1)
-      if getbufvar(idx,'&buftype')==?"quickfix"
-        execute a:wnd . "close" | return
-      endif
-    endfor
-    execute "bot" a:wnd . "window"
+" Change the action prefix depending on current window type
+function! s:Qprefix(prefix, ...)
+  let bufselect = (a:0 ? a:1 : '%')
+  if (getbufvar(bufselect,'&buftype')!=?"quickfix")
+    return a:prefix
   endif
+  " Get 'ls' output as a string
+  let ls_output = '' | redir =>> ls_output | silent! ls | redir END
+  " Match with quicklist string identifier
+  let matches = matchlist(ls_output, '\n\s*\(\d\+\)[^\n]*\[.*Quickfix.*\]')
+  return (!empty(matches) && l:matches[1]==bufnr('%') ? 'c' : 'l')
 endfunction
 
 " User commands
-command! -nargs=0 -bar Ctoggle  call s:Qtoggle('c')
+command! -nargs=0 -bar Ctoggle  call s:Wtoggle(<SID>Qprefix(''), 'c')
 command! -nargs=0 -bar Cnext    call s:Wnext('c')
 command! -nargs=0 -bar Cprev    call s:Wprev('c')
 
@@ -1097,7 +1069,7 @@ endif
 " *******************************************************
 
 " User commands
-command! -nargs=0 -bar Ltoggle  call s:Qtoggle('l')
+command! -nargs=0 -bar Ltoggle  call s:Wtoggle(<SID>Qprefix(''), 'l')
 command! -nargs=0 -bar Lnext    call s:Wnext('l')
 command! -nargs=0 -bar Lprev    call s:Wprev('l')
 
@@ -1110,6 +1082,34 @@ nnoremap <silent>L        :Lprev<CR>
 if has('quickfix')
   autocmd! QuickFixCmdPost l* nested bot lwindow
 endif
+
+
+" *******************************************************
+" } Tags {
+" *******************************************************
+" Set tags root
+let g:tags_db='tags'
+"set tags=./tags,tags;$HOME
+set tags=./tags;$HOME
+
+" Change the action prefix depending on current window type
+function! s:Tprefix(prefix)
+  return (&previewwindow ? (a:prefix==?'t' ? 'pt' : 'p') : a:prefix)
+endfunction
+
+" User commands
+command! -nargs=0 -bar Ttag     execute 'ltag' expand('<cword>')
+command! -nargs=0 -bar Tnext    call s:Wnext('t')
+command! -nargs=0 -bar Tprev    call s:Wprev('t')
+
+" Key mapping
+noremap <C-ENTER>           :Ttag<CR>
+noremap <C-BACKSPACE>       <C-t>
+FnNoremap <silent><C-F5>    :Ttag<CR>
+FnNoremap <silent><F5>      :call <SID>Wnext(<SID>Tprefix('t'))<CR>
+FnNoremap <silent><S-F5>    :call <SID>Wprev(<SID>Tprefix('t'))<CR>
+nnoremap <silent>t          :call <SID>Wnext(<SID>Tprefix('t'))<CR>
+nnoremap <silent>T          :call <SID>Wprev(<SID>Tprefix('t'))<CR>
 
 
 " *******************************************************
@@ -1261,6 +1261,20 @@ endfunction
 if has("cscope")
   " Option
   let g:cscope_db = !empty($CSCOPE_DB) ? $CSCOPE_DB : "cscope.out"
+  if has('quickfix')
+    set cscopequickfix=s-,c-,d-,i-,t-,e-
+  endif
+
+  " Cscope user command
+  command! -nargs=* Cs :lcs <args>
+
+  " Abbreviation
+  cabbrev csa lcs add
+  cabbrev csf lcs find
+  cabbrev csk lcs kill
+  cabbrev csr lcs reset
+  cabbrev css lcs show
+  cabbrev csh lcs help
 
   " Add any cscope database in the given environment variable
   "for db in add(split($CSCOPE_DB), g:cscope_db)

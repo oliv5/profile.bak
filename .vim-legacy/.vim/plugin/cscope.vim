@@ -42,8 +42,8 @@ if has("cscope")
 
     " add any cscope database in current directory
     "if filereadable("cscope.out")
-    "    silent! cs add cscope.out  
-    " else add the database pointed to by environment variable 
+    "    silent! cs add cscope.out
+    " else add the database pointed to by environment variable
     "elseif $CSCOPE_DB != ""
     "    silent! cs add $CSCOPE_DB
     "endif
@@ -91,23 +91,28 @@ if has("cscope")
     " go back to where you were before the search.
     "
 
-    nnoremap <C-d><C-s> :cs find s <C-R>=expand("<cword>")<CR><CR>
-    nnoremap <C-d><C-d> :cs find d <C-R>=expand("<cword>")<CR><CR>
-    nnoremap <C-d><C-c> :cs find c <C-R>=expand("<cword>")<CR><CR>
-    nnoremap <C-d><C-t> :cs find t <C-R>=expand("<cword>")<CR><CR>
-    nnoremap <C-d><C-e> :cs find e <C-R>=expand("<cword>")<CR><CR>
-    nnoremap <C-d><C-f> :cs find f <C-R>=expand("<cfile>")<CR><CR>
-    nnoremap <C-d><C-i> :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
-    nnoremap <C-d><C-g> :cs find g <C-R>=expand("<cword>")<CR><CR>
+    " cs user command
+    if !exists('Cs')
+      command! -nargs=* Cs :cs <args>
+    endif
 
-    vnoremap <C-d><C-s> "+y:cs find s <C-R>"<CR>
-    vnoremap <C-d><C-d> "+y:cs find d <C-R>"<CR>
-    vnoremap <C-d><C-c> "+y:cs find c <C-R>"<CR>
-    vnoremap <C-d><C-t> "+y:cs find t <C-R>"<CR>
-    vnoremap <C-d><C-e> "+y:cs find e <C-R>"<CR>
-    vnoremap <C-d><C-f> "+y:cs find f <C-R>"<CR>
-    vnoremap <C-d><C-i> "+y:cs find i <C-R>"<CR>
-    vnoremap <C-d><C-g> "+y:cs find g <C-R>"<CR>
+    nnoremap <C-d><C-s> :Cs find s <C-R>=expand("<cword>")<CR><CR>
+    nnoremap <C-d><C-d> :Cs find d <C-R>=expand("<cword>")<CR><CR>
+    nnoremap <C-d><C-c> :Cs find c <C-R>=expand("<cword>")<CR><CR>
+    nnoremap <C-d><C-t> :Cs find t <C-R>=expand("<cword>")<CR><CR>
+    nnoremap <C-d><C-e> :Cs find e <C-R>=expand("<cword>")<CR><CR>
+    nnoremap <C-d><C-f> :Cs find f <C-R>=expand("<cfile>")<CR><CR>
+    nnoremap <C-d><C-i> :Cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
+    nnoremap <C-d><C-g> :Cs find g <C-R>=expand("<cword>")<CR><CR>
+
+    vnoremap <C-d><C-s> "+y:Cs find s <C-R>"<CR>
+    vnoremap <C-d><C-d> "+y:Cs find d <C-R>"<CR>
+    vnoremap <C-d><C-c> "+y:Cs find c <C-R>"<CR>
+    vnoremap <C-d><C-t> "+y:Cs find t <C-R>"<CR>
+    vnoremap <C-d><C-e> "+y:Cs find e <C-R>"<CR>
+    vnoremap <C-d><C-f> "+y:Cs find f <C-R>"<CR>
+    vnoremap <C-d><C-i> "+y:Cs find i <C-R>"<CR>
+    vnoremap <C-d><C-g> "+y:Cs find g <C-R>"<CR>
 
     " Using 'CTRL-spacebar' (intepreted as CTRL-@ by vim) then a search type
     " makes the vim window split horizontally, with search result displayed in
