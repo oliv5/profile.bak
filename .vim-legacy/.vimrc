@@ -515,16 +515,30 @@ nmap µ              #
 
 
 " *******************************************************
+" } External commands {
+" *******************************************************
+function! s:Expr(prefix, ...)
+  execute a:prefix . "expr system('" . join(a:000) . "')"
+endfunction
+
+" User commands
+command! -nargs=+ -bar Expr  call <SID>Expr(<f-args>)
+command! -nargs=+ -bar Lexpr call <SID>Expr('l',<f-args>)
+command! -nargs=+ -bar Cexpr call <SID>Expr('c',<f-args>)
+
+
+" *******************************************************
 " } Find search {
 " *******************************************************
 " Find in files
 function! s:Find(files, ...)
   let path='"' . s:FindRootDir() . '/' . a:files . '"'
-  execute '!_find' path join(a:000)
+  call s:Expr('l','_find '.path.' '.join(a:000))
+  "execute ':!_find' path join(a:000)
 endfunction
 
 " User commands
-command! -nargs=+ -bar Find  call <SID>Find(<f-args>)
+command! -nargs=+ -bar Find call <SID>Find(<f-args>)
 
 " Keymapping
 FnNoremap <C-A-H>   :Find<SPACE>
@@ -539,7 +553,8 @@ function! s:Sed(pattern, replace, files, ...)
   let path='"' . s:FindRootDir() . '/' . a:files . '"'
   let expr1 = substitute(a:pattern, '"', '\\"', "")
   let expr2 = substitute(a:replace, '"', '\\"', "")
-  execute '!_fsed' join(a:000) expr1 expr2 path
+  call s:Expr('l','_fsed '.join(a:000).' '.expr1.' '.expr2.' '.path)
+  "execute '!_fsed' join(a:000) expr1 expr2 path
 endfunction
 
 " User commands
@@ -650,7 +665,6 @@ vnoremap <A-Right> <C-c><C-I>
 " *******************************************************
 " } Tab management {
 " *******************************************************
-
 " Options
 if exists('g:vimrc_useTabs')
   silent! set switchbuf=usetab,newtab  " Buffer switch
@@ -993,7 +1007,7 @@ nmap <silent><A-m>      :Mreset<CR>
 
 
 " *******************************************************
-" } Generic window tag management {
+" } Generic tag window management {
 " *******************************************************
 " Change the action prefix depending on current window type
 function! s:Wprefix(prefix)
@@ -1005,11 +1019,7 @@ function! s:Wtoggle(close_prefix, open_prefix)
   if !empty(a:close_prefix)
     silent! execute a:close_prefix . "close"
   else
-    try
-      silent execute a:open_prefix . "window"
-    catch
-      silent! execute a:open_prefix . "open"
-    endtry
+    silent! execute a:open_prefix . "open"
   endif
   "echo "Prefix" a:open_prefix a:close_prefix
 endfunction
@@ -1044,8 +1054,8 @@ function! s:Qprefix(prefix, ...)
   " Get 'ls' output as a string
   let ls_output = '' | redir =>> ls_output | silent! ls | redir END
   " Match with quicklist string identifier
-  let matches = matchlist(ls_output, '\n\s*\(\d\+\)[^\n]*\[.*Quickfix.*\]')
-  return (!empty(matches) && l:matches[1]==bufnr('%') ? 'c' : 'l')
+  let matches = matchlist(ls_output, '\n\s*\(\d\+\).\{-,10}\[.\{-,10}Quickfix')
+  return (!empty(matches) && matches[1]==bufnr(bufselect) ? 'c' : 'l')
 endfunction
 
 " User commands
@@ -1059,9 +1069,9 @@ nnoremap <silent>c        :Cnext<CR>
 nnoremap <silent>C        :Cprev<CR>
 
 " Autocommands
-if has('quickfix')
-  autocmd! QuickFixCmdPost [^l]* nested bot cwindow
-endif
+"if has('quickfix')
+"  autocmd! QuickFixCmdPost [^l]* nested bot cwindow
+"endif
 
 
 " *******************************************************
@@ -1079,9 +1089,9 @@ nnoremap <silent>l        :Lnext<CR>
 nnoremap <silent>L        :Lprev<CR>
 
 " Autocommands
-if has('quickfix')
-  autocmd! QuickFixCmdPost l* nested bot lwindow
-endif
+"if has('quickfix')
+"  autocmd! QuickFixCmdPost l* nested bot lwindow
+"endif
 
 
 " *******************************************************
@@ -1127,11 +1137,11 @@ endif
 
 " Open preview window
 function! s:PreviewOpenWnd()
-  silent! execute "below pedit!"
+  silent! execute "bot pedit!"
   wincmd P
   if &previewwindow
-  "  wincmd J
-    set nonu
+    set nu
+	"wincmd J
     wincmd p
   endif
   let s:p_lastw = ""
