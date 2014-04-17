@@ -2,7 +2,7 @@
 
 # Override find files functions
 # Remove the ":line" pattern from compiler & grep
-alias ff='NAME=name _ff'
+alias ff='_ff'
 function _ff() {
   _find "$(sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1/g' <<< $1)" "${@:2}"
 }

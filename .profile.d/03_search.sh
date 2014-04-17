@@ -1,5 +1,5 @@
 #!/bin/bash
-FIND_EXCLUDE="-not -path *.svn* -and -not -path *.git"
+FIND_EXCLUDE="-not -path *.svn* -and -not -path *.git*"
 
 # Find files functions
 function _find() {
@@ -9,7 +9,7 @@ function _find() {
   set +f
   trap SIGINT
 }
-function ff() { _find "$@" ;}
+function ff()  { _find "$@" ;}
 function fff() { _find "${@:-*}" -type f ;}
 function ffd() { _find "${@:-*}" -type d ;}
 alias iff='NAME=iname ff'
@@ -18,9 +18,9 @@ alias iffd='NAME=iname ffd'
 
 # Search pattern functions
 function _fgrep() {
-  [ "$1" != "" ] && NAME=${NAME:-name} _find "${!#}" -type f -print0 | xargs -0 grep -n --color "${@:1:($#-1)}"
+  [ "$1" != "" ] && _find "${!#}" -type f -print0 | xargs -0 grep -n --color "${@:1:($#-1)}"
 }
-alias gg='NAME=name _fgrep'
+alias gg='_fgrep'
 alias igg='NAME=iname gg'
 
 # Safe search & replace
@@ -33,13 +33,13 @@ function _fsed()
   echo "Replace '$IN' by '$OUT' in files '${!#}' (opts $SEDOPT) ?"
   echo "Press enter or Ctrl-C" ; read
   # Sed in place with no output
-  #NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
+  #_find "${!#}" -type f $EXCLUDE -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
   # Sed in place with display
-  #NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -execdir sed -i $SEDOPT -e "/$IN/{w /dev/stderr" -e "}" -e "s/$IN/$OUT/g" {} \;
+  #_find "${!#}" -type f $EXCLUDE -execdir sed -i $SEDOPT -e "/$IN/{w /dev/stderr" -e "}" -e "s/$IN/$OUT/g" {} \;
   # Sed in place with backup
-  NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -execdir sed -i_$(date +%Y%m%d-%H%M%S).bak $SEDOPT "s/$IN/$OUT/g" {} \;
+  _find "${!#}" -type f $EXCLUDE -execdir sed -i_$(date +%Y%m%d-%H%M%S).bak $SEDOPT "s/$IN/$OUT/g" {} \;
   # Sed with confirmation about all files
-  #NAME=${NAME:-name} _find "${!#}" -type f $EXCLUDE -exec echo "Processing file {} ?" \; -exec bash -c read \; -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
+  #_find "${!#}" -type f $EXCLUDE -exec echo "Processing file {} ?" \; -exec bash -c read \; -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
 }
-alias hh='NAME=name _fsed'
+alias hh='_fsed'
 alias ihh='NAME=iname hh'
