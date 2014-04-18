@@ -83,18 +83,11 @@ cmap w!! w !sudo tee % >/dev/null
 " } Key mapping functions {
 " *******************************************************
 
-" Map function keys (or Ctrl-X) in normal/visual & insert modes
-function! FnMap(args)
+" Map/noremap function keys (or Ctrl-X) in normal/visual & insert modes
+function! FnMap(prefix, args)
   let args = matchlist(a:args,'\(<silent>\s\+\)\?\(.\{-}\)\s\+\(.*\)')
-  execute 'map'  args[1] args[2] '<c-c>'.args[3]
-  execute 'imap' args[1] args[2] '<c-o>'.args[3]
-endfunction
-
-" Noremap function keys (or Ctrl-X) in normal/visual & insert modes
-function! FnNoremap(args)
-  let args = matchlist(a:args,'\(<silent>\s\+\)\?\(.\{-}\)\s\+\(.*\)')
-  execute 'noremap'  args[1] args[2] '<c-c>'.args[3]
-  execute 'inoremap' args[1] args[2] '<c-o>'.args[3]
+  execute a:prefix.'map'  args[1] args[2] '<c-c>'.args[3]
+  execute 'i'.a:prefix.'map <expr>' args[1] args[2] (pumvisible()?'<ESC>':'<c-o>').args[3]
 endfunction
 
 " Make an alternate mapping based on another
@@ -124,8 +117,8 @@ function! s:CondRemap(mapfct, key, mode, condition, action)
 endfunction
 
 " User commands
-command! -nargs=1 FnMap      call FnMap(<f-args>)
-command! -nargs=1 FnNoremap  call FnNoremap(<f-args>)
+command! -nargs=1 FnMap      call FnMap('',<f-args>)
+command! -nargs=1 FnNoremap  call FnMap('nore',<f-args>)
 command! -nargs=+ AltNmap    call AltNmap(<f-args>)
 
 
@@ -515,27 +508,17 @@ nmap µ              #
 
 
 " *******************************************************
-" } External commands {
-" *******************************************************
-function! s:Expr(prefix, ...)
-  execute a:prefix . "expr system('" . join(a:000) . "')"
-endfunction
-
-" User commands
-command! -nargs=+ -bar Expr  call <SID>Expr(<f-args>)
-command! -nargs=+ -bar Lexpr call <SID>Expr('l',<f-args>)
-command! -nargs=+ -bar Cexpr call <SID>Expr('c',<f-args>)
-
-
-" *******************************************************
 " } Find search {
 " *******************************************************
 " Find in files
 function! s:Find(files, ...)
   let path='"' . s:FindRootDir() . '/' . a:files . '"'
-  call s:Expr('l','_find '.path.' '.join(a:000))
+  call s:Wexprd('_find',path,join(a:000))
   "execute ':!_find' path join(a:000)
 endfunction
+
+" Make abbrevation to use the location list
+cnoreabbrev ff Find
 
 " User commands
 command! -nargs=+ -bar Find call <SID>Find(<f-args>)
@@ -553,7 +536,7 @@ function! s:Sed(pattern, replace, files, ...)
   let path='"' . s:FindRootDir() . '/' . a:files . '"'
   let expr1 = substitute(a:pattern, '"', '\\"', "")
   let expr2 = substitute(a:replace, '"', '\\"', "")
-  call s:Expr('l','_fsed '.join(a:000).' '.expr1.' '.expr2.' '.path)
+  call s:Wexprd('_fsed',join(a:000),expr1,expr2,path)
   "execute '!_fsed' join(a:000) expr1 expr2 path
 endfunction
 
@@ -579,10 +562,15 @@ set grepprg=ref\ $*
 "set grepprg=lid\ -Rgrep\ -s
 "set grepformat=%f:%l:%m
 
+" Abbreviations
+cnoreabbrev ref Grep
+cnoreabbrev Ref Grep
+
 " Grep
 function! s:Grep(expr)
   let expr = substitute(a:expr, '"', '\\"', "")
-  execute 'lgrep! "' . expr . '"' s:FindRootDir()
+  execute (g:wnd_prefix==?'c'?'':g:wnd_prefix) . 'grep! "' . expr . '"' s:FindRootDir()
+  "call s:Wexprv(g:wnd_prefix,'grep! "' . expr . '"' s:FindRootDir())
 endfunction
 
 " Count expression
@@ -593,8 +581,8 @@ endfunction
 
 " User commands
 command! -nargs=1 -bar Grep      call <SID>Grep(<q-args>)
-command! -nargs=0 -bar GrepNext  call <SID>Wnext('l')
-command! -nargs=0 -bar GrepPrev  call <SID>Wprev('l')
+command! -nargs=0 -bar GrepNext  call <SID>Wnext(g:wnd_prefix)
+command! -nargs=0 -bar GrepPrev  call <SID>Wprev(g:wnd_prefix)
 command! -nargs=1 -bar GrepCount call <SID>GrepCount(<f-args>)
 
 " Key mappings
@@ -621,8 +609,9 @@ nnoremap <A-g>              :GrepCount<SPACE><C-r><C-w>
 "set makeprg=make\ $*
 "set makeformat=%f:%l:%m
 
-" Make abbrevation to use the location list
-cnoreabbrev make lmake
+" Make abbrevation to use the right quickfix list
+"execute 'cnoreabbrev make' (g:wnd_prefix==?'c'?'':g:wnd_prefix) . 'make'
+"execute 'cnoreabbrev make' Wvcprefix(g:wnd_prefix) . 'make'
 
 " Fix make errors encoding
 function! QfRemoveAnsiColor()
@@ -1009,6 +998,24 @@ nmap <silent><A-m>      :Mreset<CR>
 " *******************************************************
 " } Generic tag window management {
 " *******************************************************
+" Options
+let g:wnd_prefix = 'c'
+
+" Execute external commands in quickfix or location window
+function! s:Wexpr(prefix, ...)
+  execute a:prefix . "expr system('" . join(a:000) . "')"
+endfunction
+
+" Execute external commands in default quickfix window
+function! s:Wexprd(...)
+  call s:Wexpr(g:wnd_prefix, join(a:000))
+endfunction
+
+" Execute vim commands in quickfix or location window
+function! s:Wexprv(prefix, ...)
+  execute (a:prefix==?'c'?'':a:prefix) . join(a:000)
+endfunction
+
 " Change the action prefix depending on current window type
 function! s:Wprefix(prefix)
   return s:Tprefix(s:Qprefix(a:prefix))
@@ -1019,7 +1026,7 @@ function! s:Wtoggle(close_prefix, open_prefix)
   if !empty(a:close_prefix)
     silent! execute a:close_prefix . "close"
   else
-    silent! execute a:open_prefix . "open"
+    silent! execute 'bot' a:open_prefix . "open"
   endif
   "echo "Prefix" a:open_prefix a:close_prefix
 endfunction
@@ -1037,9 +1044,9 @@ function! s:Wprev(prefix)
 endfunction
 
 " Generic keymapping
-FnNoremap <silent><C-SPACE>     :call <SID>Wtoggle(<SID>Wprefix(''),'l')<CR>
-nnoremap <silent><SPACE>        :call <SID>Wnext(<SID>Wprefix('l'))<CR>
-nnoremap <silent><S-SPACE>      :call <SID>Wprev(<SID>Wprefix('l'))<CR>
+FnNoremap <silent><C-SPACE>     :call <SID>Wtoggle(<SID>Wprefix(''),g:wnd_prefix)<CR>
+nnoremap <silent><SPACE>        :call <SID>Wnext(<SID>Wprefix(g:wnd_prefix))<CR>
+nnoremap <silent><S-SPACE>      :call <SID>Wprev(<SID>Wprefix(g:wnd_prefix))<CR>
 
 
 " *******************************************************
@@ -1062,6 +1069,7 @@ endfunction
 command! -nargs=0 -bar Ctoggle  call s:Wtoggle(<SID>Qprefix(''), 'c')
 command! -nargs=0 -bar Cnext    call s:Wnext('c')
 command! -nargs=0 -bar Cprev    call s:Wprev('c')
+command! -nargs=+ -bar Cexpr    call s:Wexpr('c',<f-args>)
 
 " Keymapping
 nnoremap <localleader>c   :Ctoggle<CR>
@@ -1082,6 +1090,7 @@ nnoremap <silent>C        :Cprev<CR>
 command! -nargs=0 -bar Ltoggle  call s:Wtoggle(<SID>Qprefix(''), 'l')
 command! -nargs=0 -bar Lnext    call s:Wnext('l')
 command! -nargs=0 -bar Lprev    call s:Wprev('l')
+command! -nargs=+ -bar Lexpr    call s:Wexpr('l',<f-args>)
 
 " Keymapping
 nnoremap <localleader>l   :Ltoggle<CR>
@@ -1102,13 +1111,16 @@ let g:tags_db='tags'
 "set tags=./tags,tags;$HOME
 set tags=./tags;$HOME
 
+" Target window
+let g:tag_prefix=(g:wnd_prefix==?'c'?'':g:wnd_prefix)
+
 " Change the action prefix depending on current window type
 function! s:Tprefix(prefix)
   return (&previewwindow ? (a:prefix==?'t' ? 'pt' : 'p') : a:prefix)
 endfunction
 
 " User commands
-command! -nargs=0 -bar Ttag     execute 'ltag' expand('<cword>')
+command! -nargs=0 -bar Ttag     execute g:tag_prefix . 'tag' expand('<cword>')
 command! -nargs=0 -bar Tnext    call s:Wnext('t')
 command! -nargs=0 -bar Tprev    call s:Wprev('t')
 
