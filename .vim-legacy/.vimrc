@@ -510,14 +510,13 @@ nmap µ              #
 " *******************************************************
 " } Find search {
 " *******************************************************
-" Find in files
+" Find files
 function! s:Find(files, ...)
-  let path='"' . s:FindRootDir() . '/' . a:files . '"'
-  call s:Wexprd('_find',path,join(a:000))
-  "execute ':!_find' path join(a:000)
+  let path  = escape(s:FindRootDir().'/'.a:files, '" *')
+  execute 'Wsys' '_find' path join(a:000)
 endfunction
 
-" Make abbrevation to use the location list
+" Abbreviations
 cnoreabbrev ff Find
 
 " User commands
@@ -533,11 +532,10 @@ vnoremap  <C-A-H>   "+y:Find <C-R>"
 " *******************************************************
 " Sed (replace in files)
 function! s:Sed(pattern, replace, files, ...)
-  let path='"' . s:FindRootDir() . '/' . a:files . '"'
-  let expr1 = substitute(a:pattern, '"', '\\"', "")
-  let expr2 = substitute(a:replace, '"', '\\"', "")
-  call s:Wexprd('_fsed',join(a:000),expr1,expr2,path)
-  "execute '!_fsed' join(a:000) expr1 expr2 path
+  let path  = '"'.escape(s:FindRootDir().'/'.a:files, ' ').'"'
+  let expr1 = '"'.escape(a:pattern, '" *').'"'
+  let expr2 = '"'.escape(a:replace, '" *').'"'
+  execute '!_fsed' join(a:000) expr1 expr2 path
 endfunction
 
 " User commands
@@ -563,39 +561,30 @@ set grepprg=ref\ $*
 "set grepformat=%f:%l:%m
 
 " Abbreviations
-cnoreabbrev ref Grep
-cnoreabbrev Ref Grep
+cnoreabbrev gg Grep
 
 " Grep
 function! s:Grep(expr)
-  let expr = substitute(a:expr, '"', '\\"', "")
-  execute (g:wnd_prefix==?'c'?'':g:wnd_prefix) . 'grep! "' . expr . '"' s:FindRootDir()
-  "call s:Wexprv(g:wnd_prefix,'grep! "' . expr . '"' s:FindRootDir())
+  let path = escape(s:FindRootDir(), '" *')
+  let expr = escape('"'.a:expr.'"','" *')
+  execute 'Wcmd' 'grep!' expr path
 endfunction
 
 " Count expression
 function! s:GrepCount(expr)
-  let expr = substitute(a:expr, '"', '\\"', "")
-  execute '!ref' expr s:FindRootDir() '| wc -l'
+  let path = escape(s:FindRootDir(), '" *')
+  let expr = escape('"'.a:expr.'"','" *')
+  execute '!ref' expr path '| wc -l'
 endfunction
 
 " User commands
 command! -nargs=1 -bar Grep      call <SID>Grep(<q-args>)
-command! -nargs=0 -bar GrepNext  call <SID>Wnext(g:wnd_prefix)
-command! -nargs=0 -bar GrepPrev  call <SID>Wprev(g:wnd_prefix)
-command! -nargs=1 -bar GrepCount call <SID>GrepCount(<f-args>)
+command! -nargs=1 -bar GrepCount call <SID>GrepCount(<q-args>)
 
 " Key mappings
-FnNoremap <silent><F6>      :GrepNext<CR>
-FnNoremap <silent><S-F6>    :GrepPrev<CR>
-FnNoremap <C-F6>            :Grep<SPACE><C-r><C-w>
-FnNoremap <A-F6>            :GrepCount<SPACE><C-r><C-w>
-cnoreabbrev gg Grep
-
-" Alternate key mappings
 silent! unmap gx
-nnoremap <silent>g          :GrepNext<CR>
-nnoremap <silent>G          :GrepPrev<CR>
+nnoremap <silent>g          :Wnext<CR>
+nnoremap <silent>G          :Wprev<CR>
 nnoremap <C-g>              :Grep<SPACE>
 "nnoremap <C-g><C-g>         :Grep<SPACE><C-r><C-w>
 vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
@@ -609,9 +598,8 @@ nnoremap <A-g>              :GrepCount<SPACE><C-r><C-w>
 "set makeprg=make\ $*
 "set makeformat=%f:%l:%m
 
-" Make abbrevation to use the right quickfix list
-"execute 'cnoreabbrev make' (g:wnd_prefix==?'c'?'':g:wnd_prefix) . 'make'
-"execute 'cnoreabbrev make' Wvcprefix(g:wnd_prefix) . 'make'
+" Abbrevations
+"cnoreabbrev make lmake
 
 " Fix make errors encoding
 function! QfRemoveAnsiColor()
@@ -951,7 +939,7 @@ endif
 
 " Set a mark
 function! s:MarkSet()
-  if &bt!='quickfix' && !&pvw
+  if &buftype!=#'quickfix' && !&pvw
     exec printf("ma %c", 65 + s:mark_next)
     let s:mark_cur=s:mark_next
     let s:mark_next=(s:mark_next + 1) % 26
@@ -998,78 +986,74 @@ nmap <silent><A-m>      :Mreset<CR>
 " *******************************************************
 " } Generic tag window management {
 " *******************************************************
-" Options
-let g:wnd_prefix = 'c'
+" Default windows
+let g:wdefault = 'c'
 
-" Execute external commands in quickfix or location window
-function! s:Wexpr(prefix, ...)
-  execute a:prefix . "expr system('" . join(a:000) . "')"
-endfunction
-
-" Execute external commands in default quickfix window
-function! s:Wexprd(...)
-  call s:Wexpr(g:wnd_prefix, join(a:000))
-endfunction
-
-" Execute vim commands in quickfix or location window
-function! s:Wexprv(prefix, ...)
-  execute (a:prefix==?'c'?'':a:prefix) . join(a:000)
-endfunction
-
-" Change the action prefix depending on current window type
-function! s:Wprefix(prefix)
-  return s:Tprefix(s:Qprefix(a:prefix))
-endfunction
-
-" Toggle window, close current window or open the selected window
-function! s:Wtoggle(close_prefix, open_prefix)
-  if !empty(a:close_prefix)
-    silent! execute a:close_prefix . "close"
-  else
-    silent! execute 'bot' a:open_prefix . "open"
-  endif
-  "echo "Prefix" a:open_prefix a:close_prefix
+" Select the right action list based on the current context
+function! s:Wprefix()
+  return (&previewwindow ? 'p' : (&buftype==?"quickfix" ? s:Qtype() : g:wdefault))
 endfunction
 
 " Search next
 function! s:Wnext(prefix)
   try | silent execute a:prefix . "next" | catch | silent! execute a:prefix . "first" | endtry
-  "echo "Prefix" a:prefix
 endfunction
 
 " Search prev
 function! s:Wprev(prefix)
   try | silent execute a:prefix . "prev" | catch | silent! execute a:prefix . "last" | endtry
-  "echo "Prefix" a:prefix
 endfunction
 
+" Execute system commands in quickfix or location window
+function! s:Wsys(prefix, ...)
+  execute a:prefix . "getexpr system('" . escape(join(a:000),"\"") . "')"
+endfunction
+
+" Execute vim commands in quickfix or location window
+function! s:Wcmd(prefix, ...)
+  execute (a:prefix==?'c' ? "" : a:prefix) . join(a:000)
+endfunction
+
+" User commands
+command! -nargs=0 -bar Wopen    execute toupper(s:Wprefix()).'open'
+command! -nargs=0 -bar Wclose   execute toupper(s:Wprefix()).'close'
+command! -nargs=0 -bar Wtoggle  execute toupper(s:Wprefix()).'toggle'
+command! -nargs=0 -bar Wnext    execute toupper(s:Wprefix()).'next'
+command! -nargs=0 -bar Wprev    execute toupper(s:Wprefix()).'prev'
+command! -nargs=+ -bar Wsys     call s:Wsys(g:wdefault,<f-args>)
+command! -nargs=+ -bar Wcmd     call s:Wcmd(g:wdefault,<f-args>)
+
 " Generic keymapping
-FnNoremap <silent><C-SPACE>     :call <SID>Wtoggle(<SID>Wprefix(''),g:wnd_prefix)<CR>
-nnoremap <silent><SPACE>        :call <SID>Wnext(<SID>Wprefix(g:wnd_prefix))<CR>
-nnoremap <silent><S-SPACE>      :call <SID>Wprev(<SID>Wprefix(g:wnd_prefix))<CR>
+FnNoremap <silent><C-SPACE>     :Wtoggle<CR>
+nnoremap <silent><SPACE>        :Wnext<CR>
+nnoremap <silent><S-SPACE>      :Wprev<CR>
 
 
 " *******************************************************
 " } Quickfix window management {
 " *******************************************************
-" Change the action prefix depending on current window type
-function! s:Qprefix(prefix, ...)
-  let bufselect = (a:0 ? a:1 : '%')
-  if (getbufvar(bufselect,'&buftype')!=?"quickfix")
-    return a:prefix
-  endif
-  " Get 'ls' output as a string
-  let ls_output = '' | redir =>> ls_output | silent! ls | redir END
-  " Match with quicklist string identifier
-  let matches = matchlist(ls_output, '\n\s*\(\d\+\).\{-,10}\[.\{-,10}Quickfix')
-  return (!empty(matches) && matches[1]==bufnr(bufselect) ? 'c' : 'l')
+" Find if the given buffer is quickfix or location
+function! s:Qtype(...)
+  return (&buftype==?"quickfix" ? (exists("w:quickfix_title") && w:quickfix_title[1]==?"l" ? "l" : "c") : "")
+"  let bufselect = (a:0 ? a:1 : '%')
+"  if (!empty(bufselect) && getbufvar(bufselect,'&buftype')!=?"quickfix")
+"    return ''
+"  endif
+"  " Get 'ls' output as a string
+"  let ls_output = '' | redir =>> ls_output | silent! ls | redir END
+"  " Match with quicklist string identifier
+"  let matches = matchlist(ls_output, '\n\s*\(\d\+\).\{-,10}\[.\{-,10}Quickfix')
+"  return (!empty(matches) && (empty(bufselect) || bufnr(bufselect)==matches[1]) ? 'c' : 'l')
 endfunction
 
 " User commands
-command! -nargs=0 -bar Ctoggle  call s:Wtoggle(<SID>Qprefix(''), 'c')
+command! -nargs=0 -bar Copen    bot copen
+command! -nargs=0 -bar Cclose   cclose
+command! -nargs=0 -bar Ctoggle  if s:Qtype('')==?'c' | Cclose | else | Copen | endif
 command! -nargs=0 -bar Cnext    call s:Wnext('c')
 command! -nargs=0 -bar Cprev    call s:Wprev('c')
-command! -nargs=+ -bar Cexpr    call s:Wexpr('c',<f-args>)
+command! -nargs=+ -bar Csys     call s:Wsys('c',<f-args>)
+command! -nargs=+ -bar Ccmd     call s:Wcmd('c',<f-args>)
 
 " Keymapping
 nnoremap <localleader>c   :Ctoggle<CR>
@@ -1078,7 +1062,7 @@ nnoremap <silent>C        :Cprev<CR>
 
 " Autocommands
 "if has('quickfix')
-"  autocmd! QuickFixCmdPost [^l]* nested bot cwindow
+"  autocmd! QuickFixCmdPost [^l]* nested Copen
 "endif
 
 
@@ -1087,19 +1071,23 @@ nnoremap <silent>C        :Cprev<CR>
 " *******************************************************
 
 " User commands
-command! -nargs=0 -bar Ltoggle  call s:Wtoggle(<SID>Qprefix(''), 'l')
+command! -nargs=0 -bar Lopen    bot lopen
+command! -nargs=0 -bar Lclose   lclose
+command! -nargs=0 -bar Ltoggle  if s:Qtype('')==?'l' | Lclose | else | Lopen | endif
 command! -nargs=0 -bar Lnext    call s:Wnext('l')
 command! -nargs=0 -bar Lprev    call s:Wprev('l')
-command! -nargs=+ -bar Lexpr    call s:Wexpr('l',<f-args>)
+command! -nargs=+ -bar Lsys     call s:Wsys('l',<f-args>)
+command! -nargs=+ -bar Lcmd     call s:Wcmd('l',<f-args>)
 
 " Keymapping
 nnoremap <localleader>l   :Ltoggle<CR>
 nnoremap <silent>l        :Lnext<CR>
 nnoremap <silent>L        :Lprev<CR>
 
-" Autocommands
+" Autocommands (note: ltag is not concerned...)
 "if has('quickfix')
-"  autocmd! QuickFixCmdPost l* nested bot lwindow
+"  autocmd! QuickFixCmdPost l* nested Lopen
+"  autocmd! QuickFixCmdPost l* nested call setqflist(getloclist(0))
 "endif
 
 
@@ -1111,27 +1099,16 @@ let g:tags_db='tags'
 "set tags=./tags,tags;$HOME
 set tags=./tags;$HOME
 
-" Target window
-let g:tag_prefix=(g:wnd_prefix==?'c'?'':g:wnd_prefix)
-
-" Change the action prefix depending on current window type
-function! s:Tprefix(prefix)
-  return (&previewwindow ? (a:prefix==?'t' ? 'pt' : 'p') : a:prefix)
-endfunction
-
 " User commands
-command! -nargs=0 -bar Ttag     execute g:tag_prefix . 'tag' expand('<cword>')
 command! -nargs=0 -bar Tnext    call s:Wnext('t')
 command! -nargs=0 -bar Tprev    call s:Wprev('t')
+command! -nargs=0 -bar Ttag     execute 'ltag' expand('<cword>') | call setqflist(getloclist(0))
 
 " Key mapping
 noremap <C-ENTER>           :Ttag<CR>
 noremap <C-BACKSPACE>       <C-t>
-FnNoremap <silent><C-F5>    :Ttag<CR>
-FnNoremap <silent><F5>      :call <SID>Wnext(<SID>Tprefix('t'))<CR>
-FnNoremap <silent><S-F5>    :call <SID>Wprev(<SID>Tprefix('t'))<CR>
-nnoremap <silent>t          :call <SID>Wnext(<SID>Tprefix('t'))<CR>
-nnoremap <silent>T          :call <SID>Wprev(<SID>Tprefix('t'))<CR>
+nnoremap <silent>t          :execute (&previewwindow ? 'P' : 'T').'next'<CR>
+nnoremap <silent>T          :execute (&previewwindow ? 'P' : 'T').'prev'<CR>
 
 
 " *******************************************************
@@ -1153,7 +1130,7 @@ function! s:PreviewOpenWnd()
   wincmd P
   if &previewwindow
     set nu
-	"wincmd J
+    "wincmd J
     wincmd p
   endif
   let s:p_lastw = ""
