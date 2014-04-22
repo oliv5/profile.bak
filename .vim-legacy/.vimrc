@@ -82,27 +82,22 @@ cmap w!! w !sudo tee % >/dev/null
 " *******************************************************
 " } Key mapping functions {
 " *******************************************************
+"execute 'i'.a:prefix.'map <expr>' args[1] args[2] (pumvisible()?'<ESC>':'<c-o>').args[3]
+"inoremap <Down> <C-R>=pumvisible() ? "\<lt>C-N>" : "\<lt>Down>\<lt>C-O>:update\<lt>CR>"<CR>
+"execute 'i'.a:prefix.'map' args[1] args[2] '<C-R>=(pumvisible()?"\<lt>ESC>":"")<CR><C-O>'.args[3]
 
 " Map/noremap function keys (or Ctrl-X) in normal/visual & insert modes
 function! FnMap(prefix, args)
   let args = matchlist(a:args,'\(<silent>\s\+\)\?\(.\{-}\)\s\+\(.*\)')
-  execute a:prefix.'map'  args[1] args[2] '<c-c>'.args[3]
-  execute 'i'.a:prefix.'map <expr>' args[1] args[2] (pumvisible()?'<ESC>':'<c-o>').args[3]
+  execute a:prefix.'map' args[1] args[2] '<c-c>'.args[3]
+  execute 'i'.a:prefix.'map' args[1] args[2] '<C-O>'.args[3]
 endfunction
 
 " Make an alternate mapping based on another
-function! DoAltNmap(new,old)
-  if empty(maparg(a:new,'n')) && !empty(maparg(a:old,'n'))
-    execute 'nmap' a:new a:old
+function! AltMap(prefix, new, old)
+  if empty(maparg(a:new,a:prefix)) && !empty(maparg(a:old,a:prefix))
+    execute a:prefix.'map' a:new a:old
   endif
-endfunction
-
-" Make alternate key mappings based on another one
-function! AltNmap(new,old)
-  call DoAltNmap('<'.a:new.'>', '<'.a:old.'>')
-  call DoAltNmap('<S-'.a:new.'>', '<S-'.a:old.'>')
-  call DoAltNmap('<C-'.a:new.'>', '<C-'.a:old.'>')
-  call DoAltNmap('<A-'.a:new.'>', '<A-'.a:old.'>')
 endfunction
 
 " Conditionnal key remapping
@@ -119,7 +114,8 @@ endfunction
 " User commands
 command! -nargs=1 FnMap      call FnMap('',<f-args>)
 command! -nargs=1 FnNoremap  call FnMap('nore',<f-args>)
-command! -nargs=+ AltNmap    call AltNmap(<f-args>)
+command! -nargs=+ AltMap     call AltMap(<f-args>)
+command! -nargs=+ CondRemap  call CondRemap(<f-args>)
 
 
 " *******************************************************
@@ -490,21 +486,21 @@ vnoremap <C-F>      "+y:/<C-R>"
 cnoremap <C-F>      <NOP> |" Disable command line window (use q: q/ q? instead)
 
 " F3 for search (n and N)
-FnMap  <F3>         n
-FnMap  <S-F3>       N
-FnMap  <C-F3>       :nohl<CR>
+FnNoremap <F3>      n
+FnNoremap <S-F3>    N
+FnNoremap <C-F3>    :nohl<CR>
 vmap <S-F3>         <F3>N
 vnoremap <silent>   <F3> :<C-u>call <SID>SearchHighlight()<CR>
 vnoremap <C-F3>     :nohl<CR>
 
 " Alternative search
-nmap <silent>f      n
-nmap <silent>F      N
+noremap <silent>f   n
+noremap <silent>F   N
 
 " F4 for select & search (* and #)
-FnMap <F4>          *
-FnMap <S-F4>        #
-nmap µ              #
+FnNoremap <F4>      *
+FnNoremap <S-F4>    #
+noremap µ           #
 
 
 " *******************************************************
@@ -635,8 +631,8 @@ vnoremap <C-j>  <C-c>:
 " Note: <C-[> is Esc, <C-c> exits visual mode
 FnNoremap <A-Left>  <C-O>
 FnNoremap <A-Right> <C-I>
-vnoremap <A-Left>  <C-c><C-O>
-vnoremap <A-Right> <C-c><C-I>
+vnoremap <A-Left>   <C-c><C-O>
+vnoremap <A-Right>  <C-c><C-I>
 
 
 " *******************************************************
@@ -651,21 +647,21 @@ if exists('+gtl') " Tab name is the filename only
 endif
 
 " Open/close tab
-FnMap  <C-t>            :tabnew<CR>
-FnMap  <C-t><C-t>       :tabe<SPACE>
-FnMap  <C-t><C-c>       :tabclose<CR>
+FnNoremap <C-t>        :tabnew<CR>
+FnNoremap <C-t><C-t>   :tabe<SPACE>
+FnNoremap <C-t><C-c>   :tabclose<CR>
 if exists('g:vimrc_useTabs')
-  FnNoremap  <C-F4>     :tabclose<CR>
-  FnNoremap  <C-S-F4>   :tabdo tabclose<CR>
+  FnNoremap <C-F4>     :tabclose<CR>
+  FnNoremap <C-S-F4>   :tabdo tabclose<CR>
 endif
 
 " Prev/next tab
 if exists('g:vimrc_useTabs')
-  FnNoremap  <C-Tab>    :tabn<CR>
-  FnNoremap  <C-S-Tab>  :tabp<CR>
+  FnNoremap <C-Tab>    :tabn<CR>
+  FnNoremap <C-S-Tab>  :tabp<CR>
 else
-  FnNoremap  <C-PgUp>   :tabn<CR>
-  FnNoremap  <C-PgDown> :tabp<CR>
+  FnNoremap <C-PgUp>   :tabn<CR>
+  FnNoremap <C-PgDown> :tabp<CR>
 endif
 
 " Autocommands
@@ -834,8 +830,8 @@ map <C-b><C-b>      :BufSmartOpen<CR>
 map <C-b><C-c>      :BufClose<CR>
 map <C-q>           :BufClose<CR>
 if !exists("g:vimrc_useTabs")
-  FnMap <C-F4>      :BufClose<CR>
-  FnMap <C-S-F4>    :BufCloseAll 1<CR>
+  FnNoremap <C-F4>    :BufClose<CR>
+  FnNoremap <C-S-F4>  :BufCloseAll 1<CR>
 endif
 
 " Prev/next buffer
@@ -863,7 +859,7 @@ for idx in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 endfor
 
 " Map F1 to the help
-FnMap <F1>    :vert help<SPACE>
+FnNoremap <F1>    :vert help<SPACE>
 
 
 " *******************************************************
@@ -973,10 +969,10 @@ command! -nargs=0 -bar Mprev  call <SID>MarkPrev()
 command! -nargs=0 -bar Mreset call <SID>MarkReset()
 
 " Mark key maps
-FnMap <silent><F2>      :Mnext<CR>
-FnMap <silent><S-F2>    :Mprev<CR>
-FnMap <silent><C-F2>    :Mset<CR>
-FnMap <silent><A-F2>    :Mreset<CR>
+FnNoremap <silent><F2>    :Mnext<CR>
+FnNoremap <silent><S-F2>  :Mprev<CR>
+FnNoremap <silent><C-F2>  :Mset<CR>
+FnNoremap <silent><A-F2>  :Mreset<CR>
 nmap <silent>m          :Mnext<CR>
 nmap <silent>M          :Mprev<CR>
 nmap <silent><C-m>      :Mset<CR>
@@ -1447,11 +1443,11 @@ if !exists('g:loaded_minibufexplorer')
   map <localleader>m        :MBEToggle<CR>
 
   " Overwrite open/close key mapping
-  FnMap <C-b>c              :MBEbd<CR>
+  FnNoremap <C-b>c          :MBEbd<CR>
 
   " Cycle through buffers
-  FnMap <A-Down>  :MBEbb<CR>
-  FnMap <A-Up>    :MBEbf<CR>
+  FnNoremap <A-Down>  :MBEbb<CR>
+  FnNoremap <A-Up>    :MBEbf<CR>
   if !exists("g:vimrc_useTabs")
     "FnNoremap <C-Tab>      :MBEbb<CR>
     "FnNoremap <C-S-Tab>    :MBEbf<CR>
@@ -1694,8 +1690,8 @@ map <leader>h :call <SID>HexaToggle()<CR>
 " } Sessions {
 " *******************************************************
 " Key mapping
-FnNoremap <C-F9>      :mksession! ~/.vimsession <CR>
-FnNoremap <F9>        :source! ~/.vimsession<CR>
+FnNoremap <C-F9>    :mksession! ~/.vimsession <CR>
+FnNoremap <F9>      :source! ~/.vimsession<CR>
 
 
 " *******************************************************
