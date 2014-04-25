@@ -167,6 +167,15 @@ if has('syntax') && (has("gui_running") || (&t_Co > 2))
   syntax on           " Syntax highlight
 endif
 
+" Select font
+if has('gui_running')
+  "set guifont=Lucida_Console:h11
+  set guifont=Monospace\ 9
+endif
+
+" Gui options
+set guioptions-=T     " Remove toolbar
+
 set hlsearch          " Highlight searches
 set history=50        " History length
 set wildmode=list:longest,full    " Command line completion with Tabs & cycling
@@ -199,9 +208,6 @@ set viminfo='10,\"100,:20,n~/.viminfo
 " When using list, keep tabs at their full width and display `arrows':
 " (Character 187 is a right double-chevron, and 183 a mid-dot.)
 execute 'set listchars+=tab:' . nr2char(187) . nr2char(183)
-
-" Gui options
-set guioptions-=T       " Remove toolbar
 
 " Jump to the last cursor position
 augroup vimrc_cursor_lastpos
@@ -357,10 +363,10 @@ nnoremap <silent>H          ]c<CR>
 " } Formatting {
 " *******************************************************
 " Indentation normal & visual modes
-nnoremap <Tab>   >>
-vnoremap <Tab>   >
-nnoremap <S-Tab> <LT><LT>
-vnoremap <S-Tab> <LT>
+nnoremap <Tab>      >>
+vnoremap <Tab>      >
+nnoremap <S-Tab>    <LT><LT>
+vnoremap <S-Tab>    <LT>
 
 " Identation insert mode
 "inoremap <Tab>   <C-T>
@@ -373,8 +379,8 @@ noremap Y y$
 nnoremap <silent> <leader>" viw<esc>a"<esc>hbi"<esc>lel
 
 " Upper/lower case
-vnoremap <silent> <C-u>     U
-vnoremap <silent> <C-l>     L
+vnoremap <C-u>      U
+vnoremap <C-l>      L
 
 
 " *******************************************************
@@ -494,13 +500,13 @@ vnoremap <silent>   <F3> :<C-u>call <SID>SearchHighlight()<CR>
 vnoremap <C-F3>     :nohl<CR>
 
 " Alternative search
-noremap <silent>f   n
-noremap <silent>F   N
+nnoremap f          n
+nnoremap F          N
 
 " F4 for select & search (* and #)
 FnNoremap <F4>      *
 FnNoremap <S-F4>    #
-noremap µ           #
+nnoremap µ          #
 
 
 " *******************************************************
@@ -1271,31 +1277,28 @@ if has("cscope")
   cabbrev css lcs show
   cabbrev csh lcs help
 
-  " Add any cscope database in the given environment variable
-  "for db in add(split($CSCOPE_DB), g:cscope_db)
-  "  if filereadable(db)
-  "    silent! exe "cs add" db
-  "  endif
-  "endfor
-
   " Find and load cscope database
-  function! s:LoadCscope()
-    let db = findfile(g:cscope_db, ".;")
-    if (filereadable(db))
-      silent! exe "cs add" db matchstr(db, ".*/")
+  function! s:LoadCscopeDb(db)
+    if (filereadable(a:db))
       "set nocscopeverbose " suppress 'duplicate connection' error
-      "exe "cs add" db matchstr(db, ".*/")
+      silent! exe "cs add" a:db matchstr(a:db, ".*/")
+      silent! cs reset
       "set cscopeverbose
     endif
   endfunction
 
+  " Add any cscope database in the given environment variable
+  for db in add(split($CSCOPE_DB), g:cscope_db)
+    call s:LoadCscopeDb(db)
+  endfor
+
   " Additionnal keymap
-  nnoremap <c-d><c-l>  :call <SID>LoadCscope()<CR>
-  nnoremap <c-d>       <NOP>
+  nnoremap <silent> <c-d><c-l>  :call <SID>LoadCscopeDb(findfile(g:cscope_db, ".;"))<CR>
+  nnoremap <silent> <c-d>       <NOP>
 
   " Autocommand
   augroup vimrc_cscope
-    autocmd! BufReadPost * call s:LoadCscope()
+    autocmd! BufReadPost * call s:LoadCscopeDb(findfile(g:cscope_db, ".;"))
   augroup END
 endif
 
@@ -1307,19 +1310,19 @@ endif
 "set omnifunc=cppcomplete#CompleteCPP
 "filetype plugin on
 
-" Enable vim completion
+" Enable vim basic completion
 set omnifunc=syntaxcomplete#Complete
 filetype plugin on
 
 " Set completion options
-set completeopt=longest,menuone
+"set completeopt=longest,menu,preview
+set completeopt=menu,preview
 
 " Advanced key mapping to omnicompletion
 function! s:CleverTab()
   if pumvisible()
     return "\<C-N>"
-  endif
-  if strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
+  elseif strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
     return "\<Tab>"
   elseif exists('&omnifunc') && &omnifunc != ''
     return "\<C-X>\<C-O>"
@@ -1427,8 +1430,8 @@ if !exists('g:loaded_minibufexplorer')
   let g:miniBufExplSplitToEdge = 1
   let g:miniBufExplTabWrap = 1
   let g:miniBufExplMinSize = 1
-  let g:miniBufExplMaxSize = 3
-  let g:miniBufExplSortBy = 'number'
+  let g:miniBufExplMaxSize = 1
+  let g:miniBufExplSortBy = 'mru'  "'number'
   let g:miniBufExplBRSplit = 0
 
   " Colors

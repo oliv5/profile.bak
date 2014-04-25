@@ -16,6 +16,7 @@ CSCOPE_EXCLUDE="-not -path *.svn* -and -not -path *.git -and -not -path /tmp/"
 
 # Make ctags
 function mkctags() {
+  command -v >/dev/null ctags || return
   # Get directories, remove ~/
   SRC="$(eval echo ${1:-$PWD})"
   DST="$(eval echo ${2:-$PWD})"
@@ -29,6 +30,7 @@ function mkctags() {
 
 # Scan a new cscope directory
 function scancsdir() {
+  command -v >/dev/null cscope || return
   # Get directories
   SRC="$(eval echo ${1:-$PWD})"
   DST="$(eval echo ${2:-$PWD})"
@@ -42,6 +44,7 @@ function scancsdir() {
 
 # Make cscope db
 function mkcscope() {
+  command -v >/dev/null cscope || return
   # Get directories
   SRC="$(eval echo ${1:-$PWD})"
   DST="$(eval echo ${2:-$PWD})"
@@ -60,6 +63,7 @@ function mkcscope() {
 
 # Make id-utils database
 function mkids() {
+  command -v >/dev/null mkid || return
   # Get directories
   SRC="$(eval readlink -f ${1:-$PWD})"
   DST="$(eval readlink -f ${2:-$PWD})"

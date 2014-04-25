@@ -62,3 +62,8 @@ function fct-ls() {
 function get-pwd() {
   echo $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 }
+
+# Function exist test
+function cmd-exists() {
+  command -v ${1} >/dev/null
+}
