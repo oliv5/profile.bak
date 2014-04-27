@@ -301,7 +301,7 @@ function! s:FindRootDir()
 endfunction
 
 " Directory autochange
-if 1
+if 0
   " Look for the best directory
   autocmd! BufEnter * execute "lcd" s:FindRootDir()
 elseif exists('+autochdir')
@@ -1472,24 +1472,9 @@ if !exists('g:loaded_minibufexplorer')
   if !exists("g:vimrc_useTabs")
     "FnNoremap <C-Tab>      :MBEbb<CR>
     "FnNoremap <C-S-Tab>    :MBEbf<CR>
-    FnNoremap <C-Tab>       :call <SID>MbeSwitch(1)<CR>
-    FnNoremap <C-S-Tab>     :call <SID>MbeSwitch(0)<CR>
+    FnNoremap <C-Tab>       :MBEbp<CR>
+    FnNoremap <C-S-Tab>     :MBEbn<CR>
   endif
-
-  " Switch between 2 buffers
-  if !exists('s:vimrc_mbeswitch')
-    let s:vimrc_mbeswitch = 0
-  endif
-  function! s:MbeSwitch(toggle)
-    if a:toggle == 1
-      let s:vimrc_mbeswitch = !s:vimrc_mbeswitch
-    endif
-    if s:vimrc_mbeswitch == 1
-      MBEbb
-    else
-      MBEbf
-    endif
-  endfunction
 
 endif
 
