@@ -59,7 +59,9 @@ let g:command_t_loaded = 1
 "let g:loaded_ctrlp = 1
 let g:loaded_buftabs = 2 " 2 = skip loading
 let g:loaded_easytags = 1
-let g:loaded_bbye = 1
+let g:syntax_complete_loaded = 1
+let g:omnicpp_complete_loaded = 1
+"let g:clang_complete_loaded = 1
 
 
 " *******************************************************
@@ -1026,7 +1028,7 @@ command! -nargs=+ -bar Wsys     call s:Wsys(g:wdefault,<f-args>)
 command! -nargs=+ -bar Wcmd     call s:Wcmd(g:wdefault,<f-args>)
 
 " Generic keymapping
-FnNoremap <silent><C-SPACE>     :Wtoggle<CR>
+noremap <silent><C-SPACE>       :Wtoggle<CR>
 nnoremap <silent><SPACE>        :Wnext<CR>
 nnoremap <silent><S-SPACE>      :Wprev<CR>
 
@@ -1306,17 +1308,6 @@ endif
 " *******************************************************
 " } Omnicompletion {
 " *******************************************************
-" Enable OmniCppComplete
-"set omnifunc=cppcomplete#CompleteCPP
-"filetype plugin on
-
-" Enable vim basic completion
-set omnifunc=syntaxcomplete#Complete
-filetype plugin on
-
-" Set completion options
-"set completeopt=longest,menu,preview
-set completeopt=menu,preview
 
 " Advanced key mapping to omnicompletion
 function! s:CleverTab()
@@ -1332,8 +1323,35 @@ function! s:CleverTab()
 endfunction
 
 " Key mapping
-"inoremap <C-space>  <C-x><C-o>
-inoremap <C-space>  <C-R>=<SID>CleverTab()<CR>
+"inoremap <C-space>  <C-R>=<SID>CleverTab()<CR>
+inoremap <C-space>  <C-x><C-o>
+
+
+" *******************************************************
+" } Syntax omnicompletion (vim basic) {
+" *******************************************************
+if !exists('syntax_complete_loaded')
+  " Enable vim basic completion
+  set omnifunc=syntaxcomplete#Complete
+  filetype plugin on
+
+  " Options
+  "set completeopt=longest,menu,preview
+  set completeopt=longest,menu
+endif
+
+
+" *******************************************************
+" } Clang omnicompletion {
+" *******************************************************
+if !exists('g:clang_complete_loaded')
+  " Options
+  set completeopt=longest,menu
+  let g:clang_library_path='/usr/lib'
+
+  " Key mapping
+  inoremap <C-space>  <C-x><C-o>
+endif
 
 
 " *******************************************************
