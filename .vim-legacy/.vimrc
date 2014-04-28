@@ -283,7 +283,8 @@ nnoremap <localleader>c  :set invlist<CR>
 " Look for the best root directory
 function! s:FindRootDir()
   " Ctags/cscope files
-  for file in [g:tags_db, g:cscope_db]
+  for file in ['g:tags_db', 'g:cscope_db']
+    silent! let file=eval(file)
     let file = findfile(file, ".;")
     if (filereadable(file))
       return fnamemodify(file, ':p:h')
@@ -297,25 +298,30 @@ function! s:FindRootDir()
     endif
   endfor
   " No match
-  return ''
+  return ''    "'%:p:h:gs/ /\\ /'
 endfunction
 
 " Directory autochange
 if 0
-  " Look for the best directory
-  autocmd! BufEnter * execute "lcd" s:FindRootDir()
-elseif exists('+autochdir')
-  " Automated directory change
-  set autochdir
-else
-  " Autocommand directory change
-  augroup vimrc_autochdir
-    autocmd! BufEnter * silent! lcd %:p:h:gs/ /\\ /
-  augroup END
+  if 0
+    " Look for the best directory
+    autocmd! BufEnter * execute "lcd" s:FindRootDir()
+  elseif exists('+autochdir')
+    " Automated directory change
+    set autochdir
+  else
+    " Autocommand directory change
+    augroup vimrc_autochdir
+      autocmd! BufEnter * silent! lcd %:p:h:gs/ /\\ /
+    augroup END
+  endif
 endif
 
 " Change global directory to the current directory of the current buffer
-nnoremap <leader>c :cd %:p:h<CR>
+nnoremap <leader>c  :cd %:p:h<CR>
+
+" Change global directory to the current directory of the current buffer
+nnoremap <leader>cd :execute "cd" s:FindRootDir()
 
 
 " *******************************************************
@@ -861,11 +867,6 @@ endif
 " *******************************************************
 " } Function keys {
 " *******************************************************
-" Fx keys in insert mode = normal mode
-for idx in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-  execute "imap <F" . idx . "> <C-O><F" . idx . ">"
-endfor
-
 " Map F1 to the help
 FnNoremap <F1>    :vert help<SPACE>
 
@@ -1114,6 +1115,11 @@ noremap <C-BACKSPACE>       <C-t>
 nnoremap <silent>t          :execute (&previewwindow ? 'P' : 'T').'next'<CR>
 nnoremap <silent>T          :execute (&previewwindow ? 'P' : 'T').'prev'<CR>
 
+" Change root directory once at startup
+if !exists('g:loaded_vimrc')
+  execute 'cd' s:FindRootDir()
+endif
+
 
 " *******************************************************
 " } Preview window {
@@ -1302,6 +1308,11 @@ if has("cscope")
   augroup vimrc_cscope
     autocmd! BufReadPost * call s:LoadCscopeDb(findfile(g:cscope_db, ".;"))
   augroup END
+
+  " Change root directory once at startup
+  if !exists('g:loaded_vimrc')
+    execute 'cd' s:FindRootDir()
+  endif
 endif
 
 
@@ -1675,21 +1686,20 @@ endif
 " *******************************************************
 " } Hexadecimal display {
 " *******************************************************
-if !exists('g:vimrc_hexa')
-  let g:vimrc_hexa=0
-endif
-
 function! s:HexaToggle()
-  let g:vimrc_hexa=!g:vimrc_hexa
-  if g:vimrc_hexa==1
+  if !exists('g:vimrc_hexa')
     exec ":%!xxd"
+    let g:vimrc_hexa=1
   else
     exec ":%!xxd -r"
+    unlet g:vimrc_hexa
   endif
 endfunction
 
 " Key mapping
-map <leader>h :call <SID>HexaToggle()<CR>
+map <leader>hh :call <SID>HexaToggle()<CR>
+map <leader>h  :%!xxd<CR>
+map <leader>H  :%!xxd -r<CR>
 
 
 " *******************************************************
