@@ -59,9 +59,11 @@ let g:command_t_loaded = 1
 "let g:loaded_ctrlp = 1
 let g:loaded_buftabs = 2 " 2 = skip loading
 let g:loaded_easytags = 1
+"let g:clang_complete_loaded = 1
+if !exists('g:clang_complete_loaded')
 let g:syntax_complete_loaded = 1
 let g:omnicpp_complete_loaded = 1
-"let g:clang_complete_loaded = 1
+endif
 
 
 " *******************************************************
@@ -170,7 +172,7 @@ if has('syntax') && (has("gui_running") || (&t_Co > 2))
 endif
 
 " Select font
-if has('gui_running')
+if has('gui_running') && !exists('g:loaded_vimrc')
   "set guifont=Lucida_Console:h11
   set guifont=Monospace\ 9
 endif
@@ -303,7 +305,7 @@ endfunction
 
 " Directory autochange
 if 0
-  if 0
+  if 1
     " Look for the best directory
     autocmd! BufEnter * execute "lcd" s:FindRootDir()
   elseif exists('+autochdir')
@@ -321,7 +323,7 @@ endif
 nnoremap <leader>c  :cd %:p:h<CR>
 
 " Change global directory to the current directory of the current buffer
-nnoremap <leader>cd :execute "cd" s:FindRootDir()
+nnoremap <leader>cd :execute "cd" s:FindRootDir()<CR>
 
 
 " *******************************************************
