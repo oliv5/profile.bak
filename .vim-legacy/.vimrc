@@ -496,9 +496,9 @@ nnoremap <localleader><F3>  :set invhls hls?<CR>
 nnoremap <localleader>f     :set invhls hls?<CR>
 
 " Search & replace
-FnNoremap <C-F>     /
-FnNoremap <C-A-F>   yiw:/<C-R>"
-vnoremap <C-F>      "+y:/<C-R>"
+"FnNoremap <C-F>     yiw:/<C-r>"
+FnNoremap <C-F>     :/<C-r><C-w>
+vnoremap <C-F>      "+y:/<C-r>"
 cnoremap <C-F>      <NOP> |" Disable command line window (use q: q/ q? instead)
 
 " F3 for search (n and N)
@@ -597,8 +597,7 @@ command! -nargs=1 -bar GrepCount call <SID>GrepCount(<q-args>)
 silent! unmap gx
 nnoremap <silent>g          :Wnext<CR>
 nnoremap <silent>G          :Wprev<CR>
-nnoremap <C-g>              :Grep<SPACE>
-"nnoremap <C-g><C-g>         :Grep<SPACE><C-r><C-w>
+nnoremap <C-g>              :Grep<SPACE><C-r><C-w>
 vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
 nnoremap <A-g>              :GrepCount<SPACE><C-r><C-w>
 
