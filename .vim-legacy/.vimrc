@@ -59,11 +59,10 @@ let g:command_t_loaded = 1
 "let g:loaded_ctrlp = 1
 let g:loaded_buftabs = 2 " 2 = skip loading
 let g:loaded_easytags = 1
-"let g:clang_complete_loaded = 1
-if !exists('g:clang_complete_loaded')
+let g:c_complete_loaded = 1
 let g:syntax_complete_loaded = 1
-let g:omnicpp_complete_loaded = 1
-endif
+"let g:omnicpp_complete_loaded = 1
+let g:clang_complete_loaded = 1
 
 
 " *******************************************************
@@ -842,6 +841,7 @@ command! -nargs=0 BufSmartOpen  call s:BufSmartOpen()
 " Open/close buffer (close=:bd or :bw)
 map <C-b>           :e<SPACE><C-R>=expand("%:p:h") . "/" <CR>
 map <C-b><C-b>      :BufSmartOpen<CR>
+map <C-i>           :BufSmartOpen<CR>
 map <C-b><C-c>      :BufClose<CR>
 map <C-q>           :BufClose<CR>
 if !exists("g:vimrc_useTabs")
@@ -1340,16 +1340,52 @@ inoremap <C-space>  <C-x><C-o>
 
 
 " *******************************************************
-" } Syntax omnicompletion (vim basic) {
+" } C completion (vim basic) {
 " *******************************************************
-if !exists('syntax_complete_loaded')
-  " Enable vim basic completion
-  set omnifunc=syntaxcomplete#Complete
+if !exists('g:c_complete_loaded')
+  " Enable completion
+  set omnifunc=ccomplete#Complete
   filetype plugin on
-
-  " Options
   "set completeopt=longest,menu,preview
   set completeopt=longest,menu
+endif
+
+
+" *******************************************************
+" } Syntax omnicompletion {
+" *******************************************************
+if !exists('g:syntax_complete_loaded')
+  " Enable completion
+  set omnifunc=syntaxcomplete#Complete
+  filetype plugin on
+  "set completeopt=longest,menu,preview
+  set completeopt=longest,menu
+endif
+
+
+" *******************************************************
+" } OmniCpp completion {
+" *******************************************************
+if !exists('g:omnicpp_complete_loaded')
+  " Enable completion
+  set omnifunc=omni#cpp#complete#Main
+  filetype plugin on
+  set nocp
+  set completeopt=menuone,menu,longest
+  "set completeopt=menuone,menu,longest,preview
+  
+  " Options
+  let OmniCpp_NamespaceSearch = 2
+  let OmniCpp_GlobalScopeSearch = 1
+  let OmniCpp_ShowAccess = 1
+  let OmniCpp_ShowPrototypeInAbbr = 1   " show function parameters
+  let OmniCpp_MayCompleteDot = 1        " autocomplete after .
+  let OmniCpp_MayCompleteArrow = 1      " autocomplete after ->
+  let OmniCpp_MayCompleteScope = 1      " autocomplete after ::
+  let OmniCpp_DefaultNamespaces = ["std", "_GLIBCXX_STD"]
+  let OmniCpp_LocalSearchDecl = 1       " use local search function, bracket on 1st column
+  let OmniCpp_DisplayMode = 1
+  "au CursorMovedI,InsertLeave * if pumvisible() == 0|silent! pclose|endif
 endif
 
 

@@ -2,12 +2,7 @@
 # Note: this file must be independant, it can be sourced by external scripts
 
 # Ctags settings
-#CTAGS_OPTS="-R --c++-kinds=+p --fields=+iaS --extra=+q --sort=foldcase"
-#CTAGS_OPTS="-R --fields=+iaS --extra=+q --sort=foldcase"
-#CTAGS_OPTS="-R --sort=foldcase --c++-kinds=f --c-kinds=f"
-#CTAGS_OPTS="-R --sort=foldcase --fields=+iaS --extra=+q --c++-kinds=f --c-kinds=f --exclude='.svn' --exclude='.git'"
-#CTAGS_OPTS="-R --sort=foldcase --fields=+iaS --extra=+q --exclude='.svn' --exclude='.git'"
-CTAGS_OPTS="-R --sort=yes --fields=+iaS --extra=+qf --exclude='.svn' --exclude='.git' --exclude='tmp'"
+CTAGS_OPTS="-R --sort=yes --c-kinds=+p --c++-kinds=+p --fields=+iaS --extra=+qf --exclude='.svn' --exclude='.git' --exclude='tmp'"
 
 # Cscope default settings
 CSCOPE_OPTS="-Rqb"
