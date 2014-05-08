@@ -755,7 +755,6 @@ endfunction
 " Key maps
 nnoremap <localleader>w     :call <SID>WndToggleMax()<CR>
 nnoremap <localleader>x     :call <SID>ZoomWindow()<CR>
-nnoremap x                  :call <SID>ZoomWindow()<CR>
 
 
 " *******************************************************
@@ -1373,7 +1372,7 @@ if !exists('g:omnicpp_complete_loaded')
   set nocp
   set completeopt=menuone,menu,longest
   "set completeopt=menuone,menu,longest,preview
-  
+
   " Options
   let OmniCpp_NamespaceSearch = 2
   let OmniCpp_GlobalScopeSearch = 1
