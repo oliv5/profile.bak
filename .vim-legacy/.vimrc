@@ -295,7 +295,7 @@ function! s:FindRootDir()
   for dir in ['.svn', '.git']
     let _dir = finddir(dir, ".;", -1)
     if (!empty(_dir))
-      return _dir[-1] . '/..'
+      return fnamemodify(_dir[-1], ':p:h:h')
     endif
   endfor
   " No match
@@ -319,10 +319,10 @@ if 0
 endif
 
 " Change global directory to the current directory of the current buffer
-nnoremap <leader>c  :cd %:p:h<CR>
+nnoremap <silent><leader>c    :cd %:p:h<BAR>pwd<CR>
 
 " Change global directory to the current directory of the current buffer
-nnoremap <leader>cd :execute "cd" s:FindRootDir()<CR>
+nnoremap <silent><leader>cd   :execute "cd " . <SID>FindRootDir()<BAR>pwd<CR>
 
 
 " *******************************************************
@@ -495,8 +495,9 @@ nnoremap <localleader><F3>  :set invhls hls?<CR>
 nnoremap <localleader>f     :set invhls hls?<CR>
 
 " Search & replace
+FnNoremap <C-F>     :/
 "FnNoremap <C-F>     yiw:/<C-r>"
-FnNoremap <C-F>     :/<C-r><C-w>
+"FnNoremap <C-F>     :/<C-r><C-w>
 vnoremap <C-F>      "+y:/<C-r>"
 cnoremap <C-F>      <NOP> |" Disable command line window (use q: q/ q? instead)
 
@@ -596,7 +597,8 @@ command! -nargs=1 -bar GrepCount call <SID>GrepCount(<q-args>)
 silent! unmap gx
 nnoremap <silent>g          :Wnext<CR>
 nnoremap <silent>G          :Wprev<CR>
-nnoremap <C-g>              :Grep<SPACE><C-r><C-w>
+nnoremap <C-g>              :Grep<SPACE>
+"nnoremap <C-g>              :Grep<SPACE><C-r><C-w>
 vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
 nnoremap <A-g>              :GrepCount<SPACE><C-r><C-w>
 
@@ -838,19 +840,18 @@ command! -nargs=? BufCloseAll   call s:BufCloseAll(<f-args>)
 command! -nargs=0 BufSmartOpen  call s:BufSmartOpen()
 
 " Open/close buffer (close=:bd or :bw)
-map <C-b>           :e<SPACE><C-R>=expand("%:p:h") . "/" <CR>
-map <C-b><C-b>      :BufSmartOpen<CR>
-map <C-i>           :BufSmartOpen<CR>
-map <C-b><C-c>      :BufClose<CR>
-map <C-q>           :BufClose<CR>
+FnNoremap <C-b>       :e<SPACE><C-R>=expand("%:p:h") . "/" <CR>
+FnNoremap <C-b><C-b>  :BufSmartOpen<CR>
+FnNoremap <C-b><C-c>  :BufClose<CR>
+FnNoremap <C-q>       :BufClose<CR>
 if !exists("g:vimrc_useTabs")
   FnNoremap <C-F4>    :BufClose<CR>
   FnNoremap <C-S-F4>  :BufCloseAll 1<CR>
 endif
 
 " Prev/next buffer
-map  <C-b><C-n>       :bn<CR>
-map  <C-b><C-p>       :bp<CR>
+FnNoremap <C-b><C-n>  :bn<CR>
+FnNoremap <C-b><C-p>  :bp<CR>
 FnNoremap <A-Down>    :bp<CR>
 FnNoremap <A-Up>      :bn<CR>
 if !exists("g:vimrc_useTabs")
