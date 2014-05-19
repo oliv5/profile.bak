@@ -303,8 +303,8 @@ function! s:FindRootDir()
 endfunction
 
 " Directory autochange
-if 0
-  if 1
+if 1
+  if 0
     " Look for the best directory
     autocmd! BufEnter * execute "lcd" s:FindRootDir()
   elseif exists('+autochdir')
@@ -1616,8 +1616,8 @@ endif
 " *******************************************************
 if !exists('g:loaded_ctrlp')
   " Options
-  let g:ctrlp_map = '<C-p>'
-  let g:ctrlp_cmd = 'CtrlP'
+  let g:ctrlp_map = ''
+  let g:ctrlp_cmd = 'CtrlPMixed'
   let g:ctrlp_working_path_mode = '0'
   let g:ctrlp_custom_ignore = {
   \ 'dir':  '\v[\/](\.(git|hg|svn)|tmp)$',
@@ -1625,6 +1625,7 @@ if !exists('g:loaded_ctrlp')
   \ }
   " Key mapping
   FnNoremap <C-o>     :CtrlPMRU<CR>
+  FnNoremap <C-p>     :exec 'CtrlP'.<SID>FindRootDir()<CR>
 endif
 
 
