@@ -599,7 +599,8 @@ nnoremap <silent>g          :Wnext<CR>
 nnoremap <silent>G          :Wprev<CR>
 nnoremap <C-g>              :Grep<SPACE>
 "nnoremap <C-g>              :Grep<SPACE><C-r><C-w>
-vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
+"vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
+vnoremap <C-g>              "+y:Grep<SPACE><C-r>=fnameescape("<C-r>"")<CR>
 nnoremap <A-g>              :GrepCount<SPACE><C-r><C-w>
 
 
