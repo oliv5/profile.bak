@@ -31,11 +31,6 @@ function svn-bckname() {
   echo "${1:+$1_}$(basename $(svn-repo))_$(basename $(svn-url))${2:+_$2}"
 }
 
-# Returns the last archive found based on given name
-function svn-archive() {
-  ls -t1 ${1:-$(svn-bckdir)/*} | head -n 1
-}
-
 # Retrieve date
 function svn-date() {
   date +%Y%m%d-%H%M%S
@@ -237,19 +232,6 @@ function svn-resume() {
   svn-import "$1"
 }
 
-# Extract a CL and compare with current repo
-function svn-compare() {
-  # Check parameters
-  [ -z "$1" ] && echo "Missing input archive..." && exit 1
-  # Check we are in a repository
-  svn-exists || return
-  # Extract the CL in /tmp
-  TEMP="$(mktemp -d)"
-  7z x "$1" -o"$TEMP/"
-  # Compare with repository
-  meld "${2:-.}" "$TEMP"
-}
-
 # Amend a log message
 function svn-amend() {
   svn propedit --revprop svn:log -r ${1?Error: please specify a revision}
@@ -294,23 +276,24 @@ function svn-history() {
   }
 }
 
-# Show log in a range of revisions
+# Show logs in a range of revisions
 function svn-log() {
   svn log --verbose ${1:+-r $1}${2:+:$2} ${@:3}
 }
-
-# Show a short log
 function svn-shortlog() {
-  svn-log | grep -E "^[^ |\.]"
+  svn-log $@ | grep -E "^[^ |\.]"
 }
 
 # Display the changes in a file in a range of revisions
 # or list changed files in a range of revisions 
 function svn-diff() {
-  svn diff ${1:+-r $1}${2:+:$2} ${3:---summarize} ${@:4}
+  svn diff ${1:+-r $1}${2:+:$2} ${@:3}
 }
 function svn-diffm() {
-  svn diff ${1:+-r $1}${2:+:$2} ${3:---summarize} ${@:4} --diff-cmd meld
+  svn-diff $@ --diff-cmd meld
+}
+function svn-diffl() {
+  svn-diff $@ --summarize
 }
 
 # Display content of a file
@@ -318,20 +301,19 @@ function svn-cat () {
   svn cat ${1:+-r $1}${2:+:$2} ${@:3}
 }
 
-# Diff an archive with current repo
-function svn-zipdiff() {
-  ARCHIVE="$1"
-  if [ -z "$ARCHIVE" ]; then
-    ARCHIVE="$(svn-archive)"
-  fi
-  7zdiff "$ARCHIVE"
+# Returns the last archive found based on given name
+function svn-ziplast() {
+  ls -t1 ${1:-$(svn-bckdir)/*} | head -n 1
 }
 
-# Meld an archive with current repo
-function svn-zipdiffm() {
-  ARCHIVE="$1"
+# Diff an archive with current repo
+function _svn-zipdiff() {
+  ARCHIVE="$2"
   if [ -z "$ARCHIVE" ]; then
-    ARCHIVE="$(svn-archive)"
+    ARCHIVE="$(svn-ziplast)"
   fi
-  7zdiffm "$ARCHIVE"
+  $1 "$ARCHIVE"
 }
+alias svn-zipdiff='_svn-zipdiff 7zdiff'
+alias svn-zipdiffm='_svn-zipdiff 7zdiffm'
+

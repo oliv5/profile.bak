@@ -22,12 +22,15 @@ alias b='cdb'
 alias bb='cdb;cdb'
 alias bbb='cdb;cdb;cdb'
 
-# Editor aliases
+# Editor aliases/fcts
 alias g='gedit'
 alias gv='gvim'
 alias e='gvim'
-alias es='ss | cut -c 9- | xargs gvim'
-alias eg='gs | cut -c 9- | xargs gvim'
+alias sse='ss | cut -c 9- | xargs gvim'
+alias gse='gs | grep modified | cut -d : -f 2 | xargs gvim'
+function ffe() {
+  ff "$@" | xargs gvim
+}
 
 # Alias misc
 alias hi='history'
