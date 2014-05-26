@@ -498,7 +498,8 @@ nnoremap <localleader>f     :set invhls hls?<CR>
 FnNoremap <C-F>     :/
 "FnNoremap <C-F>     yiw:/<C-r>"
 "FnNoremap <C-F>     :/<C-r><C-w>
-vnoremap <C-F>      "+y:/<C-r>"
+"vnoremap <C-F>      "+y:/<C-r>"
+vnoremap <C-F>      "+y:/<C-r>=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR>
 cnoremap <C-F>      <NOP> |" Disable command line window (use q: q/ q? instead)
 
 " F3 for search (n and N)
@@ -506,7 +507,7 @@ FnNoremap <F3>      n
 FnNoremap <S-F3>    N
 FnNoremap <C-F3>    :nohl<CR>
 vmap <S-F3>         <F3>N
-vnoremap <silent>   <F3> :<C-u>call <SID>SearchHighlight()<CR>
+vnoremap <F3>       :<C-u>call <SID>SearchHighlight()<CR>
 vnoremap <C-F3>     :nohl<CR>
 
 " Alternative search
@@ -536,7 +537,8 @@ command! -nargs=+ -bar Find call <SID>Find(<f-args>)
 
 " Keymapping
 FnNoremap <C-A-H>   :Find<SPACE>
-vnoremap  <C-A-H>   "+y:Find <C-R>"
+"vnoremap  <C-A-H>   "+y:Find <C-R>"
+vnoremap <C-A-H>    "+y:Find<SPACE><C-r>=fnameescape("<C-r>"")<CR>
 
 
 " *******************************************************
@@ -555,13 +557,16 @@ command! -nargs=+ -bar Sed  call <SID>Sed(<f-args>)
 
 " Sed keymapping
 FnNoremap <C-A-H>   :Sed<SPACE>
-vnoremap  <C-A-H>   "+y:Sed <C-R>"
+"vnoremap  <C-A-H>   "+y:Sed <C-R>"
+vnoremap  <C-A-H>   "+y:Sed <C-r>=fnameescape("<C-r>"")<CR>
 
 " Replace keymapping
 FnNoremap <C-H>     :%s///cg<left><left><left><left>
 "FnNoremap <C-A-H>   yiw:%s/<C-R>"/<C-R>"/cg<left><left><left>
-vnoremap  <C-H>     "+y:%s/<C-R>"/<C-R>"/cg<left><left><left>
+"vnoremap  <C-H>     "+y:%s/<C-R>"/<C-R>"/cg<left><left><left>
 "vnoremap  <C-A-H>   "+y:%s/<C-R>"//cg<left><left>
+"vnoremap <C-H>      "+y:%s/<C-r>=fnameescape("<C-r>"")<CR>/<C-r>=fnameescape("<C-r>"")<CR>/cg<left><left><left>
+vnoremap <C-H>      "+y:%s/<C-r>=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR>/<C-r>=escape(@", '/\.*$^~[&')<CR>/cg<left><left><left>
 
 
 " *******************************************************
