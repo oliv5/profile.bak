@@ -585,6 +585,7 @@ function! s:Grep(expr)
   let path = escape(s:FindRootDir(), '" *')
   let expr = escape('"'.a:expr.'"','" *')
   execute 'Wcmd' 'grep!' expr path
+  Wfirst
 endfunction
 
 " Count expression
@@ -1030,6 +1031,8 @@ endfunction
 command! -nargs=0 -bar Wopen    execute toupper(s:Wprefix()).'open'
 command! -nargs=0 -bar Wclose   execute toupper(s:Wprefix()).'close'
 command! -nargs=0 -bar Wtoggle  execute toupper(s:Wprefix()).'toggle'
+command! -nargs=0 -bar Wfirst   execute s:Wprefix().'first'
+command! -nargs=0 -bar Wlast    execute s:Wprefix().'last'
 command! -nargs=0 -bar Wnext    execute toupper(s:Wprefix()).'next'
 command! -nargs=0 -bar Wprev    execute toupper(s:Wprefix()).'prev'
 command! -nargs=+ -bar Wsys     call s:Wsys(g:wdefault,<f-args>)
