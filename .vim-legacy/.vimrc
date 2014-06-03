@@ -585,7 +585,7 @@ function! s:Grep(expr)
   let path = escape(s:FindRootDir(), '" *')
   let expr = escape('"'.a:expr.'"','" *')
   execute 'Wcmd' 'grep!' expr path
-  Wfirst
+  silent! Wfirst
 endfunction
 
 " Count expression
