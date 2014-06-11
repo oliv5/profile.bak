@@ -203,7 +203,7 @@ function svn-export() {
 # Import a CL from an archive
 function svn-import() {
   # Check parameters
-  [ -z "$1" ] && echo "Missing input archive..." && exit 1
+  [ -z "$1" ] && echo "Missing input archive..." && return 1
   # Check we are in a repository
   svn-exists || return
   # Extract with full path
@@ -255,22 +255,22 @@ function svn-config() {
 
 # Print the history of a file
 function svn-history() {
-  url="${1:?Please specify a file name}"
-  svn log -q $url | grep -E -e "^r[[:digit:]]+" -o | cut -c2- | sort -rn | {
+  URL="${1:?Please specify a file name}"
+  svn log -q $URL | grep -E -e "^r[[:digit:]]+" -o | cut -c2- | sort -rn | {
     if [ $# -gt 1 ]; then
       # First revision as full text
       echo
       read r
-      svn log -r$r $url@HEAD
-      svn cat -r$r $url@HEAD
+      svn log -r$r $URL@HEAD
+      svn cat -r$r $URL@HEAD
       echo
     fi
     # Remaining revisions as differences to previous revision
     while read r
     do
       echo
-      svn log -r$r $url@HEAD
-      svn diff -c$r $url@HEAD
+      svn log -r$r $URL@HEAD
+      svn diff -c$r $URL@HEAD
       echo
     done
   }
@@ -278,16 +278,28 @@ function svn-history() {
 
 # Show logs in a range of revisions
 function svn-log() {
-  svn log --verbose ${1:+-r $1}${2:+:$2} ${@:3}
+  if [ -f "$1" ]; then FILE="$1"; shift; else FILE=""; fi
+  if [ "${1#*:}" == "${1}" ]; then REV="${1:+-c $1}"; else REV="${1:+-r $1}"; fi
+  svn log --verbose $REV $FILE ${@:2}
+  #svn log --verbose ${1:+-r $1}${2:+:$2} ${@:3}
 }
 function svn-shortlog() {
   svn-log $@ | grep -E "^[^ |\.]"
 }
 
+# Display content of a file
+function svn-cat () {
+  if [ -f "$1" ]; then FILE="$1"; shift; else FILE=""; fi
+  svn cat ${1:+-r $1} $FILE ${@:2}
+}
+
 # Display the changes in a file in a range of revisions
 # or list changed files in a range of revisions 
 function svn-diff() {
-  svn diff ${1:+-r $1}${2:+:$2} ${@:3}
+  if [ -f "$1" ]; then FILE="$1"; shift; else FILE=""; fi
+  if [ "${1#*:}" == "${1}" ]; then REV="${1:+-c $1}"; else REV="${1:+-r $1}"; fi
+  svn diff $REV $FILE ${@:2}
+  #svn diff ${1:+-r $1}${2:+:$2} ${@:3}
 }
 function svn-diffm() {
   svn-diff $@ --diff-cmd meld
@@ -296,14 +308,13 @@ function svn-diffl() {
   svn-diff $@ --summarize
 }
 
-# Display content of a file
-function svn-cat () {
-  svn cat ${1:+-r $1}${2:+:$2} ${@:3}
-}
-
 # Returns the last archive found based on given name
 function svn-ziplast() {
-  ls -t1 ${1:-$(svn-bckdir)/*} | head -n 1
+  if [ -e "${1}" ]; then
+    ls -t1 ${1}/* | head -n 1
+  else
+    ls -t1 $(svn-bckdir)/${1}* | head -n 1
+  fi
 }
 
 # Diff an archive with current repo

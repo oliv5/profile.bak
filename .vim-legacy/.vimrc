@@ -573,7 +573,7 @@ vnoremap <C-H>      "+y:%s/<C-r>=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\
 " } Grep {
 " *******************************************************
 " Grep program
-set grepprg=ref\ $*
+set grepprg=iref\ $*
 "set grepprg=lid\ -Rgrep\ -s
 "set grepformat=%f:%l:%m
 
@@ -990,10 +990,10 @@ FnNoremap <silent><F2>    :Mnext<CR>
 FnNoremap <silent><S-F2>  :Mprev<CR>
 FnNoremap <silent><C-F2>  :Mset<CR>
 FnNoremap <silent><A-F2>  :Mreset<CR>
-nmap <silent>m          :Mnext<CR>
-nmap <silent>M          :Mprev<CR>
-nmap <silent><C-m>      :Mset<CR>
-nmap <silent><A-m>      :Mreset<CR>
+nmap <silent>m            :Mnext<CR>
+nmap <silent>M            :Mprev<CR>
+nmap <silent><C-m>        :Mset<CR>
+nmap <silent><A-m>        :Mreset<CR>
 
 
 " *******************************************************
@@ -1062,7 +1062,7 @@ function! s:Qtype(...)
 endfunction
 
 " User commands
-command! -nargs=0 -bar Copen    bot copen
+command! -nargs=0 -bar Copen    bot copen 8
 command! -nargs=0 -bar Cclose   cclose
 command! -nargs=0 -bar Ctoggle  if s:Qtype('')==?'c' | Cclose | else | Copen | endif
 command! -nargs=0 -bar Cnext    call s:Wnext('c')
@@ -1086,7 +1086,7 @@ nnoremap <silent>C        :Cprev<CR>
 " *******************************************************
 
 " User commands
-command! -nargs=0 -bar Lopen    bot lopen
+command! -nargs=0 -bar Lopen    bot lopen 8
 command! -nargs=0 -bar Lclose   lclose
 command! -nargs=0 -bar Ltoggle  if s:Qtype('')==?'l' | Lclose | else | Lopen | endif
 command! -nargs=0 -bar Lnext    call s:Wnext('l')
