@@ -276,30 +276,23 @@ function svn-history() {
   }
 }
 
-# Show logs in a range of revisions
+# Show logs in a range of revisions (-r and -c allowed)
 function svn-log() {
-  if [ -f "$1" ]; then FILE="$1"; shift; else FILE=""; fi
-  if [ "${1#*:}" == "${1}" ]; then REV="${1:+-c $1}"; else REV="${1:+-r $1}"; fi
-  svn log --verbose $REV $FILE ${@:2}
-  #svn log --verbose ${1:+-r $1}${2:+:$2} ${@:3}
+  svn log --verbose ${2:+-r $1:}${2:-${1:+-c $1}} ${@:3}
 }
 function svn-shortlog() {
   svn-log $@ | grep -E "^[^ |\.]"
 }
 
-# Display content of a file
+# Display content of a file (only -r rev allowed)
 function svn-cat () {
-  if [ -f "$1" ]; then FILE="$1"; shift; else FILE=""; fi
-  svn cat ${1:+-r $1} $FILE ${@:2}
+  svn cat ${1:+-r $1} ${@:2}
 }
 
 # Display the changes in a file in a range of revisions
-# or list changed files in a range of revisions 
+# or list changed files in a range of revisions (-r and -c allowed)
 function svn-diff() {
-  if [ -f "$1" ]; then FILE="$1"; shift; else FILE=""; fi
-  if [ "${1#*:}" == "${1}" ]; then REV="${1:+-c $1}"; else REV="${1:+-r $1}"; fi
-  svn diff $REV $FILE ${@:2}
-  #svn diff ${1:+-r $1}${2:+:$2} ${@:3}
+  svn diff ${2:+-r $1:}${2:-${1:+-c $1}} ${@:3}
 }
 function svn-diffm() {
   svn-diff $@ --diff-cmd meld
