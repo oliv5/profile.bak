@@ -1,6 +1,9 @@
 #!/bin/bash
 # Base profile settings
 
+# Prevent Ctrl-D exit session
+export IGNOREEOF=1
+
 # Cleanup path
 export PATH="${PATH//\~/${HOME}}"
 export PATH="${PATH//.:/}"
