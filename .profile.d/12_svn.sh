@@ -203,11 +203,21 @@ function svn-export() {
 # Import a CL from an archive
 function svn-import() {
   # Check parameters
-  [ -z "$1" ] && echo "Missing input archive..." && return 1
+  ARCHIVE="$1"
+  if [ -z "$ARCHIVE" ]; then
+    ARCHIVE="$(svn-zip)"
+    echo "Last archive available: $ARCHIVE"
+    echo -n "Use this archive? (y/n): "
+    read ANSWER
+    if [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ]; then
+      echo "No archive selected..."
+      return 0
+    fi
+  fi
   # Check we are in a repository
   svn-exists || return
   # Extract with full path
-  7z x "$1" -o"${2:-./}"
+  7z x "$ARCHIVE" -o"${2:-./}"
 }
 
 # Suspend a CL
@@ -295,14 +305,14 @@ function svn-diff() {
   svn diff ${2:+-r $1:}${2:-${1:+-c $1}} ${@:3}
 }
 function svn-diffm() {
-  svn-diff $@ --diff-cmd meld
+  svn-diff ${1:-HEAD} ${2:-HEAD} ${@:3} --diff-cmd meld
 }
 function svn-diffl() {
-  svn-diff $@ --summarize
+  svn-diff ${1:-HEAD} ${2:-HEAD} ${@:3} --summarize
 }
 
 # Returns the last archive found based on given name
-function svn-ziplast() {
+function svn-zip() {
   if [ -e "${1}" ]; then
     ls -t1 ${1}/* | head -n 1
   else
@@ -314,7 +324,7 @@ function svn-ziplast() {
 function _svn-zipdiff() {
   ARCHIVE="$2"
   if [ -z "$ARCHIVE" ]; then
-    ARCHIVE="$(svn-ziplast)"
+    ARCHIVE="$(svn-zip)"
   fi
   $1 "$ARCHIVE"
 }

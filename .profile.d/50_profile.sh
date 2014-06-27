@@ -16,6 +16,7 @@ export PATH="${PATH//.:/}"
 alias l='ls -CF'
 alias la='ls -A'
 alias ll='ls -laF'
+alias lsg='ls | grep'
 
 # Alias cd/back
 alias b='cdb'

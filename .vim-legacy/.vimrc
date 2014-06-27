@@ -495,7 +495,7 @@ nnoremap <localleader><F3>  :set invhls hls?<CR>
 nnoremap <localleader>f     :set invhls hls?<CR>
 
 " Search & replace
-FnNoremap <C-F>     :/
+FnNoremap <C-F>     /
 "FnNoremap <C-F>     yiw:/<C-r>"
 "FnNoremap <C-F>     :/<C-r><C-w>
 "vnoremap <C-F>      "+y:/<C-r>"
@@ -603,11 +603,11 @@ command! -nargs=1 -bar GrepCount call <SID>GrepCount(<q-args>)
 silent! unmap gx
 nnoremap <silent>g          :Wnext<CR>
 nnoremap <silent>G          :Wprev<CR>
-nnoremap <C-g>              :Grep<SPACE>
-"nnoremap <C-g>              :Grep<SPACE><C-r><C-w>
+FnNoremap <C-g>              :Grep<SPACE>
+"FnNoremap <C-g>              :Grep<SPACE><C-r><C-w>
 "vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
 vnoremap <C-g>              "+y:Grep<SPACE><C-r>=fnameescape("<C-r>"")<CR>
-nnoremap <A-g>              :GrepCount<SPACE><C-r><C-w>
+FnNoremap <A-g>              :GrepCount<SPACE><C-r><C-w>
 
 
 " *******************************************************
@@ -645,6 +645,10 @@ set matchpairs+=<:>       " '%' bounce between brackets
 " Backspace delete line breaks, over the start of the
 " current insertion, and over indentations
 set backspace=indent,eol,start
+
+" Highlight cursor line/column
+noremap <localleader>h   :set cursorline!<CR>
+noremap <localleader>hh  :set cursorcolumn!<CR>
 
 " Jump to line
 FnNoremap  <C-j> :
