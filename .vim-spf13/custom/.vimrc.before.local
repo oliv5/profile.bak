@@ -18,8 +18,8 @@
 	let g:spf13_no_views = 1
 
 	" Leader keys
-	let g:spf13_leader=','
-	let g:spf13_localleader=';'
+	let g:spf13_leader=';'
+	let g:spf13_localleader=','
 
 	" Disable easier moving in tabs and windows
 	"   let g:spf13_no_easyWindows = 1
@@ -77,33 +77,8 @@
 	"   let g:multi_cursor_start_key='+'
 " }
 
-" CTRLP plugin {
-
-	if !exists('g:loaded_ctrlp')
-		" Options
-		let g:ctrlp_map = '<C-p>'
-		let g:ctrlp_cmd = 'CtrlP'
-		let g:ctrlp_working_path_mode = '0'
-		let g:ctrlp_custom_ignore = {
-		\ 'dir':  '\v[\/](\.(git|hg|svn)|tmp)$',
-		\ 'file': '\v\.(exe|so|dll|o)$'
-		\ }
+" Use before config if available {
+	if filereadable(expand("~/.vim-legacy/.vimrc.before"))
+		source ~/.vim-legacy/.vimrc.before
 	endif
-
-" }
-
-" Nerdtree plugin {
-
-	" Options
-	let g:NERDTreeWinPos = 'right'
-	let g:NERDTreeWinSize = 20
-
-" }
-
-" Tagbar plugin {
-
-	" Options
-	let g:tagbar_width = 20
-	let g:tagbar_left = 1
-
 " }

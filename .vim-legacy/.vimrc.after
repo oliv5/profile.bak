@@ -204,59 +204,62 @@ vnoremap <C-l>      L
 " } Statusline {
 " *******************************************************
 
-" Returns "mixed" when indentation is mixed
-function! b:StatuslineWarning()
-	if !exists("b:statusline_tab_warning")
-		let tabs = search('^\t', 'nw')
-		let spaces = search('^ \+[^\*]', 'nw')
-		if tabs && spaces
-			let b:statusline_tab_warning =  '-mixed '.(&et ? tabs : spaces)
-		elseif (spaces && !&et) || (tabs && &et)
-			let b:statusline_tab_warning = '-error'
-		else
-			let b:statusline_tab_warning = ''
+if !exists('g:loaded_airline')
+
+	" Returns "mixed" when indentation is mixed
+	function! b:StatuslineWarning()
+		if !exists("b:statusline_tab_warning")
+			let tabs = search('^\t', 'nw')
+			let spaces = search('^ \+[^\*]', 'nw')
+			if tabs && spaces
+				let b:statusline_tab_warning =  '-mixed '.(&et ? tabs : spaces)
+			elseif (spaces && !&et) || (tabs && &et)
+				let b:statusline_tab_warning = '-error'
+			else
+				let b:statusline_tab_warning = ''
+			endif
 		endif
-	endif
-	return b:statusline_tab_warning
-endfunction
+		return b:statusline_tab_warning
+	endfunction
 
-" Set global status line content
-function! s:StatuslineGlobal()
-	if has("statusline") && &modifiable
-		if exists('g:loaded_buftabs') && g:loaded_buftabs==1
-			set statusline=\ %{buftabs#statusline(-45)}
-		else
-			set statusline=\ %<%F
+	" Set global status line content
+	function! s:StatuslineGlobal()
+		if has("statusline") && &modifiable
+			if exists('g:loaded_buftabs') && g:loaded_buftabs==1
+				set statusline=\ %{buftabs#statusline(-45)}
+			else
+				set statusline=\ %<%F
+			endif
+			set statusline+=\ %=
+			set statusline+=\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r
+			set statusline+=\ [%{&expandtab==0?'tabs':'space'}%{b:StatuslineWarning()}]
+			set statusline+=\ %y\ %c,%l/%L\ %P
 		endif
-		set statusline+=\ %=
-		set statusline+=\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r
-		set statusline+=\ [%{&expandtab==0?'tabs':'space'}%{b:StatuslineWarning()}]
-		set statusline+=\ %y\ %c,%l/%L\ %P
+	endfunction
+
+	" Hide status line
+	function! s:StatusLineHide()
+			hi StatusLine ctermbg=NONE ctermfg=white
+			hi clear StatusLine
+			set laststatus=0
+	endfunction
+
+	" Line options
+	set laststatus=2                " Always show status line
+
+	" User command
+	command! -range=% -nargs=0 StatuslineGlobal call <SID>StatuslineGlobal(<f-args>)
+
+	" Update the warning flag
+	autocmd cursorhold,bufwritepost * unlet! b:statusline_tab_warning
+
+	" Key mapping
+	noremap <silent><localleader>s  :call <SID>StatuslineGlobal()<CR>
+
+	" Set the status line once
+	if !exists("g:loaded_vimrc")
+		call s:StatuslineGlobal()
 	endif
-endfunction
-
-" Hide status line
-function! s:StatusLineHide()
-		hi StatusLine ctermbg=NONE ctermfg=white
-		hi clear StatusLine
-		set laststatus=0
-endfunction
-
-" Line options
-set laststatus=2                " Always show status line
-
-" User command
-command! -range=% -nargs=0 StatuslineGlobal call <SID>StatuslineGlobal(<f-args>)
-
-" Update the warning flag
-autocmd cursorhold,bufwritepost * unlet! b:statusline_tab_warning
-
-" Key mapping
-noremap <silent><localleader>s  :call <SID>StatuslineGlobal()<CR>
-
-" Set the status line once
-if !exists("g:loaded_vimrc")
-	call s:StatuslineGlobal()
 endif
 
 

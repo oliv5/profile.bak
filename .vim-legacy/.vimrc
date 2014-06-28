@@ -36,6 +36,16 @@ endif
 
 
 " *******************************************************
+" } Load plugins {
+" *******************************************************
+" Start plugin pathogen
+filetype off                " force reloading *after* pathogen loaded
+runtime bundle/pathogen/autoload/pathogen.vim
+execute pathogen#infect()
+filetype plugin indent on   " enable detection, plugins and indenting in one step
+
+
+" *******************************************************
 " } Global settings {
 " *******************************************************
 set path=.,,**              " Search path: recurse from current directory

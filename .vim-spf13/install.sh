@@ -7,6 +7,8 @@ ln -s $DIR/$SPF13/.vim* ~/
 ln -s $DIR/custom/.vim* ~/
 #mkdir -p $DIR/$SPF13/.vim/plugin/ 2>/dev/null
 #mkdir -p $DIR/$SPF13/.vim/bundle/ 2>/dev/null
-ln -s $DIR/custom/plugin $DIR/$SPF13/.vim/plugin
-ln -s $DIR/custom/bundle/* $DIR/$SPF13/.vim/bundle/
+ln -s $DIR/custom/plugin $DIR/$SPF13/.vim
+for BUNDLE in $(ls $DIR/custom/bundle); do
+    ln -s $BUNDLE $DIR/$SPF13/.vim/bundle/
+done
 set +x
