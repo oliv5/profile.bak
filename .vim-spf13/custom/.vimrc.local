@@ -1,468 +1,468 @@
 " General {
-    set updatetime=1000  " Swap file write / CursorHold  evt delay (in ms)
+	set updatetime=1000  " Swap file write / CursorHold  evt delay (in ms)
 " }
 " UI settings, theme & color scheme {
-    if has('syntax')
-        colorscheme torte
-        syntax on
-    endif
-    set nocursorline
-    set nu
-    set scrolloff=10
+	if has('syntax')
+		colorscheme torte
+		syntax on
+	endif
+	set nocursorline
+	set nu
+	set scrolloff=10
 " }
 
 " Mapping functions {
 
-    function! Map(args)
-        let args = matchlist(a:args,'\(<silent>\s\+\)\?\(.\{-}\)\s\+\(.*\)')
-        execute 'map'  args[1] args[2] '<c-c>'.args[3]
-        execute 'imap' args[1] args[2] '<c-o>'.args[3]
-    endfunction
+	function! Map(args)
+		let args = matchlist(a:args,'\(<silent>\s\+\)\?\(.\{-}\)\s\+\(.*\)')
+		execute 'map'  args[1] args[2] '<c-c>'.args[3]
+		execute 'imap' args[1] args[2] '<c-o>'.args[3]
+	endfunction
 
-    function! Noremap(args)
-        let args = matchlist(a:args,'\(<silent>\s\+\)\?\(.\{-}\)\s\+\(.*\)')
-        execute 'noremap'  args[1] args[2] '<c-c>'.args[3]
-        execute 'inoremap' args[1] args[2] '<c-o>'.args[3]
-    endfunction
+	function! Noremap(args)
+		let args = matchlist(a:args,'\(<silent>\s\+\)\?\(.\{-}\)\s\+\(.*\)')
+		execute 'noremap'  args[1] args[2] '<c-c>'.args[3]
+		execute 'inoremap' args[1] args[2] '<c-o>'.args[3]
+	endfunction
 
-    command! -nargs=1 Map        call Map(<f-args>)
-    command! -nargs=1 Noremap    call Noremap(<f-args>)
+	command! -nargs=1 Map        call Map(<f-args>)
+	command! -nargs=1 Noremap    call Noremap(<f-args>)
 
 " }
 
 " Function keys {
 
-    " Fx keys in insert mode = normal mode
-    for idx in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-        execute "imap <F".idx."> <C-O><F".idx.">"
-    endfor
+	" Fx keys in insert mode = normal mode
+	for idx in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+		execute "imap <F".idx."> <C-O><F".idx.">"
+	endfor
 
-    " Map F1 to the help
-    Map <F1>    :vert help<space>
+	" Map F1 to the help
+	Map <F1>    :vert help<space>
 
 " }
 
 " Source vimrc {
-    noremap  <localleader>s :source $MYVIMRC<CR>
+	noremap  <localleader>s :source $MYVIMRC<CR>
 " }
 
 " Formatting {
-    " Indentation normal & visual modes
-    noremap  <Tab>   >>
-    vnoremap <Tab>   >
-    noremap  <S-Tab> <LT><LT>
-    vnoremap <S-Tab> <LT>
+	" Indentation normal & visual modes
+	noremap  <Tab>   >>
+	vnoremap <Tab>   >
+	noremap  <S-Tab> <LT><LT>
+	vnoremap <S-Tab> <LT>
 
-    " Identation insert mode
-    "inoremap <Tab>   <C-T>
-    "inoremap <S-Tab> <C-D>
+	" Identation insert mode
+	"inoremap <Tab>   <C-T>
+	"inoremap <S-Tab> <C-D>
 
-    " Y behave like C and D (not like cc, dd, yy)
-    noremap Y y$
+	" Y behave like C and D (not like cc, dd, yy)
+	noremap Y y$
 
-    " Word quote
-    nnoremap <silent> <leader>" viw<esc>a"<esc>hbi"<esc>lel
+	" Word quote
+	nnoremap <silent> <leader>" viw<esc>a"<esc>hbi"<esc>lel
 
-    " Tab to space
-    command! -range=% -nargs=0 Tab2Space call <SID>Tab2Space()
-    function! s:Tab2Space() range
-        let firstline = a:firstline == a:lastline ? 0 : a:firstline
-        let lastline = a:firstline == a:lastline ? line('$') : a:lastline
-        execute ':'.firstline.','.lastline.'s#^\t\+#\=repeat(" ", len(submatch(0))*' . &ts . ')'
-    endfunction
+	" Tab to space
+	command! -range=% -nargs=0 Tab2Space call <SID>Tab2Space()
+	function! s:Tab2Space() range
+		let firstline = a:firstline == a:lastline ? 0 : a:firstline
+		let lastline = a:firstline == a:lastline ? line('$') : a:lastline
+		execute ':'.firstline.','.lastline.'s#^\t\+#\=repeat(" ", len(submatch(0))*' . &ts . ')'
+	endfunction
 
-    " Space to tab
-    command! -range=% -nargs=0 Space2Tab call <SID>Space2Tab()
-    function! s:Space2Tab() range
-        let firstline = a:firstline == a:lastline ? 0 : a:firstline
-        let lastline = a:firstline == a:lastline ? line('$') : a:lastline
-        execute ':'.firstline.','.lastline.'s#^\( \{'.&ts.'\}\)\+#\=repeat("\t", len(submatch(0))/' . &ts . ')'
-    endfunction
+	" Space to tab
+	command! -range=% -nargs=0 Space2Tab call <SID>Space2Tab()
+	function! s:Space2Tab() range
+		let firstline = a:firstline == a:lastline ? 0 : a:firstline
+		let lastline = a:firstline == a:lastline ? line('$') : a:lastline
+		execute ':'.firstline.','.lastline.'s#^\( \{'.&ts.'\}\)\+#\=repeat("\t", len(submatch(0))/' . &ts . ')'
+	endfunction
 
-    " Intelligent tab to spaces
-    noremap <leader><Tab> :call <SID>Tabfix()<CR>
-    function! s:Tabfix() abort
-        if &expandtab==0
-            call s:Tab2Space()
-        else
-            call s:Space2Tab()
-        endif
-    endfunction
+	" Intelligent tab to spaces
+	noremap <leader><Tab> :call <SID>Tabfix()<CR>
+	function! s:Tabfix() abort
+		if &expandtab==0
+			call s:Tab2Space()
+		else
+			call s:Space2Tab()
+		endif
+	endfunction
 
-    " Show unwanted extra white space and tab characters
-    let ewstHighlight = 0
-    nnoremap <silent><localleader>v  :
-        \let ewstHighlight = !ewstHighlight <BAR>
-        \call <SID>SetEwstHighlight(ewstHighlight)<CR>
+	" Show unwanted extra white space and tab characters
+	let ewstHighlight = 0
+	nnoremap <silent><localleader>v  :
+		\let ewstHighlight = !ewstHighlight <BAR>
+		\call <SID>SetEwstHighlight(ewstHighlight)<CR>
 
-    function! s:SetEwstHighlight(switchOn)
-        if a:switchOn == 1
-            " Set color
-            hi ExtraWhitespace ctermbg=darkgreen guibg=darkgreen
-            hi ExtraTabs ctermbg=darkgreen guibg=darkgreen
-            " Show trailing spaces and spaces before a tab
-            syn match ExtraWhitespace /\s\+$\| \+\ze\t/
-            if &expandtab==0
-                " Show spaces wrongly used for indenting
-                " Show tabs that are not at the start of a line
-                syn match ExtraTabs /^\t*\zs \+\|[^\t]\zs\t\+/
-            else
-                " Show tabs that are not at the start of a line
-                syn match ExtraTabs /[^\t]\zs\t\+/
-            endif
-        else
-            " Enable syntax back
-            syn on
-        endif
-    endfunction
+	function! s:SetEwstHighlight(switchOn)
+		if a:switchOn == 1
+			" Set color
+			hi ExtraWhitespace ctermbg=darkgreen guibg=darkgreen
+			hi ExtraTabs ctermbg=darkgreen guibg=darkgreen
+			" Show trailing spaces and spaces before a tab
+			syn match ExtraWhitespace /\s\+$\| \+\ze\t/
+			if &expandtab==0
+				" Show spaces wrongly used for indenting
+				" Show tabs that are not at the start of a line
+				syn match ExtraTabs /^\t*\zs \+\|[^\t]\zs\t\+/
+			else
+				" Show tabs that are not at the start of a line
+				syn match ExtraTabs /[^\t]\zs\t\+/
+			endif
+		else
+			" Enable syntax back
+			syn on
+		endif
+	endfunction
 " }
 
 " Search & replace {
-    nmap <C-f>f <leader>ff
+	nmap <C-f>f <leader>ff
 
-    " Toggle search highlighting
-    nnoremap <leader><F3> :set invhls hls?<CR>
+	" Toggle search highlighting
+	nnoremap <leader><F3> :set invhls hls?<CR>
 
-    " Search & replace
-    Noremap  <C-F>   /
-    Noremap  <C-A-F> yiw<C-O>/<C-R>"
-    Noremap  <C-H>   yiw<C-O>:%s/<C-R>"//c<left><left>
-    Noremap  <C-A-H> yiw<C-O>:%s/<C-R>"/<C-R>"/c<left><left>
-    vnoremap <C-F>   "+y:/<C-R>"
-    vnoremap <C-H>   "+y:%s/<C-R>"/<C-R>"/c<left><left>
-    vnoremap <C-A-H> "+y:%s/<C-R>"//c<left><left>
+	" Search & replace
+	Noremap  <C-F>   /
+	Noremap  <C-A-F> yiw<C-O>/<C-R>"
+	Noremap  <C-H>   yiw<C-O>:%s/<C-R>"//c<left><left>
+	Noremap  <C-A-H> yiw<C-O>:%s/<C-R>"/<C-R>"/c<left><left>
+	vnoremap <C-F>   "+y:/<C-R>"
+	vnoremap <C-H>   "+y:%s/<C-R>"/<C-R>"/c<left><left>
+	vnoremap <C-A-H> "+y:%s/<C-R>"//c<left><left>
 
-    " F3 for search (n and N)
-    Map  <F3>       n
-    Map  <S-F3>     N
-    cmap <F3>       <NOP>
-    vmap <S-F3>     <F3>N
-    vnoremap <silent> <F3> :<C-u>
-        \let old_reg=getreg('"')<Bar>
-        \let old_regtype=getregtype('"')<CR>
-        \gvy:let @/=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR>
-        \gV:call setreg('"', old_reg, old_regtype)<CR>
-        \:set hls<CR>
+	" F3 for search (n and N)
+	Map  <F3>       n
+	Map  <S-F3>     N
+	cmap <F3>       <NOP>
+	vmap <S-F3>     <F3>N
+	vnoremap <silent> <F3> :<C-u>
+		\let old_reg=getreg('"')<Bar>
+		\let old_regtype=getregtype('"')<CR>
+		\gvy:let @/=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR>
+		\gV:call setreg('"', old_reg, old_regtype)<CR>
+		\:set hls<CR>
 
-    " F4 for select and search (* and #)
-    Map <F4>        *
-    Map <S-F4>      #
+	" F4 for select and search (* and #)
+	Map <F4>        *
+	Map <S-F4>      #
 
 " }
 
 " Cursor movements {
-    " Goto line
-    Noremap  <C-g> :
+	" Goto line
+	Noremap  <C-g> :
 
-    " Prev/next cursor location
-    " Note: <C-[> is Esc
-    Noremap <A-Left>  <C-O>
-    Noremap <A-Right> <C-I>
-    vnoremap <A-Left>  <C-[><C-O>
-    vnoremap <A-Right> <C-[><C-I>
+	" Prev/next cursor location
+	" Note: <C-[> is Esc
+	Noremap <A-Left>  <C-O>
+	Noremap <A-Right> <C-I>
+	vnoremap <A-Left>  <C-[><C-O>
+	vnoremap <A-Right> <C-[><C-I>
 
-    " Map F2 to set/jump to marks
-    if !exists("g:vimrc_mark")
-        let g:vimrc_mark=0
-    endif
-    Map <silent> <F2>     :exec printf("normal '%c", 65 + (g:vimrc_mark + 25) % 26) <BAR> let g:vimrc_mark=(g:vimrc_mark + 25) % 26<CR>
-    Map <silent> <S-F2>   :exec printf("normal '%c", 65 + (g:vimrc_mark + 1)  % 26) <BAR> let g:vimrc_mark=(g:vimrc_mark + 1)  % 26<CR>
-    Map <silent> <C-F2>   :exec printf("ma %c",      65 + g:vimrc_mark)             <BAR> let g:vimrc_mark=(g:vimrc_mark + 1)  % 26<CR>
+	" Map F2 to set/jump to marks
+	if !exists("g:vimrc_mark")
+		let g:vimrc_mark=0
+	endif
+	Map <silent> <F2>     :exec printf("normal '%c", 65 + (g:vimrc_mark + 25) % 26) <BAR> let g:vimrc_mark=(g:vimrc_mark + 25) % 26<CR>
+	Map <silent> <S-F2>   :exec printf("normal '%c", 65 + (g:vimrc_mark + 1)  % 26) <BAR> let g:vimrc_mark=(g:vimrc_mark + 1)  % 26<CR>
+	Map <silent> <C-F2>   :exec printf("ma %c",      65 + g:vimrc_mark)             <BAR> let g:vimrc_mark=(g:vimrc_mark + 1)  % 26<CR>
 " }
 
 " Tab management {
-    " Enable/disable tabs
-    if $VIM_USETABS != ""
-        let s:vimrc_useTabs = 1
-        set switchbuf=usetab,newtab  " Buffer switch
-    endif
+	" Enable/disable tabs
+	if $VIM_USETABS != ""
+		let s:vimrc_useTabs = 1
+		set switchbuf=usetab,newtab  " Buffer switch
+	endif
 
-    " Open/close tab
-    Map  <C-t><C-t>   :tabnew<CR>:e<space>
-    Map  <C-t><C-c>   :close<CR>
-    Map  <C-F4>       :close<CR>
+	" Open/close tab
+	Map  <C-t><C-t>   :tabnew<CR>:e<space>
+	Map  <C-t><C-c>   :close<CR>
+	Map  <C-F4>       :close<CR>
 
-    " Prev/next tab
-    Noremap  <C-Tab>  :tabn<CR>
-    Noremap  <C-Tab>  :tabp<CR>
+	" Prev/next tab
+	Noremap  <C-Tab>  :tabn<CR>
+	Noremap  <C-Tab>  :tabp<CR>
 " }
 
 " Window management {
 
-    " Open/close window : standard mappings <C-w>...
-    " Prev/next window (Ctrl-w/W)
+	" Open/close window : standard mappings <C-w>...
+	" Prev/next window (Ctrl-w/W)
 
-    " Go up/down/left/right window
-    Noremap <C-Up>      :wincmd k<CR>
-    Noremap <C-Down>    :wincmd j<CR>
-    Noremap <C-Left>    :wincmd h<CR>
-    Noremap <C-Right>   :wincmd l<CR>
+	" Go up/down/left/right window
+	Noremap <C-Up>      :wincmd k<CR>
+	Noremap <C-Down>    :wincmd j<CR>
+	Noremap <C-Left>    :wincmd h<CR>
+	Noremap <C-Right>   :wincmd l<CR>
 
-    " Easy keypress fix
-    map <C-w><C-w>      <C-w>w
-    map <C-w><C-c>      <C-w>c
+	" Easy keypress fix
+	map <C-w><C-w>      <C-w>w
+	map <C-w><C-c>      <C-w>c
 
-    " Resize current window by +/- 5
-    " Same as 5<C-w>+  5<C-w>-  5<C-w>>  5<C-w><
-    "nnoremap <C-w><left>   :vertical resize -5<cr>
-    "nnoremap <C-w><right>  :vertical resize +5<cr>
-    "nnoremap <C-w><up>     :resize -5<cr>
-    "nnoremap <C-w><down>   :resize +5<cr>
+	" Resize current window by +/- 5
+	" Same as 5<C-w>+  5<C-w>-  5<C-w>>  5<C-w><
+	"nnoremap <C-w><left>   :vertical resize -5<cr>
+	"nnoremap <C-w><right>  :vertical resize +5<cr>
+	"nnoremap <C-w><up>     :resize -5<cr>
+	"nnoremap <C-w><down>   :resize +5<cr>
 
-    " Extend window through the splits...
-    " Same as <C-w>_  <C-w>|
-    "noremap <C-J> <C-w>j<C-w>_
-    "noremap <C-K> <C-w>k<C-w>_
-    "noremap <C-H> <C-w>h<C-w>\|
-    "noremap <C-L> <C-w>l<C-w>\|
+	" Extend window through the splits...
+	" Same as <C-w>_  <C-w>|
+	"noremap <C-J> <C-w>j<C-w>_
+	"noremap <C-K> <C-w>k<C-w>_
+	"noremap <C-H> <C-w>h<C-w>\|
+	"noremap <C-L> <C-w>l<C-w>\|
 
-    " Exit to normal when changing windows
-    augroup exittonormal
-        autocmd!
-        autocmd WinEnter * stopinsert
-    augroup END
+	" Exit to normal when changing windows
+	augroup exittonormal
+		autocmd!
+		autocmd WinEnter * stopinsert
+	augroup END
 
 " }
 
 " Buffer management {
 
-    " Open/close buffer (close=:bd or :bw)
-    map <C-b><C-o>      :e<SPACE>
-    map <C-b><C-c>      :bd<CR>
-    Map <F5>            :e<CR>
-    if !exists("s:vimrc_useTabs")
-        Map <C-F4>      bp<bar>sp<bar>bn<bar>bd<CR>
-    endif
+	" Open/close buffer (close=:bd or :bw)
+	map <C-b><C-o>      :e<SPACE>
+	map <C-b><C-c>      :bd<CR>
+	Map <F5>            :e<CR>
+	if !exists("s:vimrc_useTabs")
+		Map <C-F4>      bp<bar>sp<bar>bn<bar>bd<CR>
+	endif
 
-    " Prev/next buffer
-    map  <C-b><C-n>     :bn<CR>
-    map  <C-b><C-p>     :bp<CR>
-    map  <C-b>n         :bn<CR>
-    map  <C-b>p         :bp<CR>
-    Noremap <A-Up>      :bn<CR>
-    Noremap <A-Down>    :bp<CR>
-    if !exists("s:vimrc_useTabs")
-        Noremap <C-Tab>   :bn<CR>
-        Noremap <C-S-Tab> :bp<CR>
-    endif
+	" Prev/next buffer
+	map  <C-b><C-n>     :bn<CR>
+	map  <C-b><C-p>     :bp<CR>
+	map  <C-b>n         :bn<CR>
+	map  <C-b>p         :bp<CR>
+	Noremap <A-Up>      :bn<CR>
+	Noremap <A-Down>    :bp<CR>
+	if !exists("s:vimrc_useTabs")
+		Noremap <C-Tab>   :bn<CR>
+		Noremap <C-S-Tab> :bp<CR>
+	endif
 
 " }
 
 " Hexadecimal display {
 
-    if !exists('g:vimrc_hexa')
-        let g:vimrc_hexa=0
-    endif
+	if !exists('g:vimrc_hexa')
+		let g:vimrc_hexa=0
+	endif
 
-    function! s:HexaToggle()
-        let g:vimrc_hexa=!g:vimrc_hexa
-        if g:vimrc_hexa==1
-            exec ":%!xxd"
-        else
-            exec ":%!xxd -r"
-        endif
-    endfunction
+	function! s:HexaToggle()
+		let g:vimrc_hexa=!g:vimrc_hexa
+		if g:vimrc_hexa==1
+			exec ":%!xxd"
+		else
+			exec ":%!xxd -r"
+		endif
+	endfunction
 
-    " Key mapping
-    map <leader>h :call <SID>HexaToggle()<CR>
+	" Key mapping
+	map <leader>h :call <SID>HexaToggle()<CR>
 
 " }
 
 " Tags {
 
-    " Set tags root
-    set tags+=$TAGS_DB
+	" Set tags root
+	set tags+=$TAGS_DB
 
-    " Key mapping
-    Noremap <C-ENTER>   <C-]>
-    noremap <ENTER>     <C-]>
-    Noremap <C-SPACE>   <C-T>
-    noremap <SPACE>     <C-T>
-    Noremap <F6>        :exec "try <BAR> silent tnext <BAR> catch <BAR> tfirst <BAR> endtry"<CR>
-    Noremap <S-F6>      :exec "try <BAR> silent tprevious <BAR> catch <BAR> tlast <BAR> endtry"<CR>
+	" Key mapping
+	Noremap <C-ENTER>   <C-]>
+	noremap <ENTER>     <C-]>
+	Noremap <C-SPACE>   <C-T>
+	noremap <SPACE>     <C-T>
+	Noremap <F6>        :exec "try <BAR> silent tnext <BAR> catch <BAR> tfirst <BAR> endtry"<CR>
+	Noremap <S-F6>      :exec "try <BAR> silent tprevious <BAR> catch <BAR> tlast <BAR> endtry"<CR>
 
 " }
 
 " File browser netrw {
 
-    " Options
-    let g:netrw_browse_split = 0  " Use same(0)/prev(4) window
-    let g:netrw_altv = 1          " Vertical split right
-    let g:netrw_liststyle=3       " Tree mode
-    let g:netrw_special_syntax= 1 " Show special files
-    let g:netrw_sort_sequence   = "[\/]$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$"
-    let g:netrw_winsize = 20      " Window size
+	" Options
+	let g:netrw_browse_split = 0  " Use same(0)/prev(4) window
+	let g:netrw_altv = 1          " Vertical split right
+	let g:netrw_liststyle=3       " Tree mode
+	let g:netrw_special_syntax= 1 " Show special files
+	let g:netrw_sort_sequence   = "[\/]$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$"
+	let g:netrw_winsize = 20      " Window size
 
-    " Workaround
-    set winfixwidth
-    set winfixheight
+	" Workaround
+	set winfixwidth
+	set winfixheight
 
-    " Open netrw window
-    function! s:NetrwOpenWnd()
-        Vexplore!
-        let s:netrw_buf_num = bufnr("%")
-    endfunction
+	" Open netrw window
+	function! s:NetrwOpenWnd()
+		Vexplore!
+		let s:netrw_buf_num = bufnr("%")
+	endfunction
 
-    " Close netrw window
-    function! s:NetrwCloseWnd()
-        if exists("s:netrw_buf_num")
-            exec bufwinnr(s:netrw_buf_num) "wincmd c"
-            unlet s:netrw_buf_num
-        endif
-    endfunction
+	" Close netrw window
+	function! s:NetrwCloseWnd()
+		if exists("s:netrw_buf_num")
+			exec bufwinnr(s:netrw_buf_num) "wincmd c"
+			unlet s:netrw_buf_num
+		endif
+	endfunction
 
-    " Toggle netrw window
-    function! s:NetrwToggleWnd()
-        if exists("s:netrw_buf_num")
-            s:NetrwCloseWnd()
-        else
-            s:NetrwOpenWnd()
-        endif
-    endfunction
+	" Toggle netrw window
+	function! s:NetrwToggleWnd()
+		if exists("s:netrw_buf_num")
+			s:NetrwCloseWnd()
+		else
+			s:NetrwOpenWnd()
+		endif
+	endfunction
 
-    " Keymapping
-    Noremap <silent> <leader>ee     call s:NetrwToggleWnd():<CR>
+	" Keymapping
+	Noremap <silent> <leader>ee     call s:NetrwToggleWnd():<CR>
 
 " }
 
 " Preview window {
 
-    " Options
-    set previewheight=8           " Preview window height
+	" Options
+	set previewheight=8           " Preview window height
 
-    " Open preview window
-    function! s:PreviewOpenWnd()
-        silent! pedit!
-        au! CursorHold * nested silent call s:PreviewShowTag()
-        Noremap <F6>   <silent>     :call s:PreviewShowNext()<CR>
-        Noremap <S-F6> <silent>     ::call s:PreviewShowPrev()<CR>
-        Noremap <C-F6> <silent>     :pclose<CR>
-        let s:p_toggle = 1
-        let s:p_lastw = ""
-    endfunction
+	" Open preview window
+	function! s:PreviewOpenWnd()
+		silent! pedit!
+		au! CursorHold * nested silent call s:PreviewShowTag()
+		Noremap <F6>   <silent>     :call s:PreviewShowNext()<CR>
+		Noremap <S-F6> <silent>     ::call s:PreviewShowPrev()<CR>
+		Noremap <C-F6> <silent>     :pclose<CR>
+		let s:p_toggle = 1
+		let s:p_lastw = ""
+	endfunction
 
-    " Close preview window
-    function! s:PreviewCloseWnd()
-        au! CursorHold *
-        pclose
-        unlet s:p_toggle
-    endfunction
+	" Close preview window
+	function! s:PreviewCloseWnd()
+		au! CursorHold *
+		pclose
+		unlet s:p_toggle
+	endfunction
 
-    " Toggle preview window
-    function! s:PreviewToggleWnd()
-        if exists('s:p_toggle')
-            s:PreviewCloseWnd()
-        else
-            s:PreviewOpenWnd()
-        endif
-    endfunction
+	" Toggle preview window
+	function! s:PreviewToggleWnd()
+		if exists('s:p_toggle')
+			s:PreviewCloseWnd()
+		else
+			s:PreviewOpenWnd()
+		endif
+	endfunction
 
-    function! s:PreviewShowTag()
-        if &previewwindow             " don't do this in the preview window
-            return
-        endif
-        let w = expand("<cword>")     " get the word under cursor
-        if w == s:p_lastw             " Same word, skip all this
-            return
-        endif
-        let s:p_lastw = w
-        if w =~ '\a'                  " if the word contains a letter
-            " Try displaying a matching tag for the word under the cursor
-            try
-                exec "silent! ptag " . w
-                exec "wincmd P"
-                exec "wincmd J"
-                exec "wincmd p"
-            endtry
-        endif
-    endfunction
+	function! s:PreviewShowTag()
+		if &previewwindow             " don't do this in the preview window
+			return
+		endif
+		let w = expand("<cword>")     " get the word under cursor
+		if w == s:p_lastw             " Same word, skip all this
+			return
+		endif
+		let s:p_lastw = w
+		if w =~ '\a'                  " if the word contains a letter
+			" Try displaying a matching tag for the word under the cursor
+			try
+				exec "silent! ptag " . w
+				exec "wincmd P"
+				exec "wincmd J"
+				exec "wincmd p"
+			endtry
+		endif
+	endfunction
 
-    function! s:PreviewShowNext()
-        try | silent ptnext | catch | ptfirst | endtry
-    endfunction
+	function! s:PreviewShowNext()
+		try | silent ptnext | catch | ptfirst | endtry
+	endfunction
 
-    function! s:PreviewShowPrev()
-        try | silent ptprevious | catch | ptlast | endtry
-    endfunction
+	function! s:PreviewShowPrev()
+		try | silent ptprevious | catch | ptlast | endtry
+	endfunction
 
-    function! s:PreviewHighlightTag(w)
-        silent! wincmd P            " jump to preview window
-        if &previewwindow           " if we really get there...
-            match none              " delete existing highlight
-            if has("folding")
-                silent! .foldopen   " don't want a closed fold
-            endif
-            call search("$", "b")   " to end of previous line
-            let w = substitute(a:pattern, '\\', '\\\\', "")
-            call search('\<\V' . w . '\>') " position cursor on match
-            " Add a match highlight to the word at this position
-            hi previewWord term=bold ctermbg=blue guibg=blue
-            exe 'match previewWord "\%' . line(".") . 'l\%' . col(".") . 'c\k*"'
-            wincmd p                " back to old window
-        endif
-    endfunction
+	function! s:PreviewHighlightTag(w)
+		silent! wincmd P            " jump to preview window
+		if &previewwindow           " if we really get there...
+			match none              " delete existing highlight
+			if has("folding")
+				silent! .foldopen   " don't want a closed fold
+			endif
+			call search("$", "b")   " to end of previous line
+			let w = substitute(a:pattern, '\\', '\\\\', "")
+			call search('\<\V' . w . '\>') " position cursor on match
+			" Add a match highlight to the word at this position
+			hi previewWord term=bold ctermbg=blue guibg=blue
+			exe 'match previewWord "\%' . line(".") . 'l\%' . col(".") . 'c\k*"'
+			wincmd p                " back to old window
+		endif
+	endfunction
 
-    " Keymapping
-    Noremap <silent> <leader>pp     call s:PreviewToggleWnd()<CR>
+	" Keymapping
+	Noremap <silent> <leader>pp     call s:PreviewToggleWnd()<CR>
 
 " }
 
 " Yaifa plugin {
 
-    if !exists('g:loaded_yaifa')
-        " Options
-        let g:yaifa_max_lines=4096
-        " Map Yaifa
-        nmap <localleader><tab>   :call YAIFA()<CR>
-        " autocall when entering file
-        if exists("*YAIFA")
-            autocmd BufRead * nested silent! call YAIFA()
-        endif
-    endif
+	if !exists('g:loaded_yaifa')
+		" Options
+		let g:yaifa_max_lines=4096
+		" Map Yaifa
+		nmap <localleader><tab>   :call YAIFA()<CR>
+		" autocall when entering file
+		if exists("*YAIFA")
+			autocmd BufRead * nested silent! call YAIFA()
+		endif
+	endif
 
 " }
 
 " IDE management {
 
-    " IDE toggle functions
-    function! s:IdeToggle(index)
-        if a:index == 1
-            if exists('s:vimrc_ide_vsp')
-                unlet s:vimrc_ide_vsp
-                vsp
-            else
-                let s:vimrc_ide_vsp = 1
-                wincmd c
-            endif
-        elseif a:index == 2
-            if exists('s:vimrc_ide_sp')
-                unlet s:vimrc_ide_sp
-                sp
-            else
-                let s:vimrc_ide_sp = 1
-                wincmd c
-            endif
-        elseif a:index == 3
-            if exists('s:vimrc_ide_dev')
-                unlet s:vimrc_ide_dev
-                call s:PreviewCloseWnd()
-                TagbarClose
-                let g:NERDTreeQuitOnOpen=1
-                NERDTreeClose
-            else
-                let s:vimrc_ide_dev = 1
-                call s:PreviewOpenWnd()
-                TagbarOpen
-                let g:NERDTreeQuitOnOpen=0
-                NERDTreeMirrorOpen
-            endif
-        endif
-    endfunction
+	" IDE toggle functions
+	function! s:IdeToggle(index)
+		if a:index == 1
+			if exists('s:vimrc_ide_vsp')
+				unlet s:vimrc_ide_vsp
+				vsp
+			else
+				let s:vimrc_ide_vsp = 1
+				wincmd c
+			endif
+		elseif a:index == 2
+			if exists('s:vimrc_ide_sp')
+				unlet s:vimrc_ide_sp
+				sp
+			else
+				let s:vimrc_ide_sp = 1
+				wincmd c
+			endif
+		elseif a:index == 3
+			if exists('s:vimrc_ide_dev')
+				unlet s:vimrc_ide_dev
+				call s:PreviewCloseWnd()
+				TagbarClose
+				let g:NERDTreeQuitOnOpen=1
+				NERDTreeClose
+			else
+				let s:vimrc_ide_dev = 1
+				call s:PreviewOpenWnd()
+				TagbarOpen
+				let g:NERDTreeQuitOnOpen=0
+				NERDTreeMirrorOpen
+			endif
+		endif
+	endfunction
 
-    " Key mapping
-    Noremap <F11>     :call <SID>IdeToggle(1)<CR>
-    Noremap <S-F11>   :call <SID>IdeToggle(2)<CR>
-    Noremap <F12>     :call <SID>IdeToggle(3)<CR>
-    Noremap <S-F12>   :call <SID>IdeToggle(0)<CR>
+	" Key mapping
+	Noremap <F11>     :call <SID>IdeToggle(1)<CR>
+	Noremap <S-F11>   :call <SID>IdeToggle(2)<CR>
+	Noremap <F12>     :call <SID>IdeToggle(3)<CR>
+	Noremap <S-F12>   :call <SID>IdeToggle(0)<CR>
 
 " }

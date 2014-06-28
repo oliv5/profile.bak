@@ -17,21 +17,21 @@
 
 " Version check
 if v:version < 700
-  echoe ".vimrc requires VIM 7.0 or above"
-  finish
+	echoe ".vimrc requires VIM 7.0 or above"
+	finish
 endif
 
 " User commands check
 if !has("user_commands") && !exists("g:reload_vimrc")
-  " Reload .vimrc silently (removes autocommands errors)
-  let g:reload_vimrc = 1
-  silent! source $MYVIMRC
-  finish
+	" Reload .vimrc silently (removes autocommands errors)
+	let g:reload_vimrc = 1
+	silent! source $MYVIMRC
+	finish
 endif
 
 " Use before config
 if filereadable(expand("~/.vimrc.before"))
-  source ~/.vimrc.before
+	source ~/.vimrc.before
 endif
 
 
@@ -59,27 +59,27 @@ cmap w!! w !sudo tee % >/dev/null
 " `KVT' claims to be "xterm-color":
 if &term =~ 'xterm'
 
-  " `Gnome Terminal' fortunately sets $COLORTERM; it needs <BkSpc> and <Del>
-  " fixing, and it has a bug which causes spurious "c"s to appear, which can be
-  " fixed by unsetting t_RV:
-  if $COLORTERM == 'gnome-terminal'
-    execute 'set t_kb=' . nr2char(8)
-    " [Char 8 is <Ctrl>+H.]
-    fixdel
-    set t_RV=
+	" `Gnome Terminal' fortunately sets $COLORTERM; it needs <BkSpc> and <Del>
+	" fixing, and it has a bug which causes spurious "c"s to appear, which can be
+	" fixed by unsetting t_RV:
+	if $COLORTERM == 'gnome-terminal'
+		execute 'set t_kb=' . nr2char(8)
+		" [Char 8 is <Ctrl>+H.]
+		fixdel
+		set t_RV=
 
-  " `XTerm', `Konsole', and `KVT' all also need <BkSpc> and <Del> fixing;
-  " there's no easy way of distinguishing these terminals from other things
-  " that claim to be "xterm", but `RXVT' sets $COLORTERM to "rxvt" and these
-  " don't:
-  elseif $COLORTERM == ''
-    execute 'set t_kb=' . nr2char(8)
-    fixdel
+	" `XTerm', `Konsole', and `KVT' all also need <BkSpc> and <Del> fixing;
+	" there's no easy way of distinguishing these terminals from other things
+	" that claim to be "xterm", but `RXVT' sets $COLORTERM to "rxvt" and these
+	" don't:
+	elseif $COLORTERM == ''
+		execute 'set t_kb=' . nr2char(8)
+		fixdel
 
-  " The above won't work if an `XTerm' or `KVT' is started from within a `Gnome
-  " Terminal' or an `RXVT': the $COLORTERM setting will propagate; it's always
-  " OK with `Konsole' which explicitly sets $COLORTERM to "".
-  endif
+	" The above won't work if an `XTerm' or `KVT' is started from within a `Gnome
+	" Terminal' or an `RXVT': the $COLORTERM setting will propagate; it's always
+	" OK with `Konsole' which explicitly sets $COLORTERM to "".
+	endif
 endif
 
 
@@ -89,14 +89,14 @@ endif
 
 " Theme & color scheme
 if has('syntax') && (has("gui_running") || (&t_Co > 2))
-  colorscheme torte   " Theme
-  syntax on           " Syntax highlight
+	colorscheme torte   " Theme
+	syntax on           " Syntax highlight
 endif
 
 " Select font
 if has('gui_running') && !exists('g:loaded_vimrc')
-  "set guifont=Lucida_Console:h11
-  set guifont=Monospace\ 9
+	"set guifont=Lucida_Console:h11
+	set guifont=Monospace\ 9
 endif
 
 " Gui options
@@ -112,7 +112,7 @@ set showcmd           " Display partially-typed commands
 set mouse=a           " Enable mouse all the time
 set nomodeline        " Do not override this .vimrc
 if !exists('g:loaded_vimrc')
-  set nu              " Show line numbers
+	set nu              " Show line numbers
 endif
 set hidden            " Show hidden buffers & allow switching to modified buffer
 set switchbuf=useopen " Buffer switch use open windows instead of splitting/openning new window
@@ -137,10 +137,10 @@ execute 'set listchars+=tab:' . nr2char(187) . nr2char(183)
 
 " Jump to the last cursor position
 augroup vimrc_cursor_lastpos
-  autocmd! BufReadPost *
-    \ if line("'\"") > 0 && line ("'\"") <= line("$") |
-    \   exe "normal! g'\"" |
-    \ endif
+	autocmd! BufReadPost *
+		\ if line("'\"") > 0 && line ("'\"") <= line("$") |
+		\   exe "normal! g'\"" |
+		\ endif
 augroup END
 
 " Key maps
@@ -158,7 +158,7 @@ set shiftwidth=4      " Indents of 4
 set shiftround        " Indents are copied down lines
 set autoindent        " Auto-indent
 if !exists('g:loaded_vimrc')
-  set expandtab       " Expand tabs to spaces
+	set expandtab       " Expand tabs to spaces
 endif
 
 set comments-=s1:/*,mb:*,ex:*/    " Get rid of the default style of C comments
@@ -206,7 +206,7 @@ nnoremap <localleader>c  :set invlist<CR>
 
 " Use after config
 if filereadable(expand("~/.vimrc.after"))
-  source ~/.vimrc.after
+	source ~/.vimrc.after
 endif
 
 " Security

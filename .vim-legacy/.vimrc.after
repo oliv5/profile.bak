@@ -36,39 +36,39 @@ FnNoremap <A-A>   <C-x>
 
 " Look for the best root directory
 function! s:FindRootDir()
-  " Ctags/cscope files
-  for file in ['g:tags_db', 'g:cscope_db']
-    silent! let file=eval(file)
-    let file = findfile(file, ".;")
-    if (filereadable(file))
-      return fnamemodify(file, ':p:h')
-    endif
-  endfor
-  " SVN/GIT directory
-  for dir in ['.svn', '.git']
-    let _dir = finddir(dir, ".;", -1)
-    if (!empty(_dir))
-      return fnamemodify(_dir[-1], ':p:h:h')
-    endif
-  endfor
-  " No match
-  return ''    "'%:p:h:gs/ /\\ /'
+	" Ctags/cscope files
+	for file in ['g:tags_db', 'g:cscope_db']
+		silent! let file=eval(file)
+		let file = findfile(file, ".;")
+		if (filereadable(file))
+			return fnamemodify(file, ':p:h')
+		endif
+	endfor
+	" SVN/GIT directory
+	for dir in ['.svn', '.git']
+		let _dir = finddir(dir, ".;", -1)
+		if (!empty(_dir))
+			return fnamemodify(_dir[-1], ':p:h:h')
+		endif
+	endfor
+	" No match
+	return ''    "'%:p:h:gs/ /\\ /'
 endfunction
 
 " Directory autochange
 if 1
-  if 0
-    " Look for the best directory
-    autocmd! BufEnter * execute "lcd" s:FindRootDir()
-  elseif exists('+autochdir')
-    " Automated directory change
-    set autochdir
-  else
-    " Autocommand directory change
-    augroup vimrc_autochdir
-      autocmd! BufEnter * silent! lcd %:p:h:gs/ /\\ /
-    augroup END
-  endif
+	if 0
+		" Look for the best directory
+		autocmd! BufEnter * execute "lcd" s:FindRootDir()
+	elseif exists('+autochdir')
+		" Automated directory change
+		set autochdir
+	else
+		" Autocommand directory change
+		augroup vimrc_autochdir
+			autocmd! BufEnter * silent! lcd %:p:h:gs/ /\\ /
+		augroup END
+	endif
 endif
 
 " Change global directory to the current directory of the current buffer
@@ -79,7 +79,7 @@ nnoremap <silent><leader>cd   :execute "cd " . <SID>FindRootDir()<BAR>pwd<CR>
 
 " Change root directory once at startup
 if !exists('g:loaded_vimrc')
-  execute 'cd' s:FindRootDir()
+	execute 'cd' s:FindRootDir()
 endif
 
 
@@ -87,13 +87,13 @@ endif
 " } Hexadecimal display {
 " *******************************************************
 function! s:HexaToggle()
-  if !exists('g:vimrc_hexa')
-    exec ":%!xxd"
-    let g:vimrc_hexa=1
-  else
-    exec ":%!xxd -r"
-    unlet g:vimrc_hexa
-  endif
+	if !exists('g:vimrc_hexa')
+		exec ":%!xxd"
+		let g:vimrc_hexa=1
+	else
+		exec ":%!xxd -r"
+		unlet g:vimrc_hexa
+	endif
 endfunction
 
 " Key mapping
@@ -107,43 +107,43 @@ map <leader>H  :%!xxd -r<CR>
 " *******************************************************
 " Alignement function
 function! s:AlignStatement()
-  " Patterns needed to locate assignment operators...
-  let ASSIGN_OP   = '[-+*/%|&]\?=\@<!=[=~]\@!'
-  let ASSIGN_LINE = '^\(.\{-}\)\s*\(' . ASSIGN_OP . '\)'
+	" Patterns needed to locate assignment operators...
+	let ASSIGN_OP   = '[-+*/%|&]\?=\@<!=[=~]\@!'
+	let ASSIGN_LINE = '^\(.\{-}\)\s*\(' . ASSIGN_OP . '\)'
 
-  " Locate block of code to be considered (same indentation, no blanks)
-  let indent_pat = '^' . matchstr(getline('.'), '^\s*') . '\S'
-  let firstline  = search('^\%('. indent_pat . '\)\@!','bnW') + 1
-  let lastline   = search('^\%('. indent_pat . '\)\@!', 'nW') - 1
-  if lastline < 0
-    let lastline = line('$')
-  endif
+	" Locate block of code to be considered (same indentation, no blanks)
+	let indent_pat = '^' . matchstr(getline('.'), '^\s*') . '\S'
+	let firstline  = search('^\%('. indent_pat . '\)\@!','bnW') + 1
+	let lastline   = search('^\%('. indent_pat . '\)\@!', 'nW') - 1
+	if lastline < 0
+		let lastline = line('$')
+	endif
 
-  " Find the column at which the operators should be aligned...
-  let max_align_col = 0
-  let max_op_width  = 0
-  for linetext in getline(firstline, lastline)
-    " Does this line have an assignment in it?
-    let left_width = match(linetext, '\s*' . ASSIGN_OP)
+	" Find the column at which the operators should be aligned...
+	let max_align_col = 0
+	let max_op_width  = 0
+	for linetext in getline(firstline, lastline)
+		" Does this line have an assignment in it?
+		let left_width = match(linetext, '\s*' . ASSIGN_OP)
 
-    " If so, track the maximal assignment column and operator width...
-    if left_width >= 0
-      let max_align_col = max([max_align_col, left_width])
-      let op_width      = strlen(matchstr(linetext, ASSIGN_OP))
-      let max_op_width  = max([max_op_width, op_width+1])
-     endif
-  endfor
+		" If so, track the maximal assignment column and operator width...
+		if left_width >= 0
+			let max_align_col = max([max_align_col, left_width])
+			let op_width      = strlen(matchstr(linetext, ASSIGN_OP))
+			let max_op_width  = max([max_op_width, op_width+1])
+		 endif
+	endfor
 
-  " Code needed to reformat lines so as to align operators...
-  let FORMATTER = '\=printf("%-*s%*s", max_align_col, submatch(1),
-  \                                    max_op_width,  submatch(2))'
+	" Code needed to reformat lines so as to align operators...
+	let FORMATTER = '\=printf("%-*s%*s", max_align_col, submatch(1),
+	\                                    max_op_width,  submatch(2))'
 
-  " Reformat lines with operators aligned in the appropriate column...
-  for linenum in range(firstline, lastline)
-    let oldline = getline(linenum)
-    let newline = substitute(oldline, ASSIGN_LINE, FORMATTER, "")
-    call setline(linenum, newline)
-  endfor
+	" Reformat lines with operators aligned in the appropriate column...
+	for linenum in range(firstline, lastline)
+		let oldline = getline(linenum)
+		let newline = substitute(oldline, ASSIGN_LINE, FORMATTER, "")
+		call setline(linenum, newline)
+	endfor
 endfunction
 
 " User commands
@@ -206,40 +206,40 @@ vnoremap <C-l>      L
 
 " Returns "mixed" when indentation is mixed
 function! b:StatuslineWarning()
-  if !exists("b:statusline_tab_warning")
-    let tabs = search('^\t', 'nw')
-    let spaces = search('^ \+[^\*]', 'nw')
-    if tabs && spaces
-      let b:statusline_tab_warning =  '-mixed '.(&et ? tabs : spaces)
-    elseif (spaces && !&et) || (tabs && &et)
-      let b:statusline_tab_warning = '-error'
-    else
-      let b:statusline_tab_warning = ''
-    endif
-  endif
-  return b:statusline_tab_warning
+	if !exists("b:statusline_tab_warning")
+		let tabs = search('^\t', 'nw')
+		let spaces = search('^ \+[^\*]', 'nw')
+		if tabs && spaces
+			let b:statusline_tab_warning =  '-mixed '.(&et ? tabs : spaces)
+		elseif (spaces && !&et) || (tabs && &et)
+			let b:statusline_tab_warning = '-error'
+		else
+			let b:statusline_tab_warning = ''
+		endif
+	endif
+	return b:statusline_tab_warning
 endfunction
 
 " Set global status line content
 function! s:StatuslineGlobal()
-  if has("statusline") && &modifiable
-    if exists('g:loaded_buftabs') && g:loaded_buftabs==1
-      set statusline=\ %{buftabs#statusline(-45)}
-    else
-      set statusline=\ %<%F
-    endif
-    set statusline+=\ %=
-    set statusline+=\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r
-    set statusline+=\ [%{&expandtab==0?'tabs':'space'}%{b:StatuslineWarning()}]
-    set statusline+=\ %y\ %c,%l/%L\ %P
-  endif
+	if has("statusline") && &modifiable
+		if exists('g:loaded_buftabs') && g:loaded_buftabs==1
+			set statusline=\ %{buftabs#statusline(-45)}
+		else
+			set statusline=\ %<%F
+		endif
+		set statusline+=\ %=
+		set statusline+=\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r
+		set statusline+=\ [%{&expandtab==0?'tabs':'space'}%{b:StatuslineWarning()}]
+		set statusline+=\ %y\ %c,%l/%L\ %P
+	endif
 endfunction
 
 " Hide status line
 function! s:StatusLineHide()
-    hi StatusLine ctermbg=NONE ctermfg=white
-    hi clear StatusLine
-    set laststatus=0
+		hi StatusLine ctermbg=NONE ctermfg=white
+		hi clear StatusLine
+		set laststatus=0
 endfunction
 
 " Line options
@@ -256,7 +256,7 @@ noremap <silent><localleader>s  :call <SID>StatuslineGlobal()<CR>
 
 " Set the status line once
 if !exists("g:loaded_vimrc")
-  call s:StatuslineGlobal()
+	call s:StatuslineGlobal()
 endif
 
 
@@ -266,27 +266,27 @@ endif
 
 " Tab to space
 function! s:Tab2Space() range
-  let firstline = a:firstline == a:lastline ? 0 : a:firstline
-  let lastline = a:firstline == a:lastline ? line('$') : a:lastline
-  execute ':'.firstline.','.lastline.'s#^\t\+#\=repeat(" ", len(submatch(0))*' . &ts . ')'
+	let firstline = a:firstline == a:lastline ? 0 : a:firstline
+	let lastline = a:firstline == a:lastline ? line('$') : a:lastline
+	execute ':'.firstline.','.lastline.'s#^\t\+#\=repeat(" ", len(submatch(0))*' . &ts . ')'
 endfunction
 
 " Space to tab
 function! s:Space2Tab() range
-  let firstline = a:firstline == a:lastline ? 0 : a:firstline
-  let lastline = a:firstline == a:lastline ? line('$') : a:lastline
-  execute ':'.firstline.','.lastline.'s#^\( \{'.&ts.'\}\)\+#\=repeat("\t", len(submatch(0))/' . &ts . ')'
+	let firstline = a:firstline == a:lastline ? 0 : a:firstline
+	let lastline = a:firstline == a:lastline ? line('$') : a:lastline
+	execute ':'.firstline.','.lastline.'s#^\( \{'.&ts.'\}\)\+#\=repeat("\t", len(submatch(0))/' . &ts . ')'
 endfunction
 
 " Intelligent tab to spaces
 function! s:Tabfix() abort
-  if &expandtab==0
-    call s:Tab2Space()
-  else
-    call s:Space2Tab()
-  endif
-  update
-  YAIFAMagic
+	if &expandtab==0
+		call s:Tab2Space()
+	else
+		call s:Space2Tab()
+	endif
+	update
+	YAIFAMagic
 endfunction
 
 " User commands
@@ -304,35 +304,35 @@ noremap <leader><Tab> :call <SID>Tabfix()<CR>
 
 " Show unwanted extra white space and tab characters
 if !exists('s:spaceTabHighlight')
-  let s:spaceTabHighlight = 0
+	let s:spaceTabHighlight = 0
 endif
 
 " Highlight unwanted space and tabs
 function! s:SpaceTabHighlight(switchOn)
-  if a:switchOn == 1
-    " Set color
-    hi ExtraWhitespace ctermbg=darkgreen guibg=darkgreen
-    hi ExtraTabs ctermbg=darkgreen guibg=darkgreen
-    " Show trailing spaces and spaces before a tab
-    syn match ExtraWhitespace /\s\+$\| \+\ze\t/
-    if &expandtab==0
-      " Show spaces wrongly used for indenting
-      " Show tabs that are not at the start of a line
-      syn match ExtraTabs /^\t*\zs \+\|[^\t]\zs\t\+/
-    else
-      " Show tabs that are not at the start of a line
-      syn match ExtraTabs /[^\t]\zs\t\+/
-    endif
-  else
-    " Enable syntax back
-    syn on
-  endif
+	if a:switchOn == 1
+		" Set color
+		hi ExtraWhitespace ctermbg=darkgreen guibg=darkgreen
+		hi ExtraTabs ctermbg=darkgreen guibg=darkgreen
+		" Show trailing spaces and spaces before a tab
+		syn match ExtraWhitespace /\s\+$\| \+\ze\t/
+		if &expandtab==0
+			" Show spaces wrongly used for indenting
+			" Show tabs that are not at the start of a line
+			syn match ExtraTabs /^\t*\zs \+\|[^\t]\zs\t\+/
+		else
+			" Show tabs that are not at the start of a line
+			syn match ExtraTabs /[^\t]\zs\t\+/
+		endif
+	else
+		" Enable syntax back
+		syn on
+	endif
 endfunction
 
 " Highlight unwanted space and tabs
 function! s:SpaceTabToggle()
-  let s:spaceTabHighlight = !s:spaceTabHighlight
-  call <SID>SpaceTabHighlight(s:spaceTabHighlight)
+	let s:spaceTabHighlight = !s:spaceTabHighlight
+	call <SID>SpaceTabHighlight(s:spaceTabHighlight)
 endfunction
 
 " Key mapping
@@ -349,13 +349,13 @@ set nogdefault      " Assume /g flag (replace all) is NOT set
 
 " Highlight current selection
 function! s:SearchHighlight()
-  let old_reg=getreg('"')
-  let old_regtype=getregtype('"')
-  execute "normal! gvy"
-  let @/=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')
-  execute "normal! gV"
-  call setreg('"', old_reg, old_regtype)
-  set hls
+	let old_reg=getreg('"')
+	let old_regtype=getregtype('"')
+	execute "normal! gvy"
+	let @/=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')
+	execute "normal! gV"
+	call setreg('"', old_reg, old_regtype)
+	set hls
 endfunction
 
 " Toggle search highlighting
@@ -393,8 +393,8 @@ nnoremap µ          #
 " *******************************************************
 " Find files
 function! s:Find(files, ...)
-  let path  = escape(s:FindRootDir().'/'.a:files, '" *')
-  execute 'Wsys' '_find' path join(a:000)
+	let path  = escape(s:FindRootDir().'/'.a:files, '" *')
+	execute 'Wsys' '_find' path join(a:000)
 endfunction
 
 " Abbreviations
@@ -414,10 +414,10 @@ vnoremap <C-A-H>    "+y:Find<SPACE><C-r>=fnameescape("<C-r>"")<CR>
 " *******************************************************
 " Sed (replace in files)
 function! s:Sed(pattern, replace, files, ...)
-  let path  = '"'.escape(s:FindRootDir().'/'.a:files, ' ').'"'
-  let expr1 = '"'.escape(a:pattern, '" *').'"'
-  let expr2 = '"'.escape(a:replace, '" *').'"'
-  execute '!_fsed' join(a:000) expr1 expr2 path
+	let path  = '"'.escape(s:FindRootDir().'/'.a:files, ' ').'"'
+	let expr1 = '"'.escape(a:pattern, '" *').'"'
+	let expr2 = '"'.escape(a:replace, '" *').'"'
+	execute '!_fsed' join(a:000) expr1 expr2 path
 endfunction
 
 " User commands
@@ -450,17 +450,17 @@ cnoreabbrev gg Grep
 
 " Grep
 function! s:Grep(expr)
-  let path = escape(s:FindRootDir(), '" *')
-  let expr = escape('"'.a:expr.'"','" *')
-  execute 'Wcmd' 'grep!' expr path
-  silent! Wfirst
+	let path = escape(s:FindRootDir(), '" *')
+	let expr = escape('"'.a:expr.'"','" *')
+	execute 'Wcmd' 'grep!' expr path
+	silent! Wfirst
 endfunction
 
 " Count expression
 function! s:GrepCount(expr)
-  let path = escape(s:FindRootDir(), '" *')
-  let expr = escape('"'.a:expr.'"','" *')
-  execute '!ref' expr path '| wc -l'
+	let path = escape(s:FindRootDir(), '" *')
+	let expr = escape('"'.a:expr.'"','" *')
+	execute '!ref' expr path '| wc -l'
 endfunction
 
 " User commands
@@ -471,11 +471,11 @@ command! -nargs=1 -bar GrepCount call <SID>GrepCount(<q-args>)
 silent! unmap gx
 nnoremap <silent>g          :Wnext<CR>
 nnoremap <silent>G          :Wprev<CR>
-FnNoremap <C-g>              :Grep<SPACE>
-"FnNoremap <C-g>              :Grep<SPACE><C-r><C-w>
+FnNoremap <C-g>             :Grep<SPACE>
+"FnNoremap <C-g>             :Grep<SPACE><C-r><C-w>
 "vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
 vnoremap <C-g>              "+y:Grep<SPACE><C-r>=fnameescape("<C-r>"")<CR>
-FnNoremap <A-g>              :GrepCount<SPACE><C-r><C-w>
+FnNoremap <A-g>             :GrepCount<SPACE><C-r><C-w>
 
 
 " *******************************************************
@@ -490,17 +490,17 @@ FnNoremap <A-g>              :GrepCount<SPACE><C-r><C-w>
 
 " Fix make errors encoding
 function! QfRemoveAnsiColor()
-  let qflist = getqflist()
-  for i in qflist
-    "let i.text = iconv(i.text, "cp936", "utf-8")
-    let i.text = substitute(i.text, "\e[\d+;\d+m", "", "g")
-   endfor
-   call setqflist(qflist)
+	let qflist = getqflist()
+	for i in qflist
+		"let i.text = iconv(i.text, "cp936", "utf-8")
+		let i.text = substitute(i.text, "\e[\d+;\d+m", "", "g")
+	 endfor
+	 call setqflist(qflist)
 endfunction
 
 " Autocommands
 if has('quickfix')
-  autocmd! QuickfixCmdPost make call QfRemoveAnsiColor()
+	autocmd! QuickfixCmdPost make call QfRemoveAnsiColor()
 endif
 
 
@@ -535,10 +535,10 @@ vnoremap <A-Right>  <C-c><C-I>
 " *******************************************************
 " Options
 if exists('g:vimrc_useTabs')
-  silent! set switchbuf=usetab,newtab  " Buffer switch
+	silent! set switchbuf=usetab,newtab  " Buffer switch
 endif
 if exists('+gtl') " Tab name is the filename only
-  set gtl=%t
+	set gtl=%t
 endif
 
 " Open/close tab
@@ -546,27 +546,27 @@ FnNoremap <C-t>        :tabnew<CR>
 FnNoremap <C-t><C-t>   :tabe<SPACE>
 FnNoremap <C-t><C-c>   :tabclose<CR>
 if exists('g:vimrc_useTabs')
-  FnNoremap <C-F4>     :tabclose<CR>
-  FnNoremap <C-S-F4>   :tabdo tabclose<CR>
+	FnNoremap <C-F4>     :tabclose<CR>
+	FnNoremap <C-S-F4>   :tabdo tabclose<CR>
 endif
 
 " Prev/next tab
 if exists('g:vimrc_useTabs')
-  FnNoremap <C-Tab>    :tabn<CR>
-  FnNoremap <C-S-Tab>  :tabp<CR>
+	FnNoremap <C-Tab>    :tabn<CR>
+	FnNoremap <C-S-Tab>  :tabp<CR>
 else
-  FnNoremap <C-PgUp>   :tabn<CR>
-  FnNoremap <C-PgDown> :tabp<CR>
+	FnNoremap <C-PgUp>   :tabn<CR>
+	FnNoremap <C-PgDown> :tabp<CR>
 endif
 
 " Autocommands
 if exists('g:vimrc_useTabs')
-  if (&diff==0) " no in diff mode
-    " Open in tab allways
-    augroup vimrc_tab
-      autocmd! BufReadPost * tab ball
-    augroup END
-  endif
+	if (&diff==0) " no in diff mode
+		" Open in tab allways
+		augroup vimrc_tab
+			autocmd! BufReadPost * tab ball
+		augroup END
+	endif
 endif
 
 
@@ -598,39 +598,39 @@ FnNoremap <C-Right>   :wincmd l<CR>
 
 " Exit to normal when changing windows
 augroup exit_to_normal
-  autocmd! WinEnter * stopinsert
+	autocmd! WinEnter * stopinsert
 augroup END
 
 " Zoom In/out window
 function! s:ZoomWindow() abort
-  if exists('s:zw_restore')
-    execute s:zw_restore
-    unlet s:zw_restore
-    au! ZoomWindow
-  else
-    let s:zw_restore = winrestcmd()
-    "vert resize
-    wincmd _
-    wincmd |
-    augroup ZoomWindow
-      au! WinLeave * call s:ZoomWindow()
-    augroup END
-  endif
+	if exists('s:zw_restore')
+		execute s:zw_restore
+		unlet s:zw_restore
+		au! ZoomWindow
+	else
+		let s:zw_restore = winrestcmd()
+		"vert resize
+		wincmd _
+		wincmd |
+		augroup ZoomWindow
+			au! WinLeave * call s:ZoomWindow()
+		augroup END
+	endif
 endfunction
 
 " Toggles window max/equal
 function! s:WndToggleMax()
-  if exists('s:wndMaxFlag')
-    au! maxCurrWin
-    wincmd =
-    unlet s:wndMaxFlag
-  else
-    augroup maxCurrWin
-      au! WinEnter * wincmd _ | wincmd |
-    augroup END
-    do maxCurrWin WinEnter
-    let s:wndMaxFlag=1
-  endif
+	if exists('s:wndMaxFlag')
+		au! maxCurrWin
+		wincmd =
+		unlet s:wndMaxFlag
+	else
+		augroup maxCurrWin
+			au! WinEnter * wincmd _ | wincmd |
+		augroup END
+		do maxCurrWin WinEnter
+		let s:wndMaxFlag=1
+	endif
 endfunction
 
 " Key maps
@@ -643,73 +643,73 @@ nnoremap <localleader>x     :call <SID>ZoomWindow()<CR>
 " *******************************************************
 " Close buffer
 function! s:BufClose(...)
-  let idx=''
-  if a:0
-    let idx=a:1
-  endif
-  if exists(':Bdelete')
-    execute 'silent! Bdelete' idx
-  elseif exists(':MBEbd')
-    execute 'MBEbd' idx
-  else
-    bdelete idx
-  endif
+	let idx=''
+	if a:0
+		let idx=a:1
+	endif
+	if exists(':Bdelete')
+		execute 'silent! Bdelete' idx
+	elseif exists(':MBEbd')
+		execute 'MBEbd' idx
+	else
+		bdelete idx
+	endif
 endfunction
 
 " Close buffers with given extension
 function! s:BufCloseByExt(ext)
-  let last = bufnr('$')
-  let idx = 1
-  while idx <= last
-    if bufexists(idx) && bufname(idx) =~ a:ext.'$'
-      execute 'BufClose' idx
-    endif
-    let idx = idx + 1
-  endwhile
+	let last = bufnr('$')
+	let idx = 1
+	while idx <= last
+		if bufexists(idx) && bufname(idx) =~ a:ext.'$'
+			execute 'BufClose' idx
+		endif
+		let idx = idx + 1
+	endwhile
 endfunction
 
 " Cycle through each buffer, ask to close
 function! s:BufCloseAll(...)
-  let last = bufnr('$')
-  let idx = 1
-  while idx <= last
-    if bufexists(idx) && getbufvar(idx, '&modifiable')
-      if (a:0 && !a:1) || confirm("Close buffer '".bufname(idx)."'?", "&yes\n&no", 1)==1
-        execute 'BufClose' idx
-      endif
-    endif
-    let idx = idx + 1
-  endwhile
+	let last = bufnr('$')
+	let idx = 1
+	while idx <= last
+		if bufexists(idx) && getbufvar(idx, '&modifiable')
+			if (a:0 && !a:1) || confirm("Close buffer '".bufname(idx)."'?", "&yes\n&no", 1)==1
+				execute 'BufClose' idx
+			endif
+		endif
+		let idx = idx + 1
+	endwhile
 endfunction
 
 " Intelligent open related buffer
 let s:vimrc_bufopenext = ['h','cc','c']
 function! s:BufSmartOpen()
-  for file in ['<cfile>', '%']
-    " Skip non-existent files
-    if !filereadable(expand(file))
-      continue
-    endif
-    " Try few extensions
-    for ext in s:vimrc_bufopenext
-      " Search in the same directory
-      let open_file = expand(file.":r") . '.' . ext
-      if open_file!=?expand("%") && filereadable(open_file)
-        silent! execute ':e' fnameescape(open_file)
-        return
-      endif
-      " Search with tags and cscope
-      let open_file = expand(file.":t:r") . '.' . ext
-      if open_file!=?expand("%:t")
-        silent! execute "tag" open_file | return
-        if has('cscope')
-          set nocscopeverbose
-          execute "cs f f" open_file | return
-          set cscopeverbose
-        endif
-      endif
-    endfor
-  endfor
+	for file in ['<cfile>', '%']
+		" Skip non-existent files
+		if !filereadable(expand(file))
+			continue
+		endif
+		" Try few extensions
+		for ext in s:vimrc_bufopenext
+			" Search in the same directory
+			let open_file = expand(file.":r") . '.' . ext
+			if open_file!=?expand("%") && filereadable(open_file)
+				silent! execute ':e' fnameescape(open_file)
+				return
+			endif
+			" Search with tags and cscope
+			let open_file = expand(file.":t:r") . '.' . ext
+			if open_file!=?expand("%:t")
+				silent! execute "tag" open_file | return
+				if has('cscope')
+					set nocscopeverbose
+					execute "cs f f" open_file | return
+					set cscopeverbose
+				endif
+			endif
+		endfor
+	endfor
 endfunction
 
 " User commands
@@ -724,8 +724,8 @@ FnNoremap <C-b><C-b>  :BufSmartOpen<CR>
 FnNoremap <C-b><C-c>  :BufClose<CR>
 FnNoremap <C-q>       :BufClose<CR>
 if !exists("g:vimrc_useTabs")
-  FnNoremap <C-F4>    :BufClose<CR>
-  FnNoremap <C-S-F4>  :BufCloseAll 1<CR>
+	FnNoremap <C-F4>    :BufClose<CR>
+	FnNoremap <C-S-F4>  :BufCloseAll 1<CR>
 endif
 
 " Prev/next buffer
@@ -734,13 +734,13 @@ FnNoremap <C-b><C-p>  :bp<CR>
 FnNoremap <A-Down>    :bp<CR>
 FnNoremap <A-Up>      :bn<CR>
 if !exists("g:vimrc_useTabs")
-  FnNoremap <C-Tab>   :bn<CR>
-  FnNoremap <C-S-Tab> :bp<CR>
+	FnNoremap <C-Tab>   :bn<CR>
+	FnNoremap <C-S-Tab> :bp<CR>
 endif
 
 " Wide empty buffer at startup
 if bufname('%') == ''
-  set bufhidden=wipe
+	set bufhidden=wipe
 endif
 
 
@@ -750,38 +750,38 @@ endif
 
 " Marks variables
 if !exists("s:mark_next")
-  let s:mark_cur=0
-  let s:mark_next=0
-  let s:mark_max=1
+	let s:mark_cur=0
+	let s:mark_next=0
+	let s:mark_max=1
 endif
 
 " Set a mark
 function! s:MarkSet()
-  if &buftype!=#'quickfix' && !&pvw
-    exec printf("ma %c", 65 + s:mark_next)
-    let s:mark_cur=s:mark_next
-    let s:mark_next=(s:mark_next + 1) % 26
-    let s:mark_max=max([s:mark_next,s:mark_max])
-  else
-    execute "normal! \<ENTER>"
-  endif
+	if &buftype!=#'quickfix' && !&pvw
+		exec printf("ma %c", 65 + s:mark_next)
+		let s:mark_cur=s:mark_next
+		let s:mark_next=(s:mark_next + 1) % 26
+		let s:mark_max=max([s:mark_next,s:mark_max])
+	else
+		execute "normal! \<ENTER>"
+	endif
 endfunction
 
 " Goto next mark
 function! s:MarkNext()
-  let s:mark_cur=(s:mark_cur + 1) % s:mark_max
-  silent! exec printf("normal '%c", 65 + s:mark_cur)
+	let s:mark_cur=(s:mark_cur + 1) % s:mark_max
+	silent! exec printf("normal '%c", 65 + s:mark_cur)
 endfunction
 
 " Goto prev mark
 function! s:MarkPrev()
-  let s:mark_cur=(s:mark_cur + s:mark_max - 1) % s:mark_max
-  silent! exec printf("normal '%c", 65 + s:mark_cur)
+	let s:mark_cur=(s:mark_cur + s:mark_max - 1) % s:mark_max
+	silent! exec printf("normal '%c", 65 + s:mark_cur)
 endfunction
 
 " Reset all user marks
 function! s:MarkReset()
-  delmarks A-Z0-9
+	delmarks A-Z0-9
 endfunction
 
 " User commands
@@ -809,27 +809,27 @@ let g:wdefault = 'c'
 
 " Select the right action list based on the current context
 function! s:Wprefix()
-  return (&previewwindow ? 'p' : (&buftype==?"quickfix" ? s:Qtype() : g:wdefault))
+	return (&previewwindow ? 'p' : (&buftype==?"quickfix" ? s:Qtype() : g:wdefault))
 endfunction
 
 " Search next
 function! s:Wnext(prefix)
-  try | silent execute a:prefix . "next" | catch | silent! execute a:prefix . "first" | endtry
+	try | silent execute a:prefix . "next" | catch | silent! execute a:prefix . "first" | endtry
 endfunction
 
 " Search prev
 function! s:Wprev(prefix)
-  try | silent execute a:prefix . "prev" | catch | silent! execute a:prefix . "last" | endtry
+	try | silent execute a:prefix . "prev" | catch | silent! execute a:prefix . "last" | endtry
 endfunction
 
 " Execute system commands in quickfix or location window
 function! s:Wsys(prefix, ...)
-  execute a:prefix . "getexpr system('" . escape(join(a:000),"\"") . "')"
+	execute a:prefix . "getexpr system('" . escape(join(a:000),"\"") . "')"
 endfunction
 
 " Execute vim commands in quickfix or location window
 function! s:Wcmd(prefix, ...)
-  execute (a:prefix==?'c' ? "" : a:prefix) . join(a:000)
+	execute (a:prefix==?'c' ? "" : a:prefix) . join(a:000)
 endfunction
 
 " User commands
@@ -854,7 +854,7 @@ nnoremap <silent><S-SPACE>      :Wprev<CR>
 " *******************************************************
 " Find if the given buffer is quickfix or location
 function! s:Qtype(...)
-  return (&buftype==?"quickfix" ? (exists("w:quickfix_title") && w:quickfix_title[1]==?"l" ? "l" : "c") : "")
+	return (&buftype==?"quickfix" ? (exists("w:quickfix_title") && w:quickfix_title[1]==?"l" ? "l" : "c") : "")
 "  let bufselect = (a:0 ? a:1 : '%')
 "  if (!empty(bufselect) && getbufvar(bufselect,'&buftype')!=?"quickfix")
 "    return ''
@@ -932,7 +932,7 @@ nnoremap <silent>T          :execute (&previewwindow ? 'P' : 'T').'prev'<CR>
 
 " Change root directory once at startup
 if !exists('g:loaded_vimrc')
-  execute 'cd' s:FindRootDir()
+	execute 'cd' s:FindRootDir()
 endif
 
 
@@ -944,92 +944,92 @@ set previewheight=12          " Preview window height
 
 " Variables
 if !exists('s:p_lastw')
-  let s:p_lastw = ""
-  let s:p_highlight = 0
-  let s:p_center = 0
+	let s:p_lastw = ""
+	let s:p_highlight = 0
+	let s:p_center = 0
 endif
 
 " Open preview window
 function! s:PreviewOpenWnd()
-  silent! execute "bot pedit!"
-  wincmd P
-  if &previewwindow
-    set nu
-    "wincmd J
-    wincmd p
-  endif
-  let s:p_lastw = ""
-  augroup PreviewWnd
-    au! CursorHold * nested call s:PreviewShowTag()
-  augroup END
+	silent! execute "bot pedit!"
+	wincmd P
+	if &previewwindow
+		set nu
+		"wincmd J
+		wincmd p
+	endif
+	let s:p_lastw = ""
+	augroup PreviewWnd
+		au! CursorHold * nested call s:PreviewShowTag()
+	augroup END
 endfunction
 
 " Close preview window
 function! s:PreviewCloseWnd()
-  augroup PreviewWnd
-    au!
-  augroup END
-  pclose
-  unlet s:p_lastw
+	augroup PreviewWnd
+		au!
+	augroup END
+	pclose
+	unlet s:p_lastw
 endfunction
 
 " Toggle preview window
 function! s:PreviewToggleWnd()
-  silent! wincmd P
-  if &previewwindow
-    wincmd p
-    call s:PreviewCloseWnd()
-  else
-    call s:PreviewOpenWnd()
-  endif
+	silent! wincmd P
+	if &previewwindow
+		wincmd p
+		call s:PreviewCloseWnd()
+	else
+		call s:PreviewOpenWnd()
+	endif
 endfunction
 
 function! s:PreviewShowTag()
-  if &previewwindow             " don't do this in the preview window
-    return
-  endif
-  let w = expand("<cword>")     " get the word under cursor
-  if w == s:p_lastw             " Same word, skip all this
-    return
-  endif
-  let s:p_lastw = w
-  if w =~ '\a'                  " if the word contains a letter
-    " Try displaying a matching tag for the word under the cursor
-    try
-      exec "silent! ptag " . w
-      if s:p_highlight
-        call s:PreviewHighlightTag(w)
-      endif
-      if s:p_center
-        call s:PreviewCenterTag()
-      endif
-    endtry
-  endif
+	if &previewwindow             " don't do this in the preview window
+		return
+	endif
+	let w = expand("<cword>")     " get the word under cursor
+	if w == s:p_lastw             " Same word, skip all this
+		return
+	endif
+	let s:p_lastw = w
+	if w =~ '\a'                  " if the word contains a letter
+		" Try displaying a matching tag for the word under the cursor
+		try
+			exec "silent! ptag " . w
+			if s:p_highlight
+				call s:PreviewHighlightTag(w)
+			endif
+			if s:p_center
+				call s:PreviewCenterTag()
+			endif
+		endtry
+	endif
 endfunction
 
 function! s:PreviewCenterTag()
-  silent! wincmd P            " jump to preview window
-  if &previewwindow           " if we really get there...
-    normal! zz                " Center
-    wincmd p                  " back to old window
-  endif
+	silent! wincmd P            " jump to preview window
+	if &previewwindow           " if we really get there...
+		normal! zz              " Center
+		wincmd p                " back to old window
+	endif
 endfunction
 
 function! s:PreviewHighlightTag(pattern)
-  silent! wincmd P            " jump to preview window
-  if &previewwindow           " if we really get there...
-    match none                " delete existing highlight
-    if has("folding")
-      silent! .foldopen        " don't want a closed fold
-    endif
-    call search("$", "b")      " to end of previous line
-    let w = substitute(a:pattern, '\\', '\\\\', "")
-    call search('\<\V' . w . '\>') " position cursor on match
-    " Add a match highlight to the word at this position
-    hi previewWord term=bold ctermbg=blue guibg=blue
-    exe 'match previewWord "\%' . line(".") . 'l\%' . col(".") . 'c\k*"'
-    wincmd p                  " back to old window
-  endif
+	silent! wincmd P            " jump to preview window
+	if &previewwindow           " if we really get there...
+		match none              " delete existing highlight
+		if has("folding")
+			silent! .foldopen   " don't want a closed fold
+		endif
+		call search("$", "b")   " to end of previous line
+		let w = substitute(a:pattern, '\\', '\\\\', "")
+		call search('\<\V' . w . '\>') " position cursor on match
+		" Add a match highlight to the word at this position
+		hi previewWord term=bold ctermbg=blue guibg=blue
+		exe 'match previewWord "\%' . line(".") . 'l\%' . col(".") . 'c\k*"'
+		wincmd p                " back to old window
+	endif
 endfunction
 
 " User commands
