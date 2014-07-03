@@ -15,6 +15,12 @@ export PATH="${PATH//.:/}"
 # Pagers
 [ -z "$PAGER" ] && export PAGER="less -s"
 
+# History
+export HISTSIZE=5000
+export HISTFILESIZE=5000
+# Avoid duplicates in history 
+export HISTIGNORE='&:[ ]*'
+
 # Alias ls
 alias l='ls -CF'
 alias la='ls -A'
