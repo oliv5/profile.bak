@@ -33,6 +33,9 @@ endif
 if filereadable(expand("~/.vimrc.before"))
 	source ~/.vimrc.before
 endif
+if filereadable(expand("~/.vimrc.before.local"))
+	source ~/.vimrc.before.local
+endif
 
 
 " *******************************************************
@@ -217,6 +220,9 @@ nnoremap <localleader>c  :set invlist<CR>
 " Use after config
 if filereadable(expand("~/.vimrc.after"))
 	source ~/.vimrc.after
+endif
+if filereadable(expand("~/.vimrc.after.local"))
+	source ~/.vimrc.after.local
 endif
 
 " Security
