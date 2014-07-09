@@ -1,45 +1,57 @@
 #!/bin/bash
 FIND_EXCLUDE="-not -path *.svn* -and -not -path *.git*"
+GREP_EXCLUDE="--exclude-dir=.svn --exclude-dir=.git"
+SED_EXCLUDE="$FIND_EXCLUDE -not -type l -and -not -path '*obj*'"
 
 # Find files functions
-function _find() {
+function _ffind() {
   trap "set +f; trap SIGINT" SIGINT
   set -f
   find -L "$(dirname ${1:-.})" \( -${NAME:-name} $(sed -e 's/;/ -o -'${NAME:-name}' /g' <<< $(basename ${1:-*})) \) -and $FIND_EXCLUDE "${@:2}"
   set +f
   trap SIGINT
 }
-function ff()  { _find "$@" ;}
-function fff() { _find "${@:-*}" -type f ;}
-function ffd() { _find "${@:-*}" -type d ;}
+function ff()  { _ffind "$@" ;}
+function fff() { _ffind "${@:-*}" -type f ;}
+function ffd() { _ffind "${@:-*}" -type d ;}
 alias iff='NAME=iname ff'
 alias ifff='NAME=iname fff'
 alias iffd='NAME=iname ffd'
 
 # Search pattern functions
 function _fgrep() {
-  [ "$1" != "" ] && _find "${!#}" -type f -print0 | xargs -0 grep -n --color "${@:1:($#-1)}"
+  [ "$1" != "" ] && _ffind "${!#}" -type f -print0 | xargs -0 $(which grep) -nH --color "${@:1:($#-1)}"
 }
-alias gg='_fgrep'
+function gg()  { _fgrep "$@" ;}
+function ggf() { _fgrep "$@" | cut -d : -f 1 | uniq ;}
 alias igg='NAME=iname gg'
+alias iggf='NAME=iname ggf'
+
+function _fgrep2() {
+    $(which grep) --color=auto -rnH $GREP_EXCLUDE "$@"
+}
+function gg2()  { _fgrep2 "$@" ;}
+function ggf2() { _fgrep2 "$@" | cut -d : -f 1 | uniq ;}
+alias igg2='gg2 -i'
+alias iggf2='ggf2 -i'
 
 # Safe search & replace
 function _fsed()
 {
-  EXCLUDE="$FIND_EXCLUDE -not -type l -and -not -path '*obj*'"
   SEDOPT="${@:1:$(($#-3))}"
   IN="${@: -3:1}"; IN="${IN//\//\/}"
   OUT="${@: -2:1}";  OUT="${OUT//\//\/}"
   echo "Replace '$IN' by '$OUT' in files '${!#}' (opts $SEDOPT) ?"
   echo "Press enter or Ctrl-C" ; read
   # Sed in place with no output
-  #_find "${!#}" -type f $EXCLUDE -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
+  #_ffind "${!#}" -type f $SED_EXCLUDE -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
   # Sed in place with display
-  #_find "${!#}" -type f $EXCLUDE -execdir sed -i $SEDOPT -e "/$IN/{w /dev/stderr" -e "}" -e "s/$IN/$OUT/g" {} \;
+  #_ffind "${!#}" -type f $SED_EXCLUDE -execdir sed -i $SEDOPT -e "/$IN/{w /dev/stderr" -e "}" -e "s/$IN/$OUT/g" {} \;
   # Sed in place with backup
-  _find "${!#}" -type f $EXCLUDE -execdir sed -i_$(date +%Y%m%d-%H%M%S).bak $SEDOPT "s/$IN/$OUT/g" {} \;
+  _ffind "${!#}" -type f $SED_EXCLUDE -execdir sed -i _$(date +%Y%m%d-%H%M%S).bak $SEDOPT "s/$IN/$OUT/g" {} \;
   # Sed with confirmation about all files
-  #_find "${!#}" -type f $EXCLUDE -exec echo "Processing file {} ?" \; -exec bash -c read \; -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
+  #_ffind "${!#}" -type f $SED_EXCLUDE -exec echo "Processing file {} ?" \; -exec bash -c read \; -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
 }
-alias hh='_fsed'
+function hh()  { _fsed "$@" ;}
 alias ihh='NAME=iname hh'
+

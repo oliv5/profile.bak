@@ -1,7 +1,10 @@
 #!/bin/sh
 
 # Call local profile scripts
-if [ -f ~/.profile.local ]; then
+if [ -x ~/.localrc ]; then
+  source ~/.localrc
+fi
+if [ -x ~/.profile.local ]; then
   source ~/.profile.local
 fi
 for i in $HOME/.profile.local.d/*.sh ; do
@@ -11,5 +14,8 @@ for i in $HOME/.profile.local.d/*.sh ; do
 done
 
 # Export user functions
-#fct-export
-export -f die
+fct-export-all
+#export -f die
+#export -f $(fct-ls | grep svn-)
+#export -f $(fct-ls | grep git-)
+

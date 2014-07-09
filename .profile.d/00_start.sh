@@ -7,11 +7,6 @@ export ENV_PROFILE_D=$ENV_CNT
 #alias
 alias end='return 0 2>/dev/null || exit 0'
 
-# Call env external profile script
-if [ -x ~/.localsrc ]; then
-  source ~/.localsrc
-fi
-
 # Add to path function
 function path-add() {
   for DIR in "$@"; do
@@ -31,7 +26,7 @@ function print-callstack() {
 }
 
 # Set error handler
-function map-errorhandler() {
+function trap-map() {
   trap 'die "Error handler:" -1 ${LINENO}' ${@:-1 15} ERR
 }
 
@@ -41,11 +36,14 @@ function die () {
   [[ $- == *i* ]] && return ${2:--1} || exit ${2:--1}
 }
 
+# List user functions
+function fct-ls() {
+  declare -F | cut -d" " -f3 | egrep -v "^_"
+}
+
 # Export user functions from script
 function fct-export() {
-  for SCRIPT in $@; do
-    sed '/^[\s\t]*func/!d ; s/.*\s\(.\+\)(.*/\1/' "$1" | xargs sh -c "export -f" >/dev/null
-  done
+  export -f "$@"
 }
 
 # Export all user functions
@@ -53,13 +51,8 @@ function fct-export-all() {
   export -f $(fct-ls)
 }
 
-# List user functions
-function fct-ls() {
-  declare -F | cut -d" " -f3 | egrep -v "^_"
-}
-
 # Get script directory
-function get-pwd() {
+function pwd-get() {
   echo $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 }
 

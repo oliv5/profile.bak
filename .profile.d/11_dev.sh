@@ -4,7 +4,7 @@
 # Remove the ":line" pattern from compiler & grep
 alias ff='_ff'
 function _ff() {
-  _find "$(sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1/g' <<< $1)" "${@:2}"
+  _ffind "$(sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1/g' <<< $1)" "${@:2}"
 }
 
 # Various dev search function helpers

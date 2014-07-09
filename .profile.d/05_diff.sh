@@ -1,12 +1,12 @@
 #!/bin/sh
-GREP_EXCLUDE="\.git\|\.svn"
+DIFF_EXCLUDE="\.git\|\.svn"
 
 #function meld() {
 #  $(which meld) "$@" &
 #}
 
 function ddiff() {
-  diff -rq "$@" | grep -ve $GREP_EXCLUDE
+  diff -rq "$@" | grep -ve $DIFF_EXCLUDE
 }
 
 function cdiff() {
