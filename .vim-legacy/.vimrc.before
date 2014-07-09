@@ -49,6 +49,7 @@ if $VIM_USETABS != ""
 endif
 
 " Disable the following plugins
+let g:loaded_bbye = 1
 let g:loaded_project = 1
 let g:loaded_taglist = 1
 "let g:loaded_tagbar = 1
@@ -57,12 +58,12 @@ let g:loaded_nerd_tree = 1
 let g:loaded_trinity = 1
 let g:ccvext_version = 1
 let g:loaded_yankring = 1
-"let g:loaded_cctree = 1
+let g:loaded_cctree = 1
 let g:command_t_loaded = 1
 "let g:loaded_minibufexplorer = 1
 "let g:loaded_yaifa = 1
 "let g:loaded_ctrlp = 1
-let g:loaded_buftabs = 2 " 2 = skip loading
+"let g:loaded_buftabs = 1
 let g:loaded_easytags = 1
 let g:c_complete_loaded = 1
 let g:syntax_complete_loaded = 1
@@ -97,20 +98,6 @@ set winfixheight
 " Keymapping
 FnNoremap <silent> <C-e>   :Explore<CR>
 FnNoremap <silent> <C-A-e> :Vexplore<CR>
-
-" Open netrw window
-function! s:NetrwOpenWnd()
-	Vexplore!
-	let s:netrw_buf_num = bufnr("%")
-endfunction
-
-" Close netrw window
-function! s:NetrwCloseWnd()
-	if exists("s:netrw_buf_num")
-		exec bufwinnr(s:netrw_buf_num) "wincmd c"
-		unlet s:netrw_buf_num
-	endif
-endfunction
 
 
 " *******************************************************
@@ -469,8 +456,9 @@ if !exists('g:loaded_ctrlp')
 	\ 'file': '\v\.(exe|so|dll|o)$'
 	\ }
 	" Key mapping
+	FnNoremap <C-l>     :CtrlPTag<CR>
 	FnNoremap <C-o>     :CtrlPMRU<CR>
-	FnNoremap <C-p>     :exec 'CtrlP'.<SID>FindRootDir()<CR>
+	FnNoremap <C-p>     :exec 'CtrlP'.g:FindRootDir()<CR>
 endif
 
 

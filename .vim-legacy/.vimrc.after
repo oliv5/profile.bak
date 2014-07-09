@@ -35,7 +35,7 @@ FnNoremap <A-A>   <C-x>
 " *******************************************************
 
 " Look for the best root directory
-function! s:FindRootDir()
+function! g:FindRootDir()
 	" Ctags/cscope files
 	for file in ['g:tags_db', 'g:cscope_db']
 		silent! let file=eval(file)
@@ -59,7 +59,7 @@ endfunction
 if 1
 	if 0
 		" Look for the best directory
-		autocmd! BufEnter * execute "lcd" s:FindRootDir()
+		autocmd! BufEnter * execute "lcd" g:FindRootDir()
 	elseif exists('+autochdir')
 		" Automated directory change
 		set autochdir
@@ -75,11 +75,11 @@ endif
 nnoremap <silent><leader>c    :cd %:p:h<BAR>pwd<CR>
 
 " Change global directory to the current directory of the current buffer
-nnoremap <silent><leader>cd   :execute "cd " . <SID>FindRootDir()<BAR>pwd<CR>
+nnoremap <silent><leader>cd   :execute "cd " . g:FindRootDir()<BAR>pwd<CR>
 
 " Change root directory once at startup
 if !exists('g:loaded_vimrc')
-	execute 'cd' s:FindRootDir()
+	execute 'cd' g:FindRootDir()
 endif
 
 
@@ -225,11 +225,12 @@ if !exists('g:loaded_airline')
 	" Set global status line content
 	function! s:StatuslineGlobal()
 		if has("statusline") && &modifiable
-			if exists('g:loaded_buftabs') && g:loaded_buftabs==1
-				set statusline=\ %{buftabs#statusline(-45)}
-			else
-				set statusline=\ %<%F
-			endif
+			"if exists('g:loaded_buftabs')
+			"	set statusline=\ %{buftabs#statusline(-45)}
+			"else
+			"	set statusline=\ %<%F
+			"endif
+			set statusline=\ %{exists('g:loaded_buftabs')?buftabs#statusline(-45):'%<%F'}
 			set statusline+=\ %=
 			set statusline+=\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r
 			set statusline+=\ [%{&expandtab==0?'tabs':'space'}%{b:StatuslineWarning()}]
@@ -260,6 +261,7 @@ if !exists('g:loaded_airline')
 	if !exists("g:loaded_vimrc")
 		call s:StatuslineGlobal()
 	endif
+
 endif
 
 
@@ -392,24 +394,24 @@ nnoremap µ          #
 
 
 " *******************************************************
-" } Find search {
+" } Find files {
 " *******************************************************
 " Find files
-function! s:Find(files, ...)
-	let path  = escape(s:FindRootDir().'/'.a:files, '" *')
-	execute 'Wsys' '_find' path join(a:000)
+function! s:FindFiles(files, ...)
+	let path  = escape(g:FindRootDir().'/'.a:files, '" *')
+	execute 'Wsys' '_ffind' path join(a:000)
 endfunction
 
 " Abbreviations
-cnoreabbrev ff Find
+cnoreabbrev ff FindFiles
 
 " User commands
-command! -nargs=+ -bar Find call <SID>Find(<f-args>)
+command! -nargs=+ -bar FindFiles call <SID>Find(<f-args>)
 
 " Keymapping
-FnNoremap <C-A-H>   :Find<SPACE>
-"vnoremap  <C-A-H>   "+y:Find <C-R>"
-vnoremap <C-A-H>    "+y:Find<SPACE><C-r>=fnameescape("<C-r>"")<CR>
+FnNoremap <C-A-H>   :FindFiles<SPACE>
+"vnoremap  <C-A-H>   "+y:FindFiles <C-R>"
+vnoremap <C-A-H>    "+y:FindFiles<SPACE><C-r>=fnameescape("<C-r>"")<CR>
 
 
 " *******************************************************
@@ -417,7 +419,7 @@ vnoremap <C-A-H>    "+y:Find<SPACE><C-r>=fnameescape("<C-r>"")<CR>
 " *******************************************************
 " Sed (replace in files)
 function! s:Sed(pattern, replace, files, ...)
-	let path  = '"'.escape(s:FindRootDir().'/'.a:files, ' ').'"'
+	let path  = '"'.escape(g:FindRootDir().'/'.a:files, ' ').'"'
 	let expr1 = '"'.escape(a:pattern, '" *').'"'
 	let expr2 = '"'.escape(a:replace, '" *').'"'
 	execute '!_fsed' join(a:000) expr1 expr2 path
@@ -450,35 +452,46 @@ set grepprg=iref\ $*
 
 " Abbreviations
 cnoreabbrev gg Grep
+cnoreabbrev grep Grep
 
 " Grep
-function! s:Grep(expr)
-	let path = escape(s:FindRootDir(), '" *')
+function! s:Grep(path, expr)
+	let path = escape(a:path, '" *')
 	let expr = escape('"'.a:expr.'"','" *')
 	execute 'Wcmd' 'grep!' expr path
 	silent! Wfirst
 endfunction
 
 " Count expression
-function! s:GrepCount(expr)
-	let path = escape(s:FindRootDir(), '" *')
+function! s:GrepCount(path, expr)
+	let path = escape(a:path, '" *')
 	let expr = escape('"'.a:expr.'"','" *')
 	execute '!ref' expr path '| wc -l'
 endfunction
 
 " User commands
-command! -nargs=1 -bar Grep      call <SID>Grep(<q-args>)
-command! -nargs=1 -bar GrepCount call <SID>GrepCount(<q-args>)
+command! -nargs=1 -bar RGrep      call <SID>Grep(g:FindRootDir(), <q-args>)
+command! -nargs=1 -bar RGrepCount call <SID>GrepCount(g:FindRootDir(), <q-args>)
+command! -nargs=1 -bar Grep      call <SID>Grep(expand('%'), <q-args>)
+command! -nargs=1 -bar GrepCount call <SID>GrepCount(expand('%'), <q-args>)
 
 " Key mappings
 silent! unmap gx
 nnoremap <silent>g          :Wnext<CR>
 nnoremap <silent>G          :Wprev<CR>
+" RGrep key mappings
 FnNoremap <C-g>             :Grep<SPACE>
-"FnNoremap <C-g>             :Grep<SPACE><C-r><C-w>
-"vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
 vnoremap <C-g>              "+y:Grep<SPACE><C-r>=fnameescape("<C-r>"")<CR>
 FnNoremap <A-g>             :GrepCount<SPACE><C-r><C-w>
+" Grep key mappings
+FnNoremap <C-g><C-g>        :RGrep<SPACE>
+vnoremap <C-g><C-g>         "+y:RGrep<SPACE><C-r>=fnameescape("<C-r>"")<CR>
+FnNoremap <A-g><A-g>        :RGrepCount<SPACE><C-r><C-w>
+
+" Hints to copy paste inside the key map
+"FnNoremap <C-g>             :Grep<SPACE><C-r><C-w>
+"vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
+"vnoremap <C-g>              "+y:Grep<SPACE><C-r>=fnameescape("<C-r>"")<CR>
 
 
 " *******************************************************
@@ -497,8 +510,8 @@ function! QfRemoveAnsiColor()
 	for i in qflist
 		"let i.text = iconv(i.text, "cp936", "utf-8")
 		let i.text = substitute(i.text, "\e[\d+;\d+m", "", "g")
-	 endfor
-	 call setqflist(qflist)
+	endfor
+	call setqflist(qflist)
 endfunction
 
 " Autocommands
@@ -935,7 +948,7 @@ nnoremap <silent>T          :execute (&previewwindow ? 'P' : 'T').'prev'<CR>
 
 " Change root directory once at startup
 if !exists('g:loaded_vimrc')
-	execute 'cd' s:FindRootDir()
+	execute 'cd' g:FindRootDir()
 endif
 
 
