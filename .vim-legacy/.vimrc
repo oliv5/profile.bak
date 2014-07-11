@@ -29,6 +29,10 @@ if !has("user_commands") && !exists("g:reload_vimrc")
 	finish
 endif
 
+" Leader key mappings
+let mapleader = ";"         " Leader key
+let maplocalleader = ","    " Local leader key
+
 " Use before config
 if filereadable(expand("~/.vimrc.before"))
 	source ~/.vimrc.before
@@ -60,9 +64,6 @@ set noerrorbells            " No bells (!!)
 set novisualbell            " No visual bells too
 set updatetime=1000         " Swap file write / event CursorHold delay (in ms)
 set shell=/bin/bash\ --rcfile\ ~/.bashrc\ -i    " Set shell, load user profile
-
-" Force write with sudo after opening the file
-cmap w!! w !sudo tee % >/dev/null
 
 
 " *******************************************************
@@ -158,6 +159,9 @@ augroup END
 
 " Key maps
 map <localleader>n  :set nu!<CR>
+
+" Force write with sudo after opening the file
+cmap w!! w !sudo tee % >/dev/null
 
 
 " *******************************************************

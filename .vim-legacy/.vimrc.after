@@ -367,13 +367,13 @@ endfunction
 nnoremap <localleader><F3>  :set invhls hls?<CR>
 nnoremap <localleader>f     :set invhls hls?<CR>
 
-" Search & replace
-FnNoremap <C-F>     /
-"FnNoremap <C-F>     yiw:/<C-r>"
-"FnNoremap <C-F>     :/<C-r><C-w>
-"vnoremap <C-F>      "+y:/<C-r>"
-vnoremap <C-F>      "+y:/<C-r>=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR>
-cnoremap <C-F>      <NOP> |" Disable command line window (use q: q/ q? instead)
+" Search
+FnNoremap <C-f>     /
+"FnNoremap <C-f>     yiw:/<C-r>"
+"FnNoremap <C-f>     :/<C-r><C-w>
+"vnoremap <C-f>      "+y:/<C-r>"
+vnoremap <C-f>      "+y:/<C-r>=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR>
+cnoremap <C-f>      <NOP> |" Disable command line window (use q: q/ q? instead)
 
 " F3 for search (n and N)
 FnNoremap <F3>      n
@@ -406,12 +406,12 @@ endfunction
 cnoreabbrev ff FindFiles
 
 " User commands
-command! -nargs=+ -bar FindFiles call <SID>Find(<f-args>)
+command! -nargs=+ -bar FindFiles call <SID>FindFiles(<f-args>)
 
 " Keymapping
-FnNoremap <C-A-H>   :FindFiles<SPACE>
-"vnoremap  <C-A-H>   "+y:FindFiles <C-R>"
-vnoremap <C-A-H>    "+y:FindFiles<SPACE><C-r>=fnameescape("<C-r>"")<CR>
+FnNoremap <C-f><C-f>   :FindFiles<SPACE>
+"vnoremap <C-f><C-f>    "+y:FindFiles <C-R>"
+vnoremap <C-f><C-f>    "+y:FindFiles<SPACE><C-r>=fnameescape("<C-r>"")<CR>
 
 
 " *******************************************************
@@ -429,17 +429,17 @@ endfunction
 command! -nargs=+ -bar Sed  call <SID>Sed(<f-args>)
 
 " Sed keymapping
-FnNoremap <C-A-H>   :Sed<SPACE>
-"vnoremap  <C-A-H>   "+y:Sed <C-R>"
-vnoremap  <C-A-H>   "+y:Sed <C-r>=fnameescape("<C-r>"")<CR>
+FnNoremap <C-h><C-h>   :Sed<SPACE>
+"vnoremap <C-h><C-h>    "+y:Sed <C-R>"
+vnoremap <C-h><C-h>    "+y:Sed <C-r>=fnameescape("<C-r>"")<CR>
 
 " Replace keymapping
-FnNoremap <C-H>     :%s///cg<left><left><left><left>
-"FnNoremap <C-A-H>   yiw:%s/<C-R>"/<C-R>"/cg<left><left><left>
-"vnoremap  <C-H>     "+y:%s/<C-R>"/<C-R>"/cg<left><left><left>
-"vnoremap  <C-A-H>   "+y:%s/<C-R>"//cg<left><left>
-"vnoremap <C-H>      "+y:%s/<C-r>=fnameescape("<C-r>"")<CR>/<C-r>=fnameescape("<C-r>"")<CR>/cg<left><left><left>
-vnoremap <C-H>      "+y:%s/<C-r>=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR>/<C-r>=escape(@", '/\.*$^~[&')<CR>/cg<left><left><left>
+FnNoremap <C-h>     :%s///cg<left><left><left><left>
+"FnNoremap <C-A-h>    yiw:%s/<C-R>"/<C-R>"/cg<left><left><left>
+"vnoremap  <C-h>      "+y:%s/<C-R>"/<C-R>"/cg<left><left><left>
+"vnoremap  <C-A-h>    "+y:%s/<C-R>"//cg<left><left>
+"vnoremap <C-h>       "+y:%s/<C-r>=fnameescape("<C-r>"")<CR>/<C-r>=fnameescape("<C-r>"")<CR>/cg<left><left><left>
+vnoremap <C-h>      "+y:%s/<C-r>=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR>/<C-r>=escape(@", '/\.*$^~[&')<CR>/cg<left><left><left>
 
 
 " *******************************************************
@@ -811,8 +811,8 @@ FnNoremap <silent><F2>    :Mnext<CR>
 FnNoremap <silent><S-F2>  :Mprev<CR>
 FnNoremap <silent><C-F2>  :Mset<CR>
 FnNoremap <silent><A-F2>  :Mreset<CR>
-nmap <silent>m            :Mnext<CR>
-nmap <silent>M            :Mprev<CR>
+nmap <silent>m            :Mprev<CR>
+nmap <silent>M            :Mnext<CR>
 nmap <silent><C-m>        :Mset<CR>
 nmap <silent><A-m>        :Mreset<CR>
 
