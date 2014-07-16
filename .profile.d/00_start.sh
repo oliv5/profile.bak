@@ -46,6 +46,11 @@ function fct-export() {
   export -f "$@"
 }
 
+# Remove function
+function fct-unset() {
+  unset -f "$@"
+}
+
 # Export all user functions
 function fct-export-all() {
   export -f $(fct-ls)
@@ -56,7 +61,19 @@ function pwd-get() {
   echo $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 }
 
-# Function exist test
+# Cmd exist test
 function cmd-exists() {
   command -v ${1} >/dev/null
 }
+
+# Cmd unset 
+function cmd-unset() {
+  unalias $1 2>/dev/null
+  unset -f $1 2>/dev/null
+}
+
+# Remove some aliases/fct shortcuts
+cmd-unset which
+cmd-unset grep
+cmd-unset find
+
