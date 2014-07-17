@@ -228,9 +228,9 @@ if !exists('g:loaded_airline')
 			"if exists('g:loaded_buftabs')
 			"	set statusline=\ %{buftabs#statusline(-45)}
 			"else
-			"	set statusline=\ %<%F
+			"	set statusline=[%n]\ %<%F
 			"endif
-			set statusline=\ %{exists('g:loaded_buftabs')?buftabs#statusline(-45):'%<%F'}
+			set statusline=\ %{exists('g:loaded_buftabs')?buftabs#statusline(-45):'[%n]\ %<%F'}
 			set statusline+=\ %=
 			set statusline+=\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r
 			set statusline+=\ [%{&expandtab==0?'tabs':'space'}%{b:StatuslineWarning()}]

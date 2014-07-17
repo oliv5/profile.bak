@@ -295,6 +295,7 @@ function! Buftabs_show(deleted_buf)
 		call s:Pecho(s:list)
 	end
 
+	return s:list
 endfunction
 
 
@@ -319,6 +320,7 @@ endfunction
 " buffers
 "
 augroup buftabs
+	autocmd!
 	autocmd! VimEnter,BufNew,BufEnter,BufWritePost * call Buftabs_show(-1)
 	autocmd! BufDelete * call Buftabs_show(expand('<abuf>'))
 	if version >= 700
