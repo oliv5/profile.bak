@@ -42,7 +42,7 @@ command! -nargs=+ CondRemap  call CondRemap(<f-args>)
 " } Select plugins and options {
 " *******************************************************
 
-if $VIM_USETABS != ""
+if $VIM_USETABS != "" || !has("gui_running")
 	let g:vimrc_useTabs = 1
 	" Disable MBE plugin
 	let g:loaded_minibufexplorer = 1
