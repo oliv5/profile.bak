@@ -7,7 +7,7 @@ SED_EXCLUDE="$FIND_EXCLUDE -not -type l -and -not -path '*obj*'"
 function _ffind() {
   trap "set +f; trap SIGINT" SIGINT
   set -f
-  find -L "$(dirname ${1:-.})" "${@:2}" \( -${NAME:-name} $(sed -e 's/;/ -o -'${NAME:-name}' /g' <<< $(basename ${1:-*})) \) -and $FIND_EXCLUDE
+  find -L "$(dirname ${1:-.})" -nowarn \( -${NAME:-name} $(sed -e 's/;/ -o -'${NAME:-name}' /g' <<< $(basename ${1:-*})) \) -and $FIND_EXCLUDE "${@:2}"
   set +f
   trap SIGINT
 }
