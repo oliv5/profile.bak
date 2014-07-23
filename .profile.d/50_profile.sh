@@ -4,10 +4,6 @@
 # Prevent Ctrl-D exit session
 export IGNOREEOF=1
 
-# Cleanup path
-export PATH="${PATH//\~/${HOME}}"
-export PATH="${PATH//.:/}"
-
 # Use vim as editor
 [ -z "$EDITOR" ] && export EDITOR="$(which vi)"
 [ -z "$VISUAL" ] && export VISUAL="$(which vi)"
@@ -31,6 +27,9 @@ alias lsg='ls | grep'
 alias b='cdb'
 alias bb='cdb;cdb'
 alias bbb='cdb;cdb;cdb'
+alias f='cdf'
+alias ff='cdf;cdf'
+alias fff='cdf;cdf;cdf'
 
 # Editor aliases/fcts
 alias g='gedit'
