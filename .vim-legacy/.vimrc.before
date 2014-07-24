@@ -2,15 +2,20 @@
 " } Key mapping helpers {
 " *******************************************************
 
-"execute 'i'.a:prefix.'map <expr>' args[1] args[2] (pumvisible()?'<ESC>':'<c-o>').args[3]
-"inoremap <Down> <C-R>=pumvisible() ? "\<lt>C-N>" : "\<lt>Down>\<lt>C-O>:update\<lt>CR>"<CR>
-"execute 'i'.a:prefix.'map' args[1] args[2] '<C-R>=(pumvisible()?"\<lt>ESC>":"")<CR><C-O>'.args[3]
+" Keymap examples with the completion popup menu
+"inoremap <expr> <Esc>      pumvisible() ? "\<C-e>" : "\<Esc>"
+"inoremap <expr> <CR>       pumvisible() ? "\<C-y>" : "\<CR>"
+"inoremap <expr> <Down>     pumvisible() ? "\<C-n>" : "\<Down>"
+"inoremap <expr> <Up>       pumvisible() ? "\<C-p>" : "\<Up>"
+"inoremap <expr> <PageDown> pumvisible() ? "\<PageDown>\<C-p>\<C-n>" : "\<PageDown>"
+"inoremap <expr> <PageUp>   pumvisible() ? "\<PageUp>\<C-p>\<C-n>" : "\<PageUp>"
 
 " Map/noremap function keys (or Ctrl-X) in normal/visual & insert modes
 function! FnMap(prefix, args)
 	let args = matchlist(a:args,'\(<silent>\s\+\)\?\(.\{-}\)\s\+\(.*\)')
-	execute a:prefix.'map' args[1] args[2] '<c-c>'.args[3]
-	execute 'i'.a:prefix.'map' args[1] args[2] '<C-O>'.args[3]
+	execute a:prefix.'map' args[1] args[2] '<C-c>'.args[3]
+	"execute 'i'.a:prefix.'map' args[1] args[2] '<C-o>'.args[3]
+	execute 'i'.a:prefix.'map <expr>' args[1] args[2] '(pumvisible() ? "\<C-e>" : "")."<C-O>'.args[3].'"'
 endfunction
 
 " Make an alternate mapping based on another

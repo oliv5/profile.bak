@@ -17,7 +17,7 @@ FnNoremap <F1>    :vert help<SPACE>
 " } Sessions {
 " *******************************************************
 " Key mapping
-FnNoremap <C-F9>    :mksession! ~/.vimsession <CR>
+FnNoremap <C-F9>    :mksession! ~/.vimsession<CR>
 FnNoremap <F9>      :source! ~/.vimsession<CR>
 
 
@@ -922,8 +922,10 @@ nnoremap <silent>L        :Lprev<CR>
 
 " Autocommands (note: ltag is not concerned...)
 "if has('quickfix')
-"  autocmd! QuickFixCmdPost l* nested Lopen
-"  autocmd! QuickFixCmdPost l* nested call setqflist(getloclist(0))
+"  augroup location_wnd
+"    autocmd! QuickFixCmdPost * nested Lopen
+"    autocmd! QuickFixCmdPost * nested call setqflist(getloclist(0))
+"  augroup END
 "endif
 
 
