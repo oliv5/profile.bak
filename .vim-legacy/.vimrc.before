@@ -543,14 +543,15 @@ endif
 " *******************************************************
 if !exists('g:loaded_easytags')
 	" Options
-	let g:easytags_auto_update = 0          " Enable/disable tags auto-updating
+	let g:easytags_auto_update = 1          " Enable/disable tags auto-updating
 	let g:easytags_dynamic_files = 1        " Use project tag file instead of ~/.vimtags
 	let g:easytags_autorecurse = 0          " No recursion, update current file only
 	let g:easytags_include_members = 1      " C++ include class members
 	"let g:easytags_events = ['BufWritePost']" Update tags on events
-	let g:easytags_updatetime_min = 30000   " Wait for few ms before updating tags
+	let g:easytags_updatetime_min = 10000   " Wait for few ms before updating tags
 	let g:easytags_updatetime_warn = 0      " Disable warning when update-time is low
 	let g:easytags_on_cursorhold = 1        " Update on cursor hold
+	let g:g:easytags_async = 1              " Update in background
 endif
 
 
