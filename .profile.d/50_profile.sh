@@ -25,11 +25,7 @@ alias lsg='ls | grep'
 
 # Alias cd/back
 alias b='cdb'
-alias bb='cdb;cdb'
-alias bbb='cdb;cdb;cdb'
 alias f='cdf'
-alias ff='cdf;cdf'
-alias fff='cdf;cdf;cdf'
 
 # Editor aliases/fcts
 alias g='gedit'
