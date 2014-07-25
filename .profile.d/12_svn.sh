@@ -312,13 +312,18 @@ function svn-diffl() {
   svn-diff ${1:-HEAD} ${2:-HEAD} ${@:3} --summarize
 }
 
+# List the archives based on given name
+function svn-zipls() {
+  if [ -e "${1}" ]; then
+    ls -t1 ${1}/*
+  else
+    ls -t1 $(svn-bckdir)/${1}*
+  fi
+}
+
 # Returns the last archive found based on given name
 function svn-zip() {
-  if [ -e "${1}" ]; then
-    ls -t1 ${1}/* | head -n 1
-  else
-    ls -t1 $(svn-bckdir)/${1}* | head -n 1
-  fi
+  svn-zipls "$@" | head -n 1
 }
 
 # Diff an archive with current repo
