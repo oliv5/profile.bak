@@ -34,6 +34,7 @@ function pdeln() {
     eval unset $1[$i]
   done
   pack $1
+  [ $(eval expr \${#$1[@]}) -gt 0 ]
 }
 
 # Delete n elements from head
