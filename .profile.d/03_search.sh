@@ -24,11 +24,11 @@ function _fgrep() {
 }
 function gg()  { _fgrep "$@" ;}
 function ggf() { _fgrep "$@" | cut -d : -f 1 | uniq ;}
-alias igg='NAME=iname gg'
-alias iggf='NAME=iname ggf'
+alias igg='gg -i'
+alias iggf='ggf -i'
 
 function _fgrep2() {
-    $(which grep) --color=auto -rnH $GREP_EXCLUDE "$@"
+  $(which grep) --color=auto -rnH $GREP_EXCLUDE "$@"
 }
 function gg2()  { _fgrep2 "$@" ;}
 function ggf2() { _fgrep2 "$@" | cut -d : -f 1 | uniq ;}
@@ -36,8 +36,7 @@ alias igg2='gg2 -i'
 alias iggf2='ggf2 -i'
 
 # Safe search & replace
-function _fsed()
-{
+function _fsed() {
   SEDOPT="${@:1:$(($#-3))}"
   IN="${@: -3:1}"; IN="${IN//\//\/}"
   OUT="${@: -2:1}";  OUT="${OUT//\//\/}"

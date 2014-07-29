@@ -18,7 +18,7 @@ function toUpper()
 }
 
 # Get password
-function passwd() {
+function get-passwd() {
   trap "stty echo; trap SIGINT" SIGINT; stty -echo
   read -p "${1:-Password: }" PASSWD; echo
   stty echo; trap SIGINT

@@ -27,6 +27,7 @@ alias imk='CASE=-i mk'
 alias ishell='CASE=-i shell'
 alias iref='CASE=-i ref'
 alias iv='CASE=-i v'
+alias ixml='CASE=-i xml'
 alias iasm='CASE=-i asm'
 
 # Search regex
