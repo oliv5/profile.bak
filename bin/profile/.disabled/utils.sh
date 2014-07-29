@@ -65,6 +65,10 @@ array1=("${array0[@]}")
 #################
 Map keyboard
 
+cat ~/.xmodmaprc
+#keycode 115 = , NoSymbol NoSymbol NoSymbol NoSymbol NoSymbol NoSymbol NoSymbol
+#keycode 116 = ; NoSymbol NoSymbol NoSymbol NoSymbol NoSymbol NoSymbol NoSymbol
+
 xev | sed -n 's/.*keycode *\([0-9]\+\)[^,]*, \([^)]\+\)).*$/keycode \1, keysym \2/p'
 xmodmap ~/.xmodmaprc
 xmodmap -pke
