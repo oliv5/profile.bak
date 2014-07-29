@@ -46,34 +46,11 @@ command! -nargs=+ CondRemap  call CondRemap(<f-args>)
 " *******************************************************
 " } Select plugins and options {
 " *******************************************************
-
 if $VIM_USETABS != "" || !has("gui_running")
 	let g:vimrc_useTabs = 1
 	" Disable MBE plugin
 	let g:loaded_minibufexplorer = 1
 endif
-
-" Disable the following plugins
-let g:loaded_bbye = 1
-let g:loaded_project = 1
-let g:loaded_taglist = 1
-"let g:loaded_tagbar = 1
-let g:loaded_srcexpl = 1
-let g:loaded_nerd_tree = 1
-let g:loaded_trinity = 1
-let g:ccvext_version = 1
-let g:loaded_yankring = 1
-let g:loaded_cctree = 1
-let g:command_t_loaded = 1
-"let g:loaded_minibufexplorer = 1
-"let g:loaded_yaifa = 1
-"let g:loaded_ctrlp = 1
-"let g:loaded_buftabs = 1
-let g:loaded_easytags = 1
-let g:c_complete_loaded = 1
-let g:syntax_complete_loaded = 1
-"let g:omnicpp_complete_loaded = 1
-let g:clang_complete_loaded = 1
 
 
 " *******************************************************
@@ -557,6 +534,15 @@ if !exists('g:loaded_easytags')
 	let g:easytags_updatetime_warn = 0      " Disable warning when update-time is low
 	let g:easytags_on_cursorhold = 1        " Update on cursor hold
 	let g:g:easytags_async = 1              " Update in background
+endif
+
+
+" *******************************************************
+" } vim-commentary plugin {
+" *******************************************************
+if !exists('loaded_commentary')
+	" Options
+	autocmd FileType c,cpp set commentstring=//%s
 endif
 
 

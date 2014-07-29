@@ -10,6 +10,9 @@
 " Toggle key maps: <localleader>
 " Action key maps: <leader>
 "
+" Resources
+" Vim refcards: http://tnerual.eriogerg.free.fr/vim.html
+" Vim tips: http://www.rayninfo.co.uk/vimtips.html
 
 " *******************************************************
 " } Environment preamble {
@@ -32,6 +35,29 @@ endif
 " Leader key mappings
 let mapleader = ";"         " Leader key
 let maplocalleader = ","    " Local leader key
+
+" Disable some plugins
+let g:loaded_bbye = 1
+let g:loaded_project = 1
+let g:loaded_taglist = 1
+"let g:loaded_tagbar = 1
+let g:loaded_srcexpl = 1
+let g:loaded_nerd_tree = 1
+let g:loaded_trinity = 1
+let g:ccvext_version = 1
+let g:loaded_yankring = 1
+let g:loaded_cctree = 1
+let g:command_t_loaded = 1
+"let g:loaded_minibufexplorer = 1
+"let g:loaded_yaifa = 1
+"let g:loaded_ctrlp = 1
+"let g:loaded_buftabs = 1
+let g:loaded_easytags = 1
+let g:c_complete_loaded = 1
+let g:syntax_complete_loaded = 1
+"let g:omnicpp_complete_loaded = 1
+let g:clang_complete_loaded = 1
+"let g:loaded_commentary = 1
 
 " Use before config
 if filereadable(expand("~/.vimrc.before"))
