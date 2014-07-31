@@ -83,6 +83,15 @@ FnNoremap <silent> <C-A-e> :Vexplore<CR>
 
 
 " *******************************************************
+" } GUI file browser {
+" *******************************************************
+if has("gui_running")
+	" Keymapping
+	FnNoremap <silent> <C-r>   :browse confirm e<CR>
+endif
+
+
+" *******************************************************
 " } Cscope {
 " *******************************************************
 
@@ -543,6 +552,15 @@ endif
 if !exists('loaded_commentary')
 	" Options
 	autocmd FileType c,cpp set commentstring=//%s
+endif
+
+
+" *******************************************************
+" } Vim IDE plugins {
+" *******************************************************
+if !exists('g:C_Version')
+	" Options
+	let g:C_Ctrl_j = 'off'
 endif
 
 
