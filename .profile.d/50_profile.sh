@@ -5,8 +5,8 @@
 export IGNOREEOF=1
 
 # Use vim as editor
-[ -z "$EDITOR" ] && export EDITOR="$(which vi)"
-[ -z "$VISUAL" ] && export VISUAL="$(which vi)"
+[ -z "$EDITOR" ] && export EDITOR="$(which vim)"
+[ -z "$VISUAL" ] && export VISUAL="$(which vim)"
 
 # Pagers
 [ -z "$PAGER" ] && export PAGER="less -s"
@@ -14,7 +14,7 @@ export IGNOREEOF=1
 # History
 export HISTSIZE=5000
 export HISTFILESIZE=5000
-# Avoid duplicates in history 
+# Avoid duplicates in history
 export HISTIGNORE='&:[ ]*'
 
 # Alias ls
@@ -28,8 +28,7 @@ alias b='cdb'
 alias f='cdf'
 
 # Editor aliases/fcts
-alias g='gedit'
-alias gv='gvim'
+function g() { (command -v geany && geany "$@") || (command -v gedit && gedit "$@"); }
 alias e='gvim'
 alias sse='ss | cut -c 9- | xargs gvim'
 alias gse='gs | grep modified | cut -d : -f 2 | xargs gvim'
