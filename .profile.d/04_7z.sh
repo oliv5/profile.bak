@@ -22,13 +22,23 @@ function 7zd() {
   done
 }
 
+# 7z deflate and ddiff
+function 7zddiff() {
+  TMP=$(mktemp -d)
+  for FILE in "$@"; do
+    7z x "$FILE" -o"$TMP"
+    echo -e '\nDir diff list:'
+    ddiff "$TMP" . | grep -v "Only in ."
+  done
+}
+
 # 7z deflate and diff
 function 7zdiff() {
   TMP=$(mktemp -d)
   for FILE in "$@"; do
     7z x "$FILE" -o"$TMP"
     echo -e '\nDiff list:'
-    ddiff "$TMP" . | grep -v "Only in ."
+    diff -r "$TMP" . | grep -v "Only in ."
   done
 }
 

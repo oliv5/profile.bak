@@ -337,4 +337,4 @@ function _svn-zipdiff() {
 }
 alias svn-zipdiff='_svn-zipdiff 7zdiff'
 alias svn-zipdiffm='_svn-zipdiff 7zdiffm'
-
+alias svn-zipddiff='_svn-zipdiff 7zddiff'

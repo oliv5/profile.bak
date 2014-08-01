@@ -17,6 +17,10 @@ function toUpper()
   echo "${@}" | tr "[:lower:]" "[:upper:]"
 }
 
+function mkbak() {
+  cp "${1:?Please specify input file 1}" "${1}.$(date +%Y%m%d-%H%M%S).bak"
+}
+
 # Get password
 function get-passwd() {
   trap "stty echo; trap SIGINT" SIGINT; stty -echo
