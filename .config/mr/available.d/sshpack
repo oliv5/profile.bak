@@ -1,6 +1,0 @@
-[${XDG_CONFIG_HOME:-.config}/vcsh/repo.d/sshpack.git]
-pull     = vcsh sshpack pull --rebase
-push     = vcsh sshpack push github master;
-           vcsh sshpack push backup master
-status   = vcsh sshpack status
-gc       = vcsh sshpack gc
