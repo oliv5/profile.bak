@@ -1,0 +1,523 @@
+" *******************************************************
+" } Select plugins and options {
+" *******************************************************
+if $VIM_USETABS != "" || !has("gui_running")
+	let g:vimrc_useTabs = 1
+	" Disable MBE plugin
+	let g:loaded_minibufexplorer = 1
+endif
+
+
+" *******************************************************
+" } Mswin plugin - its settings may be overriden afterwards {
+" *******************************************************
+
+" Additional key mapping
+vmap <C-z>  <C-c><C-z>
+vmap <C-y>  <C-c><C-y>
+
+
+" *******************************************************
+" } File browser netrw {
+" *******************************************************
+" Options
+let g:netrw_browse_split = 0  " Use same(0)/prev(4) window
+let g:netrw_altv = 1          " Vertical split right
+let g:netrw_liststyle=3       " Tree mode
+let g:netrw_special_syntax= 1 " Show special files
+let g:netrw_sort_sequence   = "[\/]$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$"
+let g:netrw_winsize = 20      " Window size
+
+" Workaround
+set winfixwidth
+set winfixheight
+
+" Keymapping
+FnNoremap <silent> <C-e>   :Explore<CR>
+FnNoremap <silent> <C-A-e> :Vexplore<CR>
+
+
+" *******************************************************
+" } GUI file browser {
+" *******************************************************
+if has("gui_running")
+	" Keymapping
+	FnNoremap <silent> <C-r>   :browse confirm e<CR>
+endif
+
+
+" *******************************************************
+" } Cscope {
+" *******************************************************
+
+if has("cscope")
+	" Option
+	let g:cscope_db = !empty($CSCOPE_DB) ? $CSCOPE_DB : "cscope.out"
+	if has('quickfix')
+		set cscopequickfix=s-,c-,d-,i-,t-,e-
+	endif
+
+	" Cscope user command
+	command! -nargs=* Cs :lcs <args>
+
+	" Abbreviation
+	cabbrev csa lcs add
+	cabbrev csf lcs find
+	cabbrev csk lcs kill
+	cabbrev csr lcs reset
+	cabbrev css lcs show
+	cabbrev csh lcs help
+
+	" Find and load cscope database
+	function! s:LoadCscopeDb(db)
+		if (filereadable(a:db))
+			"set nocscopeverbose " suppress 'duplicate connection' error
+			silent! exe "cs add" a:db matchstr(a:db, ".*/")
+			silent! cs reset
+			"set cscopeverbose
+		endif
+	endfunction
+
+	" Add any cscope database in the given environment variable
+	for db in [g:cscope_db]
+		call s:LoadCscopeDb(db)
+	endfor
+
+	" Additionnal keymap
+	nnoremap <silent> <c-d><c-l>  :call <SID>LoadCscopeDb(findfile(g:cscope_db, ".;"))<CR>
+	nnoremap <silent> <c-d>       <NOP>
+
+	" Autocommand
+	augroup vimrc_cscope
+		autocmd! BufReadPost * call s:LoadCscopeDb(findfile(g:cscope_db, ".;"))
+	augroup END
+
+endif
+
+
+" *******************************************************
+" } Omnicompletion {
+" *******************************************************
+
+" Advanced key mapping to omnicompletion
+function! s:CleverTab()
+	if pumvisible()
+		return "\<C-N>"
+	elseif strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
+		return "\<Tab>"
+	elseif exists('&omnifunc') && &omnifunc != ''
+		return "\<C-X>\<C-O>"
+	else
+		return "\<C-N>"
+	endif
+endfunction
+
+" Key mapping
+"inoremap <C-space>  <C-R>=<SID>CleverTab()<CR>
+inoremap <C-space>  <C-x><C-o>
+
+
+" *******************************************************
+" } C completion (vim basic) {
+" *******************************************************
+if !exists('g:c_complete_loaded')
+	" Enable completion
+	set omnifunc=ccomplete#Complete
+	filetype plugin on
+	"set completeopt=longest,menu,preview
+	set completeopt=longest,menu
+endif
+
+
+" *******************************************************
+" } Syntax omnicompletion {
+" *******************************************************
+if !exists('g:syntax_complete_loaded')
+	" Enable completion
+	set omnifunc=syntaxcomplete#Complete
+	filetype plugin on
+	"set completeopt=longest,menu,preview
+	set completeopt=longest,menu
+endif
+
+
+" *******************************************************
+" } OmniCpp completion {
+" *******************************************************
+if !exists('g:omnicpp_complete_loaded')
+	" Enable completion
+	set omnifunc=omni#cpp#complete#Main
+	filetype plugin on
+	set nocp
+	set completeopt=menuone,menu,longest
+	"set completeopt=menuone,menu,longest,preview
+
+	" Options
+	let OmniCpp_NamespaceSearch = 2
+	let OmniCpp_GlobalScopeSearch = 1
+	let OmniCpp_ShowAccess = 1
+	let OmniCpp_ShowPrototypeInAbbr = 1   " show function parameters
+	let OmniCpp_MayCompleteDot = 1        " autocomplete after .
+	let OmniCpp_MayCompleteArrow = 1      " autocomplete after ->
+	let OmniCpp_MayCompleteScope = 1      " autocomplete after ::
+	let OmniCpp_DefaultNamespaces = ["std", "_GLIBCXX_STD"]
+	let OmniCpp_LocalSearchDecl = 1       " use local search function, bracket on 1st column
+	let OmniCpp_DisplayMode = 1
+	"au CursorMovedI,InsertLeave * if pumvisible() == 0|silent! pclose|endif
+endif
+
+
+" *******************************************************
+" } Clang omnicompletion {
+" *******************************************************
+if !exists('g:clang_complete_loaded')
+	" Options
+	set completeopt=longest,menu
+	let g:clang_library_path='/usr/lib'
+
+	" Key mapping
+	inoremap <C-space>  <C-x><C-o>
+endif
+
+
+" *******************************************************
+" } Project plugin {
+" *******************************************************
+if !exists('g:loaded_project')
+	" Options
+	set nocompatible
+	let g:proj_window_width = 22
+	let g:proj_window_increment = 0
+	let g:proj_flags = 'GS'
+	let g:proj_window_pos = 'L'
+
+	" Toggle ON/OFF
+	nmap <localleader>j  :Project<CR>
+endif
+
+
+" *******************************************************
+" } Taglist plugin {
+" *******************************************************
+if !exists('g:loaded_taglist')
+	" Options
+	if !exists('g:Tlist_Use_Right_Window')
+		let g:Tlist_Use_Right_Window = 0    " Split to the right side of the screen
+	endif
+	let g:Tlist_WinWidth = 22             " Set the window width
+	let g:Tlist_Sort_Type = "order"       " Sort by the "order" or "name"
+	let g:Tlist_Compact_Format = 1        " Display the help info
+	let g:Tlist_Exit_OnlyWindow = 1       " If you are the last, kill yourself
+	let g:Tlist_File_Fold_Auto_Close = 1  " Close tags for other files
+	let g:Tlist_Enable_Fold_Column = 0    " Show folding tree
+	let g:Tlist_Show_One_File = 1         " Always display one file tags
+	let g:Tlist_Display_Tag_Scope = 0     " Display tag scope (function/constants/variables)
+	let g:Tlist_Use_SingleClick = 1       " Single click instead of double
+
+	" Toggle ON/OFF
+	nmap <localleader>t   :Tlist<CR>
+	nmap <localleader>tt  :TlistClose<CR>
+endif
+
+
+" *******************************************************
+" } SrcExplorer plugin {
+" *******************************************************
+if !exists('g:loaded_srcexpl')
+	" Options
+	let g:SrcExpl_winHeight = 8         " Set the height of Source Explorer window
+	let g:SrcExpl_refreshTime = 100     " Set 100 ms for refreshing the Source Explorer
+	let g:SrcExpl_jumpKey = "<ENTER>"       " Set key to jump into the exact definition context
+	let g:SrcExpl_gobackKey = "<BACKSPACE>" " Set key for back from the definition context
+	let g:SrcExpl_searchLocalDef = 0    " Enable/Disable the local definition searching (Warning: side effect Ctrl-O/I stop working)
+	let g:SrcExpl_isUpdateTags = 0      " Tag update on file opening
+	let g:SrcExpl_updateTagsCmd = ""    " Tag update command
+	let g:SrcExpl_updateTagsKey = ""    " Tag update key
+	let g:SrcExpl_prevDefKey = "<C-S-F5>" " Show prev definition in jump list
+	let g:SrcExpl_nextDefKey = "<C-F5>"   " Show next definition in jump list
+
+	" Toggle ON/OFF
+	nmap <localleader>s   :SrcExpl<CR>
+	nmap <localleader>ss  :SrcExplClose<CR>
+endif
+
+
+" *******************************************************
+" } NERDTree plugin {
+" *******************************************************
+if !exists('g:loaded_nerd_tree')
+	" Options
+	let g:NERDTreeWinSize = 25            " Set the window width
+	let g:NERDTreeWinPos = "right"        " Set the window position
+	let g:NERDTreeAutoCenter = 0          " Auto centre
+	let g:NERDTreeHighlightCursorline = 0 " Not Highlight the cursor line
+
+	" Toggle ON/OFF
+	nmap <localleader>n   :NERDTree<CR>
+	nmap <localleader>nn  :NERDTreeClose<CR>
+endif
+
+
+" *******************************************************
+" } MiniBufExplorer plugin {
+" *******************************************************
+if !exists('g:loaded_minibufexplorer')
+	" Options
+	let g:miniBufExplStatusLineText = ""
+	let g:miniBufExplBuffersNeeded = 2
+	let g:miniBufExplUseSingleClick = 1
+	let g:miniBufExplCycleArround = 1
+	let g:miniBufExplShowBufNumbers = 1
+	let g:miniBufExplAutoStart = 1
+	let g:miniBufExplAutoUpdate = 1
+	let g:miniBufExplSplitToEdge = 1
+	let g:miniBufExplTabWrap = 1
+	let g:miniBufExplMinSize = 1
+	let g:miniBufExplMaxSize = 1
+	let g:miniBufExplSortBy = 'mru'  "'number'
+	let g:miniBufExplBRSplit = 0
+
+	" Colors
+	hi MBENormal               guifg=#FFFFFF guibg=bg
+	hi MBEChanged              guifg='orange' guibg=bg
+	hi MBEVisibleNormal        guifg=#FFFFFF guibg=bg
+	hi MBEVisibleChanged       guifg='orange' guibg=bg
+	hi MBEVisibleActiveNormal  guifg='cyan'  guibg=bg gui=bold,underline
+	hi MBEVisibleActiveChanged guifg=#FF0000 guibg=bg
+
+	" Toggle ON/OFF
+	map <localleader>m        :MBEToggle<CR>
+
+	" Overwrite open/close key mapping
+	FnNoremap <C-b>c          :MBEbd<CR>
+
+	" Cycle through buffers
+	FnNoremap <A-Down>  :MBEbb<CR>
+	FnNoremap <A-Up>    :MBEbf<CR>
+	if !exists("g:vimrc_useTabs")
+		"FnNoremap <C-Tab>      :MBEbb<CR>
+		"FnNoremap <C-S-Tab>    :MBEbf<CR>
+		FnNoremap <C-Tab>       :MBEbp<CR>
+		FnNoremap <C-S-Tab>     :MBEbn<CR>
+	endif
+
+endif
+
+
+" *******************************************************
+" } CCVext plugin {
+" *******************************************************
+if !exists('g:ccvext_version')
+	" Options
+	let g:ccvext_WndHeight = 10
+	let g:ccvext_autostart = 0
+	" Toggle ON/OFF
+	nmap <localleader>c   :CCVext<CR>
+	nmap <localleader>cc  :CCVextClose<CR>
+endif
+
+
+" *******************************************************
+" } Yaifa plugin {
+" *******************************************************
+if !exists('g:loaded_yaifa')
+	" Options
+	let g:yaifa_max_lines=512
+	" Map Yaifa
+	nmap <localleader><tab>   :call YAIFA()<CR>
+	" autocall when entering file
+	augroup YAIFA
+		autocmd! BufRead * silent! call YAIFA()
+	augroup END
+endif
+
+
+" *******************************************************
+" } Yankring plugin {
+" *******************************************************
+if !exists('g:loaded_yankring')
+	" Options
+	let g:yankring_v_key = ""
+	let g:yankring_del_v_key = ""
+	let g:yankring_paste_n_bkey = ""
+	let g:yankring_paste_n_akey = ""
+	let g:yankring_paste_v_bkey = ""
+	let g:yankring_paste_v_akey = ""
+	let g:yankring_replace_n_pkey = ""
+	let g:yankring_replace_n_nkey = ""
+endif
+
+
+" *******************************************************
+" } CCTree plugin {
+" *******************************************************
+if !exists('g:loaded_cctree')
+	" Options
+	let g:CCTreeCscopeDb = "cscope.out, $CSCOPE_DB"
+	let g:CCTreeDisplayMode = 2
+	let g:CCTreeRecursiveDepth = 3
+
+	" Add any cscope database in the given environment variable
+	for db in split(g:CCTreeCscopeDb)
+		if filereadable(db)
+			exec 'let g:CCTreeCscopeDb =' db
+			break
+		endif
+	endfor
+
+	" Key mappings
+	let g:CCTreeKeyTraceReverseTree = '<localleader>x'
+	let g:CCTreeKeyTraceForwardTree = '<localleader>xf'
+	let g:CCTreeKeyToggleWindow = '<localleader>xx'
+	nmap <localleader>xl      :if filereadable(g:CCTreeCscopeDb) <BAR> exec "CCTreeLoadDB" g:CCTreeCscopeDb <BAR> endif
+	"nmap <localleader>xl     :if filereadable('xref.out') <BAR> CCTreeLoadXRefDbFromDisk xref.out <BAR> endif
+endif
+
+
+" *******************************************************
+" } Command-T plugin {
+" *******************************************************
+if !exists('g:command_t_loaded')
+	" Options
+	let g:CommandTWildIgnore="*.o,*.obj,**/tmp/**"
+	let g:CommandTMaxDepth = 8
+	let g:CommandTMaxCachedDirectories = 2
+
+	" Key mapping
+	FnNoremap <C-p>     :CommandT<CR>
+endif
+
+
+" *******************************************************
+" } CTRLP plugin {
+" *******************************************************
+if !exists('g:loaded_ctrlp')
+	" Options
+	let g:ctrlp_map = ''
+	let g:ctrlp_cmd = 'CtrlPMixed'
+	let g:ctrlp_working_path_mode = '0'
+	let g:ctrlp_custom_ignore = {
+	\ 'dir':  '\v[\/](\.(git|hg|svn)|tmp)$',
+	\ 'file': '\v\.(exe|so|dll|o)$'
+	\ }
+	" Key mapping
+	FnNoremap <C-l>     :CtrlPTag<CR>
+	FnNoremap <C-o>     :CtrlPMRU<CR>
+	FnNoremap <C-p>     :exec 'CtrlP'.g:FindRootDir()<CR>
+endif
+
+
+" *******************************************************
+" } Tagbar plugin {
+" *******************************************************
+if !exists('g:loaded_tagbar')
+	" Options
+	let g:tagbar_left = 1
+	let g:tagbar_width = 30
+	let g:tagbar_autoshowtag = 0
+	let g:tagbar_expand = 1
+	let g:tagbar_indent = 1
+	let g:tagbar_show_linenumbers = 0
+	let g:tagbar_singleclick = 1
+	let g:tagbar_sort = 0
+
+	" VHDL support
+	let g:tagbar_type_vhdl = {
+		\ 'ctagstype': 'vhdl',
+		\ 'kinds' : [
+			\'d:prototypes',
+			\'b:package bodies',
+			\'e:entities',
+			\'a:architectures',
+			\'t:types',
+			\'p:processes',
+			\'f:functions',
+			\'r:procedures',
+			\'c:constants',
+			\'T:subtypes',
+			\'r:records',
+			\'C:components',
+			\'P:packages',
+			\'l:locals'
+		\]
+	\}
+
+	" Toggle ON/OFF
+	nmap <localleader>t   :TagbarToggle<CR>
+	nmap <localleader>tt  :TagbarClose<CR>
+endif
+
+
+" *******************************************************
+" } buftabs plugin {
+" *******************************************************
+if !exists('g:loaded_buftabs')
+	" Options
+	let g:buftabs_only_basename = 1
+	let g:buftabs_in_statusline = 1
+	"let g:buftabs_marker_start = '[['
+	"let g:buftabs_marker_end = ']]'
+	let g:buftabs_separator = ":"
+	"let g:buftabs_active_highlight_group="Visual"
+endif
+
+
+" *******************************************************
+" } DirDiff plugin {
+" *******************************************************
+if !exists('g:loaded_dirdiff')
+	" Options
+	let g:DirDiffExcludes = "CVS,*.class,*.exe,.*.swp"  " Default exclude pattern
+	let g:DirDiffIgnore = "Id:,Revision:,Date:"         " Default ignore pattern
+	let g:DirDiffSort = 1                               " Sorts the diff lines
+	let g:DirDiffWindowSize = 14                        " Diff window height
+	let g:DirDiffIgnoreCase = 0                         " Ignore case during diff
+	let g:DirDiffDynamicDiffText = 0                    " Dynamically figure out the diff text
+	let g:DirDiffTextFiles = "Files "                   " Diff tool difference text
+	let g:DirDiffTextAnd = " and "                      " Diff tool "and" text
+	let g:DirDiffTextDiffer = " differ"                 " Diff tool "differ" text
+	let g:DirDiffTextOnlyIn = "Only in "                " Diff tool "Only in" text
+
+	" Key mapping
+	nnoremap <silent><leader>d  :DirDiff\
+endif
+
+
+" *******************************************************
+" } Easytags plugin {
+" *******************************************************
+if !exists('g:loaded_easytags')
+	" Options
+	let g:easytags_auto_update = 1          " Enable/disable tags auto-updating
+	let g:easytags_dynamic_files = 1        " Use project tag file instead of ~/.vimtags
+	let g:easytags_autorecurse = 0          " No recursion, update current file only
+	let g:easytags_include_members = 1      " C++ include class members
+	"let g:easytags_events = ['BufWritePost']" Update tags on events
+	let g:easytags_updatetime_min = 10000   " Wait for few ms before updating tags
+	let g:easytags_updatetime_warn = 0      " Disable warning when update-time is low
+	let g:easytags_on_cursorhold = 1        " Update on cursor hold
+	let g:easytags_async = 1              " Update in background
+endif
+
+
+" *******************************************************
+" } vim-commentary plugin {
+" *******************************************************
+if !exists('loaded_commentary')
+	" Options
+	autocmd FileType c,cpp set commentstring=//%s
+endif
+
+
+" *******************************************************
+" } Vim IDE plugins {
+" *******************************************************
+if !exists('g:C_Version')
+	" Options
+	let g:C_Ctrl_j = 'off'
+endif
+
+
+" *******************************************************
+" } The end
+" *******************************************************

@@ -32,11 +32,32 @@ if !has("user_commands") && !exists("g:reload_vimrc")
 	finish
 endif
 
+" Security
+set secure
+set noexrc
+
 " Leader key mappings
 let mapleader = ";"         " Leader key
 let maplocalleader = ","    " Local leader key
 
-" Disable some plugins
+
+" *******************************************************
+" } Before scripts {
+" *******************************************************
+
+" Use before config
+if filereadable(expand("~/.vimrc.before"))
+	source ~/.vimrc.before
+endif
+if filereadable(expand("~/.vimrc.before.local"))
+	source ~/.vimrc.before.local
+endif
+
+
+" *******************************************************
+" } Load plugins {
+" *******************************************************
+" Disable unused plugins
 let g:loaded_bbye = 1
 let g:loaded_project = 1
 let g:loaded_taglist = 1
@@ -59,19 +80,15 @@ let g:syntax_complete_loaded = 1
 let g:clang_complete_loaded = 1
 "let g:loaded_commentary = 1
 
-" Use before config
-if filereadable(expand("~/.vimrc.before"))
-	source ~/.vimrc.before
+" Load bundles config
+if filereadable(expand("~/.vimrc.bundles"))
+	source ~/.vimrc.bundles
 endif
-if filereadable(expand("~/.vimrc.before.local"))
-	source ~/.vimrc.before.local
+if filereadable(expand("~/.vimrc.bundles.local"))
+	source ~/.vimrc.bundles.local
 endif
 
-
-" *******************************************************
-" } Load plugins {
-" *******************************************************
-" Start plugin pathogen
+" Load plugins with pathogen
 filetype off                " force reloading *after* pathogen loaded
 runtime bundle/pathogen/autoload/pathogen.vim
 execute pathogen#infect()
@@ -244,7 +261,7 @@ nnoremap <localleader>c  :set invlist<CR>
 
 
 " *******************************************************
-" } Environment conclusion {
+" } After scripts {
 " *******************************************************
 
 " Use after config
@@ -255,9 +272,10 @@ if filereadable(expand("~/.vimrc.after.local"))
 	source ~/.vimrc.after.local
 endif
 
-" Security
-set secure
-set noexrc
+
+" *******************************************************
+" } Environment conclusion {
+" *******************************************************
 
 " Load flag
 let g:loaded_vimrc = 1
