@@ -1,5 +1,12 @@
 " General {
 	set updatetime=1000  " Swap file write / CursorHold  evt delay (in ms)
+
+	" Security
+	set secure
+	set noexrc
+
+	" Force write with sudo after opening the file
+	cmap w!! w !sudo tee % >/dev/null
 " }
 
 " UI settings, theme & color scheme {
@@ -7,13 +14,36 @@
 		colorscheme torte
 		syntax on
 	endif
-	set nocursorline
+
+	" Select font
+	if has('gui_running') && !exists('g:loaded_vimrc')
+		"set guifont=Lucida_Console:h11
+		set guifont=Monospace\ 9
+	endif
+" }
+
+" Text formatting {
+	" Cursor
 	set nu
+	set nocursorline
 	set scrolloff=10
+	map <localleader>n  :set nu!<CR>
+
+	" Word/line wrap options
+	set nowrap              " No wrap by default
+	nnoremap <localleader>w  :set invwrap<CR>
+
+	" Show all characters
+	set nolist              " Do not show all characters by default
+	nnoremap <localleader>c  :set invlist<CR>
 " }
 
 " Use after config if available {
 	if filereadable(expand("~/.vim-legacy/.vimrc.after"))
 		source ~/.vim-legacy/.vimrc.after
 	endif
+" }
+
+" User profile end {
+	let g:loaded_vimrc = 1
 " }

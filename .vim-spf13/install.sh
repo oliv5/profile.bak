@@ -1,14 +1,11 @@
 #!/bin/bash
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-SPF13=spf13-vim
-set -x
-rm ~/.vimrc* ~/.vim
-ln -s $DIR/$SPF13/.vim* ~/
-ln -s $DIR/custom/.vim* ~/
-#mkdir -p $DIR/$SPF13/.vim/plugin/ 2>/dev/null
-#mkdir -p $DIR/$SPF13/.vim/bundle/ 2>/dev/null
-ln -s $DIR/custom/plugin $DIR/$SPF13/.vim
-for BUNDLE in $(ls $DIR/custom/bundle); do
-    ln -s $BUNDLE $DIR/$SPF13/.vim/bundle/
+
+# Make links
+SRC=$( cd "$( dirname "${BASH_SOURCE[0]}" )" ; pwd )
+ln -fsv $SRC/custom/.vimrc* ~/
+for BUNDLE in ~/.vim-legacy/.vim/bundle/*; do
+    ln -fsv $BUNDLE ~/.vim/bundle/
 done
-set +x
+mkdir -p ~/.vim/plugin
+ln -fsv ~/.vim-legacy/.vim/plugin/*.vim ~/.vim/plugin/
+

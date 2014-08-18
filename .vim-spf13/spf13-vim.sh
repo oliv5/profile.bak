@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 ############################  SETUP PARAMETERS
 app_name='spf13-vim'
-git_uri='https://github.com/spf13/spf13-vim.git'
+app_dir="$HOME/.spf13-vim-3"
+[ -z "$git_uri" ] && git_uri='https://github.com/spf13/spf13-vim.git'
 git_branch='3.0'
 debug_mode='0'
 fork_maintainer='0'
+[ -z "$VUNDLE_URI" ] && VUNDLE_URI="https://github.com/gmarik/vundle.git"
 
 ############################  BASIC SETUP TOOLS
 msg() {
@@ -24,7 +26,7 @@ error() {
 
 debug() {
     if [ "$debug_mode" -eq '1' ] && [ "$ret" -gt '1' ]; then
-      msg "An error occured in function \"${FUNCNAME[$i+1]}\" on line ${BASH_LINENO[$i+1]}, we're sorry for that."
+      msg "An error occurred in function \"${FUNCNAME[$i+1]}\" on line ${BASH_LINENO[$i+1]}, we're sorry for that."
     fi
 }
 
@@ -63,7 +65,7 @@ upgrade_repo() {
       msg "trying to update $1"
 
       if [ "$1" = "$app_name" ]; then
-          cd "$HOME/.$app_name-3" &&
+          cd "$app_dir" &&
           git pull origin "$git_branch"
       fi
 
@@ -79,10 +81,9 @@ upgrade_repo() {
 
 clone_repo() {
     program_exists "git" "Sorry, we cannot continue without GIT, please install it first."
-    endpath="$HOME/.$app_name-3"
 
-    if [ ! -e "$endpath/.git" ]; then
-        git clone --recursive -b "$git_branch" "$git_uri" "$endpath"
+    if [ ! -e "$app_dir" ]; then
+        git clone --recursive -b "$git_branch" "$git_uri" "$app_dir"
         ret="$?"
         success "$1"
         debug
@@ -93,7 +94,7 @@ clone_repo() {
 
 clone_vundle() {
     if [ ! -e "$HOME/.vim/bundle/vundle" ]; then
-        git clone https://github.com/gmarik/vundle.git "$HOME/.vim/bundle/vundle"
+        git clone $VUNDLE_URI "$HOME/.vim/bundle/vundle"
     else
         upgrade_repo "vundle"   "Successfully updated vundle"
     fi
@@ -103,7 +104,7 @@ clone_vundle() {
 }
 
 create_symlinks() {
-    endpath="$HOME/.$app_name-3"
+    endpath="$app_dir"
 
     if [ ! -d "$endpath/.vim/bundle" ]; then
         mkdir -p "$endpath/.vim/bundle"
@@ -141,7 +142,14 @@ create_symlinks() {
 setup_vundle() {
     system_shell="$SHELL"
     export SHELL='/bin/sh'
-    vim -u "$HOME/.vimrc.bundles" +BundleInstall! +BundleClean +qall
+    
+    vim \
+        -u "$app_dir/.vimrc.bundles.default" \
+        "+set nomore" \
+        "+BundleInstall!" \
+        "+BundleClean" \
+        "+qall"
+    
     export SHELL="$system_shell"
 
     success "$1"
