@@ -1,4 +1,4 @@
-[${XDG_CONFIG_HOME:-.config}/vcsh/repo.d/profile.git]
+[${XDG_CONFIG_HOME:-$HOME/.config}/vcsh/repo.d/profile.git]
 pull     = vcsh profile pull --rebase
 push     = vcsh profile push github master;
            vcsh profile push backup master

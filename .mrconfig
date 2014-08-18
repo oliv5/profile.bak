@@ -1,0 +1,2 @@
+[DEFAULT]
+include = cat ${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/*

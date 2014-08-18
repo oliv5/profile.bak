@@ -15,10 +15,8 @@
 !/.config/mr
 !/.config/mr/available.d
 !/.config/mr/available.d/profile
-!/.config/mr/available.d/sshpack
 !/.config/mr/config.d
 !/.config/mr/config.d/profile
-!/.config/mr/config.d/sshpack
 !/.gitignore.d
 !/.gitignore.d/profile
 !/.profile
