@@ -1,8 +1,8 @@
 #!/bin/bash
 declare -a g_backward_stack=()
-g_backward_stack_maxsize=10
+export g_backward_stack_maxsize=10
 declare -a g_forward_stack=()
-g_forward_stack_maxsize=10
+export g_forward_stack_maxsize=10
 
 # First implementation cd/back functions
 #function cda_old() { export PWD_0="$PWD"; builtin cd "$@"; }
