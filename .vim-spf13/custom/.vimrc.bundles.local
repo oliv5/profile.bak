@@ -1,7 +1,7 @@
 " Legacy bundles config {
 	" Leader key mappings
-	let mapleader = ";"         " Leader key
-	let maplocalleader = ","    " Local leader key
+	let mapleader = g:spf13_leader
+	let maplocalleader = g:spf13_localleader
 
 	" Disable unused plugins
 	let g:loaded_bbye = 1
@@ -9,7 +9,7 @@
 	let g:loaded_taglist = 1
 	"let g:loaded_tagbar = 1
 	let g:loaded_srcexpl = 1
-	let g:loaded_nerd_tree = 1
+	"let g:loaded_nerd_tree = 1
 	let g:loaded_trinity = 1
 	let g:ccvext_version = 1
 	let g:loaded_yankring = 1
@@ -38,4 +38,3 @@
 	Bundle 'vim-ide'
 	Bundle 'yaifa'
 " }
-
