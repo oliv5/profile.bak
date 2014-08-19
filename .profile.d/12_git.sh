@@ -7,6 +7,12 @@ export GIT_PAGER="cat"
 alias gs='git status'
 alias gdd='git diff'
 alias gdm='git difftool -y -t meld --'
+alias gsc='git-stash-push'
+alias gsb='git-stash-save --include-untracked'
+alias gsp='git stash pop'
+alias gsa='git stash apply'
+alias gsl='git stash list'
+alias gss='git stash show -t'
 
 # Meld called by git
 function git-meld() {
@@ -20,7 +26,7 @@ function git-modified() {
 
 # Push changes onto stash
 function git-stash-push() {
-  git stash save --include-untracked "stash-$(date +%Y%m%d-%H%M)${1:+_$1}" && git stash apply stash@{0}
+  git stash save "stash-$(date +%Y%m%d-%H%M)${1:+_$1}" && git stash apply stash@{0}
 }
 
 # Export a CL
