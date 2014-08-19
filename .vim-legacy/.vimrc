@@ -108,6 +108,9 @@ set novisualbell            " No visual bells too
 set updatetime=1000         " Swap file write / event CursorHold delay (in ms)
 set shell=/bin/bash\ --rcfile\ ~/.bashrc\ -i    " Set shell, load user profile
 
+" Force write with sudo after opening the file
+cmap w!! w !sudo tee % >/dev/null
+
 
 " *******************************************************
 " } Terminal Settings {
@@ -177,6 +180,12 @@ set noea              " No equalize windows
 set splitbelow        " Window split location. Also applied to :vsp & :sp
 set splitright        " Window split location. Also applied to :vsp & :sp
 set nofoldenable      " Disable folding
+set whichwrap=h,l,~,[,]   " Wrap between lines for h, l, ~, cursor keys [ and ]
+set matchpairs+=<:>   " '%' bounce between brackets
+
+" Backspace delete line breaks, over the start of the
+" current insertion, and over indentations
+set backspace=indent,eol,start
 
 " Save/restore part of edit session
 "  /10  :  search items
@@ -199,12 +208,6 @@ augroup vimrc_cursor_lastpos
 		\   exe "normal! g'\"" |
 		\ endif
 augroup END
-
-" Key maps
-map <localleader>n  :set nu!<CR>
-
-" Force write with sudo after opening the file
-cmap w!! w !sudo tee % >/dev/null
 
 
 " *******************************************************

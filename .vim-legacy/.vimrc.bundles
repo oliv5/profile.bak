@@ -253,8 +253,8 @@ if !exists('g:loaded_nerd_tree')
 	let g:NERDTreeHighlightCursorline = 0 " Not Highlight the cursor line
 
 	" Toggle ON/OFF
-	nmap <localleader>n   :NERDTree<CR>
-	nmap <localleader>nn  :NERDTreeClose<CR>
+	nmap <localleader>e   :NERDTree<CR>
+	nmap <localleader>ee  :NERDTreeClose<CR>
 endif
 
 
@@ -295,10 +295,8 @@ if !exists('g:loaded_minibufexplorer')
 	FnNoremap <A-Down>  :MBEbb<CR>
 	FnNoremap <A-Up>    :MBEbf<CR>
 	if !exists("g:vimrc_useTabs")
-		"FnNoremap <C-Tab>      :MBEbb<CR>
-		"FnNoremap <C-S-Tab>    :MBEbf<CR>
-		FnNoremap <C-Tab>       :MBEbp<CR>
-		FnNoremap <C-S-Tab>     :MBEbn<CR>
+		FnNoremap <C-Tab>      :MBEbf<CR>
+		FnNoremap <C-S-Tab>    :MBEbb<CR>
 	endif
 
 endif
@@ -413,7 +411,7 @@ endif
 if !exists('g:loaded_tagbar')
 	" Options
 	let g:tagbar_left = 1
-	let g:tagbar_width = 30
+	let g:tagbar_width = 40
 	let g:tagbar_autoshowtag = 0
 	let g:tagbar_expand = 1
 	let g:tagbar_indent = 1

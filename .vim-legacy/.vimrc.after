@@ -203,7 +203,6 @@ vnoremap <C-l>      L
 " *******************************************************
 " } Statusline {
 " *******************************************************
-
 if !exists('g:loaded_airline')
 
 	" Returns "mixed" when indentation is mixed
@@ -240,9 +239,9 @@ if !exists('g:loaded_airline')
 
 	" Hide status line
 	function! s:StatusLineHide()
-			hi StatusLine ctermbg=NONE ctermfg=white
-			hi clear StatusLine
-			set laststatus=0
+		hi StatusLine ctermbg=NONE ctermfg=white
+		hi clear StatusLine
+		set laststatus=0
 	endfunction
 
 	" Line options
@@ -523,16 +522,12 @@ endif
 " *******************************************************
 " } Cursor management {
 " *******************************************************
-set whichwrap=h,l,~,[,]   " Wrap between lines for h, l, ~, cursor keys [ and ]
-set matchpairs+=<:>       " '%' bounce between brackets
-
-" Backspace delete line breaks, over the start of the
-" current insertion, and over indentations
-set backspace=indent,eol,start
-
 " Highlight cursor line/column
 noremap <localleader>h   :set cursorline!<CR>
 noremap <localleader>hh  :set cursorcolumn!<CR>
+
+" Show line number
+map <localleader>n  :set nu!<CR>
 
 " Jump to line
 FnNoremap  <C-j> :
@@ -749,7 +744,7 @@ FnNoremap <C-b><C-n>  :bn<CR>
 FnNoremap <C-b><C-p>  :bp<CR>
 FnNoremap <A-Down>    :bp<CR>
 FnNoremap <A-Up>      :bn<CR>
-if !exists("g:vimrc_useTabs")
+if !hasmapto('<C-Tab>')
 	FnNoremap <C-Tab>   :bn<CR>
 	FnNoremap <C-S-Tab> :bp<CR>
 endif
