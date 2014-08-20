@@ -38,3 +38,9 @@
 	set nolist              " Do not show all characters by default
 	nnoremap <localleader>c  :set invlist<CR>
 " }
+
+" Use local after config if available {
+	if filereadable(expand("~/.vimrc.after.local"))
+		source ~/.vimrc.after.local
+	endif
+" }
