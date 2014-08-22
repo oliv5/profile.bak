@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Syslog
+alias syslog='sudo tail /var/log/syslog'
+
 # Processes
 alias psf='ps -faux'
 alias psd='ps -ef'
