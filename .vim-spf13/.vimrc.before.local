@@ -7,7 +7,7 @@
 " spf13 options {
 
 	" Select the buffer group
-	let g:spf13_bundle_groups=['general', 'youcompleteme', 'programming', 'python', 'php', 'javascript', 'html', 'misc']
+	let g:spf13_bundle_groups=['general', 'neocomplcache', 'programming', 'python', 'php', 'javascript', 'html', 'misc']
 
 	" http://vim.wikia.com/wiki/Restore_cursor_to_file_position_in_previous_editing_session
 	" Restore cursor to file position in previous editing session
@@ -85,6 +85,9 @@
 	" Do not enable plugin bufferline
 	let g:bufferline_echo = 0
 	
-	" Youcompleteme auto trigger disable
+	" Disable youcompleteme auto trigger
 	let g:ycm_auto_trigger = 0
+	
+	" Disable neocomplcache auto complete
+	let g:neocomplcache_disable_auto_complete = 1
 " }

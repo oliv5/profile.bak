@@ -100,21 +100,18 @@ endif
 " *******************************************************
 
 " Advanced key mapping to omnicompletion
-function! s:CleverTab()
-	if pumvisible()
-		return "\<C-N>"
-	elseif strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
-		return "\<Tab>"
-	elseif exists('&omnifunc') && &omnifunc != ''
-		return "\<C-X>\<C-O>"
-	else
-		return "\<C-N>"
-	endif
-endfunction
-
-" Key mapping
 "inoremap <C-space>  <C-R>=<SID>CleverTab()<CR>
-inoremap <C-space>  <C-x><C-o>
+"function! s:CleverTab()
+"	if pumvisible()
+"		return "\<C-N>"
+"	elseif strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
+"		return "\<Tab>"
+"	elseif exists('&omnifunc') && &omnifunc != ''
+"		return "\<C-X>\<C-O>"
+"	else
+"		return "\<C-N>"
+"	endif
+"endfunction
 
 
 " *******************************************************
@@ -126,6 +123,9 @@ if !exists('g:c_complete_loaded')
 	filetype plugin on
 	"set completeopt=longest,menu,preview
 	set completeopt=longest,menu
+	
+	" Key mapping
+	inoremap <C-space>  <C-x><C-o>
 endif
 
 
@@ -138,6 +138,9 @@ if !exists('g:syntax_complete_loaded')
 	filetype plugin on
 	"set completeopt=longest,menu,preview
 	set completeopt=longest,menu
+	
+	" Key mapping
+	inoremap <C-space>  <C-x><C-o>
 endif
 
 
@@ -164,6 +167,9 @@ if !exists('g:omnicpp_complete_loaded')
 	let OmniCpp_LocalSearchDecl = 1       " use local search function, bracket on 1st column
 	let OmniCpp_DisplayMode = 1
 	"au CursorMovedI,InsertLeave * if pumvisible() == 0|silent! pclose|endif
+	
+	" Key mapping
+	inoremap <C-space>  <C-x><C-o>
 endif
 
 

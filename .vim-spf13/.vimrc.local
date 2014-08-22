@@ -39,6 +39,11 @@
 	nnoremap <localleader>c  :set invlist<CR>
 " }
 
+" Misc configuration {
+	" Autocompletion
+	imap <C-space>  <C-x><C-u>
+" }
+
 " Use local after config if available {
 	if filereadable(expand("~/.vimrc.after.local"))
 		source ~/.vimrc.after.local
