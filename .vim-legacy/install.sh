@@ -2,8 +2,9 @@
 
 # Backup current config
 TODAY=`date +%Y%m%d`
+mkdir -p ~/.vimbackup
 for VIM in ~/.vim ~/.vimrc*; do
-    mv -v $VIM $VIM.$TODAY
+    mv -v $VIM ~/.vimbackup/$(basename $VIM).$TODAY.bak
 done
 
 # Make links
