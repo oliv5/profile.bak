@@ -11,7 +11,7 @@
 "inoremap <expr> <PageUp>   pumvisible() ? "\<PageUp>\<C-p>\<C-n>" : "\<PageUp>"
 
 " Map/noremap function keys (or Ctrl-X) in normal/visual & insert modes
-function! FnMap(prefix, args)
+function! s:FnMap(prefix, args)
 	let args = matchlist(a:args,'\(<silent>\s\+\)\?\(.\{-}\)\s\+\(.*\)')
 	execute a:prefix.'map' args[1] args[2] '<C-c>'.args[3]
 	"execute 'i'.a:prefix.'map' args[1] args[2] '<C-o>'.args[3]
@@ -19,7 +19,7 @@ function! FnMap(prefix, args)
 endfunction
 
 " Make an alternate mapping based on another
-function! AltMap(prefix, new, old)
+function! s:AltMap(prefix, new, old)
 	if empty(maparg(a:new,a:prefix)) && !empty(maparg(a:old,a:prefix))
 		execute a:prefix.'map' a:new a:old
 	endif
@@ -32,15 +32,25 @@ function! s:CondRemap(mapfct, key, mode, condition, action)
 	else
 		execute a:mapfct a:key
 					 \ ":if" a:condition "<BAR>" a:action "<BAR> else <BAR>"
-					 \ substitute(mapcheck(a:key,a:mode),'<CR>\|:','','g') "<BAR> endif<CR>"
+					 \ substitute(mapcheck(a:key,a:mode),'<CR>\|','','g') "<BAR> endif<CR>"
+	endif
+endfunction
+
+" IMap fix for menucompletions
+function! s:IMapFix(mapfct, key)
+	let mapping = mapcheck(a:key,'i')
+	if mapping!='' && match(mapping,"pumvisible")==-1
+		execute a:mapfct '<expr>' a:key
+			\ '(pumvisible() ? "\<C-e>" : "")."'.substitute(mapping,'<CR>\|','','g').'<CR>"'
 	endif
 endfunction
 
 " User commands
-command! -nargs=1 FnMap      call FnMap('',<f-args>)
-command! -nargs=1 FnNoremap  call FnMap('nore',<f-args>)
-command! -nargs=+ AltMap     call AltMap(<f-args>)
-command! -nargs=+ CondRemap  call CondRemap(<f-args>)
+command! -nargs=1 FnMap      call <SID>FnMap('',<f-args>)
+command! -nargs=1 FnNoremap  call <SID>FnMap('nore',<f-args>)
+command! -nargs=+ AltMap     call <SID>AltMap(<f-args>)
+command! -nargs=+ CondRemap  call <SID>CondRemap(<f-args>)
+command! -nargs=+ IMapFix  	 call <SID>IMapFix(<f-args>)
 
 " *******************************************************
 " } The end

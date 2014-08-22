@@ -102,6 +102,16 @@ cnoremap <C-F4> <C-C><C-W>c
 onoremap <C-F4> <C-C><C-W>c
 endif
 
+" Inoremap
+IMapFix imap <S-Insert>
+IMapFix inoremap <C-s>
+IMapFix inoremap <C-z>
+IMapFix inoremap <C-y>
+IMapFix inoremap <M-Space>
+IMapFix inoremap <C-A>
+IMapFix inoremap <C-Tab>
+IMapFix inoremap <C-F4>
+
 " restore 'cpoptions'
 set cpo&
 if 1
