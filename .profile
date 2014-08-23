@@ -9,13 +9,11 @@
 #umask 022
 
 # Add to path
-IFS=:
-for P in $(expr "/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"); do
-  if ! [[ $PATH =~ $P ]]; then
-    export PATH="$PATH:$P"
+for DIR in /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin; do
+  if ! [[ $PATH =~ $DIR ]]; then
+    export PATH="${PATH:+$PATH:}$DIR"
   fi
 done
-unset IFS
 
 # Misc variables
 [ -z "$USER" ] && export USER="$(id -un)"
