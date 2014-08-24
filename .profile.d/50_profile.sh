@@ -4,6 +4,9 @@
 # Prevent Ctrl-D exit session
 export IGNOREEOF=1
 
+# Start ssh-agent when not already running
+pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
+
 # Use vim as editor
 [ -z "$EDITOR" ] && export EDITOR="$(which vim)"
 [ -z "$VISUAL" ] && export VISUAL="$(which vim)"
