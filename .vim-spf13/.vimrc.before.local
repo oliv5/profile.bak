@@ -90,4 +90,7 @@
 	
 	" Disable neocomplcache auto complete
 	let g:neocomplcache_disable_auto_complete = 1
+	
+	" Disable vim-autoclose
+	let g:autoclose_on = 0
 " }
