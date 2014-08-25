@@ -1,5 +1,5 @@
 [${XDG_CONFIG_HOME:-$HOME/.config}/vcsh/repo.d/profile.git]
-pull     = vcsh profile pull --rebase
+pull     = vcsh profile pull --rebase master
 push     = vcsh profile remote | xargs -l vcsh profile push
 status   = vcsh profile status
 gc       = vcsh profile gc
