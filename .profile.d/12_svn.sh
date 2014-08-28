@@ -3,8 +3,10 @@
 # Environment
 export SVN_EDITOR=vim
 
-# Aliases
+# Show svn aliases
 alias salias='alias | grep -re " s..\?="'
+
+# Status aliases
 alias ss='svn st | grep -E "^(A|\~|D|M|R|C|\!|---)"'
 alias sa='svn st | grep -E "^(A|---)"'
 alias sc='svn st | grep -E "^(C|---)"'
@@ -12,11 +14,21 @@ alias sn='svn st | grep -E "^(\?|\~|---)"'
 alias sm='svn st | grep -E "^(M|R|---)"'
 alias sd='svn st | grep -E "^D"'
 alias st='svn st'
-alias sl='svn ls --depth infinity'
+alias ssl='ss | cut -c 9-'
+alias sal='sa | cut -c 9-'
+alias scl='sc | cut -c 9-'
+alias snl='sn | cut -c 9-'
+alias sml='sm | cut -c 9-'
+alias sdl='sd | cut -c 9-'
+alias stl='st | cut -c 9-'
 alias sst='ss | cut -c 9- | xargs touch'
+# ls aliases
+alias sls='svn ls --depth infinity'
+# diff aliases
 alias sdd='svn diff'
 alias sds='svn diff --summarize'
 alias sdm='svn diff --diff-cmd meld'
+# Misc aliases
 alias svn-resolve='svn-merge'
 alias svn-cl-add='svn cl'
 alias svn-cl-rm='svn changelist --remove'
@@ -64,11 +76,19 @@ function svn-st() {
   svn st "${@:2}" | grep -E "${1:-^[^ ]}" | cut -c 9-
 }
 
-# Extract SVN revision from string rev0:rev1
-function svn-getrev() {
-  REV0="${1%%:*}"
-  REV1="${1##*:}"
-  echo "${REV0:-HEAD} ${REV1:-HEAD}"
+# Extract SVN revisions from string rev0:rev1
+function _svn-getrev() {
+  REV1="${1%%:*}"
+  REV2="${1##*:}"
+  echo "${REV1:-HEAD} ${REV2:-HEAD}"
+}
+function _svn-getrev1() {
+  REV1="${1%%:*}"
+  echo "${REV1:-HEAD}"
+}
+function _svn-getrev2() {
+  REV2="${1##*:}"
+  echo "${REV2:-HEAD}"
 }
 
 # Merge 3-way
@@ -154,13 +174,14 @@ function svn-revert() {
 # Rollback to a previous revision, don't change unversionned files
 function svn-rollback() {
   # Get target revision number
-  REV=${1:?Please enter a revision number}
+  REV1=${1:-HEAD}
+  REV2=${2:-HEAD}
   # Check we are in a repository
   svn-exists || return
   # Backup
-  svn-export HEAD $REV "$(svn-bckdir)/rollback_$(svn-bckname)_r${REV}_$(svn-date).7z"
+  svn-export $REV1 $REV2 "$(svn-bckdir)/rollback_$(svn-bckname)_r${REV1}-${REV2}_$(svn-date).7z"
   # Rollback (svn merge back)
-  svn merge -r HEAD:$REV .
+  svn merge -r $REV1:$REV2 .
 }
 
 # Backup current changes
@@ -168,31 +189,31 @@ function svn-export() {
   # Check we are in a repository
   svn-exists || return
   # Get revisions
-  REV0=${1:-HEAD}
-  REV1=${2:-HEAD}
+  REV1=${1:-HEAD}
+  REV2=${2:-HEAD}
   # Get archive path, if not specified
   ARCHIVE="$3"
   if [ -z "$ARCHIVE" ]; then
-    if [ "$REV0" == "HEAD" ]; then
+    if [ "$REV1" == "HEAD" ]; then
       # Export changes made upon HEAD
       REV="$(svn-rev)"
       ARCHIVE="$(svn-bckdir)/export_$(svn-bckname)_r${REV}_$(svn-date).7z"
     else
       # Export changes between the 2 revisions
-      ARCHIVE="$(svn-bckdir)/export_$(svn-bckname)_r${REV0}-${REV1}_$(svn-date).7z"
+      ARCHIVE="$(svn-bckdir)/export_$(svn-bckname)_r${REV1}-${REV2}_$(svn-date).7z"
     fi
   fi
   # Get applicable files
   FILES="${@:4}"
   # Create archive, if not existing already
   if [ ! -f $ARCHIVE ]; then
-    if [ "$REV0" == "HEAD" ]; then
+    if [ "$REV1" == "HEAD" ]; then
       # Export changes made upon HEAD
       svn-st "^(A|M|R|\~|\!)" $FILES | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
       RESULT=$?
     else
       # Export changes between the 2 revisions
-      svn diff --summarize -r ${REV0}:${REV1} $FILES | awk '{ print $2 }' | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
+      svn diff --summarize -r ${REV1}:${REV2} $FILES | grep -vE "^ " | awk '{ print $2 }' | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
       RESULT=$?
     fi
   else
@@ -334,7 +355,7 @@ function _svn-zipdiff() {
   if [ -z "$ARCHIVE" ]; then
     ARCHIVE="$(svn-zip)"
   fi
-  $1 "$ARCHIVE"
+  eval $1 "." "$ARCHIVE"
 }
 alias svn-zipdiff='_svn-zipdiff 7zdiff'
 alias svn-zipdiffm='_svn-zipdiff 7zdiffm'

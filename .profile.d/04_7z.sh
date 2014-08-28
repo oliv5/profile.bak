@@ -8,45 +8,63 @@ function 7zta() {
   done
 }
 
-# 7z > tar uncompress
-function 7ztx() {
+# 7z > tar deflate
+function 7ztd() {
   for i in $@; do
     7z x -so $i.tar.7z | tar xf -
   done
 }
 
-# 7z compress directory
-function 7zd() {
-  for DIR in "$@"; do
-    7z ${OPTS_7Z} "$(basename $DIR).7z" "$DIR"
+# 7z compress
+function 7za() {
+  for i in "$@"; do
+    7z a ${OPTS_7Z} "$(basename $i).7z" "$i"
   done
+}
+
+# 7z deflate
+function 7zd() {
+  for i in "$@"; do
+    7z x "$i"
+  done
+}
+
+# Extract to tmp dir
+function _7zd() {
+  DIR="$1"
+  if [ ! -d "$1" ]; then
+	DIR="$(mktemp -d $(basename $1).XXXXXX)"
+	7z x "$1" -o"$DIR" 1>&2
+  fi
+  echo "$DIR"
 }
 
 # 7z deflate and ddiff
 function 7zddiff() {
-  TMP=$(mktemp -d)
-  for FILE in "$@"; do
-    7z x "$FILE" -o"$TMP"
+  DIR1=$(_7zd "$1")
+  for DIR2 in "${@:2}"; do
+    DIR2=$(_7zd "$DIR2")
     echo -e '\nDir diff list:'
-    ddiff "$TMP" . | grep -v "Only in ."
+    ddiff "$DIR1" "$DIR2" | grep -v "Only in $DIR1"
   done
 }
 
 # 7z deflate and diff
 function 7zdiff() {
-  TMP=$(mktemp -d)
-  for FILE in "$@"; do
-    7z x "$FILE" -o"$TMP"
-    echo -e '\nDiff list:'
-    diff -r "$TMP" . | grep -v "Only in ."
+  DIR1=$(_7zd "$1")
+  for DIR2 in "${@:2}"; do
+    DIR2=$(_7zd "$DIR2")
+    echo -e '\nDir diff list:'
+    diff -r "$DIR1" "$DIR2" | grep -v "Only in $DIR1"
   done
 }
 
 # 7z deflate and meld
 function 7zdiffm() {
-  TMP=$(mktemp -d)
-  for FILE in "$@"; do
-    7z x "$FILE" -o"$TMP"
-    meld "$TMP" .
+  DIR1=$(_7zd "$1")
+  for DIR2 in "${@:2}"; do
+    DIR2=$(_7zd "$DIR2")
+    echo -e '\nDir diff list:'
+    meld "$DIR1" "$DIR2"
   done
 }
