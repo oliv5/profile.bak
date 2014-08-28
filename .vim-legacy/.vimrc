@@ -195,7 +195,13 @@ set backspace=indent,eol,start
 "  :20  :  20 lines of command-line history
 "  %    :  buffer list
 "  n... :  viminfo file location
-set viminfo='10,\"100,:20,n~/.viminfo
+set viminfo='10,\"100,:20,n~/.vimdata/viminfo
+
+" Set directories
+set backupdir=~/.vimdata/backup
+set viewdir=~/.vimdata/view
+set directory=~/.vimdata/swap
+set undodir=~/.vimdata/undo
 
 " When using list, keep tabs at their full width and display `arrows':
 " (Character 187 is a right double-chevron, and 183 a mid-dot.)
