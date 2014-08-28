@@ -1,9 +1,0 @@
-" Use legacy after config if available {
-	if filereadable(expand("~/.vim-legacy/.vimrc.after"))
-		source ~/.vim-legacy/.vimrc.after
-	endif
-" }
-
-" User profile end {
-	let g:loaded_vimrc = 1
-" }

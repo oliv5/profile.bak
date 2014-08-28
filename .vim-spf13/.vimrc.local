@@ -29,6 +29,12 @@
 		set nu
 		map <localleader>n  :set nu!<CR>
 	endif
+	
+	" Scroll bars
+	if has('gui_running')
+		set guioptions+=rbh
+		set guioptions-=rl
+	endif
 
 	" Word/line wrap options
 	set nowrap              " No wrap by default
@@ -44,8 +50,17 @@
 	imap <C-space>  <C-x><C-u>
 " }
 
-" Use local after config if available {
-	if filereadable(expand("~/.vimrc.after.local"))
-		source ~/.vimrc.after.local
+" Disable unwanted SPF13 plugins {
+	UnBundle 'bling/vim-bufferline'
+	UnBundle 'spf13/vim-autoclose'
+" }
+
+" Use legacy after config if available {
+	if filereadable(expand("~/.vim-legacy/.vimrc.after"))
+		source ~/.vim-legacy/.vimrc.after
 	endif
+" }
+
+" User profile end {
+	let g:loaded_vimrc = 1
 " }
