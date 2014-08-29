@@ -2,9 +2,9 @@
 declare -a g_forward_stack=()
 
 # Pushd/popd based cd/back functions
-function cda { builtin cd "$@" && builtin pushd -n "$OLDPWD" >/dev/null; }
-function cdb { builtin popd >/dev/null && push g_forward_stack "$OLDPWD"; }
-function cdf { pop g_forward_stack DIR 2>/dev/null && cda "$DIR"; }
+function cda { builtin cd "$@" && builtin pushd -n "$OLDPWD" >/dev/null 2>&1; }
+function cdb { builtin popd >/dev/null 2>&1 && push g_forward_stack "$OLDPWD" && cd .; }
+function cdf { pop g_forward_stack DIR >/dev/null 2>&1 && cd "$DIR"; }
 
 # Aliases
 alias cd='cda'
