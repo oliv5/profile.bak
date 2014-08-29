@@ -63,17 +63,6 @@
 	endif
 " }
 
-" Configure SPF13 plugins {
-	" Disable unwanted SPF13 plugins
-	UnBundle 'bling/vim-bufferline'
-	UnBundle 'spf13/vim-autoclose'
-	
-	" MRU feature using tlib_vim
-	"call tlib#buffer#EnableMRU()
-	"FnNoremap <C-Tab>   :call tlib#buffer#DisableMRU()<BAR>exe "b" tlib#buffer#GetList(0,0,'mru')[0][1]<BAR>call tlib#buffer#EnableMRU()<CR>
-	"FnNoremap <C-S-Tab> :call tlib#buffer#DisableMRU()<BAR>exe "b" tlib#buffer#GetList(0,0,'mru')[0][1]<BAR>call tlib#buffer#EnableMRU()<CR>
-" }
-
 " Use legacy after config if available {
 	if filereadable(expand("~/.vim-legacy/.vimrc.after"))
 		source ~/.vim-legacy/.vimrc.after
