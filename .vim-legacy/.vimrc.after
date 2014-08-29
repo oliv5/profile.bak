@@ -744,7 +744,7 @@ FnNoremap <C-b><C-n>  :bn<CR>
 FnNoremap <C-b><C-p>  :bp<CR>
 FnNoremap <A-Down>    :bp<CR>
 FnNoremap <A-Up>      :bn<CR>
-if !hasmapto('<C-Tab>')
+if mapcheck('<C-Tab>')==''
 	FnNoremap <C-Tab>   :bn<CR>
 	FnNoremap <C-S-Tab> :bp<CR>
 endif
