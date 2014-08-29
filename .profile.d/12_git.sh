@@ -3,16 +3,27 @@
 export GIT_EDITOR="vim"
 export GIT_PAGER="cat"
 
-# alias
+# Status aliases
 alias gs='git status'
+alias gsm='git ls-files -m'
+alias gsu='git ls-files -u'
+alias gsd='git ls-files -d'
+# Diff aliases
 alias gdd='git diff'
 alias gdm='git difftool -y -t meld --'
-alias gsc='git-stash-push'
-alias gsb='git-stash-save --include-untracked'
-alias gsp='git stash pop'
-alias gsa='git stash apply'
+# Stash aliases
+alias gsc='git-stash-create'
+alias gsb='git-stash-create --include-untracked'
+alias gsp='git-stash-pop'
+alias gsa='git-stash-apply'
 alias gsl='git stash list'
 alias gss='git stash show -t'
+
+# Commit fct
+function git-ci() {
+  git add "$@"
+  git commit
+}
 
 # Meld called by git
 function git-meld() {
@@ -24,9 +35,25 @@ function git-modified() {
   ! git diff-index --quiet HEAD --
 }
 
-# Push changes onto stash
+# Push changes onto stash, revert changes
+function git-stash() {
+  git stash save "stash-$(date +%Y%m%d-%H%M)${1:+_$1}"
+}
+
+# Push changes onto stash, does not revert anything
+alias git-stash-create='git-stash-push'
 function git-stash-push() {
-  git stash save "stash-$(date +%Y%m%d-%H%M)${1:+_$1}" && git stash apply stash@{0}
+  git-stash "$@" && git stash apply stash@{0} >/dev/null
+}
+
+# Pop change from stash
+function git-stash-pop() {
+  git stash pop stash@{${1:-0}}
+}
+
+# Apply change from stash
+function git-stash-apply() {
+  git stash apply stash@{${1:-0}}
 }
 
 # Export a CL
