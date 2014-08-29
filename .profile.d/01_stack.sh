@@ -17,7 +17,7 @@ function push() {
 
 # Add to fifo
 # Call: add array elem1 .. elemN
-function add() {
+function padd() {
   eval "$1=(\"\${@:2}\" \"\${$1[@]}\")"
 }
 
@@ -33,8 +33,9 @@ function pdeln() {
   for i in $(seq $3 -1 $2); do
     eval unset $1[$i]
   done
+  RET=$?
   pack $1
-  [ $(eval expr \${#$1[@]}) -gt 0 ]
+  return $RET
 }
 
 # Delete n elements from head
@@ -144,6 +145,24 @@ function psedb() {
   #array0=("${array0[@]/%$2/$3}")
   eval "$1=(\"\${$1[@]/%\$2/\$3}\")"
 }
+
+# Display list
+function pdisp() {
+  eval echo "\${$1[@]}"
+}
+
+# clear list
+function pclear() {
+  eval "$1=()"
+}
+
+# Set list
+function pset() {
+  eval "$1=(${@:2})"
+}
+
+# Declare list
+alias pdeclare='declare -a'
 
 # Sanity test function
 function psanity() {
