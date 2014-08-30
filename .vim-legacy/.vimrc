@@ -198,10 +198,10 @@ set backspace=indent,eol,start
 set viminfo='10,\"100,:20,n~/.vimdata/viminfo
 
 " Set directories
-set backupdir=~/.vimdata/backup
-set viewdir=~/.vimdata/view
-set directory=~/.vimdata/swap
-set undodir=~/.vimdata/undo
+set backupdir=~/.vimdata/vimbackup
+set viewdir=~/.vimdata/vimview
+set directory=~/.vimdata/vimswap
+set undodir=~/.vimdata/vimundo
 
 " When using list, keep tabs at their full width and display `arrows':
 " (Character 187 is a right double-chevron, and 183 a mid-dot.)
