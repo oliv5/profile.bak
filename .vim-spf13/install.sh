@@ -3,8 +3,10 @@
 # Backup current config
 TODAY=`date +%Y%m%d`
 mkdir -p ~/.vimdata/vimbackup
-for VIM in ~/.vim ~/.vimrc*; do
-    mv -v $VIM ~/.vimdata/vimbackup/$(basename $VIM).$TODAY.bak
+for FILE in ~/.vim ~/.vimrc*; do
+  if [ ! -h $FILE ]; then
+    mv -v $FILE ~/.vimdata/vimbackup/$(basename $FILE).$TODAY.bak
+  fi
 done
 
 # Make links
@@ -16,4 +18,3 @@ for BUNDLE in ~/.vim-legacy/.vim/bundle/*; do
 done
 mkdir -p ~/.vim/plugin
 ln -fsv ~/.vim-legacy/.vim/plugin/*.vim ~/.vim/plugin/
-

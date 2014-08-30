@@ -57,6 +57,8 @@
 	" menu is open, tab will cycle through it. If a snippet is selected, <C-k>
 	" expands it and jumps between fields.
 	let g:spf13_noninvasive_completion = 1
+	" OLA++ bug fix for noninvasive_completion at line 843 "iunmap <CR>" in .vimrc 
+	imap <CR> <NOP>
 
 	" Don't turn conceallevel or concealcursor
 	"   let g:spf13_no_conceal = 1
@@ -87,16 +89,16 @@
 
 	" Do not enable plugin bufferline
 	"let g:bufferline_echo = 0
-	
+
 	" Disable youcompleteme auto trigger
 	let g:ycm_auto_trigger = 0
-	
+
 	" Disable neocomplcache auto complete
 	let g:neocomplcache_disable_auto_complete = 1
-	
+
 	" Disable vim-autoclose
 	"let g:autoclose_on = 0
-	
+
 	" vim-airline parameters
 	if has('gui_running')
 		" Enable the list of buffers
