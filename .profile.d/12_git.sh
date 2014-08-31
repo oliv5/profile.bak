@@ -18,12 +18,8 @@ alias gsp='git-stash-pop'
 alias gsa='git-stash-apply'
 alias gsl='git stash list'
 alias gss='git stash show -t'
-
-# Commit fct
-function git-ci() {
-  git add "$@"
-  git commit
-}
+# Commit aliases
+alias git-ci='git commit'
 
 # Meld called by git
 function git-meld() {
