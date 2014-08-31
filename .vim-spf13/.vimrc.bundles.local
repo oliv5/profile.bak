@@ -15,7 +15,7 @@
 	let g:loaded_yankring = 1
 	let g:loaded_cctree = 1
 	let g:command_t_loaded = 1
-	"let g:loaded_minibufexplorer = 1
+	let g:loaded_minibufexplorer = 1
 	"let g:loaded_yaifa = 1
 	"let g:loaded_ctrlp = 1
 	let g:loaded_buftabs = 1
@@ -28,7 +28,7 @@
 
 	" Load additional bundle config
 	if filereadable(expand("~/.vim-legacy/.vimrc.bundles"))
-	    source ~/.vim-legacy/.vimrc.bundles
+		source ~/.vim-legacy/.vimrc.bundles
 	endif
 " }
 
@@ -43,12 +43,34 @@
 	" Disable unwanted SPF13 plugins
 	UnBundle 'bling/vim-bufferline'
 	UnBundle 'spf13/vim-autoclose'
-	
+
+	"----------------------
 	" MRU feature using tlib_vim
-	"call tlib#buffer#EnableMRU()
-	"FnNoremap <C-Tab>   :call tlib#buffer#DisableMRU()<BAR>exe "b" tlib#buffer#GetList(0,0,'mru')[0][1]<BAR>call tlib#buffer#EnableMRU()<CR>
-	"FnNoremap <C-S-Tab> :call tlib#buffer#DisableMRU()<BAR>exe "b" tlib#buffer#GetList(0,0,'mru')[0][1]<BAR>call tlib#buffer#EnableMRU()<CR>
-	
+	let s:idx=0
+
+	function! s:MRUfirst()
+		call tlib#buffer#DisableMRU()
+		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
+		let s:idx=s:idx+1
+		if s:idx>=len(l:buflist)
+			let s:idx=0
+		endif
+		exe "b" l:buflist[s:idx]
+		call tlib#buffer#EnableMRU()
+	endfunction
+
+	function! s:MRUlast()
+		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
+		exe "b" l:buflist[len(l:buflist)-1]
+	endfunction
+
+	command! -nargs=0 -bar MRUfirst		call s:MRUfirst()
+	command! -nargs=0 -bar MRUlast		call s:MRUlast()
+
+	FnNoremap <C-Tab>		:MRUfirst<CR>
+	FnNoremap <C-S-Tab>		:MRUlast<CR>
+	"----------------------
+
 	" CtrlpFunky
 	FnNoremap <C-o><C-o>	:CtrlPFunky<CR>
 " }
