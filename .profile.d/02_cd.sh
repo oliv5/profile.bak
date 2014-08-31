@@ -13,6 +13,10 @@ function cda()  { builtin cd "$@" && ${PUSH:-true} && push g_backward_stack "$OL
 function cdb()  { pop g_backward_stack DIR 2>/dev/null && push g_forward_stack "$PWD" && pkeepq g_forward_stack $g_forward_stack_maxsize && PUSH=false cd "$DIR"; }
 function cdf()  { pop g_forward_stack DIR 2>/dev/null && push g_backward_stack "$PWD" && pkeepq g_backward_stack $g_backward_stack_maxsize && PUSH=false cd "$DIR"; }
 
+# Overload pushd and popd functions
+function pushd { builtin pushd "$@" >/dev/null 2>&1; }
+function popd  { builtin popd  "$@" >/dev/null 2>&1; }
+
 # Alias (do not put this before cdb function definition)
 alias scd='echo "backward[${#g_backward_stack[@]}]: ${g_backward_stack[@]}"; echo "forward[${#g_forward_stack[@]}]: ${g_forward_stack[@]}"'
 alias cd='cda'
