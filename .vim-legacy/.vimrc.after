@@ -613,40 +613,40 @@ augroup exit_to_normal
 augroup END
 
 " Zoom In/out window
-function! s:ZoomWindow() abort
-	if exists('s:zw_restore')
-		execute s:zw_restore
-		unlet s:zw_restore
-		au! ZoomWindow
+function! s:ZoomWnd() abort
+	if exists('s:zoomWndFlag')
+		execute s:zoomWndFlag
+		unlet s:zoomWndFlag
+		au! ZoomWnd
 	else
-		let s:zw_restore = winrestcmd()
+		let s:zoomWndFlag = winrestcmd()
 		"vert resize
 		wincmd _
 		wincmd |
-		augroup ZoomWindow
-			au! WinLeave * call s:ZoomWindow()
+		augroup ZoomWnd
+			au! WinLeave * call s:ZoomWnd()
 		augroup END
 	endif
 endfunction
 
 " Toggles window max/equal
-function! s:WndToggleMax()
+function! s:ToggleWndMax()
 	if exists('s:wndMaxFlag')
-		au! maxCurrWin
-		wincmd =
+		execute s:wndMaxFlag
 		unlet s:wndMaxFlag
+		au! maxCurrWin
 	else
+		let s:wndMaxFlag = winrestcmd()
+		do maxCurrWin WinEnter
 		augroup maxCurrWin
 			au! WinEnter * wincmd _ | wincmd |
 		augroup END
-		do maxCurrWin WinEnter
-		let s:wndMaxFlag=1
 	endif
 endfunction
 
 " Key maps
-nnoremap <localleader>w     :call <SID>WndToggleMax()<CR>
-nnoremap <localleader>x     :call <SID>ZoomWindow()<CR>
+nnoremap <localleader>w     :call <SID>ToggleWndMax()<CR>
+nnoremap <localleader>x     :call <SID>ZoomWnd()<CR>
 
 
 " *******************************************************
