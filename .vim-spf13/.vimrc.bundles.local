@@ -61,7 +61,7 @@
 
 	function! s:MRUlast()
 		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
-		exe "b" l:buflist[len(l:buflist)-1]
+		exe "b" l:buflist[-1]
 	endfunction
 
 	command! -nargs=0 -bar MRUfirst		call s:MRUfirst()
