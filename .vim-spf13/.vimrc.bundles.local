@@ -46,29 +46,34 @@
 
 	"----------------------
 	" MRU feature using tlib_vim
-	let s:idx=0
+	let s:idx_backward=0
+	let s:idx_forward=0
 
-	function! s:MRUfirst()
-		call tlib#buffer#DisableMRU()
+	function! s:MRUbackward()
 		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
-		let s:idx=s:idx+1
-		if s:idx>=len(l:buflist)
-			let s:idx=0
+		let s:idx_forward=0
+		let s:idx_backward=s:idx_backward+1
+		if s:idx_backward>=len(l:buflist)
+			let s:idx_backward=0
 		endif
-		exe "b" l:buflist[s:idx]
-		call tlib#buffer#EnableMRU()
+		exe "b" l:buflist[s:idx_backward]
 	endfunction
 
-	function! s:MRUlast()
+	function! s:MRUforward()
 		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
-		exe "b" l:buflist[-1]
+		let s:idx_backward=0
+		let s:idx_forward=s:idx_forward+1
+		if s:idx_forward>=len(l:buflist)
+			let s:idx_forward=0
+		endif
+		exe "b" l:buflist[s:idx_forward]
 	endfunction
 
-	command! -nargs=0 -bar MRUfirst		call s:MRUfirst()
-	command! -nargs=0 -bar MRUlast		call s:MRUlast()
+	command! -nargs=0 -bar MRUbackward	call s:MRUbackward()
+	command! -nargs=0 -bar MRUforward	call s:MRUforward()
 
-	FnNoremap <C-Tab>		:MRUfirst<CR>
-	FnNoremap <C-S-Tab>		:MRUlast<CR>
+	FnNoremap <C-Tab>		:MRUbackward<CR>
+	FnNoremap <C-S-Tab>		:MRUforward<CR>
 	"----------------------
 
 	" CtrlpFunky
