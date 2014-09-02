@@ -52,21 +52,35 @@
 	function! s:MRUbackward()
 		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
 		let s:idx_forward=0
-		let s:idx_backward=s:idx_backward+1
-		if s:idx_backward>=len(l:buflist)
-			let s:idx_backward=0
+		if s:idx_backward<(len(l:buflist)-1)
+			let s:idx_backward=(s:idx_backward+1)
 		endif
 		exe "b" l:buflist[s:idx_backward]
+		" ---------------------------------
+		"let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
+		"let s:idx_backward=(s:idx_backward+1)
+		"if s:idx_backward==len(l:buflist)
+		"	" Skip 0, except if len=1
+		"	let s:idx_backward=(s:idx_backward+1)%len(l:buflist)
+		"endif
+		"exe "b" l:buflist[s:idx_backward]
 	endfunction
 
 	function! s:MRUforward()
 		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
 		let s:idx_backward=0
-		let s:idx_forward=s:idx_forward+1
-		if s:idx_forward>=len(l:buflist)
-			let s:idx_forward=0
+		if s:idx_forward<(len(l:buflist)-1)
+			let s:idx_forward=(s:idx_forward+1)
 		endif
 		exe "b" l:buflist[s:idx_forward]
+		" ---------------------------------
+		"let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
+		"let s:idx_forward=(s:idx_forward+1)
+		"if s:idx_forward>=len(l:buflist)
+		"	" Skip 0, except if len=1
+		"	let s:idx_forward=(s:idx_forward+1)%len(l:buflist)
+		"endif
+		"exe "b" l:buflist[s:idx_forward]
 	endfunction
 
 	command! -nargs=0 -bar MRUbackward	call s:MRUbackward()
