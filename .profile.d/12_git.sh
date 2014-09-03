@@ -11,13 +11,14 @@ alias gsd='git ls-files -d'
 # Diff aliases
 alias gdd='git diff'
 alias gdm='git difftool -y -t meld --'
+alias gds='git stash show -t'
 # Stash aliases
-alias gsc='git-stash-create'
-alias gsb='git-stash-create --include-untracked'
+alias gsc='git-stash-push'
+alias gss='git-stash-save'
+alias gsb='git-stash-save --include-untracked'
 alias gsp='git-stash-pop'
 alias gsa='git-stash-apply'
 alias gsl='git stash list'
-alias gss='git stash show -t'
 # Commit aliases
 alias git-ci='git commit'
 
@@ -32,14 +33,13 @@ function git-modified() {
 }
 
 # Push changes onto stash, revert changes
-function git-stash() {
+function git-stash-push() {
   git stash save "stash-$(date +%Y%m%d-%H%M)${1:+_$1}"
 }
 
 # Push changes onto stash, does not revert anything
-alias git-stash-create='git-stash-push'
-function git-stash-push() {
-  git-stash "$@" && git stash apply stash@{0} >/dev/null
+function git-stash-save() {
+  git-stash-push "$@" && git stash apply stash@{0} >/dev/null
 }
 
 # Pop change from stash
