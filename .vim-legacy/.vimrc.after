@@ -654,16 +654,13 @@ nnoremap <localleader>x     :call <SID>ZoomWnd()<CR>
 " *******************************************************
 " Close buffer
 function! s:BufClose(...)
-	let idx=''
-	if a:0
-		let idx=a:1
-	endif
+	let idx = (a:0 ? a:1 : '')
 	if exists(':Bdelete')
 		execute 'silent! Bdelete' idx
 	elseif exists(':MBEbd')
 		execute 'MBEbd' idx
 	else
-		bdelete idx
+		execute 'bdelete' idx
 	endif
 endfunction
 
