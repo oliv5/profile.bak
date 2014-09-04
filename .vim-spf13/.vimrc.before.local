@@ -6,6 +6,9 @@
 
 " spf13 options {
 
+	" Override SPF13 plugins, don't load them
+	"let g:override_spf13_bundles = 1
+	
 	" Select the buffer group
 	let g:spf13_bundle_groups=['general', 'neocomplcache', 'programming', 'python', 'php', 'javascript', 'html', 'misc']
 
@@ -101,10 +104,20 @@
 
 	" vim-airline parameters
 	if has('gui_running')
-		" Enable the list of buffers
+		" Theme
+		let g:airline_theme = 'molokai'
+		" Sections
+		let g:airline_section_c = '%<%F%m %#__accent_red#%{airline#util#wrap(airline#parts#readonly(),0)}%#__restore__#'
+		" Enable the tabline extension
 		let g:airline#extensions#tabline#enabled = 1
-		" Show just the filename
+		" Show the filename (:t) or full path (:p) or collapsed (:~:.) or relative (:p:.)
 		let g:airline#extensions#tabline#fnamemod = ':t'
+		let g:airline#extensions#tabline#fnamecollapse = 0
+		" Separators
+		let g:airline#extensions#tabline#left_sep = ' '
+		let g:airline#extensions#tabline#left_alt_sep = ''
+		" Show buffer number
+		let g:airline#extensions#tabline#buffer_nr_show = 1
 	endif
 
 " }

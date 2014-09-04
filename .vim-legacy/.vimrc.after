@@ -56,7 +56,7 @@ function! g:FindRootDir()
 endfunction
 
 " Directory autochange
-if 1
+if !exists('g:vimrc_noautochdir')
 	if 0
 		" Look for the best directory
 		autocmd! BufEnter * execute "lcd" g:FindRootDir()
@@ -203,7 +203,7 @@ vnoremap <C-l>      L
 " *******************************************************
 " } Statusline {
 " *******************************************************
-if !exists('g:loaded_airline')
+if !exists('g:loaded_airline') && !exists('g:vimrc_nostatusline')
 
 	" Returns "mixed" when indentation is mixed
 	function! b:StatuslineWarning()
@@ -660,7 +660,7 @@ function! s:BufClose(...)
 	elseif exists(':MBEbd')
 		execute 'MBEbd' idx
 	else
-		execute 'bdelete' idx
+		execute 'bdelete!' idx
 	endif
 endfunction
 

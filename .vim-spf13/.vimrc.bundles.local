@@ -25,6 +25,9 @@
 	let g:omnicpp_complete_loaded = 1
 	let g:clang_complete_loaded = 1
 	let g:loaded_commentary = 1
+	
+	" Disable my statusline
+	let g:vimrc_nostatusline = 1
 
 	" Load additional bundle config
 	if filereadable(expand("~/.vim-legacy/.vimrc.bundles"))
@@ -44,52 +47,9 @@
 	UnBundle 'bling/vim-bufferline'
 	UnBundle 'spf13/vim-autoclose'
 
-	"----------------------
-	" MRU feature using tlib_vim
-	let s:idx_backward=0
-	let s:idx_forward=0
-
-	function! s:MRUbackward()
-		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
-		let s:idx_forward=0
-		if s:idx_backward<(len(l:buflist)-1)
-			let s:idx_backward=(s:idx_backward+1)
-		endif
-		exe "b" l:buflist[s:idx_backward]
-		" ---------------------------------
-		"let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
-		"let s:idx_backward=(s:idx_backward+1)
-		"if s:idx_backward==len(l:buflist)
-		"	" Skip 0, except if len=1
-		"	let s:idx_backward=(s:idx_backward+1)%len(l:buflist)
-		"endif
-		"exe "b" l:buflist[s:idx_backward]
-	endfunction
-
-	function! s:MRUforward()
-		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
-		let s:idx_backward=0
-		if s:idx_forward<(len(l:buflist)-1)
-			let s:idx_forward=(s:idx_forward+1)
-		endif
-		exe "b" l:buflist[s:idx_forward]
-		" ---------------------------------
-		"let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
-		"let s:idx_forward=(s:idx_forward+1)
-		"if s:idx_forward>=len(l:buflist)
-		"	" Skip 0, except if len=1
-		"	let s:idx_forward=(s:idx_forward+1)%len(l:buflist)
-		"endif
-		"exe "b" l:buflist[s:idx_forward]
-	endfunction
-
-	command! -nargs=0 -bar MRUbackward	call s:MRUbackward()
-	command! -nargs=0 -bar MRUforward	call s:MRUforward()
-
-	FnNoremap <C-Tab>		:MRUbackward<CR>
-	FnNoremap <C-S-Tab>		:MRUforward<CR>
-	"----------------------
-
 	" CtrlpFunky
 	FnNoremap <C-o><C-o>	:CtrlPFunky<CR>
+	
+	" Neosnippet
+	let g:neosnippet#disable_select_mode_mappings = 0
 " }

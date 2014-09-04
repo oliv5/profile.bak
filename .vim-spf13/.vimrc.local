@@ -19,9 +19,7 @@
 		"set guifont=Lucida_Console:h11
 		set guifont=Monospace\ 9
 	endif
-" }
 
-" Text formatting {
 	" Cursor
 	set nocursorline
 	set scrolloff=0
@@ -35,7 +33,9 @@
 		set guioptions+=rbh
 		set guioptions-=rl
 	endif
+" }
 
+" Text formatting {
 	" Word/line wrap options
 	set nowrap              " No wrap by default
 	nnoremap <localleader>w  :set invwrap<CR>
@@ -43,9 +43,16 @@
 	" Show all characters
 	set nolist              " Do not show all characters by default
 	nnoremap <localleader>c  :set invlist<CR>
+
+	" Word spelling
+	set nospell
+	autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl set spell spelllang=en_us
 " }
 
 " Misc configuration {
+	" Autochange dir
+	let g:vimrc_noautochdir = 1
+	
 	" Autocompletion
 	imap <C-space>  <C-x><C-u>
 
@@ -61,6 +68,68 @@
 	  let &t_EI .= "\<Esc>[?2004l"
 	  inoremap <special> <expr> <Esc>[200~ XTermPasteBegin()
 	endif
+" }
+
+" MRU using tlib {
+	silent! call tlib#buffer#EnableMRU()
+	let s:mru_backward=0
+	let s:mru_forward=0
+	let s:mru_reset=0
+
+	function! s:MRUreset()
+		if s:mru_reset!=0
+			let s:mru_backward=0
+			let s:mru_forward=0
+		endif
+		let s:mru_reset = 1
+	endfunction
+
+	function! s:MRUbackward()
+		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
+		let s:mru_reset = 0
+		let s:mru_forward = 0
+		if s:mru_backward<(len(l:buflist)-1)
+			let s:mru_backward = (s:mru_backward+1)
+		endif
+		exe "b" l:buflist[s:mru_backward]
+		" ---------------------------------
+		"let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
+		"let s:mru_backward=(s:mru_backward+1)
+		"if s:mru_backward==len(l:buflist)
+		"	" Skip 0, except if len=1
+		"	let s:mru_backward=(s:mru_backward+1)%len(l:buflist)
+		"endif
+		"exe "b" l:buflist[s:mru_backward]
+	endfunction
+
+	function! s:MRUforward()
+		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
+		let s:mru_reset = 0
+		let s:mru_backward = 0
+		if s:mru_forward<(len(l:buflist)-1)
+			let s:mru_forward = (s:mru_forward+1)
+		endif
+		exe "b" l:buflist[s:mru_forward]
+		" ---------------------------------
+		"let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
+		"let s:mru_forward=(s:mru_forward+1)
+		"if s:mru_forward>=len(l:buflist)
+		"	" Skip 0, except if len=1
+		"	let s:mru_forward=(s:mru_forward+1)%len(l:buflist)
+		"endif
+		"exe "b" l:buflist[s:mru_forward]
+	endfunction
+	
+	command! -nargs=0 -bar MRUbackward	call s:MRUbackward()
+	command! -nargs=0 -bar MRUforward	call s:MRUforward()
+
+	silent! augroup! MRU
+	augroup MRU
+		au BufEnter * 		call <SID>MRUreset()
+	augroup END
+	
+	FnNoremap <C-Tab>		:MRUbackward<CR>
+	FnNoremap <C-S-Tab>		:MRUforward<CR>
 " }
 
 " Use legacy after config if available {
