@@ -46,7 +46,7 @@
 
 	" Word spelling
 	set nospell
-	autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl set spell spelllang=en_us
+	autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl setlocal spell spelllang=en_us
 " }
 
 " Misc configuration {
@@ -74,7 +74,7 @@
 	silent! call tlib#buffer#EnableMRU()
 	let s:mru_backward=0
 	let s:mru_forward=0
-	let s:mru_reset=0
+	let s:mru_reset=1
 
 	function! s:MRUreset()
 		if s:mru_reset!=0

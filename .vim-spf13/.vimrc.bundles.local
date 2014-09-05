@@ -50,6 +50,7 @@
 
 	" CtrlpFunky
 	FnNoremap <C-o><C-o>	:CtrlPFunky<CR>
+	FnNoremap <C-p><C-p>	:CtrlPFunky<CR>
 	
 	" Neosnippet
 	let g:neosnippet#disable_select_mode_mappings = 0
