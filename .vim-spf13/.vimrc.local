@@ -92,14 +92,6 @@
 			let s:mru_backward = (s:mru_backward+1)
 		endif
 		exe "b" l:buflist[s:mru_backward]
-		" ---------------------------------
-		"let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
-		"let s:mru_backward=(s:mru_backward+1)
-		"if s:mru_backward==len(l:buflist)
-		"	" Skip 0, except if len=1
-		"	let s:mru_backward=(s:mru_backward+1)%len(l:buflist)
-		"endif
-		"exe "b" l:buflist[s:mru_backward]
 	endfunction
 
 	function! s:MRUforward()
@@ -110,14 +102,6 @@
 			let s:mru_forward = (s:mru_forward+1)
 		endif
 		exe "b" l:buflist[s:mru_forward]
-		" ---------------------------------
-		"let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
-		"let s:mru_forward=(s:mru_forward+1)
-		"if s:mru_forward>=len(l:buflist)
-		"	" Skip 0, except if len=1
-		"	let s:mru_forward=(s:mru_forward+1)%len(l:buflist)
-		"endif
-		"exe "b" l:buflist[s:mru_forward]
 	endfunction
 	
 	command! -nargs=0 -bar MRUbackward	call s:MRUbackward()
