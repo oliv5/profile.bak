@@ -1,0 +1,384 @@
+*bufline.txt*      For Vim version 7.4  Last change: 2014 May 19
+
+------------------------------------------------------------------------------
+                  BufLine script - user manual           *bufline* *BufLine*
+
+Index: ~
+
+|bufline-intro|         Introduction
+|bufline-scrolling|     Scrolling the BufLine
+|bufline-filters|       Managing filters
+|bufline-mapping|       Default script mappings
+|bufline-highlighting|  Highlight groups
+|bufline-settings|      Script settings
+|bufline-license|       Licence
+
+
+------------------------------------------------------------------------------
+                          Introduction                *bufline-intro*
+
+   BufLine is a VIM script that displays the list of currently available
+buffers in your |tabline|. Since the VIM |tabline| is always one row high, the
+script adds a scrolling feature and a setting to control if the BufLine is
+automatically scrolled to always show your currently edited buffer.
+Furthermore, you may exclude some buffers from the BufLine by applying a
+filter and/or limiting the maximal displayed filename length.
+
+   See |bufline-scrolling|, |bufline-autoscroll|, |bufline-filters| and
+|bufline-bufname-maxlength|.
+
+   You can set-up the default mappings, starting with your preferred prefix,
+such as "<Leader>b". For more information on feature, see |bufline-mappings|.
+
+   The tabline is not mouse-interactive, so the script serves only as a visual
+index into your buffers list.
+
+   This script was inspired by the miniBufExpl VIM script, available at
+www.vim.org.
+
+
+------------------------------------------------------------------------------
+                      Scrolling the BufLine           *bufline-scrolling*
+
+   If some buffers are not shown in the tabline, an appropriate arrow will
+show or illuminate, according to your |bufline-arrows-placement| and
+|bufline-show-inactive-arrows|. You may redefine how the arrows look by
+modifying the |bufline-left-arrow| and |bufline-right-arrow| settings.
+
+   You may manually scroll the BufLine by calling *BufLine_ScrollLeft()* and
+*BufLine_ScrollRight()* functions. It is also possible to set-up the BufLine,
+such that it will always show your currently edited buffer, automatically
+scrolling if necessary. In order to do it, you must set the |bufline-autoscroll|
+setting to one.
+
+   Ex.: ~
+
+   Scrolling manually: >
+
+   :call BufLine_ScrollLeft()
+   :call BufLine_ScrollRight()
+<
+   Enabling the autoscroll from your |.vimrc| file: >
+
+   :let g:bufline_autoscroll = 1
+<
+   Enabling the autoscroll on the fly: >
+
+   :call BufLine_SetSetting('autoscroll', 1)
+<
+
+------------------------------------------------------------------------------
+                         Managing filters             *bufline-filters*
+
+   The filter is a pattern that defines which buffers should be displayed in
+the tabline. You can set the filter pattern by calling the *BufLine_SetFilter()*
+function. You can further straighten your filtering condition by calling the
+*BufLine_AddFilter()* function. Several helper functions are available to add a
+specific filter function:
+
+   - *BufLine_FilterFromExt()* will add a filter that passes through only files
+      that end with a provided extension;
+
+   - *BufLine_FilterFromCurExt()* will add a filter to only allow files with the
+      same extension as the currently edited one;
+
+   - *BufLine_FilterFromCurPath()* will filter out files that are not in the
+      subdirectory of the currently edited files' directory.
+
+   You may see the current filtering pattern in the beginning of your tabline
+if your |bufline-show-filter| setting is on. Once you no longer need your
+filter, you may call the *BufLine_SetDefaultFilter()* function to reset the
+filtering condition to its default value, determined by
+|bufline-default-filter| setting.
+
+   Ex.: ~
+
+   Only display buffers when their associated file contains substring "foo": >
+
+   :call BufLine_SetFilter('foo') 
+<
+   Straighten the condition to only those filenames, ending with ".txt": >
+
+   :call BufLine_FilterFromExt('txt')
+<
+   Removing the filter: >
+
+   :call BufLine_SetDefaultFilter()
+<
+   ----~
+
+
+   An alternative to this is to use the filter stack to store and restore
+your filters. You do so using *BufLine_PushFilter()* and *BufLine_PopFilter()*
+functions. This feature can be useful if you have a complex filter active,
+and want to temporarily change it: first you call the BufLine_PushFilter(),
+then you modify the filter; once you want to get back to your previous
+filter, you simply call the BufLine_PopFilter(). You may also temporarily
+disable the current filtering condition by using the
+*BufLine_ToggleFiltering()* function or modifying the |bufline-filtering|
+setting.
+
+   Ex.: ~
+
+   Editing C files: >
+
+   :call BufLine_FilterFromExt('c')
+<
+   Further restrict filenames to those contained within the same branch of
+   the source tree as the currently edited file: >
+
+   :call BufLine_PushFilter()
+   :call BufLine_FilterFromCurPath()
+<
+   Back to all C files: >
+
+   :call BufLine_PopFilter()
+<
+   Disable all the filtering temporarily and re-enabling it back: >
+
+   :call BufLine_ToggleFiltering()
+   :call BufLine_ToggleFiltering()
+<
+   ---- ~
+
+
+   By default, the filtering is case-sensitive unless you are using Windows
+OS. To override the behaviour, modify the |bufline-case-sensitivity| setting
+or use the *BufLine_CycleSensitivity()* function.
+
+   Ex.: ~
+
+   Case-insensitive "foo" substring filter: >
+
+   :call BufLine_SetFiter('foo')
+   :call BufLine_SetSetting('case-sensitivity', 2)
+<
+   Add extension filter and make a filtering case-sensitive: >
+
+   :call BufLine_FilterFromCurExt()
+   :call BufLine_SetSetting('case-sensitivity', 1)
+<
+   Back to OS default: >
+
+   :call BufLine_SetSetting('case-sensitivity', 0)
+<
+
+------------------------------------------------------------------------------
+                     Default script mappings          *bufline-mappings*
+
+   A set of useful mapping can be defined by calling
+*BufLine_InitializeMappings()* with a string argument. The argument is the
+prefix used for all mappings as per |:nnoremap| command. It is a good idea to
+put something like a following line into your |.vimrc|: >
+
+   :call BufLine_InitializeMappings('<Leader>b')
+<
+   Once such a |.vimrc| was sourced, you will have access to the set of mappings
+via <Leader>bx, where the x is a character from the following table:
+
+   f  - request a filter pattern from user, add it to the current filter;
+   F  - request a filter pattern from user, set it as the current filter;
+   e  - add a filter from the current files' extension;
+   E  - request an extension from user, add it to the current filter;
+   n  - add a filter from the current files' path;
+   d  - reset filter to the default;
+   p  - push current filter into the filter stack;
+   P  - pop filter of the top of the filter stack and make it current;
+   t  - toggle filtering on and off;
+   s  - cycle through the |bufline-case-sensitivity| options;
+   h  - scroll left;
+   l  - scroll right.
+
+
+------------------------------------------------------------------------------
+                         Highlight groups             *bufline-highlighting*
+
+   The script defines several highlight groups to signify certain information
+about the specific tabline element with a color. The default colors for light
+and dark background for gVim are in the following table in RGB format. Color
+values for colored terminals approximate these colors. All the groups use
+default background, with an exception of BufLineFilter, which is #C0C0C0 on
+the light background and #003030 on the dark background.
+
+   Group name:                Color (light/dark):  Flags:
+
+   *BufLineHidden*              #303030/#008000      italic
+   *BufLineInactive*            #101010/#00B000
+   *BufLineActive*              #000000/#00FF00      bold
+   *BufLineHiddenModified*      #602020/#808000      italic
+   *BufLineInactiveModified*    #802020/#B0B000
+   *BufLineActiveModified*      #800000/#FFFF00      bold
+   *BufLineFilter*              #000000/#00FF00
+   *BufLineFilterDisabled*      #E0E0E0/#002000
+   *BufLineArrow*               #000000/#00FF00      bold
+   *BufLineArrowInactive*       #E0E0E0/#002000
+   
+   For the purpose of highlight groups naming: hidden buffer is the buffer not
+currently displayed anywhere; active buffer is the buffer displayed in the
+currently focused split; inactive buffer is the buffer displayed in the
+non-focused split.
+
+
+------------------------------------------------------------------------------
+                         Script settings              *bufline-settings*
+
+   You may set the following settings either by using the |:let| command with
+the specified variable name. This approach is fine if you put the :let lines
+into your |.vimrc|, but not so good for on-the-fly setting modification: the
+changes you've made will only be shown on the next tabline update, which is
+triggered by certain events. As an alternative, you may call the
+*BufLine_SetSetting()* function, supplying it with an argument, with removed
+g:bufline_ prefix, and a new value. For instance, to set the
+g:bufline_left_arrow variable and instantly refresh the tabline, you could
+type: >
+   
+   :call BufLine_SetSetting('left_arrow', ' <- ')
+<
+   The list of all available settings:
+
+   g:bufline_left_arrow                *bufline-left-arrow*
+
+      The string to use for the left arrow.
+      Default: " ◀ ".
+
+   g:bufline_right_arrow               *bufline-right-arrow*
+
+      The string to use for the right arrow.
+      Default: " ▶ ".
+
+
+   g:bufline_arrows_placement          *bufline-arrows-placement*
+
+      The placement of arrows:
+         0 - place arrows on the opposite sides of the tabline;
+         1 - place both arrows on the leftmost side of the tabline;
+         2 - place both arrows on the rightmost side of the tabline;
+      Default: 0.
+
+
+   g:bufline_show_inactive_arrows      *bufline-show-inactive-arrows*
+   
+      Set to one to show the arrows with inactive coloring even when
+      there are no buffers out of displayed range of the tabline.
+      Default: 0.
+
+
+   g:bufline_modified_sign             *bufline-modified-sign*
+
+      A string to display to the right of the buffer name if it has unsaved
+      changes.
+      Default: "".
+
+
+   g:bufline_default_filter            *bufline-default-filter*
+
+      A filter to use as the default.
+      Default: ".*".
+
+
+   g:bufline_show_filter               *bufline-show-filter*
+
+      Whether to show the filter in the tabline (1) or not (0).
+      Default: 1.
+
+
+   g:bufline_filtering                 *bufline-filtering*
+
+      One if the filtering is enabled, zero otherwise.
+      Default: 1.
+      See also: |BufLine_ToggleFiltering()|
+
+
+   g:bufline_autoscroll                *bufline-autoscroll*
+
+      Whether to follow an active buffer (1) or not (0).
+      Default: 1.
+
+
+   g:bufline_bufname_maxlength         *bufline-bufname-maxlength*
+
+      Shorten the filename to given number of characters plus extension.
+      If set to 0, no shortening will be done.
+      Default: 0.
+      
+
+   g:bufline_case_sensitivity          *bufline-case-sensitivity*
+
+      The case sensitivity of the filter:
+         0 - yes, except for Windows system;
+         1 - yes
+         2 - no
+      Default: 0.
+
+
+------------------------------------------------------------------------------
+                                 License                 *bufline-license*
+
+   The script is distributed on conditions, defined by a 3-clause BSD
+license. The full license text follows: >
+
+   Copyright © 2014, Gleevoy Valentin AKA SbT
+   All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
+   met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the script author nor the names of its
+      contributors may be used to endorse or promote products derived from
+      this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+   TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+   PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE
+   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+   POSSIBILITY OF SUCH DAMAGE.
+<
+   
+   This documentation file is distributed on condition, defined by the BSD
+documentation licence. The fill license text follows: >
+
+   Redistribution and use in source (Docbook format) and 'compiled' forms
+   (PDF, PostScript, HTML, RTF, etc), with or without modification, are
+   permitted provided that the following conditions are met:
+
+   1. Redistributions of source code (Docbook format) must retain the
+      above copyright notice, this list of conditions and the following
+      disclaimer.
+
+   2. Redistributions in compiled form (transformed to other DTDs,
+      converted to PDF, PostScript, HTML, RTF, and other formats) must
+      reproduce the above copyright notice, this list of conditions and the
+      following disclaimer in the documentation and/or other materials
+      provided with the distribution.
+
+   3. The name of the author may not be used to endorse or promote
+      products derived from this documentation without specific prior
+      written permission.
+
+   THIS DOCUMENTATION IS PROVIDED BY THE AUTHOR ``AS IS AND ANY EXPRESS
+   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+   DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
+   INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+   SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+   STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+   IN ANY WAY OUT OF THE USE OF THIS DOCUMENTATION, EVEN IF ADVISED OF
+   THE POSSIBILITY OF SUCH DAMAGE.
+
+
+------------------------------------------------------------------------------
+vim:ft=help:norl:
+
