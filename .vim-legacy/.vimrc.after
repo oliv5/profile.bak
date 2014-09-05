@@ -59,7 +59,9 @@ endfunction
 if !exists('g:vimrc_noautochdir')
 	if 0
 		" Look for the best directory
-		autocmd! BufEnter * execute "lcd" g:FindRootDir()
+		augroup autochdir
+			autocmd! BufEnter * execute "lcd" g:FindRootDir()
+		augroup END
 	elseif exists('+autochdir')
 		" Automated directory change
 		set autochdir
@@ -637,10 +639,10 @@ function! s:ToggleWndMax()
 		au! maxCurrWin
 	else
 		let s:wndMaxFlag = winrestcmd()
-		do maxCurrWin WinEnter
 		augroup maxCurrWin
 			au! WinEnter * wincmd _ | wincmd |
 		augroup END
+		do maxCurrWin WinEnter
 	endif
 endfunction
 
