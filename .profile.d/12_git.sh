@@ -21,6 +21,9 @@ alias gsa='git-stash-apply'
 alias gsl='git stash list'
 # Commit aliases
 alias git-ci='git commit'
+# Gitignore
+alias gil='git-ignore-list'
+alias gia='git-ignore-add'
 
 # Meld called by git
 function git-meld() {
@@ -85,9 +88,13 @@ function git-resume() {
   git-import "$1"
 }
 
-# Hard revert to a given CL
+# Hard revert to a given CL or revert a file
 function git-revert() {
-  git reset --hard ${1:-HEAD} "${@:2}"
+  if [ -f "$1" -o -f "$2" ]; then
+    git checkout -- "$@"
+  else
+    git reset --hard ${1:-HEAD} "${@:2}"
+  fi
 }
 
 # Soft revert to a given CL, won't change modified files
@@ -162,4 +169,14 @@ function git-ci() {
 # Git history
 function git-history() {
   git log -p "$@"
+}
+
+# Git add gitignore
+function git-ignore-add() {
+  grep "$1" .gitignore >/dev/null || echo "$1" >>.gitignore
+}
+
+# Git list gitignore
+function git-ignore-list() {
+  git status -s --ignored 2>/dev/null || git clean -ndX
 }
