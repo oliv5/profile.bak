@@ -1,0 +1,4 @@
+[$HOME/bin/z]
+pull     = git pull --rebase
+push     = true
+commit   = true
