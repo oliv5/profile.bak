@@ -1,4 +1,9 @@
 [${XDG_CONFIG_HOME:-$HOME/.config}/vcsh/repo.d/profile.git]
+checkout = 
+	cd $HOME
+	git clone https://oliv5@github.com/oliv5/profile.git
+	cd profile
+	git remote add upstream https://oliv5@github.com/oliv5/profile.git
 pull     = vcsh profile remote | xargs -l -I{} vcsh profile pull --rebase {} master
 push     = vcsh profile remote | xargs -l vcsh profile push
 status   = vcsh profile status
