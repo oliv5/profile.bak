@@ -28,3 +28,12 @@ function get-passwd() {
   stty echo; trap SIGINT
   echo $PASSWD
 }
+
+#wget mirror website
+function wget-mirror() {
+  SITE=${1:?Please specify the URL}
+  DOMAIN=$(sed -E 's;^https?://([^/]*)/.*$;\1;' <<< $SITE)
+  LEVEL=9999
+  LIMITRATE=200k
+  wget --recursive -l$LEVEL --no-parent --no-directories --no-clobber --domains $DOMAIN --convert-links --html-extension --page-requisites -e robots=off -U mozilla --limit-rate=$LIMITRATE --random-wait $SITE
+}
