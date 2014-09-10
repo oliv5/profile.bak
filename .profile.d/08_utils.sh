@@ -37,3 +37,14 @@ function wget-mirror() {
   LIMITRATE=200k
   wget --recursive -l$LEVEL --no-parent --no-directories --no-clobber --domains $DOMAIN --convert-links --html-extension --page-requisites -e robots=off -U mozilla --limit-rate=$LIMITRATE --random-wait $SITE
 }
+
+# Hex to signed decimal
+function hex2int() {
+	#MAX=$(( 1 << ${2:-32} ))
+	#MEAN=$(($(($MAX >> 1)) - 1))
+	let "MAX=1<<${2:-32}"
+	let "MEAN=($MAX >> 1) - 1"
+    RES=$(printf "%d" "$1")
+    (( RES > $MEAN )) && (( RES -= $MAX )) 
+    echo $RES
+}
