@@ -49,6 +49,7 @@
 	UnBundle 'spf13/vim-autoclose'
 
 	" CtrlpFunky
+	let g:ctrlp_funky_syntax_highlight = 1
 	FnNoremap <C-o><C-o>	:CtrlPFunky<CR>
 	FnNoremap <C-p><C-p>	:CtrlPFunky<CR>
 	
