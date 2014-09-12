@@ -402,10 +402,10 @@ if !exists('g:loaded_ctrlp')
 	let g:ctrlp_working_path_mode = '0'
 	let g:ctrlp_custom_ignore = {
 	\ 'dir':  '\v[\/]\.(git|hg|svn)$',
-	\ 'file': '\v\.(exe|so|dll|o)$'
+	\ 'file': '\v\.(exe|dll|o|so|pyc|swp|zip|7z)$'
 	\ }
 	" File ignore
-	set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*.pyc,*.d
+	set wildignore+=*/tmp/**
 	" Key mapping
 	FnNoremap <C-l>     :CtrlPTag<CR>
 	FnNoremap <C-o>     :CtrlPMRU<CR>

@@ -57,7 +57,7 @@ endfunction
 
 " Directory autochange
 if !exists('g:vimrc_noautochdir')
-	if 0
+	if 1
 		" Look for the best directory
 		augroup autochdir
 			autocmd! BufEnter * execute "lcd" g:FindRootDir()
