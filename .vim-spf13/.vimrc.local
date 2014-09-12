@@ -51,7 +51,7 @@
 
 " Misc configuration {
 	" Autochange dir
-	let g:vimrc_noautochdir = 1
+	"let g:vimrc_noautochdir = 1
 	
 	" Autocompletion
 	imap <C-space>  <C-x><C-u>
