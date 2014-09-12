@@ -31,7 +31,7 @@ alias b='cdb'
 alias f='cdf'
 
 # Editor aliases/fcts
-function g() { (command -v geany && geany "$@") || (command -v gedit && gedit "$@"); }
+function g() { (command -v geany >/dev/null && geany "$@") || (command -v gedit >/dev/null && gedit "$@"); }
 alias e='gvim'
 alias sse='ss | cut -c 9- | xargs gvim'
 alias gse='gs | grep modified | cut -d : -f 2 | xargs gvim'
