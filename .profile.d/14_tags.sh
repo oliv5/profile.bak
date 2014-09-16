@@ -6,7 +6,7 @@ CTAGS_OPTS="-R --sort=yes --c-kinds=+p --c++-kinds=+p --fields=+iaS --extra=+qf 
 
 # Cscope default settings
 CSCOPE_OPTS="-Rqb"
-CSCOPE_REGEX=".*\.c|.*\.h|.*\.cc|.*\.cpp|.*\.hpp"
+CSCOPE_REGEX=".*\.c|.*\.h|.*\.cc|.*\.cpp|.*\.hpp|.*\.inc"
 CSCOPE_EXCLUDE="-not -path *.svn* -and -not -path *.git -and -not -path /tmp/"
 
 # Make ctags
@@ -19,7 +19,7 @@ function mkctags() {
   CTAGS_OPTIONS="$CTAGS_OPTS $3"
   CTAGS_DB="${DST}/tags"
   # Build tag file
-  ${DBG} $(which ctags) $CTAGS_OPTIONS -f "${CTAGS_DB}" "${SRC}"
+  ${DBG} $(which ctags) $CTAGS_OPTIONS -g "${CTAGS_DB}" "${SRC}"
   #echo ${CTAGS_DB}
 }
 

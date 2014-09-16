@@ -48,15 +48,15 @@ function cpu-inst() {
 	if [ -z "$1" ]; then
 		top -d 0.5 -b -n2 | grep "Cpu(s)" | tail -n 1 | awk '{print $2 + $4 + $6}'
 	else
-		top -d 0.5 -b -n2 | grep "$1" | tail -n 1 | awk 'BEGIN {sum=0} {sum+=$9}; END {print sum}'
+		top -d 0.5 -b -n2 | grep "$1" | awk 'BEGIN {sum=0} {sum+=$9}; END {print sum}'
 	fi
 }
 
 function mem-inst() {
 	if [ -z "$1" ]; then
-		top -d 0.5 -b -n2 | grep "Mem:" | tail -n 1 | awk '{print ($4*100/$2)}'
+		top -d 0.5 -b -n2 | grep "Mem:" | tail -n 1 | awk '{print ($5*100/$3)}'
 	else
-		top -d 0.5 -b -n2 | grep "$1" | tail -n 1 | awk 'BEGIN {sum=0} {sum+=$10}; END {print sum}'
+		top -d 0.5 -b -n2 | grep "$1" | awk 'BEGIN {sum=0} {sum+=$10}; END {print sum}'
 	fi
 }
 
