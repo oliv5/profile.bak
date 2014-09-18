@@ -48,3 +48,14 @@ function hex2int() {
     (( RES > $MEAN )) && (( RES -= $MAX )) 
     echo $RES
 }
+
+# Execute on remote host
+alias exec-rem='exec-remote'
+function exec-remote() {
+  CMD="${2:?No command specified} ${@:3}"
+  if [ "${1:?No host specified}" != "$HOSTNAME" ]; then
+	\ssh -X $1 "$CMD"
+  else
+    eval "\\$CMD"
+  fi
+}

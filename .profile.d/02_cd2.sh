@@ -16,3 +16,6 @@ function popd  { builtin popd  "$@" >/dev/null 2>&1; }
 
 # Display stacks
 alias scd='echo -n "Backward: ";dirs; echo "Forward: $g_forward_stack"'
+
+# Remove all this stuff
+alias ucd='unalias cd scd; unset -f cd pushd popd cda cdb cdf'
