@@ -168,7 +168,7 @@ function svn-revert() {
   # Backup
   svn-export HEAD HEAD "$(svn-bckdir)/revert_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z"
   # Revert local modifications
-  svn revert -R . ${1:+--cl $1}
+  svn revert -R . ${1:+--cl $1} "${@:2}"
 }
 
 # Rollback to a previous revision, don't change unversionned files
