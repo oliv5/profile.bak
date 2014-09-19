@@ -71,8 +71,14 @@
 	endif
 	
 	" Wildfire (text object selection)
-	map <BS> <Plug>(wildfire-fuel)
-	vmap <S-BS> <Plug>(wildfire-water)
+	let g:wildfire_objects = {
+		\ "*" : ["iw", "i'", 'i"', "i)", "i]", "i}", "it", "ip"],
+		\ "html,xml" : ["at", "it"],
+	\ }
+	noremap <BS> <Plug>(wildfire-fuel)
+	vnoremap <S-BS> <Plug>(wildfire-water)
+	map z <BS>
+	map Z <S-BS>
 	
 	" Syntastic
 	let g:syntastic_python_checkers = ['pylint']
