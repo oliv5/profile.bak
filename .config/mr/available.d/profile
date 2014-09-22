@@ -1,9 +1,10 @@
 [${XDG_CONFIG_HOME:-$HOME/.config}/vcsh/repo.d/profile.git]
 checkout = 
 	cd $HOME
-	git clone https://oliv5@github.com/oliv5/profile.git
+	git clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/repo/sync/git/profile.git
 	cd profile
-	git remote add upstream https://oliv5@github.com/oliv5/profile.git
+	git remote add upstream ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/repo/sync/git/profile.git
+	git remote add github https://oliv5@github.com/oliv5/profile.git
 pull     = vcsh profile remote | xargs -l -I{} vcsh profile pull --rebase {} master
 push     = vcsh profile remote | xargs -l vcsh profile push
 status   = vcsh profile status
