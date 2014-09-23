@@ -446,8 +446,8 @@ vnoremap <C-h>      "+y:%s/<C-r>=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\
 " *******************************************************
 " } Grep {
 " *******************************************************
-" Grep program
-set grepprg=iref\ $*
+" Grep program & format
+"set grepprg=iref\ $*
 "set grepprg=lid\ -Rgrep\ -s
 "set grepformat=%f:%l:%m
 
@@ -456,7 +456,8 @@ cnoreabbrev gg Grep
 cnoreabbrev grep Grep
 
 " Grep
-function! s:Grep(path, expr)
+function! s:Grep(tool, path, expr)
+	execute 'set grepprg='.a:tool
 	let path = escape(a:path, '" *')
 	let expr = escape('"'.a:expr.'"','" *')
 	execute 'Wcmd' 'grep!' expr path
@@ -464,17 +465,17 @@ function! s:Grep(path, expr)
 endfunction
 
 " Count expression
-function! s:GrepCount(path, expr)
+function! s:GrepCount(tool, path, expr)
 	let path = escape(a:path, '" *')
 	let expr = escape('"'.a:expr.'"','" *')
-	execute '!ref' expr path '| wc -l'
+	echom '!'.a:tool expr path '| wc -l'
 endfunction
 
 " User commands
-command! -nargs=1 -bar RGrep      call <SID>Grep(g:FindRootDir(), <q-args>)
-command! -nargs=1 -bar RGrepCount call <SID>GrepCount(g:FindRootDir(), <q-args>)
-command! -nargs=1 -bar Grep      call <SID>Grep(expand('%'), <q-args>)
-command! -nargs=1 -bar GrepCount call <SID>GrepCount(expand('%'), <q-args>)
+command! -nargs=1 -bar RGrep      call <SID>Grep('iref\ $*', g:FindRootDir(), <q-args>)
+command! -nargs=1 -bar RGrepCount call <SID>GrepCount('iref', g:FindRootDir(), <q-args>)
+command! -nargs=1 -bar Grep       call <SID>Grep('grep\ -nH\ $*', expand('%'), <q-args>)
+command! -nargs=1 -bar GrepCount  call <SID>GrepCount('grep -nH', expand('%'), <q-args>)
 
 " Key mappings
 silent! unmap gx
