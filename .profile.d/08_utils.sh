@@ -59,3 +59,23 @@ function exec-remote() {
     eval "\\$CMD"
   fi
 }
+
+# Get public external IP
+function get-extip() {
+  DNSLOOKUP="ifconfig.me/ip"
+  if command -v curl >/dev/null; then
+    curl $DNSLOOKUP
+  elif command -v wget >/dev/null; then
+    wget -qO- $DNSLOOKUP
+  else
+    HOST=${DNSLOOKUP%%/*}
+    URL=${DNSLOOKUP#*/}
+    exec 3</dev/tcp/$HOST/80
+    sed 's/ *//' <<< "
+      GET /$URL HTTP/1.1
+      connection: close
+      host: $HOST
+      " >&3
+    grep -oE '([0-9]+\.){3}[0-9]+' <&3
+  fi
+}
