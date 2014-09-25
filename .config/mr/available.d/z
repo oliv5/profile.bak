@@ -1,7 +1,0 @@
-[$HOME/bin/z]
-checkout = 
-	cd $HOME/bin
-	git clone https://github.com/rupa/z.git
-pull     = git pull --rebase
-push     = true
-commit   = true
