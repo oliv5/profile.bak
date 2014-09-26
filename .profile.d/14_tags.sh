@@ -1,12 +1,13 @@
 #!/bin/sh
 # Note: this file must be independant, it can be sourced by external scripts
+DBG=""
 
 # Ctags settings
 CTAGS_OPTS="-R --sort=yes --c-kinds=+p --c++-kinds=+p --fields=+iaS --extra=+qf --exclude='.svn' --exclude='.git' --exclude='tmp'"
 
 # Cscope default settings
 CSCOPE_OPTS="-Rqb"
-CSCOPE_REGEX=".*\.c|.*\.h|.*\.cc|.*\.cpp|.*\.hpp|.*\.inc"
+CSCOPE_REGEX=".*\.c|.*\.h|.*\.cc|.*\.cpp|.*\.hpp|.*\.inc|.*\.py"
 CSCOPE_EXCLUDE="-not -path *.svn* -and -not -path *.git -and -not -path /tmp/"
 
 # Make ctags
@@ -19,7 +20,7 @@ function mkctags() {
   CTAGS_OPTIONS="$CTAGS_OPTS $3"
   CTAGS_DB="${DST}/tags"
   # Build tag file
-  ${DBG} $(which ctags) $CTAGS_OPTIONS -g "${CTAGS_DB}" "${SRC}"
+  ${DBG} $(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}"
   #echo ${CTAGS_DB}
 }
 
@@ -98,7 +99,37 @@ function rmids() {
 
 # Clean tags and cscope db
 function rmtags() {
-  rmctags
-  rmcscope
-  rmids
+  rmctags "$@"
+  rmcscope "$@"
+  rmids "$@"
+}
+
+function mkalltags() {
+  OLDPWD="$PWD"
+  for TAGS in $(find "${1:-.}" -maxdepth ${2:-5} -type f -name "tags.path"); do
+    echo "[ctags] directory: $TAGS"
+    cd $(dirname $TAGS)
+    rmctags
+    for DIR in $(cat $TAGS); do
+      mkctags "$DIR" . "-a"
+    done
+  done
+  for TAGS in $(find "${1:-.}" -maxdepth ${2:-5} -type f -name "cscope.path"); do
+    echo "[cscope] directory: $TAGS"
+    cd $(dirname $TAGS)
+    rmcscope
+    for DIR in $(cat $TAGS); do
+      scancsdir "$DIR" .
+    done
+    mkcscope "$DIR" .
+  done
+  for TAGS in $(find "${1:-.}" -maxdepth ${2:-5} -type f -name "id.path"); do
+    echo "[ID] directory: $TAGS"
+    cd $(dirname $TAGS)
+    rmids
+    for DIR in $(cat $TAGS); do
+      mkids "$DIR" .
+    done
+  done
+  cd $OLDPWD
 }
