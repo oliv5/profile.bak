@@ -663,7 +663,7 @@ function! s:BufClose(...)
 	elseif exists(':MBEbd')
 		execute 'MBEbd' idx
 	else
-		execute 'bdelete!' idx
+		execute 'silent! bdelete!' idx
 	endif
 endfunction
 
