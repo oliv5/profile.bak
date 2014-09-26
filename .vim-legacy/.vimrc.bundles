@@ -58,7 +58,7 @@ if has("cscope")
 	endif
 
 	" Cscope user command
-	command! -nargs=* Cs :lcs <args>
+	command! -nargs=* Cs :cs <args>
 
 	" Abbreviation
 	cabbrev csa lcs add
@@ -401,8 +401,8 @@ if !exists('g:loaded_ctrlp')
 	let g:ctrlp_cmd = 'CtrlPMixed'
 	let g:ctrlp_working_path_mode = '0'
 	let g:ctrlp_custom_ignore = {
-	\ 'dir':  '\v[\/]\.(git|hg|svn)$',
-	\ 'file': '\v\.(exe|dll|o|so|pyc|swp|zip|7z)$'
+	\ 'dir':  '(\.git\|\.hg\|\.svn\|tmp)$',
+	\ 'file': '\.(exe\|dll\|o\|so\|pyc\|swp\|zip\|7z)$'
 	\ }
 	" File ignore
 	set wildignore+=*/tmp/**

@@ -885,16 +885,13 @@ command! -nargs=0 -bar Cnext    call s:Wnext('c')
 command! -nargs=0 -bar Cprev    call s:Wprev('c')
 command! -nargs=+ -bar Csys     call s:Wsys('c',<f-args>)
 command! -nargs=+ -bar Ccmd     call s:Wcmd('c',<f-args>)
+command! -nargs=0 -bar Ccopy    call setqflist(getloclist(0))
+command! -nargs=0 -bar Cclear   call setqflist([])
 
 " Keymapping
 nnoremap <localleader>c   :Ctoggle<CR>
 nnoremap <silent>c        :Cnext<CR>
 nnoremap <silent>C        :Cprev<CR>
-
-" Autocommands
-"if has('quickfix')
-"  autocmd! QuickFixCmdPost [^l]* nested Copen
-"endif
 
 
 " *******************************************************
@@ -909,6 +906,8 @@ command! -nargs=0 -bar Lnext    call s:Wnext('l')
 command! -nargs=0 -bar Lprev    call s:Wprev('l')
 command! -nargs=+ -bar Lsys     call s:Wsys('l',<f-args>)
 command! -nargs=+ -bar Lcmd     call s:Wcmd('l',<f-args>)
+command! -nargs=0 -bar Lcopy    call setloclist(0,getqflist())
+command! -nargs=0 -bar Lclear   call setloclist(0,[])
 
 " Keymapping
 nnoremap <localleader>l   :Ltoggle<CR>
@@ -917,9 +916,9 @@ nnoremap <silent>L        :Lprev<CR>
 
 " Autocommands (note: ltag is not concerned...)
 "if has('quickfix')
-"  augroup location_wnd
-"    autocmd! QuickFixCmdPost * nested Lopen
-"    autocmd! QuickFixCmdPost * nested call setqflist(getloclist(0))
+"  augroup! quickfix
+"    autocmd QuickFixCmdPost [^l]* nested Lcopy
+"    autocmd QuickFixCmdPost l* nested Ccopy
 "  augroup END
 "endif
 

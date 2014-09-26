@@ -77,8 +77,6 @@
 	\ }
 	map <BS> <Plug>(wildfire-fuel)
 	vmap <S-BS> <Plug>(wildfire-water)
-	map z <BS>
-	map Z <S-BS>
 	
 	" Syntastic
 	let g:syntastic_python_checkers = ['pylint']
