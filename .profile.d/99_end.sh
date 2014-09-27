@@ -14,7 +14,7 @@ for i in $HOME/.profile.local.d/*.sh ; do
 done
 
 # Export user functions
-fct-export-all
+#fct-export-all
 #export -f die
 #export -f $(fct-ls | grep svn-)
 #export -f $(fct-ls | grep git-)
