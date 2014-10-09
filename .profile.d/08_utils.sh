@@ -79,3 +79,6 @@ function get-extip() {
     grep -oE '([0-9]+\.){3}[0-9]+' <&3
   fi
 }
+
+# Strip ANSI codes
+alias rm-ansi='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'
