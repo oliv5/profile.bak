@@ -20,20 +20,15 @@ alias iffd='NAME=iname ffd'
 
 # Search pattern functions
 function _fgrep() {
-  [ "$1" != "" ] && _ffind "${!#}" -type f -print0 | xargs -0 $(which grep) -nH --color "${@:1:($#-1)}"
+  [ $# -ge 1 ] && _ffind "${!#}" -type f -print0 | xargs -0 $(which grep) -nH --color "${@:1:($#-1)}"
 }
-function gg()  { _fgrep "$@" ;}
-function ggf() { _fgrep "$@" | cut -d : -f 1 | uniq ;}
-alias igg='gg -i'
-alias iggf='ggf -i'
-
 function _fgrep2() {
-  $(which grep) --color=auto -rnH $GREP_EXCLUDE "$@"
+  $(which grep) --color=auto -rnH $GREP_EXCLUDE "${@:1:$(($# - 1))}" --include=${!#}
 }
-function gg2()  { _fgrep2 "$@" ;}
-function ggf2() { _fgrep2 "$@" | cut -d : -f 1 | uniq ;}
-alias igg2='gg2 -i'
-alias iggf2='ggf2 -i'
+function gg()  { _fgrep2    "${1:?Nothing to do}" "${2:-*}" "${@:3}" ;}
+function igg() { _fgrep2 -i "${1:?Nothing to do}" "${2:-*}" "${@:3}" ;}
+function ggf() { _fgrep2    "${1:?Nothing to do}" "${2:-*}" "${@:3}" | cut -d : -f 1 | uniq ;}
+function iggf(){ _fgrep2 -i "${1:?Nothing to do}" "${2:-*}" "${@:3}" | cut -d : -f 1 | uniq ;}
 
 # Safe search & replace
 function _fsed() {
