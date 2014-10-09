@@ -404,6 +404,7 @@ if !exists('g:loaded_ctrlp')
 	\ 'dir':  '(\.git\|\.hg\|\.svn\|tmp)$',
 	\ 'file': '\.(exe\|dll\|o\|so\|pyc\|swp\|zip\|7z)$'
 	\ }
+	let g:ctrlp_switch_buffer = 'eT'
 	" File ignore
 	set wildignore+=*/tmp/**
 	" Key mapping
