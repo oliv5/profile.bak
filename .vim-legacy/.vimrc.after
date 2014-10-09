@@ -105,6 +105,17 @@ map <leader>H  :%!xxd -r<CR>
 
 
 " *******************************************************
+" } Ansi code management {
+" *******************************************************
+function! s:RmAnsi()
+	:%!sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g'
+endfunction
+
+" Key mapping
+map <leader>r 	:call <SID>RmAnsi()<CR>
+
+
+" *******************************************************
 " } Alignment function {
 " *******************************************************
 " Alignement function
@@ -955,11 +966,9 @@ endif
 set previewheight=12          " Preview window height
 
 " Variables
-if !exists('s:p_lastw')
-	let s:p_lastw = ""
-	let s:p_highlight = 0
-	let s:p_center = 0
-endif
+let s:p_lastw = ""
+let s:p_highlight = 0
+let s:p_center = 0
 
 " Open preview window
 function! s:PreviewOpenWnd()
@@ -970,9 +979,10 @@ function! s:PreviewOpenWnd()
 		"wincmd J
 		wincmd p
 	endif
-	let s:p_lastw = ""
 	augroup PreviewWnd
+		au!
 		au! CursorHold * nested call s:PreviewShowTag()
+		"au! CursorHold * nested windo if &previewwindow|call s:PreviewShowTag()|endif
 	augroup END
 endfunction
 
@@ -982,7 +992,6 @@ function! s:PreviewCloseWnd()
 		au!
 	augroup END
 	pclose
-	unlet s:p_lastw
 endfunction
 
 " Toggle preview window
@@ -1000,15 +1009,29 @@ function! s:PreviewShowTag()
 	if &previewwindow             " don't do this in the preview window
 		return
 	endif
+
+	for w in range(1, winnr('$')+1)	" Don't do this when preview window is not visible
+		if getwinvar(w,'&previewwindow') == 1
+			break
+		endif
+	endfor
+	if w > winnr('$')
+		return
+	endif
+
 	let w = expand("<cword>")     " get the word under cursor
 	if w == s:p_lastw             " Same word, skip all this
 		return
 	endif
 	let s:p_lastw = w
+
 	if w =~ '\a'                  " if the word contains a letter
 		" Try displaying a matching tag for the word under the cursor
 		try
 			exec "silent! ptag " . w
+			if has("folding")
+				silent! .foldopen	" don't want a closed fold
+			endif
 			if s:p_highlight
 				call s:PreviewHighlightTag(w)
 			endif
