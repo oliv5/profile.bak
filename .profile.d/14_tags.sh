@@ -7,7 +7,7 @@ CTAGS_OPTS="-R --sort=yes --c-kinds=+p --c++-kinds=+p --fields=+iaS --extra=+qf 
 
 # Cscope default settings
 CSCOPE_OPTS="-Rqb"
-CSCOPE_REGEX=".*\.c|.*\.h|.*\.cc|.*\.cpp|.*\.hpp|.*\.inc|.*\.py"
+CSCOPE_REGEX='.*\.\(h\|c\|cc\|cpp\|hpp\|inc\|S\|py\)$'
 CSCOPE_EXCLUDE="-not -path *.svn* -and -not -path *.git -and -not -path /tmp/"
 
 # Make ctags
@@ -24,7 +24,7 @@ function mkctags() {
   #echo ${CTAGS_DB}
 }
 
-# Scan a new cscope directory
+# Scan directory for cscope files
 function scancsdir() {
   command -v >/dev/null cscope || return
   # Get directories
@@ -34,12 +34,12 @@ function scancsdir() {
   CSCOPE_FILES="$DST/cscope.files"
   # Scan directory
   set -f
-  find "$SRC" -regextype "posix-egrep" $CSCOPE_EXCLUDE ${@:3} -regex "$CSCOPE_REGEX" -printf '"%p"\n' >> "$CSCOPE_FILES"
+  find "$SRC" $CSCOPE_EXCLUDE ${@:3} -regex "$CSCOPE_REGEX" -printf '"%p"\n' >> "$CSCOPE_FILES"
   set +f
 }
 
-# Make cscope db
-function mkcscope() {
+# Make cscope db from source list file
+function mkcscope-1() {
   command -v >/dev/null cscope || return
   # Get directories
   SRC="$(eval echo ${1:-$PWD})"
@@ -55,6 +55,25 @@ function mkcscope() {
   # Build tag file
   ${DBG} $(which cscope) $CSCOPE_OPTIONS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
   #echo $CSCOPE_DB
+}
+
+# Scan and make cscope db
+function mkcscope-2() {
+  command -v >/dev/null cscope || return
+  # Get directories
+  SRC="$(eval echo ${1:-$PWD})"
+  DST="$(eval echo ${2:-$PWD})"
+  # Get options
+  CSCOPE_OPTIONS="$CSCOPE_OPTS $3"
+  CSCOPE_DB="$DST/cscope.out"
+  # Build tag file
+  find "$SRC" -type f -regex "$CSCOPE_REGEX" -printf '"%p"\n' | ${DBG} $(which cscope) $CSCOPE_OPTIONS -i '-' -f "$CSCOPE_DB"
+  #echo $CSCOPE_DB
+}
+
+# Cscope alias
+function mkcscope() {
+  mkcscope-2 "$@"
 }
 
 # Make id-utils database
@@ -79,22 +98,22 @@ function mktags() {
 # Clean ctags
 function rmctags() {
   DIR="$(eval echo ${1:-$PWD})"
-  rm -v "${DIR}/tags"
+  rm -v "${DIR}/tags" 2>/dev/null
 }
 
 # Clean cscope db
 function rmcscope() {
   DIR="$(eval echo ${1:-$PWD})"
   FILE="${DIR}/cscope"
-  rm -v "${FILE}.out"*
-  rm -v "${FILE}.files"
+  rm -v "${FILE}.out"* 2>/dev/null
+  rm -v "${FILE}.files" 2>/dev/null
 }
 
 # Clean id-utils db
 function rmids() {
   DIR="$(eval echo ${1:-$PWD})"
   FILE="${DIR}/ID"
-  rm -v "${FILE}"
+  rm -v "${FILE}" 2>/dev/null
 }
 
 # Clean tags and cscope db
@@ -105,31 +124,37 @@ function rmtags() {
 }
 
 function mkalltags() {
-  OLDPWD="$PWD"
-  for TAGS in $(find "${1:-.}" -maxdepth ${2:-5} -type f -name "tags.path"); do
-    echo "[ctags] directory: $TAGS"
-    cd $(dirname $TAGS)
-    rmctags
-    for DIR in $(cat $TAGS); do
-      mkctags "$DIR" . "-a"
-    done
+  builtin pushd >/dev/null
+  for TAGS in $(find "${1:-.}" -maxdepth ${2:-5} -type f -name "*.path"); do
+    if [ "$(basename $TAGS)" == "tags.path" -o "$(basename $TAGS)" == "ctags.path" ]; then
+      echo "[ctags] source: $TAGS"
+      cd $(dirname $TAGS)
+      rmctags
+      for DIR in $(cat $TAGS); do
+        echo "[ctags] dir: $DIR"
+        mkctags "$DIR" . "-a"
+      done
+    fi
+    if [ "$(basename $TAGS)" == "tags.path" -o "$(basename $TAGS)" == "cscope.path" ]; then
+      echo "[cscope] source: $TAGS"
+      cd $(dirname $TAGS)
+      rmcscope
+      for DIR in $(cat $TAGS); do
+        echo "[cscope] dir: $DIR"
+        #scancsdir "$DIR" .
+        mkcscope "$DIR" .
+      done
+      # mkcscope "$DIR" .
+    fi
+    if [ "$(basename $TAGS)" == "tags.path" -o "$(basename $TAGS)" == "id.path" ]; then
+      echo "[id] source: $TAGS"
+      cd $(dirname $TAGS)
+      rmids
+      for DIR in $(cat $TAGS); do
+        echo "[id] dir: $DIR"
+        mkids "$DIR" .
+      done
+    fi
   done
-  for TAGS in $(find "${1:-.}" -maxdepth ${2:-5} -type f -name "cscope.path"); do
-    echo "[cscope] directory: $TAGS"
-    cd $(dirname $TAGS)
-    rmcscope
-    for DIR in $(cat $TAGS); do
-      scancsdir "$DIR" .
-    done
-    mkcscope "$DIR" .
-  done
-  for TAGS in $(find "${1:-.}" -maxdepth ${2:-5} -type f -name "id.path"); do
-    echo "[ID] directory: $TAGS"
-    cd $(dirname $TAGS)
-    rmids
-    for DIR in $(cat $TAGS); do
-      mkids "$DIR" .
-    done
-  done
-  cd $OLDPWD
+  builtin popd >/dev/null
 }
