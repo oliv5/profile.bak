@@ -30,8 +30,7 @@ alias lsg='ls | grep'
 alias b='cdb'
 alias f='cdf'
 
-# Editor aliases/fcts
-function g() { (command -v geany >/dev/null && geany "$@" && true) || (command -v gedit >/dev/null && gedit "$@"); }
+# Gvim
 alias e='gvim'
 alias sse='ss | cut -c 9- | xargs gvim'
 alias gse='gs | grep modified | cut -d : -f 2 | xargs gvim'
@@ -39,7 +38,18 @@ function ffe() {
   ff "$@" | xargs gvim
 }
 
+# Gedit/geany
+function g() {
+  #$(which geany) "$@" || $(which gedit) "$@"
+  #${GEANY:-false} "$@" || ${GEDIT:-false} "$@"
+  $(command -v geany) "$@" || $(command -v gedit) "$@"
+}
+alias ssg='ss | cut -c 9- | xargs g'
+alias gsg='gs | grep modified | cut -d : -f 2 | xargs g'
+function ffg() {
+  ff "$@" | xargs g
+}
+
 # Alias misc
 alias hi='history'
 alias mo='mimeopen'
-

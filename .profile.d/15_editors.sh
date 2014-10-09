@@ -2,25 +2,25 @@
 
 #########################
 # Gedit
-export GEDIT="$(which gedit 2>/dev/null)"
+export GEDIT="$(which gedit)"
 
 function gedit() {
   ARGS="$(echo $@ | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1 +\2/g')"
-  ${GEDIT:-true} $ARGS
+  ${GEDIT:-false} $ARGS
 }
 
 #########################
 # Geany
-export GEANY="$(which geany 2>/dev/null)"
+export GEANY="$(which geany)"
 
 function geany() {
   ARGS="$(echo $@ | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1 +\2/g')"
-  ${GEANY:-true} $ARGS
+  ${GEANY:-false} $ARGS
 }
 
 #########################
 # Vim
-export GVIM="$(which gvim 2>/dev/null)"
+export GVIM="$(which gvim)"
 [ -z "$VIM_USETABS" ] && export VIM_USETABS=""
 [ -z "$VIM_IDE" ] && export VIM_IDE=4
 export COLORTERM="xterm" # backspace bug in vim
@@ -29,9 +29,9 @@ export COLORTERM="xterm" # backspace bug in vim
 function gvim() {
   ARGS="$(sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/+\2 \1/g' <<< $@)"
   if [ -z "$VIM_USETABS" ]; then
-    ${GVIM:-true} ${1:+--remote-silent} $ARGS
+    ${GVIM:-false} ${1:+--remote-silent} $ARGS
   else
-    ${GVIM:-true} ${1:+--remote-tab-silent} $ARGS
+    ${GVIM:-false} ${1:+--remote-tab-silent} $ARGS
   fi
 }
 
@@ -40,4 +40,3 @@ function gvim() {
 export -f gedit
 export -f geany
 export -f gvim
-
