@@ -37,6 +37,7 @@
 " }
 
 " Additional bundles {
+	"Bundle 'powerman/vim-plugin-AnsiEsc'
 	Bundle 'minibufexpl'
 	Bundle 'vim-autotag'
 	Bundle 'vim-ide'
