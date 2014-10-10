@@ -8,7 +8,7 @@ CTAGS_OPTS="-R --sort=yes --c-kinds=+p --c++-kinds=+p --fields=+iaS --extra=+qf 
 # Cscope default settings
 #CSCOPE_OPTS="-qb"
 CSCOPE_OPTS="-b"
-CSCOPE_REGEX='.*\.\(h\|c\|cc\|cpp\|hpp\|inc\|S\|py\)$'
+CSCOPE_REGEX='.*\.(h|c|cc|cpp|hpp|inc|S|py)$'
 CSCOPE_EXCLUDE="-not -path *.svn* -and -not -path *.git -and -not -path /tmp/"
 
 # Make ctags
