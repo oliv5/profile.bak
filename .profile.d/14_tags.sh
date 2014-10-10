@@ -124,7 +124,7 @@ function rmtags() {
 
 function mkalltags() {
   _PWD="$PWD"
-  for TAGPATH in $(find -L "${1:-$PWD}" -maxdepth ${2:-5} -type f -name "*.path"); do
+  for TAGPATH in $(find -L "${1:-$PWD}" -maxdepth ${2:-5} -type f -name "*.path" 2>/dev/null); do
     echo "** Processing file $TAGPATH"
     builtin cd "$(dirname $TAGPATH)"
     TAGNAME="$(basename $TAGPATH)"
@@ -139,7 +139,7 @@ function mkalltags() {
       rmcscope
       for SRC in $(cat $TAGNAME); do
         echo "[cscope] add: $SRC"
-        mkcscope "${SRC/#./$PWD}" .
+        mkcscope "$SRC" .
       done
     fi
     if [ "$TAGNAME" == "tags.path" -o "$TAGNAME" == "id.path" ]; then
