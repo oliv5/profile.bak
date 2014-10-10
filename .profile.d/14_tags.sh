@@ -66,7 +66,7 @@ function mkcscope-2() {
   CSCOPE_OPTIONS="$CSCOPE_OPTS $3"
   CSCOPE_DB="$DST/cscope.out"
   # Build tag file
-  find "$SRC" -type f -regex "$CSCOPE_REGEX" -printf '"%p"\n' | \
+  find "$SRC" -type f -regextype posix-egrep -regex "$CSCOPE_REGEX" -printf '"%p"\n' | \
     ${DBG} $(which cscope) $CSCOPE_OPTIONS -i '-' -f "$CSCOPE_DB"
 }
 
