@@ -6,7 +6,8 @@ DBG=""
 CTAGS_OPTS="-R --sort=yes --c-kinds=+p --c++-kinds=+p --fields=+iaS --extra=+qf --exclude='.svn' --exclude='.git' --exclude='tmp'"
 
 # Cscope default settings
-CSCOPE_OPTS="-Rqb"
+#CSCOPE_OPTS="-qb"
+CSCOPE_OPTS="-b"
 CSCOPE_REGEX='.*\.\(h\|c\|cc\|cpp\|hpp\|inc\|S\|py\)$'
 CSCOPE_EXCLUDE="-not -path *.svn* -and -not -path *.git -and -not -path /tmp/"
 
@@ -21,7 +22,6 @@ function mkctags() {
   CTAGS_DB="${DST}/tags"
   # Build tag file
   ${DBG} $(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}"
-  #echo ${CTAGS_DB}
 }
 
 # Scan directory for cscope files
@@ -54,7 +54,6 @@ function mkcscope-1() {
   fi
   # Build tag file
   ${DBG} $(which cscope) $CSCOPE_OPTIONS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
-  #echo $CSCOPE_DB
 }
 
 # Scan and make cscope db
@@ -67,8 +66,8 @@ function mkcscope-2() {
   CSCOPE_OPTIONS="$CSCOPE_OPTS $3"
   CSCOPE_DB="$DST/cscope.out"
   # Build tag file
-  find "$SRC" -type f -regex "$CSCOPE_REGEX" -printf '"%p"\n' | ${DBG} $(which cscope) $CSCOPE_OPTIONS -i '-' -f "$CSCOPE_DB"
-  #echo $CSCOPE_DB
+  find "$SRC" -type f -regex "$CSCOPE_REGEX" -printf '"%p"\n' | \
+    ${DBG} $(which cscope) $CSCOPE_OPTIONS -i '-' -f "$CSCOPE_DB"
 }
 
 # Cscope alias
@@ -124,37 +123,33 @@ function rmtags() {
 }
 
 function mkalltags() {
-  builtin pushd >/dev/null
-  for TAGS in $(find "${1:-.}" -maxdepth ${2:-5} -type f -name "*.path"); do
-    if [ "$(basename $TAGS)" == "tags.path" -o "$(basename $TAGS)" == "ctags.path" ]; then
-      echo "[ctags] source: $TAGS"
-      cd $(dirname $TAGS)
+  _PWD="$PWD"
+  for TAGPATH in $(find -L "${1:-$PWD}" -maxdepth ${2:-5} -type f -name "*.path"); do
+    echo "** Processing file $TAGPATH"
+    builtin cd "$(dirname $TAGPATH)"
+    TAGNAME="$(basename $TAGPATH)"
+    if [ "$TAGNAME" == "tags.path" -o "$TAGNAME" == "ctags.path" ]; then
       rmctags
-      for DIR in $(cat $TAGS); do
-        echo "[ctags] dir: $DIR"
-        mkctags "$DIR" . "-a"
+      for SRC in $(cat $TAGNAME); do
+        echo "[ctags] add: $SRC"
+        mkctags "$SRC" . "-a"
       done
     fi
-    if [ "$(basename $TAGS)" == "tags.path" -o "$(basename $TAGS)" == "cscope.path" ]; then
-      echo "[cscope] source: $TAGS"
-      cd $(dirname $TAGS)
+    if [ "$TAGNAME" == "tags.path" -o "$TAGNAME" == "cscope.path" ]; then
       rmcscope
-      for DIR in $(cat $TAGS); do
-        echo "[cscope] dir: $DIR"
-        #scancsdir "$DIR" .
-        mkcscope "$DIR" .
+      for SRC in $(cat $TAGNAME); do
+        echo "[cscope] add: $SRC"
+        mkcscope "${SRC/#./$PWD}" .
       done
-      # mkcscope "$DIR" .
     fi
-    if [ "$(basename $TAGS)" == "tags.path" -o "$(basename $TAGS)" == "id.path" ]; then
-      echo "[id] source: $TAGS"
-      cd $(dirname $TAGS)
+    if [ "$TAGNAME" == "tags.path" -o "$TAGNAME" == "id.path" ]; then
       rmids
-      for DIR in $(cat $TAGS); do
-        echo "[id] dir: $DIR"
-        mkids "$DIR" .
+      for SRC in $(cat $TAGNAME); do
+        echo "[id] add: $SRC"
+        mkids "$SRC" .
       done
     fi
+    echo -e "** Done.\n"
   done
-  builtin popd >/dev/null
+  builtin cd "$_PWD"
 }
