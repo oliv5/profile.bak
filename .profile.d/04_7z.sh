@@ -33,8 +33,8 @@ function 7zd() {
 function _7zd() {
   DIR="$1"
   if [ ! -d "$1" ]; then
-	DIR="$(mktemp -d $(basename $1).XXXXXX)"
-	7z x "$1" -o"$DIR" 1>&2
+	  DIR="$(mktemp -d --tmpdir $(basename $1).XXXXXX)"
+	  7z x "$1" -o"$DIR" 1>&2
   fi
   echo "$DIR"
 }
