@@ -394,6 +394,9 @@ FnNoremap <C-F3>    :nohl<CR>
 vmap <S-F3>         <F3>N
 vnoremap <F3>       :<C-u>call <SID>SearchHighlight()<CR>
 vnoremap <C-F3>     :nohl<CR>
+cmap <F3>           <CR>
+cmap <S-F3>         <CR>
+cmap <C-F3>         <ESC>:nohl<CR>
 
 " Alternative search
 nnoremap f          n
@@ -403,6 +406,8 @@ nnoremap F          N
 FnNoremap <F4>      *
 FnNoremap <S-F4>    #
 nnoremap µ          #
+cmap <F4>           <CR>
+cmap <S-F4>         <CR>
 
 
 " *******************************************************
@@ -493,15 +498,16 @@ silent! unmap gx
 nnoremap <silent>g          :Wnext<CR>
 nnoremap <silent>G          :Wprev<CR>
 " RGrep key mappings
-FnNoremap <C-g>             :Grep<SPACE>
+FnNoremap <C-g>             :Grep<SPACE><C-r>=expand("<cword>")<CR>
 vnoremap <C-g>              "+y:Grep<SPACE><C-r>=fnameescape("<C-r>"")<CR>
 FnNoremap <A-g>             :GrepCount<SPACE><C-r><C-w>
 " Grep key mappings
-FnNoremap <C-g><C-g>        :RGrep<SPACE>
+FnNoremap <C-g><C-g>        :RGrep<SPACE><C-r>=expand("<cword>")<CR>
 vnoremap <C-g><C-g>         "+y:RGrep<SPACE><C-r>=fnameescape("<C-r>"")<CR>
 FnNoremap <A-g><A-g>        :RGrepCount<SPACE><C-r><C-w>
 
 " Hints to copy paste inside the key map
+"FnNoremap <C-g><C-g>        :RGrep<SPACE><C-r>=expand("<cword>")<CR>
 "FnNoremap <C-g>             :Grep<SPACE><C-r><C-w>
 "vnoremap <C-g>              "+y:Grep<SPACE><C-r>"
 "vnoremap <C-g>              "+y:Grep<SPACE><C-r>=fnameescape("<C-r>"")<CR>
