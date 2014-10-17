@@ -12,15 +12,15 @@ alias pg='pgrep -fl'
 alias pgu='pgrep -flu $(id -u $USER)'
 
 function pid() {
-    for NAME in "$@"; do
-        ps -C "$@" -o pid=
-    done
+	for NAME in "$@"; do
+		ps -C "$@" -o pid=
+	done
 }
 
 function uid() {
-    for NAME in "$@"; do
-        ps -C "$@" -o user=
-    done
+	for NAME in "$@"; do
+		ps -C "$@" -o user=
+	done
 }
 
 # System information
@@ -62,6 +62,24 @@ function mem-inst() {
 
 function swap-inst() {
 	top -d 0.5 -b -n2 | grep "Swap:" | tail -n 1 | awk '{print ($4*100/$2)}'
+}
+
+function cpu-top() {
+	eval "ps aux --sort -%cpu ${1:+| head -n $(($1 + 1))}"
+}
+
+function mem-top() {
+	eval "ps aux --sort -rss ${1:+| head -n $(($1 + 1))}"
+}
+
+function kill-cpu-top() {
+	END=$((${1:-1} + 1))
+	ps a --sort -%cpu | awk "NR>1 && NR<=$END {print \$1;}" | xargs kill ${@:2}
+}
+
+function kill-mem-top() {
+	END=$((${1:-1} + 1))
+	ps a --sort -rss | awk "NR>1 && NR<=$END {print \$1;}" | xargs kill ${@:2}
 }
 
 # system information aliases
