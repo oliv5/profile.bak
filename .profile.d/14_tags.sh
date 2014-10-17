@@ -7,7 +7,7 @@ CTAGS_OPTS="-R --sort=yes --c-kinds=+p --c++-kinds=+p --fields=+iaS --extra=+qf 
 
 # Cscope default settings
 #CSCOPE_OPTS="-qb"
-CSCOPE_OPTS="-b"
+CSCOPE_OPTS="-qbk"
 CSCOPE_REGEX='.*\.(h|c|cc|cpp|hpp|inc|S|py)$'
 CSCOPE_EXCLUDE="-not -path *.svn* -and -not -path *.git -and -not -path /tmp/"
 
@@ -34,7 +34,7 @@ function scancsdir() {
   CSCOPE_FILES="$DST/cscope.files"
   # Scan directory
   set -f
-  find "$SRC" $CSCOPE_EXCLUDE ${@:3} -regex "$CSCOPE_REGEX" -printf '"%p"\n' >> "$CSCOPE_FILES"
+  find "$SRC" $CSCOPE_EXCLUDE ${@:3} -regextype posix-egrep -regex "$CSCOPE_REGEX" -type f -printf '"%p"\n' >> "$CSCOPE_FILES"
   set +f
 }
 
@@ -57,6 +57,8 @@ function mkcscope-1() {
 }
 
 # Scan and make cscope db
+# Warning: this is not incremental
+# It erases the old database and rebuild it
 function mkcscope-2() {
   command -v >/dev/null cscope || return
   # Get directories
@@ -66,13 +68,13 @@ function mkcscope-2() {
   CSCOPE_OPTIONS="$CSCOPE_OPTS $3"
   CSCOPE_DB="$DST/cscope.out"
   # Build tag file
-  find "$SRC" -type f -regextype posix-egrep -regex "$CSCOPE_REGEX" -printf '"%p"\n' | \
+  find "$SRC" $CSCOPE_EXCLUDE ${@:4} -regextype posix-egrep -regex "$CSCOPE_REGEX" -type f -printf '"%p"\n' | \
     ${DBG} $(which cscope) $CSCOPE_OPTIONS -i '-' -f "$CSCOPE_DB"
 }
 
-# Cscope alias
+# Cscope alias - use a fct because aliases are not exported to other fct
 function mkcscope() {
-  mkcscope-2 "$@"
+  mkcscope-1 "$@"
 }
 
 # Make id-utils database
@@ -124,9 +126,12 @@ function rmtags() {
 
 function mkalltags() {
   _PWD="$PWD"
-  for TAGPATH in $(find -L "${1:-$PWD}" -maxdepth ${2:-5} -type f -name "*.path" 2>/dev/null); do
+  for TAGPATH in $(find -L "$(readlink -m "${1:-$PWD}")" -maxdepth ${2:-5} -type f -name "*.path" 2>/dev/null); do
     echo "** Processing file $TAGPATH"
+    set -x
     builtin cd "$(dirname $TAGPATH)"
+    set +x
+    pwd
     TAGNAME="$(basename $TAGPATH)"
     if [ "$TAGNAME" == "tags.path" -o "$TAGNAME" == "ctags.path" ]; then
       rmctags
@@ -139,8 +144,9 @@ function mkalltags() {
       rmcscope
       for SRC in $(cat $TAGNAME); do
         echo "[cscope] add: $SRC"
-        mkcscope "$SRC" .
+        scancsdir "$SRC" .
       done
+      mkcscope "$SRC" .
     fi
     if [ "$TAGNAME" == "tags.path" -o "$TAGNAME" == "id.path" ]; then
       rmids
