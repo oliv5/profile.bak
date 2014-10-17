@@ -30,7 +30,7 @@
 	
 	" Scroll bars
 	if has('gui_running')
-		set guioptions+=rbh
+		set guioptions+=rb
 		set guioptions-=rl
 	endif
 " }
@@ -71,47 +71,54 @@
 " }
 
 " MRU using tlib {
-	silent! call tlib#buffer#EnableMRU()
 	let s:mru_backward=0
 	let s:mru_forward=0
-	let s:mru_reset=1
+	"let s:mru_reset=1
+	if !exists('s:mru_init')
+		silent! call tlib#buffer#EnableMRU()
+		let s:mru_init=1
+	endif
 
-	function! s:MRUreset()
-		if s:mru_reset!=0
-			let s:mru_backward=0
-			let s:mru_forward=0
-		endif
-		let s:mru_reset = 1
-	endfunction
+	"function! s:MRUreset()
+	"	if s:mru_reset!=0
+	"		let s:mru_backward=0
+	"		let s:mru_forward=0
+	"	endif
+	"	let s:mru_reset = 1
+	"endfunction
 
 	function! s:MRUbackward()
 		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
-		let s:mru_reset = 0
+		"let s:mru_reset = 0
 		let s:mru_forward = 0
 		if s:mru_backward<(len(l:buflist)-1)
 			let s:mru_backward = (s:mru_backward+1)
 		endif
+		"let tmp = s:mru_backward
 		exe "b" l:buflist[s:mru_backward]
+		"let s:mru_backward = tmp
 	endfunction
 
 	function! s:MRUforward()
 		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
-		let s:mru_reset = 0
+		"let s:mru_reset = 0
 		let s:mru_backward = 0
 		if s:mru_forward<(len(l:buflist)-1)
 			let s:mru_forward = (s:mru_forward+1)
 		endif
+		"let tmp = s:mru_forward
 		exe "b" l:buflist[s:mru_forward]
+		"let s:mru_forward = tmp
 	endfunction
 	
 	command! -nargs=0 -bar MRUbackward	call s:MRUbackward()
 	command! -nargs=0 -bar MRUforward	call s:MRUforward()
 	command! -nargs=0 -bar MRUlist		echo tlib#buffer#GetList(0,0,'mru')[1]
 
-	silent! augroup! MRU
-	augroup MRU
-		au BufEnter * 		call <SID>MRUreset()
-	augroup END
+	"augroup MRU
+	"	au!
+	"	au BufEnter * 		call <SID>MRUreset()
+	"augroup END
 	
 	FnNoremap <C-Tab>		:MRUbackward<CR>
 	FnNoremap <C-S-Tab>		:MRUforward<CR>
