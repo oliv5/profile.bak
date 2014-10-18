@@ -31,12 +31,13 @@ alias ixml='CASE=-i xml'
 alias iasm='CASE=-i asm'
 
 # Search regex
-REGEX_FUNC='(^|[ \t]+|::)$1[ \t]*\(([^;]*$|[^\}]\})'
-#REGEX_VAR='(^|;)[ \t]*\w+[ \t]+$1[ \t]*(=.+)?;'
-REGEX_VAR='[ \t]*\w+[ \t]+$1[ \t]*(=.+)?;'
-REGEX_STRUCT='(struct|union|enum|class)[ \t]*$1[ \t]*(\{|\$)'
-REGEX_TYPEDEF='(typedef[ \t]\w+[ \t]$1)|(^[ \t]*$1[ \t]*;)'
-REGEX_DEFINE='(#define[ \t]+$1|^[ \t]*$1[ \t]*,)|(^[ \t]*$1[ \t]*=.*,)'
+#REGEX_FUNC='(^|\s+|::)$1\s*\(([^;]*$|[^\}]\})'
+REGEX_FUNC='\w+\s+$1\s*\(\s*($|\w+\s+\w+|void)'
+#REGEX_VAR='(^|;)\s*\w+\s+$1\s*(=.+)?;'
+REGEX_VAR='\w+\s+$1\s*(=.+|\(\w+\))?\s*;'
+REGEX_STRUCT='(struct|union|enum|class)\s*$1\s*(\{|$)'
+REGEX_TYPEDEF='(typedef\s+\w+\s$1)|(^\s*$1\s*;)'
+REGEX_DEFINE='(#define\s+$1|^\s*$1\s*,)|(^\s*$1\s*=.*,)'
 
 function func() {
   ref "${REGEX_FUNC//\$1/$1}" . -E ${@:2}
