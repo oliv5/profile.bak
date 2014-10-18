@@ -10,8 +10,12 @@
 
 " UI settings, theme & color scheme {
 	if has('syntax')
-		colorscheme torte
 		syntax on
+		if has('gui_running')
+			colorscheme torte
+		else
+			colorscheme jelleybeans
+		endif
 	endif
 
 	" Select font
@@ -27,7 +31,7 @@
 		set nu
 		map <localleader>n  :set nu!<CR>
 	endif
-	
+
 	" Scroll bars
 	if has('gui_running')
 		set guioptions+=rb
@@ -52,7 +56,7 @@
 " Misc configuration {
 	" Autochange dir
 	"let g:vimrc_noautochdir = 1
-	
+
 	" Autocompletion
 	imap <C-space>  <C-x><C-u>
 
@@ -110,7 +114,7 @@
 		exe "b" l:buflist[s:mru_forward]
 		"let s:mru_forward = tmp
 	endfunction
-	
+
 	command! -nargs=0 -bar MRUbackward	call s:MRUbackward()
 	command! -nargs=0 -bar MRUforward	call s:MRUforward()
 	command! -nargs=0 -bar MRUlist		echo tlib#buffer#GetList(0,0,'mru')[1]
@@ -119,7 +123,7 @@
 	"	au!
 	"	au BufEnter * 		call <SID>MRUreset()
 	"augroup END
-	
+
 	FnNoremap <C-Tab>		:MRUbackward<CR>
 	FnNoremap <C-S-Tab>		:MRUforward<CR>
 " }
