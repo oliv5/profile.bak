@@ -32,6 +32,9 @@ alias sdm='svn diff --diff-cmd meld'
 alias svn-resolve='svn-merge'
 alias svn-cl-add='svn cl'
 alias svn-cl-rm='svn changelist --remove'
+# Commit aliases
+alias sci='svn ci'
+alias scid='svn ci -m "Development commit $(svn-date)"'
 
 # Build a unique backup directory for this repo
 function svn-bckdir() {
@@ -119,18 +122,16 @@ function svn-merge() {
 }
 
 # Commit a list of files
-function svn-ci() {
-  CL="CL$(svn-date)"
-  svn cl "$CL" "$@"
-  svn ci --cl "$CL"
-}
+#function svn-ci() {
+#  CL="CL$(svn-date)"
+#  svn cl "$CL" "$@" && svn ci --cl "$CL"
+#}
 
 # Make a dev commit of a list of files
-function svn-cid() {
-  CL="CL$(svn-date)"
-  svn cl "$CL" "$@"
-  svn ci --cl "$CL" -m "Development commit $(svn-date)"
-}
+#function svn-cid() {
+#  CL="CL$(svn-date)"
+#  svn cl "$CL" "$@" && svn ci --cl "$CL" -m "Development commit $(svn-date)"
+#}
 
 # Create a changelist
 function svn-cl() {
