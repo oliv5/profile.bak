@@ -21,7 +21,9 @@ behave mswin
 set backspace=indent,eol,start whichwrap+=<,>,[,]
 
 " backspace in Visual mode deletes selection
-vnoremap <BS> d
+if empty(mapcheck('<BS>','v'))
+  vnoremap <BS> d
+endif
 
 " CTRL-X and SHIFT-Del are Cut
 vnoremap <C-X> "+x
