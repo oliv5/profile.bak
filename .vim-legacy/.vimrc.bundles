@@ -69,49 +69,28 @@ if has("cscope")
 	cabbrev csh lcs help
 
 	" Find and load cscope database
-	function! s:LoadCscopeDb(db)
-		if (filereadable(a:db))
-			"set nocscopeverbose " suppress 'duplicate connection' error
-			silent! exe "cs add" a:db matchstr(a:db, ".*/")
-			silent! cs reset
-			"set cscopeverbose
-		endif
+	function! s:LoadCscopeDb(dblist)
+		for db in a:dblist
+			if (filereadable(db))
+				"set nocscopeverbose " suppress 'duplicate connection' error
+				silent! exe "cs add" db matchstr(db, ".*/")
+				silent! cs reset
+				"set cscopeverbose
+			endif
+		endfor
 	endfunction
 
-	" Add any cscope database in the given environment variable
-	for db in [g:cscope_db]
-		call s:LoadCscopeDb(db)
-	endfor
-
 	" Additionnal keymap
-	nnoremap <silent> <c-d><c-l>  :call <SID>LoadCscopeDb(findfile(g:cscope_db, ".;"))<CR>
+	nnoremap <silent> <c-d><c-l>  :call <SID>LoadCscopeDb(findfile(g:cscope_db, "**", -1))<CR>
 	nnoremap <silent> <c-d>       <NOP>
 
 	" Autocommand
 	augroup vimrc_cscope
-		autocmd! BufReadPost * call s:LoadCscopeDb(findfile(g:cscope_db, ".;"))
+		autocmd! VimEnter * call s:LoadCscopeDb([g:cscope_db])
+		"autocmd! BufReadPost * call s:LoadCscopeDb(findfile(g:cscope_db, ".;", -1))
 	augroup END
 
 endif
-
-
-" *******************************************************
-" } Omnicompletion {
-" *******************************************************
-
-" Advanced key mapping to omnicompletion
-"inoremap <C-space>  <C-R>=<SID>CleverTab()<CR>
-"function! s:CleverTab()
-"	if pumvisible()
-"		return "\<C-N>"
-"	elseif strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
-"		return "\<Tab>"
-"	elseif exists('&omnifunc') && &omnifunc != ''
-"		return "\<C-X>\<C-O>"
-"	else
-"		return "\<C-N>"
-"	endif
-"endfunction
 
 
 " *******************************************************
@@ -184,6 +163,26 @@ if !exists('g:clang_complete_loaded')
 	" Key mapping
 	inoremap <C-space>  <C-x><C-o>
 endif
+
+
+" *******************************************************
+" } Omnicompletion general config {
+" *******************************************************
+" Advanced omnicompletion key mapping
+"inoremap <C-space>  <C-R>=<SID>CleverTab()<CR>
+"function! s:CleverTab()
+"	if pumvisible()
+"		return "\<C-N>"
+"	elseif strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
+"		return "\<Tab>"
+"	elseif exists('&omnifunc') && !empty(&omnifunc)
+"		return "\<C-X>\<C-O>"
+"	elseif exists('&completefunc') && !empty(&completefunc)
+"		return "\<C-X>\<C-U>"
+"	else
+"		return "\<C-N>"
+"	endif
+"endfunction
 
 
 " *******************************************************
@@ -330,7 +329,7 @@ if !exists('g:loaded_yaifa')
 	" Map Yaifa
 	nmap <localleader><tab>   :call YAIFA()<CR>
 	" autocall when entering file
-	augroup YAIFA
+	augroup YAIFA_vimrc
 		autocmd! BufRead * silent! call YAIFA()
 	augroup END
 endif
@@ -357,24 +356,35 @@ endif
 " *******************************************************
 if !exists('g:loaded_cctree')
 	" Options
-	let g:CCTreeCscopeDb = "cscope.out, $CSCOPE_DB"
+	let g:CCTreeCscopeDb = !empty($CSCOPE_DB) ? $CSCOPE_DB : "cscope.out"
+	let g:CCTreeWindowVertical = 1
 	let g:CCTreeDisplayMode = 2
-	let g:CCTreeRecursiveDepth = 3
+	let g:CCTreeRecursiveDepth = 1
+	let g:CCTreeWindowWidth = 30
+	let g:CCTreeKeyToggleWindow = '<localleader>cc'
+	
+	" Find and load cscope database
+	function! s:LoadCCtreeDb(dblist)
+		for db in a:dblist
+			if (filereadable(db))
+				exec "CCTreeLoadDB" db
+			endif
+		endfor
+	endfunction
 
-	" Add any cscope database in the given environment variable
-	for db in split(g:CCTreeCscopeDb)
-		if filereadable(db)
-			exec 'let g:CCTreeCscopeDb =' db
-			break
-		endif
-	endfor
+	" Additionnal keymap
+	nnoremap <silent> <c-d>		<NOP>
+	nnoremap <c-d><c-l><c-l>  	:call <SID>LoadCCtreeDb(findfile(g:CCTreeCscopeDb, ".;", -1))<CR>
+	nnoremap <c-d><c-c><c-c>	:CCTreeWindowToggle<CR>
+    nnoremap <C-d><C-r> 		:CCTreeTraceReverse <C-R>=expand("<cword>")<CR><CR>
+    vnoremap <C-d><C-r> 		"+y:CCTreeTraceReverse <C-R>"<CR>
+    nnoremap <C-d><C-r><C-r>	:CCTreeTraceForward <C-R>=expand("<cword>")<CR><CR>
+    vnoremap <C-d><C-r><C-r>	"+y:CCTreeTraceForward <C-R>"<CR>
 
-	" Key mappings
-	let g:CCTreeKeyTraceReverseTree = '<localleader>x'
-	let g:CCTreeKeyTraceForwardTree = '<localleader>xf'
-	let g:CCTreeKeyToggleWindow = '<localleader>xx'
-	nmap <localleader>xl      :if filereadable(g:CCTreeCscopeDb) <BAR> exec "CCTreeLoadDB" g:CCTreeCscopeDb <BAR> endif
-	"nmap <localleader>xl     :if filereadable('xref.out') <BAR> CCTreeLoadXRefDbFromDisk xref.out <BAR> endif
+	" Autocommand
+	augroup vimrc_cctree
+		"autocmd! VimEnter * call s:LoadCscopeDb([g:CCTreeCscopeDb])
+	augroup END
 endif
 
 
