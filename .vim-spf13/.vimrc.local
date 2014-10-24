@@ -23,6 +23,12 @@
 		"set guifont=Lucida_Console:h11
 		set guifont=Monospace\ 9
 	endif
+	
+	" Menu & toolbar
+	if has('gui_running')
+		set guioptions-=T
+		set guioptions-=m
+	endif
 
 	" Cursor
 	set nocursorline
@@ -35,7 +41,7 @@
 	" Scroll bars
 	if has('gui_running')
 		set guioptions+=rb
-		set guioptions-=rl
+		set guioptions-=l
 	endif
 " }
 
@@ -57,7 +63,7 @@
 	" Autochange dir
 	"let g:vimrc_noautochdir = 1
 
-	" Autocompletion
+	" Autocompletion using completefunc (omnifunc=<c-x><c-o>)
 	imap <C-space>  <C-x><C-u>
 
 	" Paste in terminal mode
@@ -127,6 +133,17 @@
 	FnNoremap <C-Tab>		:MRUbackward<CR>
 	FnNoremap <C-S-Tab>		:MRUforward<CR>
 " }
+
+" Bundles configuration overwritten by SPF13 {
+	" Wildfire (text object selection)
+	let g:wildfire_objects = {
+		\ "*" : ["iw", "iW", "i'", 'i"', "i)", "i]", "i}", "at", "it"],
+		\ "html,xml" : ["at", "it"],
+	\ }
+	map <BS> <Plug>(wildfire-fuel)
+	vmap <BS> <Plug>(wildfire-fuel)
+	vmap <S-BS> <Plug>(wildfire-water)
+" }
 
 " Use legacy after config if available {
 	if filereadable(expand("~/.vim-legacy/.vimrc.after"))

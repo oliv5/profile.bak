@@ -13,7 +13,7 @@
 	let g:loaded_trinity = 1
 	let g:ccvext_version = 1
 	let g:loaded_yankring = 1
-	let g:loaded_cctree = 1
+	"let g:loaded_cctree = 1
 	let g:command_t_loaded = 1
 	let g:loaded_minibufexplorer = 1
 	"let g:loaded_yaifa = 1
@@ -26,6 +26,7 @@
 	let g:clang_complete_loaded = 1
 	let g:loaded_commentary = 1
 	let g:loaded_bufline = 1
+	let g:autotag_vim_version_sourced = 1
 	
 	" Disable my statusline
 	let g:vimrc_nostatusline = 1
@@ -38,10 +39,10 @@
 
 " Additional bundles {
 	"Bundle 'powerman/vim-plugin-AnsiEsc'
-	Bundle 'minibufexpl'
-	Bundle 'vim-autotag'
-	Bundle 'vim-ide'
-	Bundle 'yaifa'
+	Bundle 'fholgado/minibufexpl.vim'
+	Bundle 'vim-scripts/AutoTag'
+	Bundle 'hari-rangarajan/CCTree'
+	Bundle 'Raimondi/YAIFA'
 " }
 
 " Configure SPF13 plugins {
@@ -71,15 +72,8 @@
 		set conceallevel=2 concealcursor=i
 	endif
 	
-	" Wildfire (text object selection)
-	let g:wildfire_objects = {
-		\ "*" : ["iw", "iW", "i'", 'i"', "i)", "i]", "i}", "at", "it"],
-		\ "html,xml" : ["at", "it"],
-	\ }
-	map <BS> <Plug>(wildfire-fuel)
-	vmap <S-BS> <Plug>(wildfire-water)
-	
 	" Syntastic
 	let g:syntastic_python_checkers = ['pylint']
 	let g:syntastic_python_pylint_args='--max-line-length=120 --max-module-lines=5000 --indent-string=""'
+
 " }
