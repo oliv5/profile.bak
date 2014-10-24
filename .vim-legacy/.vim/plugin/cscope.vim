@@ -102,7 +102,7 @@ if has("cscope")
     nnoremap <C-d><C-t> :Cs find t <C-R>=expand("<cword>")<CR><CR>
     nnoremap <C-d><C-e> :Cs find e <C-R>=expand("<cword>")<CR><CR>
     nnoremap <C-d><C-f> :Cs find f <C-R>=expand("<cfile>")<CR><CR>
-    nnoremap <C-d><C-i> :Cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
+    nnoremap <C-d><C-i> :Cs find i <C-R>=expand("<cfile>")<CR>$<CR>
     nnoremap <C-d><C-g> :Cs find g <C-R>=expand("<cword>")<CR><CR>
 
     vnoremap <C-d><C-s> "+y:Cs find s <C-R>"<CR>
