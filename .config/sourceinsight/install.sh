@@ -24,7 +24,7 @@ fi
 ln -sf "$REPO/GLOBAL.CF3" "$USER_PREFIX/Mes documents/Source Insight/Settings/GLOBAL.CF3"
 
 # Copy run script into user bin
-cp "$REPO/run.sh" "$HOME/bin/sourceinsight.sh"
+cp "$REPO/run.sh" "$HOME/bin/si.sh"
 
 #WINEPREFIX="$PREFIX" reg add "HKLM\SYSTEM\CurrentControlSet\services\Service" /v "KeyName" /d "Parameters" /f
 #WINEPREFIX="$PREFIX" wine regedit
