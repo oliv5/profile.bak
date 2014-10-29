@@ -8,13 +8,6 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
-# Add to path
-for DIR in /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin; do
-  if ! [[ $PATH =~ $DIR ]]; then
-    export PATH="${PATH:+$PATH:}$DIR"
-  fi
-done
-
 # Misc variables
 [ -z "$USER" ] && export USER="$(id -un)"
 [ -z "$HOME" ] && export HOME="$(grep "$USER" /etc/passwd | cut -d: -f6)"
@@ -22,9 +15,6 @@ done
 [ -z "$HOSTNAME" ] && export HOSTNAME="$(/bin/hostname)"
 [ -z "$DOMAIN" ] && export DOMAIN="$(/bin/hostname -d)"
 [ -z "$DISPLAY" ] && export DISPLAY=":0.0"
-
-# Setup env for user
-export PATH="$HOME/bin:$HOME/bin/profile:$PATH"
 
 # Set load flag
 export ENV_CNT=$(expr ${ENV_CNT:-0} + 1)

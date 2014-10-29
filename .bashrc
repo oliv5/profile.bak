@@ -145,6 +145,14 @@ if [ -f "$HOME/.profile" ]; then
   . "$HOME/.profile"
 fi
 
+# Setup user path
+for DIR in /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin; do
+  if ! [[ "$PATH" =~ "$DIR" ]] && [[ -d "$DIR" ]]; then
+    export PATH="${PATH:+$PATH:}$DIR"
+  fi
+done
+export PATH="$HOME/bin:$HOME/bin/profile:$PATH"
+
 # Load profile.d scripts
 unalias profile 2>/dev/null
 profile
