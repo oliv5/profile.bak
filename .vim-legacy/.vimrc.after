@@ -52,14 +52,15 @@ function! g:FindRootDir()
 		endif
 	endfor
 	" No match
-	return ''    "'%:p:h:gs/ /\\ /'
+	return '%:p:h'
+	"return getcwd()
 endfunction
 
 " Directory autochange
 if !exists('g:vimrc_noautochdir')
 	if 1
 		" Look for the best directory
-		augroup autochdir
+		augroup vimrc_autochdir
 			autocmd! BufEnter * execute "lcd" g:FindRootDir()
 		augroup END
 	elseif exists('+autochdir')
