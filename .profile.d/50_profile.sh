@@ -50,6 +50,9 @@ function ffg() {
   ff "$@" | xargs g
 }
 
+# Source insight
+alias s='si'
+
 # Alias misc
 alias hi='history'
 alias mo='mimeopen'

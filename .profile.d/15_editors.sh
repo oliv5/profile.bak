@@ -6,7 +6,7 @@ export GEDIT="$(which gedit)"
 
 function gedit() {
   ARGS="$(echo $@ | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1 +\2/g')"
-  ${GEDIT:-false} $ARGS
+  eval ${GEDIT:-false} $ARGS
 }
 
 #########################
@@ -15,7 +15,7 @@ export GEANY="$(which geany)"
 
 function geany() {
   ARGS="$(echo $@ | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1 +\2/g')"
-  ${GEANY:-false} $ARGS
+  eval ${GEANY:-false} $ARGS
 }
 
 #########################
@@ -29,10 +29,18 @@ export COLORTERM="xterm" # backspace bug in vim
 function gvim() {
   ARGS="$(sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/+\2 \1/g' <<< $@)"
   if [ -z "$VIM_USETABS" ]; then
-    ${GVIM:-false} ${1:+--remote-silent} $ARGS
+    eval ${GVIM:-false} ${1:+--remote-silent} $ARGS
   else
-    ${GVIM:-false} ${1:+--remote-tab-silent} $ARGS
+    eval ${GVIM:-false} ${1:+--remote-tab-silent} $ARGS
   fi
+}
+
+#########################
+# Source insight
+export SI="$(which si.sh)"
+
+function si() {
+  eval ${SI:-false} "$@"
 }
 
 #########################
@@ -40,3 +48,4 @@ function gvim() {
 export -f gedit
 export -f geany
 export -f gvim
+export -f si
