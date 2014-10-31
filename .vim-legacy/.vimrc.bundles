@@ -260,6 +260,7 @@ if !exists('g:loaded_nerd_tree')
 	" Toggle ON/OFF
 	nmap <localleader>e   :NERDTree<CR>
 	nmap <localleader>ee  :NERDTreeClose<CR>
+	FnNoremap <c-e>       :NERDTreeToggle %:p:h<CR>
 endif
 
 

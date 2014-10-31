@@ -574,8 +574,8 @@ if exists('+gtl') " Tab name is the filename only
 endif
 
 " Open/close tab
-FnNoremap <C-t>        :tabnew<CR>
-FnNoremap <C-t><C-t>   :tabe<SPACE>
+FnNoremap <C-t>        :tabnew %:p<CR>
+FnNoremap <C-t><C-t>   :tabe <C-R>=expand('%:p:h')<CR>/
 FnNoremap <C-t><C-c>   :tabclose<CR>
 if exists('g:vimrc_useTabs')
 	FnNoremap <C-F4>     :tabclose<CR>
