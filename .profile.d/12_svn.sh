@@ -360,5 +360,6 @@ function _svn-zipdiff() {
   #$1 "." "$ARCHIVE"
 }
 alias svn-zipdiff='_svn-zipdiff 7zdiff'
+alias svn-zipdiffc='_svn-zipdiff 7zddiff 2>/dev/null | wc -l'
 alias svn-zipdiffm='_svn-zipdiff 7zdiffm'
 alias svn-zipddiff='_svn-zipdiff 7zddiff'

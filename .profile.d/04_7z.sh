@@ -44,7 +44,6 @@ function 7zddiff() {
   DIR1=$(_7zd "$1")
   for DIR2 in "${@:2}"; do
     DIR2=$(_7zd "$DIR2")
-    echo -e '\nDir diff list:'
     ddiff "$DIR1" "$DIR2" | grep -v "Only in $DIR1"
   done
 }
@@ -54,7 +53,6 @@ function 7zdiff() {
   DIR1=$(_7zd "$1")
   for DIR2 in "${@:2}"; do
     DIR2=$(_7zd "$DIR2")
-    echo -e '\nDir diff list:'
     diff -r "$DIR1" "$DIR2" | grep -v "Only in $DIR1"
   done
 }
@@ -64,7 +62,6 @@ function 7zdiffm() {
   DIR1=$(_7zd "$1")
   for DIR2 in "${@:2}"; do
     DIR2=$(_7zd "$DIR2")
-    echo -e '\nDir diff list:'
     meld "$DIR1" "$DIR2"
   done
 }
