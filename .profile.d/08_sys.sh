@@ -91,3 +91,15 @@ alias swap='swap-inst'
 alias keyb-list='grep ^[^#] /etc/locale.gen'
 alias keyb-set='setxkbmap -layout'
 alias keyb-setfr='setxkbmap -layout fr'
+
+# Chroot
+function mk-chroot(){
+	SRC="/dev/${1:?Please specify the root device}"
+	DST="${2:-/mnt}"
+	mount "$SRC" "$DST"
+	mount --bind "/dev" "$DST/dev"
+	mount --bind "/dev/pts" "$DST/dev/pts"
+	mount -t sysfs "/sys" "$DST/sys"
+	mount -t proc "/proc" "$DST/proc"
+	chroot "$DST"
+}
