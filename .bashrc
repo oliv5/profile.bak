@@ -128,6 +128,8 @@ function lang_en() {
 }
 
 # Load user profile
+unset -f profile 2>/dev/null
+unalias profile 2>/dev/null
 function profile {
   for i in $HOME/.profile.d/*.sh ; do
     if [ -x "$i" ]; then
@@ -145,14 +147,11 @@ if [ -f "$HOME/.profile" ]; then
   . "$HOME/.profile"
 fi
 
-# Setup user path
-for DIR in /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin; do
-  if ! [[ "$PATH" =~ "$DIR" ]] && [[ -d "$DIR" ]]; then
-    export PATH="${PATH:+$PATH:}$DIR"
-  fi
-done
-export PATH="$HOME/bin:$HOME/bin/profile:$PATH"
-
 # Load profile.d scripts
-unalias profile 2>/dev/null
-profile
+if [ -z "$ENV_PROFILE_D" ]; then
+  profile
+  # Setup user path
+  path-append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
+  path-prepend "$HOME/bin" "$HOME/bin/profile"
+fi
+

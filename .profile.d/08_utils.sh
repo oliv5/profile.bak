@@ -44,7 +44,7 @@ function hex2int() {
 	let "MAX=1<<${2:-32}"
 	let "MEAN=($MAX >> 1) - 1"
     RES=$(printf "%d" "$1")
-    (( RES > $MEAN )) && (( RES -= $MAX )) 
+    (( RES > $MEAN )) && (( RES -= $MAX ))
     echo $RES
 }
 
@@ -81,13 +81,3 @@ function get-extip() {
 
 # Strip ANSI codes
 alias rm-ansi='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'
-
-# Make deb package from source
-function make-deb() {
-  ARCHIVE="${1:?No input archive specified}"
-  tar zxf "$ARCHIVE" || return 0
-  cd "${ARCHIVE%.*}"
-  ./configure || return 0
-  dh_make -s -f "../$ARCHIVE"
-  fakeroot debian/rules binary
-}

@@ -103,3 +103,13 @@ function mk-chroot(){
 	mount -t proc "/proc" "$DST/proc"
 	chroot "$DST"
 }
+
+# Make deb package from source
+function make-deb() {
+	ARCHIVE="${1:?No input archive specified}"
+	tar zxf "$ARCHIVE" || return 0
+	cd "${ARCHIVE%.*}"
+	./configure || return 0
+	dh_make -s -f "../$ARCHIVE"
+	fakeroot debian/rules binary
+}

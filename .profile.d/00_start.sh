@@ -7,11 +7,21 @@ export ENV_PROFILE_D=$ENV_CNT
 #alias
 alias end='return 0 2>/dev/null || exit 0'
 
-# Add to path function
-function path-add() {
+# Prepend to path
+function path-prepend () {
   for DIR in "$@"; do
-    if ! [[ $PATH =~ $DIR ]]; then
-      export PATH="$PATH:$DIR"
+    if ! [[ "$PATH" =~ "$DIR" ]] && [[ -d "$DIR" ]]; then
+      export PATH="${DIR}${PATH:+:$PATH}"
+    fi
+  done
+}
+
+# Append to path
+alias path-add='path-append'
+function path-append () {
+  for DIR in "$@"; do
+    if ! [[ "$PATH" =~ "$DIR" ]] && [[ -d "$DIR" ]]; then
+      export PATH="${PATH:+$PATH:}${DIR}"
     fi
   done
 }
@@ -66,7 +76,7 @@ function cmd-exists() {
   command -v ${1} >/dev/null
 }
 
-# Cmd unset 
+# Cmd unset
 function cmd-unset() {
   unalias $1 2>/dev/null
   unset -f $1 2>/dev/null
