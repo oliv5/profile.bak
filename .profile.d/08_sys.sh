@@ -113,3 +113,57 @@ function make-deb() {
 	dh_make -s -f "../$ARCHIVE"
 	fakeroot debian/rules binary
 }
+
+# Install file notifier
+alias write-notify='notify close_write'
+alias read-notify='notify close_read'
+alias rw-notify='notify "close_read,close_write"'
+alias create-notify='notify create'
+alias mv-notify='notify moved_to'
+alias notify='_notify-file'
+
+# Basic notification method with a loop
+# Pros: file move is captured
+# Cons: may miss event, high system resource consumption on large directories
+function _notify-loop() {
+	while true; do
+		inotifywait -qq -e ${1:?Nothing to monitor} "${2:-$PWD}"
+		eval ${3:-true} ${@:4}
+	done
+}
+
+# Main notification method
+# Pros: only a single inotifywait process & set of pipes
+# Cons: does not capture file moves properly
+function _notify-proc() {
+	TRIGGER=${1:?Nothing to monitor}
+	FILE="${2:-$PWD}"
+	SCRIPT="${3:-true} ${@:4}"
+	
+	# Start child shell process, open pipes
+	coproc INOTIFY {
+		inotifywait -q -m -e $TRIGGER "$FILE" &
+		trap "kill $!" 1 2 3 6 15 # Kill inotifywait when this process is killed
+		wait
+	}
+
+	# Kill the coproc child process when father is killed or interrupted
+	trap "kill $INOTIFY_PID" 0 1 2 3 6 15
+
+	## Loop for each action
+	while IFS=' ' read -ru ${INOTIFY[0]} DIR TRIGGER FILE; do # could use "read 0<&${INOTIFY[0]}"
+		#echo "$FILE $DIR $TRIGGER"
+		eval $SCRIPT
+	done
+	
+	# Kill the coproc child process
+	kill $INOTIFY_PID 2>/dev/null
+}
+
+# Main notification method enhencement to support file moves
+# Monitor the root directory, filter events on file names
+# Pros: uses _notify-proc low resource method
+# Cons: it is triggered for every file event of the root directory
+function _notify-file() {
+	_notify-proc $1 "$(dirname "$2")" 'if [ "$DIR$FILE" == "'$2'" ]; then '${@:3}'; fi'
+}

@@ -66,6 +66,11 @@ function fct-export-all() {
   export -f $(fct-ls)
 }
 
+# Print fct content
+function fct-content() {
+  type ${1:?No fct name given...} | tail -n+4 | head -n-1
+}
+
 # Get script directory
 function pwd-get() {
   echo $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
