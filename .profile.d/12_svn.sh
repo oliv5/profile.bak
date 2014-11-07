@@ -311,6 +311,11 @@ function svn-history() {
   }
 }
 
+# Show user commit
+function svn-loguser() {
+  svn log | sed -n "/${1:-$USER}/,/-----$/ p"
+}
+
 # Show logs in a range of revisions (-r and -c allowed)
 function svn-log() {
   svn log --verbose ${2:+-r $1:}${2:-${1:+-c $1}} ${@:3}

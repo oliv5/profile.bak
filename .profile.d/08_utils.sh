@@ -81,3 +81,22 @@ function get-extip() {
 
 # Strip ANSI codes
 alias rm-ansi='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'
+
+# Send email using mutt or mail
+function send-mail() {
+  DEST="${1:?No email address specified}"
+  SUBJECT="${2:?No subject specified}"
+  CONTENT="${3:?No content specified}"
+  ATTACH="$4"
+  CC="$5"
+  BCC="$6"
+  if command -v mutt >/dev/null; then
+    echo -e "$CONTENT" | mutt ${ATTACH:+-a "$ATTACH"} ${SUBJECT:+-s "$SUBJECT"} -- ${DEST} && echo "Email sent"
+  elif command -v mail >/dev/null; then
+    echo -e "$CONTENT" | mail ${SUBJECT:+-s "$SUBJECT"} ${DEST} && echo "Email sent"
+  else
+    echo "No mail program found"
+    return 1
+  fi
+  return 0
+}
