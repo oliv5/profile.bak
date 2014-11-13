@@ -15,11 +15,7 @@ done
 
 # Export user functions
 #fct-export-all
-#export -f die
-#export -f $(fct-ls | grep svn-)
-#export -f $(fct-ls | grep git-)
 
 # Cleanup path
 export PATH="${PATH//\~/${HOME}}"
 export PATH="${PATH//.:/}"
-

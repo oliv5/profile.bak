@@ -4,28 +4,18 @@
 export ENV_CNT=$(expr ${ENV_CNT:-0} + 1)
 export ENV_PROFILE_D=$ENV_CNT
 
-#alias
-alias end='return 0 2>/dev/null || exit 0'
-
-# Prepend to path
-function path-prepend () {
-  for DIR in "$@"; do
-    if ! [[ "$PATH" =~ "$DIR" ]] && [[ -d "$DIR" ]]; then
-      export PATH="${DIR}${PATH:+:$PATH}"
-    fi
-  done
+################################
+# Language selection functions
+function lang_fr() {
+  export LANGUAGE="fr:en"
+  export LC_ALL="fr_FR.UTF-8"
+}
+function lang_en() {
+  unset LANGUAGE
+  export LC_ALL="en_US.UTF-8"
 }
 
-# Append to path
-alias path-add='path-append'
-function path-append () {
-  for DIR in "$@"; do
-    if ! [[ "$PATH" =~ "$DIR" ]] && [[ -d "$DIR" ]]; then
-      export PATH="${PATH:+$PATH:}${DIR}"
-    fi
-  done
-}
-
+################################
 # Call stack
 function print-callstack() {
   # skipping i=0 as this is print_call_trace itself
@@ -35,6 +25,7 @@ function print-callstack() {
   done
 }
 
+################################
 # Set error handler
 function trap-map() {
   trap 'die "Error handler:" -1 ${LINENO}' ${@:-1 15} ERR
@@ -46,6 +37,7 @@ function die () {
   [[ $- == *i* ]] && return ${2:--1} || exit ${2:--1}
 }
 
+################################
 # List user functions
 function fct-ls() {
   declare -F | cut -d" " -f3 | egrep -v "^_"
@@ -68,14 +60,16 @@ function fct-export-all() {
 
 # Print fct content
 function fct-content() {
-  type ${1:?No fct name given...} | tail -n+4 | head -n-1
+  type ${1:?No fct name given...} 2>/dev/null | tail -n+4 | head -n-1
 }
 
+################################
 # Get script directory
 function pwd-get() {
   echo $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 }
 
+################################
 # Cmd exist test
 function cmd-exists() {
   command -v ${1} >/dev/null

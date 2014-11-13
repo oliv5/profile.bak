@@ -117,19 +117,38 @@ fi
 # Personnal section
 ######################################
 
-# Language selection functions
-function lang_fr() {
-  export LANGUAGE="fr:en"
-  export LC_ALL="fr_FR.UTF-8"
+# Set load flag
+export ENV_CNT=$(expr ${ENV_CNT:-0} + 1)
+export ENV_BASHRC=$ENV_CNT
+
+# Load .profile when not already done
+if [ -z "$ENV_PROFILE" -a -f "$HOME/.profile" ]; then
+  . "$HOME/.profile"
+fi
+
+# Prepend to path
+function path-prepend () {
+  for DIR in "$@"; do
+    if ! [[ "$PATH" =~ "$DIR" ]] && [[ -d "$DIR" ]]; then
+      export PATH="${DIR}${PATH:+:$PATH}"
+    fi
+  done
 }
-function lang_en() {
-  unset LANGUAGE
-  export LC_ALL="en_US.UTF-8"
+unalias path-prepend 2>/dev/null
+path-prepend "$HOME/bin" "$HOME/bin/profile"
+  
+# Append to path
+function path-append () {
+  for DIR in "$@"; do
+    if ! [[ "$PATH" =~ "$DIR" ]] && [[ -d "$DIR" ]]; then
+      export PATH="${PATH:+$PATH:}${DIR}"
+    fi
+  done
 }
+unalias path-append 2>/dev/null
+eval path-append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
 
 # Load user profile
-unset -f profile 2>/dev/null
-unalias profile 2>/dev/null
 function profile {
   for i in $HOME/.profile.d/*.sh ; do
     if [ -x "$i" ]; then
@@ -137,21 +156,5 @@ function profile {
     fi
   done
 }
-
-# Set load flag
-export ENV_CNT=$(expr ${ENV_CNT:-0} + 1)
-export ENV_BASHRC=$ENV_CNT
-
-# Load .profile
-if [ -f "$HOME/.profile" ]; then
-  . "$HOME/.profile"
-fi
-
-# Load profile.d scripts
-if [ -z "$ENV_PROFILE_D" ]; then
-  profile
-  # Setup user path
-  path-append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
-  path-prepend "$HOME/bin" "$HOME/bin/profile"
-fi
-
+unalias profile 2>/dev/null
+eval profile
