@@ -12,8 +12,8 @@ function _ffind() {
   trap SIGINT
 }
 function ff()  { _ffind "$@" ;}
-function fff() { _ffind "${@:-*}" -type f ;}
-function ffd() { _ffind "${@:-*}" -type d ;}
+function fff() { _ffind "${1:-*}" -type f "${@:2}" ;}
+function ffd() { _ffind "${1:-*}" -type d "${@:2}" ;}
 alias iff='NAME=iname ff'
 alias ifff='NAME=iname fff'
 alias iffd='NAME=iname ffd'
