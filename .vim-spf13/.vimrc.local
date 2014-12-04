@@ -6,6 +6,10 @@
 
 	" Force write with sudo after opening the file
 	cmap w!! w !sudo tee % >/dev/null
+	
+	" Autoreload changed files
+	set autoread
+	au FileChangedShell * exec 'echohl WarningMsg | echo "Warning: file' expand('%') 'changed on disk" | echohl None'
 " }
 
 " UI settings, theme & color scheme {

@@ -112,6 +112,10 @@ set shell=/bin/bash\ --rcfile\ ~/.bashrc\ -i    " Set shell, load user profile
 " Force write with sudo after opening the file
 cmap w!! w !sudo tee % >/dev/null
 
+" Autoreload changed files
+set autoread
+au FileChangedShell * exec 'echohl WarningMsg | echo "Warning: file' expand('%') 'changed on disk" | echohl None'
+
 
 " *******************************************************
 " } Terminal Settings {
