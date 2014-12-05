@@ -335,10 +335,10 @@ function svn-diff() {
   svn diff ${2:+-r $1:}${2:-${1:+-c $1}} ${@:3}
 }
 function svn-diffm() {
-  svn-diff ${1:-HEAD} ${2:-HEAD} ${@:3} --diff-cmd meld
+  svn-diff ${1:-HEAD} ${2:-PREV} ${@:3} --diff-cmd meld
 }
 function svn-diffl() {
-  svn-diff ${1:-HEAD} ${2:-HEAD} ${@:3} --summarize
+  svn-diff ${1:-HEAD} ${2:-PREV} ${@:3} --summarize
 }
 
 # List the archives based on given name
