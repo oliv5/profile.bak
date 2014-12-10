@@ -129,7 +129,7 @@ fi
 # Prepend to path
 function path-prepend () {
   for DIR in "$@"; do
-    if ! [[ "$PATH" =~ "$DIR" ]] && [[ -d "$DIR" ]]; then
+    if ! [[ "$PATH" =~ "${DIR}(:|$)" ]] && [[ -d "$DIR" ]]; then
       export PATH="${DIR}${PATH:+:$PATH}"
     fi
   done
@@ -140,7 +140,7 @@ path-prepend "$HOME/bin" "$HOME/bin/profile"
 # Append to path
 function path-append () {
   for DIR in "$@"; do
-    if ! [[ "$PATH" =~ "$DIR" ]] && [[ -d "$DIR" ]]; then
+    if ! [[ "$PATH" =~ "${DIR}(:|$)" ]] && [[ -d "$DIR" ]]; then
       export PATH="${PATH:+$PATH:}${DIR}"
     fi
   done
