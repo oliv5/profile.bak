@@ -3,7 +3,7 @@ declare -a g_forward_stack=()
 export g_forward_stack_maxsize=10
 
 # Pushd/popd based cd/back functions
-function cda { ${PUSH:-true} && builtin cd "$@" && builtin pushd -n "$OLDPWD" >/dev/null 2>&1; }
+function cda { ${PUSH:-true} || return 0 && builtin cd "$@" && builtin pushd -n "$OLDPWD" >/dev/null 2>&1; }
 function cdb { builtin popd >/dev/null 2>&1 && push g_forward_stack "$OLDPWD" && pkeepq g_forward_stack $g_forward_stack_maxsize && PUSH=false cd .; }
 function cdf { pop g_forward_stack DIR >/dev/null 2>&1 && cd "$DIR"; }
 
