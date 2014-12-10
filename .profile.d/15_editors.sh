@@ -2,45 +2,38 @@
 
 #########################
 # Gedit
-export GEDIT="$(which gedit)"
-
 function gedit() {
   ARGS="$(echo $@ | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1 +\2/g')"
-  eval ${GEDIT:-false} $ARGS
+  command -p gedit $ARGS
 }
 
 #########################
 # Geany
-export GEANY="$(which geany)"
-
 function geany() {
   ARGS="$(echo $@ | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1 +\2/g')"
-  eval ${GEANY:-false} $ARGS
+  command -p geany $ARGS
 }
 
 #########################
 # Vim
-export GVIM="$(which gvim)"
-[ -z "$VIM_USETABS" ] && export VIM_USETABS=""
-[ -z "$VIM_IDE" ] && export VIM_IDE=4
 export COLORTERM="xterm" # backspace bug in vim
+[ -z "$VIM_USETABS" ] && export VIM_USETABS=""
 
 # Start gvim
 function gvim() {
   ARGS="$(sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/+\2 \1/g' <<< $@)"
   if [ -z "$VIM_USETABS" ]; then
-    eval ${GVIM:-false} ${1:+--remote-silent} $ARGS
+    ARGS="${1:+--remote-silent} $ARGS"
   else
-    eval ${GVIM:-false} ${1:+--remote-tab-silent} $ARGS
+    ARGS="${1:+--remote-tab-silent} $ARGS"
   fi
+  command -p gvim $ARGS
 }
 
 #########################
 # Source insight
-export SI="$(which si.sh)"
-
 function si() {
-  eval ${SI:-false} "$@"
+  eval $(command -v si.sh || false) "$@"
 }
 
 #########################

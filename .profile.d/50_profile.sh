@@ -40,9 +40,7 @@ function ffe() {
 
 # Gedit/geany
 function g() {
-  #$(which geany) "$@" || $(which gedit) "$@"
-  #${GEANY:-false} "$@" || ${GEDIT:-false} "$@"
-  $(command -v geany) "$@" || $(command -v gedit) "$@"
+  eval $(command -v geany || command -v gedit || command -v gvim || false) "$@"
 }
 alias ssg='ss | cut -c 9- | xargs g'
 alias gsg='gs | grep modified | cut -d : -f 2 | xargs g'
