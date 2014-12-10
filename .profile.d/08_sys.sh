@@ -136,23 +136,29 @@ function _notify-loop() {
 # Pros: only a single inotifywait process & set of pipes
 # Cons: does not capture file moves properly
 function _notify-proc() {
-	TRIGGER=${1:?Nothing to monitor}
-	FILE="${2:-$PWD}"
-	SCRIPT="${3:-true} ${@:4}"
+	TRIGGER="${1:?No event to monitor}"
+	FILE="${2:?No dir/file to monitor}"
+	SCRIPT="${3:?No action to execute} ${@:4}"
 	
 	# Start child shell process, open pipes
-	coproc INOTIFY {
-		inotifywait -q -m -e $TRIGGER "$FILE" &
-		trap "kill $!" 1 2 3 6 15 # Kill inotifywait when this process is killed
-		wait
-	}
+	# Kill inotifywait when this process is killed
+	if [ ${BASH_VERSION%%[^0-9]*} -ge 4 ]; then
+		eval "
+			coproc INOTIFY {
+				inotifywait -q -m -e $TRIGGER \"$FILE\" &
+				trap \"kill $!\" 1 2 3 6 15
+				wait 
+			}"
+	else
+		echo "This bash version \"${BASH_VERSION%%[^0-9.]*}\" does not support coproc"
+	fi
 
 	# Kill the coproc child process when father is killed or interrupted
 	trap "kill $INOTIFY_PID" 0 1 2 3 6 15
 
 	## Loop for each action
 	while IFS=' ' read -ru ${INOTIFY[0]} DIR TRIGGER FILE; do # could use "read 0<&${INOTIFY[0]}"
-		#echo "$FILE $DIR $TRIGGER"
+		#echo "Event=$TRIGGER dir=$DIR file=$FILE exec=$SCRIPT"
 		eval $SCRIPT
 	done
 	
@@ -165,5 +171,5 @@ function _notify-proc() {
 # Pros: uses _notify-proc low resource method
 # Cons: it is triggered for every file event of the root directory
 function _notify-file() {
-	_notify-proc $1 "$(dirname "$2")" 'if [ "$DIR$FILE" == "'$2'" ]; then '${@:3}'; fi'
+	_notify-proc $1 "$(dirname "$2")" 'if [ "$(readlink -f "$DIR$FILE")" == "$(readlink -f "'$2'")" ]; then '${3:?No action to execute} ${@:4}'; fi'
 }
