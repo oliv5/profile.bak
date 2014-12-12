@@ -175,7 +175,7 @@ function svn-revert() {
 # Rollback to a previous revision, don't change unversionned files
 function svn-rollback() {
   # Get target revision number
-  REV1=${1:-HEAD}
+  REV1=${1:-PREV}
   REV2=${2:-HEAD}
   # Check we are in a repository
   svn-exists || return

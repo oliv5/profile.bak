@@ -66,7 +66,7 @@ function 7zdiffm() {
     echo; echo "Number of diff files: $DIFFCNT"
     ddiff "$DIR1" "$DIR2" | grep -v "Only in $DIR1"
     if [[ $DIFFCNT -gt 0 ]]; then
-      meld "$DIR1" "$DIR2"
+      meld "$DIR2" "$DIR1"
     fi
   done
 }
