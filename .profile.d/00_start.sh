@@ -28,13 +28,13 @@ function print-callstack() {
 ################################
 # Set error handler
 function trap-map() {
-  trap 'die "Error handler:" -1 ${LINENO}' ${@:-1 15} ERR
+  trap 'die "Error handler:" 1 ${LINENO}' ${@:-1 15} ERR
 }
 
 # Die function
 function die () {
   printf '%s%s\n' "${3:+(line $3) }" "${1:-Unknown error. abort...}"
-  [[ $- == *i* ]] && return ${2:--1} || exit ${2:--1}
+  [[ $- == *i* ]] && return ${2:-1} || exit ${2:-1}
 }
 
 ################################
