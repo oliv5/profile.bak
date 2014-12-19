@@ -410,14 +410,12 @@ if !exists('g:loaded_ctrlp')
 	" Options
 	let g:ctrlp_map = ''
 	let g:ctrlp_cmd = 'CtrlPMixed'
-	let g:ctrlp_working_path_mode = '0'
+	let g:ctrlp_working_path_mode = 'ra'
 	let g:ctrlp_custom_ignore = {
-	\ 'dir':  '(\.git\|\.hg\|\.svn\|tmp)$',
-	\ 'file': '\.(exe\|dll\|o\|so\|pyc\|swp\|zip\|7z)$'
+	\ 'dir':  '\v[\/]\.(git|hg|svn|tmp)$',
+	\ 'file': '\v\.(exe|so|dll|o|pyc|swp|zip|7z|tar|tgz)$',
 	\ }
-	let g:ctrlp_switch_buffer = 'eT'
-	" File ignore
-	set wildignore+=*/tmp/**
+	let g:ctrlp_switch_buffer = 'et'
 	" Key mapping
 	FnNoremap <C-l>     :CtrlPTag<CR>
 	FnNoremap <C-o>     :CtrlPMRU<CR>

@@ -116,6 +116,9 @@ cmap w!! w !sudo tee % >/dev/null
 set autoread
 au FileChangedShell * exec 'echohl WarningMsg | echo "Warning: file' expand('%') 'changed on disk" | echohl None'
 
+" File ignore
+set wildignore+=*/tmp/**,*.so,*.o,*.dll,*.a
+
 
 " *******************************************************
 " } Terminal Settings {
