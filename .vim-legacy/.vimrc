@@ -117,7 +117,7 @@ set autoread
 au FileChangedShell * exec 'echohl WarningMsg | echo "Warning: file' expand('%') 'changed on disk" | echohl None'
 
 " File ignore
-set wildignore+=*/tmp/**,*.so,*.o,*.dll,*.a
+"set wildignore+=**/.snv/**,**/.git/**,**/tmp/**,*.so,*.o,*.dll,*.a,*.tmp
 
 
 " *******************************************************
