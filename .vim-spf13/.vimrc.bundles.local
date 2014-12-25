@@ -54,13 +54,7 @@
 	let g:ctrlp_funky_syntax_highlight = 1
 	FnNoremap <C-o><C-o>	:CtrlPFunky<CR>
 	FnNoremap <C-p><C-p>	:CtrlPFunky<CR>
-	
-	" Ctrlp - apply wildignore & g:ctrlp_custom_ignore
-	let g:ctrlp_user_command['ignore'] = 1
-	let g:ctrlp_custom_ignore = {
-		\ 'dir':  '\.git$\|\.hg$\|\.svn$\|tmp$',
-		\ 'file': '\.exe$\|\.so$\|\.dll$\|\.pyc$\|\.tmp$\|\.svn' }
-	
+
 	" Neosnippet
 	let g:neosnippet#disable_select_mode_mappings = 0
 	imap <C-k>     <Plug>(neosnippet_expand_or_jump)

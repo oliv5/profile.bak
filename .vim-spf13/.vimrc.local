@@ -147,6 +147,12 @@
 	map <BS> <Plug>(wildfire-fuel)
 	vmap <BS> <Plug>(wildfire-fuel)
 	vmap <S-BS> <Plug>(wildfire-water)
+
+	" Ctrlp - apply wildignore & g:ctrlp_custom_ignore
+	let g:ctrlp_user_command['ignore'] = 1
+	let g:ctrlp_custom_ignore = {
+		\ 'dir':  '\.git$\|\.hg$\|\.svn$\|tmp$',
+		\ 'file': '\.exe$\|\.so$\|\.dll$\|\.pyc$\|\.tmp$\|\.svn' }
 " }
 
 " Use legacy after config if available {
