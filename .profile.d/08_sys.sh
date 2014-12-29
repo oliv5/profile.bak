@@ -82,6 +82,15 @@ function kill-mem-top() {
 	ps a --sort -rss | awk "NR>1 && NR<=$END {print \$1;}" | xargs kill ${@:2}
 }
 
+function mem-ps() {
+	while read command percent rss; do
+		if [[ "${command}" != "COMMAND" ]]; then 
+			rss="$(bc <<< "scale=2;${rss}/1024")"
+		fi
+		printf "%-26s%-8s%s\n" "${command}" "${percent}" "${rss}"
+	done < <(ps -A --sort -rss -o comm,pmem,rss | head -n 11)
+}
+
 # system information aliases
 alias cpu='cpu-inst'
 alias mem='mem-inst'
