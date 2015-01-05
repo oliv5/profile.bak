@@ -5,9 +5,10 @@ export GIT_PAGER="cat"
 
 # Status aliases
 alias gs='git status'
-alias gsm='git ls-files -m'
-alias gsu='git ls-files -u'
-alias gsd='git ls-files -d'
+alias gm='git ls-files -m'
+alias gc='git ls-files -u'
+alias gd='git ls-files -d'
+alias gn='git ls-files -o --exclude-standard'
 # Diff aliases
 alias gdd='git diff'
 alias gdm='git difftool -y -t meld --'
