@@ -43,6 +43,8 @@
 	Bundle 'vim-scripts/AutoTag'
 	Bundle 'hari-rangarajan/CCTree'
 	Bundle 'Raimondi/YAIFA'
+	Bundle 'vim-scripts/MultipleSearch'
+	"Bundle 'vim-scripts/highlight.vim'
 " }
 
 " Configure SPF13 plugins {
