@@ -535,5 +535,33 @@ endif
 
 
 " *******************************************************
+" } Highlight.vim plugin {
+" *******************************************************
+if !exists('loaded_highlight')
+	" Key mapping
+	FnMap <F2>		<C-h><C-f><CR>
+	FnMap <S-F2>	<C-h><C-k><CR>
+	FnMap <C-F2>	<C-h><C-n><CR>
+endif
+
+
+" *******************************************************
+" } Multisearch plugin {
+" *******************************************************
+if !exists('loaded_multiplesearch')
+	" Options
+	let g:MultipleSearchMaxColors = 8
+	let g:MultipleSearchColorSequence = "yellow,blue,green,magenta,cyan,gray,brown,red"
+	let g:MultipleSearchTextColorSequence = "black,white,black,white,black,black,white,white"
+	" Key mapping
+	inoremap <F2>		<C-o>:execute ':Search \<'.expand('<cword>').'\>'<CR>
+	vmap <F2>			<Leader>*
+	nmap <F2>			<Leader>n
+	FnMap <S-F2>		<Leader>N
+	FnNoremap <C-F2>	:SearchBuffersReset<CR>
+endif
+
+
+" *******************************************************
 " } The end
 " *******************************************************

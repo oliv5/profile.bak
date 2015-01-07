@@ -821,10 +821,10 @@ command! -nargs=0 -bar Mprev  call <SID>MarkPrev()
 command! -nargs=0 -bar Mreset call <SID>MarkReset()
 
 " Mark key maps
-FnNoremap <silent><F2>    :Mnext<CR>
-FnNoremap <silent><S-F2>  :Mprev<CR>
-FnNoremap <silent><C-F2>  :Mset<CR>
-FnNoremap <silent><A-F2>  :Mreset<CR>
+FnNoremap <silent><F5>    :Mnext<CR>
+FnNoremap <silent><S-F5>  :Mprev<CR>
+FnNoremap <silent><C-F5>  :Mset<CR>
+FnNoremap <silent><A-F5>  :Mreset<CR>
 nmap <silent>m            :Mprev<CR>
 nmap <silent>M            :Mnext<CR>
 nmap <silent><C-m>        :Mset<CR>

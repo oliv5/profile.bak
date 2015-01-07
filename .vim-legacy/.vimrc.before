@@ -18,6 +18,12 @@ function! s:FnMap(prefix, args)
 	execute 'i'.a:prefix.'map <expr>' args[1] args[2] '(pumvisible() ? "\<C-e>" : "")."<C-O>'.args[3].'"'
 endfunction
 
+" Unmap function keys in normal/visual & insert modes
+function! s:FnUnmap(map)
+	execute 'unmap' a:map
+	execute 'iunmap' a:map
+endfunction
+
 " Make an alternate mapping based on another
 function! s:AltMap(prefix, new, old)
 	if empty(maparg(a:new,a:prefix)) && !empty(maparg(a:old,a:prefix))
@@ -48,6 +54,7 @@ endfunction
 " User commands
 command! -nargs=1 FnMap      call <SID>FnMap('',<f-args>)
 command! -nargs=1 FnNoremap  call <SID>FnMap('nore',<f-args>)
+command! -nargs=1 FnUnmap    call <SID>FnUnmap(<args>)
 command! -nargs=+ AltMap     call <SID>AltMap(<f-args>)
 command! -nargs=+ CondRemap  call <SID>CondRemap(<f-args>)
 command! -nargs=+ IMapFix  	 call <SID>IMapFix(<f-args>)
