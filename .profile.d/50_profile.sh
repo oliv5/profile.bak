@@ -1,56 +1,15 @@
-#!/bin/bash
-# Base profile settings
+#!/bin/sh
+# Call local profile scripts
+if [ -x ~/.localrc ]; then
+  source ~/.localrc
+fi
 
-# Prevent Ctrl-D exit session
-export IGNOREEOF=1
+if [ -x ~/.profile.local ]; then
+  source ~/.profile.local
+fi
 
-# Start ssh-agent when not already running
-pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
-
-# Use vim as editor
-[ -z "$EDITOR" ] && export EDITOR="$(which vim)"
-[ -z "$VISUAL" ] && export VISUAL="$(which vim)"
-
-# Pagers
-[ -z "$PAGER" ] && export PAGER="less -s"
-
-# History
-export HISTSIZE=5000
-export HISTFILESIZE=5000
-# Avoid duplicates in history
-export HISTIGNORE='&:[ ]*'
-
-# Alias ls
-alias l='ls -CF'
-alias la='ls -A'
-alias ll='ls -laF'
-alias lsg='ls | grep'
-
-# Alias cd/back
-alias b='cdb'
-alias f='cdf'
-
-# Gvim
-alias e='gvim'
-alias sse='ss | cut -c 9- | xargs gvim'
-alias gse='gs | grep modified | cut -d : -f 2 | xargs gvim'
-function ffe() {
-  ff "$@" | xargs gvim
-}
-
-# Gedit/geany
-function g() {
-  eval $(command -v geany || command -v gedit || command -v gvim || false) "$@"
-}
-alias ssg='ss | cut -c 9- | xargs g'
-alias gsg='gs | grep modified | cut -d : -f 2 | xargs g'
-function ffg() {
-  ff "$@" | xargs g
-}
-
-# Source insight
-alias s='si'
-
-# Alias misc
-alias hi='history'
-alias mo='mimeopen'
+for i in $HOME/.profile.local.d/*.sh ; do
+  if [ -x "$i" ]; then
+    . "$i"
+  fi
+done

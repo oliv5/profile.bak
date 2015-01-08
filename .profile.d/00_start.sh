@@ -77,12 +77,14 @@ function cmd-exists() {
 
 # Cmd unset
 function cmd-unset() {
-  unalias $1 2>/dev/null
-  unset -f $1 2>/dev/null
+  unalias $* 2>/dev/null
+  unset -f $* 2>/dev/null
 }
 
 # Remove some aliases/fct shortcuts
-cmd-unset which
-cmd-unset grep
-cmd-unset find
+cmd-unset which grep find
+
+################################
+# Start ssh-agent when not already running
+pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
 
