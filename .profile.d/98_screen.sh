@@ -2,8 +2,8 @@
 
 # Alias
 alias screen-list='screen -ls'
-alias screen-kill="screen -ls | grep detached | cut -d. -f1 | awk '{print $1}' | xargs kill"
-alias screen-killall="screen -ls | grep pts | cut -d. -f1 | awk '{print $1}' | xargs kill"
+alias screen-killd='screen -ls | grep detached | cut -d. -f1 | awk '\''{print $1}'\'' | xargs -r kill'
+alias screen-killa='screen -ls | grep pts | cut -d. -f1 | awk '\''{print $1}'\'' | xargs -r kill'
 
 # Screen : re-attach session, or print the list
 # see http://www.saltycrane.com/blog/2008/01/how-to-scroll-in-gnu-screen/
