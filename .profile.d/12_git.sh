@@ -5,6 +5,7 @@ export GIT_PAGER="cat"
 
 # Status aliases
 alias gs='git status'
+alias gl='git ls-files'
 alias gm='git ls-files -m'
 alias gc='git ls-files -u'
 alias gd='git ls-files -d'
