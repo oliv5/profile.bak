@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Test the type of shell
+# [[ $- == *i* ]] && echo 'Interactive' || echo 'Not interactive'
+# shopt -q login_shell && echo 'Login shell' || echo 'Not login shell'
+# see http://www.saltycrane.com/blog/2008/01/how-to-scroll-in-gnu-screen/
+
 # Set load flag
 export ENV_CNT=$(expr ${ENV_CNT:-0} + 1)
 export ENV_PROFILE_D=$ENV_CNT
