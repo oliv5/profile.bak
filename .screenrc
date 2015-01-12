@@ -1,0 +1,100 @@
+# ~/.screenrc
+# note: use showkey -a to find key codes
+
+# set shell
+shell $SHELL
+
+# scrollback
+defscrollback 4000
+
+# create initial windows
+screen -t home 1 $SHELL -c "export DISPLAY=$SCREEN_DISPLAY; $SHELL"
+
+# set the caption on the bottom line:
+# from http://diveintomark.org/public/2007/03/screenrc
+caption always "%{= kw}%-w%{= BW}%n %t%{-}%+w %-= %1`"
+
+# use regular audible bell and don't tell me when bells happen in other windows
+vbell off
+bell_msg ""
+
+# skip intro
+startup_message off
+
+# detach on disconnect
+autodetach on
+
+# make search case-insensitive
+ignorecase on
+
+# use backtick for prefix key instead of Ctrl-A
+#escape ``
+
+# Disable delay when entering copy mode
+msgminwait 0
+
+# Set "xterm*" terminals tweeks
+# String capabilities
+#  te   End program that uses cursor motion
+#  ti   Begin program that uses cursor motion
+#  @    turn entry off
+termcapinfo xterm* ti@:te@
+
+# Bindings for default behaviour - may not be needed
+# - C-g and other keys quit copy mode.
+#markkeys \033=\015=^G
+# - Special hack for C-e, since it should go *past* the last char.
+#bindkey -m ^e stuff "\$l"
+
+# Set the second mark, write to the screen-exchange
+# file, and use xsel to synchronize the paste buffer
+# with the X selection.
+# from http://snarfed.org/synchronizing_gnu_screens_paste_buffer_and_the_x_selection
+# http://snarfed.org/dotfiles/.screenrc
+bindkey -m "^ " eval "stuff ' '" writebuf "exec sh -c 'xsel -i < /tmp/screen-exchange'"
+
+# Window management
+bind c screen 1			# Open new windows from index 1
+bindkey "^w^w" screen 1
+bindkey "^w^n" next
+bindkey "^w^p" prev
+bindkey -k k1 select 1  #  F1 = screen 1
+bindkey -k k2 select 2  #  F2 = screen 2
+bindkey -k k3 select 3  #  F3 = screen 3
+bindkey -k k4 select 4  #  F4 = screen 4
+bindkey -k k5 select 5  #  F5 = screen 5
+bindkey -k k6 select 6  #  F6 = screen 6
+bindkey -k k7 select 7  #  F7 = screen 7
+bindkey -k k8 select 8  #  F8 = screen 8
+bindkey -k k9 select 9  #  F9 = screen 9
+bindkey -k F1 prev      # F11 = prev
+bindkey -k F2 next      # F12 = next
+bindkey "^[O1;5S" kill
+
+# Split management
+bind s eval "split" "focus down" "screen 1"
+bind v eval "split -v" "focus left" "screen 1"
+bind d remove
+bind o only
+bind f fit
+bindkey "^[[1;5A" focus up
+bindkey "^[[1;5B" focus down
+bindkey "^[[1;5C" focus right
+bindkey "^[[1;5D" focus left
+
+# Set PgUp/C-Home enter copy mode immediatly
+bindkey -t -k "kP" eval "copy" "stuff ^b"
+bindkey -t -k "kN" eval "copy" "stuff ^f"
+#bindkey -m kP stuff ^b
+#bindkey -m kN stuff ^f
+
+##################################
+# Trial bindings
+#bind ' ' windows # space key displays a list of windows
+#bind ^f screen telnet foobar # C-f to the command "create a window with a TELNET connection to foobar"
+#bind \033 screen -ln -t root -h 1000 9 su # bind ESC to the command that creates an non-login window with title `root' in slot #9, with a super-user shell and a scrollbackbuffer of 1000 lines
+#bindkey -t foo stuff barfoo
+#bindkey "^j" stuff "user-mode ctrl-j"
+#bindkey "^[j" stuff "user-mode alt-j"
+#bindkey -m "^j" stuff "copy-mode ctrl-j"
+#bindkey "^u^t" stuff "user-mode ctrl-u t"
