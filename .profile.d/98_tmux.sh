@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Variables
-TMUX_AUTOLOAD=""
+#TMUX_AUTOLOAD=""
 
 # Wrapper function
 function tmux() {

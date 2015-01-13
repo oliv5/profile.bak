@@ -182,3 +182,9 @@ function _notify-proc() {
 function _notify-file() {
 	_notify-proc $1 "$(dirname "$2")" 'if [ "$(readlink -f "$DIR$FILE")" == "$(readlink -f "'$2'")" ]; then '${3:?No action to execute} ${@:4}'; fi'
 }
+
+# NFS unmount
+function nfs-umount() {
+	ifconfig eth0:fakenfs ${1:?NFS IP not specified...} netmask 255.255.255.255
+	umount -f -l "${2:?NFS mount point not specified...}"
+}

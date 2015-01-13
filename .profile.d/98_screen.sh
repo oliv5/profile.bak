@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Variables
-SCREEN_AUTOLOAD=""
+#SCREEN_AUTOLOAD=""
 export SCREEN_DISPLAY="$DISPLAY"
 
 # Wrapper function
