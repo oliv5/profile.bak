@@ -14,4 +14,4 @@ if ! command -v vcsh >/dev/null 2>&1; then
 fi
 
 # Get profile repository
-vcsh clone https://github.com/oliv5/profile.git
+vcsh clone ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/profile.git
