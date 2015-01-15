@@ -61,7 +61,7 @@ if !exists('g:vimrc_noautochdir')
 	if 1
 		" Look for the best directory
 		augroup vimrc_autochdir
-			autocmd! BufEnter * execute "lcd" g:FindRootDir()
+			autocmd! BufEnter * execute "silent! lcd" g:FindRootDir()
 		augroup END
 	elseif exists('+autochdir')
 		" Automated directory change
@@ -82,7 +82,7 @@ nnoremap <silent><leader>cd   :execute "cd " . g:FindRootDir()<BAR>pwd<CR>
 
 " Change root directory once at startup
 if !exists('g:loaded_vimrc')
-	execute 'cd' g:FindRootDir()
+	execute 'silent! cd' g:FindRootDir()
 endif
 
 
@@ -961,11 +961,6 @@ noremap <C-ENTER>           :Ttag<CR>
 noremap <C-BACKSPACE>       <C-t>
 nnoremap <silent>t          :execute (&previewwindow ? 'P' : 'T').'next'<CR>
 nnoremap <silent>T          :execute (&previewwindow ? 'P' : 'T').'prev'<CR>
-
-" Change root directory once at startup
-if !exists('g:loaded_vimrc')
-	execute 'cd' g:FindRootDir()
-endif
 
 
 " *******************************************************
