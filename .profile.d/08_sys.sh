@@ -185,6 +185,21 @@ function _notify-file() {
 
 # NFS unmount
 function nfs-umount() {
-	ifconfig eth0:fakenfs ${1:?NFS IP not specified...} netmask 255.255.255.255
-	umount -f -l "${2:?NFS mount point not specified...}"
+	sudo sh -c "
+		ifconfig eth0:fakenfs ${1:?NFS IP not specified...} netmask 255.255.255.255
+		umount -f -l \"${2:?NFS mount point not specified...}\"
+		ifconfig eth0:fakenfs down
+	"
+}
+
+# NFS remount
+function nfs-remount() {
+	sudo sh -c "
+		nfs-umount \"$1\" \"$2\" && mount \"$2\"
+	"
+}
+
+# Fstab to autofs conversion
+function fstab2autofs() {
+	awk 'NF && substr($1,0,1)!="#" {print $2 "\t-fstype="$3 "," $4 "\t" $1}' "$@"
 }
