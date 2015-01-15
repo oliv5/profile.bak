@@ -5,7 +5,8 @@
 export SCREEN_DISPLAY="$DISPLAY"
 
 # Wrapper function
-function sceen() {
+function screen() {
+  export SCREEN_DISPLAY="$DISPLAY"
   if [ $# == 0 ]; then
     # Recall old session or create a new one
     command -p screen -D -R
