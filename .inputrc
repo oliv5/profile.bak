@@ -1,0 +1,28 @@
+# ~/.inputrc - local inputrc for libreadline
+# See readline(3readline) and `info rluserman' for more information.
+# https://wiki.archlinux.org/index.php/readline
+
+# Prevent strange errors
+# https://bbs.archlinux.org/viewtopic.php?id=112537
+$include /etc/inputrc
+
+# Set vi mode
+#set editing-mode vi
+
+# Intelligent history
+$if mode=vi
+set keymap vi-command
+# these are for vi-command mode
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+set keymap vi-insert
+# these are for vi-insert mode
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+$endif
+
+################################
+## Command binds
+
+# Send command into background silently
+"\e\C-b":"\C-e > /dev/null 2>&1 &\C-m"

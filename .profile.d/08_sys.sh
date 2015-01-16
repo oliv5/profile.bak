@@ -184,22 +184,35 @@ function _notify-file() {
 }
 
 # NFS unmount
+alias nfs-umountall='umount -a -t nfs'
 function nfs-umount() {
 	sudo sh -c "
-		ifconfig eth0:fakenfs ${1:?NFS IP not specified...} netmask 255.255.255.255
-		umount -f -l \"${2:?NFS mount point not specified...}\"
-		ifconfig eth0:fakenfs down
+		ifconfig eth0:nfstmp ${2:?NFS IP not specified...} netmask 255.255.255.255
+		umount -f -l \"${1:?NFS mount point not specified...}\"
+		ifconfig eth0:nfstmp down
 	"
 }
 
 # NFS remount
 function nfs-remount() {
 	sudo sh -c "
-		nfs-umount \"$1\" \"$2\" && mount \"$2\"
+		ifconfig eth0:fakenfs ${2:?NFS IP not specified...} netmask 255.255.255.255
+		umount -f -l \"${1:?NFS mount point not specified...}\"
+		ifconfig eth0:fakenfs down
+		mount \"$1\"
 	"
 }
 
 # Fstab to autofs conversion
 function fstab2autofs() {
 	awk 'NF && substr($1,0,1)!="#" {print $2 "\t-fstype="$3 "," $4 "\t" $1}' "$@"
+}
+
+# Disable bell
+# https://wiki.archlinux.org/index.php/Disable_PC_speaker_beep
+function bell-off() {
+	# In X
+	xset -b
+	# In console
+	setterm -blength 0
 }

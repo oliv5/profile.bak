@@ -93,3 +93,9 @@ cmd-unset which grep find
 # Start ssh-agent when not already running
 pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
 
+################################
+# Misc settings
+export HISTCONTROL=ignoreboth
+
+# Reload ~/.inputrc
+bind -f ~/.inputrc
