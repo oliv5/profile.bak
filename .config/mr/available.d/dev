@@ -1,0 +1,5 @@
+[$HOME/dev]
+pull     = git_pull_all
+push     = git_push_all
+bundle   = git_bundle
+gc       = git gc
