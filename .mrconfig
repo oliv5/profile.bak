@@ -1,2 +1,49 @@
 [DEFAULT]
+
+# Add few git actions
+lib =
+	git_pull_all() {
+		git remote | xargs -l -I{} git pull --rebase {} master
+	}
+	git_push_all() {
+		git remote | xargs -l git push
+	}
+	git_bundle() {
+		REPO="${1:-$(basename $MR_REPO)}"
+		git bundle create "$HOME/repo/sync/git/bundle/$REPO.bundle.$(date +%Y%m%d-%H%M%S).git" --all --tags --remotes
+	}
+
+# Define vcsh as a new rcs
+lib =
+	vcsh_checkout() {
+		VCSH_REPO=$(basename $MR_REPO .git)
+		cd $HOME
+		git clone ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/$MR_REPO
+		cd $VCSH_REPO
+		git remote rename origin rpi
+		git branch --set-upstream-to=rpi/master master
+		git remote add github https://oliv5@github.com/oliv5/$MR_REPO
+	}
+	vcsh_pull() {
+		VCSH_REPO=$(basename $MR_REPO .git)
+		vcsh $VCSH_REPO remote | xargs -l -I{} vcsh $VCSH_REPO pull --rebase {} master
+	}
+	vcsh_push() {
+		VCSH_REPO=$(basename $MR_REPO .git)
+		vcsh $VCSH_REPO remote | xargs -l vcsh $VCSH_REPO push
+	}
+	vcsh_status() {
+		VCSH_REPO=$(basename $MR_REPO .git)
+		vcsh $VCSH_REPO status
+	}
+	vcsh_gc() {
+		VCSH_REPO=$(basename $MR_REPO .git)
+		vcsh $VCSH_REPO gc
+	}
+	vcsh_bundle() {
+		VCSH_REPO=$(basename $MR_REPO .git)
+		git_bundle "$VCSH_REPO"
+	}
+
+# Include our repositories
 include = cat ${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/*
