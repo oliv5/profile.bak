@@ -1,5 +1,5 @@
 [${XDG_CONFIG_HOME:-$HOME/.config}/vcsh/repo.d/profile.git]
-checkout = vcsh_checkout
+checkout = vcsh_clone_remote
 pull     = vcsh_pull
 push     = vcsh_push
 status   = vcsh_status
