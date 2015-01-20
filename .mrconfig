@@ -34,9 +34,9 @@ lib =
 	}
 	vcsh_pull() {
 		VCSH_REPO=$(basename $MR_REPO .git)
-		vcsh $VCSH_REPO git stash save
+		vcsh $VCSH_REPO stash save
 		vcsh $VCSH_REPO remote | xargs -l -I{} vcsh $VCSH_REPO pull --rebase {} master
-		vcsh $VCSH_REPO git stash pop
+		vcsh $VCSH_REPO stash pop
 	}
 	vcsh_push() {
 		VCSH_REPO=$(basename $MR_REPO .git)
