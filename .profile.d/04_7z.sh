@@ -39,12 +39,12 @@ function _7zd() {
   echo "$DIR"
 }
 
-# 7z deflate and ddiff
-function 7zddiff() {
+# 7z deflate and diffd
+function 7zdiffd() {
   DIR1=$(_7zd "$1")
   for DIR2 in "${@:2}"; do
     DIR2=$(_7zd "$DIR2")
-    ddiff "$DIR1" "$DIR2" | grep -v "Only in $DIR1"
+    diffd "$DIR1" "$DIR2" | grep -v "Only in $DIR1"
   done
 }
 
@@ -62,9 +62,9 @@ function 7zdiffm() {
   DIR1=$(_7zd "$1")
   for DIR2 in "${@:2}"; do
     DIR2=$(_7zd "$DIR2")
-    DIFFCNT=$(ddiff "$DIR1" "$DIR2" | grep -v "Only in $DIR1" | wc -l)
+    DIFFCNT=$(diffd "$DIR1" "$DIR2" | grep -v "Only in $DIR1" | wc -l)
     echo; echo "Number of diff files: $DIFFCNT"
-    ddiff "$DIR1" "$DIR2" | grep -v "Only in $DIR1"
+    diffd "$DIR1" "$DIR2" | grep -v "Only in $DIR1"
     if [[ $DIFFCNT -gt 0 ]]; then
       meld "$DIR2" "$DIR1"
     fi
