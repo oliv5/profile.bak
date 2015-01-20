@@ -55,9 +55,9 @@ bindkey -m "^ " eval "stuff ' '" writebuf "exec sh -c 'xsel -i < /tmp/screen-exc
 
 # Window management
 bind c screen 1			# Open new windows from index 1
-bindkey "^w^w" screen 1
-bindkey "^w^n" next
-bindkey "^w^p" prev
+bind "^z" next
+bind "^q" prev
+bindkey -k k0 select 0  #  F10= screen 0
 bindkey -k k1 select 1  #  F1 = screen 1
 bindkey -k k2 select 2  #  F2 = screen 2
 bindkey -k k3 select 3  #  F3 = screen 3
@@ -83,8 +83,8 @@ bindkey "^[[1;5C" focus right
 bindkey "^[[1;5D" focus left
 
 # Set PgUp/C-Home enter copy mode immediatly
-bindkey -t -k "kP" eval "copy" "stuff ^b"
-bindkey -t -k "kN" eval "copy" "stuff ^f"
+#bindkey -t -k "kP" eval "copy" "stuff ^b"
+#bindkey -t -k "kN" eval "copy" "stuff ^f"
 #bindkey -m kP stuff ^b
 #bindkey -m kN stuff ^f
 
