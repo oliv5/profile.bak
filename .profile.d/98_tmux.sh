@@ -16,5 +16,5 @@ function tmux() {
 
 # Re-attach session, or print the list
 if [[ ! -z "$TMUX_AUTOLOAD" && -z "$ENV_PROFILE_DONE" && $- == *i* ]] && shopt -q login_shell; then
-  tmux
+  tmux 2>/dev/null
 fi

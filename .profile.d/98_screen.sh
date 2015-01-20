@@ -17,7 +17,7 @@ function screen() {
 
 # Send a command to a running screen
 function screen-cmd() {
-  screen -S ${1:?No session specified...} -X stuff "${@:2}"
+  command -p screen -S ${1:?No session specified...} -X stuff "${@:2}"
 }
 
 # Alias
@@ -28,5 +28,5 @@ alias screen-killa="screen -ls | awk -F "." '/pts/{print $1}' | xargs -r kill"
 
 # Re-attach session, or print the list
 if [[ ! -z "$SCREEN_AUTOLOAD" && -z "$ENV_PROFILE_DONE" && $- == *i* ]] && shopt -q login_shell; then
-  screen
+  screen 2> /dev/null
 fi
