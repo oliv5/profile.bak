@@ -99,22 +99,22 @@ function mktags() {
 # Clean ctags
 function rmctags() {
   DIR="$(eval echo ${1:-$PWD})"
-  rm -v "${DIR}/tags" 2>/dev/null
+  rm -v "${DIR:?No directory specified}/tags" 2>/dev/null
 }
 
 # Clean cscope db
 function rmcscope() {
   DIR="$(eval echo ${1:-$PWD})"
   FILE="${DIR}/cscope"
-  rm -v "${FILE}.out"* 2>/dev/null
-  rm -v "${FILE}.files" 2>/dev/null
+  rm -v "${FILE:?No directory specified}.out"* 2>/dev/null
+  rm -v "${FILE:?No directory specified}.files" 2>/dev/null
 }
 
 # Clean id-utils db
 function rmids() {
   DIR="$(eval echo ${1:-$PWD})"
   FILE="${DIR}/ID"
-  rm -v "${FILE}" 2>/dev/null
+  rm -v "${FILE:?No directory specified}" 2>/dev/null
 }
 
 # Clean tags and cscope db
