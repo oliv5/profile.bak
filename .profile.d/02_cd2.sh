@@ -16,4 +16,4 @@ function cd() { cda "$@"; }
 function cdc() { unalias cd cda cdb cdf pushd popd 2>/dev/null; unset -f cd cda cdb cdf pushd popd 2>/dev/null; }
 
 # Display stacks
-alias scd='echo -n "Backward: ";dirs; echo "Forward: $g_forward_stack"'
+function cds() { echo -n "Backward: ";dirs; echo "Forward: $g_forward_stack"; }
