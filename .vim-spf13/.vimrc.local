@@ -18,7 +18,7 @@
 		if has('gui_running')
 			colorscheme torte
 		else
-			colorscheme jelleybeans
+			colorscheme default
 		endif
 	endif
 
@@ -109,7 +109,7 @@
 			let s:mru_backward = (s:mru_backward+1)
 		endif
 		"let tmp = s:mru_backward
-		exe "b" l:buflist[s:mru_backward]
+		exe "silent! b" l:buflist[s:mru_backward]
 		"let s:mru_backward = tmp
 	endfunction
 
@@ -121,7 +121,7 @@
 			let s:mru_forward = (s:mru_forward+1)
 		endif
 		"let tmp = s:mru_forward
-		exe "b" l:buflist[s:mru_forward]
+		exe "silent! b" l:buflist[s:mru_forward]
 		"let s:mru_forward = tmp
 	endfunction
 
