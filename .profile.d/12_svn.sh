@@ -38,8 +38,7 @@ alias scid='svn ci -m "Development commit $(svn-date)"'
 
 # Build a unique backup directory for this repo
 function svn-bckdir() {
-  DIR=$(basename "$(readlink -m "$PWD")")
-  DIR=$(readlink -m "$(svn-root)/${1:-.svnbackup}/$DIR${2:+_$2}")
+  DIR="$(readlink -m "$(svn-root)/${1:-.svnbackup}/$(basename $(svn-repo))$(svn-branch)${2:+_$2}")"
   mkdir -p "${DIR}"
   echo "${DIR}"
 }
@@ -64,9 +63,14 @@ function svn-url() {
   svn info "$@" | grep "URL:" | grep -oh 'svn.*'
 }
 
-# Get svn current root
+# Get path to svn current root
 function svn-root() {
   echo "${PWD}$(sed -e "s;$(svn-repo);;" -e "s;/[^\/]*;/..;g" <<< $(svn-url))"
+}
+
+# Get svn current branch
+function svn-branch() {
+  sed -e "s;$(svn-repo);;" <<< "$(svn-url)"
 }
 
 # Get svn repository revision
@@ -121,27 +125,26 @@ function svn-merge() {
   fi
 }
 
-# Commit a list of files
-#function svn-ci() {
-#  CL="CL$(svn-date)"
-#  svn cl "$CL" "$@" && svn ci --cl "$CL"
-#}
-
-# Make a dev commit of a list of files
-#function svn-cid() {
-#  CL="CL$(svn-date)"
-#  svn cl "$CL" "$@" && svn ci --cl "$CL" -m "Development commit $(svn-date)"
-#}
-
 # Create a changelist
 function svn-cl() {
   CL="CL$(svn-date)"
   svn cl "$CL" "$@"
 }
 
+# Commit a changelist
+function svn-ci() {
+  svn ci --cl "${1:?No changelist specified...}" "${@:2}"
+}
+
 # Check svn repository existenz
 function svn-exists() {
   svn info "$@" > /dev/null
+}
+
+# Tells when repo has been modified
+function svn-modified() {
+  # Avoid ?, X, Performing status on external item at '...'
+  [ $(svn st | grep -E "^[^\?\X\P]" | wc -l) -gt 0 ]
 }
 
 # Clean repo, remove unversionned files
@@ -277,12 +280,6 @@ function svn-get() {
   svn export "$@" "./$(filename $1)"
 }
 
-# Tells when repo has been modified
-function svn-modified() {
-  # Avoid ?, X, Performing status on external item at '...'
-  [ $(svn st | grep -E "^[^\?\X\P]" | wc -l) -gt 0 ]
-}
-
 # Edit svn global config
 function svn-config() {
   vi "${HOME}/.subversion/config"
@@ -290,22 +287,23 @@ function svn-config() {
 
 # Print the history of a file
 function svn-history() {
-  URL="${1:?Please specify a file name}"
-  svn log -q $URL | grep -E -e "^r[[:digit:]]+" -o | cut -c2- | sort -rn | {
-    if [ $# -gt 1 ]; then
+  URL="${1}"
+  #svn log -q $URL | grep -E -e "^r[[:digit:]]+" -o | cut -c2- | sort -rn | {
+  svn log -q $URL | awk '/^r[[:digit:]]+/ {print substr($1,2)}' | {
+    if [ ! -z "$URL" -a $# -gt 1 ]; then
       # First revision as full text
       echo
       read r
-      svn log -r$r $URL@HEAD
-      svn cat -r$r $URL@HEAD
+      svn log -r$r $URL
+      svn cat -r$r $URL
       echo
     fi
     # Remaining revisions as differences to previous revision
     while read r
     do
       echo
-      svn log -r$r $URL@HEAD
-      svn diff -c$r $URL@HEAD
+      svn log -r$r $URL
+      svn diff -c$r $URL
       echo
     done
   }
@@ -343,11 +341,11 @@ function svn-diffl() {
 
 # List the archives based on given name
 function svn-zipls() {
-  if [ -e "${1}" ]; then
-    ls -t1 ${1}/*
-  else
-    ls -t1 $(svn-bckdir)/${1}*
+  DIR="$1"
+  if [ ! -e "$DIR" ]; then
+    DIR="$(svn-bckdir)"
   fi
+  find "$DIR" -type f -printf '%T@ %p\n' | sort -rn | head -n 1 | cut -d' ' -f 2-
 }
 
 # Returns the last archive found based on given name
