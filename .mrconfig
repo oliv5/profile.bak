@@ -56,6 +56,11 @@ lib =
 		VCSH_REPO=$(basename $MR_REPO .git)
 		git_bundle "$VCSH_REPO"
 	}
+	vcsh_gitk() {
+		VCSH_REPO=$(basename $MR_REPO .git)
+		vcsh run $VCSH_REPO gitk
+	}
+	
 
 # Include our repositories
 include = cat ${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/*

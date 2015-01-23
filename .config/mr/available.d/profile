@@ -5,3 +5,4 @@ push     = vcsh_push
 status   = vcsh_status
 gc       = vcsh_gc
 bundle   = vcsh_bundle
+gitk     = vcsh_gitk
