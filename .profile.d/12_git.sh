@@ -10,6 +10,7 @@ alias gm='git ls-files -m'
 alias gc='git ls-files -u'
 alias gd='git ls-files -d'
 alias gn='git ls-files -o --exclude-standard'
+alias gu='git ls-files -o'
 # Diff aliases
 alias gdd='git diff'
 alias gdm='git difftool -y -t meld --'
@@ -26,6 +27,9 @@ alias git-ci='git commit'
 # Gitignore
 alias gil='git-ignore-list'
 alias gia='git-ignore-add'
+# git add new files
+alias gan='git add $(git ls-files -o --exclude-standard)'
+alias gau='git add $(git ls-files -o)'
 
 # Meld called by git
 function git-meld() {
@@ -123,7 +127,7 @@ function git-ls() {
 
 # Check commit existenz
 function git-exists() {
-  git rev-parse --verify "${1:?Please enter a commit hash...}" 2>/dev/null
+  git rev-parse --verify "${1:-HEAD}" 2>/dev/null
 }
 
 # Amend author/committer names & emails
