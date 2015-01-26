@@ -30,17 +30,17 @@ alias f='cdf'
 alias e='gvim'
 alias sse='ss | cut -c 9- | xargs gvim'
 alias gse='gs | grep modified | cut -d : -f 2 | xargs gvim'
-function ffe() {
+ffe() {
   ff "$@" | xargs gvim
 }
 
 # Gedit/geany
-function g() {
+g() {
   eval $(command -v geany || command -v gedit || command -v gvim || false) "$@"
 }
 alias ssg='ss | cut -c 9- | xargs g'
 alias gsg='gs | grep modified | cut -d : -f 2 | xargs g'
-function ffg() {
+ffg() {
   ff "$@" | xargs g
 }
 

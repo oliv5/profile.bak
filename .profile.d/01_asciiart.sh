@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Betty Boop
-function betty_boop()
+betty_boop()
 {
   echo -ne "\033[02;36m"
   echo -e "                                .::                       ."

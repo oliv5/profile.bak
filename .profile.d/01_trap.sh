@@ -1,18 +1,18 @@
 #!/bin/bash
-function trap-stack-name() {
+trap-stack-name() {
   local sig=${1//[^a-zA-Z0-9]/_}
   echo "__trap_stack_$sig"
 }
 
-function trap-extract() {
+trap-extract() {
   echo ${@:3:$(($#-3))}
 }
 
-function trap-get() {
+trap-get() {
   eval echo $(trap-extract `trap -p $1`)
 }
 
-function trap-push() {
+trap-push() {
   local new_trap=$1
   shift
   local sigs=$*
@@ -24,7 +24,7 @@ function trap-push() {
   done
 }
 
-function trap-pop() {
+trap-pop() {
   local sigs=$*
   for sig in $sigs; do
     local stack_name=`trap-stack-name "$sig"`
@@ -38,7 +38,7 @@ function trap-pop() {
   done
 }
 
-function trap-prepend() {
+trap-prepend() {
   local new_trap=$1
   shift
   local sigs=$*
@@ -51,7 +51,7 @@ function trap-prepend() {
   done
 }
 
-function trap-append() {
+trap-append() {
   local new_trap=$1
   shift
   local sigs=$*

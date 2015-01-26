@@ -1,25 +1,25 @@
 #!/bin/sh
 
-function shutdown() {
+shutdown() {
   sudo $(which shutdown) -h -P ${1:-now} ${@:2}
 }
 
-function poweroff() {
+poweroff() {
   sudo $(which shutdown)
 }
 
-function reboot() {
+reboot() {
   sudo $(which shutdown) -r ${1:-now} ${@:2}
 }
 
-function hardreboot() {
+hardreboot() {
   sudo $(which reboot) -fv ${@}
 }
 
-function suspend() {
+suspend() {
   sudo pm-suspend ${@}
 }
 
-function hibernate() {
+hibernate() {
   sudo pm-hibernate ${@}
 }

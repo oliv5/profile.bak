@@ -3,7 +3,7 @@
 #########################
 # Gedit
 if command -v gedit >/dev/null; then
-  function gedit() {
+  gedit() {
     ARGS="$(echo $@ | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1 +\2/g')"
     command -p gedit $ARGS
   }
@@ -13,7 +13,7 @@ fi
 #########################
 # Geany
 if command -v geany >/dev/null; then
-  function geany() {
+  geany() {
     ARGS="$(echo $@ | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1 +\2/g')"
     command -p geany $ARGS
   }
@@ -27,7 +27,7 @@ export COLORTERM="xterm" # backspace bug in vim
 
 # Start gvim
 if command -v gvim >/dev/null; then
-  function gvim() {
+  gvim() {
     ARGS="$(sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/+\2 \1/g' <<< $@)"
     if [ -z "$VIM_USETABS" ]; then
       ARGS="${1:+--remote-silent} $ARGS"
@@ -42,7 +42,7 @@ fi
 #########################
 # Source insight
 if command -v si.sh >/dev/null; then
-  function si() {
+  si() {
     eval $(command -v si.sh || false) "$@"
   }
   export si

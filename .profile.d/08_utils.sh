@@ -6,23 +6,23 @@
 alias mountiso='mount -o loop -t iso9660'
 
 # To lower
-function toLower()
+toLower()
 {
   echo "${@}" | tr "[:upper:]" "[:lower:]"
 }
 
 # To upper
-function toUpper()
+toUpper()
 {
   echo "${@}" | tr "[:lower:]" "[:upper:]"
 }
 
-function mkbak() {
+mkbak() {
   cp "${1:?Please specify input file 1}" "${1}.$(date +%Y%m%d-%H%M%S).bak"
 }
 
 # Get password
-function get-passwd() {
+get-passwd() {
   trap "stty echo; trap SIGINT" SIGINT; stty -echo
   read -p "${1:-Password: }" PASSWD; echo
   stty echo; trap SIGINT
@@ -30,7 +30,7 @@ function get-passwd() {
 }
 
 #wget mirror website
-function wget-mirror() {
+wget-mirror() {
   SITE=${1:?Please specify the URL}
   DOMAIN=$(sed -E 's;^https?://([^/]*)/.*$;\1;' <<< $SITE)
   OPTS="${@:2}"
@@ -38,7 +38,7 @@ function wget-mirror() {
 }
 
 # Hex to signed decimal
-function hex2int() {
+hex2int() {
 	#MAX=$(( 1 << ${2:-32} ))
 	#MEAN=$(($(($MAX >> 1)) - 1))
 	let "MAX=1<<${2:-32}"
@@ -50,7 +50,7 @@ function hex2int() {
 
 # Execute on remote host
 alias exec-rem='exec-remote'
-function exec-remote() {
+exec-remote() {
   CMD="${2:?No command specified} ${@:3}"
   if [ "${1:?No host specified}" != "$HOSTNAME" ]; then
 	\ssh -X $1 "$CMD"
@@ -60,7 +60,7 @@ function exec-remote() {
 }
 
 # Get public external IP
-function get-extip() {
+get-extip() {
   DNSLOOKUP="ifconfig.me/ip"
   if command -v curl >/dev/null; then
     curl $DNSLOOKUP
@@ -83,7 +83,7 @@ function get-extip() {
 alias rm-ansi='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'
 
 # Send email using mutt or mail
-function send-mail() {
+send-mail() {
   DEST="${1:?No email address specified}"
   SUBJECT="${2:?No subject specified}"
   CONTENT="${3:?No content specified}"

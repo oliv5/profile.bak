@@ -4,7 +4,7 @@
 #SCREEN_AUTOLOAD=""
 
 # Wrapper function
-function screen() {
+screen() {
   [ -z "$SCREEN_DISPLAY" ] && export SCREEN_DISPLAY="$DISPLAY"
   if [ $# == 0 ]; then
     # Recall old session or create a new one
@@ -16,7 +16,7 @@ function screen() {
 }
 
 # Send a command to a running screen
-function screen-cmd() {
+screen-cmd() {
   command -p screen -S ${1:?No session specified...} -X stuff "${@:2}"
 }
 

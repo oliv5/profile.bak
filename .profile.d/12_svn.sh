@@ -37,69 +37,69 @@ alias sci='svn ci'
 alias scid='svn ci -m "Development commit $(svn-date)"'
 
 # Build a unique backup directory for this repo
-function svn-bckdir() {
+svn-bckdir() {
   DIR="$(readlink -m "$(svn-root)/${1:-.svnbackup}/$(basename $(svn-repo))$(svn-branch)${2:+_$2}")"
   mkdir -p "${DIR}"
   echo "${DIR}"
 }
 
 # Build a backup filename for this repo
-function svn-bckname() {
+svn-bckname() {
   echo "${1:+$1_}$(basename $(svn-repo))_$(basename $(svn-url))${2:+_$2}"
 }
 
 # Retrieve date
-function svn-date() {
+svn-date() {
   date +%Y%m%d-%H%M%S
 }
 
 # Get svn repository path
-function svn-repo() {
+svn-repo() {
   svn info "$@" | grep "Repository Root:" | grep -oh 'svn.*'
 }
 
 # Get svn url name
-function svn-url() {
+svn-url() {
   svn info "$@" | grep "URL:" | grep -oh 'svn.*'
 }
 
 # Get path to svn current root
-function svn-root() {
+svn-root() {
   echo "${PWD}$(sed -e "s;$(svn-repo);;" -e "s;/[^\/]*;/..;g" <<< $(svn-url))"
 }
 
 # Get svn current branch
-function svn-branch() {
+svn-branch() {
   sed -e "s;$(svn-repo);;" <<< "$(svn-url)"
 }
 
 # Get svn repository revision
-function svn-rev() {
+svn-rev() {
   svn info "$@" | grep "Revision:" | grep -oh '[0-9]\+'
 }
 
 # Get status file list
-function svn-st() {
+svn-st() {
   svn st "${@:2}" | grep -E "${1:-^[^ ]}" | cut -c 9-
 }
 
 # Extract SVN revisions from string rev0:rev1
-function _svn-getrev() {
+_svn-getrev() {
   REV1="${1%%:*}"
   REV2="${1##*:}"
   echo "${REV1:-HEAD} ${REV2:-HEAD}"
 }
-function _svn-getrev1() {
+_svn-getrev1() {
   REV1="${1%%:*}"
   echo "${REV1:-HEAD}"
 }
-function _svn-getrev2() {
+_svn-getrev2() {
   REV2="${1##*:}"
   echo "${REV2:-HEAD}"
 }
 
 # Merge 3-way
-function svn-merge() {
+svn-merge() {
   if [ -z "$1" ]; then
     export -f svn-merge
     svn-st "^C" | xargs --no-run-if-empty sh -c 'svn-merge "$@"' _
@@ -126,29 +126,29 @@ function svn-merge() {
 }
 
 # Create a changelist
-function svn-cl() {
+svn-cl() {
   CL="CL$(svn-date)"
   svn cl "$CL" "$@"
 }
 
 # Commit a changelist
-function svn-ci() {
+svn-ci() {
   svn ci --cl "${1:?No changelist specified...}" "${@:2}"
 }
 
 # Check svn repository existenz
-function svn-exists() {
+svn-exists() {
   svn info "$@" > /dev/null
 }
 
 # Tells when repo has been modified
-function svn-modified() {
+svn-modified() {
   # Avoid ?, X, Performing status on external item at '...'
   [ $(svn st | grep -E "^[^\?\X\P]" | wc -l) -gt 0 ]
 }
 
 # Clean repo, remove unversionned files
-function svn-clean() {
+svn-clean() {
   # Check we are in a repository
   svn-exists || return
   # Confirmation
@@ -166,7 +166,7 @@ function svn-clean() {
 }
 
 # Revert modified files, don't change unversionned files
-function svn-revert() {
+svn-revert() {
   # Check we are in a repository
   svn-exists || return
   # Backup
@@ -176,7 +176,7 @@ function svn-revert() {
 }
 
 # Rollback to a previous revision, don't change unversionned files
-function svn-rollback() {
+svn-rollback() {
   # Get target revision number
   REV1=${1:-PREV}
   REV2=${2:-HEAD}
@@ -189,7 +189,7 @@ function svn-rollback() {
 }
 
 # Backup current changes
-function svn-export() {
+svn-export() {
   # Check we are in a repository
   svn-exists || return
   # Get revisions
@@ -229,7 +229,7 @@ function svn-export() {
 }
 
 # Import a CL from an archive
-function svn-import() {
+svn-import() {
   # Check parameters
   ARCHIVE="$1"
   if [ -z "$ARCHIVE" ]; then
@@ -249,7 +249,7 @@ function svn-import() {
 }
 
 # Suspend a CL
-function svn-suspend() {
+svn-suspend() {
   # Export & revert if succeed
   if svn-export HEAD HEAD "$(svn-bckdir)/suspend_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z" "$@"; then
     svn revert -R "${@:-.}"
@@ -257,7 +257,7 @@ function svn-suspend() {
 }
 
 # Resume a CL
-function svn-resume() {
+svn-resume() {
   # Look for modified repo
   if [ -z "$SVN_YES" -a svn-modified ]; then
     echo -n "Your repository has local changes, proceed anyway? (y/n): "
@@ -271,22 +271,22 @@ function svn-resume() {
 }
 
 # Amend a log message
-function svn-amend() {
+svn-amend() {
   svn propedit --revprop svn:log -r ${1?Error: please specify a revision}
 }
 
 # Get a single file
-function svn-get() {
+svn-get() {
   svn export "$@" "./$(filename $1)"
 }
 
 # Edit svn global config
-function svn-config() {
+svn-config() {
   vi "${HOME}/.subversion/config"
 }
 
 # Print the history of a file
-function svn-history() {
+svn-history() {
   URL="${1}"
   #svn log -q $URL | grep -E -e "^r[[:digit:]]+" -o | cut -c2- | sort -rn | {
   svn log -q $URL | awk '/^r[[:digit:]]+/ {print substr($1,2)}' | {
@@ -310,37 +310,37 @@ function svn-history() {
 }
 
 # Show user commit
-function svn-loguser() {
+svn-loguser() {
   svn log | sed -n "/${1:-$USER}/,/-----$/ p"
 }
 
 # Show logs in a range of revisions (-r and -c allowed)
-function svn-log() {
+svn-log() {
   svn log --verbose ${2:+-r $1:}${2:-${1:+-c $1}} ${@:3}
 }
-function svn-shortlog() {
+svn-shortlog() {
   svn-log $@ | grep -E "^[^ |\.]"
 }
 
 # Display content of a file (only -r rev allowed)
-function svn-cat () {
+svn-cat () {
   svn cat ${1:+-r $1} ${@:2}
 }
 
 # Display the changes in a file in a range of revisions
 # or list changed files in a range of revisions (-r and -c allowed)
-function svn-diff() {
+svn-diff() {
   svn diff ${2:+-r $1:}${2:-${1:+-c $1}} ${@:3}
 }
-function svn-diffm() {
+svn-diffm() {
   svn-diff ${1:-HEAD} ${2:-PREV} ${@:3} --diff-cmd meld
 }
-function svn-diffl() {
+svn-diffl() {
   svn-diff ${1:-HEAD} ${2:-PREV} ${@:3} --summarize
 }
 
 # List the archives based on given name
-function svn-zipls() {
+svn-zipls() {
   DIR="$1"
   if [ ! -e "$DIR" ]; then
     DIR="$(svn-bckdir)"
@@ -349,12 +349,12 @@ function svn-zipls() {
 }
 
 # Returns the last archive found based on given name
-function svn-zip() {
+svn-zip() {
   svn-zipls "$@" | head -n 1
 }
 
 # Diff an archive with current repo
-function _svn-zipdiff() {
+_svn-zipdiff() {
   ARCHIVE="$2"
   if [ -z "$ARCHIVE" ]; then
     ARCHIVE="$(svn-zip)"

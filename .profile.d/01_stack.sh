@@ -3,33 +3,33 @@
 
 # Get length
 # Call: plen array
-function plen() {
+plen() {
   #echo "${#array0[@]}"
   eval echo \${#$1[@]}
 }
 
 # Push onto stack
 # Call: push array elem1 .. elemN
-function push() {
+push() {
   #array0[${#array0[@]}]="${@:2}"
   eval "$1=(\"\${$1[@]}\" \"\${@:2}\")"
 }
 
 # Add to fifo
 # Call: add array elem1 .. elemN
-function padd() {
+padd() {
   eval "$1=(\"\${@:2}\" \"\${$1[@]}\")"
 }
 
 # Pack array removing holes
 # Call: pack array
-function pack() {
+pack() {
   eval "$1=(\${$1[@]})"
 }
 
 # Delete n elements
 # Call: pdeln array start end
-function pdeln() {
+pdeln() {
   for i in $(seq $3 -1 $2); do
     eval unset $1[$i]
   done
@@ -40,59 +40,59 @@ function pdeln() {
 
 # Delete n elements from head
 # Call: pdelh array n
-function pdelh() {
+pdelh() {
   pdeln $1 0 $(expr ${2:-1} - 1)
 }
 
 # Delete n elements from queue
 # Call: pdelq array n
-function pdelq() {
+pdelq() {
   local LEN=$(eval expr \${#$1[@]})
   eval pdeln $1 $(expr $LEN - ${2:-1}) $(expr $LEN - 1)
 }
 
 # Keep n elements from head
 # Call: pkeeph array n
-function pkeeph() {
+pkeeph() {
   pdelq $1 $(eval expr \${#$1[@]} - $2)
 }
 
 # Keep n elements from queue
 # Call: pkeepq array n
-function pkeepq() {
+pkeepq() {
   pdelh $1 $(eval expr \${#$1[@]} - $2)
 }
 
 # Peek 1 element from stack
 # Call: peek array var
-function peek() {
+peek() {
   eval "$2=\${$1[\${#$1[@]}-1]}"
 }
 
 # Peek 1 element from stack
 # and return it with echo
 # Call: peekl array
-function peekl() {
+peekl() {
   eval echo \${$1[\${#$1[@]}-1]}
 }
 
 # Peek n elements from stack
 # Call: peekn array start end
-function peekn() {
+peekn() {
   local LEN=$(eval expr \${#$1[@]})
   pcopy $1 $2 $LEN-$3 $LEN
 }
 
 # Extract elements from array
 # Call: pcopy array1 array2 start end
-function pcopy() {
+pcopy() {
   #echo array1=("${array0[@]:$2:$3}")
   eval "$2=(\"\${$1[@]:\$3:\$4}\")"
 }
 
 # Pop from stack
 # Call: pop array var
-function pop() {
+pop() {
   peek $1 $2
   pdelq $1
   #eval unset $1[\${#$1[@]}-1]
@@ -101,7 +101,7 @@ function pop() {
 
 # Pop 1 element from stack
 # Call: pop array var
-function popl() {
+popl() {
   peek $1 PEEK
   pdelq $1
   echo $PEEK
@@ -109,7 +109,7 @@ function popl() {
 
 # Pop n elements from stack
 # Call: popn array var n
-function popn() {
+popn() {
   peekn $1 $2 $3
   pdelq $1 $3
   #for i in $(seq 1 $3); do
@@ -120,44 +120,44 @@ function popn() {
 
 # Replace in array 1 matching element
 # Call: psed array regex replacement
-function psed() {
+psed() {
   #array0=("${array0[@]/$2/$3}")
   eval "$1=(\"\${$1[@]/\$2/\$3}\")"
 }
 
 # Replace in array all matching elements
 # Call: psedg array regex replacement
-function psedg() {
+psedg() {
   #array0=("${array0[@]//$2/$3}")
   eval "$1=(\"\${$1[@]//\$2/\$3}\")"
 }
 
 # Replace in array 1 element from front of list
 # Call: psedf array regex replacement
-function psedf() {
+psedf() {
   #array0=("${array0[@]/#$2/$3}")
   eval "$1=(\"\${$1[@]/#\$2/\$3}\")"
 }
 
 # Replace in array 1 element from back of list
 # Call: psedb array regex replacement
-function psedb() {
+psedb() {
   #array0=("${array0[@]/%$2/$3}")
   eval "$1=(\"\${$1[@]/%\$2/\$3}\")"
 }
 
 # Display list
-function pdisp() {
+pdisp() {
   eval echo "\${$1[@]}"
 }
 
 # clear list
-function pclear() {
+pclear() {
   eval "$1=()"
 }
 
 # Set list
-function pset() {
+pset() {
   eval "$1=(${@:2})"
 }
 
@@ -165,8 +165,8 @@ function pset() {
 alias pdeclare='declare -a'
 
 # Sanity test function
-function psanity() {
-  function pexec() {
+psanity() {
+  pexec() {
     echo "$@"
     $@
   }

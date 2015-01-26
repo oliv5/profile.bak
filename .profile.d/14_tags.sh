@@ -12,7 +12,7 @@ CSCOPE_REGEX='.*\.(h|c|cc|cpp|hpp|inc|S|py)$'
 CSCOPE_EXCLUDE="-not -path *.svn* -and -not -path *.git -and -not -path /tmp/"
 
 # Make ctags
-function mkctags() {
+mkctags() {
   command -v >/dev/null ctags || return
   # Get directories, remove ~/
   SRC="$(eval echo ${1:-$PWD})"
@@ -25,7 +25,7 @@ function mkctags() {
 }
 
 # Scan directory for cscope files
-function scancsdir() {
+scancsdir() {
   command -v >/dev/null cscope || return
   # Get directories
   SRC="$(eval echo ${1:-$PWD})"
@@ -39,7 +39,7 @@ function scancsdir() {
 }
 
 # Make cscope db from source list file
-function mkcscope-1() {
+mkcscope-1() {
   command -v >/dev/null cscope || return
   # Get directories
   SRC="$(eval echo ${1:-$PWD})"
@@ -59,7 +59,7 @@ function mkcscope-1() {
 # Scan and make cscope db
 # Warning: this is not incremental
 # It erases the old database and rebuild it
-function mkcscope-2() {
+mkcscope-2() {
   command -v >/dev/null cscope || return
   # Get directories
   SRC="$(eval echo ${1:-$PWD})"
@@ -73,12 +73,12 @@ function mkcscope-2() {
 }
 
 # Cscope alias - use a fct because aliases are not exported to other fct
-function mkcscope() {
+mkcscope() {
   mkcscope-1 "$@"
 }
 
 # Make id-utils database
-function mkids() {
+mkids() {
   command -v >/dev/null mkid || return
   # Get directories
   SRC="$(eval readlink -f ${1:-$PWD})"
@@ -90,20 +90,20 @@ function mkids() {
 }
 
 # Make tags and cscope db
-function mktags() {
+mktags() {
   mkctags "$@"
   mkcscope "$@"
   mkids "$@"
 }
 
 # Clean ctags
-function rmctags() {
+rmctags() {
   DIR="$(eval echo ${1:-$PWD})"
   rm -v "${DIR:?No directory specified}/tags" 2>/dev/null
 }
 
 # Clean cscope db
-function rmcscope() {
+rmcscope() {
   DIR="$(eval echo ${1:-$PWD})"
   FILE="${DIR}/cscope"
   rm -v "${FILE:?No directory specified}.out"* 2>/dev/null
@@ -111,20 +111,20 @@ function rmcscope() {
 }
 
 # Clean id-utils db
-function rmids() {
+rmids() {
   DIR="$(eval echo ${1:-$PWD})"
   FILE="${DIR}/ID"
   rm -v "${FILE:?No directory specified}" 2>/dev/null
 }
 
 # Clean tags and cscope db
-function rmtags() {
+rmtags() {
   rmctags "$@"
   rmcscope "$@"
   rmids "$@"
 }
 
-function mkalltags() {
+mkalltags() {
   _PWD="$PWD"
   for TAGPATH in $(find -L "$(readlink -m "${1:-$PWD}")" -maxdepth ${2:-5} -type f -name "*.path" 2>/dev/null); do
     echo "** Processing file $TAGPATH"

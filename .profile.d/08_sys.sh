@@ -11,40 +11,40 @@ alias psu='ps -fu $USER'
 alias pg='pgrep -fl'
 alias pgu='pgrep -flu $(id -u $USER)'
 
-function pid() {
+pid() {
 	for NAME in "$@"; do
 		ps -C "$@" -o pid=
 	done
 }
 
-function uid() {
+uid() {
 	for NAME in "$@"; do
 		ps -C "$@" -o user=
 	done
 }
 
 # System information
-function sys-iostat() {
+sys-iostat() {
 	iostat -x 2
 }
 
-function sys-stalled() {
+sys-stalled() {
 	while true; do ps -eo state,pid,cmd | grep "^D"; echo "—-"; sleep 5; done
 }
 
-function sys-cpu() {
+sys-cpu() {
 	sar ${1:-1} ${2}
 }
 
-function cpu-avg() {
+cpu-avg() {
 	eval "ps aux ${1:+| grep $1} | awk 'BEGIN {sum=0} {sum+=\$3}; END {print sum}'"
 }
 
-function mem-avg() {
+mem-avg() {
 	eval "ps aux ${1:+| grep $1} | awk 'BEGIN {sum=0} {sum+=\$4}; END {print sum}'"
 }
 
-function cpu-inst() {
+cpu-inst() {
 	if [ -z "$1" ]; then
 		top -d 0.5 -b -n2 | grep "Cpu(s)" | tail -n 1 | awk '{print $2 + $4 + $6}'
 	else
@@ -52,7 +52,7 @@ function cpu-inst() {
 	fi
 }
 
-function mem-inst() {
+mem-inst() {
 	if [ -z "$1" ]; then
 		top -d 0.5 -b -n2 | grep "Mem:" | tail -n 1 | awk '{print ($5*100/$3)}'
 	else
@@ -60,29 +60,29 @@ function mem-inst() {
 	fi
 }
 
-function swap-inst() {
+swap-inst() {
 	top -d 0.5 -b -n2 | grep "Swap:" | tail -n 1 | awk '{print ($4*100/$2)}'
 }
 
-function cpu-top() {
+cpu-top() {
 	eval "ps aux --sort -%cpu ${1:+| head -n $(($1 + 1))}"
 }
 
-function mem-top() {
+mem-top() {
 	eval "ps aux --sort -rss ${1:+| head -n $(($1 + 1))}"
 }
 
-function kill-cpu-top() {
+kill-cpu-top() {
 	END=$((${1:-1} + 1))
 	ps a --sort -%cpu | awk "NR>1 && NR<=$END {print \$1;}" | xargs kill ${@:2}
 }
 
-function kill-mem-top() {
+kill-mem-top() {
 	END=$((${1:-1} + 1))
 	ps a --sort -rss | awk "NR>1 && NR<=$END {print \$1;}" | xargs kill ${@:2}
 }
 
-function mem-ps() {
+mem-ps() {
 	while read command percent rss; do
 		if [[ "${command}" != "COMMAND" ]]; then 
 			rss="$(bc <<< "scale=2;${rss}/1024")"
@@ -102,7 +102,7 @@ alias keyb-set='setxkbmap -layout'
 alias keyb-setfr='setxkbmap -layout fr'
 
 # Chroot
-function mk-chroot(){
+mk-chroot(){
 	SRC="/dev/${1:?Please specify the root device}"
 	DST="${2:-/mnt}"
 	mount "$SRC" "$DST"
@@ -114,7 +114,7 @@ function mk-chroot(){
 }
 
 # Make deb package from source
-function make-deb() {
+make-deb() {
 	ARCHIVE="${1:?No input archive specified}"
 	tar zxf "$ARCHIVE" || return 0
 	cd "${ARCHIVE%.*}"
@@ -134,7 +134,7 @@ alias notify='_notify-file'
 # Basic notification method with a loop
 # Pros: file move is captured
 # Cons: may miss event, high system resource consumption on large directories
-function _notify-loop() {
+_notify-loop() {
 	while true; do
 		inotifywait -qq -e ${1:?Nothing to monitor} "${2:-$PWD}"
 		eval ${3:-true} ${@:4}
@@ -144,7 +144,7 @@ function _notify-loop() {
 # Main notification method
 # Pros: only a single inotifywait process & set of pipes
 # Cons: does not capture file moves properly
-function _notify-proc() {
+_notify-proc() {
 	TRIGGER="${1:?No event to monitor}"
 	FILE="${2:?No dir/file to monitor}"
 	SCRIPT="${3:?No action to execute} ${@:4}"
@@ -179,13 +179,13 @@ function _notify-proc() {
 # Monitor the root directory, filter events on file names
 # Pros: uses _notify-proc low resource method
 # Cons: it is triggered for every file event of the root directory
-function _notify-file() {
+_notify-file() {
 	_notify-proc $1 "$(dirname "$2")" 'if [ "$(readlink -f "$DIR$FILE")" == "$(readlink -f "'$2'")" ]; then '${3:?No action to execute} ${@:4}'; fi'
 }
 
 # NFS unmount
 alias nfs-umountall='umount -a -t nfs'
-function nfs-umount() {
+nfs-umount() {
 	sudo sh -c "
 		ifconfig eth0:nfstmp ${2:?NFS IP not specified...} netmask 255.255.255.255
 		umount -f -l \"${1:?NFS mount point not specified...}\"
@@ -194,7 +194,7 @@ function nfs-umount() {
 }
 
 # NFS remount
-function nfs-remount() {
+nfs-remount() {
 	sudo sh -c "
 		ifconfig eth0:fakenfs ${2:?NFS IP not specified...} netmask 255.255.255.255
 		umount -f -l \"${1:?NFS mount point not specified...}\"
@@ -204,13 +204,13 @@ function nfs-remount() {
 }
 
 # Fstab to autofs conversion
-function fstab2autofs() {
+fstab2autofs() {
 	awk 'NF && substr($1,0,1)!="#" {print $2 "\t-fstype="$3 "," $4 "\t" $1}' "$@"
 }
 
 # Disable bell
 # https://wiki.archlinux.org/index.php/Disable_PC_speaker_beep
-function bell-off() {
+bell-off() {
 	# In X
 	xset -b
 	# In console

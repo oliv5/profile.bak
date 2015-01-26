@@ -4,7 +4,7 @@
 #TMUX_AUTOLOAD=""
 
 # Wrapper function
-function tmux() {
+tmux() {
   if [ $# == 0 ]; then
     # Recall old session or create a new one
     command -p tmux attach -d || command -p tmux new-session

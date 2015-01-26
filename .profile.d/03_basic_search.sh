@@ -2,17 +2,17 @@
 # Bash utils
 ############################################
 
-function toLower()
+toLower()
 {
   echo "${@}" | tr "[:upper:]" "[:lower:]"
 }
 
-function toUpper()
+toUpper()
 {
   echo "${@}" | tr "[:lower:]" "[:upper:]"
 }
 
-function multiColorString()
+multiColorString()
 {
   for letterNbr in `seq ${#1}`
   do
@@ -45,7 +45,7 @@ function multiColorString()
 # Safe find & replace
 #############################################################################
 
-function rpl()
+rpl()
 {
   if [[ $# != 4 ]]
   then
@@ -64,7 +64,7 @@ function rpl()
 # the file at the right line
 #############################################################################
 
-function v()
+v()
 {
   args=""
   if [[ $# == 1 ]]
@@ -79,7 +79,7 @@ function v()
 # Search core function
 #############################################################################
 
-function _search()
+_search()
 {
   if [[ $# == 0 ]]
   then
@@ -102,7 +102,7 @@ function _search()
 # Search in header files
 #############################################################################
 
-function h()
+h()
 {
   _search "${1}" "*.h" "*.hpp"
 }
@@ -111,7 +111,7 @@ function h()
 # Search in source files
 #############################################################################
 
-function c()
+c()
 {
   _search "${1}" "*.c" "*.cpp" "*.cc"
 }
@@ -120,7 +120,7 @@ function c()
 # Search in python scripts
 #############################################################################
 
-function py()
+py()
 {
   _search "${1}" "*.py"
 }
@@ -129,7 +129,7 @@ function py()
 # Search in build system
 #############################################################################
 
-function mk()
+mk()
 {
   _search "${1}" "Makefile" "*.mk"
 }

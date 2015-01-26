@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Mount ecryptfs
-function mount-ecryptfs() {
+mount-ecryptfs() {
 	SRC="${1:?Missing source directory...}"
 	DST="${2:?Missing dest directory...}"
 	KEY1="${3:?Missing content key...}"
@@ -18,6 +18,6 @@ function mount-ecryptfs() {
 }
 
 # Mount iso
-function mount-iso() {
+mount-iso() {
   sudo mount -o loop -t iso9660 "$@"
 }

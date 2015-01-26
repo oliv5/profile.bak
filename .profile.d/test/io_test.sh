@@ -1,11 +1,11 @@
 #!/bin/bash
 
-function autocom() {
+autocom() {
   stty -F /dev/ttyUSB0 ospeed 9600 -parity cs8 -cstopb
   echo $'T0\r\n' > /dev/ttyUSB0
 }
 
-function autotelnet() {
+autotelnet() {
   ( echo 'check'; sleep 1;
     echo 'check'; sleep 1;
     echo -e "?\r\n"; sleep 1; echo -e "?\r\n"; sleep 1;
@@ -13,4 +13,3 @@ function autotelnet() {
     echo -e "${ON}${RELAY}\r\n"; sleep 1;
   ) | telnet $HOST $DEV
 }
-

@@ -127,34 +127,34 @@ if [ -z "$ENV_PROFILE" -a -f "$HOME/.profile" ]; then
 fi
 
 # Prepend to path
-function path-prepend () {
+unalias path-prepend 2>/dev/null
+path-prepend() {
   for DIR in "$@"; do
     if ! [[ "$PATH" =~ "${DIR}(:|$)" ]] && [[ -d "$DIR" ]]; then
       export PATH="${DIR}${PATH:+:$PATH}"
     fi
   done
 }
-unalias path-prepend 2>/dev/null
 path-prepend "$HOME/bin" "$HOME/bin/profile"
   
 # Append to path
-function path-append () {
+unalias path-append 2>/dev/null
+path-append() {
   for DIR in "$@"; do
     if ! [[ "$PATH" =~ "${DIR}(:|$)" ]] && [[ -d "$DIR" ]]; then
       export PATH="${PATH:+$PATH:}${DIR}"
     fi
   done
 }
-unalias path-append 2>/dev/null
 eval path-append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
 
 # Load user profile
-function profile {
+unalias profile 2>/dev/null
+profile() {
   for i in $HOME/.profile.d/*.sh ; do
     if [ -x "$i" ]; then
       . "$i"
     fi
   done
 }
-unalias profile 2>/dev/null
 eval profile

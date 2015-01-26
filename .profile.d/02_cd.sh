@@ -11,15 +11,15 @@ fi
 #function cdb_old() { cd "$PWD_0"; }
 
 # Stack based cd/back functions
-function cda()  { builtin cd "$@" || return $? && test -z "${ENV_PUSH}" && push g_backward_stack "$OLDPWD" && pkeepq g_backward_stack $g_backward_stack_maxsize || true; }
-function cdb()  { pop g_backward_stack DIR 2>/dev/null && push g_forward_stack "$PWD" && pkeepq g_forward_stack $g_forward_stack_maxsize && ENV_PUSH=1 cd "$DIR"; }
-function cdf()  { pop g_forward_stack DIR 2>/dev/null && push g_backward_stack "$PWD" && pkeepq g_backward_stack $g_backward_stack_maxsize && ENV_PUSH=1 cd "$DIR"; }
+cda()  { builtin cd "$@" || return $? && test -z "${ENV_PUSH}" && push g_backward_stack "$OLDPWD" && pkeepq g_backward_stack $g_backward_stack_maxsize || true; }
+cdb()  { pop g_backward_stack DIR 2>/dev/null && push g_forward_stack "$PWD" && pkeepq g_forward_stack $g_forward_stack_maxsize && ENV_PUSH=1 cd "$DIR"; }
+cdf()  { pop g_forward_stack DIR 2>/dev/null && push g_backward_stack "$PWD" && pkeepq g_backward_stack $g_backward_stack_maxsize && ENV_PUSH=1 cd "$DIR"; }
 
 # Replace cd
-function cd() { cda "$@"; }
+cd() { cda "$@"; }
 
 # Clean up all custom mappings
-function cdc() { unalias cd cda cdb cdf pushd popd 2>/dev/null; unset -f cd cda cdb cdf pushd popd 2>/dev/null; }
+cdc() { unalias cd cda cdb cdf pushd popd 2>/dev/null; unset -f cd cda cdb cdf pushd popd 2>/dev/null; }
 
 # Display stacks
-function cds() { echo "backward[${#g_backward_stack[@]}]: ${g_backward_stack[@]}"; echo "forward[${#g_forward_stack[@]}]: ${g_forward_stack[@]}"; }
+cds() { echo "backward[${#g_backward_stack[@]}]: ${g_backward_stack[@]}"; echo "forward[${#g_forward_stack[@]}]: ${g_forward_stack[@]}"; }

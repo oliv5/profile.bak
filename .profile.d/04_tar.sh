@@ -1,9 +1,9 @@
 #!/bin/sh
 
-function tgz() {
+tgz() {
   tar -cvzf "${1%*/}.tgz" "$@"
 }
 
-function untgz() {
+untgz() {
   tar ${2:+-C "$2"} -xvzf "$1"
 }
