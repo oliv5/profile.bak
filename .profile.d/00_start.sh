@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 
 # Test the type of shell
-# [[ $- == *i* ]] && echo 'Interactive' || echo 'Not interactive'
+# [[ $- = *i* ]] && echo 'Interactive' || echo 'Not interactive'
 # shopt -q login_shell && echo 'Login shell' || echo 'Not login shell'
 # see http://www.saltycrane.com/blog/2008/01/how-to-scroll-in-gnu-screen/
 
@@ -21,21 +21,6 @@ lang_en() {
 }
 
 ################################
-# Call stack
-print-callstack() {
-  # skipping i=0 as this is print_call_trace itself
-  for ((i = 1; i < ${#FUNCNAME[@]}; i++)); do
-    echo -n  ${BASH_SOURCE[$i]}:${BASH_LINENO[$i-1]}:${FUNCNAME[$i]}"(): "
-    sed -n "${BASH_LINENO[$i-1]}p" $0
-  done
-}
-
-################################
-# Set error handler
-trap-map() {
-  trap 'die "Error handler:" 1 ${LINENO}' ${@:-1 15} ERR
-}
-
 # Die function
 die() {
   printf '%s%s\n' "${3:+(line $3) }" "${1:-Unknown error. abort...}"

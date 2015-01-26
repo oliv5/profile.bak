@@ -63,3 +63,18 @@ trap-append() {
     fi
   done
 }
+
+# Set error handler
+trap-map() {
+  trap 'die "Error handler:" 1 ${LINENO}' ${@:-1 15} ERR
+}
+
+# Call stack
+print-callstack() {
+  # skipping i=0 as this is print_call_trace itself
+  for ((i = 1; i < ${#FUNCNAME[@]}; i++)); do
+    echo -n  ${BASH_SOURCE[$i]}:${BASH_LINENO[$i-1]}:${FUNCNAME[$i]}"(): "
+    sed -n "${BASH_LINENO[$i-1]}p" $0
+  done
+}
+

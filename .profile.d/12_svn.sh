@@ -120,7 +120,7 @@ svn-merge() {
         done
       fi
       echo -n "Mark the conflict as resolved? (y/n): "
-      read ANSWER; [ "$ANSWER" == "y" -o "$ANSWER" == "Y" ] && svn resolved "${file}"
+      read ANSWER; [ "$ANSWER" = "y" -o "$ANSWER" = "Y" ] && svn resolved "${file}"
     done
   fi
 }
@@ -198,7 +198,7 @@ svn-export() {
   # Get archive path, if not specified
   ARCHIVE="$3"
   if [ -z "$ARCHIVE" ]; then
-    if [ "$REV1" == "HEAD" ]; then
+    if [ "$REV1" = "HEAD" ]; then
       # Export changes made upon HEAD
       REV="$(svn-rev)"
       ARCHIVE="$(svn-bckdir)/export_$(svn-bckname)_r${REV}_$(svn-date).7z"
@@ -211,7 +211,7 @@ svn-export() {
   FILES="${@:4}"
   # Create archive, if not existing already
   if [ ! -f $ARCHIVE ]; then
-    if [ "$REV1" == "HEAD" ]; then
+    if [ "$REV1" = "HEAD" ]; then
       # Export changes made upon HEAD
       svn-st "^(A|M|R|\~|\!)" $FILES | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
       RESULT=$?

@@ -180,7 +180,7 @@ _notify-proc() {
 # Pros: uses _notify-proc low resource method
 # Cons: it is triggered for every file event of the root directory
 _notify-file() {
-	_notify-proc $1 "$(dirname "$2")" 'if [ "$(readlink -f "$DIR$FILE")" == "$(readlink -f "'$2'")" ]; then '${3:?No action to execute} ${@:4}'; fi'
+	_notify-proc $1 "$(dirname "$2")" 'if [ "$(readlink -f "$DIR$FILE")" = "$(readlink -f "'$2'")" ]; then '${3:?No action to execute} ${@:4}'; fi'
 }
 
 # NFS unmount

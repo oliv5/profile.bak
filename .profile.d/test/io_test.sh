@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 autocom() {
   stty -F /dev/ttyUSB0 ospeed 9600 -parity cs8 -cstopb

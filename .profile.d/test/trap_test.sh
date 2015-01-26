@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 initial_trap='echo "messy" ;'" echo 'handler'"
 non_f_trap='echo "non-function trap"'

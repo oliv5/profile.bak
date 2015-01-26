@@ -133,14 +133,14 @@ mkalltags() {
     set +x
     pwd
     TAGNAME="$(basename $TAGPATH)"
-    if [ "$TAGNAME" == "tags.path" -o "$TAGNAME" == "ctags.path" ]; then
+    if [ "$TAGNAME" = "tags.path" -o "$TAGNAME" = "ctags.path" ]; then
       rmctags
       for SRC in $(cat $TAGNAME); do
         echo "[ctags] add: $SRC"
         mkctags "$SRC" . "-a"
       done
     fi
-    if [ "$TAGNAME" == "tags.path" -o "$TAGNAME" == "cscope.path" ]; then
+    if [ "$TAGNAME" = "tags.path" -o "$TAGNAME" = "cscope.path" ]; then
       rmcscope
       for SRC in $(cat $TAGNAME); do
         echo "[cscope] add: $SRC"
@@ -148,7 +148,7 @@ mkalltags() {
       done
       mkcscope "$SRC" .
     fi
-    if [ "$TAGNAME" == "tags.path" -o "$TAGNAME" == "id.path" ]; then
+    if [ "$TAGNAME" = "tags.path" -o "$TAGNAME" = "id.path" ]; then
       rmids
       for SRC in $(cat $TAGNAME); do
         echo "[id] add: $SRC"

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Bash utils
 ############################################
 
@@ -67,9 +67,9 @@ rpl()
 v()
 {
   args=""
-  if [[ $# == 1 ]]
+  if [[ $# = 1 ]]
   then
-    pyCmd="a=\"${1}\".split(\":\"); b = a[0] if (len(a) == 1) else \"%s +%s\" % (a[0], a[1]); print b;"
+    pyCmd="a=\"${1}\".split(\":\"); b = a[0] if (len(a) = 1) else \"%s +%s\" % (a[0], a[1]); print b;"
     args=`python -c "${pyCmd}"`
   fi
   vim ${args}
@@ -81,7 +81,7 @@ v()
 
 _search()
 {
-  if [[ $# == 0 ]]
+  if [[ $# = 0 ]]
   then
     multiColorString "Invalid number of arguments!!! $0 <string> [file extensions]"
     return

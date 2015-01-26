@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Betty Boop
 betty_boop()

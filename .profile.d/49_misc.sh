@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Prevent Ctrl-D exit session
 export IGNOREEOF=1

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Bash utils
 # see http://tldp.org/LDP/abs/html/
 

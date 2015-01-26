@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 FIND_EXCLUDE="-not -path *.svn* -and -not -path *.git*"
 GREP_EXCLUDE="--exclude-dir=.svn --exclude-dir=.git"
 SED_EXCLUDE="$FIND_EXCLUDE -not -type l -and -not -path '*obj*'"
