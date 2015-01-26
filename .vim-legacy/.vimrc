@@ -157,7 +157,8 @@ endif
 
 " Theme & color scheme
 if has('syntax') && (has("gui_running") || (&t_Co > 2))
-	colorscheme torte   " Theme
+	"colorscheme torte   " Theme
+	colorscheme default " Theme
 	syntax on           " Syntax highlight
 endif
 
