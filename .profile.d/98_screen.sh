@@ -17,7 +17,12 @@ screen() {
 
 # Send a command to a running screen
 screen-cmd() {
-  command -p screen -S ${1:?No session specified...} -X stuff "${@:2}"
+  command -p screen -S ${1:?No session specified...} -X stuff "^C\n${@:2}\n"
+}
+
+# Set $DISPLAY
+screen-setdisplay() {
+  screen-cmd "$1" "export DISPLAY=$DISPLAY"
 }
 
 # Alias
