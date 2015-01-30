@@ -156,14 +156,17 @@ endif
 " *******************************************************
 
 " Theme & color scheme
-if has('syntax') && (has("gui_running") || (&t_Co > 2))
-	"colorscheme torte   " Theme
-	colorscheme default " Theme
-	syntax on           " Syntax highlight
+if has('syntax')
+	syntax on     " Syntax highlight
+	if &term=="builtin_gui" && (has("gui_running") || (&t_Co > 2))
+		colorscheme torte   " Theme
+	else
+		colorscheme default " Theme
+	endif
 endif
 
 " Select font
-if has('gui_running') && !exists('g:loaded_vimrc')
+if !exists('g:loaded_vimrc')
 	"set guifont=Lucida_Console:h11
 	set guifont=Monospace\ 9
 endif

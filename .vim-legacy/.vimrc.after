@@ -667,7 +667,7 @@ function! s:ToggleWndMax()
 endfunction
 
 " Key maps
-nnoremap <localleader>w     :call <SID>ToggleWndMax()<CR>
+nnoremap <localleader>X     :call <SID>ToggleWndMax()<CR>
 nnoremap <localleader>x     :call <SID>ZoomWnd()<CR>
 
 
