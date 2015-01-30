@@ -38,14 +38,16 @@ alias scid='svn ci -m "Development commit $(svn-date)"'
 
 # Build a unique backup directory for this repo
 svn-bckdir() {
-  DIR="$(readlink -m "$(svn-root)/${1:-.svnbackup}/$(basename $(svn-repo))$(svn-branch)${2:+_$2}")"
+  DIR="$(readlink -m "$(svn-root)/${1:-.svnbackup}/$(basename "$(svn-repo)")$(svn-branch)${2:+_$2}")"
   mkdir -p "${DIR}"
   echo "${DIR}"
 }
 
 # Build a backup filename for this repo
 svn-bckname() {
-  echo "${1:+$1_}$(basename $(svn-repo))_$(basename $(svn-url))${2:+_$2}"
+  #echo "${1:+$1_}$(basename "$(svn-repo)")_$(basename "$(svn-url)")${2:+_$2}"
+  #echo "${1:+$1_}$(basename "$(svn-repo)")_$(basename "$(svn-url)")_$(basename "$PWD")${2:+_$2}"
+  echo "${1:+$1_}$(basename "$PWD")${2:+_$2}"
 }
 
 # Retrieve date

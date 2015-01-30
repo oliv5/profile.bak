@@ -61,7 +61,7 @@ mem-inst() {
 }
 
 swap-inst() {
-	top -d 0.5 -b -n2 | grep "Swap:" | tail -n 1 | awk '{print ($4*100/$2)}'
+	top -d 0.5 -b -n2 | grep "Swap:" | tail -n 1 | awk '{print ($5*100/$3)}'
 }
 
 cpu-top() {
