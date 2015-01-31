@@ -84,7 +84,7 @@ kill-mem-top() {
 
 mem-ps() {
 	while read command percent rss; do
-		if [[ "${command}" != "COMMAND" ]]; then 
+		if [[ "${command}" != "COMMAND" ]]; then
 			rss="$(bc <<< "scale=2;${rss}/1024")"
 		fi
 		printf "%-26s%-8s%s\n" "${command}" "${percent}" "${rss}"
@@ -148,7 +148,7 @@ _notify-proc() {
 	TRIGGER="${1:?No event to monitor}"
 	FILE="${2:?No dir/file to monitor}"
 	SCRIPT="${3:?No action to execute} ${@:4}"
-	
+
 	# Start child shell process, open pipes
 	# Kill inotifywait when this process is killed
 	if [ ${BASH_VERSION%%[^0-9]*} -ge 4 ]; then
@@ -156,7 +156,7 @@ _notify-proc() {
 			coproc INOTIFY {
 				inotifywait -q -m -e $TRIGGER \"$FILE\" &
 				trap \"kill $!\" 1 2 3 6 15
-				wait 
+				wait
 			}"
 	else
 		echo "This bash version \"${BASH_VERSION%%[^0-9.]*}\" does not support coproc"
@@ -170,7 +170,7 @@ _notify-proc() {
 		#echo "Event=$TRIGGER dir=$DIR file=$FILE exec=$SCRIPT"
 		eval $SCRIPT
 	done
-	
+
 	# Kill the coproc child process
 	kill $INOTIFY_PID 2>/dev/null
 }
@@ -215,4 +215,18 @@ bell-off() {
 	xset -b
 	# In console
 	setterm -blength 0
+}
+
+# Shell-mutex with pidfile
+# https://jdimpson.livejournal.com/5685.html
+mutex-flock() {
+	# Open output 200 to the pid file
+	PIDFILE="${1:-/var/run}/$(basename "${0%.*}").pid"
+	exec 200>"$PIDFILE" || return 1
+	# Lock or die
+	flock -n 200 || return 1
+	# Store the pid
+	echo $$ 1>&200
+	echo "$PIDFILE"
+	return 0
 }
