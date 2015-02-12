@@ -74,42 +74,13 @@ git-stash-apply() {
   git stash apply stash@{${1:-0}}
 }
 
+# Aliases using stashes
+alias git-export='git-stash-save'
+alias git-import='git-stash-apply'
+alias git-suspend='git-stash-push'
+alias git-resume='git-stash-pop'
+
 ########################################
-# Export a CL
-git-export() {
-  git diff --name-only ${1:-HEAD} "${@:2}" | xargs --no-run-if-empty 7z a ${OPTS_7Z} "$(git-root)/.gitbackup/export_$(date +%s).7z"
-  #git diff-tree -r --no-commit-id --name-only --diff-filter=ACMRT ${1:-HEAD} | xargs tar -rf mytarfile.tar
-}
-
-# Import a CL
-git-import() {
-  git-exists || return
-  # Extract with full path
-  7z x "${1:?Please specify the imported archive. Abort...}" -o"$(git-root)"
-}
-
-# Suspend a CL
-git-suspend() {
-  if git-export "$@"; then
-    git reset --hard ${1:-HEAD} "${@:2}"
-  fi
-}
-
-# Resume a CL
-git-resume() {
-  git-exists || return
-  # Look for modified repo
-  if [ -z "$GIT_YES" -a git-modified ]; then
-    echo -n "Your repository has local changes, proceed anyway? (y/n): "
-    read ANSWER
-    if [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ]; then
-      return
-    fi
-  fi
-  # Import CL
-  git-import "$1"
-}
-
 # Hard revert to a given CL or revert a file
 git-revert() {
   if [ -f "$1" -o -f "$2" ]; then
