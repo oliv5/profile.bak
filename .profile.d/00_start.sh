@@ -21,13 +21,6 @@ lang_en() {
 }
 
 ################################
-# Die function
-die() {
-  printf '%s%s\n' "${3:+(line $3) }" "${1:-Unknown error. abort...}"
-  [[ $- = *i* ]] && return ${2:-1} || exit ${2:-1}
-}
-
-################################
 # List user functions
 fct-ls() {
   declare -F | cut -d" " -f3 | egrep -v "^_"

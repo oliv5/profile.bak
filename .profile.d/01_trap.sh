@@ -69,6 +69,7 @@ trap-map() {
   trap 'die "Error handler:" 1 ${LINENO}' ${@:-1 15} ERR
 }
 
+######################################
 # Call stack
 print-callstack() {
   # skipping i=0 as this is print_call_trace itself
@@ -78,3 +79,24 @@ print-callstack() {
   done
 }
 
+# Call stack
+print-callstack2() {
+  local frame=0
+  while caller $frame; do
+    ((frame++));
+  done
+}
+
+################################
+# warn function
+warn() {
+  local message="${1:-unspecified error. abort..}"
+  echo "${BASH_SOURCE[1]}: line ${BASH_LINENO[0]}: ${FUNCNAME[1]}: $message." >&2
+}
+
+# Die function
+# Cannot be used from within a function: it will not return from it
+die() {
+  warn "$1"
+  [[ $- = *i* ]] && return ${2:-1} || exit ${2:-1}
+}
