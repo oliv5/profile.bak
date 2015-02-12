@@ -8,7 +8,7 @@ alias salias='alias | grep -re " s..\?="'
 
 # Status aliases
 alias st='svn st | grep . | sort'
-alias ss='st | grep -E "^(A|\~|D|M|R|C|\!|---)"'
+alias ss='st | grep -E "^(A|\~|D|M|R|C|\!|---| M)"'
 alias sa='st | grep -E "^(A|---)"'
 alias sc='st | grep -E "^(C|---|      C)"'
 alias sn='st | grep -E "^(\?|\~|---)"'
@@ -45,9 +45,9 @@ svn-bckdir() {
 
 # Build a backup filename for this repo
 svn-bckname() {
-  #echo "${1:+$1_}$(basename "$(svn-repo)")_$(basename "$(svn-url)")${2:+_$2}"
-  #echo "${1:+$1_}$(basename "$(svn-repo)")_$(basename "$(svn-url)")_$(basename "$PWD")${2:+_$2}"
-  echo "${1:+$1_}$(basename "$PWD")${2:+_$2}"
+  #echo "${1:+$1__}$(basename "$(svn-repo)")__$(basename "$(svn-url)")${2:+__$2}"
+  #echo "${1:+$1__}$(basename "$(svn-repo)")__$(basename "$(svn-url)")__$(basename "$PWD")${2:+__$2}"
+  echo "${1:+$1__}$(basename "$PWD")${2:+__$2}"
 }
 
 # Retrieve date
