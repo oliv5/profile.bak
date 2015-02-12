@@ -31,9 +31,21 @@ alias gia='git-ignore-add'
 alias gan='git add $(git ls-files -o --exclude-standard)'
 alias gau='git add $(git ls-files -o)'
 
+########################################
 # Meld called by git
 git-meld() {
   meld "$2" "$5"
+}
+
+########################################
+# Get git repo root directory
+git-root() {
+  git rev-parse --show-toplevel
+}
+
+# Check commit existenz
+git-exists() {
+  git rev-parse --verify "${1:-HEAD}" 2>&1 >/dev/null
 }
 
 # Check if a repo has been modified
@@ -41,6 +53,7 @@ git-modified() {
   ! git diff-index --quiet HEAD --
 }
 
+########################################
 # Push changes onto stash, revert changes
 git-stash-push() {
   git stash save "stash-$(date +%Y%m%d-%H%M)${1:+_$1}"
@@ -61,16 +74,18 @@ git-stash-apply() {
   git stash apply stash@{${1:-0}}
 }
 
+########################################
 # Export a CL
 git-export() {
-  git diff --name-only ${1:-HEAD} "${@:2}" | xargs --no-run-if-empty 7z a ${OPTS_7Z} "${GIT_ROOT:-.}/.gitbackup/export_$(date +%s).7z"
+  git diff --name-only ${1:-HEAD} "${@:2}" | xargs --no-run-if-empty 7z a ${OPTS_7Z} "$(git-root)/.gitbackup/export_$(date +%s).7z"
   #git diff-tree -r --no-commit-id --name-only --diff-filter=ACMRT ${1:-HEAD} | xargs tar -rf mytarfile.tar
 }
 
 # Import a CL
 git-import() {
+  git-exists || return
   # Extract with full path
-  7z x "${1:?Please specify the imported archive. Abort...}" -o"${GIT_ROOT:-.}"
+  7z x "${1:?Please specify the imported archive. Abort...}" -o"$(git-root)"
 }
 
 # Suspend a CL
@@ -82,6 +97,7 @@ git-suspend() {
 
 # Resume a CL
 git-resume() {
+  git-exists || return
   # Look for modified repo
   if [ -z "$GIT_YES" -a git-modified ]; then
     echo -n "Your repository has local changes, proceed anyway? (y/n): "
@@ -120,14 +136,10 @@ git-clean() {
   git clean "$@"
 }
 
+########################################
 # List files
 git-ls() {
   git ls-tree -r ${1:-master} --name-only ${2:+| grep -F "$2"}
-}
-
-# Check commit existenz
-git-exists() {
-  git rev-parse --verify "${1:-HEAD}" 2>/dev/null
 }
 
 # Amend author/committer names & emails
