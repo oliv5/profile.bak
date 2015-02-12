@@ -183,26 +183,6 @@ _notify-file() {
 	_notify-proc $1 "$(dirname "$2")" 'if [ "$(readlink -f "$DIR$FILE")" = "$(readlink -f "'$2'")" ]; then '${3:?No action to execute} ${@:4}'; fi'
 }
 
-# NFS unmount
-alias nfs-umountall='umount -a -t nfs'
-nfs-umount() {
-	sudo sh -c "
-		ifconfig eth0:nfstmp ${2:?NFS IP not specified...} netmask 255.255.255.255
-		umount -f -l \"${1:?NFS mount point not specified...}\"
-		ifconfig eth0:nfstmp down
-	"
-}
-
-# NFS remount
-nfs-remount() {
-	sudo sh -c "
-		ifconfig eth0:fakenfs ${2:?NFS IP not specified...} netmask 255.255.255.255
-		umount -f -l \"${1:?NFS mount point not specified...}\"
-		ifconfig eth0:fakenfs down
-		mount \"$1\"
-	"
-}
-
 # Fstab to autofs conversion
 fstab2autofs() {
 	awk 'NF && substr($1,0,1)!="#" {print $2 "\t-fstype="$3 "," $4 "\t" $1}' "$@"

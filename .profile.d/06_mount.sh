@@ -21,3 +21,23 @@ mount-ecryptfs() {
 mount-iso() {
   sudo mount -o loop -t iso9660 "$@"
 }
+
+# NFS unmount
+alias nfs-umountall='umount -a -t nfs'
+nfs-umount() {
+	sudo sh -c "
+		ifconfig eth0:nfstmp ${2:?NFS IP not specified...} netmask 255.255.255.255
+		umount -f -l \"${1:?NFS mount point not specified...}\"
+		ifconfig eth0:nfstmp down
+	"
+}
+
+# NFS remount
+nfs-remount() {
+	sudo sh -c "
+		ifconfig eth0:fakenfs ${2:?NFS IP not specified...} netmask 255.255.255.255
+		umount -f -l \"${1:?NFS mount point not specified...}\"
+		ifconfig eth0:fakenfs down
+		mount \"$1\"
+	"
+}
