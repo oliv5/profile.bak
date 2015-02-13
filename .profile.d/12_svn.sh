@@ -21,7 +21,7 @@ alias snl='sn | cut -c 9-'
 alias sml='sm | cut -c 9-'
 alias sdl='sd | cut -c 9-'
 alias stl='st | cut -c 9-'
-alias sst='ss | cut -c 9- | xargs touch'
+alias sst='svn-st "^(A|\~|D|M|R|C|\!|---| M)" | xargs touch'
 # ls aliases
 alias sls='svn ls --depth infinity'
 # diff aliases
@@ -80,9 +80,9 @@ svn-rev() {
   svn info "$@" | grep "Revision:" | grep -oh '[0-9]\+'
 }
 
-# Get status file list
+# Get status file list, surrounded by quotes
 svn-st() {
-  svn st "${@:2}" | grep -E "${1:-^[^ ]}" | cut -c 9-
+  svn st "${@:2}" | awk '/'"${1:-^[^ ]}"'/ {print "\""substr($0,9)"\""}'
 }
 
 # Extract SVN revisions from string rev0:rev1
@@ -219,7 +219,7 @@ svn-export() {
       RESULT=$?
     else
       # Export changes between the 2 revisions
-      svn diff --summarize -r ${REV1}:${REV2} $FILES | grep -vE "^ " | awk '{ print $2 }' | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
+      svn diff --summarize -r ${REV1}:${REV2} $FILES | awk '/^[^ ]/ {print "\""$2"\""}' | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
       RESULT=$?
     fi
   else
@@ -311,17 +311,15 @@ svn-history() {
   }
 }
 
-# Show user commit
-svn-loguser() {
-  svn log | sed -n "/${1:-$USER}/,/-----$/ p"
-}
-
 # Show logs in a range of revisions (-r and -c allowed)
 svn-log() {
   svn log --verbose ${2:+-r $1:}${2:-${1:+-c $1}} ${@:3}
 }
 svn-shortlog() {
-  svn-log $@ | grep -E "^[^ |\.]"
+  svn-log ${2:+-r $1:}${2:-${1:+-c $1}} ${@:3} | grep -E "^[^ |\.]"
+}
+svn-userlog() {
+  svn-log ${@:2} | sed -n "/${1:-$USER}/,/-----$/ p"
 }
 
 # Display content of a file (only -r rev allowed)
