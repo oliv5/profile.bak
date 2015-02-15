@@ -14,7 +14,7 @@
 [ -z "$LOGNAME" ] && export LOGNAME="$USER"
 [ -z "$HOSTNAME" ] && export HOSTNAME="$(/bin/hostname)"
 [ -z "$DOMAIN" ] && export DOMAIN="$(/bin/hostname -d)"
-[ -z "$DISPLAY" ] && export DISPLAY=":0.0"
+[ -z "$DISPLAY" ] && export DISPLAY=":0"
 
 # Set load flag
 export ENV_CNT=$(expr ${ENV_CNT:-0} + 1)
