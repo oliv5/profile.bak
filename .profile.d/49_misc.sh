@@ -1,8 +1,6 @@
 #!/bin/sh
 
-# Prevent Ctrl-D exit session
-export IGNOREEOF=1
-
+################################
 # Use vim as editor
 [ -z "$EDITOR" ] && export EDITOR="$(which vim)"
 [ -z "$VISUAL" ] && export VISUAL="$(which vim)"
@@ -10,12 +8,41 @@ export IGNOREEOF=1
 # Pagers
 [ -z "$PAGER" ] && export PAGER="less -s"
 
-# History
-export HISTSIZE=5000
-export HISTFILESIZE=5000
-# Avoid duplicates in history
-export HISTIGNORE='&:[ ]*'
+################################
+# Language selection functions
+lang-fr() {
+  export LANGUAGE="fr:en"
+  export LC_ALL="fr_FR.UTF-8"
+}
+lang-en() {
+  unset LANGUAGE
+  export LC_ALL="en_US.UTF-8"
+}
 
+################################
+# Cmd exist test
+cmd-exists() {
+  command -v ${1} >/dev/null
+}
+
+# Cmd unset
+cmd-unset() {
+  unalias $* 2>/dev/null
+  unset -f $* 2>/dev/null
+}
+
+# Remove some aliases/fct shortcuts
+cmd-unset which grep find
+
+################################
+# Start ssh-agent when not already running
+pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
+
+################################
+# Reload ~/.inputrc
+bind -f ~/.inputrc
+
+################################
 # Alias ls
 alias l='ls -CF'
 alias la='ls -A'
