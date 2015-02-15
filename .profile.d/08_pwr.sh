@@ -1,7 +1,8 @@
 #!/bin/sh
 
 shutdown() {
-  sudo $(which shutdown) -h -P ${1:-now} ${@:2}
+  local WHEN="${1:-now}"; shift
+  sudo $(which shutdown) -h -P "$WHEN" "$@"
 }
 
 poweroff() {
@@ -9,17 +10,18 @@ poweroff() {
 }
 
 reboot() {
-  sudo $(which shutdown) -r ${1:-now} ${@:2}
+  local WHEN="${1:-now}"; shift
+  sudo $(which shutdown) -r "$WHEN" "$@"
 }
 
 hardreboot() {
-  sudo $(which reboot) -fv ${@}
+  sudo $(which reboot) -fv "$@"
 }
 
 suspend() {
-  sudo pm-suspend ${@}
+  sudo pm-suspend "$@"
 }
 
 hibernate() {
-  sudo pm-hibernate ${@}
+  sudo pm-hibernate "$@"
 }
