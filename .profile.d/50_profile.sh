@@ -16,4 +16,3 @@ for i in $HOME/.profile.local.d/*.sh ; do
     . "$i"
   fi
 done
-export ENV_PROFILE_LOCAL_D_DONE=$((ENV_CNT=ENV_CNT+1))

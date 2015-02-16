@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# Set load flag
+export ENV_PROFILERC=$((ENV_CNT=ENV_CNT+1))
+
+# Load .profile when not already done
+if [ -z "$ENV_PROFILE" -a -r "$HOME/.profile" ]; then
+  . "$HOME/.profile"
+fi
+
+# Load profile scripts
+export ENV_PROFILE_D=$((ENV_CNT=ENV_CNT+1))
+for i in "$HOME/.profile.d/"*.sh ; do
+  if [ -x "$i" ]; then
+    . "$i"
+  fi
+done
+
+# Cleanup path
+path-cleanup
+
+# Define profile alias
+alias profile='. "$HOME/.profilerc"'

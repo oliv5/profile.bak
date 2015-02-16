@@ -120,13 +120,7 @@ fi
 # Set load flag
 export ENV_BASHRC=$((ENV_CNT=ENV_CNT+1))
 
-# Load .profile when not already done
-if [ -z "$ENV_PROFILE" -a -f "$HOME/.profile" ]; then
-  . "$HOME/.profile"
-fi
-
-# Load user profile when not already done
-if [ -z "$ENV_PROFILE_D" ]; then
-  unalias profile 2>/dev/null
-  eval profile
+# Bootstrap user profile
+if [ -r "$HOME/.profilerc" ]; then
+  . "$HOME/.profilerc"
 fi
