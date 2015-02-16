@@ -17,5 +17,20 @@
 [ -z "$DISPLAY" ] && export DISPLAY=":0"
 
 # Set load flag
-export ENV_CNT=$(expr ${ENV_CNT:-0} + 1)
-export ENV_PROFILE=$ENV_CNT
+export ENV_PROFILE=$((ENV_CNT=ENV_CNT+1))
+
+# User profile
+profile() {
+  # Set load flag
+  export ENV_PROFILE_D=$((ENV_CNT=ENV_CNT+1))
+  # Load profile scripts
+  for i in "$HOME/.profile.d/"*.sh ; do
+    if [ -x "$i" ]; then
+      . "$i"
+    fi
+  done
+  # Cleanup path
+  path-cleanup
+  # Set load flag
+  export ENV_PROFILE_D_DONE=$((ENV_CNT=ENV_CNT+1))
+}

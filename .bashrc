@@ -118,43 +118,15 @@ fi
 ######################################
 
 # Set load flag
-export ENV_CNT=$(expr ${ENV_CNT:-0} + 1)
-export ENV_BASHRC=$ENV_CNT
+export ENV_BASHRC=$((ENV_CNT=ENV_CNT+1))
 
 # Load .profile when not already done
 if [ -z "$ENV_PROFILE" -a -f "$HOME/.profile" ]; then
   . "$HOME/.profile"
 fi
 
-# Prepend to path
-unalias path-prepend 2>/dev/null
-path-prepend() {
-  for DIR in "$@"; do
-    if ! [[ "$PATH" =~ "${DIR}" ]] && [[ -d "$DIR" ]]; then
-      export PATH="${DIR}${PATH:+:$PATH}"
-    fi
-  done
-}
-eval path-prepend "$HOME/bin" "$HOME/bin/profile"
-  
-# Append to path
-unalias path-append 2>/dev/null
-path-append() {
-  for DIR in "$@"; do
-    if ! [[ "$PATH" =~ "${DIR}" ]] && [[ -d "$DIR" ]]; then
-      export PATH="${PATH:+$PATH:}${DIR}"
-    fi
-  done
-}
-eval path-append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
-
-# Load user profile
-unalias profile 2>/dev/null
-profile() {
-  for i in $HOME/.profile.d/*.sh ; do
-    if [ -x "$i" ]; then
-      . "$i"
-    fi
-  done
-}
-eval profile
+# Load user profile when not already done
+if [ -z "$ENV_PROFILE_D" ]; then
+  unalias profile 2>/dev/null
+  eval profile
+fi
