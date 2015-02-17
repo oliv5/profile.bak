@@ -84,9 +84,10 @@ mkids() {
   SRC="$(eval readlink -f ${1:-$PWD})"
   DST="$(eval readlink -f ${2:-$PWD})"
   # build db
-  pushd "$SRC" >/dev/null
+  _PWD="$PWD"
+  cd "$SRC"
   mkid -o "$DST/ID"
-  popd >/dev/null
+  cd "$_PWD"
 }
 
 # Make tags and cscope db
@@ -129,7 +130,7 @@ mkalltags() {
   for TAGPATH in $(find -L "$(readlink -m "${1:-$PWD}")" -maxdepth ${2:-5} -type f -name "*.path" 2>/dev/null); do
     echo "** Processing file $TAGPATH"
     set -x
-    builtin cd "$(dirname $TAGPATH)"
+    cd "$(dirname $TAGPATH)"
     set +x
     pwd
     TAGNAME="$(basename $TAGPATH)"
@@ -155,7 +156,7 @@ mkalltags() {
         mkids "$SRC" .
       done
     fi
-    echo -e "** Done.\n"
+    echo "** Done."
   done
-  builtin cd "$_PWD"
+  cd "$_PWD"
 }

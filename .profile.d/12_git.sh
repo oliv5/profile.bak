@@ -86,13 +86,15 @@ git-revert() {
   if [ -f "$1" -o -f "$2" ]; then
     git checkout -- "$@"
   else
-    git reset --hard ${1:-HEAD} "${@:2}"
+    REV="${1:-HEAD}"; shift; ARGS="$@"
+    git reset --hard "$REV" "$ARGS"
   fi
 }
 
 # Soft revert to a given CL, won't change modified files
 git-rollback() {
-  git reset ${1:-HEAD} "${@:2}"
+  REV="${1:-HEAD}"; shift; ARGS="$@"
+  git reset "$REV" "$ARGS"
 }
 
 # Clean repo back to given CL
@@ -161,4 +163,12 @@ git-ignore-add() {
 # Git list gitignore
 git-ignore-list() {
   git status -s --ignored 2>/dev/null || git clean -ndX
+}
+
+# Git ignore changes
+git-ignore-changes() {
+  git update-index --assume-unchanged "$@"
+}
+git-noignore-changes() {
+  git update-index --no-assume-unchanged "$@"
 }

@@ -6,14 +6,12 @@
 alias mountiso='mount -o loop -t iso9660'
 
 # To lower
-toLower()
-{
+toLower() {
   echo "${@}" | tr "[:upper:]" "[:lower:]"
 }
 
 # To upper
-toUpper()
-{
+toUpper() {
   echo "${@}" | tr "[:lower:]" "[:upper:]"
 }
 
@@ -23,6 +21,7 @@ mkbak() {
 
 # Get password
 get-passwd() {
+  local PASSWD
   trap "stty echo; trap SIGINT" SIGINT; stty -echo
   read -p "${1:-Password: }" PASSWD; echo
   stty echo; trap SIGINT
@@ -31,29 +30,48 @@ get-passwd() {
 
 #wget mirror website
 wget-mirror() {
-  SITE=${1:?Please specify the URL}
-  DOMAIN=$(sed -E 's;^https?://([^/]*)/.*$;\1;' <<< $SITE)
-  OPTS="${@:2}"
+  local SITE=${1:?Please specify the URL}
+  local DOMAIN=$(echo "$SITE" | sed -E 's;^https?://([^/]*)/.*$;\1;')
+  local OPTS="${@:2}"
   wget $OPTS --recursive -l${LEVEL:-9999} --no-parent --no-directories --no-clobber --domains ${DOMAIN:?Found no domain} --convert-links --html-extension --page-requisites -e robots=off -U mozilla --limit-rate=${LIMITRATE:-200k} --random-wait "$SITE"
 }
 
-# Hex to signed decimal
-hex2int() {
-	#MAX=$(( 1 << ${2:-32} ))
-	#MEAN=$(($(($MAX >> 1)) - 1))
-	let "MAX=1<<${2:-32}"
-	let "MEAN=($MAX >> 1) - 1"
-    RES=$(printf "%d" "$1")
-    (( RES > $MEAN )) && (( RES -= $MAX ))
-    echo $RES
+# Hex to signed 32
+hex2int32() {
+  local MAX=$((1<<${2:-32}))
+  local MEAN=$(($(($MAX>>1))-1))
+  local RES=$(printf "%d" "$1")
+  [ $RES -gt $MEAN ] && RES=$((RES-MAX))
+  echo $RES
+}
+
+# Hex to signed 64
+hex2int64() {
+  local MAX=$((1<<${2:-64}))
+  local MEAN=$(($(($MAX>>1))-1))
+  local RES=$(printf "%d" "$1")
+  [ $RES -gt $MEAN ] && RES=$((RES-MAX))
+  echo $RES
+}
+
+# Hex to unsigned 64
+hex2uint32() {
+  printf "%d" "$1"
+}
+
+# Hex to unsigned 64
+uint2hex() {
+  printf "0x%x" "$1"
 }
 
 # Execute on remote host
 alias exec-rem='exec-remote'
 exec-remote() {
-  CMD="${2:?No command specified} ${@:3}"
-  if [ "${1:?No host specified}" != "$HOSTNAME" ]; then
-	\ssh -X $1 "$CMD"
+  local HOST="${1:?No host specified}"
+  shift
+  local CMD="${@:?No command specified}"
+  if [ "$HOST" != "$HOSTNAME" ]; then
+    ssh -X $HOST "$CMD"
   else
     eval "\\$CMD"
   fi
@@ -61,20 +79,25 @@ exec-remote() {
 
 # Get public external IP
 get-extip() {
-  DNSLOOKUP="ifconfig.me/ip"
+  local DNSLOOKUP="ifconfig.me/ip"
   if command -v curl >/dev/null; then
     curl $DNSLOOKUP
   elif command -v wget >/dev/null; then
     wget -qO- $DNSLOOKUP
   else
-    HOST=${DNSLOOKUP%%/*}
-    URL=${DNSLOOKUP#*/}
+    local HOST="${DNSLOOKUP%%/*}"
+    local URL="${DNSLOOKUP#*/}"
     exec 3</dev/tcp/$HOST/80
-    sed 's/ *//' <<< "
-      GET /$URL HTTP/1.1
-      connection: close
-      host: $HOST
-      " >&3
+    #sed 's/ *//' <<< "
+    #  GET /$URL HTTP/1.1
+    #  connection: close
+    #  host: $HOST
+    #  " >&3
+    echo >&3 << EOL
+GET /$URL HTTP/1.1
+connection: close
+host: $HOST
+EOL
     grep -oE '([0-9]+\.){3}[0-9]+' <&3
   fi
 }
@@ -84,16 +107,16 @@ alias rm-ansi='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'
 
 # Send email using mutt or mail
 send-mail() {
-  DEST="${1:?No email address specified}"
-  SUBJECT="${2:?No subject specified}"
-  CONTENT="${3:?No content specified}"
-  ATTACH="$4"
-  CC="$5"
-  BCC="$6"
+  local DEST="${1:?No email address specified}"
+  local SUBJECT="${2:?No subject specified}"
+  local CONTENT="${3:?No content specified}"
+  local ATTACH="$4"
+  local CC="$5"
+  local BCC="$6"
   if command -v mutt >/dev/null; then
-    echo -e "$CONTENT" | mutt ${ATTACH:+-a "$ATTACH"} ${SUBJECT:+-s "$SUBJECT"} -- ${DEST} && echo "Email sent"
+    echo "$CONTENT" | mutt ${ATTACH:+-a "$ATTACH"} ${SUBJECT:+-s "$SUBJECT"} -- ${DEST} && echo "Email sent"
   elif command -v mail >/dev/null; then
-    echo -e "$CONTENT" | mail ${SUBJECT:+-s "$SUBJECT"} ${DEST} && echo "Email sent"
+    echo "$CONTENT" | mail ${SUBJECT:+-s "$SUBJECT"} ${DEST} && echo "Email sent"
   else
     echo "No mail program found"
     return 1

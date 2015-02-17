@@ -84,8 +84,8 @@ kill-mem-top() {
 
 mem-ps() {
 	while read command percent rss; do
-		if [[ "${command}" != "COMMAND" ]]; then
-			rss="$(bc <<< "scale=2;${rss}/1024")"
+		if [ "${command}" != "COMMAND" ]; then
+			rss="$(echo "scale=2;${rss}/1024" | bc)"
 		fi
 		printf "%-26s%-8s%s\n" "${command}" "${percent}" "${rss}"
 	done < <(ps -A --sort -rss -o comm,pmem,rss | head -n 11)
@@ -135,9 +135,13 @@ alias notify='_notify-file'
 # Pros: file move is captured
 # Cons: may miss event, high system resource consumption on large directories
 _notify-loop() {
+	TRIGGER="${1:?No event to monitor}"
+	FILE="${2:?No dir/file to monitor}"
+	shift 2
+	SCRIPT="${@:?No action to execute}"
 	while true; do
-		inotifywait -qq -e ${1:?Nothing to monitor} "${2:-$PWD}"
-		eval ${3:-true} ${@:4}
+		inotifywait -qq -e "$TRIGGER" "$FILE"
+		eval "$SCRIPT"
 	done
 }
 
@@ -147,7 +151,8 @@ _notify-loop() {
 _notify-proc() {
 	TRIGGER="${1:?No event to monitor}"
 	FILE="${2:?No dir/file to monitor}"
-	SCRIPT="${3:?No action to execute} ${@:4}"
+	shift 2
+	SCRIPT="${@:?No action to execute}"
 
 	# Start child shell process, open pipes
 	# Kill inotifywait when this process is killed
@@ -180,7 +185,11 @@ _notify-proc() {
 # Pros: uses _notify-proc low resource method
 # Cons: it is triggered for every file event of the root directory
 _notify-file() {
-	_notify-proc $1 "$(dirname "$2")" 'if [ "$(readlink -f "$DIR$FILE")" = "$(readlink -f "'$2'")" ]; then '${3:?No action to execute} ${@:4}'; fi'
+	TRIGGER="${1:?No event to monitor}"
+	FILE="${2:?No dir/file to monitor}"
+	shift 2
+	SCRIPT="${@:?No action to execute}"
+	_notify-proc "$TRIGGER" "$(dirname "$FILE")" 'if [ "$(readlink -f "$DIR$FILE")" = "$(readlink -f "'$FILE'")" ]; then '$SCRIPT'; fi'
 }
 
 # Fstab to autofs conversion

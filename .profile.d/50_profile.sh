@@ -1,17 +1,17 @@
 #!/bin/sh
 # Call local profile scripts
-if [ -x ~/.localrc ]; then
+if [ -x "$HOME/.localrc" ]; then
   export ENV_LOCALRC=$((ENV_CNT=ENV_CNT+1))
-  source ~/.localrc
+  . "$HOME/.localrc"
 fi
 
-if [ -x ~/.profile.local ]; then
+if [ -x "$HOME/.profile.local" ]; then
   export ENV_PROFILE_LOCAL=$((ENV_CNT=ENV_CNT+1))
-  source ~/.profile.local
+  . "$HOME/.profile.local"
 fi
 
 export ENV_PROFILE_LOCAL_D=$((ENV_CNT=ENV_CNT+1))
-for i in $HOME/.profile.local.d/*.sh ; do
+for i in "$HOME/.profile.local.d/"*.sh ; do
   if [ -x "$i" ]; then
     . "$i"
   fi
