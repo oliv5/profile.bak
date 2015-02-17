@@ -42,7 +42,8 @@ lib =
 	}
 	vcsh_push() {
 		VCSH_REPO=$(basename $MR_REPO .git)
-		vcsh $VCSH_REPO remote | xargs -l vcsh $VCSH_REPO push
+		vcsh run $VCSH_REPO \
+			git remote | xargs -l -I{} sh -c 'echo -n "Push {} : "; git push {} master'
 	}
 	vcsh_status() {
 		VCSH_REPO=$(basename $MR_REPO .git)
@@ -60,7 +61,7 @@ lib =
 		VCSH_REPO=$(basename $MR_REPO .git)
 		vcsh run $VCSH_REPO gitk
 	}
-	
+
 
 # Include our repositories
 include = cat ${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/*
