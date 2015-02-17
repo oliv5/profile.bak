@@ -17,7 +17,10 @@ screen() {
 
 # Send a command to a running screen
 screen-cmd() {
-  command -p screen -S ${1:?No session specified...} -X stuff "^C\n${@:2}\n"
+  SESSION="${1:?No session specified...}"
+  shift
+  ARGS="$@"
+  command -p screen -S "$SESSION" -X stuff "^C\n${ARGS}\n"
 }
 
 # Set $DISPLAY
