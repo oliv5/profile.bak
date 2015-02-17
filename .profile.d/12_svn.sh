@@ -38,7 +38,7 @@ alias scid='svn ci -m "Development commit $(svn-date)"'
 
 # Build a unique backup directory for this repo
 svn-bckdir() {
-  DIR="$(readlink -m "$(svn-root)/${1:-.svnbackup}/$(basename "$(svn-repo)")$(svn-branch)${2:+_$2}")"
+  local DIR="$(readlink -m "$(svn-root)/${1:-.svnbackup}/$(basename "$(svn-repo)")$(svn-branch)${2:+__$2}")"
   mkdir -p "${DIR}"
   echo "${DIR}"
 }
@@ -47,7 +47,9 @@ svn-bckdir() {
 svn-bckname() {
   #echo "${1:+$1__}$(basename "$(svn-repo)")__$(basename "$(svn-url)")${2:+__$2}"
   #echo "${1:+$1__}$(basename "$(svn-repo)")__$(basename "$(svn-url)")__$(basename "$PWD")${2:+__$2}"
-  echo "${1:+$1__}$(basename "$PWD")${2:+__$2}"
+  #echo "${1:+$1__}$(basename "$PWD")${2:+__$2}"
+  local PREFIX="$1"; local SUFFIX="$2"; local REV1="$3"; local REV2="$4"
+  echo "${PREFIX:+${PREFIX}__}$(basename "$PWD")${REV1:+__r$REV1}${REV2:+-$REV2}__$(svn-date)${SUFFIX:+__$SUFFIX}"
 }
 
 # Retrieve date
@@ -87,16 +89,16 @@ svn-st() {
 
 # Extract SVN revisions from string rev0:rev1
 _svn-getrev() {
-  REV1="${1%%:*}"
-  REV2="${1##*:}"
+  local REV1="${1%%:*}"
+  local REV2="${1##*:}"
   echo "${REV1:-HEAD} ${REV2:-HEAD}"
 }
 _svn-getrev1() {
-  REV1="${1%%:*}"
+  local REV1="${1%%:*}"
   echo "${REV1:-HEAD}"
 }
 _svn-getrev2() {
-  REV2="${1##*:}"
+  local REV2="${1##*:}"
   echo "${REV2:-HEAD}"
 }
 
@@ -109,27 +111,27 @@ svn-merge() {
     for file in "$@"; do
       echo "Processing file ${file}"
       if [ -f ${file}.working ]; then 
-        CNT=$(ls -1 ${file}.*-right.* | wc -l)
+        local CNT=$(ls -1 ${file}.*-right.* | wc -l)
         for LINE in $(seq $CNT); do
-          right="$(ls -1 ${file}.*-right.* | sort | sed -n ${LINE}p)"
-          meld "${right}" "${file}" "${file}.working" 2>/dev/null
+          local right="$(ls -1 ${file}.*-right.* | sort | sed -n ${LINE}p)"
+          local meld "${right}" "${file}" "${file}.working" 2>/dev/null
         done
       else
-        CNT=$(ls -1 ${file}.r* | wc -l)
+        local CNT=$(ls -1 ${file}.r* | wc -l)
         for LINE in $(seq $CNT); do
-          rev="$(ls -1 ${file}.r* | sort | sed -n ${LINE}p)"
-          meld "${rev}" "${file}" "${file}.mine" 2>/dev/null
+          local rev="$(ls -1 ${file}.r* | sort | sed -n ${LINE}p)"
+          local meld "${rev}" "${file}" "${file}.mine" 2>/dev/null
         done
       fi
       echo -n "Mark the conflict as resolved? (y/n): "
-      read ANSWER; [ "$ANSWER" = "y" -o "$ANSWER" = "Y" ] && svn resolved "${file}"
+      local ANSWER; read ANSWER; [ "$ANSWER" = "y" -o "$ANSWER" = "Y" ] && svn resolved "${file}"
     done
   fi
 }
 
 # Create a changelist
 svn-cl() {
-  CL="CL$(svn-date)"
+  local CL="CL$(svn-date)"
   svn cl "$CL" "$@"
 }
 
@@ -156,10 +158,10 @@ svn-clean() {
   # Confirmation
   if [ -z "$SVN_YES" ]; then
     echo -n "Backup unversioned files? (y/n): "
-    read ANSWER
+    local ANSWER; read ANSWER
     if [ "$ANSWER" != "n" -a "$ANSWER" != "N" ]; then
       # Backup
-      svn-st "^(\?|\I)" | xargs --no-run-if-empty 7z a $OPTS_7Z "$(svn-bckdir)/clean_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z"
+      svn-st "^(\?|\I)" | xargs --no-run-if-empty 7z a $OPTS_7Z "$(svn-bckdir)/$(svn-bckname clean "" $(svn-rev)).7z"
       echo
     fi
   fi
@@ -172,7 +174,7 @@ svn-revert() {
   # Check we are in a repository
   svn-exists || return
   # Backup
-  svn-export HEAD HEAD "$(svn-bckdir)/revert_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z"
+  svn-export HEAD HEAD "$(svn-bckdir)/$(svn-bckname revert "" $(svn-rev)).7z"
   # Revert local modifications
   svn revert -R . ${1:+--cl $1} "${@:2}"
 }
@@ -180,12 +182,12 @@ svn-revert() {
 # Rollback to a previous revision, don't change unversionned files
 svn-rollback() {
   # Get target revision number
-  REV1=${1:-PREV}
-  REV2=${2:-HEAD}
+  local REV1=${1:-PREV}
+  local REV2=${2:-HEAD}
   # Check we are in a repository
   svn-exists || return
   # Backup
-  svn-export $REV1 $REV2 "$(svn-bckdir)/rollback_$(svn-bckname)_r${REV1}-${REV2}_$(svn-date).7z"
+  svn-export $REV1 $REV2 "$(svn-bckdir)/$(svn-bckname rollback "" $REV1 $REV2).7z"
   # Rollback (svn merge back)
   svn merge -r $REV1:$REV2 .
 }
@@ -195,36 +197,36 @@ svn-export() {
   # Check we are in a repository
   svn-exists || return
   # Get revisions
-  REV1=${1:-HEAD}
-  REV2=${2:-HEAD}
+  local REV1=${1:-HEAD}
+  local REV2=${2:-HEAD}
   # Get archive path, if not specified
-  ARCHIVE="$3"
+  local ARCHIVE="$3"
   if [ -z "$ARCHIVE" ]; then
     if [ "$REV1" = "HEAD" ]; then
       # Export changes made upon HEAD
-      REV="$(svn-rev)"
-      ARCHIVE="$(svn-bckdir)/export_$(svn-bckname)_r${REV}_$(svn-date).7z"
+      local REV="$(svn-rev)"
+      ARCHIVE="$(svn-bckdir)/$(svn-bckname export "" $REV).7z"
     else
       # Export changes between the 2 revisions
-      ARCHIVE="$(svn-bckdir)/export_$(svn-bckname)_r${REV1}-${REV2}_$(svn-date).7z"
+      ARCHIVE="$(svn-bckdir)/$(svn-bckname export "" $REV1 $REV2).7z"
     fi
   fi
   # Get applicable files
-  FILES="${@:4}"
+  local FILES="${@:4}"
   # Create archive, if not existing already
   if [ ! -f $ARCHIVE ]; then
     if [ "$REV1" = "HEAD" ]; then
       # Export changes made upon HEAD
       svn-st "^(A|M|R|\~|\!)" $FILES | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
-      RESULT=$?
+      local RESULT=$?
     else
       # Export changes between the 2 revisions
       svn diff --summarize -r ${REV1}:${REV2} $FILES | awk '/^[^ ]/ {print "\""$2"\""}' | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
-      RESULT=$?
+      local RESULT=$?
     fi
   else
     echo "File '$ARCHIVE' exists already..."
-    RESULT=1
+    local RESULT=1
   fi
   # cleanup
   return $RESULT
@@ -233,12 +235,12 @@ svn-export() {
 # Import a CL from an archive
 svn-import() {
   # Check parameters
-  ARCHIVE="$1"
+  local ARCHIVE="$1"
   if [ -z "$ARCHIVE" ]; then
     ARCHIVE="$(svn-zip)"
     echo "Last archive available: $ARCHIVE"
     echo -n "Use this archive? (y/n): "
-    read ANSWER
+    local ANSWER; read ANSWER
     if [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ]; then
       echo "No archive selected..."
       return 0
@@ -253,7 +255,7 @@ svn-import() {
 # Suspend a CL
 svn-suspend() {
   # Export & revert if succeed
-  if svn-export HEAD HEAD "$(svn-bckdir)/suspend_$(svn-bckname)_r$(svn-rev)_$(svn-date).7z" "$@"; then
+  if svn-export HEAD HEAD "$(svn-bckdir)/$(svn-bckname suspend "" $(svn-rev)).7z" "$@"; then
     svn revert -R "${@:-.}"
   fi
 }
@@ -263,7 +265,7 @@ svn-resume() {
   # Look for modified repo
   if [ -z "$SVN_YES" -a svn-modified ]; then
     echo -n "Your repository has local changes, proceed anyway? (y/n): "
-    read ANSWER
+    local ANSWER; read ANSWER
     if [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ]; then
       return
     fi
@@ -289,7 +291,7 @@ svn-config() {
 
 # Print the history of a file
 svn-history() {
-  URL="${1}"
+  local URL="${1}"
   #svn log -q $URL | grep -E -e "^r[[:digit:]]+" -o | cut -c2- | sort -rn | {
   svn log -q $URL | awk '/^r[[:digit:]]+/ {print substr($1,2)}' | {
     if [ ! -z "$URL" -a $# -gt 1 ]; then
@@ -341,7 +343,7 @@ svn-diffl() {
 
 # List the archives based on given name
 svn-zipls() {
-  DIR="$1"
+  local DIR="$1"
   if [ ! -e "$DIR" ]; then
     DIR="$(svn-bckdir)"
   fi
@@ -355,7 +357,7 @@ svn-zip() {
 
 # Diff an archive with current repo
 _svn-zipdiff() {
-  ARCHIVE="$2"
+  local ARCHIVE="$2"
   if [ -z "$ARCHIVE" ]; then
     ARCHIVE="$(svn-zip)"
   fi
