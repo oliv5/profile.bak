@@ -1,15 +1,4 @@
 #!/bin/bash
-#[ "${SHELL##*/}" = "bash" ] || return 1
-
-################################
-# Prevent Ctrl-D exit session
-export IGNOREEOF=1
-
-# History
-export HISTSIZE=5000
-export HISTFILESIZE=5000
-export HISTCONTROL=ignoreboth
-export HISTIGNORE='&:[ ]*'	# Avoid duplicates in history
 
 ################################
 # List user functions
@@ -46,5 +35,6 @@ pwd-get() {
 ################################
 # Check bashism in scripts
 bash-checkbashisms() {
-  find "${1:-.}" -name "${2:-*.sh}" -exec sh -c 'checkbashisms {} 2>/dev/null || echo "checkbashisms {}"' \;
+  command -v checkbashisms 2>&1 >/dev/null || die "checkbashisms not found..."
+  find "${1:-.}" -name "${2:-*.sh}" -exec sh -c 'checkbashisms {} 2>/dev/null || ([ $? -ne 2 ] && echo "checkbashisms {}")' \;
 }

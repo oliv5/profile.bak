@@ -1,5 +1,8 @@
 #!/bin/sh
+# Main user profile script
+# Things should be compatible with all shells (dash, bash,...)
 
+################################
 # Set load flag
 export ENV_PROFILERC=$((ENV_CNT=ENV_CNT+1))
 
@@ -16,8 +19,72 @@ for i in "$HOME/.profile.d/"*.sh ; do
   fi
 done
 
+# Load bash scripts when running bash
+if [ ! -z "$BASH_VERSION" ]; then
+  export ENV_BASH_D=$((ENV_CNT=ENV_CNT+1))
+  for i in "$HOME/.profile.d/bash/"*.sh ; do
+    if [ -x "$i" ]; then
+      . "$i"
+    fi
+  done
+fi
+
+################################
 # Cleanup path
 path-cleanup
 
-# Define profile alias
+# Remove some aliases/fct shortcuts
+cmd-unset which grep find
+
+# Start ssh-agent when not already running
+pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
+
+# Reload ~/.inputrc
+bind -f ~/.inputrc
+
+################################
+# Use vim as editor
+[ -z "$EDITOR" ] && export EDITOR="$(which vim)"
+[ -z "$VISUAL" ] && export VISUAL="$(which vim)"
+
+# Pagers
+[ -z "$PAGER" ] && export PAGER="less -s"
+
+################################
+# Alias profile
 alias profile='. "$HOME/.profilerc"'
+
+# Alias ls
+alias l='ls -CF'
+alias la='ls -A'
+alias ll='ls -laF'
+alias lsg='ls | grep'
+
+# Alias cd/back
+alias b='cdb'
+alias f='cdf'
+
+# Gvim
+alias e='gvim'
+alias sse='ss | cut -c 9- | xargs gvim'
+alias gse='gs | grep modified | cut -d : -f 2 | xargs gvim'
+ffe() {
+  ff "$@" | xargs gvim
+}
+
+# Gedit/geany
+g() {
+  eval $(command -v geany || command -v gedit || command -v gvim || false) "$@"
+}
+alias ssg='ss | cut -c 9- | xargs g'
+alias gsg='gs | grep modified | cut -d : -f 2 | xargs g'
+ffg() {
+  ff "$@" | xargs g
+}
+
+# Source insight
+alias s='si'
+
+# Alias misc
+alias hi='history'
+alias mo='mimeopen'

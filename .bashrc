@@ -124,3 +124,12 @@ export ENV_BASHRC=$((ENV_CNT=ENV_CNT+1))
 if [ -r "$HOME/.profilerc" ]; then
   . "$HOME/.profilerc"
 fi
+
+# Prevent Ctrl-D exit session
+export IGNOREEOF=1
+
+# History
+export HISTSIZE=5000
+export HISTFILESIZE=5000
+export HISTCONTROL=ignoreboth
+export HISTIGNORE='&:[ ]*'	# Avoid duplicates in history

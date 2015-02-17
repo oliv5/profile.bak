@@ -1,5 +1,6 @@
 #!/bin/sh
 
+################################
 # Syslog
 alias syslog='sudo tail /var/log/syslog'
 
@@ -96,11 +97,37 @@ alias cpu='cpu-inst'
 alias mem='mem-inst'
 alias swap='swap-inst'
 
+################################
 # Keyboad layout
 alias keyb-list='grep ^[^#] /etc/locale.gen'
 alias keyb-set='setxkbmap -layout'
 alias keyb-setfr='setxkbmap -layout fr'
 
+
+################################
+# Language selection functions
+lang-fr() {
+  export LANGUAGE="fr:en"
+  export LC_ALL="fr_FR.UTF-8"
+}
+lang-en() {
+  unset LANGUAGE
+  export LC_ALL="en_US.UTF-8"
+}
+
+################################
+# Cmd exist test
+cmd-exists() {
+  command -v ${1} >/dev/null
+}
+
+# Cmd unset
+cmd-unset() {
+  unalias $* 2>/dev/null
+  unset -f $* 2>/dev/null
+}
+
+################################
 # Chroot
 mk-chroot(){
 	SRC="/dev/${1:?Please specify the root device}"
@@ -113,6 +140,7 @@ mk-chroot(){
 	chroot "$DST"
 }
 
+################################
 # Make deb package from source
 make-deb() {
 	ARCHIVE="${1:?No input archive specified}"
@@ -123,99 +151,8 @@ make-deb() {
 	fakeroot debian/rules binary
 }
 
-# Install file notifier
-alias write-notify='notify close_write'
-alias read-notify='notify close_read'
-alias rw-notify='notify "close_read,close_write"'
-alias create-notify='notify create'
-alias mv-notify='notify moved_to'
-alias notify='_notify-file'
-
-# Basic notification method with a loop
-# Pros: file move is captured
-# Cons: may miss event, high system resource consumption on large directories
-_notify-loop() {
-	TRIGGER="${1:?No event to monitor}"
-	FILE="${2:?No dir/file to monitor}"
-	shift 2
-	SCRIPT="${@:?No action to execute}"
-	while true; do
-		inotifywait -qq -e "$TRIGGER" "$FILE"
-		eval "$SCRIPT"
-	done
-}
-
-# Main notification method
-# Pros: only a single inotifywait process & set of pipes
-# Cons: does not capture file moves properly
-_notify-proc() {
-	TRIGGER="${1:?No event to monitor}"
-	FILE="${2:?No dir/file to monitor}"
-	shift 2
-	SCRIPT="${@:?No action to execute}"
-
-	# Start child shell process, open pipes
-	# Kill inotifywait when this process is killed
-	if [ ${BASH_VERSION%%[^0-9]*} -ge 4 ]; then
-		eval "
-			coproc INOTIFY {
-				inotifywait -q -m -e $TRIGGER \"$FILE\" &
-				trap \"kill $!\" 1 2 3 6 15
-				wait
-			}"
-	else
-		echo "This bash version \"${BASH_VERSION%%[^0-9.]*}\" does not support coproc"
-	fi
-
-	# Kill the coproc child process when father is killed or interrupted
-	trap "kill $INOTIFY_PID" 0 1 2 3 6 15
-
-	## Loop for each action
-	while IFS=' ' read -ru ${INOTIFY[0]} DIR TRIGGER FILE; do # could use "read 0<&${INOTIFY[0]}"
-		#echo "Event=$TRIGGER dir=$DIR file=$FILE exec=$SCRIPT"
-		eval $SCRIPT
-	done
-
-	# Kill the coproc child process
-	kill $INOTIFY_PID 2>/dev/null
-}
-
-# Main notification method enhencement to support file moves
-# Monitor the root directory, filter events on file names
-# Pros: uses _notify-proc low resource method
-# Cons: it is triggered for every file event of the root directory
-_notify-file() {
-	TRIGGER="${1:?No event to monitor}"
-	FILE="${2:?No dir/file to monitor}"
-	shift 2
-	SCRIPT="${@:?No action to execute}"
-	_notify-proc "$TRIGGER" "$(dirname "$FILE")" 'if [ "$(readlink -f "$DIR$FILE")" = "$(readlink -f "'$FILE'")" ]; then '$SCRIPT'; fi'
-}
-
+################################
 # Fstab to autofs conversion
 fstab2autofs() {
 	awk 'NF && substr($1,0,1)!="#" {print $2 "\t-fstype="$3 "," $4 "\t" $1}' "$@"
-}
-
-# Disable bell
-# https://wiki.archlinux.org/index.php/Disable_PC_speaker_beep
-bell-off() {
-	# In X
-	xset -b
-	# In console
-	setterm -blength 0
-}
-
-# Shell-mutex with pidfile
-# https://jdimpson.livejournal.com/5685.html
-mutex-flock() {
-	# Open output 200 to the pid file
-	PIDFILE="${1:-/var/run}/$(basename "${0%.*}").pid"
-	exec 200>"$PIDFILE" || return 1
-	# Lock or die
-	flock -n 200 || return 1
-	# Store the pid
-	echo $$ 1>&200
-	echo "$PIDFILE"
-	return 0
 }
