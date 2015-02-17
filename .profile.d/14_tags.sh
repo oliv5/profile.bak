@@ -15,11 +15,11 @@ CSCOPE_EXCLUDE="-not -path *.svn* -and -not -path *.git -and -not -path /tmp/"
 mkctags() {
   command -v >/dev/null ctags || return
   # Get directories, remove ~/
-  SRC="$(eval echo ${1:-$PWD})"
-  DST="$(eval echo ${2:-$PWD})"
+  local SRC="$(eval echo ${1:-$PWD})"
+  local DST="$(eval echo ${2:-$PWD})"
   # Get options
-  CTAGS_OPTIONS="$CTAGS_OPTS $3"
-  CTAGS_DB="${DST}/tags"
+  local CTAGS_OPTIONS="$CTAGS_OPTS $3"
+  local CTAGS_DB="${DST}/tags"
   # Build tag file
   ${DBG} $(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}"
 }
@@ -28,10 +28,10 @@ mkctags() {
 scancsdir() {
   command -v >/dev/null cscope || return
   # Get directories
-  SRC="$(eval echo ${1:-$PWD})"
-  DST="$(eval echo ${2:-$PWD})"
+  local SRC="$(eval echo ${1:-$PWD})"
+  local DST="$(eval echo ${2:-$PWD})"
   # Get options
-  CSCOPE_FILES="$DST/cscope.files"
+  local CSCOPE_FILES="$DST/cscope.files"
   # Scan directory
   set -f
   find "$SRC" $CSCOPE_EXCLUDE ${@:3} -regextype posix-egrep -regex "$CSCOPE_REGEX" -type f -printf '"%p"\n' >> "$CSCOPE_FILES"
@@ -42,12 +42,12 @@ scancsdir() {
 mkcscope-1() {
   command -v >/dev/null cscope || return
   # Get directories
-  SRC="$(eval echo ${1:-$PWD})"
-  DST="$(eval echo ${2:-$PWD})"
+  local SRC="$(eval echo ${1:-$PWD})"
+  local DST="$(eval echo ${2:-$PWD})"
   # Get options
-  CSCOPE_OPTIONS="$CSCOPE_OPTS $3"
-  CSCOPE_FILES="$DST/cscope.files"
-  CSCOPE_DB="$DST/cscope.out"
+  local CSCOPE_OPTIONS="$CSCOPE_OPTS $3"
+  local CSCOPE_FILES="$DST/cscope.files"
+  local CSCOPE_DB="$DST/cscope.out"
   # Build file list
   if [ ! -e $CSCOPE_FILES ]; then
     scancsdir "$SRC" "$DST" ${@:4}
@@ -62,11 +62,11 @@ mkcscope-1() {
 mkcscope-2() {
   command -v >/dev/null cscope || return
   # Get directories
-  SRC="$(eval echo ${1:-$PWD})"
-  DST="$(eval echo ${2:-$PWD})"
+  local SRC="$(eval echo ${1:-$PWD})"
+  local DST="$(eval echo ${2:-$PWD})"
   # Get options
-  CSCOPE_OPTIONS="$CSCOPE_OPTS $3"
-  CSCOPE_DB="$DST/cscope.out"
+  local CSCOPE_OPTIONS="$CSCOPE_OPTS $3"
+  local CSCOPE_DB="$DST/cscope.out"
   # Build tag file
   find "$SRC" $CSCOPE_EXCLUDE ${@:4} -regextype posix-egrep -regex "$CSCOPE_REGEX" -type f -printf '"%p"\n' | \
     ${DBG} $(which cscope) $CSCOPE_OPTIONS -i '-' -f "$CSCOPE_DB"
@@ -81,10 +81,10 @@ mkcscope() {
 mkids() {
   command -v >/dev/null mkid || return
   # Get directories
-  SRC="$(eval readlink -f ${1:-$PWD})"
-  DST="$(eval readlink -f ${2:-$PWD})"
+  local SRC="$(eval readlink -f ${1:-$PWD})"
+  local DST="$(eval readlink -f ${2:-$PWD})"
   # build db
-  _PWD="$PWD"
+  local _PWD="$PWD"
   cd "$SRC"
   mkid -o "$DST/ID"
   cd "$_PWD"
@@ -99,22 +99,22 @@ mktags() {
 
 # Clean ctags
 rmctags() {
-  DIR="$(eval echo ${1:-$PWD})"
+  local DIR="$(eval echo ${1:-$PWD})"
   rm -v "${DIR:?No directory specified}/tags" 2>/dev/null
 }
 
 # Clean cscope db
 rmcscope() {
-  DIR="$(eval echo ${1:-$PWD})"
-  FILE="${DIR}/cscope"
+  local DIR="$(eval echo ${1:-$PWD})"
+  local FILE="${DIR}/cscope"
   rm -v "${FILE:?No directory specified}.out"* 2>/dev/null
   rm -v "${FILE:?No directory specified}.files" 2>/dev/null
 }
 
 # Clean id-utils db
 rmids() {
-  DIR="$(eval echo ${1:-$PWD})"
-  FILE="${DIR}/ID"
+  local DIR="$(eval echo ${1:-$PWD})"
+  local FILE="${DIR}/ID"
   rm -v "${FILE:?No directory specified}" 2>/dev/null
 }
 
@@ -126,7 +126,7 @@ rmtags() {
 }
 
 mkalltags() {
-  _PWD="$PWD"
+  local _PWD="$PWD"
   for TAGPATH in $(find -L "$(readlink -m "${1:-$PWD}")" -maxdepth ${2:-5} -type f -name "*.path" 2>/dev/null); do
     echo "** Processing file $TAGPATH"
     set -x

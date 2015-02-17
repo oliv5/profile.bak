@@ -17,8 +17,8 @@ trap-push() {
   shift
   local sigs=$*
   for sig in $sigs; do
-    local stack_name=`trap-stack-name "$sig"`
-    local old_trap=$(trap-get $sig)
+    stack_name=`trap-stack-name "$sig"`
+    old_trap=$(trap-get $sig)
     eval "${stack_name}"'[${#'"${stack_name}"'[@]}]=$old_trap'
     trap "${new_trap}" "$sig"
   done
@@ -27,12 +27,11 @@ trap-push() {
 trap-pop() {
   local sigs=$*
   for sig in $sigs; do
-    local stack_name=`trap-stack-name "$sig"`
-    local count; eval 'count=${#'"${stack_name}"'[@]}'
+    stack_name=`trap-stack-name "$sig"`
+    eval 'count=${#'"${stack_name}"'[@]}'
     [[ $count -lt 1 ]] && return 127
-    local new_trap
-    local ref="${stack_name}"'[${#'"${stack_name}"'[@]}-1]'
-    local cmd='new_trap=${'"$ref}"; eval $cmd
+    ref="${stack_name}"'[${#'"${stack_name}"'[@]}-1]'
+    cmd='new_trap=${'"$ref}"; local new_trap; eval $cmd
     trap "${new_trap}" "$sig"
     eval "unset $ref"
   done

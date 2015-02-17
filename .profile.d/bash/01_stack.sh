@@ -170,6 +170,7 @@ psanity() {
     echo "$@"
     $@
   }
+  local array
   array=(0 1 2 3 4 5 6); echo array; echo ${array[@]}; echo
   array=(0 1 2 3 4 5 6); pexec plen array; echo
   array=(0 1 2 3 4 5 6); pexec pdeln array 0 0; echo ${array[@]}; echo

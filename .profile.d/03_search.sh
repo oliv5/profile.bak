@@ -32,9 +32,9 @@ iggf(){ _fgrep2 -i "${1:?Nothing to do}" "${2:-*}" "${@:3}" | cut -d : -f 1 | un
 
 # Safe search & replace
 _fsed() {
-  SEDOPT="${@:1:$(($#-3))}"
-  IN="${@: -3:1}"; IN="${IN//\//\/}"
-  OUT="${@: -2:1}";  OUT="${OUT//\//\/}"
+  local SEDOPT="${@:1:$(($#-3))}"
+  local IN="${@: -3:1}"; IN="${IN//\//\/}"
+  local OUT="${@: -2:1}";  OUT="${OUT//\//\/}"
   echo "Replace '$IN' by '$OUT' in files '${!#}' (opts $SEDOPT) ?"
   echo "Press enter or Ctrl-C" ; read
   # Sed in place with no output

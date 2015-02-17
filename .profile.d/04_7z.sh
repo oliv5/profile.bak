@@ -32,7 +32,7 @@ export OPTS_7Z="-t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off"
 
 # Extract to tmp dir
 _7zd() {
-  DIR="$1"
+  local DIR="$1"
   if [ ! -d "$1" ]; then
 	  DIR="$(mktemp -d --tmpdir $(basename $1).XXXXXX)"
 	  7z x "$1" -o"$DIR" 1>&2
@@ -42,7 +42,7 @@ _7zd() {
 
 # 7z deflate and diffd
 7zdiffd() {
-  DIR1="$(_7zd "$1")"; shift
+  local DIR1="$(_7zd "$1")"; shift
   for DIR2 in "$@"; do
     DIR2="$(_7zd "$DIR2")"
     diffd "$DIR1" "$DIR2" | grep -v "Only in $DIR1"
@@ -51,7 +51,7 @@ _7zd() {
 
 # 7z deflate and diff
 7zdiff() {
-  DIR1="$(_7zd "$1")"; shift
+  local DIR1="$(_7zd "$1")"; shift
   for DIR2 in "$@"; do
     DIR2=$(_7zd "$DIR2")
     diff -r "$DIR1" "$DIR2" | grep -v "Only in $DIR1"
@@ -60,7 +60,7 @@ _7zd() {
 
 # 7z deflate and meld
 7zdiffm() {
-  DIR1=$(_7zd "$1"); shift
+  local DIR1=$(_7zd "$1"); shift
   for DIR2 in "$@"; do
     DIR2="$(_7zd "$DIR2")"
     DIFFCNT=$(diffd "$DIR1" "$DIR2" | grep -v "Only in $DIR1" | wc -l)

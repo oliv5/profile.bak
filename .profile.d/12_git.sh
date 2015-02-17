@@ -118,21 +118,21 @@ git-ls() {
 # Amend author/committer names & emails
 git-amend-names() {
   # Identify who/what the amend is about
-  AUTHOR_1="${1%%:*}"
-  AUTHOR_2="${1##*:}"
-  AUTHOR_EMAIL_1="${2%%:*}"
-  AUTHOR_EMAIL_2="${2##*:}"
-  COMMITTER_1="${3%%:*}"
-  COMMITTER_2="${3##*:}"
-  COMMITTER_EMAIL_1="${4%%:*}"
-  COMMITTER_EMAIL_2="${4##*:}"
+  local AUTHOR_1="${1%%:*}"
+  local AUTHOR_2="${1##*:}"
+  local AUTHOR_EMAIL_1="${2%%:*}"
+  local AUTHOR_EMAIL_2="${2##*:}"
+  local COMMITTER_1="${3%%:*}"
+  local COMMITTER_2="${3##*:}"
+  local COMMITTER_EMAIL_1="${4%%:*}"
+  local COMMITTER_EMAIL_2="${4##*:}"
   # Display what is going to be done
   echo "Replace author name '$AUTHOR_1' by '$AUTHOR_2'"
   echo "Replace author email '$AUTHOR_EMAIL_1' by '$AUTHOR_EMAIL_2'"
   echo "Replace committer name '$COMMITTER_1' by '$COMMITTER_2'"
   echo "Replace committer email '$COMMITTER_EMAIL_1' by '$COMMITTER_EMAIL_2'"
   # Write the script
-  SCRIPT='
+  local SCRIPT='
     if [ -z "$AUTHOR_1" -o "$GIT_AUTHOR_NAME" = "$AUTHOR_1" ]; then
       if [ -z "$AUTHOR_EMAIL_1" -o "$GIT_AUTHOR_NAME" = "$AUTHOR_EMAIL_1" ]; then
         if [ -z "$COMMITTER_1" -o "$GIT_AUTHOR_NAME" = "$COMMITTER_1" ]; then

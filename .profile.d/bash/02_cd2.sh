@@ -7,7 +7,7 @@ fi
 # Pushd/popd based cd/back functions
 cda { ${ENV_PUSH:-true} || return 0 && builtin cd "$@" && builtin pushd -n "$OLDPWD" >/dev/null 2>&1; }
 cdb { while ! builtin popd >/dev/null 2>&1; do builtin popd -n >/dev/null 2>&1; done && push g_forward_stack "$OLDPWD" && pkeepq g_forward_stack $g_forward_stack_maxsize && ENV_PUSH=false cd .; }
-cdf { pop g_forward_stack DIR >/dev/null 2>&1 && cd "$DIR"; }
+cdf { local DIR; pop g_forward_stack DIR >/dev/null 2>&1 && cd "$DIR"; }
 
 # Replace cd
 cd() { cda "$@"; }

@@ -21,7 +21,9 @@ xrandr-getres() {
 
 # Set screen resolution
 xrandr-setres() {
-  xrandr -s ${1:?No resolution specified, like 1280x1024} ${@:2}
+  local RESOLUTION="${1:?No resolution specified, like 1280x1024}"
+  local ARGS="$@"
+  xrandr -s "$RESOLUTION" "$ARGS"
 }
 
 # Enable display

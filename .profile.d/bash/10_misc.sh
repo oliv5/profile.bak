@@ -8,7 +8,7 @@ fct-ls() {
 
 # Export user functions from script
 fct-export() {
-export -f "$@"
+  export -f "$@"
 }
 
 # Export all user functions

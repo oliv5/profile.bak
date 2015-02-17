@@ -12,8 +12,8 @@ fi
 
 # Stack based cd/back functions
 cda()  { builtin cd "$@" || return $? && test -z "${ENV_PUSH}" && push g_backward_stack "$OLDPWD" && pkeepq g_backward_stack $g_backward_stack_maxsize || true; }
-cdb()  { pop g_backward_stack DIR 2>/dev/null && push g_forward_stack "$PWD" && pkeepq g_forward_stack $g_forward_stack_maxsize && ENV_PUSH=1 cd "$DIR"; }
-cdf()  { pop g_forward_stack DIR 2>/dev/null && push g_backward_stack "$PWD" && pkeepq g_backward_stack $g_backward_stack_maxsize && ENV_PUSH=1 cd "$DIR"; }
+cdb()  { local DIR; pop g_backward_stack DIR 2>/dev/null && push g_forward_stack "$PWD" && pkeepq g_forward_stack $g_forward_stack_maxsize && ENV_PUSH=1 cd "$DIR"; }
+cdf()  { local DIR; pop g_forward_stack DIR 2>/dev/null && push g_backward_stack "$PWD" && pkeepq g_backward_stack $g_backward_stack_maxsize && ENV_PUSH=1 cd "$DIR"; }
 
 # Replace cd
 cd() { cda "$@"; }

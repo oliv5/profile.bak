@@ -61,7 +61,7 @@ typedef() {
 }
 
 def() {
-  REGEX="($REGEX_FUNC)|($REGEX_VAR)|($REGEX_STRUCT)|($REGEX_DEFINE)|($REGEX_TYPEDEF)"
+  local REGEX="($REGEX_FUNC)|($REGEX_VAR)|($REGEX_STRUCT)|($REGEX_DEFINE)|($REGEX_TYPEDEF)"
   ref "${REGEX//\$1/$1}" . -E ${@:2}
 }
 
