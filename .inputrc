@@ -21,6 +21,9 @@ set keymap vi-insert
 "\e[B": history-search-forward
 $endif
 
+# Disable beep
+set bell-style none
+
 ################################
 ## Command binds
 

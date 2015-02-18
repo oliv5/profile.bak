@@ -42,6 +42,10 @@ pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
 # Reload ~/.inputrc
 bind -f ~/.inputrc
 
+# Disable console beep
+xset b off          # From X11 window system
+setterm -blength 0  # From the system console
+
 ################################
 # Use vim as editor
 [ -z "$EDITOR" ] && export EDITOR="$(which vim)"
