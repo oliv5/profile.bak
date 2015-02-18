@@ -2,6 +2,7 @@
 
 # Prepend to path
 path-prepend() {
+  local DIR
   for DIR in "$@"; do
     #if ! [[ "$PATH" =~ "${DIR}" ]] && [[ -d "$DIR" ]]; then
     if [ -d "$DIR" ] && ! (echo "$PATH" | grep "${DIR}" >/dev/null); then
@@ -12,6 +13,7 @@ path-prepend() {
 
 # Append to path
 path-append() {
+  local DIR
   for DIR in "$@"; do
     #if ! [[ "$PATH" =~ "${DIR}" ]] && [[ -d "$DIR" ]]; then
     if [ -d "$DIR" ] && ! (echo "$PATH" | grep "${DIR}" >/dev/null); then

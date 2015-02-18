@@ -127,13 +127,14 @@ rmtags() {
 
 mkalltags() {
   local _PWD="$PWD"
+  local SRC
   for TAGPATH in $(find -L "$(readlink -m "${1:-$PWD}")" -maxdepth ${2:-5} -type f -name "*.path" 2>/dev/null); do
     echo "** Processing file $TAGPATH"
     set -x
     cd "$(dirname $TAGPATH)"
     set +x
     pwd
-    TAGNAME="$(basename $TAGPATH)"
+    local TAGNAME="$(basename $TAGPATH)"
     if [ "$TAGNAME" = "tags.path" -o "$TAGNAME" = "ctags.path" ]; then
       rmctags
       for SRC in $(cat $TAGNAME); do

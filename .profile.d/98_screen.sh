@@ -17,10 +17,8 @@ screen() {
 
 # Send a command to a running screen
 screen-cmd() {
-  SESSION="${1:?No session specified...}"
-  shift
-  ARGS="$@"
-  command -p screen -S "$SESSION" -X stuff "^C\n${ARGS}\n"
+  local SESSION="${1:?No session specified...}"; shift
+  command -p screen -S "$SESSION" -X stuff "^C\n${@}\n"
 }
 
 # Set $DISPLAY

@@ -86,14 +86,14 @@ git-revert() {
   if [ -f "$1" -o -f "$2" ]; then
     git checkout -- "$@"
   else
-    REV="${1:-HEAD}"; shift; ARGS="$@"
+    local REV="${1:-HEAD}"; shift; local ARGS="$@"
     git reset --hard "$REV" "$ARGS"
   fi
 }
 
 # Soft revert to a given CL, won't change modified files
 git-rollback() {
-  REV="${1:-HEAD}"; shift; ARGS="$@"
+  local REV="${1:-HEAD}"; shift; local ARGS="$@"
   git reset "$REV" "$ARGS"
 }
 
@@ -103,7 +103,7 @@ git-clean() {
   # Confirmation
   if [ "$1" != "-y" ]; then
     echo -n "Remove unversioned files? (y/n): "
-    read ANSWER; [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ] && return 0
+    local ANSWER; read ANSWER; [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ] && return 0
   fi
   # Clean repository
   git clean "$@"
