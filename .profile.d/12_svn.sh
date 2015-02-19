@@ -38,9 +38,9 @@ alias scid='svn ci -m "Development commit $(svn-date)"'
 
 # Build a unique backup directory for this repo
 svn-bckdir() {
-  local DIR="$(readlink -m "$(svn-root)/${1:-.svnbackup}/$(basename "$(svn-repo)")$(svn-branch)${2:+__$2}")"
-  mkdir -p "${DIR}"
-  echo "${DIR}"
+  local DIR="$(readlink -m "$(svn-root)/${1:-.svnbackup}/$(basename "$(svn-repo)")$(svn-branch)${2:+__$2}")" 
+  #mkdir -p "${DIR}"
+  echo "${DIR}" | sed -e 's/ /_/g'
 }
 
 # Build a backup filename for this repo
@@ -49,7 +49,7 @@ svn-bckname() {
   #echo "${1:+$1__}$(basename "$(svn-repo)")__$(basename "$(svn-url)")__$(basename "$PWD")${2:+__$2}"
   #echo "${1:+$1__}$(basename "$PWD")${2:+__$2}"
   local PREFIX="$1"; local SUFFIX="$2"; local REV1="$3"; local REV2="$4"
-  echo "${PREFIX:+${PREFIX}__}$(basename "$PWD")${REV1:+__r$REV1}${REV2:+-$REV2}__$(svn-date)${SUFFIX:+__$SUFFIX}"
+  echo "${PREFIX:+${PREFIX}__}$(basename "$PWD")${REV1:+__r$REV1}${REV2:+-$REV2}__$(svn-date)${SUFFIX:+__$SUFFIX}" | sed -e 's/ /_/g'
 }
 
 # Retrieve date
@@ -59,12 +59,12 @@ svn-date() {
 
 # Get svn repository path
 svn-repo() {
-  svn info "$@" | grep "Repository Root:" | grep -oh 'svn.*'
+  svn info "$@" | awk 'NR==3 {print $NF}'
 }
 
 # Get svn url name
 svn-url() {
-  svn info "$@" | grep "URL:" | grep -oh 'svn.*'
+  svn info "$@" | awk 'NR==2 {print $NF}'
 }
 
 # Get path to svn current root
@@ -79,7 +79,7 @@ svn-branch() {
 
 # Get svn repository revision
 svn-rev() {
-  svn info "$@" | grep "Revision:" | grep -oh '[0-9]\+'
+  svn info "$@" | awk 'NR==5 {print $NF}'
 }
 
 # Get status file list, surrounded by quotes
@@ -214,7 +214,7 @@ svn-export() {
   # Get applicable files
   local FILES="${@:4}"
   # Create archive, if not existing already
-  if [ ! -f $ARCHIVE ]; then
+  if [ ! -f "$ARCHIVE" ]; then
     if [ "$REV1" = "HEAD" ]; then
       # Export changes made upon HEAD
       svn-st "^(A|M|R|\~|\!)" $FILES | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
@@ -290,24 +290,38 @@ svn-config() {
 }
 
 # Print the history of a file
+#svn-history() {
+#  local URL="${1}"
+#  svn log -q $URL | grep -E -e "^r[[:digit:]]+" -o | cut -c2- | sort -rn | {
+#    if [ ! -z "$URL" -a $# -gt 1 ]; then
+#      # First revision as full text
+#      echo
+#      read r
+#      svn log -r$r $URL
+#      svn cat -r$r $URL
+#      echo
+#    fi
+#    # Remaining revisions as differences to previous revision
+#    while read r
+#    do
+#      echo
+#      svn log -r$r $URL
+#      svn diff -c$r $URL
+#      echo
+#    done
+#  }
+#}
+
+# Print the history of a file
 svn-history() {
-  local URL="${1}"
-  #svn log -q $URL | grep -E -e "^r[[:digit:]]+" -o | cut -c2- | sort -rn | {
-  svn log -q $URL | awk '/^r[[:digit:]]+/ {print substr($1,2)}' | {
-    if [ ! -z "$URL" -a $# -gt 1 ]; then
-      # First revision as full text
-      echo
-      read r
-      svn log -r$r $URL
-      svn cat -r$r $URL
-      echo
-    fi
-    # Remaining revisions as differences to previous revision
+  local URL="${1}" REV1="${2:-1}" REV2="${3:-$(svn-rev)}"
+  svn log -q "$URL" | awk '/^r/ {REV=substr($1,2); if (REV>='$REV1' && REV<='$REV2') print REV}' | {
+    # Show diffs
     while read r
     do
       echo
-      svn log -r$r $URL
-      svn diff -c$r $URL
+      svn log -r$r "$URL" 2>/dev/null
+      svn diff -c$r "$URL" 2>/dev/null
       echo
     done
   }

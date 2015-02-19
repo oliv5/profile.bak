@@ -123,3 +123,11 @@ send-mail() {
   fi
   return 0
 }
+
+# Convert to libreoffice formats
+conv-soffice() {
+  FORMAT="${1:?No output format specified}"; shift
+  FILES="$@"
+  unoconv -f "$FORMAT" "$FILES" || 
+    soffice --headless --convert-to "$FORMAT" "$FILES"
+}
