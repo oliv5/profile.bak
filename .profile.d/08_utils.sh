@@ -15,8 +15,20 @@ toUpper() {
   echo "${@}" | tr "[:lower:]" "[:upper:]"
 }
 
+# Create file backup
 mkbak() {
   cp "${1:?Please specify input file 1}" "${1}.$(date +%Y%m%d-%H%M%S).bak"
+}
+
+# Ask and expect one of the given answer
+askme() {
+  local ANSWER;
+  read ${1:+-p "$1"} ANSWER
+  shift
+  for ACK in "$@"; do
+    [ "$ANSWER" = "$ACK" ] && return 0
+  done
+  return 1
 }
 
 # Get password

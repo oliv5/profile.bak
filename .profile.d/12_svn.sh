@@ -44,9 +44,6 @@ svn-bckdir() {
 
 # Build a backup filename for this repo
 svn-bckname() {
-  #echo "${1:+$1__}$(basename "$(svn-repo)")__$(basename "$(svn-url)")${2:+__$2}"
-  #echo "${1:+$1__}$(basename "$(svn-repo)")__$(basename "$(svn-url)")__$(basename "$PWD")${2:+__$2}"
-  #echo "${1:+$1__}$(basename "$PWD")${2:+__$2}"
   local PREFIX="$1"; local SUFFIX="$2"; local REV1="$3"; local REV2="$4"
   echo "${PREFIX:+${PREFIX}__}$(basename "$PWD")${REV1:+__r$REV1}${REV2:+-$REV2}__$(svn-date)${SUFFIX:+__$SUFFIX}" | sed -e 's/ /_/g'
 }
@@ -81,9 +78,13 @@ svn-rev() {
   svn info "$@" | awk 'NR==5 {print $NF}'
 }
 
-# Get status file list, surrounded by quotes
+# Get status file list
 svn-st() {
-  svn st "${@:2}" | awk '/'"${1:-^[^ ]}"'/ {print "\""substr($0,9)"\""}'
+  svn st "${@:2}" | awk '/'"${1:-^[^ ]}"'/ {$0=substr($0,9); gsub(/\"/,"\\\"",$0); print "\""$0"\""}'
+}
+svn-stx() {
+  #svn st "${@:2}" | awk '/'"${1:-^[^ ]}"'/ {print substr($0,9)}' | tr '\n' '\0'
+  svn st "${@:2}" | grep -E "${1:-^[^ ]}" | cut -c 9- | tr '\n' '\0'
 }
 
 # Extract SVN revisions from string rev0:rev1
@@ -103,29 +104,34 @@ _svn-getrev2() {
 
 # Merge 3-way
 svn-merge() {
-  # Get args, find files in conflict if none
-  ARGS="$@"
-  if [ -z "$@" ]; then
-    ARGS="$(svn-st '^C')"
-  fi
+#  # Recursive call when no argument is given
+#  if [ $# -eq 0 ]; then
+#    svn-stx '^C' | while IFS="" read -r -d "" FILE ; do
+#      svn-merge "$FILE"
+#    done
+#    return
+#  fi
   # Process each file in conflict
-  for file in "$ARGS"; do
-    echo "Processing file ${file}"
-    if [ -f ${file}.working ]; then 
-      local CNT=$(ls -1 ${file}.*-right.* | wc -l)
+  local FILE
+  for FILE in "${@:-"$(svn-st '^C')"}"; do
+    echo "Processing file ${FILE}"
+    local CNT=0
+    if [ -f ${FILE}.working ]; then 
+      CNT=$(ls -1 ${FILE}.*-right.* | wc -l)
       for LINE in $(seq $CNT); do
-        local right="$(ls -1 ${file}.*-right.* | sort | sed -n ${LINE}p)"
-        local meld "${right}" "${file}" "${file}.working" 2>/dev/null
+        local right="$(ls -1 ${FILE}.*-right.* | sort | sed -n ${LINE}p)"
+        meld "${right}" "${FILE}" "${FILE}.working" 2>/dev/null
       done
     else
-      local CNT=$(ls -1 ${file}.r* | wc -l)
+      CNT=$(ls -1 ${FILE}.r* | wc -l)
       for LINE in $(seq $CNT); do
-        local rev="$(ls -1 ${file}.r* | sort | sed -n ${LINE}p)"
-        local meld "${rev}" "${file}" "${file}.mine" 2>/dev/null
+        local rev="$(ls -1 ${FILE}.r* | sort | sed -n ${LINE}p)"
+        meld "${rev}" "${FILE}" "${FILE}.mine" 2>/dev/null
       done
     fi
-    echo -n "Mark the conflict as resolved? (y/n): "
-    local ANSWER; read ANSWER; [ "$ANSWER" = "y" -o "$ANSWER" = "Y" ] && svn resolved "${file}"
+    if [ $CNT -gt 0 ] && $SVN_YES askme "Mark the conflict as resolved? (y/n): " y Y; then
+      svn resolved "${FILE}"
+    fi
   done
 }
 
@@ -156,16 +162,12 @@ svn-clean() {
   # Check we are in a repository
   svn-exists || return
   # Confirmation
-  if [ -z "$SVN_YES" ]; then
-    echo -n "Backup unversioned files? (y/n): "
-    local ANSWER; read ANSWER
-    if [ "$ANSWER" != "n" -a "$ANSWER" != "N" ]; then
-      # Backup
-      svn-zipst "^(\?|\I)" "$(svn-bckdir)/$(svn-bckname clean "" $(svn-rev)).7z"
-    fi
+  if $SVN_YES ! askme "Backup unversioned files? (y/n): " n N; then
+    # Backup
+    svn-zipst "^(\?|\I)" "$(svn-bckdir)/$(svn-bckname clean "" $(svn-rev)).7z"
   fi
   # Remove files not in SVN
-  svn-st "^(\?|\I)" | xargs --no-run-if-empty rm -Iv
+  svn-stx "^(\?|\I)" | xargs -0 --no-run-if-empty rm -Iv
 }
 
 # Revert modified files, don't change unversionned files
@@ -216,7 +218,7 @@ svn-export() {
   if [ ! -f "$ARCHIVE" ]; then
     if [ "$REV1" = "HEAD" ]; then
       # Export changes made upon HEAD
-      svn-zipst "$ARCHIVE" "^(A|M|R|\~|\!)" "$FILES"
+      svn-zipst "$ARCHIVE" "^(A|M|R|C|\~|\!)" "$FILES"
       local RESULT=$?
     else
       # Export changes between the 2 revisions
@@ -238,9 +240,7 @@ svn-import() {
   if [ -z "$ARCHIVE" ]; then
     ARCHIVE="$(svn-ziplast)"
     echo "Last archive available: $ARCHIVE"
-    echo -n "Use this archive? (y/n): "
-    local ANSWER; read ANSWER
-    if [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ]; then
+    if ! $SVN_YES askme "Use this archive? (y/n): " y Y; then
       echo "No archive selected..."
       return 0
     fi
@@ -262,12 +262,8 @@ svn-suspend() {
 # Resume a CL
 svn-resume() {
   # Look for modified repo
-  if [ -z "$SVN_YES" -a svn-modified ]; then
-    echo -n "Your repository has local changes, proceed anyway? (y/n): "
-    local ANSWER; read ANSWER
-    if [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ]; then
-      return
-    fi
+  if svn-modified && ! $SVN_YES askme "Your repository has local changes, proceed anyway? (y/n): " y Y; then
+    return
   fi
   # Import CL
   svn-import "$1"
@@ -287,29 +283,6 @@ svn-get() {
 svn-config() {
   vi "${HOME}/.subversion/config"
 }
-
-# Print the history of a file
-#svn-history() {
-#  local URL="${1}"
-#  svn log -q $URL | grep -E -e "^r[[:digit:]]+" -o | cut -c2- | sort -rn | {
-#    if [ ! -z "$URL" -a $# -gt 1 ]; then
-#      # First revision as full text
-#      echo
-#      read r
-#      svn log -r$r $URL
-#      svn cat -r$r $URL
-#      echo
-#    fi
-#    # Remaining revisions as differences to previous revision
-#    while read r
-#    do
-#      echo
-#      svn log -r$r $URL
-#      svn diff -c$r $URL
-#      echo
-#    done
-#  }
-#}
 
 # Print the history of a file
 svn-history() {
@@ -347,6 +320,9 @@ svn-cat () {
 svn-diff() {
   svn diff ${2:+-r $1:}${2:-${1:+-c $1}} ${@:3}
 }
+svn-diffx() {
+  svn diff ${2:+-r $1:}${2:-${1:+-c $1}} ${@:3} | tr '\n' '\0'
+}
 svn-diffm() {
   svn-diff ${1:-HEAD} ${2:-PREV} ${@:3} --diff-cmd meld
 }
@@ -356,12 +332,12 @@ svn-diffl() {
 
 # Make an archive based on the file status
 svn-zipst() {
-  svn-st "${2:-^(A|M|R|\~|\!)}" "${3}" | xargs --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${1:?No archive file defined}"
+  svn-stx "${2:-^(A|M|R|\~|\!)}" "${3}" | xargs -0 --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${1:?No archive file defined}"
 }
 
 # Make an archive based on a diff
 svn-zipdiff() {
-  svn diff --summarize -r ${2:-HEAD}:${3:-PREV} "${4}" | awk '/^[^ ]/ {print "\""$2"\""}' | xargs --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${1:?No archive file defined}"
+  svn-diffx "${@:2}" | xargs -0 --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${1:?No archive file defined}"
 }
 
 # List the archives based on given name
