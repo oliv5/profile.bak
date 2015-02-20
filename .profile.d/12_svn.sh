@@ -7,13 +7,13 @@ export SVN_EDITOR=vim
 alias salias='alias | grep -re " s..\?="'
 
 # Status aliases
-alias st='svn st | grep . | sort'
+alias st='svn st | sort'
 alias ss='st | grep -E "^(A|\~|D|M|R|C|\!|---| M)"'
 alias sa='st | grep -E "^(A|---)"'
 alias sc='st | grep -E "^(C|---|      C)"'
 alias sn='st | grep -E "^(\?|\~|---)"'
 alias sm='st | grep -E "^(M|R|---)"'
-alias sd='st | grep -E "^D"'
+alias sd='st | grep -E "^(D|!)"'
 alias ssl='ss | cut -c 9-'
 alias sal='sa | cut -c 9-'
 alias scl='sc | cut -c 9-'
@@ -21,7 +21,6 @@ alias snl='sn | cut -c 9-'
 alias sml='sm | cut -c 9-'
 alias sdl='sd | cut -c 9-'
 alias stl='st | cut -c 9-'
-alias sst='svn-st "^(A|\~|D|M|R|C|\!|---| M)" | xargs touch'
 # ls aliases
 alias sls='svn ls --depth infinity'
 # diff aliases
@@ -104,29 +103,30 @@ _svn-getrev2() {
 
 # Merge 3-way
 svn-merge() {
-  if [ -z "$1" ]; then
-    export -f svn-merge
-    svn-st "^C" | xargs --no-run-if-empty sh -c 'svn-merge "$@"' _
-  else
-    for file in "$@"; do
-      echo "Processing file ${file}"
-      if [ -f ${file}.working ]; then 
-        local CNT=$(ls -1 ${file}.*-right.* | wc -l)
-        for LINE in $(seq $CNT); do
-          local right="$(ls -1 ${file}.*-right.* | sort | sed -n ${LINE}p)"
-          local meld "${right}" "${file}" "${file}.working" 2>/dev/null
-        done
-      else
-        local CNT=$(ls -1 ${file}.r* | wc -l)
-        for LINE in $(seq $CNT); do
-          local rev="$(ls -1 ${file}.r* | sort | sed -n ${LINE}p)"
-          local meld "${rev}" "${file}" "${file}.mine" 2>/dev/null
-        done
-      fi
-      echo -n "Mark the conflict as resolved? (y/n): "
-      local ANSWER; read ANSWER; [ "$ANSWER" = "y" -o "$ANSWER" = "Y" ] && svn resolved "${file}"
-    done
+  # Get args, find files in conflict if none
+  ARGS="$@"
+  if [ -z "$@" ]; then
+    ARGS="$(svn-st '^C')"
   fi
+  # Process each file in conflict
+  for file in "$ARGS"; do
+    echo "Processing file ${file}"
+    if [ -f ${file}.working ]; then 
+      local CNT=$(ls -1 ${file}.*-right.* | wc -l)
+      for LINE in $(seq $CNT); do
+        local right="$(ls -1 ${file}.*-right.* | sort | sed -n ${LINE}p)"
+        local meld "${right}" "${file}" "${file}.working" 2>/dev/null
+      done
+    else
+      local CNT=$(ls -1 ${file}.r* | wc -l)
+      for LINE in $(seq $CNT); do
+        local rev="$(ls -1 ${file}.r* | sort | sed -n ${LINE}p)"
+        local meld "${rev}" "${file}" "${file}.mine" 2>/dev/null
+      done
+    fi
+    echo -n "Mark the conflict as resolved? (y/n): "
+    local ANSWER; read ANSWER; [ "$ANSWER" = "y" -o "$ANSWER" = "Y" ] && svn resolved "${file}"
+  done
 }
 
 # Create a changelist
@@ -148,7 +148,7 @@ svn-exists() {
 # Tells when repo has been modified
 svn-modified() {
   # Avoid ?, X, Performing status on external item at '...'
-  [ $(svn st | grep -E "^[^\?\X\P]" | wc -l) -gt 0 ]
+  [ $(svn-st "^[^\?\X\P]" | wc -l) -gt 0 ]
 }
 
 # Clean repo, remove unversionned files
