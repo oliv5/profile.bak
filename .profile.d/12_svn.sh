@@ -161,12 +161,11 @@ svn-clean() {
     local ANSWER; read ANSWER
     if [ "$ANSWER" != "n" -a "$ANSWER" != "N" ]; then
       # Backup
-      svn-st "^(\?|\I)" | xargs --no-run-if-empty 7z a $OPTS_7Z "$(svn-bckdir)/$(svn-bckname clean "" $(svn-rev)).7z"
-      echo
+      svn-zipst "^(\?|\I)" "$(svn-bckdir)/$(svn-bckname clean "" $(svn-rev)).7z"
     fi
   fi
   # Remove files not in SVN
-  svn-st "^(\?|\I)" | xargs --no-run-if-empty rm -rv
+  svn-st "^(\?|\I)" | xargs --no-run-if-empty rm -Iv
 }
 
 # Revert modified files, don't change unversionned files
@@ -217,11 +216,11 @@ svn-export() {
   if [ ! -f "$ARCHIVE" ]; then
     if [ "$REV1" = "HEAD" ]; then
       # Export changes made upon HEAD
-      svn-st "^(A|M|R|\~|\!)" $FILES | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
+      svn-zipst "$ARCHIVE" "^(A|M|R|\~|\!)" "$FILES"
       local RESULT=$?
     else
       # Export changes between the 2 revisions
-      svn diff --summarize -r ${REV1}:${REV2} $FILES | awk '/^[^ ]/ {print "\""$2"\""}' | xargs --no-run-if-empty 7z a $OPTS_7Z "$ARCHIVE"
+      svn-zipdiff "$ARCHIVE" ${REV1} ${REV2} "$FILES"
       local RESULT=$?
     fi
   else
@@ -237,7 +236,7 @@ svn-import() {
   # Check parameters
   local ARCHIVE="$1"
   if [ -z "$ARCHIVE" ]; then
-    ARCHIVE="$(svn-zip)"
+    ARCHIVE="$(svn-ziplast)"
     echo "Last archive available: $ARCHIVE"
     echo -n "Use this archive? (y/n): "
     local ANSWER; read ANSWER
@@ -355,6 +354,16 @@ svn-diffl() {
   svn-diff ${1:-HEAD} ${2:-PREV} ${@:3} --summarize
 }
 
+# Make an archive based on the file status
+svn-zipst() {
+  svn-st "${2:-^(A|M|R|\~|\!)}" "${3}" | xargs --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${1:?No archive file defined}"
+}
+
+# Make an archive based on a diff
+svn-zipdiff() {
+  svn diff --summarize -r ${2:-HEAD}:${3:-PREV} "${4}" | awk '/^[^ ]/ {print "\""$2"\""}' | xargs --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${1:?No archive file defined}"
+}
+
 # List the archives based on given name
 svn-zipls() {
   local DIR="$1"
@@ -365,20 +374,20 @@ svn-zipls() {
 }
 
 # Returns the last archive found based on given name
-svn-zip() {
+svn-ziplast() {
   svn-zipls "$@" | head -n 1
 }
 
 # Diff an archive with current repo
-_svn-zipdiff() {
+_svn-diffzip() {
   local ARCHIVE="$2"
   if [ -z "$ARCHIVE" ]; then
-    ARCHIVE="$(svn-zip)"
+    ARCHIVE="$(svn-ziplast)"
   fi
   builtin eval "$1" "." "$ARCHIVE"
   #$1 "." "$ARCHIVE"
 }
-alias svn-zipdiff='_svn-zipdiff 7zdiff'
-alias svn-zipdiffc='_svn-zipdiff 7zdiffd 2>/dev/null | wc -l'
-alias svn-zipdiffm='_svn-zipdiff 7zdiffm'
-alias svn-zipdiffd='_svn-zipdiff 7zdiffd'
+alias svn-diffzip='_svn-diffzip 7zdiff'
+alias svn-diffzipc='_svn-diffzip 7zdiffd 2>/dev/null | wc -l'
+alias svn-diffzipm='_svn-diffzip 7zdiffm'
+alias svn-diffzipd='_svn-diffzip 7zdiffd'
