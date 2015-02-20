@@ -12,6 +12,6 @@ getargs(){
 
 # Shift and return the remaining parameters
 shiftargs() {
-	shift ${1:-0}; shift
+	shift $1; shift
 	echo "$@"
 }
