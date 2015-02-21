@@ -13,13 +13,13 @@ alias pg='pgrep -fl'
 alias pgu='pgrep -flu $(id -u $USER)'
 
 pid() {
-  for NAME in "$@"; do
+  for NAME; do
     ps -C "$@" -o pid=
   done
 }
 
 uid() {
-  for NAME in "$@"; do
+  for NAME; do
     ps -C "$@" -o user=
   done
 }
@@ -75,12 +75,12 @@ mem-top() {
 
 kill-cpu-top() {
   local END=$((${1:-1} + 1))
-  ps a --sort -%cpu | awk "NR>1 && NR<=$END {print \$1;}" | xargs kill ${@:2}
+  ps a --sort -%cpu | awk 'NR>1 && NR<=$END {print $1;}' | xargs -r kill ${@:2}
 }
 
 kill-mem-top() {
   local END=$((${1:-1} + 1))
-  ps a --sort -rss | awk "NR>1 && NR<=$END {print \$1;}" | xargs kill ${@:2}
+  ps a --sort -rss | awk 'NR>1 && NR<=$END {print $1;}' | xargs -r kill ${@:2}
 }
 
 mem-ps() {

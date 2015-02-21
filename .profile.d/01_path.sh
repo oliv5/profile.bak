@@ -3,7 +3,7 @@
 # Prepend to path
 path-prepend() {
   local DIR
-  for DIR in "$@"; do
+  for DIR; do
     #if ! [[ "$PATH" =~ "${DIR}" ]] && [[ -d "$DIR" ]]; then
     if [ -d "$DIR" ] && ! (echo "$PATH" | grep "${DIR}" >/dev/null); then
       export PATH="${DIR}${PATH:+:$PATH}"
@@ -14,7 +14,7 @@ path-prepend() {
 # Append to path
 path-append() {
   local DIR
-  for DIR in "$@"; do
+  for DIR; do
     #if ! [[ "$PATH" =~ "${DIR}" ]] && [[ -d "$DIR" ]]; then
     if [ -d "$DIR" ] && ! (echo "$PATH" | grep "${DIR}" >/dev/null); then
       export PATH="${PATH:+$PATH:}${DIR}"

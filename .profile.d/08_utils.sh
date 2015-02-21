@@ -21,11 +21,11 @@ mkbak() {
 }
 
 # Ask and expect one of the given answer
-askme() {
+askuser() {
   local ANSWER;
   read ${1:+-p "$1"} ANSWER
   shift
-  for ACK in "$@"; do
+  for ACK; do
     [ "$ANSWER" = "$ACK" ] && return 0
   done
   return 1
@@ -140,6 +140,6 @@ send-mail() {
 conv-soffice() {
   FORMAT="${1:?No output format specified}"; shift
   FILES="$@"
-  unoconv -f "$FORMAT" "$FILES" || 
+  unoconv -f "$FORMAT" "$FILES" ||
     soffice --headless --convert-to "$FORMAT" "$FILES"
 }

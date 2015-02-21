@@ -37,7 +37,7 @@ alias scid='svn ci -m "Development commit $(svn-date)"'
 
 # Build a unique backup directory for this repo
 svn-bckdir() {
-  local DIR="$(readlink -m "$(svn-root)/${1:-.svnbackup}/$(basename "$(svn-repo)")$(svn-branch)${2:+__$2}")" 
+  local DIR="$(readlink -m "$(svn-root)/${1:-.svnbackup}/$(basename "$(svn-repo)")$(svn-branch)${2:+__$2}")"
   #mkdir -p "${DIR}"
   echo "${DIR}" | sed -e 's/ /_/g'
 }
@@ -80,7 +80,7 @@ svn-rev() {
 
 # Get status file list
 svn-st() {
-  svn st "${@:2}" | awk '/'"${1:-^[^ ]}"'/ {$0=substr($0,9); gsub(/\"/,"\\\"",$0); print "\""$0"\""}'
+  svn st "${@:2}" | awk '/'"${1:-^[^ ]}"'/ {$0=substr($0,9); gsub(/\"/,"\\\"",$0); printf "\"%s\"", $0}'
 }
 svn-stx() {
   #svn st "${@:2}" | awk '/'"${1:-^[^ ]}"'/ {print substr($0,9)}' | tr '\n' '\0'
@@ -113,10 +113,11 @@ svn-merge() {
 #  fi
   # Process each file in conflict
   local FILE
-  for FILE in "${@:-"$(svn-st '^C')"}"; do
+  #for FILE in "${@:-"$(svn-st '^C')"}"; do
+  svn-stx '^C' | while IFS="" read -r -d "" FILE ; do
     echo "Processing file ${FILE}"
     local CNT=0
-    if [ -f ${FILE}.working ]; then 
+    if [ -f ${FILE}.working ]; then
       CNT=$(ls -1 ${FILE}.*-right.* | wc -l)
       for LINE in $(seq $CNT); do
         local right="$(ls -1 ${FILE}.*-right.* | sort | sed -n ${LINE}p)"
@@ -129,7 +130,7 @@ svn-merge() {
         meld "${rev}" "${FILE}" "${FILE}.mine" 2>/dev/null
       done
     fi
-    if [ $CNT -gt 0 ] && $SVN_YES askme "Mark the conflict as resolved? (y/n): " y Y; then
+    if [ $CNT -gt 0 ] && $SVN_YES askuser "Mark the conflict as resolved? (y/n): " y Y; then
       svn resolved "${FILE}"
     fi
   done
@@ -162,7 +163,7 @@ svn-clean() {
   # Check we are in a repository
   svn-exists || return
   # Confirmation
-  if $SVN_YES ! askme "Backup unversioned files? (y/n): " n N; then
+  if $SVN_YES ! askuser "Backup unversioned files? (y/n): " n N; then
     # Backup
     svn-zipst "^(\?|\I)" "$(svn-bckdir)/$(svn-bckname clean "" $(svn-rev)).7z"
   fi
@@ -240,7 +241,7 @@ svn-import() {
   if [ -z "$ARCHIVE" ]; then
     ARCHIVE="$(svn-ziplast)"
     echo "Last archive available: $ARCHIVE"
-    if ! $SVN_YES askme "Use this archive? (y/n): " y Y; then
+    if ! $SVN_YES askuser "Use this archive? (y/n): " y Y; then
       echo "No archive selected..."
       return 0
     fi
@@ -262,7 +263,7 @@ svn-suspend() {
 # Resume a CL
 svn-resume() {
   # Look for modified repo
-  if svn-modified && ! $SVN_YES askme "Your repository has local changes, proceed anyway? (y/n): " y Y; then
+  if svn-modified && ! $SVN_YES askuser "Your repository has local changes, proceed anyway? (y/n): " y Y; then
     return
   fi
   # Import CL
