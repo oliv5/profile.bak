@@ -42,6 +42,11 @@ fct-unalias() {
   done
 }
 
+# Convert fct names with "-" into "_"
+fct-convert() {
+  sed -E 's@^([^\-\(]+)-([^\-\(]+\(\))@\1_\2@' "$@"
+}
+
 ################################
 # Get script directory
 pwd-get() {
