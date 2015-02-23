@@ -24,7 +24,7 @@ padd() {
 # Pack array removing holes
 # Call: pack array
 pack() {
-  eval "$1=(\${$1[@]})"
+  eval "$1=(\"\${$1[@]}\")"
 }
 
 # Delete n elements

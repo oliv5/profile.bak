@@ -1,9 +1,9 @@
 #!/bin/bash
-if [ -z "$g_backward_stack_maxsize" ]; then
-	declare -a g_backward_stack=()
-	export g_backward_stack_maxsize=10
-	declare -a g_forward_stack=()
-	export g_forward_stack_maxsize=10
+if [ -z "$_cd_sback_maxsize" ]; then
+	declare -a _cd_sback=()
+	export _cd_sback_maxsize=10
+	declare -a _cd_sforw=()
+	export _cd_sforw_maxsize=10
 fi
 
 # First implementation cd/back functions
@@ -11,15 +11,18 @@ fi
 #function cdb_old() { cd "$PWD_0"; }
 
 # Stack based cd/back functions
-cda()  { builtin cd "$@" || return $? && test -z "${ENV_PUSH}" && push g_backward_stack "$OLDPWD" && pkeepq g_backward_stack $g_backward_stack_maxsize || true; }
-cdb()  { local DIR; pop g_backward_stack DIR 2>/dev/null && push g_forward_stack "$PWD" && pkeepq g_forward_stack $g_forward_stack_maxsize && ENV_PUSH=1 cd "$DIR"; }
-cdf()  { local DIR; pop g_forward_stack DIR 2>/dev/null && push g_backward_stack "$PWD" && pkeepq g_backward_stack $g_backward_stack_maxsize && ENV_PUSH=1 cd "$DIR"; }
+cda()  { builtin cd "$@" && { test -z "${_CD_PUSH}" && push _cd_sback "$OLDPWD" && pkeepq _cd_sback $_cd_sback_maxsize; }; }
+cdb()  { local DIR; pop _cd_sback DIR 2>/dev/null && push _cd_sforw "$PWD" && pkeepq _cd_sforw $_cd_sforw_maxsize && _CD_PUSH=1 cd "$DIR"; }
+cdf()  { local DIR; pop _cd_sforw DIR 2>/dev/null && push _cd_sback "$PWD" && pkeepq _cd_sback $_cd_sback_maxsize && _CD_PUSH=1 cd "$DIR"; }
 
 # Replace cd
 cd() { cda "$@"; }
 
 # Clean up all custom mappings
-cdc() { unalias cd cda cdb cdf pushd popd 2>/dev/null; unset -f cd cda cdb cdf pushd popd 2>/dev/null; }
+cdu() { unalias cd cda cdb cdf pushd popd 2>/dev/null; unset -f cd cda cdb cdf pushd popd 2>/dev/null; }
 
 # Display stacks
-cds() { echo "backward[${#g_backward_stack[@]}]: ${g_backward_stack[@]}"; echo "forward[${#g_forward_stack[@]}]: ${g_forward_stack[@]}"; }
+cds() { echo "backward[${#_cd_sback[@]}]: ${_cd_sback[@]}"; echo "forward[${#_cd_sforw[@]}]: ${_cd_sforw[@]}"; }
+
+# Empty stacks
+cdc() { _cd_sback=(); _cd_sforw=(); }
