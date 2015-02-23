@@ -1,1 +1,0 @@
-os.setlocale ( 'C' )
