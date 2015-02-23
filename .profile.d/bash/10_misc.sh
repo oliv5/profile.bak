@@ -3,7 +3,7 @@
 ################################
 # List user functions
 fct-ls() {
-  declare -F | cut -d" " -f3 | egrep -v "^_"
+  declare -F | cut -d" " -f3
 }
 
 # Export user functions from script
@@ -24,6 +24,22 @@ fct-unset() {
 # Print fct content
 fct-content() {
   type ${1:?No fct name given...} 2>/dev/null | tail -n+4 | head -n-1
+}
+
+# Create fct aliases with - instead of _ character
+fct-alias() {
+  # Note: cannot use while here, alias not set out of the while !?
+  for FCT in $(fct-ls | grep -E "^[^_].+_.+"); do 
+    alias $(echo $FCT | tr '_' '-')="$FCT"
+  done
+}
+
+# Remove fct aliases with - instead of _ character
+fct-unalias() {
+  # Note: cannot use while here, alias not set out of the while !?
+  for FCT in $(fct-ls | grep -E "^[^_].+_.+"); do 
+    unalias $(echo $FCT | tr '_' '-')
+  done
 }
 
 ################################
