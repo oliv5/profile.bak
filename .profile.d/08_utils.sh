@@ -32,7 +32,7 @@ askuser() {
 }
 
 # Get password
-get-passwd() {
+get_passwd() {
   local PASSWD
   trap "stty echo; trap SIGINT" SIGINT; stty -echo
   read -p "${1:-Password: }" PASSWD; echo
@@ -41,7 +41,7 @@ get-passwd() {
 }
 
 #wget mirror website
-wget-mirror() {
+wget_mirror() {
   local SITE=${1:?Please specify the URL}
   local DOMAIN=$(echo "$SITE" | sed -E 's;^https?://([^/]*)/.*$;\1;')
   local OPTS="${@:2}"
@@ -78,7 +78,7 @@ uint2hex() {
 
 # Execute on remote host
 alias exec-rem='exec-remote'
-exec-remote() {
+exec_remote() {
   local HOST="${1:?No host specified}"
   shift
   local CMD="${@:?No command specified}"
@@ -90,7 +90,7 @@ exec-remote() {
 }
 
 # Get public external IP
-get-extip() {
+get_extip() {
   local DNSLOOKUP="ifconfig.me/ip"
   if command -v curl >/dev/null; then
     curl $DNSLOOKUP
@@ -118,7 +118,7 @@ EOL
 alias rm-ansi='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'
 
 # Send email using mutt or mail
-send-mail() {
+send_mail() {
   local DEST="${1:?No email address specified}"
   local SUBJECT="${2:?No subject specified}"
   local CONTENT="${3:?No content specified}"
@@ -137,7 +137,7 @@ send-mail() {
 }
 
 # Convert to libreoffice formats
-conv-soffice() {
+conv_soffice() {
   FORMAT="${1:?No output format specified}"; shift
   FILES="$@"
   unoconv -f "$FORMAT" "$FILES" ||

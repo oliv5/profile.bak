@@ -2,17 +2,17 @@
 
 ################################
 # Install file notifier
-alias write-notify='notify close_write'
-alias read-notify='notify close_read'
-alias rw-notify='notify "close_read,close_write"'
-alias create-notify='notify create'
-alias mv-notify='notify moved_to'
-alias notify='_notify-file'
+alias write_notify='notify close_write'
+alias read_notify='notify close_read'
+alias rw_notify='notify "close_read,close_write"'
+alias create_notify='notify create'
+alias mv_notify='notify moved_to'
+alias notify='_notify_file'
 
 # Basic notification method with a loop
 # Pros: file move is captured
 # Cons: may miss event, high system resource consumption on large directories
-_notify-loop() {
+_notify_loop() {
   local TRIGGER="${1:?No event to monitor}"
   local FILE="${2:?No dir/file to monitor}"
   shift 2
@@ -26,7 +26,7 @@ _notify-loop() {
 # Main notification method
 # Pros: only a single inotifywait process & set of pipes
 # Cons: does not capture file moves properly
-_notify-proc() {
+_notify_proc() {
   local TRIGGER="${1:?No event to monitor}"
   local FILE="${2:?No dir/file to monitor}"
   shift 2
@@ -60,20 +60,20 @@ _notify-proc() {
 
 # Main notification method enhencement to support file moves
 # Monitor the root directory, filter events on file names
-# Pros: uses _notify-proc low resource method
+# Pros: uses _notify_proc low resource method
 # Cons: it is triggered for every file event of the root directory
-_notify-file() {
+_notify_file() {
   local TRIGGER="${1:?No event to monitor}"
   local FILE="${2:?No dir/file to monitor}"
   shift 2
   local SCRIPT="${@:?No action to execute}"
-  _notify-proc "$TRIGGER" "$(dirname "$FILE")" 'if [ "$(readlink -f "$DIR$FILE")" = "$(readlink -f "'$FILE'")" ]; then '$SCRIPT'; fi'
+  _notify_proc "$TRIGGER" "$(dirname "$FILE")" 'if [ "$(readlink -f "$DIR$FILE")" = "$(readlink -f "'$FILE'")" ]; then '$SCRIPT'; fi'
 }
 
 ################################
 # Disable bell
 # https://wiki.archlinux.org/index.php/Disable_PC_speaker_beep
-bell-off() {
+bell_off() {
   # In X
   xset -b
   # In console
@@ -83,7 +83,7 @@ bell-off() {
 ################################
 # Shell-mutex with pidfile
 # https://jdimpson.livejournal.com/5685.html
-mutex-flock() {
+mutex_flock() {
   # Open output 200 to the pid file
   local PIDFILE="${1:-/var/run}/$(basename "${0%.*}").pid"
   exec 200>"$PIDFILE" || return 1

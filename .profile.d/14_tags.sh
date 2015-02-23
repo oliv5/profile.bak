@@ -39,7 +39,7 @@ scancsdir() {
 }
 
 # Make cscope db from source list file
-mkcscope-1() {
+mkcscope_1() {
   command -v >/dev/null cscope || return
   # Get directories
   local SRC="$(eval echo ${1:-$PWD})"
@@ -59,7 +59,7 @@ mkcscope-1() {
 # Scan and make cscope db
 # Warning: this is not incremental
 # It erases the old database and rebuild it
-mkcscope-2() {
+mkcscope_2() {
   command -v >/dev/null cscope || return
   # Get directories
   local SRC="$(eval echo ${1:-$PWD})"
@@ -74,7 +74,7 @@ mkcscope-2() {
 
 # Cscope alias - use a fct because aliases are not exported to other fct
 mkcscope() {
-  mkcscope-1 "$@"
+  mkcscope_1 "$@"
 }
 
 # Make id-utils database

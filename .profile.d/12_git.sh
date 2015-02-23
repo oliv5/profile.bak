@@ -16,73 +16,73 @@ alias gdd='git diff'
 alias gdm='git difftool -y -t meld --'
 alias gds='git stash show -t'
 # Stash aliases
-alias gsc='git-stash-push'
-alias gss='git-stash-save'
-alias gsb='git-stash-save --include-untracked'
-alias gsp='git-stash-pop'
-alias gsa='git-stash-apply'
+alias gsc='git_stash_push'
+alias gss='git_stash_save'
+alias gsb='git_stash_save --include-untracked'
+alias gsp='git_stash_pop'
+alias gsa='git_stash_apply'
 alias gsl='git stash list'
 # Commit aliases
-alias git-ci='git commit'
+alias git_ci='git commit'
 # Gitignore
-alias gil='git-ignore-list'
-alias gia='git-ignore-add'
+alias gil='git_ignore_list'
+alias gia='git_ignore_add'
 # git add new files
 alias gan='git add $(git ls-files -o --exclude-standard)'
 alias gau='git add $(git ls-files -o)'
 
 ########################################
 # Meld called by git
-git-meld() {
+git_meld() {
   meld "$2" "$5"
 }
 
 ########################################
 # Get git repo root directory
-git-root() {
+git_root() {
   git rev-parse --show-toplevel
 }
 
 # Check commit existenz
-git-exists() {
+git_exists() {
   git rev-parse --verify "${1:-HEAD}" 2>&1 >/dev/null
 }
 
 # Check if a repo has been modified
-git-modified() {
+git_modified() {
   ! git diff-index --quiet HEAD --
 }
 
 ########################################
 # Push changes onto stash, revert changes
-git-stash-push() {
+git_stash_push() {
   git stash save "stash-$(date +%Y%m%d-%H%M)${1:+_$1}"
 }
 
 # Push changes onto stash, does not revert anything
-git-stash-save() {
-  git-stash-push "$@" && git stash apply stash@{0} >/dev/null
+git_stash_save() {
+  git_stash_push "$@" && git stash apply stash@{0} >/dev/null
 }
 
 # Pop change from stash
-git-stash-pop() {
+git_stash_pop() {
   git stash pop stash@{${1:-0}}
 }
 
 # Apply change from stash
-git-stash-apply() {
+git_stash_apply() {
   git stash apply stash@{${1:-0}}
 }
 
 # Aliases using stashes
-alias git-export='git-stash-save'
-alias git-import='git-stash-apply'
-alias git-suspend='git-stash-push'
-alias git-resume='git-stash-pop'
+alias git_export='git_stash_save'
+alias git_import='git_stash_apply'
+alias git_suspend='git_stash_push'
+alias git_resume='git_stash_pop'
 
 ########################################
 # Hard revert to a given CL or revert a file
-git-revert() {
+git_revert() {
   if [ -f "$1" -o -f "$2" ]; then
     git checkout -- "$@"
   else
@@ -92,14 +92,14 @@ git-revert() {
 }
 
 # Soft revert to a given CL, won't change modified files
-git-rollback() {
+git_rollback() {
   local REV="${1:-HEAD}"; shift; local ARGS="$@"
   git reset "$REV" "$ARGS"
 }
 
 # Clean repo back to given CL
 # remove unversionned files
-git-clean() {
+git_clean() {
   # Confirmation
   if [ "$1" != "-y" ]; then
     echo -n "Remove unversioned files? (y/n): "
@@ -111,12 +111,12 @@ git-clean() {
 
 ########################################
 # List files
-git-ls() {
+git_ls() {
   git ls-tree -r ${1:-master} --name-only ${2:+| grep -F "$2"}
 }
 
 # Amend author/committer names & emails
-git-amend-names() {
+git_amend_names() {
   # Identify who/what the amend is about
   local AUTHOR_1="${1%%:*}"
   local AUTHOR_2="${1##*:}"
@@ -151,24 +151,24 @@ git-amend-names() {
 }
 
 # Git history
-git-history() {
+git_history() {
   git log -p "$@"
 }
 
 # Git add gitignore
-git-ignore-add() {
+git_ignore_add() {
   grep "$1" .gitignore >/dev/null || echo "$1" >>.gitignore
 }
 
 # Git list gitignore
-git-ignore-list() {
+git_ignore_list() {
   git status -s --ignored 2>/dev/null || git clean -ndX
 }
 
 # Git ignore changes
-git-ignore-changes() {
+git_ignore_changes() {
   git update-index --assume-unchanged "$@"
 }
-git-noignore-changes() {
+git_noignore_changes() {
   git update-index --no-assume-unchanged "$@"
 }

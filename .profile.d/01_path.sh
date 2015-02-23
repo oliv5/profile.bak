@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Prepend to path
-path-prepend() {
+path_prepend() {
   local DIR
   for DIR; do
     #if ! [[ "$PATH" =~ "${DIR}" ]] && [[ -d "$DIR" ]]; then
@@ -12,7 +12,7 @@ path-prepend() {
 }
 
 # Append to path
-path-append() {
+path_append() {
   local DIR
   for DIR; do
     #if ! [[ "$PATH" =~ "${DIR}" ]] && [[ -d "$DIR" ]]; then
@@ -23,7 +23,7 @@ path-append() {
 }
 
 # Cleanup path
-path-cleanup() {
+path_cleanup() {
   #export PATH="${PATH//\~/${HOME}}"
   #export PATH="${PATH//.:/}"
   export PATH="$(echo "$PATH" | sed -e 's|~|'"${HOME}"'|g' -e 's|\.\:||g')"

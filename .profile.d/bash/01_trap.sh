@@ -1,33 +1,33 @@
 #!/bin/bash
-trap-stack-name() {
+trap_stack_name() {
   local sig=${1//[^a-zA-Z0-9]/_}
   echo "__trap_stack_$sig"
 }
 
-trap-extract() {
+trap_extract() {
   echo ${@:3:$(($#-3))}
 }
 
-trap-get() {
-  eval echo $(trap-extract `trap -p $1`)
+trap_get() {
+  eval echo $(trap_extract `trap -p $1`)
 }
 
-trap-push() {
+trap_push() {
   local new_trap=$1
   shift
   local sigs=$*
   for sig in $sigs; do
-    stack_name=`trap-stack-name "$sig"`
-    old_trap=$(trap-get $sig)
+    stack_name=`trap_stack_name "$sig"`
+    old_trap=$(trap_get $sig)
     eval "${stack_name}"'[${#'"${stack_name}"'[@]}]=$old_trap'
     trap "${new_trap}" "$sig"
   done
 }
 
-trap-pop() {
+trap_pop() {
   local sigs=$*
   for sig in $sigs; do
-    stack_name=`trap-stack-name "$sig"`
+    stack_name=`trap_stack_name "$sig"`
     eval 'count=${#'"${stack_name}"'[@]}'
     [[ $count -lt 1 ]] && return 127
     ref="${stack_name}"'[${#'"${stack_name}"'[@]}-1]'
@@ -37,40 +37,40 @@ trap-pop() {
   done
 }
 
-trap-prepend() {
+trap_prepend() {
   local new_trap=$1
   shift
   local sigs=$*
   for sig in $sigs; do
-    if [[ -z $(trap-get $sig) ]]; then
-      trap-push "$new_trap" "$sig"
+    if [[ -z $(trap_get $sig) ]]; then
+      trap_push "$new_trap" "$sig"
     else
-      trap-push "$new_trap ; $(trap-get $sig)" "$sig"
+      trap_push "$new_trap ; $(trap_get $sig)" "$sig"
     fi
   done
 }
 
-trap-append() {
+trap_append() {
   local new_trap=$1
   shift
   local sigs=$*
   for sig in $sigs; do
-    if [[ -z $(trap-get $sig) ]]; then
-      trap-push "$new_trap" "$sig"
+    if [[ -z $(trap_get $sig) ]]; then
+      trap_push "$new_trap" "$sig"
     else
-      trap-push "$(trap-get $sig) ; $new_trap" "$sig"
+      trap_push "$(trap_get $sig) ; $new_trap" "$sig"
     fi
   done
 }
 
 # Set error handler
-trap-map() {
+trap_map() {
   trap 'die "Error handler:" 1 ${LINENO}' ${@:-1 15} ERR
 }
 
 ######################################
 # Call stack
-print-callstack() {
+print_callstack() {
   # skipping i=0 as this is print_call_trace itself
   for ((i = 1; i < ${#FUNCNAME[@]}; i++)); do
     echo -n  ${BASH_SOURCE[$i]}:${BASH_LINENO[$i-1]}:${FUNCNAME[$i]}"(): "
@@ -79,7 +79,7 @@ print-callstack() {
 }
 
 # Call stack
-print-callstack2() {
+print_callstack2() {
   local frame=0
   while caller $frame; do
     ((frame++));

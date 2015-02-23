@@ -1,38 +1,38 @@
 #!/bin/sh
 
 # List devices
-xrandr-connected() {
+xrandr_connected() {
   xrandr -q | awk '/ connected/{print $1}'
 }
-xrandr-disconnected() {
+xrandr_disconnected() {
   xrandr -q | awk '/disconnected/{print $1}'
 }
-xrandr-on() {
+xrandr_on() {
   xrandr -q | awk '/ connected/{name=$1} /*/{print name}'
 }
-xrandr-off() {
+xrandr_off() {
   xrandr -q | awk '/ connected/{name=$1} /*/{name=""} END{print name}'
 }
 
 # Get screen resolution
-xrandr-getres() {
+xrandr_getres() {
   xrandr --current | grep \* | cut -d' ' -f4
 }
 
 # Set screen resolution
-xrandr-setres() {
+xrandr_setres() {
   local RESOLUTION="${1:?No resolution specified, like 1280x1024}"
   local ARGS="$@"
   xrandr -s "$RESOLUTION" "$ARGS"
 }
 
 # Enable display
-xrandr-en() {
+xrandr_en() {
   #See options like --dryrun, --mode 1024x768
   xrandr --output "${1:?No display specified}" --auto ${@:2}
 }
 
 # Disable display
-xrandr-dis() {
+xrandr_dis() {
   xrandr --output "${1:?No display specified}" --off ${@:2}
 }

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Mount ecryptfs
-mount-ecryptfs() {
+mount_ecryptfs() {
   local SRC="${1:?Missing source directory...}"
   local DST="${2:?Missing dest directory...}"
   local KEY1="${3:?Missing content key...}"
@@ -18,13 +18,13 @@ mount-ecryptfs() {
 }
 
 # Mount iso
-mount-iso() {
+mount_iso() {
   sudo mount -o loop -t iso9660 "$@"
 }
 
 # NFS unmount
 alias nfs-umountall='umount -a -t nfs'
-nfs-umount() {
+nfs_umount() {
   sudo sh -c "
     ifconfig eth0:nfstmp ${2:?NFS IP not specified...} netmask 255.255.255.255
     umount -f -l \"${1:?NFS mount point not specified...}\"
@@ -33,7 +33,7 @@ nfs-umount() {
 }
 
 # NFS remount
-nfs-remount() {
+nfs_remount() {
   sudo sh -c "
     ifconfig eth0:fakenfs ${2:?NFS IP not specified...} netmask 255.255.255.255
     umount -f -l \"${1:?NFS mount point not specified...}\"

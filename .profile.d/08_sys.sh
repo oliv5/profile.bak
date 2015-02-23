@@ -25,27 +25,27 @@ uid() {
 }
 
 # System information
-sys-iostat() {
+sys_iostat() {
   iostat -x 2
 }
 
-sys-stalled() {
+sys_stalled() {
   while true; do ps -eo state,pid,cmd | grep "^D"; echo "—-"; sleep 5; done
 }
 
-sys-cpu() {
+sys_cpu() {
   sar ${1:-1} ${2}
 }
 
-cpu-avg() {
+cpu_avg() {
   eval "ps aux ${1:+| grep $1} | awk 'BEGIN {sum=0} {sum+=\$3}; END {print sum}'"
 }
 
-mem-avg() {
+mem_avg() {
   eval "ps aux ${1:+| grep $1} | awk 'BEGIN {sum=0} {sum+=\$4}; END {print sum}'"
 }
 
-cpu-inst() {
+cpu_inst() {
   if [ -z "$1" ]; then
     top -d 0.5 -b -n2 | grep "Cpu(s)" | tail -n 1 | awk '{print $2 + $4 + $6}'
   else
@@ -53,7 +53,7 @@ cpu-inst() {
   fi
 }
 
-mem-inst() {
+mem_inst() {
   if [ -z "$1" ]; then
     top -d 0.5 -b -n2 | grep "Mem:" | tail -n 1 | awk '{print ($5*100/$3)}'
   else
@@ -61,29 +61,29 @@ mem-inst() {
   fi
 }
 
-swap-inst() {
+swap_inst() {
   top -d 0.5 -b -n2 | grep "Swap:" | tail -n 1 | awk '{print ($5*100/$3)}'
 }
 
-cpu-top() {
+cpu_top() {
   eval "ps aux --sort -%cpu ${1:+| head -n $(($1 + 1))}"
 }
 
-mem-top() {
+mem_top() {
   eval "ps aux --sort -rss ${1:+| head -n $(($1 + 1))}"
 }
 
-kill-cpu-top() {
+kill_cpu_top() {
   local END=$((${1:-1} + 1))
   ps a --sort -%cpu | awk 'NR>1 && NR<=$END {print $1;}' | xargs -r kill ${@:2}
 }
 
-kill-mem-top() {
+kill_mem_top() {
   local END=$((${1:-1} + 1))
   ps a --sort -rss | awk 'NR>1 && NR<=$END {print $1;}' | xargs -r kill ${@:2}
 }
 
-mem-ps() {
+mem_ps() {
   while read command percent rss; do
     if [ "${command}" != "COMMAND" ]; then
       rss="$(echo "scale=2;${rss}/1024" | bc)"
@@ -93,9 +93,9 @@ mem-ps() {
 }
 
 # system information aliases
-alias cpu='cpu-inst'
-alias mem='mem-inst'
-alias swap='swap-inst'
+alias cpu='cpu_inst'
+alias mem='mem_inst'
+alias swap='swap_inst'
 
 ################################
 # Keyboad layout
@@ -106,30 +106,30 @@ alias keyb-setfr='setxkbmap -layout fr'
 
 ################################
 # Language selection functions
-lang-fr() {
+lang_fr() {
   export LANGUAGE="fr:en"
   export LC_ALL="fr_FR.UTF-8"
 }
-lang-en() {
+lang_en() {
   unset LANGUAGE
   export LC_ALL="en_US.UTF-8"
 }
 
 ################################
 # Cmd exist test
-cmd-exists() {
+cmd_exists() {
   command -v ${1} >/dev/null
 }
 
 # Cmd unset
-cmd-unset() {
+cmd_unset() {
   unalias $* 2>/dev/null
   unset -f $* 2>/dev/null
 }
 
 ################################
 # Chroot
-mk-chroot(){
+mkchroot(){
   local SRC="/dev/${1:?Please specify the root device}"
   local DST="${2:-/mnt}"
   mount "$SRC" "$DST"
@@ -142,7 +142,7 @@ mk-chroot(){
 
 ################################
 # Make deb package from source
-make-deb() {
+mkdeb() {
   local ARCHIVE="${1:?No input archive specified}"
   tar zxf "$ARCHIVE" || return 0
   cd "${ARCHIVE%.*}"
