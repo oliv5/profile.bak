@@ -26,25 +26,32 @@ fct_content() {
   type ${1:?No fct name given...} 2>/dev/null | tail -n+4 | head -n-1
 }
 
-# Create fct aliases with - instead of _ character
+# Create fct aliases with "-" instead of "_" character
 fct_alias() {
   # Note: cannot use while here, alias not set out of the while !?
-  for FCT in $(fct-ls | grep -E "^[^_].+_.+"); do 
+  for FCT in $(fct-ls | grep -E "^[^_].+_.+"); do
     alias $(echo $FCT | tr '_' '-')="$FCT"
   done
 }
 
-# Remove fct aliases with - instead of _ character
+# Remove fct aliases with "-" instead of "_" character
 fct_unalias() {
   # Note: cannot use while here, alias not set out of the while !?
-  for FCT in $(fct-ls | grep -E "^[^_].+_.+"); do 
+  for FCT in $(fct-ls | grep -E "^[^_].+_.+"); do
     unalias $(echo $FCT | tr '_' '-')
   done
 }
 
-# Convert fct names with "-" into "_"
-fct_convert() {
-  sed -E 's@^([^\-\(]+)-([^\-\(]+\(\))@\1_\2@' "$@"
+# Convert alias with "_" in their name into "-"
+alias_convert() {
+  local _IFS=$IFS
+  IFS=$(printf '\n')
+  # Note: cannot use while here, alias not set out of the while !?
+  # Grep with "^alias " to protect against bad "alias" outputs
+  for ALIAS in $(alias | grep -e '^alias ' | sed '/^[^=]\+_[^=]\+=/s/_/-/'); do
+    eval "$ALIAS"
+  done
+  IFS=$_IFS
 }
 
 ################################
