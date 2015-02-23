@@ -45,7 +45,7 @@ git_root() {
 
 # Check commit existenz
 git_exists() {
-  git rev-parse --verify "${1:-HEAD}" 2>&1 >/dev/null
+  git rev-parse --verify "${1:-HEAD}" >/dev/null 2>&1
 }
 
 # Check if a repo has been modified
@@ -74,7 +74,20 @@ git_stash_apply() {
   git stash apply stash@{${1:-0}}
 }
 
+# Show diff between stash and local copy
+git_stash_diff() {
+  local STASH="${1:-0}"; shift; local ARGS="$@"
+  git diff stash@{$STASH} "$ARGS"
+}
+
+#Show stash content
+git_stash_show() {
+  local STASH="${1:-0}"; shift; local ARGS="$@"
+  git stash show -p stash@{$STASH} "$ARGS"
+}
+
 # Aliases using stashes
+alias git_stash_diffl='git_stash_diff --name-only'
 alias git_export='git_stash_save'
 alias git_import='git_stash_apply'
 alias git_suspend='git_stash_push'

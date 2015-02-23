@@ -30,8 +30,8 @@ path_cleanup() {
 }
 
 # Main
-unalias path-append 2>/dev/null
-eval path-append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
-unalias path-prepend 2>/dev/null
-eval path-prepend "$HOME/bin" "$HOME/bin/profile"
+unalias path_append 2>/dev/null
+eval path_append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
+unalias path_prepend 2>/dev/null
+eval path_prepend "$HOME/bin" "$HOME/bin/profile"
 

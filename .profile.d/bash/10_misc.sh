@@ -56,6 +56,6 @@ pwd_get() {
 ################################
 # Check bashism in scripts
 bash_checkbashisms() {
-  command -v checkbashisms 2>&1 >/dev/null || die "checkbashisms not found..."
+  command -v checkbashisms >/dev/null 2>&1 || die "checkbashisms not found..."
   find "${1:-.}" -name "${2:-*.sh}" -exec sh -c 'checkbashisms {} 2>/dev/null || ([ $? -ne 2 ] && echo "checkbashisms {}")' \;
 }

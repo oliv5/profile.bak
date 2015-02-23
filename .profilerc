@@ -31,10 +31,10 @@ fi
 
 ################################
 # Cleanup path
-path-cleanup
+path_cleanup
 
 # Remove some aliases/fct shortcuts
-cmd-unset which grep find
+cmd_unset which grep find
 
 # Start ssh-agent when not already running
 pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
