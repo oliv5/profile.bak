@@ -238,8 +238,13 @@ svn_export() {
 svn_import() {
   # Check parameters
   local ARCHIVE="$1"
+  local PATTERN="${2:-export*}"
   if [ -z "$ARCHIVE" ]; then
-    ARCHIVE="$(svn_ziplast)"
+    ARCHIVE="$(svn_ziplast "" "$PATTERN")"
+    if [ -z "$ARCHIVE" ]; then
+      echo "No archive found..."
+      return 0
+    fi
     echo "Last archive available: $ARCHIVE"
     if ! $SVN_YES askuser "Use this archive? (y/n): " y Y; then
       echo "No archive selected..."
@@ -267,7 +272,7 @@ svn_resume() {
     return
   fi
   # Import CL
-  svn_import "$1"
+  svn_import "$1" "suspend*"
 }
 
 # Amend a log message
@@ -344,10 +349,11 @@ svn_zipdiff() {
 # List the archives based on given name
 svn_zipls() {
   local DIR="$1"
-  if [ ! -e "$DIR" ]; then
+  local FILE="${2:-*}"
+  if [ ! -d "$DIR" ]; then
     DIR="$(svn_bckdir)"
   fi
-  find "$DIR" -type f -printf '%T@ %p\n' | sort -rn | head -n 1 | cut -d' ' -f 2-
+  find "$DIR" -type f -name "$FILE" -printf '%T@ %p\n' | sort -rn | cut -d' ' -f 2-
 }
 
 # Returns the last archive found based on given name
@@ -358,11 +364,10 @@ svn_ziplast() {
 # Diff an archive with current repo
 _svn_diffzip() {
   local ARCHIVE="$2"
-  if [ -z "$ARCHIVE" ]; then
-    ARCHIVE="$(svn_ziplast)"
+  if [ ! -f "$ARCHIVE" ]; then
+    ARCHIVE="$(svn_ziplast "" "${ARCHIVE:-"*$(basename "$PWD")*"}")"
   fi
-  builtin eval "$1" "." "$ARCHIVE"
-  #$1 "." "$ARCHIVE"
+  eval "$1" "." "$ARCHIVE"
 }
 alias svn_diffzip='_svn_diffzip 7zdiff'
 alias svn_diffzipc='_svn_diffzip 7zdiffd 2>/dev/null | wc -l'
