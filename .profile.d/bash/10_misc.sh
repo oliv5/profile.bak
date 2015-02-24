@@ -13,7 +13,7 @@ fct_export() {
 
 # Export all user functions
 fct_export_all() {
-  export -f $(fct-ls)
+  export -f $(fct_ls)
 }
 
 # Remove function
@@ -29,7 +29,7 @@ fct_content() {
 # Create fct aliases with "-" instead of "_" character
 fct_alias() {
   # Note: cannot use while here, alias not set out of the while !?
-  for FCT in $(fct-ls | grep -E "^[^_].+_.+"); do
+  for FCT in $(fct_ls | grep -E "^[^_].+_.+"); do
     alias $(echo $FCT | tr '_' '-')="$FCT"
   done
 }
@@ -37,7 +37,7 @@ fct_alias() {
 # Remove fct aliases with "-" instead of "_" character
 fct_unalias() {
   # Note: cannot use while here, alias not set out of the while !?
-  for FCT in $(fct-ls | grep -E "^[^_].+_.+"); do
+  for FCT in $(fct_ls | grep -E "^[^_].+_.+"); do
     unalias $(echo $FCT | tr '_' '-')
   done
 }
