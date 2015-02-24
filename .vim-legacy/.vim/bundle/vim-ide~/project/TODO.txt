@@ -1,0 +1,110 @@
+Project
+- (WM, DONE) Remove 'plugin/make.vim'.
+- (WM, DONE) Tag 'perlsupport-5.2' is wrong.
+- (FM,WM) Use normal!, noremap and noremenu consistently.
+- (FM,WM) Is the difference between local and global/system installation
+  documented somewhere?
+- (WM) Improve 'adjust end-of-line comment' to change the line if the comment
+  itself contains ignored sections?
+
+vim.org:
+- (FM, DONE?) Reference github on plug-in pages.
+
+Templates:
+- (WM) Correct escape for menu names.
+  * At least these special characters must be escaped: <space> . | \ &
+  * Expanded menus for lists.
+- (WM) API 'EditTemplateFiles'.
+  * (DONE) Check whether an indexed file actually exists.
+  * Configuration of the file browser (+ documentation).
+- (WM) When overwriting templates, also set new map and shortcut, if one is
+  given.
+- (WM) Help templates.
+  * The browser for help templates should be called by a dedicated function in
+    the help template.
+  * The browser should be configurable from outside, so it does not have to be
+    set up within the template library.
+
+Awk:
+- (FM) 'code->comment' should not insert a space following the hash?
+
+Bash:
+- (FM) 'code->comment' should not insert a space following the hash?
+
+C/C++:
+- (FM, DONE) Documentation: Change documentation with regard to Make integration.
+  * 'Run' menu entries removed.
+  * Maps configured in ftplugin.
+  * Reference documentation of toolbox.
+  * Reference toolbox in 'c-hotkeys.tex'?
+  * Document 'g:C_UseToolbox' and 'g:C_UseTool_*'.
+  * Menu entry 'Run->executable to run' is not part of the Make integration
+    anymore, since the Make integration moves to the toolbox. It is to be
+    documented as configuration for 'Run->run', similar to 'Run->cmdline arg.'.
+    Shortcut changes to '\re'.
+- (WM) Doxygen:
+  * (DONE) Templates for "overload".
+  * (DONE) Append "short, after member" to several lines.
+  * Add escaped characters "\" and "|" once the template engine supports this.
+
+Git:
+- (WM, DONE) Add more suggestions for custom menu entries to 's:Git_CustomMenu'.
+- (WM, DONE) Add current custom menu entries to documentation and/or "git-support/rc/",
+  as a starting point for customization.
+- (WM, DONE) Give directory as an argument to ':GitStatus'.
+- (WM, DONE) ':GitStatus' should respect 'status.relativePaths'.
+- (WM) Current method for jumping to Git buffers does not work for tabs.
+  * (DONE) Open the buffer in a new window.
+  * Optionally: Jump across tab pages.
+- (WM) How about jumping to windows?
+  * (DONE) Open the buffer in a new window.
+  * Optionally: Jump across tab pages.
+- (WM, DONE?) Problem with 's:OpenFile()':
+  Since the name of the buffer has to match exactly, this does not always work
+  with different working directories.
+- (WM, DONE?) For global installation (compare Matlab):
+  Which method is best to obtain 's:plugin_dir'?
+- (WM, DONE?) Maps for completing Git commands, branches, tags, remotes, ...
+  similar to the cmd-line completion plug-in.
+- (WM) New status buffer output (version > 1.8.5):
+  Update syntax highlighting, folding function, file actions
+- (WM) Do not use "sync fromstart" in syntax highlighting,
+  is extremely slow for diff and log.
+- (WM) Document map "ow" in status buffer.
+- (WM) Update buffer after executing a command: :GitBranch, :GitRemote, :GitStash, ...
+- (WM) Buffer "git stash list", maps for: create
+- (WM) Feed output of "git apply" into quickfix.
+
+LaTeX:
+- (FM) Documentation: Menu 'Beamer' missing.
+- (WM, DONE) Documentation: Menu 'Help' missing.
+- (FM) Reference Card: Menu 'Beamer' missing.
+- (WM, DONE) Reference Card: Entry 'Help->english' missing.
+
+Matlab:
+- (WM, DONE?) For global installation (compare Git):
+  Which method is best to obtain 's:plugin_dir'?
+
+Perl:
+- (FM, DONE) Documentation: Change documentation with regard to Make integration.
+  * 'Run' menu entries removed.
+  * Maps configured in ftplugin.
+  * Reference documentation of toolbox.
+  * Reference toolbox in 'perl-hotkeys.tex'?
+  * Document 'g:Perl_UseToolbox' and 'g:Perl_UseTool_make'.
+
+Vim:
+- (FM/WM) 'code->comment' should not insert a space following the quote.
+
+Toolbox:
+- CMake: Does the help work at all under Windows?
+- CMake: Names of help buffers, can we use brackets, other characters (Windows)?
+- CMake: Run CMakeSetup.exe (Windows)
+- CMake: Run ccmake (in xterm), cmake-gui (UNIX)
+- Doxygen: Run doxywizard (UNIX, Windows?)
+- Make: Use option 'Make_Executable'.
+
+Snippets:
+- (FM, DONE?) Set first parameter ("save") in "browse()" to '1' for writing snippets
+
+" vim: expandtab:tw=80
