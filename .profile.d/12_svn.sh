@@ -38,14 +38,14 @@ alias scid='svn ci -m "Development commit $(svn_date)"'
 # Build a unique backup directory for this repo
 svn_bckdir() {
   local DIR="$(readlink -m "$(svn_root)/${1:-.svnbackup}/$(basename "$(svn_repo)")$(svn_branch)${2:+__$2}")"
-  #mkdir -p "${DIR}"
   echo "${DIR}" | sed -e 's/ /_/g'
+  #mkdir -p "${DIR}"
 }
 
 # Build a backup filename for this repo
 svn_bckname() {
   local PREFIX="$1"; local SUFFIX="$2"; local REV1="$3"; local REV2="$4"
-  echo "${PREFIX:+${PREFIX}__}$(basename "$PWD")${REV1:+__r$REV1}${REV2:+-$REV2}__$(svn_date)${SUFFIX:+__$SUFFIX}" | sed -e 's/ /_/g'
+  echo "${PREFIX:+${PREFIX}__}$(basename "$PWD")${REV1:+__r$REV1}${REV2:+-$REV2}__$(svn_date)${SUFFIX:+__$SUFFIX}"
 }
 
 # Retrieve date
@@ -240,7 +240,7 @@ svn_import() {
   local ARCHIVE="$1"
   local PATTERN="${2:-export*}"
   if [ -z "$ARCHIVE" ]; then
-    ARCHIVE="$(svn_ziplast "" "$PATTERN")"
+    ARCHIVE="$(svn_ziplast 1 "" "$PATTERN")"
     if [ -z "$ARCHIVE" ]; then
       echo "No archive found..."
       return 0
@@ -358,16 +358,17 @@ svn_zipls() {
 
 # Returns the last archive found based on given name
 svn_ziplast() {
-  svn_zipls "$@" | head -n 1
+  svn_zipls "${@:2}" | head -n ${1:-1}
 }
 
 # Diff an archive with current repo
 _svn_diffzip() {
   local ARCHIVE="$2"
   if [ ! -f "$ARCHIVE" ]; then
-    ARCHIVE="$(svn_ziplast "" "${ARCHIVE:-"*$(basename "$PWD")*"}")"
+    ARCHIVE="$(svn_ziplast 1 "" "${ARCHIVE:-"*$(basename "$PWD")*"}")"
   fi
-  eval "$1" "." "$ARCHIVE"
+  # Warning: eval remove one level of quotes
+  eval "$1" "." "\"$ARCHIVE\""
 }
 alias svn_diffzip='_svn_diffzip 7zdiff'
 alias svn_diffzipc='_svn_diffzip 7zdiffd 2>/dev/null | wc -l'
