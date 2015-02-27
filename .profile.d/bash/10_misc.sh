@@ -1,4 +1,19 @@
 #!/bin/bash
+# Bash utils
+# see http://tldp.org/LDP/abs/html/
+
+################################
+#http://www.tldp.org/LDP/abs/html/intandnonint.html
+
+# Returns true for interactive shells
+shell_isinteractive() {
+  [ -n "$PS1" ]
+}
+
+# Returns true for login shells
+shell_islogin() {
+  shopt -q login_shell
+}
 
 ################################
 # List user functions

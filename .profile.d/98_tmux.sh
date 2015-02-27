@@ -15,7 +15,6 @@ tmux() {
 }
 
 # Re-attach session, or print the list
-#if [ ! -z "$TMUX_AUTOLOAD" -a -z "$ENV_PROFILE_DONE" ] && [ "$-" = "*i*" ] && shopt -q login_shell; then
-if [ ! -z "$TMUX_AUTOLOAD" ] && [ -z "$ENV_PROFILE_DONE" ] && [ "$-" = "*i*" ] && test -t "0"; then
+if [ ! -z "$TMUX_AUTOLOAD" ] && [ -z "$ENV_LOADED" ] && shell_isinteractive && shell_islogin; then
   tmux 2>/dev/null
 fi

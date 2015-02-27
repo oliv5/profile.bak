@@ -29,6 +29,9 @@ if [ ! -z "$BASH_VERSION" ]; then
   done
 fi
 
+# Set load flag
+export ENV_LOADED=$ENV_CNT
+
 ################################
 # Cleanup path
 path_cleanup

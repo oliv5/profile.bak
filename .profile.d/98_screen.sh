@@ -33,7 +33,6 @@ alias screen-killd="screen -ls | awk -F "." '/Detached/{print $1}' | xargs -r ki
 alias screen-killa="screen -ls | awk -F "." '/pts/{print $1}' | xargs -r kill"
 
 # Re-attach session, or print the list
-#if [ ! -z "$SCREEN_AUTOLOAD" -a -z "$ENV_PROFILE_DONE" ] && [ "$-" = "*i*" ] && shopt -q login_shell; then
-if [ ! -z "$SCREEN_AUTOLOAD" ] && [ -z "$ENV_PROFILE_DONE" ] && [ "$-" = "*i*" ] && test -t "0"; then
+if [ ! -z "$SCREEN_AUTOLOAD" ] && [ -z "$ENV_LOADED" ] && shell_isinteractive && shell_islogin; then
   screen 2> /dev/null
 fi

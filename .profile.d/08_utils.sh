@@ -1,10 +1,21 @@
 #!/bin/sh
-# Bash utils
-# see http://tldp.org/LDP/abs/html/
 
-# Alias
-alias mountiso='mount -o loop -t iso9660'
+################################
+# https://stackoverflow.com/questions/18186929/differences-between-login-shell-and-interactive-shell
 
+# Returns true for interactive shells
+shell_isinteractive() {
+  # Test whether stdin exists
+  [ -t "0" ] || [ -p /dev/stdin ]
+}
+
+# Returns true for login shells
+shell_islogin() {
+  # Test whether the caller name starts with a "-"
+  [ "$(echo "$0" | cut -c 1)" = "-" ]
+}
+
+################################
 # To lower
 toLower() {
   echo "${@}" | tr "[:upper:]" "[:lower:]"
@@ -15,6 +26,7 @@ toUpper() {
   echo "${@}" | tr "[:lower:]" "[:upper:]"
 }
 
+################################
 # Create file backup
 mkbak() {
   cp "${1:?Please specify input file 1}" "${1}.$(date +%Y%m%d-%H%M%S).bak"
