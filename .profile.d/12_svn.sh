@@ -7,7 +7,7 @@ export SVN_EDITOR=vim
 alias salias='alias | grep -re " s..\?="'
 
 # Status aliases
-alias st='svn st | sort'
+alias st='svn st | sort | grep -v "^$"'
 alias ss='st | grep -E "^(A|\~|D|M|R|C|\!|---| M)"'
 alias sa='st | grep -E "^(A|---)"'
 alias sc='st | grep -E "^(C|---|      C)"'
@@ -130,7 +130,7 @@ svn_merge() {
         meld "${rev}" "${FILE}" "${FILE}.mine" 2>/dev/null
       done
     fi
-    if [ $CNT -gt 0 ] && $SVN_YES askuser "Mark the conflict as resolved? (y/n): " y Y; then
+    if [ $CNT -gt 0 ] && test $SVN_YES || askuser "Mark the conflict as resolved? (y/n): " y Y; then
       svn resolved "${FILE}"
     fi
   done
@@ -163,12 +163,12 @@ svn_clean() {
   # Check we are in a repository
   svn_exists || return
   # Confirmation
-  if $SVN_YES ! askuser "Backup unversioned files? (y/n): " n N; then
+  if test $SVN_YES || ! askuser "Backup unversioned files? (y/n): " n N; then
     # Backup
     svn_zipst "^(\?|\I)" "$(svn_bckdir)/$(svn_bckname clean "" $(svn_rev)).7z"
   fi
   # Remove files not in SVN
-  svn_stx "^(\?|\I)" | xargs -0 --no-run-if-empty rm -Iv
+  svn_stx "^(\?|\I)" | xargs -0 -p --no-run-if-empty rm -v --one-file-system --
 }
 
 # Revert modified files, don't change unversionned files
@@ -246,7 +246,7 @@ svn_import() {
       return 0
     fi
     echo "Last archive available: $ARCHIVE"
-    if ! $SVN_YES askuser "Use this archive? (y/n): " y Y; then
+    if test $SVN_YES || ! askuser "Use this archive? (y/n): " y Y; then
       echo "No archive selected..."
       return 0
     fi
@@ -268,7 +268,7 @@ svn_suspend() {
 # Resume a CL
 svn_resume() {
   # Look for modified repo
-  if svn_modified && ! $SVN_YES askuser "Your repository has local changes, proceed anyway? (y/n): " y Y; then
+  if svn_modified && test $SVN_YES || ! askuser "Your repository has local changes, proceed anyway? (y/n): " y Y; then
     return
   fi
   # Import CL
