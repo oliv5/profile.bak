@@ -8,7 +8,7 @@ screen() {
   [ -z "$SCREEN_DISPLAY" ] && export SCREEN_DISPLAY="$DISPLAY"
   if [ $# = 0 ]; then
     # Recall old session or create a new one
-    command -p screen -d -R
+    command -p screen -R
   else
     # Execute command normally
     command -p screen "$@"
@@ -28,6 +28,7 @@ screen_setdisplay() {
 
 # Alias
 alias screen-list='screen -ls'
+alias screen-recall='screen -R'
 alias screen-restore='screen -R -D'
 alias screen-killd="screen -ls | awk -F "." '/Detached/{print $1}' | xargs -r kill"
 alias screen-killa="screen -ls | awk -F "." '/pts/{print $1}' | xargs -r kill"
