@@ -134,8 +134,8 @@
 	"	au BufEnter * 		call <SID>MRUreset()
 	"augroup END
 
-	FnNoremap <C-Tab>		:MRUbackward<CR>
-	FnNoremap <C-S-Tab>		:MRUforward<CR>
+	FnNoremap <C-Tab>		:MRUforward<CR>
+	FnNoremap <C-S-Tab>		:MRUbackward<CR>
 " }
 
 " Bundles configuration overwritten by SPF13 {
