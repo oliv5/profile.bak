@@ -12,27 +12,23 @@ if [ -z "$ENV_PROFILE" -a -r "$HOME/.profile" ]; then
 fi
 
 # Load local configuration scripts
-if [ -x "$HOME/.localrc" ]; then
-  export ENV_LOCALRC=$((ENV_CNT=ENV_CNT+1))
-  . "$HOME/.localrc"
-fi
-if [ -x "$HOME/.profile.local" ]; then
-  export ENV_PROFILE_LOCAL=$((ENV_CNT=ENV_CNT+1))
-  . "$HOME/.profile.local"
+if [ -x "$HOME/.profilerc.local" ]; then
+  export ENV_PROFILERC_LOCAL=$((ENV_CNT=ENV_CNT+1))
+  . "$HOME/.profilerc.local"
 fi
 
 # Load main profile scripts
-export ENV_PROFILE_D=$((ENV_CNT=ENV_CNT+1))
-for i in "$HOME/.profile.d/"*.sh ; do
+export ENV_PROFILERC_D=$((ENV_CNT=ENV_CNT+1))
+for i in "$HOME/.profilerc.d/"*.sh ; do
   if [ -x "$i" ]; then
     . "$i"
   fi
 done
 
-# Load bash scripts when running bash
+# Load bash profile scripts when running bash
 if [ ! -z "$BASH_VERSION" ]; then
   export ENV_BASH_D=$((ENV_CNT=ENV_CNT+1))
-  for i in "$HOME/.profile.d/bash/"*.sh ; do
+  for i in "$HOME/.profilerc.d/bash/"*.sh ; do
     if [ -x "$i" ]; then
       . "$i"
     fi
@@ -40,8 +36,8 @@ if [ ! -z "$BASH_VERSION" ]; then
 fi
 
 # Load local profile scripts
-export ENV_PROFILE_LOCAL_D=$((ENV_CNT=ENV_CNT+1))
-for i in "$HOME/.profile.local.d/"*.sh ; do
+export ENV_PROFILERC_LOCAL_D=$((ENV_CNT=ENV_CNT+1))
+for i in "$HOME/.profilerc.local.d/"*.sh ; do
   if [ -x "$i" ]; then
     . "$i"
   fi

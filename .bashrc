@@ -3,6 +3,9 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
+# Load .profile when not already done
+[ -z "$ENV_PROFILE" ] && [ -r ~/.profile ] && . ~/.profile
+
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 case $- in
