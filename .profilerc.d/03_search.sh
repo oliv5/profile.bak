@@ -20,10 +20,10 @@ alias iffd='NAME=iname ffd'
 
 # Search pattern functions
 _fgrep() {
-  [ $# -ge 1 ] && _ffind "${!#}" -type f -print0 | xargs -0 $(which grep) -nH --color "${@:1:($#-1)}"
+  [ $# -ge 1 ] && _ffind "${!#}" -type f -print0 | xargs -0 grep -nH --color "${@:1:($#-1)}"
 }
 _fgrep2() {
-  $(which grep) --color=auto -rnH $GREP_EXCLUDE "${@:1:$(($# - 1))}" --include=${!#}
+  grep --color=auto -rnH $GREP_EXCLUDE --include="$(basename "${!#}")" "${@:1:$(($# - 1))}" "$(dirname "${!#}")"
 }
 gg()  { _fgrep2    "${1:?Nothing to do}" "${2:-*}" "${@:3}" ;}
 igg() { _fgrep2 -i "${1:?Nothing to do}" "${2:-*}" "${@:3}" ;}
