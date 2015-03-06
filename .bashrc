@@ -4,7 +4,9 @@
 # for examples
 
 # Load .profile when not already done
-[ -z "$ENV_PROFILE" ] && [ -r ~/.profile ] && . ~/.profile
+if [ -z "$ENV_PROFILE" ] && [ -r "$HOME/.profile" ]; then
+    . "$HOME/.profile"
+fi
 
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
@@ -124,7 +126,7 @@ fi
 export ENV_BASHRC=$((ENV_CNT=ENV_CNT+1))
 
 # Bootstrap user profile
-if [ -r "$HOME/.profilerc" ]; then
+if [ -x "$HOME/.profilerc" ]; then
   . "$HOME/.profilerc"
 fi
 

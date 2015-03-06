@@ -7,7 +7,7 @@
 export ENV_PROFILERC=$((ENV_CNT=ENV_CNT+1))
 
 # Load .profile when not already done
-if [ -z "$ENV_PROFILE" -a -r "$HOME/.profile" ]; then
+if [ -z "$ENV_PROFILE" ] && [ -r "$HOME/.profile" ]; then
   . "$HOME/.profile"
 fi
 
