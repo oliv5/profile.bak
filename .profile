@@ -20,7 +20,7 @@ export ENV="$HOME/.profilerc"
 export ENV_PROFILE=$((ENV_CNT=ENV_CNT+1))
 
 # Load local profile script
-if [ -x "$HOME/.profile.local" ]; then
+if [ -r "$HOME/.profile.local" ]; then
   export ENV_PROFILE_LOCAL=$((ENV_CNT=ENV_CNT+1))
   . "$HOME/.profile.local"
 fi
