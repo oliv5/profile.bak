@@ -7,7 +7,6 @@ if command -v gedit >/dev/null; then
     local ARGS="$(echo $@ | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1 +\2/g')"
     command -p gedit $ARGS
   }
-  export gedit
 fi
 
 #########################
@@ -17,7 +16,6 @@ if command -v geany >/dev/null; then
     local ARGS="$(echo $@ | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1 +\2/g')"
     command -p geany $ARGS
   }
-  export geany
 fi
 
 #########################
@@ -35,14 +33,12 @@ if command -v gvim >/dev/null; then
     fi
     command -p gvim $ARGS
   }
-  export gvim
 fi
 
 #########################
 # Source insight
 if command -v si.sh >/dev/null; then
   si() {
-    eval $(command -v si.sh || false) "$@"
+    PREFIX="$HOME/.wine-sourceinsight" si.sh "$@"
   }
-  export si
 fi
