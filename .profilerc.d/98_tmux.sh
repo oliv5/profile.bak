@@ -1,4 +1,6 @@
 #!/bin/sh
+# Do not load when not installed
+command -v tmux >/dev/null || return 1
 
 # Variables
 #TMUX_AUTOLOAD=""
@@ -14,7 +16,12 @@ tmux() {
   fi
 }
 
+#alias
+alias tmux_list='tmux ls 2>/dev/null'
+
 # Re-attach session, or print the list
 if [ ! -z "$TMUX_AUTOLOAD" ] && [ -z "$ENV_LOADED" ] && shell_isinteractive && shell_islogin; then
   tmux 2>/dev/null
+else
+  tmux ls 2>/dev/null
 fi

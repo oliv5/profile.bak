@@ -1,4 +1,6 @@
 #!/bin/sh
+# Do not load when not installed
+command -v screen >/dev/null || return 1
 
 # Variables
 #SCREEN_AUTOLOAD=""
@@ -26,14 +28,24 @@ screen_setdisplay() {
   screen-cmd "$1" "export DISPLAY=$DISPLAY"
 }
 
+# List screen sessions
+screen_list() {
+  command -p screen -q -r
+  if [ $? -ne 10 ]; then
+    screen -ls
+  fi
+}
+
 # Alias
-alias screen-list='screen -ls'
-alias screen-recall='screen -R'
-alias screen-restore='screen -R -D'
-alias screen-killd="screen -ls | awk -F "." '/Detached/{print $1}' | xargs -r kill"
-alias screen-killa="screen -ls | awk -F "." '/pts/{print $1}' | xargs -r kill"
+alias screen_recall='screen -r'
+alias screen_restore='screen -R -D'
+alias screen_quit='screen -X quit -S'
+alias screen_killdetached="screen -ls | awk -F '.' '/Detached/{print \$1}' | xargs -r kill"
+alias screen_killall="screen -ls | awk -F '.' '/pts/{print \$1}' | xargs -r kill"
 
 # Re-attach session, or print the list
 if [ ! -z "$SCREEN_AUTOLOAD" ] && [ -z "$ENV_LOADED" ] && shell_isinteractive && shell_islogin; then
   screen 2> /dev/null
+else
+  screen_list
 fi
