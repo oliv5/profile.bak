@@ -254,7 +254,7 @@ svn_import() {
   # Check we are in a repository
   svn_exists || return
   # Extract with full path
-  7z x "$ARCHIVE" -o"${2:-./}"
+  7z x "$ARCHIVE" -o"${3:-./}"
 }
 
 # Suspend a CL
