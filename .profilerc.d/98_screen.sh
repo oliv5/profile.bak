@@ -30,8 +30,8 @@ screen_setdisplay() {
 
 # List screen sessions
 screen_list() {
-  command -p screen -q -r
-  if [ $? -ne 10 ]; then
+  command -p screen -q -ls
+  if [ $? -ne 9 ]; then
     screen -ls
   fi
 }
