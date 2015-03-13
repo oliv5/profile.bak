@@ -5,11 +5,7 @@ SED_EXCLUDE="$FIND_EXCLUDE -not -type l -and -not -path '*obj*'"
 
 # Find files functions
 _ffind() {
-  trap "set +f; trap SIGINT" SIGINT
-  set -f
-  find -L "$(dirname "${1:-.}")" -nowarn \( -${NAME:-name} $(sed -e 's/;/ -o -'${NAME:-name}' /g' <<< $(basename "${1:-*}")) \) -and $FIND_EXCLUDE "${@:2}"
-  set +f
-  trap SIGINT
+  (set -f; find -L "$(dirname "${1:-.}")" -nowarn \( -${NAME:-name} $(echo "$(basename "${1:-*}")" | sed -e 's/;/ -o -'${NAME:-name}' /g') \) -and $FIND_EXCLUDE "${@:2}")
 }
 ff()  { _ffind "$@" ;}
 fff() { _ffind "${1:-*}" -type f "${@:2}" ;}
