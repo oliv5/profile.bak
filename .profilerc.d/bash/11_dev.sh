@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Override find files functions
 # Remove the ":line" pattern from compiler & grep
