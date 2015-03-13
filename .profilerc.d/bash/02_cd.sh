@@ -26,3 +26,6 @@ cds() { echo "backward[${#_cd_sback[@]}]: ${_cd_sback[@]}"; echo "forward[${#_cd
 
 # Empty stacks
 cdc() { _cd_sback=(); _cd_sforw=(); }
+
+# Make and cd
+mkcd () { mkdir -p "$@" && cd "$@"; }
