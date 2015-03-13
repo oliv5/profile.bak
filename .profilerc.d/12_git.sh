@@ -128,6 +128,9 @@ git_ls() {
   git ls-tree -r ${1:-master} --name-only ${2:+| grep -F "$2"}
 }
 
+# Amend log
+alias git_amend='git commit --amend'
+
 # Amend author/committer names & emails
 git_amend_names() {
   # Identify who/what the amend is about
