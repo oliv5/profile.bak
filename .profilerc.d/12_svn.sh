@@ -65,12 +65,12 @@ svn_url() {
 
 # Get path to svn current root
 svn_root() {
-  echo "${PWD}$(sed -e "s;$(svn_repo);;" -e "s;/[^\/]*;/..;g" <<< $(svn_url))"
+  echo "${PWD}$(svn_url | sed -e "s;$(svn_repo);;" -e "s;/[^\/]*;/..;g")"
 }
 
 # Get svn current branch
 svn_branch() {
-  sed -e "s;$(svn_repo);;" <<< "$(svn_url)"
+  svn_url | sed -e "s;$(svn_repo);;"
 }
 
 # Get svn repository revision
@@ -362,7 +362,7 @@ svn_ziplast() {
 }
 
 # Diff an archive with current repo
-_svn_diffzip() {
+__svn_diffzip() {
   local ARCHIVE="$2"
   if [ ! -f "$ARCHIVE" ]; then
     ARCHIVE="$(svn_ziplast 1 "" "${ARCHIVE:-"*$(basename "$PWD")*"}")"
@@ -370,7 +370,7 @@ _svn_diffzip() {
   # Warning: eval remove one level of quotes
   eval "$1" "." "\"$ARCHIVE\""
 }
-alias svn_diffzip='_svn_diffzip 7zdiff'
-alias svn_diffzipc='_svn_diffzip 7zdiffd 2>/dev/null | wc -l'
-alias svn_diffzipm='_svn_diffzip 7zdiffm'
-alias svn_diffzipd='_svn_diffzip 7zdiffd'
+alias svn_diffzip='__svn_diffzip _7zdiff'
+alias svn_diffzipc='__svn_diffzip _7zdiffd 2>/dev/null | wc -l'
+alias svn_diffzipm='__svn_diffzip _7zdiffm'
+alias svn_diffzipd='__svn_diffzip _7zdiffd'

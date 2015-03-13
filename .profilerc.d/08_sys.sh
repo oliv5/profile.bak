@@ -84,12 +84,15 @@ kill_mem_top() {
 }
 
 mem_ps() {
+  ps -A --sort -rss -o comm,pmem,rss | head -n 11 |
   while read command percent rss; do
     if [ "${command}" != "COMMAND" ]; then
       rss="$(echo "scale=2;${rss}/1024" | bc)"
     fi
     printf "%-26s%-8s%s\n" "${command}" "${percent}" "${rss}"
-  done < <(ps -A --sort -rss -o comm,pmem,rss | head -n 11)
+  done
+  # The following is a bashism
+  #done < <(ps -A --sort -rss -o comm,pmem,rss | head -n 11)
 }
 
 # system information aliases
