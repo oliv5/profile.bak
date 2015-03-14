@@ -17,6 +17,16 @@ mount_ecryptfs() {
   sudo chmod 700 "$DST"
 }
 
+# Mount encfs
+mount_encfs() {
+  local SRC="${1:?Missing source directory...}"
+  local DST="${2:?Missing dest directory...}"
+  local KEY="${3:?Missing encfs key...}"
+  local PASSFILE="${4}"
+  local OPT="${@:5}"
+  ENCFS6_CONFIG="$(readlink -f "$KEY")" encfs -o nonempty ${PASSFILE:+--extpass='cat "$PASSFILE"'} "$OPT" "$SRC" "$DST"
+}
+
 # Mount iso
 mount_iso() {
   sudo mount -o loop -t iso9660 "$@"
