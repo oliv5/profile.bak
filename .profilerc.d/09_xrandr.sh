@@ -29,10 +29,10 @@ xrandr_setres() {
 # Enable display
 xrandr_en() {
   #See options like --dryrun, --mode 1024x768
-  xrandr --output "${1:?No display specified}" --auto ${@:2}
+  xrandr --output "${1:?No display specified}" --auto "$(shell_ltrim 1 "$@")"
 }
 
 # Disable display
 xrandr_dis() {
-  xrandr --output "${1:?No display specified}" --off ${@:2}
+  xrandr --output "${1:?No display specified}" --off "$(shell_ltrim 1 "$@")"
 }

@@ -32,10 +32,9 @@ scancsdir() {
   local DST="$(eval echo ${2:-$PWD})"
   # Get options
   local CSCOPE_FILES="$DST/cscope.files"
+  shift 2; local OPTS="$@"
   # Scan directory
-  set -f
-  find "$SRC" $CSCOPE_EXCLUDE ${@:3} -regextype posix-egrep -regex "$CSCOPE_REGEX" -type f -printf '"%p"\n' >> "$CSCOPE_FILES"
-  set +f
+  ( set -f; find "$SRC" $CSCOPE_EXCLUDE "$OPTS" -regextype posix-egrep -regex "$CSCOPE_REGEX" -type f -printf '"%p"\n' >> "$CSCOPE_FILES" )
 }
 
 # Make cscope db from source list file
@@ -50,7 +49,8 @@ mkcscope_1() {
   local CSCOPE_DB="$DST/cscope.out"
   # Build file list
   if [ ! -e $CSCOPE_FILES ]; then
-    scancsdir "$SRC" "$DST" ${@:4}
+    shift 3; local OPTS="$@"
+    scancsdir "$SRC" "$DST" "$OPTS"
   fi
   # Build tag file
   ${DBG} $(which cscope) $CSCOPE_OPTIONS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
@@ -67,8 +67,9 @@ mkcscope_2() {
   # Get options
   local CSCOPE_OPTIONS="$CSCOPE_OPTS $3"
   local CSCOPE_DB="$DST/cscope.out"
+  shift 3; local OPTS="$@"
   # Build tag file
-  find "$SRC" $CSCOPE_EXCLUDE ${@:4} -regextype posix-egrep -regex "$CSCOPE_REGEX" -type f -printf '"%p"\n' | \
+  find "$SRC" $CSCOPE_EXCLUDE "$OPTS" -regextype posix-egrep -regex "$CSCOPE_REGEX" -type f -printf '"%p"\n' | \
     ${DBG} $(which cscope) $CSCOPE_OPTIONS -i '-' -f "$CSCOPE_DB"
 }
 

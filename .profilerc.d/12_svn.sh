@@ -80,11 +80,11 @@ svn_rev() {
 
 # Get status file list
 svn_st() {
-  svn st "${@:2}" | awk '/'"${1:-^[^ ]}"'/ {$0=substr($0,9); gsub(/\"/,"\\\"",$0); printf "\"%s\"", $0}'
+  svn st "$(shell_ltrim 1 "$@")" | awk '/'"${1:-^[^ ]}"'/ {$0=substr($0,9); gsub(/\"/,"\\\"",$0); printf "\"%s\"", $0}'
 }
 svn_stx() {
-  #svn st "${@:2}" | awk '/'"${1:-^[^ ]}"'/ {print substr($0,9)}' | tr '\n' '\0'
-  svn st "${@:2}" | grep -E "${1:-^[^ ]}" | cut -c 9- | tr '\n' '\0'
+  #svn st "$(shell_ltrim 1 "$@")" | awk '/'"${1:-^[^ ]}"'/ {print substr($0,9)}' | tr '\n' '\0'
+  svn st "$(shell_ltrim 1 "$@")" | grep -E "${1:-^[^ ]}" | cut -c 9- | tr '\n' '\0'
 }
 
 # Extract SVN revisions from string rev0:rev1
@@ -144,7 +144,7 @@ svn_cl() {
 
 # Commit a changelist
 svn_ci() {
-  svn ci --cl "${1:?No changelist specified...}" "${@:2}"
+  svn ci --cl "${1:?No changelist specified...}" "$(shell_ltrim 1 "$@")"
 }
 
 # Check svn repository existenz
@@ -178,7 +178,7 @@ svn_revert() {
   # Backup
   svn_export HEAD HEAD "$(svn_bckdir)/$(svn_bckname revert "" $(svn_rev)).7z"
   # Revert local modifications
-  svn revert -R . ${1:+--cl $1} "${@:2}"
+  svn revert -R . ${1:+--cl $1} "$(shell_ltrim 1 "$@")"
 }
 
 # Rollback to a previous revision, don't change unversionned files
@@ -214,7 +214,7 @@ svn_export() {
     fi
   fi
   # Get applicable files
-  local FILES="${@:4}"
+  local FILES="$(shell_ltrim 3 "$@")"
   # Create archive, if not existing already
   if [ ! -f "$ARCHIVE" ]; then
     if [ "$REV1" = "HEAD" ]; then
@@ -307,33 +307,33 @@ svn_history() {
 
 # Show logs in a range of revisions (-r and -c allowed)
 svn_log() {
-  svn log --verbose ${2:+-r $1:}${2:-${1:+-c $1}} ${@:3}
+  svn log --verbose ${2:+-r $1:}${2:-${1:+-c $1}} $(shell_ltrim 2 "$@")
 }
 svn_shortlog() {
-  svn_log ${2:+-r $1:}${2:-${1:+-c $1}} ${@:3} | grep -E "^[^ |\.]"
+  svn_log ${2:+-r $1:}${2:-${1:+-c $1}} $(shell_ltrim 2 "$@") | grep -E "^[^ |\.]"
 }
 svn_userlog() {
-  svn_log ${@:2} | sed -n "/${1:-$USER}/,/-----$/ p"
+  svn_log $(shell_ltrim 1 "$@") | sed -n "/${1:-$USER}/,/-----$/ p"
 }
 
 # Display content of a file (only -r rev allowed)
 svn_cat () {
-  svn cat ${1:+-r $1} ${@:2}
+  svn cat ${1:+-r $1} $(shell_ltrim 1 "$@")
 }
 
 # Display the changes in a file in a range of revisions
 # or list changed files in a range of revisions (-r and -c allowed)
 svn_diff() {
-  svn diff ${2:+-r $1:}${2:-${1:+-c $1}} ${@:3}
+  svn diff ${2:+-r $1:}${2:-${1:+-c $1}} $(shell_ltrim 2 "$@")
 }
 svn_diffx() {
-  svn diff ${2:+-r $1:}${2:-${1:+-c $1}} ${@:3} | tr '\n' '\0'
+  svn diff ${2:+-r $1:}${2:-${1:+-c $1}} $(shell_ltrim 2 "$@") | tr '\n' '\0'
 }
 svn_diffm() {
-  svn_diff ${1:-HEAD} ${2:-PREV} ${@:3} --diff-cmd meld
+  svn_diff ${1:-HEAD} ${2:-PREV} $(shell_ltrim 2 "$@") --diff-cmd meld
 }
 svn_diffl() {
-  svn_diff ${1:-HEAD} ${2:-PREV} ${@:3} --summarize
+  svn_diff ${1:-HEAD} ${2:-PREV} $(shell_ltrim 2 "$@") --summarize
 }
 
 # Make an archive based on the file status
@@ -343,7 +343,7 @@ svn_zipst() {
 
 # Make an archive based on a diff
 svn_zipdiff() {
-  svn_diffx "${@:2}" | xargs -0 --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${1:?No archive file defined}"
+  svn_diffx "$(shell_ltrim 1 "$@")" | xargs -0 --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${1:?No archive file defined}"
 }
 
 # List the archives based on given name
@@ -358,7 +358,7 @@ svn_zipls() {
 
 # Returns the last archive found based on given name
 svn_ziplast() {
-  svn_zipls "${@:2}" | head -n ${1:-1}
+  svn_zipls "$(shell_ltrim 1 "$@")" | head -n ${1:-1}
 }
 
 # Diff an archive with current repo

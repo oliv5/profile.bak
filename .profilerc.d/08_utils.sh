@@ -1,21 +1,6 @@
 #!/bin/sh
 
 ################################
-# https://stackoverflow.com/questions/18186929/differences-between-login-shell-and-interactive-shell
-
-# Returns true for interactive shells
-shell_isinteractive() {
-  # Test whether stdin exists
-  [ -t "0" ] || [ -p /dev/stdin ]
-}
-
-# Returns true for login shells
-shell_islogin() {
-  # Test whether the caller name starts with a "-"
-  [ "$(echo "$0" | cut -c 1)" = "-" ]
-}
-
-################################
 # To lower
 toLower() {
   echo "${@}" | tr "[:upper:]" "[:lower:]"
@@ -56,7 +41,7 @@ get_passwd() {
 wget_mirror() {
   local SITE=${1:?Please specify the URL}
   local DOMAIN=$(echo "$SITE" | sed -E 's;^https?://([^/]*)/.*$;\1;')
-  local OPTS="${@:2}"
+  shift; local OPTS="$@"
   wget $OPTS --recursive -l${LEVEL:-9999} --no-parent --no-directories --no-clobber --domains ${DOMAIN:?Found no domain} --convert-links --html-extension --page-requisites -e robots=off -U mozilla --limit-rate=${LIMITRATE:-200k} --random-wait "$SITE"
 }
 
