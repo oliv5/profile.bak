@@ -14,6 +14,7 @@ alias gu='git ls-files -o'
 # Diff aliases
 alias gdd='git diff'
 alias gdm='git difftool -y -t meld --'
+alias gdc='git mergetool -y -t meld --'
 alias gds='git stash show -t'
 # Stash aliases
 alias gsc='git_stash_push'
@@ -76,14 +77,19 @@ git_stash_apply() {
 
 # Show diff between stash and local copy
 git_stash_diff() {
-  local STASH="${1:-0}"; shift; local ARGS="$@"
-  git diff stash@{$STASH} "$ARGS"
+  local STASH="${1:-0}"; shift
+  git diff stash@{$STASH} "$@"
 }
 
 #Show stash content
 git_stash_show() {
-  local STASH="${1:-0}"; shift; local ARGS="$@"
-  git stash show -p stash@{$STASH} "$ARGS"
+  local STASH="${1:-0}"; shift
+  git stash show -p stash@{$STASH} "$@"
+}
+
+#List stash content
+git_stash_list() {
+  git stash list
 }
 
 # Aliases using stashes
@@ -99,15 +105,15 @@ git_revert() {
   if [ -f "$1" -o -f "$2" ]; then
     git checkout -- "$@"
   else
-    local REV="${1:-HEAD}"; shift; local ARGS="$@"
-    git reset --hard "$REV" "$ARGS"
+    local REV="${1:-HEAD}"; shift
+    git reset --hard "$REV" "$@"
   fi
 }
 
 # Soft revert to a given CL, won't change modified files
 git_rollback() {
-  local REV="${1:-HEAD}"; shift; local ARGS="$@"
-  git reset "$REV" "$ARGS"
+  local REV="${1:-HEAD}"; shift
+  git reset "$REV" "$@"
 }
 
 # Clean repo back to given CL
