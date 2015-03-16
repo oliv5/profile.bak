@@ -4,22 +4,21 @@
 # Remove the ":line" pattern from compiler & grep
 alias ff='_ff'
 _ff() {
-  local IFS="$(printf '\t\n ')"
-  local ARGS="$(shell_ltrim 1 "$@")"
-  (set -f; eval _ffind "$(echo "$1" | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1/g')" "$ARGS")
+  local ARG1="$1"; shift
+  (set -f; _ffind "$(echo "$ARG1" | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1/g')" "$@")
 }
 
 # Various dev search function helpers
-h()     { local ARGS="$(shell_ltrim 2 "$@")"; (set -f; eval NAME= _fgrep "${1}" ${CASE} "$ARGS" "${2:-.}/*.h;*.hpp"); }
-c()     { local ARGS="$(shell_ltrim 2 "$@")"; (set -f; eval NAME= _fgrep "${1}" ${CASE} "$ARGS" "${2:-.}/*.c;*.cpp;*.cc"); }
-hc()    { local ARGS="$(shell_ltrim 2 "$@")"; (set -f; eval NAME= _fgrep "${1}" ${CASE} "$ARGS" "${2:-.}/*.c;*.cpp;*.cc;*.h;*.hpp"); }
-py()    { local ARGS="$(shell_ltrim 2 "$@")"; (set -f; eval NAME= _fgrep "${1}" ${CASE} "$ARGS" "${2:-.}/*.py"); }
-mk()    { local ARGS="$(shell_ltrim 2 "$@")"; (set -f; eval NAME= _fgrep "${1}" ${CASE} "$ARGS" "${2:-.}/*.mk;Makefile"); }
-shell() { local ARGS="$(shell_ltrim 2 "$@")"; (set -f; eval NAME= _fgrep "${1}" ${CASE} "$ARGS" "${2:-.}/*.sh"); }
-ref()   { local ARGS="$(shell_ltrim 2 "$@")"; (set -f; eval NAME= _fgrep "${1}" ${CASE} "$ARGS" "${2:-.}/*.c;*.cpp;*.cc;*.h;*.hpp;*.py;*.mk;Makefile;*.sh;*.vhd;*.v;*.inc;*.S"); }
-v()     { local ARGS="$(shell_ltrim 2 "$@")"; (set -f; eval NAME= _fgrep "${1}" ${CASE} "$ARGS" "${2:-.}/*.vhd;*.v"); }
-xml()   { local ARGS="$(shell_ltrim 2 "$@")"; (set -f; eval NAME= _fgrep "${1}" ${CASE} "$ARGS" "${2:-.}/*.xml"); }
-asm()   { local ARGS="$(shell_ltrim 2 "$@")"; (set -f; eval NAME= _fgrep "${1}" ${CASE} "$ARGS" "${2:-.}/*.inc;*.S"); }
+h()     { local ARG1="$1"; local ARG2="$2"; shift; (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.h;*.hpp"); }
+c()     { local ARG1="$1"; local ARG2="$2"; shift; (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.c;*.cpp;*.cc"); }
+hc()    { local ARG1="$1"; local ARG2="$2"; shift; (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.c;*.cpp;*.cc;*.h;*.hpp"); }
+py()    { local ARG1="$1"; local ARG2="$2"; shift; (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.py"); }
+mk()    { local ARG1="$1"; local ARG2="$2"; shift; (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.mk;Makefile"); }
+shell() { local ARG1="$1"; local ARG2="$2"; shift; (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.sh"); }
+ref()   { local ARG1="$1"; local ARG2="$2"; shift; (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.c;*.cpp;*.cc;*.h;*.hpp;*.py;*.mk;Makefile;*.sh;*.vhd;*.v;*.inc;*.S"); }
+v()     { local ARG1="$1"; local ARG2="$2"; shift; (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.vhd;*.v"); }
+xml()   { local ARG1="$1"; local ARG2="$2"; shift; (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.xml"); }
+asm()   { local ARG1="$1"; local ARG2="$2"; shift; (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.inc;*.S"); }
 alias ih='CASE=-i h'
 alias ic='CASE=-i c'
 alias ihc='CASE=-i hc'
@@ -40,28 +39,28 @@ REGEX_TYPEDEF='(typedef\s+\w+\s$1)|(^\s*$1\s*;)'
 REGEX_DEFINE='(#define\s+$1|^\s*$1\s*,)|(^\s*$1\s*=.*,)'
 
 func() {
-  local ARGS="$(shell_ltrim 1 "$@")"; (set -f; eval ref "${REGEX_FUNC//\$1/$1}" . -E "$ARGS")
+  local ARG1="$1"; shift; (set -f; ref "${REGEX_FUNC//\$ARG1/$ARG1}" . -E "$@")
 }
 
 var() {
-  local ARGS="$(shell_ltrim 1 "$@")"; (set -f; eval ref "${REGEX_VAR//\$1/$1}" . -E "$ARGS")
+  local ARG1="$1"; shift; (set -f; ref "${REGEX_VAR//\$ARG1/$ARG1}" . -E "$@")
 }
 
 struct() {
-  local ARGS="$(shell_ltrim 1 "$@")"; (set -f; eval ref "${REGEX_STRUCT//\$1/$1}" . -E "$ARGS")
+  local ARG1="$1"; shift; (set -f; ref "${REGEX_STRUCT//\$ARG1/$ARG1}" . -E "$@")
 }
 
 define() {
-  local ARGS="$(shell_ltrim 1 "$@")"; (set -f; eval ref "${REGEX_DEFINE//\$1/$1}" . -E "$ARGS")
+  local ARG1="$1"; shift; (set -f; ref "${REGEX_DEFINE//\$ARG1/$ARG1}" . -E "$@")
 }
 
 typedef() {
-  local ARGS="$(shell_ltrim 1 "$@")"; (set -f; eval ref "${REGEX_TYPEDEF//\$1/$1}" . -E "$ARGS")
+  local ARG1="$1"; shift; (set -f; ref "${REGEX_TYPEDEF//\$ARG1/$ARG1}" . -E "$@")
 }
 
 def() {
   local REGEX="($REGEX_FUNC)|($REGEX_VAR)|($REGEX_STRUCT)|($REGEX_DEFINE)|($REGEX_TYPEDEF)"
-  local ARGS="$(shell_ltrim 1 "$@")"; (set -f; eval ref "${REGEX//\$1/$1}" . -E "$ARGS")
+  local ARG1="$1"; shift; (set -f; ref "${REGEX//\$ARG1/$ARG1}" . -E "$@")
 }
 
 # Search alias

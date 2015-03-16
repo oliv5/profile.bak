@@ -5,11 +5,11 @@
 # arguments are escaped.
 #
 shell_quote() {
-	local sep=''
-	for arg in "$@"; do
-		sqesc=$(printf '%s\n' "${arg}" | sed -e "s/'/'\\\\''/g")
-		printf '%s' "${sep}'${sqesc}'"
-		sep=' '
+	local SEP=''
+	for ARG in "$@"; do
+		SQESC=$(printf '%s\n' "${ARG}" | sed -e "s/'/'\\\\''/g")
+		printf '%s' "${SEP}'${SQESC}'"
+		SEP=' '
 	done
 }
 
@@ -22,33 +22,6 @@ shell_rtrim() {
 		ARG=$(printf '%s\n' "${ARG}" | sed -e "s/'/'\\\\''/g")
 		printf '%s' "'${ARG}' "
 	done
-}
-
-# Left trim shell parameters
-shell_ltrim() {
-	local IFS="$(printf '\n\t ')"
-	shift $(($1+1))
-	echo "$@"
-}
-
-# Trim left&right shell parameters
-shell_trim() {
-	eval set $(shell_rtrim $2 $(shell_ltrim $1 "$@"))
-	echo "$@"
-}
-
-# Retrieve last shell parameters
-shell_lastargs() {
-	local IFS="$(printf '\n\t ')"
-	shift $(($#-$1))
-	echo "$@"
-}
-
-# Retrieve one of the last shell parameters
-shell_lastarg() {
-	local IFS="$(printf '\n\t ')"
-	shift $(($#-$1))
-	echo "$1"
 }
 
 ################################
@@ -65,4 +38,3 @@ shell_islogin() {
   # Test whether the caller name starts with a "-"
   [ "$(echo "$0" | cut -c 1)" = "-" ]
 }
-
