@@ -45,6 +45,7 @@ wget_mirror() {
   wget $OPTS --recursive -l${LEVEL:-9999} --no-parent --no-directories --no-clobber --domains ${DOMAIN:?Found no domain} --convert-links --html-extension --page-requisites -e robots=off -U mozilla --limit-rate=${LIMITRATE:-200k} --random-wait "$SITE"
 }
 
+################################
 # Hex to signed 32
 hex2int32() {
   local MAX=$((1<<${2:-32}))
@@ -73,6 +74,7 @@ uint2hex() {
   printf "0x%x" "$1"
 }
 
+################################
 # Execute on remote host
 alias exec-rem='exec-remote'
 exec_remote() {
@@ -116,16 +118,22 @@ alias rm-ansi='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'
 
 # Send email using mutt or mail
 send_mail() {
-  local DEST="${1:?No email address specified}"
+  local DEST="${1:?No dest email address specified}"
   local SUBJECT="${2:?No subject specified}"
   local CONTENT="${3:?No content specified}"
   local ATTACH="$4"
   local CC="$5"
   local BCC="$6"
+  local FROM="$7"
+  local SMTP="$8"
   if command -v mutt >/dev/null; then
     echo "$CONTENT" | mutt ${ATTACH:+-a "$ATTACH"} ${SUBJECT:+-s "$SUBJECT"} -- ${DEST} && echo "Email sent"
   elif command -v mail >/dev/null; then
     echo "$CONTENT" | mail ${SUBJECT:+-s "$SUBJECT"} ${DEST} && echo "Email sent"
+  elif command -v sendmail >/dev/null; then
+    echo "$CONTENT" | sendmail ${DEST} && echo "Email sent"
+  elif command -v sendemail >/dev/null; then
+    sendemail -q -u "$CONTENT" -f "${FROM:-$USER}" -t "$DEST" ${SMTP:+-s $SMTP} && echo "Email sent"
   else
     echo "No mail program found"
     return 1
@@ -133,10 +141,22 @@ send_mail() {
   return 0
 }
 
+################################
 # Convert to libreoffice formats
 conv_soffice() {
-  FORMAT="${1:?No output format specified}"; shift
-  FILES="$@"
-  unoconv -f "$FORMAT" "$FILES" ||
-    soffice --headless --convert-to "$FORMAT" "$FILES"
+  local FORMAT="${1:?No output format specified}"; shift
+  unoconv -f "$FORMAT" "$@" ||
+    soffice --headless --convert-to "$FORMAT" "$@"
+}
+
+# Convert to PDF
+conv_pdf() {
+  # sudo apt-get install wv texlive-base texlive-latex-base ghostscript
+  wvPDF "$@"
+}
+
+# Merge PDFs
+merge_pdf() {
+  local INPUT="$(shell_rtrim 1 "$@")"; shift $(($#-1))
+  eval command -p gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -sOutputFile="$@" "$INPUT"
 }

@@ -194,8 +194,8 @@ svn_rollback() {
   svn_exists || return
   # Backup
   svn_export $REV1 $REV2 "$(svn_bckdir)/$(svn_bckname rollback "" $REV1 $REV2).7z"
-  # Rollback (svn merge back)
-  svn merge -r $REV1:$REV2 .
+  # Rollback (svn merge back from REV2 to REV1)
+  svn merge -r $REV2:$REV1 .
 }
 
 # Backup current changes
@@ -335,10 +335,6 @@ svn_diff() {
   local ARG1="$1"; local ARG2="$2"; shift 2
   svn diff ${ARG2:+-r $ARG1:}${ARG2:-${ARG1:+-c $ARG1}} "$@"
 }
-svn_diffx() {
-  local ARG1="$1"; local ARG2="$2"; shift 2
-  svn diff ${ARG2:+-r $ARG1:}${ARG2:-${ARG1:+-c $ARG1}} "$@" | tr '\n' '\0'
-}
 svn_diffm() {
   local ARG1="$1"; local ARG2="$2"; shift 2
   svn_diff ${ARG1:-HEAD} ${ARG2:-PREV} "$@" --diff-cmd meld
@@ -346,6 +342,9 @@ svn_diffm() {
 svn_diffl() {
   local ARG1="$1"; local ARG2="$2"; shift 2
   svn_diff ${ARG1:-HEAD} ${ARG2:-PREV} "$@" --summarize
+}
+svn_difflx() {
+  svn_diffl "$@" | grep -E "^[^ D]" | cut -c 9- | tr '\n' '\0'
 }
 
 # Make an archive based on the file status
@@ -357,7 +356,10 @@ svn_zipst() {
 # Make an archive based on a diff
 svn_zipdiff() {
   local ARG1="$1"; shift
-  svn_diffx "$@" | xargs -0 --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${ARG1:?No archive file defined}"
+  local PATCH="diff_r${1:-HEAD}-${2:-PREV}.patch"
+  svn_diff "$@" > "$PATCH"
+  svn_difflx "$@" | xargs -0 --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${ARG1:?No archive file defined}" "$PATCH"
+  rm "$PATCH"
 }
 
 # List the archives based on given name
