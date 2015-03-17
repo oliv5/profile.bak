@@ -3,6 +3,7 @@
 export GIT_EDITOR="vim"
 export GIT_PAGER="cat"
 
+########################################
 # Status aliases
 alias gs='git status'
 alias gl='git ls-files'
@@ -14,8 +15,9 @@ alias gu='git ls-files -o'
 # Diff aliases
 alias gdd='git diff'
 alias gdm='git difftool -y -t meld --'
-alias gdc='git mergetool -y -t meld --'
 alias gds='git stash show -t'
+# Merge aliases
+alias gmm='git mergetool -y -t meld --'
 # Stash aliases
 alias gsc='git_stash_push'
 alias gss='git_stash_save'
@@ -87,17 +89,14 @@ git_stash_show() {
   git stash show -p stash@{$STASH} "$@"
 }
 
-#List stash content
-git_stash_list() {
-  git stash list
-}
-
 # Aliases using stashes
 alias git_stash_diffl='git_stash_diff --name-only'
 alias git_export='git_stash_save'
 alias git_import='git_stash_apply'
 alias git_suspend='git_stash_push'
 alias git_resume='git_stash_pop'
+alias git_stash_list='git stash list'
+alias git_stash_drop='git stash drop'
 
 ########################################
 # Hard revert to a given CL or revert a file
