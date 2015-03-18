@@ -9,26 +9,26 @@ _ff() {
 }
 
 # Various dev search function helpers
-h()     { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.h;*.hpp"); }
-c()     { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.c;*.cpp;*.cc"); }
-hc()    { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.c;*.cpp;*.cc;*.h;*.hpp"); }
-py()    { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.py"); }
-mk()    { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.mk;Makefile"); }
-shell() { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.sh"); }
-ref()   { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.c;*.cpp;*.cc;*.h;*.hpp;*.py;*.mk;Makefile;*.sh;*.vhd;*.v;*.inc;*.S"); }
-v()     { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.vhd;*.v"); }
-xml()   { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.xml"); }
-asm()   { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; NAME= _fgrep "$ARG1" ${CASE} "$@" "${ARG2:-.}/*.inc;*.S"); }
-alias ih='CASE=-i h'
-alias ic='CASE=-i c'
-alias ihc='CASE=-i hc'
-alias ipy='CASE=-i py'
-alias imk='CASE=-i mk'
-alias ishell='CASE=-i shell'
-alias iref='CASE=-i ref'
-alias iv='CASE=-i v'
-alias ixml='CASE=-i xml'
-alias iasm='CASE=-i asm'
+h()     { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; FCASE= _fgrep "$ARG1" ${GCASE} "$@" "${ARG2:-.}/*.h;*.hpp"); }
+c()     { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; FCASE= _fgrep "$ARG1" ${GCASE} "$@" "${ARG2:-.}/*.c;*.cpp;*.cc"); }
+hc()    { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; FCASE= _fgrep "$ARG1" ${GCASE} "$@" "${ARG2:-.}/*.c;*.cpp;*.cc;*.h;*.hpp"); }
+py()    { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; FCASE= _fgrep "$ARG1" ${GCASE} "$@" "${ARG2:-.}/*.py"); }
+mk()    { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; FCASE= _fgrep "$ARG1" ${GCASE} "$@" "${ARG2:-.}/*.mk;Makefile"); }
+shell() { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; FCASE= _fgrep "$ARG1" ${GCASE} "$@" "${ARG2:-.}/*.sh"); }
+ref()   { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; FCASE= _fgrep "$ARG1" ${GCASE} "$@" "${ARG2:-.}/*.c;*.cpp;*.cc;*.h;*.hpp;*.py;*.mk;Makefile;*.sh;*.vhd;*.v;*.inc;*.S"); }
+v()     { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; FCASE= _fgrep "$ARG1" ${GCASE} "$@" "${ARG2:-.}/*.vhd;*.v"); }
+xml()   { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; FCASE= _fgrep "$ARG1" ${GCASE} "$@" "${ARG2:-.}/*.xml"); }
+asm()   { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; FCASE= _fgrep "$ARG1" ${GCASE} "$@" "${ARG2:-.}/*.inc;*.S"); }
+alias ih='GCASE=-i h'
+alias ic='GCASE=-i c'
+alias ihc='GCASE=-i hc'
+alias ipy='GCASE=-i py'
+alias imk='GCASE=-i mk'
+alias ishell='GCASE=-i shell'
+alias iref='GCASE=-i ref'
+alias iv='GCASE=-i v'
+alias ixml='GCASE=-i xml'
+alias iasm='GCASE=-i asm'
 
 # Search regex
 #REGEX_FUNC='(^|\s+|::)$1\s*\(([^;]*$|[^\}]\})'
@@ -67,14 +67,14 @@ def() {
 alias class='struct'
 alias union='struct'
 alias enum='struct'
-alias ifunc='CASE=-i func'
-alias ivar='CASE=-i var'
-alias istruct='CASE=-i struct'
-alias ienum='CASE=-i enum'
-alias iunion='CASE=-i union'
-alias iclass='CASE=-i class'
-alias itypedef='CASE=-i typedef'
-alias idef='CASE=-i def'
+alias ifunc='GCASE=-i func'
+alias ivar='GCASE=-i var'
+alias istruct='GCASE=-i struct'
+alias ienum='GCASE=-i enum'
+alias iunion='GCASE=-i union'
+alias iclass='GCASE=-i class'
+alias itypedef='GCASE=-i typedef'
+alias idef='GCASE=-i def'
 
 # Hexdump to txt 32 bits
 bin2hex32() {
