@@ -80,11 +80,11 @@ svn_rev() {
 
 # Get status file list
 svn_st() {
-  local ARG1="$1"; shift
+  local ARG1="$1"; shift $(min 1 $#)
   svn st "$@" | awk '/'"${ARG1:-^[^ ]}"'/ {$0=substr($0,9); gsub(/\"/,"\\\"",$0); printf "\"%s\"", $0}'
 }
 svn_stx() {
-  local ARG1="$1"; shift
+  local ARG1="$1"; shift $(min 1 $#)
   #svn st "$@" | awk '/'"${ARG1:-^[^ ]}"'/ {print substr($0,9)}' | tr '\n' '\0'
   svn st "$@" | grep -E "${ARG1:-^[^ ]}" | cut -c 9- | tr '\n' '\0'
 }
@@ -146,7 +146,7 @@ svn_cl() {
 
 # Commit a changelist
 svn_ci() {
-  local ARG1="$1"; shift
+  local ARG1="$1"; shift $(min 1 $#)
   svn ci --cl "${ARG1:?No changelist specified...}" "$@"
 }
 
@@ -171,7 +171,7 @@ svn_clean() {
     svn_zipst "^(\?|\I)" "$(svn_bckdir)/$(svn_bckname clean "" $(svn_rev)).7z"
   fi
   # Remove files not in SVN
-  svn_stx "^(\?|\I)" | xargs -0 -p --no-run-if-empty rm -v --one-file-system --
+  svn_stx "^(\?|\I)" | xargs -0 -p --no-run-if-empty rm -r -v --one-file-system --
 }
 
 # Revert modified files, don't change unversionned files
@@ -181,7 +181,7 @@ svn_revert() {
   # Backup
   svn_export HEAD HEAD "$(svn_bckdir)/$(svn_bckname revert "" $(svn_rev)).7z"
   # Revert local modifications
-  local ARG1="$1"; shift
+  local ARG1="$1"; shift $(min 1 $#)
   svn revert -R . ${ARG1:+--cl $ARG1} "$@"
 }
 
@@ -218,7 +218,7 @@ svn_export() {
     fi
   fi
   # Get applicable files
-  shift 3; local FILES="$@"
+  shift $(min 3 $#)
   # Create archive, if not existing already
   if [ ! -f "$ARCHIVE" ]; then
     if [ "$REV1" = "HEAD" ]; then
@@ -311,36 +311,36 @@ svn_history() {
 
 # Show logs in a range of revisions (-r and -c allowed)
 svn_log() {
-  local ARG1="$1"; local ARG2="$2"; shift 2
+  local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
   svn log --verbose ${ARG2:+-r $ARG1:}${ARG2:-${ARG1:+-c $ARG1}} "$@"
 }
 svn_shortlog() {
-  local ARG1="$1"; local ARG2="$2"; shift 2
+  local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
   svn_log ${ARG2:+-r $ARG1:}${ARG2:-${ARG1:+-c $ARG1}} "$@" | grep -E "^[^ |\.]"
 }
 svn_userlog() {
-  local ARG1="$1"; shift
+  local ARG1="$1"; shift $(min 1 $#)
   svn_log "$@" | sed -n "/${ARG1:-$USER}/,/-----$/ p"
 }
 
 # Display content of a file (only -r rev allowed)
 svn_cat () {
-  local ARG1="$1"; shift
+  local ARG1="$1"; shift $(min 1 $#)
   svn cat ${ARG1:+-r $ARG1} "$@"
 }
 
 # Display the changes in a file in a range of revisions
 # or list changed files in a range of revisions (-r and -c allowed)
 svn_diff() {
-  local ARG1="$1"; local ARG2="$2"; shift 2
+  local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
   svn diff ${ARG2:+-r $ARG1:}${ARG2:-${ARG1:+-c $ARG1}} "$@"
 }
 svn_diffm() {
-  local ARG1="$1"; local ARG2="$2"; shift 2
+  local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
   svn_diff ${ARG1:-HEAD} ${ARG2:-PREV} "$@" --diff-cmd meld
 }
 svn_diffl() {
-  local ARG1="$1"; local ARG2="$2"; shift 2
+  local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
   svn_diff ${ARG1:-HEAD} ${ARG2:-PREV} "$@" --summarize
 }
 svn_difflx() {
@@ -349,13 +349,13 @@ svn_difflx() {
 
 # Make an archive based on the file status
 svn_zipst() {
-  local ARG1="$1"; local ARG2="$2"; shift 2
+  local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
   svn_stx "${ARG2:-^(A|M|R|\~|\!)}" "$@" | xargs -0 --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${ARG1:?No archive file defined}"
 }
 
 # Make an archive based on a diff
 svn_zipdiff() {
-  local ARG1="$1"; shift
+  local ARG1="$1"; shift $(min 1 $#)
   local PATCH="diff_r${1:-HEAD}-${2:-PREV}.patch"
   svn_diff "$@" > "$PATCH"
   svn_difflx "$@" | xargs -0 --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${ARG1:?No archive file defined}" "$PATCH"
@@ -374,7 +374,7 @@ svn_zipls() {
 
 # Returns the last archive found based on given name
 svn_ziplast() {
-  local ARG1="$1"; shift
+  local ARG1="$1"; shift $(min 1 $#)
   svn_zipls "$@" | head -n ${ARG1:-1}
 }
 

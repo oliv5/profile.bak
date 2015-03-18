@@ -75,13 +75,13 @@ mem_top() {
 
 kill_cpu_top() {
   local END=$((${1:-1} + 1))
-  shift
+  shift $(min 1 $#)
   ps a --sort -%cpu | awk 'NR>1 && NR<=$END {print $1;}' | xargs -r kill "$@"
 }
 
 kill_mem_top() {
   local END=$((${1:-1} + 1))
-  shift
+  shift $(min 1 $#)
   ps a --sort -rss | awk 'NR>1 && NR<=$END {print $1;}' | xargs -r kill "$@"
 }
 

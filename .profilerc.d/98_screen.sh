@@ -19,7 +19,7 @@ screen() {
 
 # Send a command to a running screen
 screen_cmd() {
-  local SESSION="${1:?No session specified...}"; shift
+  local SESSION="${1:?No session specified...}"; shift $(min 1 $#)
   command -p screen -S "$SESSION" -X stuff "^C\n${@}\n"
 }
 

@@ -8,11 +8,11 @@ _ffind() {
   local NAME="${NAME:-name}"
   local FILES="$(basename "${1:-.}" | sed -e 's/;/ -o -'$NAME' /g')"
   local DIR="$(dirname "${1:-.}")"
-  (set -f; shift; find -L "$DIR" -nowarn \( -$NAME $FILES \) -and $FIND_EXCLUDE "$@")
+  (set -f; shift $(min 1 $#); find -L "$DIR" -nowarn \( -$NAME $FILES \) -and $FIND_EXCLUDE "$@")
 }
 ff()  { (set -f; _ffind "$@"); }
-fff() { local ARG1="$1"; shift; (set -f; _ffind "${ARG1:-*}" -type f "$@"); }
-ffd() { local ARG1="$1"; shift; (set -f; _ffind "${ARG1:-*}" -type d "$@"); }
+fff() { local ARG1="$1"; shift $(min 1 $#); (set -f; _ffind "${ARG1:-*}" -type f "$@"); }
+ffd() { local ARG1="$1"; shift $(min 1 $#); (set -f; _ffind "${ARG1:-*}" -type d "$@"); }
 alias iff='NAME=iname ff'
 alias ifff='NAME=iname fff'
 alias iffd='NAME=iname ffd'
@@ -29,17 +29,16 @@ _fgrep1() {
 _fgrep2() {
 	local ARGS="$(shell_rtrim 1 "$@")"
   shift $(($#-1))
-	local FILES="$@"
-	local DIR="$(dirname "$FILES")"
-	local FILES="$(basename "$FILES")"
+	local DIR="$(dirname "$@")"
+	local FILES="$(basename "$@")"
 	(set -f; eval grep -rnH --color "$ARGS" --include="$FILES" "$DIR")
 }
 
 # Search pattern functions
-gg()  { local ARG1="$1"; local ARG2="$2"; shift 2; (set -f; _fgrep2    "${ARG1:?Nothing to do}" "${ARG2:-*}" "$@"); }
-igg() { local ARG1="$1"; local ARG2="$2"; shift 2; (set -f; _fgrep2 -i "${ARG1:?Nothing to do}" "${ARG2:-*}" "$@"); }
-ggf() { local ARG1="$1"; local ARG2="$2"; shift 2; (set -f; _fgrep2    "${ARG1:?Nothing to do}" "${ARG2:-*}" "$@" | cut -d : -f 1 | uniq); }
-iggf(){ local ARG1="$1"; local ARG2="$2"; shift 2; (set -f; _fgrep2 -i "${ARG1:?Nothing to do}" "${ARG2:-*}" "$@" | cut -d : -f 1 | uniq); }
+gg()  { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; _fgrep2    "${ARG1:?Nothing to do}" "${ARG2:-*}" "$@"); }
+igg() { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; _fgrep2 -i "${ARG1:?Nothing to do}" "${ARG2:-*}" "$@"); }
+ggf() { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; _fgrep2    "${ARG1:?Nothing to do}" "${ARG2:-*}" "$@" | cut -d : -f 1 | uniq); }
+iggf(){ local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; _fgrep2 -i "${ARG1:?Nothing to do}" "${ARG2:-*}" "$@" | cut -d : -f 1 | uniq); }
 
 # Safe search & replace
 _fsed() {

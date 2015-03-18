@@ -13,10 +13,9 @@ trap_get() {
 }
 
 trap_push() {
-  local new_trap=$1
-  shift
-  local sigs=$*
-  for sig in $sigs; do
+  local new_trap="$1"
+  shift $(min 1 $#)
+  for sig in "$@"; do
     stack_name=`trap_stack_name "$sig"`
     old_trap=$(trap_get $sig)
     eval "${stack_name}"'[${#'"${stack_name}"'[@]}]=$old_trap'
@@ -25,8 +24,7 @@ trap_push() {
 }
 
 trap_pop() {
-  local sigs=$*
-  for sig in $sigs; do
+  for sig in "$@"; do
     stack_name=`trap_stack_name "$sig"`
     eval 'count=${#'"${stack_name}"'[@]}'
     [[ $count -lt 1 ]] && return 127
@@ -38,10 +36,9 @@ trap_pop() {
 }
 
 trap_prepend() {
-  local new_trap=$1
-  shift
-  local sigs=$*
-  for sig in $sigs; do
+  local new_trap="$1"
+  shift $(min 1 $#)
+  for sig in "$@"; do
     if [[ -z $(trap_get $sig) ]]; then
       trap_push "$new_trap" "$sig"
     else
@@ -51,10 +48,9 @@ trap_prepend() {
 }
 
 trap_append() {
-  local new_trap=$1
-  shift
-  local sigs=$*
-  for sig in $sigs; do
+  local new_trap="$1"
+  shift $(min 1 $#)
+  for sig in "$@"; do
     if [[ -z $(trap_get $sig) ]]; then
       trap_push "$new_trap" "$sig"
     else

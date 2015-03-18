@@ -5,7 +5,7 @@ export OPTS_7Z="-t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off"
 _7zta() {
   local ARCHIVE="$1.tar.7z"
   local i
-  shift
+  shift $(min 1 $#)
   for i; do
     tar cf - "$i" | 7z a ${OPTS_7Z} -si "$ARCHIVE"
   done
@@ -49,7 +49,7 @@ __7zd() {
 _7zdiffd() {
   local DIR1="$(__7zd "$1")"
   local DIR2
-  shift
+  shift $(min 1 $#)
   for DIR2; do
     DIR2="$(__7zd "$DIR2")"
     diffd "$DIR1" "$DIR2" | grep -v "Only in $DIR1"
@@ -60,7 +60,7 @@ _7zdiffd() {
 _7zdiff() {
   local DIR1="$(__7zd "$1")"
   local DIR2
-  shift
+  shift $(min 1 $#)
   for DIR2; do
     DIR2=$(__7zd "$DIR2")
     diff -r "$DIR1" "$DIR2" | grep -v "Only in $DIR1"
@@ -71,7 +71,7 @@ _7zdiff() {
 _7zdiffm() {
   local DIR1="$(__7zd "$1")"
   local DIR2 DIFFCNT
-  shift
+  shift $(min 1 $#)
   for DIR2; do
     DIR2="$(__7zd "$DIR2")"
     DIFFCNT=$(diffd "$DIR1" "$DIR2" | grep -v "Only in $DIR1" | wc -l)

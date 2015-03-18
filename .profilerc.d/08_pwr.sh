@@ -1,7 +1,7 @@
 #!/bin/sh
 
 shutdown() {
-  local WHEN="${1:-now}"; shift
+  local WHEN="${1:-now}"; shift $(min 1 $#)
   sudo $(which shutdown) -h -P "$WHEN" "$@"
 }
 
@@ -10,7 +10,7 @@ poweroff() {
 }
 
 reboot() {
-  local WHEN="${1:-now}"; shift
+  local WHEN="${1:-now}"; shift $(min 1 $#)
   sudo $(which shutdown) -r "$WHEN" "$@"
 }
 

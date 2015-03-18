@@ -15,7 +15,7 @@ alias notify='_notify_file'
 _notify_loop() {
   local TRIGGER="${1:?No event to monitor}"
   local FILE="${2:?No dir/file to monitor}"
-  shift 2
+  shift $(min 2 $#)
   local SCRIPT="${@:?No action to execute}"
   while true; do
     inotifywait -qq -e "$TRIGGER" "$FILE"
@@ -29,7 +29,7 @@ _notify_loop() {
 _notify_proc() {
   local TRIGGER="${1:?No event to monitor}"
   local FILE="${2:?No dir/file to monitor}"
-  shift 2
+  shift $(min 2 $#)
   local SCRIPT="${@:?No action to execute}"
 
   # Start child shell process, open pipes
@@ -65,7 +65,7 @@ _notify_proc() {
 _notify_file() {
   local TRIGGER="${1:?No event to monitor}"
   local FILE="${2:?No dir/file to monitor}"
-  shift 2
+  shift $(min 2 $#)
   local SCRIPT="${@:?No action to execute}"
   _notify_proc "$TRIGGER" "$(dirname "$FILE")" 'if [ "$(readlink -f "$DIR$FILE")" = "$(readlink -f "'$FILE'")" ]; then '$SCRIPT'; fi'
 }

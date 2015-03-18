@@ -79,13 +79,13 @@ git_stash_apply() {
 
 # Show diff between stash and local copy
 git_stash_diff() {
-  local STASH="${1:-0}"; shift
+  local STASH="${1:-0}"; shift $(min 1 $#)
   git diff stash@{$STASH} "$@"
 }
 
 #Show stash content
 git_stash_show() {
-  local STASH="${1:-0}"; shift
+  local STASH="${1:-0}"; shift $(min 1 $#)
   git stash show -p stash@{$STASH} "$@"
 }
 
@@ -104,14 +104,14 @@ git_revert() {
   if [ -f "$1" -o -f "$2" ]; then
     git checkout -- "$@"
   else
-    local REV="${1:-HEAD}"; shift
+    local REV="${1:-HEAD}"; shift $(min 1 $#)
     git reset --hard "$REV" "$@"
   fi
 }
 
 # Soft revert to a given CL, won't change modified files
 git_rollback() {
-  local REV="${1:-HEAD}"; shift
+  local REV="${1:-HEAD}"; shift $(min 1 $#)
   git reset "$REV" "$@"
 }
 

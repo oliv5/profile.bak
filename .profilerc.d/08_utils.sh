@@ -21,7 +21,7 @@ mkbak() {
 askuser() {
   local ANSWER;
   read ${1:+-p "$1"} ANSWER
-  shift
+  shift $(min 1 $#)
   for ACK; do
     [ "$ANSWER" = "$ACK" ] && return 0
   done
@@ -41,8 +41,8 @@ get_passwd() {
 wget_mirror() {
   local SITE=${1:?Please specify the URL}
   local DOMAIN=$(echo "$SITE" | sed -E 's;^https?://([^/]*)/.*$;\1;')
-  shift; local OPTS="$@"
-  wget $OPTS --recursive -l${LEVEL:-9999} --no-parent --no-directories --no-clobber --domains ${DOMAIN:?Found no domain} --convert-links --html-extension --page-requisites -e robots=off -U mozilla --limit-rate=${LIMITRATE:-200k} --random-wait "$SITE"
+  shift $(min 1 $#)
+  wget "$@" --recursive -l${LEVEL:-9999} --no-parent --no-directories --no-clobber --domains ${DOMAIN:?Found no domain} --convert-links --html-extension --page-requisites -e robots=off -U mozilla --limit-rate=${LIMITRATE:-200k} --random-wait "$SITE"
 }
 
 ################################
@@ -79,7 +79,7 @@ uint2hex() {
 alias exec-rem='exec-remote'
 exec_remote() {
   local HOST="${1:?No host specified}"
-  shift
+  shift $(min 1 $#)
   local CMD="${@:?No command specified}"
   if [ "$HOST" != "$HOSTNAME" ]; then
     ssh -X $HOST "$CMD"
@@ -144,7 +144,8 @@ send_mail() {
 ################################
 # Convert to libreoffice formats
 conv_soffice() {
-  local FORMAT="${1:?No output format specified}"; shift
+  local FORMAT="${1:?No output format specified}"
+  shift $(min 1 $#)
   unoconv -f "$FORMAT" "$@" ||
     soffice --headless --convert-to "$FORMAT" "$@"
 }

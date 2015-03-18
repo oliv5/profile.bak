@@ -38,3 +38,9 @@ shell_islogin() {
   # Test whether the caller name starts with a "-"
   [ "$(echo "$0" | cut -c 1)" = "-" ]
 }
+
+################################
+# Shell utils (used for shifts)
+min() { echo $(($1<$2?$1:$2)); }
+max() { echo $(($1>$2?$1:$2)); }
+lim() { max $(min $1 $3) $2; }
