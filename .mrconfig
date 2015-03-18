@@ -3,9 +3,9 @@
 # Add few git actions
 lib =
 	git_pull_all() {
-		git stash save -q "mrconfig_stash"
+		git stash save -q 'mrconfig_stash'
 		git remote | xargs -l -I{} git pull --rebase {} master
-		if git stash list -n 1 | grep 'mrconfig_stash' >/dev/null 2>&1; then git stash pop -q; fi
+		if git stash list -n 1 | grep 'mrconfig_stash' >/dev/null 2>&1; then git stash apply -q --index; git stash drop -q; fi
 	}
 	git_push_all() {
 		git remote | xargs -l git push
@@ -35,9 +35,9 @@ lib =
 	vcsh_pull() {
 		VCSH_REPO=$(basename $MR_REPO .git)
 		vcsh run $VCSH_REPO sh -c "
-			git stash save -q "mrconfig_stash"
+			git stash save -q 'mrconfig_stash'
 			git remote | xargs -l -I{} git pull --rebase {} master
-			if git stash list -n 1 | grep 'mrconfig_stash' >/dev/null 2>&1; then git stash pop -q; fi
+			if git stash list -n 1 | grep 'mrconfig_stash' >/dev/null 2>&1; then git stash apply -q --index; git stash drop -q; fi
 		"
 	}
 	vcsh_push() {
