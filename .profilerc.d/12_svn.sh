@@ -34,6 +34,8 @@ alias svn_clr='svn changelist --remove'
 # Commit aliases
 alias sci='svn ci'
 alias scid='svn ci -m "Development commit $(svn_date)"'
+# jump aliases
+alias sr='cd "$(svn_root)"'
 
 # Ask user
 svn_askuser() {
