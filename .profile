@@ -14,7 +14,7 @@
 [ -z "$DISPLAY" ] && export DISPLAY=":0"
 
 # Load next script (dash-only)
-export ENV="$HOME/.profilerc"
+export ENV="$HOME/.rc"
 
 # Set load flag
 export ENV_PROFILE=$((ENV_CNT=ENV_CNT+1))

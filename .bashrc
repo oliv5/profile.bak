@@ -126,8 +126,8 @@ fi
 export ENV_BASHRC=$((ENV_CNT=ENV_CNT+1))
 
 # Bootstrap user profile
-if [ -x "$HOME/.profilerc" ]; then
-  . "$HOME/.profilerc"
+if [ -r "$HOME/.rc" ]; then
+  . "$HOME/.rc"
 fi
 
 # Prevent Ctrl-D exit session

@@ -3,45 +3,39 @@
 # Things should be compatible with all shells (dash, bash,...)
 
 ################################
-# Load user profile scripts
-export ENV_PROFILERC=$((ENV_CNT=ENV_CNT+1))
+# Set load flag
+export ENV_RC=$((ENV_CNT=ENV_CNT+1))
+
+# Load executable scripts from given directory
+# Declare the associated ENV_ variable
+rc_source() {
+  local DIR="$1"
+  local DIRNAME="$(basename "$DIR" | sed -r 's/\./_/g; s/^_//g; s/(.*)/\U\1/')"
+  eval "export ENV_$DIRNAME=$((ENV_CNT=ENV_CNT+1))"
+  for FILE in "$DIR/"*.sh; do
+    if [ -x "$FILE" ]; then
+      . "$FILE"
+    fi
+  done
+}
 
 # Load .profile when not already done
 if [ -z "$ENV_PROFILE" ] && [ -r "$HOME/.profile" ]; then
   . "$HOME/.profile"
 fi
 
-# Load local configuration scripts
-if [ -x "$HOME/.profilerc.local" ]; then
-  export ENV_PROFILERC_LOCAL=$((ENV_CNT=ENV_CNT+1))
-  . "$HOME/.profilerc.local"
+# Load local configuration script
+if [ -r "$HOME/.rc.local" ]; then
+  export ENV_RC_LOCAL=$((ENV_CNT=ENV_CNT+1))
+  . "$HOME/.rc.local"
 fi
 
-# Load main profile scripts
-export ENV_PROFILERC_D=$((ENV_CNT=ENV_CNT+1))
-for i in "$HOME/.profilerc.d/"*.sh ; do
-  if [ -x "$i" ]; then
-    . "$i"
-  fi
-done
-
-# Load bash profile scripts when running bash
+# Load profile scripts
+rc_source "$HOME/.rc.d"
 if [ ! -z "$BASH_VERSION" ]; then
-  export ENV_BASH_D=$((ENV_CNT=ENV_CNT+1))
-  for i in "$HOME/.profilerc.d/bash/"*.sh ; do
-    if [ -x "$i" ]; then
-      . "$i"
-    fi
-  done
+  rc_source "$HOME/.rc.d/bash"
 fi
-
-# Load local profile scripts
-export ENV_PROFILERC_LOCAL_D=$((ENV_CNT=ENV_CNT+1))
-for i in "$HOME/.profilerc.local.d/"*.sh ; do
-  if [ -x "$i" ]; then
-    . "$i"
-  fi
-done
+rc_source "$HOME/.rc.d/local"
 
 # Set load flag
 export ENV_LOADED=$ENV_CNT
@@ -57,7 +51,9 @@ cmd_unset which grep find
 pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
 
 # Reload ~/.inputrc
-bind -f ~/.inputrc
+if [ ! -z "$BASH_VERSION" ]; then
+  bind -f ~/.inputrc
+fi
 
 # Disable console beep
 command -v xset >/dev/null 2>&1 && xset b off 2>/dev/null # From X11 window system
@@ -73,7 +69,7 @@ command -v setterm >/dev/null 2>&1 && setterm -blength 0  # From the system cons
 
 ################################
 # Alias profile
-alias profile='. "$HOME/.profilerc"'
+alias profile='. "$HOME/.rc"'
 
 # Alias ls
 alias l='ls -CF'
