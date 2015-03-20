@@ -39,6 +39,7 @@ alias sr='cd "$(svn_root)"'
 
 # Ask user
 svn_askuser() {
+  # Warning: don't put a pipe after askuser or the return code will be modified
   test "${SVN_YES}" || askuser "$@"
 }
 
@@ -141,12 +142,12 @@ svn_merge() {
 
 # Mark files as resolved
 svn_resolved() {
+  local SVN_ASKUSER=""
   local FILE
   exec 7<&0
   # Process each file in conflict or in command line
   svn_stx "^.? {0,7}C" "$@" | while IFS="" read -r -d "" FILE ; do
-    echo "Processing file ${FILE}"
-    if svn_askuser 7 "  -> mark the conflict as resolved? (y/n): " y Y; then
+    if [ "$SVN_ASKUSER" = "a" ] || { echo "Processing file ${FILE}"; SVN_ASKUSER=$(svn_askuser 7 "  -> mark the conflict as resolved? (a/y/n): " a A y Y); }; then
       svn resolved "${FILE}"
     fi
   done
@@ -181,7 +182,7 @@ svn_clean() {
   # Check we are in a repository
   svn_exists || return 1
   # Confirmation
-  if ! svn_askuser "Backup unversioned files? (y/n): " n N; then
+  if ! svn_askuser "Backup unversioned files? (y/n): " n N >/dev/null; then
     # Backup
     svn_zipst "^(\?|\I)" "$(svn_bckdir)/$(svn_bckname clean "" $(svn_rev)).7z"
   fi
@@ -262,7 +263,7 @@ svn_import() {
     ARCHIVE="$(svn_ziplast 1 "" "$PATTERN")"
     false ${ARCHIVE:?No archive found...}
     echo "Last archive available: $ARCHIVE"
-    if ! svn_askuser "Use this archive? (y/n): " y Y; then
+    if ! svn_askuser "Use this archive? (y/n): " y Y >/dev/null; then
       echo "Cancelled by the user..."
       return 1
     fi
@@ -284,7 +285,7 @@ svn_suspend() {
 # Resume a CL
 svn_resume() {
   # Look for modified repo
-  if svn_modified && ! svn_askuser "Your repository has local changes, proceed anyway? (y/n): " y Y; then
+  if svn_modified && ! svn_askuser "Your repository has local changes, proceed anyway? (y/n): " y Y >/dev/null; then
     echo "Cancelled by the user..."
     return 1
   fi

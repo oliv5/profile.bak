@@ -26,6 +26,7 @@ askuser() {
     shift $(min 1 $#)
   fi
   read ${1:+-p "$1"} ANSWER <${STDIN}
+  echo "$ANSWER"
   shift $(min 1 $#)
   for ACK; do
     [ "$ANSWER" = "$ACK" ] && return 0
