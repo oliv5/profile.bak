@@ -7,10 +7,10 @@ export SVN_EDITOR=vim
 alias salias='alias | grep -re " s..\?="'
 
 # Status aliases
-alias st='svn st | sort | grep -v "^$"'
+alias st='svn st | grep -v "^$"'
 alias ss='st | grep -E "^(A|\~|D|M|R|C|\!|---| M)"'
 alias sa='st | grep -E "^(A|---)"'
-alias sc='st | grep -E "^(C|---|      C)"'
+alias sc='st | grep -E "^.? {0,7}C"'
 alias sn='st | grep -E "^(\?|\~|---)"'
 alias sm='st | grep -E "^(M|R|---)"'
 alias sd='st | grep -E "^(D|!)"'
@@ -35,9 +35,14 @@ alias svn_clr='svn changelist --remove'
 alias sci='svn ci'
 alias scid='svn ci -m "Development commit $(svn_date)"'
 
+# Ask user
+svn_askuser() {
+  test "${SVN_YES}" || askuser "$@"
+}
+
 # Build a unique backup directory for this repo
 svn_bckdir() {
-  local DIR="$(readlink -m "$(svn_root)/${1:-.svnbackup}/$(basename "$(svn_repo)")$(svn_branch)${2:+__$2}")"
+  local DIR="$(readlink -m "$(svn_root)/../${1:-.svnbackup}/$(basename "$(svn_repo)")$(svn_branch)${2:+__$2}")"
   echo "${DIR}" | sed -e 's/ /_/g'
   #mkdir -p "${DIR}"
 }
@@ -65,7 +70,8 @@ svn_url() {
 
 # Get path to svn current root
 svn_root() {
-  echo "${PWD}$(svn_url | sed -e "s;$(svn_repo);;" -e "s;/[^\/]*;/..;g")"
+  #echo "${PWD}$(svn_url | sed -e "s;$(svn_repo);;" -e "s;/[^\/]*;/..;g")"
+  _bfind ".svn" d shortest
 }
 
 # Get svn current branch
@@ -81,11 +87,11 @@ svn_rev() {
 # Get status file list
 svn_st() {
   local ARG1="$1"; shift $(min 1 $#)
-  svn st "$@" | awk '/'"${ARG1:-^[^ ]}"'/ {$0=substr($0,9); gsub(/\"/,"\\\"",$0); printf "\"%s\"", $0}'
+  #svn st "$@" | awk '/'"${ARG1:-^[^ ]}"'/ {$0=substr($0,9); gsub(/\"/,"\\\"",$0); printf "\"%s\"\n", $0}'
+  svn st "$@" | grep -E "${ARG1:-^[^ ]}" | cut -c 9- | sed -E 's/^(.*)$/"\1"/'
 }
 svn_stx() {
   local ARG1="$1"; shift $(min 1 $#)
-  #svn st "$@" | awk '/'"${ARG1:-^[^ ]}"'/ {print substr($0,9)}' | tr '\n' '\0'
   svn st "$@" | grep -E "${ARG1:-^[^ ]}" | cut -c 9- | tr '\n' '\0'
 }
 
@@ -106,36 +112,43 @@ _svn_getrev2() {
 
 # Merge 3-way
 svn_merge() {
-#  # Recursive call when no argument is given
-#  if [ $# -eq 0 ]; then
-#    svn_stx '^C' | while IFS="" read -r -d "" FILE ; do
-#      svn_merge "$FILE"
-#    done
-#    return
-#  fi
-  # Process each file in conflict
   local FILE
-  #for FILE in "${@:-"$(svn_st '^C')"}"; do
-  svn_stx '^C' | while IFS="" read -r -d "" FILE ; do
+  # Process each file in conflict or in command line
+  svn_stx '^C' "$@" | while IFS="" read -r -d "" FILE ; do
     echo "Processing file ${FILE}"
     local CNT=0
     if [ -f ${FILE}.working ]; then
       CNT=$(ls -1 ${FILE}.*-right.* | wc -l)
       for LINE in $(seq $CNT); do
         local right="$(ls -1 ${FILE}.*-right.* | sort | sed -n ${LINE}p)"
+        echo "  -> compare working with ${right}"
         meld "${right}" "${FILE}" "${FILE}.working" 2>/dev/null
       done
     else
       CNT=$(ls -1 ${FILE}.r* | wc -l)
       for LINE in $(seq $CNT); do
         local rev="$(ls -1 ${FILE}.r* | sort | sed -n ${LINE}p)"
+        echo "  -> compare mine with ${rev}"
         meld "${rev}" "${FILE}" "${FILE}.mine" 2>/dev/null
       done
     fi
-    if [ $CNT -gt 0 ] && test $SVN_YES || askuser "Mark the conflict as resolved? (y/n): " y Y; then
+    # ISSUE HERE: askuser uses read => it reads the value from svn_stx
+    sleep 1
+  done
+}
+
+# Mark files as resolved
+svn_resolved() {
+  local FILE
+  exec 7<&0
+  # Process each file in conflict or in command line
+  svn_stx "^.? {0,7}C" "$@" | while IFS="" read -r -d "" FILE ; do
+    echo "Processing file ${FILE}"
+    if svn_askuser 7 "  -> mark the conflict as resolved? (y/n): " y Y; then
       svn resolved "${FILE}"
     fi
   done
+  exec 7<&-
 }
 
 # Create a changelist
@@ -164,9 +177,9 @@ svn_modified() {
 # Clean repo, remove unversionned files
 svn_clean() {
   # Check we are in a repository
-  svn_exists || return
+  svn_exists || return 1
   # Confirmation
-  if test $SVN_YES || ! askuser "Backup unversioned files? (y/n): " n N; then
+  if ! svn_askuser "Backup unversioned files? (y/n): " n N; then
     # Backup
     svn_zipst "^(\?|\I)" "$(svn_bckdir)/$(svn_bckname clean "" $(svn_rev)).7z"
   fi
@@ -177,7 +190,7 @@ svn_clean() {
 # Revert modified files, don't change unversionned files
 svn_revert() {
   # Check we are in a repository
-  svn_exists || return
+  svn_exists || return 1
   # Backup
   svn_export HEAD HEAD "$(svn_bckdir)/$(svn_bckname revert "" $(svn_rev)).7z"
   # Revert local modifications
@@ -191,7 +204,7 @@ svn_rollback() {
   local REV1=${1:-PREV}
   local REV2=${2:-HEAD}
   # Check we are in a repository
-  svn_exists || return
+  svn_exists || return 1
   # Backup
   svn_export $REV1 $REV2 "$(svn_bckdir)/$(svn_bckname rollback "" $REV1 $REV2).7z"
   # Rollback (svn merge back from REV2 to REV1)
@@ -201,7 +214,7 @@ svn_rollback() {
 # Backup current changes
 svn_export() {
   # Check we are in a repository
-  svn_exists || return
+  svn_exists || return 1
   # Get revisions
   local REV1=${1:-HEAD}
   local REV2=${2:-HEAD}
@@ -245,18 +258,15 @@ svn_import() {
   local PATTERN="${2:-export*}"
   if [ -z "$ARCHIVE" ]; then
     ARCHIVE="$(svn_ziplast 1 "" "$PATTERN")"
-    if [ -z "$ARCHIVE" ]; then
-      echo "No archive found..."
-      return 0
-    fi
+    false ${ARCHIVE:?No archive found...}
     echo "Last archive available: $ARCHIVE"
-    if test $SVN_YES || ! askuser "Use this archive? (y/n): " y Y; then
-      echo "No archive selected..."
-      return 0
+    if ! svn_askuser "Use this archive? (y/n): " y Y; then
+      echo "Cancelled by the user..."
+      return 1
     fi
   fi
   # Check we are in a repository
-  svn_exists || return
+  svn_exists || return 1
   # Extract with full path
   7z x "$ARCHIVE" -o"${3:-./}"
 }
@@ -272,8 +282,9 @@ svn_suspend() {
 # Resume a CL
 svn_resume() {
   # Look for modified repo
-  if svn_modified && test $SVN_YES || ! askuser "Your repository has local changes, proceed anyway? (y/n): " y Y; then
-    return
+  if svn_modified && ! svn_askuser "Your repository has local changes, proceed anyway? (y/n): " y Y; then
+    echo "Cancelled by the user..."
+    return 1
   fi
   # Import CL
   svn_import "$1" "suspend*"
@@ -347,6 +358,26 @@ svn_difflx() {
   svn_diffl "$@" | grep -E "^[^ D]" | cut -c 9- | tr '\n' '\0'
 }
 
+# Make a diff between the current branch and another one
+# Only for modified files
+__svn_diffb() {
+  local FILE
+  local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
+  # Process each file in conflict or in command line
+  svn_stx '^(A|M|R|C|\~|\!)' "$@" | while IFS="" read -r -d "" FILE ; do
+    # Warning: eval remove one level of quotes
+    diff -q "$ARG2/$FILE" "$FILE" >/dev/null && {
+      echo "Skip file ${FILE}"
+    } || {
+      echo "Diff file ${FILE}"
+      eval "$ARG1" '"$ARG2/$FILE"' '"$FILE"'
+      sleep 1
+    }
+  done
+}
+alias svn_diffb='__svn_diffb diff'
+alias svn_diffbm='__svn_diffb meld'
+
 # Make an archive based on the file status
 svn_zipst() {
   local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
@@ -369,7 +400,7 @@ svn_zipls() {
   if [ ! -d "$DIR" ]; then
     DIR="$(svn_bckdir)"
   fi
-  find "$DIR" -type f -name "$FILE" -printf '%T@ %p\n' | sort -rn | cut -d' ' -f 2-
+  find "$DIR" -type f -name "$FILE" -printf '%T@ %p\n' 2>/dev/null | sort -rn | cut -d' ' -f 2-
 }
 
 # Returns the last archive found based on given name
@@ -384,8 +415,9 @@ __svn_diffzip() {
   if [ ! -f "$ARCHIVE" ]; then
     ARCHIVE="$(svn_ziplast 1 "" "${ARCHIVE:-"*$(basename "$PWD")*"}")"
   fi
+  false ${ARCHIVE:?No archive found...}
   # Warning: eval remove one level of quotes
-  eval "$1" "." "\"$ARCHIVE\""
+  eval "$1" "." '"$ARCHIVE"'
 }
 alias svn_diffzip='__svn_diffzip _7zdiff'
 alias svn_diffzipc='__svn_diffzip _7zdiffd 2>/dev/null | wc -l'
