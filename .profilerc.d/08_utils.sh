@@ -20,7 +20,12 @@ mkbak() {
 # Ask and expect one of the given answer
 askuser() {
   local ANSWER;
-  read ${1:+-p "$1"} ANSWER
+  local STDIN=/dev/fd/0
+  if isint "$1"; then
+    STDIN=/dev/fd/$1
+    shift $(min 1 $#)
+  fi
+  read ${1:+-p "$1"} ANSWER <${STDIN}
   shift $(min 1 $#)
   for ACK; do
     [ "$ANSWER" = "$ACK" ] && return 0

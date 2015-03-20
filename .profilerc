@@ -84,6 +84,7 @@ alias lsg='ls | grep'
 # Alias cd/back
 alias b='cdb'
 alias f='cdf'
+alias p='cd ..'
 
 # Gvim
 alias e='gvim'
