@@ -351,11 +351,11 @@ svn_diff() {
 }
 svn_diffm() {
   local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
-  svn_diff ${ARG1:-HEAD} ${ARG2:-PREV} "$@" --diff-cmd meld
+  svn_diff "${ARG1}" "${ARG2}" "$@" --diff-cmd meld
 }
 svn_diffl() {
   local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
-  svn_diff ${ARG1:-HEAD} ${ARG2:-PREV} "$@" --summarize
+  svn_diff "${ARG1}" "${ARG2}" "$@" --summarize
 }
 svn_difflx() {
   svn_diffl "$@" | grep -E "^[^ D]" | cut -c 9- | tr '\n' '\0'
@@ -390,7 +390,7 @@ svn_zipst() {
 # Make an archive based on a diff
 svn_zipdiff() {
   local ARG1="$1"; shift $(min 1 $#)
-  local PATCH="diff_r${1:-HEAD}-${2:-PREV}.patch"
+  local PATCH="diff${1:+_r$1}${2:+-$2}.patch"
   svn_diff "$@" > "$PATCH"
   svn_difflx "$@" | xargs -0 --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${ARG1:?No archive file defined}" "$PATCH"
   rm "$PATCH"
