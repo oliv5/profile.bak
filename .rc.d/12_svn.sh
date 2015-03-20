@@ -52,8 +52,8 @@ svn_bckdir() {
 
 # Build a backup filename for this repo
 svn_bckname() {
-  local PREFIX="$1"; local SUFFIX="$2"; local REV1="$3"; local REV2="$4"
-  echo "${PREFIX:+${PREFIX}__}$(basename "$PWD")${REV1:+__r$REV1}${REV2:+-$REV2}__$(svn_date)${SUFFIX:+__$SUFFIX}"
+  local PREFIX="$1" SUFFIX="$2" REV="$3"
+  echo "${PREFIX:+${PREFIX}__}$(basename "$PWD")$(__svn_revarg "$REV" "__" "-")__$(svn_date)${SUFFIX:+__$SUFFIX}"
 }
 
 # Retrieve date
@@ -98,20 +98,14 @@ svn_stx() {
   svn st "$@" | grep -E "${ARG1:-^[^ ]}" | cut -c 9- | tr '\n' '\0'
 }
 
-# Extract SVN revisions from string rev0:rev1
-_svn_getrev() {
-  local REV1="${1%%:*}"
-  local REV2="${1##*:}"
-  echo "${REV1:-HEAD} ${REV2:-HEAD}"
+# Build svn revision argument
+__svn_revarg() {
+  { [ "${1##*:}" = "$1" ] && echo "${1:+${2:--}c$1}" || echo "${2:--}r${1%*:}"; } | tr ':' "${3:-:}"
 }
-_svn_getrev1() {
-  local REV1="${1%%:*}"
-  echo "${REV1:-HEAD}"
-}
-_svn_getrev2() {
-  local REV2="${1##*:}"
-  echo "${REV2:-HEAD}"
-}
+# Get svn revision numbers
+__svn_rev1() { local REV="${1%%:*}"; [ ! -z "${REV}" ] && echo "${REV}"; }
+__svn_rev2() { local REV="${1##*:}"; [ ! -z "${REV}" ] && echo "${REV}"; }
+
 
 # Merge 3-way
 svn_merge() {
@@ -195,7 +189,7 @@ svn_revert() {
   # Check we are in a repository
   svn_exists || return 1
   # Backup
-  svn_export HEAD HEAD "$(svn_bckdir)/$(svn_bckname revert "" $(svn_rev)).7z"
+  svn_export "" "$(svn_bckdir)/$(svn_bckname revert "" $(svn_rev)).7z"
   # Revert local modifications
   local ARG1="$1"; shift $(min 1 $#)
   svn revert -R . ${ARG1:+--cl $ARG1} "$@"
@@ -204,14 +198,13 @@ svn_revert() {
 # Rollback to a previous revision, don't change unversionned files
 svn_rollback() {
   # Get target revision number
-  local REV1=${1:-PREV}
-  local REV2=${2:-HEAD}
+  local REV="${1:-PREV:HEAD}"
   # Check we are in a repository
   svn_exists || return 1
   # Backup
-  svn_export $REV1 $REV2 "$(svn_bckdir)/$(svn_bckname rollback "" $REV1 $REV2).7z"
-  # Rollback (svn merge back from REV2 to REV1)
-  svn merge -r $REV2:$REV1 .
+  svn_export "$REV" "$(svn_bckdir)/$(svn_bckname rollback "" "$REV").7z"
+  # Rollback (svn merge back from first to second)
+  svn merge $(__svn_revarg "$REV") .
 }
 
 # Backup current changes
@@ -219,39 +212,23 @@ svn_export() {
   # Check we are in a repository
   svn_exists || return 1
   # Get revisions
-  local REV1=${1:-HEAD}
-  local REV2=${2:-HEAD}
-  # Get archive path, if not specified
-  local ARCHIVE="$3"
-  if [ -z "$ARCHIVE" ]; then
-    if [ "$REV1" = "HEAD" ]; then
-      # Export changes made upon HEAD
-      local REV="$(svn_rev)"
-      ARCHIVE="$(svn_bckdir)/$(svn_bckname export "" $REV).7z"
-    else
-      # Export changes between the 2 revisions
-      ARCHIVE="$(svn_bckdir)/$(svn_bckname export "" $REV1 $REV2).7z"
-    fi
-  fi
-  # Get applicable files
-  shift $(min 3 $#)
-  # Create archive, if not existing already
-  if [ ! -f "$ARCHIVE" ]; then
-    if [ "$REV1" = "HEAD" ]; then
-      # Export changes made upon HEAD
-      svn_zipst "$ARCHIVE" "^(A|M|R|C|\~|\!)" "$@"
-      local RESULT=$?
-    else
-      # Export changes between the 2 revisions
-      svn_zipdiff "$ARCHIVE" ${REV1} ${REV2} "$@"
-      local RESULT=$?
-    fi
-  else
+  local REV="${1:-$(svn_rev)}"
+  # Get archive path - exit when it exists already
+  local ARCHIVE="${2:-$(svn_bckdir)/$(svn_bckname export "" $REV).7z}"
+  if [ -e "$ARCHIVE" ]; then
     echo "File '$ARCHIVE' exists already..."
-    local RESULT=1
+    return 1
   fi
-  # cleanup
-  return $RESULT
+  # Shift already red arguments
+  shift $(min 2 $#)
+  # Create archive, if not existing already
+  if [ -z "$REV" ]; then
+    # Export changes made upon HEAD
+    svn_zipst "$ARCHIVE" "^(A|M|R|C|\~|\!)" "$@"
+  else
+    # Export changes between the 2 revisions
+    svn_zipdiff "$ARCHIVE" "${REV}" "$@"
+  fi
 }
 
 # Import a CL from an archive
@@ -277,7 +254,7 @@ svn_import() {
 # Suspend a CL
 svn_suspend() {
   # Export & revert if succeed
-  if svn_export HEAD HEAD "$(svn_bckdir)/$(svn_bckname suspend "" $(svn_rev)).7z" "$@"; then
+  if svn_export "" "$(svn_bckdir)/$(svn_bckname suspend "" $(svn_rev)).7z" "$@"; then
     svn revert -R "${@:-.}"
   fi
 }
@@ -310,7 +287,9 @@ svn_config() {
 
 # Print the history of a file
 svn_history() {
-  local URL="${1}" REV1="${2:-1}" REV2="${3:-$(svn_rev)}"
+  local URL="$1"
+  local REV1="$(__svn_rev1 "$2" || echo 1)"
+  local REV2="$(__svn_rev2 "$2" || echo $(svn_rev))"
   svn log -q "$URL" | awk '/^r/ {REV=substr($1,2); if (REV>='$REV1' && REV<='$REV2') print REV}' | {
     # Show diffs
     while read r
@@ -325,12 +304,11 @@ svn_history() {
 
 # Show logs in a range of revisions (-r and -c allowed)
 svn_log() {
-  local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
-  svn log --verbose ${ARG2:+-r $ARG1:}${ARG2:-${ARG1:+-c $ARG1}} "$@"
+  local ARG1="$1"; shift $(min 1 $#)
+  svn log $(__svn_revarg "$ARG1") "$@" --verbose
 }
 svn_shortlog() {
-  local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
-  svn_log ${ARG2:+-r $ARG1:}${ARG2:-${ARG1:+-c $ARG1}} "$@" | grep -E "^[^ |\.]"
+  svn_log "$@" | grep -E "^[^ |\.]"
 }
 svn_userlog() {
   local ARG1="$1"; shift $(min 1 $#)
@@ -346,20 +324,12 @@ svn_cat () {
 # Display the changes in a file in a range of revisions
 # or list changed files in a range of revisions (-r and -c allowed)
 svn_diff() {
-  local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
-  svn diff ${ARG2:+-r $ARG1:}${ARG2:-${ARG1:+-c $ARG1}} "$@"
+  local ARG1="$1"; shift $(min 1 $#)
+  svn diff $(__svn_revarg "$ARG1") "$@"
 }
-svn_diffm() {
-  local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
-  svn_diff "${ARG1}" "${ARG2}" "$@" --diff-cmd meld
-}
-svn_diffl() {
-  local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
-  svn_diff "${ARG1}" "${ARG2}" "$@" --summarize
-}
-svn_difflx() {
-  svn_diffl "$@" | grep -E "^[^ D]" | cut -c 9- | tr '\n' '\0'
-}
+svn_diffm()  { svn_diff "$@" --diff-cmd meld; }
+svn_diffl()  { svn_diff "$@" --summarize; }
+svn_difflx() { svn_diffl "$@" | grep -E "^[^ D]" | cut -c 9- | tr '\n' '\0'; }
 
 # Make a diff between the current branch and another one
 # Only for modified files
@@ -390,7 +360,7 @@ svn_zipst() {
 # Make an archive based on a diff
 svn_zipdiff() {
   local ARG1="$1"; shift $(min 1 $#)
-  local PATCH="diff${1:+_r$1}${2:+-$2}.patch"
+  local PATCH="diff$(__svn_revarg "$1" "_" "-").patch"
   svn_diff "$@" > "$PATCH"
   svn_difflx "$@" | xargs -0 --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${ARG1:?No archive file defined}" "$PATCH"
   rm "$PATCH"
