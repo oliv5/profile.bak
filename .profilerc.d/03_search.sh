@@ -17,14 +17,32 @@ _ffind2() {
   local FILES="$FCASE .*/$(basename "$1")"
   (set -f; shift $(min 1 $#); find -L "$DIR" -regextype egrep -nowarn $FILES -and $FIND_EXCLUDE "$@")
 }
+_bfind() {
+  local DIR="$PWD"
+  local TYPE="$2"
+  local STOP="$3"
+  local FOUND=""
+  while true; do
+    if eval test -${TYPE:-e} "\"$DIR/$1\""; then 
+      FOUND="$DIR"
+      [ -z "$STOP" ] && break
+    fi
+    [ -z "$DIR" ] && break
+    DIR="${DIR%/*}"
+  done
+  echo "$FOUND"
+}
 
 # Find files functions
-ff()  { (set -f; _ffind "$@"); }
 fff() { local ARG1="$1"; shift $(min 1 $#); (set -f; _ffind "${ARG1:-*}" -type f "$@"); }
 ffd() { local ARG1="$1"; shift $(min 1 $#); (set -f; _ffind "${ARG1:-*}" -type d "$@"); }
+alias ff='_ffind'
 alias iff='FCASE=-i ff'
 alias ifff='FCASE=-i fff'
 alias iffd='FCASE=-i ffd'
+bff() { local ARG1="$1"; shift $(min 1 $#); (set -f; _bfind "${ARG1:-.}" "f" "$@"); }
+bfd() { local ARG1="$1"; shift $(min 1 $#); (set -f; _bfind "${ARG1:-.}" "d" "$@"); }
+alias bf='_bfind'
 
 # File grep implementations
 alias _fgrep='_fgrep2'
