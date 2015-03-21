@@ -98,14 +98,16 @@ svn_stx() {
   svn st "$@" | grep -E "${ARG1:-^[^ ]}" | cut -c 9- | tr '\n' '\0'
 }
 
-# Build svn revision argument
-__svn_revarg() {
-  { [ "${1##*:}" = "$1" ] && echo "${1:+${2:--}c$1}" || echo "${2:--}r${1%*:}"; } | tr ':' "${3:-:}"
-}
 # Get svn revision numbers
 __svn_rev1() { local REV="${1%%:*}"; [ ! -z "${REV}" ] && echo "${REV}"; }
 __svn_rev2() { local REV="${1##*:}"; [ ! -z "${REV}" ] && echo "${REV}"; }
-
+__svn_revarg() {
+  if [ "${1##*:}" = "$1" ]; then 
+    echo "${1:+${2:--}c$1}"
+  else 
+    echo "${2:--}r${1}" | sed -r 's/r:/r1:/; s/:$//; s/:/'"${3:-:}"'/'
+  fi
+}
 
 # Merge 3-way
 svn_merge() {
