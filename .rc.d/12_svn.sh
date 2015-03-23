@@ -105,7 +105,7 @@ __svn_revarg() {
   if [ "${1##*:}" = "$1" ]; then 
     echo "${1:+${2:--}c$1}"
   else 
-    echo "${2:--}r${1}" | sed -r 's/r:/r1:/; s/:$//; s/:/'"${3:-:}"'/'
+    echo "${2:--}r${1}" | sed -r 's/r:/r1:/; s/:$/:HEAD/; s/:/'"${3:-:}"'/'
   fi
 }
 
@@ -214,9 +214,9 @@ svn_export() {
   # Check we are in a repository
   svn_exists || return 1
   # Get revisions
-  local REV="${1:-$(svn_rev)}"
+  local REV="$1"
   # Get archive path - exit when it exists already
-  local ARCHIVE="${2:-$(svn_bckdir)/$(svn_bckname export "" $REV).7z}"
+  local ARCHIVE="${2:-$(svn_bckdir)/$(svn_bckname export "" "${REV:-$(svn_rev)}").7z}"
   if [ -e "$ARCHIVE" ]; then
     echo "File '$ARCHIVE' exists already..."
     return 1
@@ -365,7 +365,7 @@ svn_zipdiff() {
   local PATCH="diff$(__svn_revarg "$1" "_" "-").patch"
   svn_diff "$@" > "$PATCH"
   svn_difflx "$@" | xargs -0 --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${ARG1:?No archive file defined}" "$PATCH"
-  rm "$PATCH"
+  #rm "$PATCH"
 }
 
 # List the archives based on given name
