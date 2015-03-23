@@ -39,9 +39,12 @@ rc_source "$HOME/.rc.d/local"
 
 # Set load flag
 export ENV_LOADED=$ENV_CNT
+export ENV_CNT
 
 ################################
-# Cleanup path
+# Setup path
+path_prepend "$HOME/bin" "$HOME/bin/profile"
+path_append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
 path_cleanup
 
 # Remove some aliases/fct shortcuts
@@ -49,11 +52,6 @@ cmd_unset which grep find
 
 # Start ssh-agent when not already running
 pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
-
-# Reload ~/.inputrc
-if [ ! -z "$BASH_VERSION" ]; then
-  bind -f ~/.inputrc
-fi
 
 # Disable console beep
 command -v xset >/dev/null 2>&1 && xset b off 2>/dev/null # From X11 window system

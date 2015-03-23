@@ -24,14 +24,8 @@ path_append() {
 
 # Cleanup path
 path_cleanup() {
-  #export PATH="${PATH//\~/${HOME}}"
-  #export PATH="${PATH//.:/}"
-  export PATH="$(echo "$PATH" | sed -e 's|~|'"${HOME}"'|g' -e 's|\.\:||g')"
+  #PATH="${PATH//\~/${HOME}}"; PATH=${PATH//.:/}
+  #PATH="$(echo "$PATH" | sed -r 's|~|'"${HOME}"'|g; s|\.\:||g' | awk -v RS=':' -v ORS=":" '!a[$1]++')"
+  PATH="$(echo "$PATH" | sed -r 's|~|'"${HOME}"'|g; s|\.\:||g' | awk 'NF && !x[$0]++' RS='[:|\n]' ORS=':')"
+  export PATH
 }
-
-# Main
-unalias path_append 2>/dev/null
-eval path_append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
-unalias path_prepend 2>/dev/null
-eval path_prepend "$HOME/bin" "$HOME/bin/profile"
-

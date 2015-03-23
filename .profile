@@ -24,3 +24,7 @@ if [ -r "$HOME/.profile.local" ]; then
   export ENV_PROFILE_LOCAL=$((ENV_CNT=ENV_CNT+1))
   . "$HOME/.profile.local"
 fi
+
+# Exports
+export ENV_CNT
+export PATH
