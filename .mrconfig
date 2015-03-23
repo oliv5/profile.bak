@@ -62,6 +62,12 @@ lib =
 		vcsh run $VCSH_REPO gitk
 	}
 
+# Define git annex helpers
+lib =
+	annex_sync() {
+		VCSH_REPO=$(basename $MR_REPO .git)
+		vcsh $VCSH_REPO annex sync
+	}
 
 # Include our repositories
 include = cat ${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/*
