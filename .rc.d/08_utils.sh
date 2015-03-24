@@ -12,35 +12,53 @@ toUpper() {
 }
 
 ################################
-# Create file backup
-mkbak() {
-  cp "${1:?Please specify input file 1}" "${1}.$(date +%Y%m%d-%H%M%S).bak"
-}
-
-# Ask and expect one of the given answer
-askuser() {
-  local ANSWER;
+# Ask question and expect one of the given answer
+# ask_question [fd number] [question] [expected replies]
+ask_question() {
+  local REPLY
   local STDIN=/dev/fd/0
   if isint "$1"; then
     STDIN=/dev/fd/$1
     shift $(min 1 $#)
   fi
-  read ${1:+-p "$1"} ANSWER <${STDIN}
-  echo "$ANSWER"
+  read ${1:+-p "$1"} REPLY <${STDIN}
+  echo "$REPLY"
   shift $(min 1 $#)
   for ACK; do
-    [ "$ANSWER" = "$ACK" ] && return 0
+    [ "$REPLY" = "$ACK" ] && return 0
   done
   return 1
 }
 
+# Ask for a file
+# ask_file [fd number] [question] [file test] [default value]
+ask_file() {
+  local REPLY
+  local STDIN=/dev/fd/0
+  if isint "$1"; then
+    STDIN=/dev/fd/$1
+    shift $(min 1 $#)
+  fi
+  read ${1:+-p "$1"} REPLY <${STDIN}
+  shift $(min 1 $#)
+  [ -z "$REPLY" ] && REPLY="$2"
+  echo "$REPLY"
+  test ${1:-e} "$REPLY"
+}
+
 # Get password
-get_passwd() {
+ask_passwd() {
   local PASSWD
   trap "stty echo; trap SIGINT" SIGINT; stty -echo
   read -p "${1:-Password: }" PASSWD; echo
   stty echo; trap SIGINT
   echo $PASSWD
+}
+
+################################
+# Create file backup
+mkbak() {
+  cp "${1:?Please specify input file 1}" "${1}.$(date +%Y%m%d-%H%M%S).bak"
 }
 
 #wget mirror website

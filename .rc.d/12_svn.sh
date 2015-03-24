@@ -39,8 +39,8 @@ alias sr='cd "$(svn_root)"'
 
 # Ask user
 svn_askuser() {
-  # Warning: don't put a pipe after askuser or the return code will be modified
-  test "${SVN_YES}" || askuser "$@"
+  # Warning: don't put a pipe after ask_question or the return code will be modified
+  test "${SVN_YES}" || ask_question "$@"
 }
 
 # Build a unique backup directory for this repo
@@ -131,7 +131,7 @@ svn_merge() {
         meld "${rev}" "${FILE}" "${FILE}.mine" 2>/dev/null
       done
     fi
-    # ISSUE HERE: askuser uses read => it reads the value from svn_stx
+    # ISSUE HERE: when using read => it gets the value from svn_stx read statement
     sleep 1
   done
 }

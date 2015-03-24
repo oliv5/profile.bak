@@ -1,0 +1,71 @@
+#!/bin/sh
+DIR="${1:-$HOME/bin/cron}"
+BACKUPDIR="${2:-/var/backups/$USER}"
+
+# Ask for backup script binary directory
+echo "Select backup scripts directory (default: '$DIR'): "
+if ! { DIR=$(ask_file "" -n "$DIR"); }; then
+	echo "Error: unknown directory '$DIR'..."
+	return 1
+fi
+mkdir -p "$DIR"
+echo
+
+# Create scripts
+BACKUP="$DIR/backup"
+if ask_question "Create backup scripts? (y/n) " y Y >/dev/null; then
+	touch "$BACKUP.cron"; 						chmod +x "$BACKUP.cron"
+	echo "!#/bin/sh" > "$BACKUP.daily.sh";		chmod +x "$BACKUP.daily.sh"
+	echo "!#/bin/sh" > "$BACKUP.weekly.sh";		chmod +x "$BACKUP.weekly.sh"
+	echo "!#/bin/sh" > "$BACKUP.monthly.sh";	chmod +x "$BACKUP.monthly.sh"
+	echo "!#/bin/sh" > "$BACKUP.yearly.sh";		chmod +x "$BACKUP.yearly.sh"
+	# Create rules
+	grep "$BACKUP.daily.sh" "$BACKUP.cron" 		>/dev/null || echo "0  0 * * * $USER sh -c \"$BACKUP.daily.sh\""	>> "$BACKUP.cron"
+	grep "$BACKUP.weekly.sh" "$BACKUP.cron" 	>/dev/null || echo "5  0 * * 1 $USER sh -c \"$BACKUP.weekly.sh\""	>> "$BACKUP.cron"
+	grep "$BACKUP.monthly.sh" "$BACKUP.cron" 	>/dev/null || echo "10 0 1 * * $USER sh -c \"$BACKUP.monthly.sh\""	>> "$BACKUP.cron"
+	grep "$BACKUP.yearly.sh" "$BACKUP.cron" 	>/dev/null || echo "15 0 1 1 * $USER sh -c \"$BACKUP.yearly.sh\""	>> "$BACKUP.cron"
+fi
+echo
+
+# Make system or local cron links
+if ask_question "Create cron links in system /etc/cron* directory? (y/n) " y Y >/dev/null; then
+	sudo sudo ln -s "$BACKUP.cron" "/etc/cron.d/backup.$USER"
+elif { echo; ask_question "Edit user crontab instead? (y/n) " y Y >/dev/null; }; then
+	CRONTAB="$(mktemp)"
+	crontab -l > "$CRONTAB"
+	grep "$BACKUP.cron" "$CRONTAB" >/dev/null && echo "Rule already there, skip it." || {
+		printf '\n%s\n' "## from $BACKUP.cron (do not remove this line)" >> "$CRONTAB"
+		cat "$BACKUP.cron" >> "$CRONTAB"
+		crontab "$CRONTAB"
+	}
+	crontab -l
+	rm "$CRONTAB"
+fi
+echo
+
+# Make backup directory
+if ask_question "Create backup directory in '$BACKUPDIR'? (y/n) " y Y >/dev/null; then
+	sudo mkdir -p "$BACKUPDIR"
+fi
+echo
+
+# Add home backup line in weekly script when not already there
+if ask_question "Add a weekly home backup rule in '$BACKUP.weekly.sh'? (y/n) " y Y >/dev/null; then
+	grep "##### Weekly home backup" "$BACKUP.weekly.sh" >/dev/null && echo "Rule already there, skip it." || {
+		cat >> "$BACKUP.weekly.sh" << EOF
+
+##### Weekly home backup (do not remove this line)
+EXCLUSIONS="--exclude=tmp --exclude=.cache"
+
+# Delete file too old (mtime=nb days)
+find "/var/backups/$USER" -name 'backup.tar*' -maxdepth 1 -mtime +28 -type f -delete
+
+# Do the backup
+ARCHIVE="/var/backups/$USER/backup.tar.gz.\$(date +%Y%m%d_%H%M%S)"
+tar -cvpjf "\$ARCHIVE" --one-file-system \$EXCLUSIONS "$HOME" | tee "\${ARCHIVE}.log"
+##### Weekly home backup (end)
+
+EOF
+	}
+fi
+echo
