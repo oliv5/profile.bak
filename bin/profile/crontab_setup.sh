@@ -30,12 +30,13 @@ echo
 # Make system or local cron links
 if ask_question "Create cron links in system /etc/cron* directory? (y/n) " y Y >/dev/null; then
 	sudo sudo ln -s "$BACKUP.cron" "/etc/cron.d/backup.$USER"
-elif { echo; ask_question "Edit user crontab instead? (y/n) " y Y >/dev/null; }; then
+elif { echo; ask_question "Add in user crontab instead? (y/n) " y Y >/dev/null; }; then
 	CRONTAB="$(mktemp)"
 	crontab -l > "$CRONTAB"
 	grep "$BACKUP.cron" "$CRONTAB" >/dev/null && echo "Rule already there, skip it." || {
 		printf '\n%s\n' "## from $BACKUP.cron (do not remove this line)" >> "$CRONTAB"
-		cat "$BACKUP.cron" >> "$CRONTAB"
+		cat "$BACKUP.cron" | awk '!/^.*#/ && /'$USER'/ {$6="";print $0}' >> "$CRONTAB"
+		printf '\n%s\n' "## from $BACKUP.cron (do not remove this line)" >> "$CRONTAB"
 		crontab "$CRONTAB"
 	}
 	crontab -l
@@ -46,6 +47,8 @@ echo
 # Make backup directory
 if ask_question "Create backup directory in '$BACKUPDIR'? (y/n) " y Y >/dev/null; then
 	sudo mkdir -p "$BACKUPDIR"
+	sudo chown $USER:$USER -R "$BACKUPDIR"
+	sudo chmod 700 "$BACKUPDIR"
 fi
 echo
 
