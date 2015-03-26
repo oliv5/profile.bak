@@ -3,15 +3,22 @@
 # Add few git actions
 lib =
 	git_pull_all() {
-		git stash save -q 'mrconfig_stash'
-		git remote | xargs -l -I{} git pull --rebase {} master
-		if git stash list -n 1 | grep 'mrconfig_stash' >/dev/null 2>&1; then git stash apply -q --index; git stash drop -q; fi
+		RUN=""
+		if git config --bool vcsh.vcsh >/dev/null; then
+			VCSH_REPO=$(basename $MR_REPO .git)
+			RUN="vcsh run $VCSH_REPO"
+		fi
+		eval $RUN sh -c "\"
+			git stash save -q 'mrconfig_stash'
+			git remote | xargs -I{} git pull --rebase {}
+			if git stash list -n 1 | grep 'mrconfig_stash' >/dev/null 2>&1; then git stash apply -q --index; git stash drop -q; fi
+		\""
 	}
 	git_push_all() {
-		git remote | xargs -l git push
+		git remote | xargs -I{} sh -c 'echo -n "Push {} : "; git push {}'
 	}
 	git_bundle() {
-		REPO="${1:-$(basename $MR_REPO)}"
+		REPO="${1:-$(basename $MR_REPO .git)}"
 		git bundle create "$HOME/repo/sync/git/bundle/$REPO.bundle.$(date +%Y%m%d-%H%M%S).git" --all --tags --remotes
 	}
 
@@ -19,47 +26,18 @@ lib =
 lib =
 	vcsh_clone_remote() {
 		VCSH_REPO=$(basename $MR_REPO .git)
-		cd $HOME
 		vcsh run $VCSH_REPO sh -c "
-			git clone ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/$MR_REPO $VCSH_REPO
+			vcsh clone "ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/$MR_REPO" $VCSH_REPO
 			git remote rename origin rpi
-			git branch --set-upstream-to=rpi/master master
-			git remote add github https://oliv5@github.com/oliv5/$MR_REPO
+			## Not necessary
+			#git branch --set-upstream-to=rpi/master master
+			## Not used anymore
+			#git remote add github https://oliv5@github.com/oliv5/$MR_REPO
 		"
 	}
 	vcsh_clone_local() {
 		VCSH_REPO=$(basename $MR_REPO .git)
-		cd $HOME
 		vcsh clone "$HOME/repo/sync/git/$MR_REPO" $VCSH_REPO
-	}
-	vcsh_pull() {
-		VCSH_REPO=$(basename $MR_REPO .git)
-		vcsh run $VCSH_REPO sh -c "
-			git stash save -q 'mrconfig_stash'
-			git remote | xargs -l -I{} git pull --rebase {} master
-			if git stash list -n 1 | grep 'mrconfig_stash' >/dev/null 2>&1; then git stash apply -q --index; git stash drop -q; fi
-		"
-	}
-	vcsh_push() {
-		VCSH_REPO=$(basename $MR_REPO .git)
-		vcsh run $VCSH_REPO \
-			git remote | xargs -l -I{} sh -c 'echo -n "Push {} : "; git push {} master'
-	}
-	vcsh_status() {
-		VCSH_REPO=$(basename $MR_REPO .git)
-		vcsh $VCSH_REPO status
-	}
-	vcsh_gc() {
-		VCSH_REPO=$(basename $MR_REPO .git)
-		vcsh $VCSH_REPO gc
-	}
-	vcsh_bundle() {
-		VCSH_REPO=$(basename $MR_REPO .git)
-		git_bundle "$VCSH_REPO"
-	}
-	vcsh_gitk() {
-		VCSH_REPO=$(basename $MR_REPO .git)
-		vcsh run $VCSH_REPO gitk
 	}
 
 # Define git annex helpers

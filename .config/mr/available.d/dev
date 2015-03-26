@@ -1,4 +1,5 @@
 [$HOME/dev]
+gitk     = gitk
 pull     = git_pull_all
 push     = git_push_all
 bundle   = git_bundle

@@ -1,8 +1,8 @@
 [${XDG_CONFIG_HOME:-$HOME/.config}/vcsh/repo.d/profile.git]
 checkout = vcsh_clone_remote
-pull     = vcsh_pull
-push     = vcsh_push
-status   = vcsh_status
-gc       = vcsh_gc
-bundle   = vcsh_bundle
-gitk     = vcsh_gitk
+annex    = annex_sync
+gitk     = gitk
+pull     = git_pull_all
+push     = git_push_all
+gc       = git gc
+bundle   = git_bundle
