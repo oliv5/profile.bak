@@ -26,6 +26,6 @@ path_append() {
 path_cleanup() {
   #PATH="${PATH//\~/${HOME}}"; PATH=${PATH//.:/}
   #PATH="$(echo "$PATH" | sed -r 's|~|'"${HOME}"'|g; s|\.\:||g' | awk -v RS=':' -v ORS=":" '!a[$1]++')"
-  PATH="$(echo "$PATH" | sed -r 's|~|'"${HOME}"'|g; s|\.\:||g' | awk 'NF && !x[$0]++' RS='[:|\n]' ORS=':')"
+  PATH="$(echo "$PATH" | awk 'NF && !x[$0]++' RS='[:|\n]' ORS=':' | sed -r 's|~|'"${HOME}"'|g; s|\:\.||g; s|(^:\|:$)||')"
   export PATH
 }
