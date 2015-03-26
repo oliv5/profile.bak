@@ -52,8 +52,8 @@ svn_bckdir() {
 
 # Build a backup filename for this repo
 svn_bckname() {
-  local PREFIX="$1" SUFFIX="$2" REV="$3"
-  echo "${PREFIX:+${PREFIX}__}$(basename "$PWD")$(__svn_revarg "$REV" "__" "-")__$(svn_date)${SUFFIX:+__$SUFFIX}"
+  local PREFIX="$1" SUFFIX="$2" REV="$3" DATE="${4:-$(svn_date)}"
+  echo "${PREFIX:+${PREFIX}__}$(basename "$PWD")$(__svn_revarg "$REV" "__" "-")${DATE:+__$DATE}${SUFFIX:+__$SUFFIX}"
 }
 
 # Retrieve date
@@ -374,6 +374,7 @@ svn_zipls() {
   local FILE="${2:-*}"
   if [ ! -d "$DIR" ]; then
     DIR="$(svn_bckdir)"
+    FILE="*$(svn_bckname "" "" "" "*")"
   fi
   find "$DIR" -type f -name "$FILE" -printf '%T@ %p\n' 2>/dev/null | sort -rn | cut -d' ' -f 2-
 }
