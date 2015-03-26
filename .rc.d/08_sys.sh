@@ -24,6 +24,7 @@ uid() {
   done
 }
 
+################################
 # System information
 sys_iostat() {
   iostat -x 2
@@ -37,77 +38,89 @@ sys_cpu() {
   sar ${1:-1} ${2}
 }
 
-cpu_avg() {
-  eval "ps aux ${1:+| grep $1} | awk 'BEGIN {sum=0} {sum+=\$3}; END {print sum}'"
+################################
+# Memory information
+mem() {
+  free -mt --si
 }
 
-mem_avg() {
-  eval "ps aux ${1:+| grep $1} | awk 'BEGIN {sum=0} {sum+=\$4}; END {print sum}'"
+mem_free() {
+  free | awk '{if (FNR==2){sum+=$4} else if (FNR==3){sum-=$4}} END {print sum}'
 }
 
-cpu_inst() {
-  if [ -z "$1" ]; then
-    top -d 0.5 -b -n2 | grep "Cpu(s)" | tail -n 1 | awk '{print $2 + $4 + $6}'
-  else
-    top -d 0.5 -b -n2 | grep "$1" | awk 'BEGIN {sum=0} {sum+=$9}; END {print sum}'
-  fi
+swap_free() {
+  free | awk 'FNR==4 {print $4}'
 }
 
-mem_inst() {
-  if [ -z "$1" ]; then
-    top -d 0.5 -b -n2 | grep "Mem:" | tail -n 1 | awk '{print ($5*100/$3)}'
-  else
-    top -d 0.5 -b -n2 | grep "$1" | awk 'BEGIN {sum=0} {sum+=$10}; END {print sum}'
-  fi
+mem_used() {
+  free | awk '{if (FNR==2){sum+=$3} else if (FNR==3){sum-=$3}} END {print sum}'
 }
 
-swap_inst() {
-  top -d 0.5 -b -n2 | grep "Swap:" | tail -n 1 | awk '{print ($5*100/$3)}'
+swap_used() {
+  free | awk 'FNR==4 {print $3}'
 }
 
-cpu_top() {
-  eval "ps aux --sort -%cpu ${1:+| head -n $(($1 + 1))}"
+mem_total() {
+  free | awk 'FNR==2 {print $2}'
 }
 
-mem_top() {
-  eval "ps aux --sort -rss ${1:+| head -n $(($1 + 1))}"
+swap_total() {
+  free | awk 'FNR==4 {print $2}'
 }
 
-kill_cpu_top() {
-  local END=$((${1:-1} + 1))
-  shift $(min 1 $#)
-  ps a --sort -%cpu | awk 'NR>1 && NR<=$END {print $1;}' | xargs -r kill "$@"
-}
+################################
+# Processes information
+alias cpu='cpu_ps'
 
-kill_mem_top() {
-  local END=$((${1:-1} + 1))
-  shift $(min 1 $#)
-  ps a --sort -rss | awk 'NR>1 && NR<=$END {print $1;}' | xargs -r kill "$@"
+cpu_ps() {
+  # use eval because of the option "|" in $1
+  eval ps aux ${1:+| grep $1} | awk 'BEGIN {sum=0} {sum+=$3}; END {print sum}'
 }
 
 mem_ps() {
-  ps -A --sort -rss -o comm,pmem,rss | head -n 11 |
-  while read command percent rss; do
-    if [ "${command}" != "COMMAND" ]; then
-      rss="$(echo "scale=2;${rss}/1024" | bc)"
-    fi
-    printf "%-26s%-8s%s\n" "${command}" "${percent}" "${rss}"
-  done
-  # The following is a bashism
-  #done < <(ps -A --sort -rss -o comm,pmem,rss | head -n 11)
+  # use eval because of the option "|" in $1
+  eval ps aux ${1:+| grep $1} | awk 'BEGIN {sum=0} {sum+=$4}; END {print sum}'
 }
 
-# system information aliases
-alias cpu='cpu_inst'
-alias mem='mem_inst'
-alias swap='swap_inst'
+cpu_list() {
+  local NUM=$((${1:-1} + 1))
+  shift $(min 1 $#)
+  # use eval because of the option "|" in $1
+  eval ps ${@:-aux} --sort -%cpu ${NUM:+| head -n $NUM}
+}
+
+mem_list() {
+  local NUM=$((${1:-1} + 1))
+  shift $(min 1 $#)
+  # use eval because of the option "|" in $1
+  eval ps ${@:-aux} --sort -rss ${NUM:+| head -n $NUM}
+}
+
+cpu_listshort() {
+  cpu_list "$1" ax -o comm,pid,%cpu,cpu
+}
+
+mem_listshort() {
+  mem_list "$1" ax -o comm,pid,pmem,rss,vsz
+}
+
+kill_cpu() {
+  local NUM=$((${1:-1} + 1))
+  shift $(min 1 $#)
+  ps a --sort -%cpu | awk 'NR>1 && NR<=$NUM {print $1;}' | xargs -r kill "$@"
+}
+
+kill_mem() {
+  local NUM=$((${1:-1} + 1))
+  shift $(min 1 $#)
+  ps a --sort -rss | awk 'NR>1 && NR<=$NUM {print $1;}' | xargs -r kill "$@"
+}
 
 ################################
 # Keyboad layout
 alias keyb-list='grep ^[^#] /etc/locale.gen'
 alias keyb-set='setxkbmap -layout'
 alias keyb-setfr='setxkbmap -layout fr'
-
 
 ################################
 # Language selection functions
