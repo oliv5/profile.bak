@@ -21,7 +21,8 @@ if [ ! -z "$EXE" ]; then
 fi
 
 # Link the configuration file to the repository
-ln -sf "$REPO/GLOBAL.CF3" "$USER_PREFIX/Mes documents/Source Insight/Settings/GLOBAL.CF3"
+#ln -sf "$REPO/GLOBAL.CF3" "$USER_PREFIX/Mes documents/Source Insight/Settings/GLOBAL.CF3"
+find "$USER_PREFIX" -type f -name "GLOBAL.CF3" -exec cp "$REPO/GLOBAL.CF3" "{}" \;
 
 # Copy run script into user bin
 cp "$REPO/run.sh" "$HOME/bin/si.sh"
