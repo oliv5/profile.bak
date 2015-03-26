@@ -15,10 +15,10 @@ echo
 BACKUP="$DIR/backup"
 if ask_question "Create backup scripts? (y/n) " y Y >/dev/null; then
 	touch "$BACKUP.cron"; 						chmod +x "$BACKUP.cron"
-	echo "!#/bin/sh" > "$BACKUP.daily.sh";		chmod +x "$BACKUP.daily.sh"
-	echo "!#/bin/sh" > "$BACKUP.weekly.sh";		chmod +x "$BACKUP.weekly.sh"
-	echo "!#/bin/sh" > "$BACKUP.monthly.sh";	chmod +x "$BACKUP.monthly.sh"
-	echo "!#/bin/sh" > "$BACKUP.yearly.sh";		chmod +x "$BACKUP.yearly.sh"
+	echo "#!/bin/sh" > "$BACKUP.daily.sh";		chmod +x "$BACKUP.daily.sh"
+	echo "#!/bin/sh" > "$BACKUP.weekly.sh";		chmod +x "$BACKUP.weekly.sh"
+	echo "#!/bin/sh" > "$BACKUP.monthly.sh";	chmod +x "$BACKUP.monthly.sh"
+	echo "#!/bin/sh" > "$BACKUP.yearly.sh";		chmod +x "$BACKUP.yearly.sh"
 	# Create rules
 	grep "$BACKUP.daily.sh" "$BACKUP.cron" 		>/dev/null || echo "0  0 * * * $USER sh -c \"$BACKUP.daily.sh\""	>> "$BACKUP.cron"
 	grep "$BACKUP.weekly.sh" "$BACKUP.cron" 	>/dev/null || echo "5  0 * * 1 $USER sh -c \"$BACKUP.weekly.sh\""	>> "$BACKUP.cron"
