@@ -2,7 +2,7 @@
 checkout = vcsh_clone_remote
 annex    = annex_sync
 gitk     = gitk
-pull     = git_pull_all
-push     = git_push_all
+pull     = git_pull_all master
+push     = git_push_all master
 gc       = git gc
 bundle   = git_bundle

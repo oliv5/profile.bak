@@ -10,12 +10,12 @@ lib =
 		fi
 		eval $RUN sh -c "\"
 			git stash save -q 'mrconfig_stash'
-			git remote | xargs -I{} git pull --rebase {}
+			git remote | xargs -I{} git pull --rebase {} $1
 			if git stash list -n 1 | grep 'mrconfig_stash' >/dev/null 2>&1; then git stash apply -q --index; git stash drop -q; fi
 		\""
 	}
 	git_push_all() {
-		git remote | xargs -I{} sh -c 'echo -n "Push {} : "; git push {}'
+		git remote | xargs -I{} sh -c 'echo -n "Push {} : "; git push {} $1'
 	}
 	git_bundle() {
 		REPO="${1:-$(basename $MR_REPO .git)}"

@@ -1,6 +1,6 @@
 [$HOME/bin]
 gitk     = gitk
-pull     = git_pull_all
-push     = git_push_all
+pull     = git_pull_all master
+push     = git_push_all master
 bundle   = git_bundle
 gc       = git gc
