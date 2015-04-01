@@ -337,7 +337,7 @@ svn_difflx() { svn_diffl "$@" | grep -E "^[^ D]" | cut -c 9- | tr '\n' '\0'; }
 # Only for modified files
 __svn_diffb() {
   local FILE
-  local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
+  local ARG1="${1:-true}"; local ARG2="${2:-.}"; shift $(min 2 $#)
   # Process each file in conflict or in command line
   svn_stx '^(A|M|R|C|\~|\!)' "$@" | while IFS="" read -r -d "" FILE ; do
     # Warning: eval remove one level of quotes
@@ -371,10 +371,9 @@ svn_zipdiff() {
 # List the archives based on given name
 svn_zipls() {
   local DIR="$1"
-  local FILE="${2:-*}"
+  local FILE="${2:-*$(svn_bckname "" "" "" "*")}"
   if [ ! -d "$DIR" ]; then
     DIR="$(svn_bckdir)"
-    FILE="*$(svn_bckname "" "" "" "*")"
   fi
   find "$DIR" -type f -name "$FILE" -printf '%T@ %p\n' 2>/dev/null | sort -rn | cut -d' ' -f 2-
 }
