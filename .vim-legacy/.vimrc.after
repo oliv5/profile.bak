@@ -236,19 +236,19 @@ if !exists('g:loaded_airline') && !exists('g:vimrc_nostatusline')
 		return b:statusline_tab_warning
 	endfunction
 
-	" Set global status line content
-	function! s:StatuslineGlobal()
+	" Set status line content
+	function! s:Statusline(local)
 		if has("statusline") && &modifiable
 			"if exists('g:loaded_buftabs')
 			"	set statusline=\ %{buftabs#statusline(-45)}
 			"else
 			"	set statusline=[%n]\ %<%F
 			"endif
-			set statusline=\ %{exists('g:loaded_buftabs')?buftabs#statusline(-45):'[%n]\ %<%F'}
-			set statusline+=\ %=
-			set statusline+=\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r
-			set statusline+=\ [%{&expandtab==0?'tabs':'space'}%{b:StatuslineWarning()}]
-			set statusline+=\ %y\ %c,%l/%L\ %P
+			exe "set" . a:local "statusline=\\ %{exists('g:loaded_buftabs')?buftabs#statusline(-45):'[%n]\\ %<%F'}"
+			exe "set" . a:local "statusline+=\\ %="
+			exe "set" . a:local "statusline+=\\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r"
+			exe "set" . a:local "statusline+=\\ [%{&expandtab==0?'tabs':'space'}%{b:StatuslineWarning()}]"
+			exe "set" . a:local "statusline+=\\ %y\\ %c,%l/%L\\ %P"
 		endif
 	endfunction
 
@@ -262,18 +262,15 @@ if !exists('g:loaded_airline') && !exists('g:vimrc_nostatusline')
 	" Line options
 	set laststatus=2                " Always show status line
 
-	" User command
-	command! -range=% -nargs=0 StatuslineGlobal call <SID>StatuslineGlobal(<f-args>)
-
 	" Update the warning flag
 	autocmd cursorhold,bufwritepost * unlet! b:statusline_tab_warning
 
 	" Key mapping
-	noremap <silent><localleader>s  :call <SID>StatuslineGlobal()<CR>
+	noremap <silent><localleader>s  :call <SID>Statusline()<CR>
 
 	" Set the status line once
 	if !exists("g:loaded_vimrc")
-		call s:StatuslineGlobal()
+		call s:Statusline('local')
 	endif
 
 endif
