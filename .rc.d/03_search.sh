@@ -7,23 +7,32 @@ SED_EXCLUDE="$FIND_EXCLUDE -not -type l -and -not -path '*obj*'"
 alias _ffind='_ffind1'
 _ffind1() {
   local FCASE="${FCASE:--}name"
-  local DIR="$(dirname "${1:-.}")"
+  local DIR="$(dirname "$1")"
   local FILES="$FCASE $(basename "$1" | sed -e 's/;/ -o '${FCASE}' /g')"
   (set -f; shift $(min 1 $#); find -L "$DIR" -nowarn \( $FILES \) -and $FIND_EXCLUDE "$@")
 }
 _ffind2() {
   local FCASE="${FCASE:--}regex"
-  local DIR="$(dirname "${1:-.}")"
+  local DIR="$(dirname "$1")"
   local FILES="$FCASE .*/$(basename "$1")"
   (set -f; shift $(min 1 $#); find -L "$DIR" -regextype egrep -nowarn $FILES -and $FIND_EXCLUDE "$@")
 }
+fff() { local ARG1="$1"; shift $(min 1 $#); (set -f; _ffind "${ARG1:-*}" -type f "$@"); }
+ffd() { local ARG1="$1"; shift $(min 1 $#); (set -f; _ffind "${ARG1:-*}" -type d "$@"); }
+alias ff='_ffind'
+alias iff='FCASE=-i ff'
+alias ifff='FCASE=-i fff'
+alias iffd='FCASE=-i ffd'
+
+# Backward find
 _bfind() {
-  local DIR="$PWD"
-  local TYPE="$2"
+  local DIR="$(dirname "$1")"
+  local NAME="$(basename "$1")"
+  local TYPE="${2:-e}"
   local STOP="$3"
   local FOUND=""
   while true; do
-    if eval test -${TYPE:-e} "\"$DIR/$1\""; then 
+    if eval test -$TYPE "\"$DIR/$NAME\""; then 
       FOUND="$DIR"
       [ -z "$STOP" ] && break
     fi
@@ -32,17 +41,15 @@ _bfind() {
   done
   echo "$FOUND"
 }
-
-# Find files functions
-fff() { local ARG1="$1"; shift $(min 1 $#); (set -f; _ffind "${ARG1:-*}" -type f "$@"); }
-ffd() { local ARG1="$1"; shift $(min 1 $#); (set -f; _ffind "${ARG1:-*}" -type d "$@"); }
-alias ff='_ffind'
-alias iff='FCASE=-i ff'
-alias ifff='FCASE=-i fff'
-alias iffd='FCASE=-i ffd'
 bff() { local ARG1="$1"; shift $(min 1 $#); (set -f; _bfind "${ARG1:-.}" "f" "$@"); }
 bfd() { local ARG1="$1"; shift $(min 1 $#); (set -f; _bfind "${ARG1:-.}" "d" "$@"); }
 alias bf='_bfind'
+
+# Find breadth-first (width-first)
+_wfind() { _ffind "${@:-*}" -printf '%d\t%p\n' | sort -nk1 | cut -f2-; }
+wff() { _wfind "${@:-*}" -type f; }
+wfd() { _wfind "${@:-*}" -type d; }
+alias wf='_wfind'
 
 # File grep implementations
 alias _fgrep='_fgrep2'

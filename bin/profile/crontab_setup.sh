@@ -15,15 +15,17 @@ echo
 BACKUP="$DIR/backup"
 if ask_question "Create backup scripts? (y/n) " y Y >/dev/null; then
 	touch "$BACKUP.cron"; 						chmod +x "$BACKUP.cron"
+	echo "#!/bin/sh" > "$BACKUP.hourly.sh";		chmod +x "$BACKUP.hourly.sh"
 	echo "#!/bin/sh" > "$BACKUP.daily.sh";		chmod +x "$BACKUP.daily.sh"
 	echo "#!/bin/sh" > "$BACKUP.weekly.sh";		chmod +x "$BACKUP.weekly.sh"
 	echo "#!/bin/sh" > "$BACKUP.monthly.sh";	chmod +x "$BACKUP.monthly.sh"
 	echo "#!/bin/sh" > "$BACKUP.yearly.sh";		chmod +x "$BACKUP.yearly.sh"
 	# Create rules
-	grep "$BACKUP.daily.sh" "$BACKUP.cron" 		>/dev/null || echo "0  0 * * * $USER sh -c \"$BACKUP.daily.sh\""	>> "$BACKUP.cron"
-	grep "$BACKUP.weekly.sh" "$BACKUP.cron" 	>/dev/null || echo "5  0 * * 1 $USER sh -c \"$BACKUP.weekly.sh\""	>> "$BACKUP.cron"
-	grep "$BACKUP.monthly.sh" "$BACKUP.cron" 	>/dev/null || echo "10 0 1 * * $USER sh -c \"$BACKUP.monthly.sh\""	>> "$BACKUP.cron"
-	grep "$BACKUP.yearly.sh" "$BACKUP.cron" 	>/dev/null || echo "15 0 1 1 * $USER sh -c \"$BACKUP.yearly.sh\""	>> "$BACKUP.cron"
+	grep "$BACKUP.hourly.sh" "$BACKUP.cron" 	>/dev/null || echo "0  * * * * $USER sh -c \"$BACKUP.hourly.sh\""	>> "$BACKUP.cron"
+	grep "$BACKUP.daily.sh" "$BACKUP.cron" 		>/dev/null || echo "10 0 * * * $USER sh -c \"$BACKUP.daily.sh\""	>> "$BACKUP.cron"
+	grep "$BACKUP.weekly.sh" "$BACKUP.cron" 	>/dev/null || echo "20 0 * * 1 $USER sh -c \"$BACKUP.weekly.sh\""	>> "$BACKUP.cron"
+	grep "$BACKUP.monthly.sh" "$BACKUP.cron" 	>/dev/null || echo "30 0 1 * * $USER sh -c \"$BACKUP.monthly.sh\""	>> "$BACKUP.cron"
+	grep "$BACKUP.yearly.sh" "$BACKUP.cron" 	>/dev/null || echo "40 0 1 1 * $USER sh -c \"$BACKUP.yearly.sh\""	>> "$BACKUP.cron"
 fi
 echo
 
