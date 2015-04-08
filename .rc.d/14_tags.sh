@@ -21,7 +21,8 @@ mkctags() {
   local CTAGS_OPTIONS="$CTAGS_OPTS $3"
   local CTAGS_DB="${DST}/tags"
   # Build tag file
-  ${DBG} $(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}"
+  ${DBG} $(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}" 2>&1 >/dev/null | \
+    grep -vE 'Warning: Language ".*" already defined'
 }
 
 # Scan directory for cscope files
@@ -131,10 +132,7 @@ mkalltags() {
   local SRC
   for TAGPATH in $(find -L "$(readlink -m "${1:-$PWD}")" -maxdepth ${2:-5} -type f -name "*.path" 2>/dev/null); do
     echo "** Processing file $TAGPATH"
-    set -x
     cd "$(dirname $TAGPATH)"
-    set +x
-    pwd
     local TAGNAME="$(basename $TAGPATH)"
     if [ "$TAGNAME" = "tags.path" -o "$TAGNAME" = "ctags.path" ]; then
       rmctags
