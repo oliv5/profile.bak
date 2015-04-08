@@ -36,7 +36,7 @@ _bfind() {
       FOUND="$DIR"
       [ -z "$STOP" ] && break
     fi
-    [ -z "$DIR" ] && break
+    [ -z "$DIR" -o "$DIR" == "." ] && break
     DIR="${DIR%/*}"
   done
   echo "$FOUND"
