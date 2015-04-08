@@ -158,7 +158,7 @@ endif
 " Theme & color scheme
 if has('syntax')
 	syntax on     " Syntax highlight
-	if (&term=="builtin_gui" || has("gui_running")) && (&t_Co>2)
+	if (&term=="builtin_gui" || has("gui_running") || &t_Co>2)
 		colorscheme torte   " Theme
 	else
 		colorscheme default " Theme
