@@ -2,19 +2,22 @@
 
 # Add few git actions
 lib =
-	git_pull_all() {
-		RUN=""
+	execute() {
+		CMD="$1"
 		if git config --bool vcsh.vcsh >/dev/null; then
-			VCSH_REPO=$(basename $MR_REPO .git)
-			RUN="vcsh run $VCSH_REPO"
+			REPO="$(basename $MR_REPO .git)"
+			CMD="vcsh run $REPO"
 		fi
-		eval $RUN sh -c "\"
+		eval $CMD sh -c "$2"
+	}
+	git_pull() {
+		execute "" "\"
 			git stash save -q 'mrconfig_stash'
 			git remote | xargs -I{} git pull --rebase {} $1
 			if git stash list -n 1 | grep 'mrconfig_stash' >/dev/null 2>&1; then git stash apply -q --index; git stash drop -q; fi
 		\""
 	}
-	git_push_all() {
+	git_push() {
 		git remote | xargs -I{} sh -c 'echo -n "Push {} : "; git push {} $1'
 	}
 	git_bundle() {
@@ -22,29 +25,31 @@ lib =
 		git bundle create "$HOME/repo/sync/git/bundle/$REPO.bundle.$(date +%Y%m%d-%H%M%S).git" --all --tags --remotes
 	}
 
-# Define vcsh as a new rcs
+# Define vcsh helpers
 lib =
-	vcsh_clone_remote() {
-		VCSH_REPO=$(basename $MR_REPO .git)
-		vcsh run $VCSH_REPO sh -c "
-			vcsh clone "ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/$MR_REPO" $VCSH_REPO
+	vcsh_clone() {
+		URL="$1"
+		REPO=$(basename $MR_REPO .git)
+		vcsh run $REPO sh -c "\"
+			vcsh clone "$URL" $REPO
 			git remote rename origin rpi
 			## Not necessary
 			#git branch --set-upstream-to=rpi/master master
 			## Not used anymore
 			#git remote add github https://oliv5@github.com/oliv5/$MR_REPO
-		"
+		\""
+	}
+	vcsh_clone_remote() {
+		vcsh_clone "ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/$MR_REPO"
 	}
 	vcsh_clone_local() {
-		VCSH_REPO=$(basename $MR_REPO .git)
-		vcsh clone "$HOME/repo/sync/git/$MR_REPO" $VCSH_REPO
+		vcsh_clone "$HOME/repo/sync/git/$MR_REPO"
 	}
 
 # Define git annex helpers
 lib =
 	annex_sync() {
-		VCSH_REPO=$(basename $MR_REPO .git)
-		vcsh $VCSH_REPO annex sync
+		execute "" "git annex sync"
 	}
 
 # Include our repositories
