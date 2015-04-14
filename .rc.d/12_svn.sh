@@ -164,7 +164,7 @@ svn_ci() {
 
 # Check svn repository existenz
 svn_exists() {
-  svn info "$@" > /dev/null
+  svn info "$@" >/dev/null 2>&1
 }
 
 # Tells when repo has been modified
@@ -388,7 +388,7 @@ svn_ziplast() {
 __svn_diffzip() {
   local ARCHIVE="$2"
   if [ ! -f "$ARCHIVE" ]; then
-    ARCHIVE="$(svn_ziplast 1 "" "${ARCHIVE:-"*$(basename "$PWD")*"}")"
+    ARCHIVE="$(svn_ziplast 1 "" "${ARCHIVE:-"*$(basename "$PWD")__*"}")"
   fi
   false ${ARCHIVE:?No archive found...}
   # Warning: eval remove one level of quotes
