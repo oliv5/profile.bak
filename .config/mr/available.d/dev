@@ -1,4 +1,4 @@
-[${HOME}/private/dev]
+[${PRIVATE:-$HOME}/dev]
 checkout = git_clone_remote
 annex    = annex_sync
 gitk     = gitk
