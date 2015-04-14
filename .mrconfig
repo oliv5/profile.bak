@@ -3,34 +3,43 @@
 # Add few git actions
 lib =
 	execute() {
-		CMD="$1"
+		CMD="$1"; shift
 		if git config --bool vcsh.vcsh >/dev/null; then
 			REPO="$(basename $MR_REPO .git)"
 			CMD="vcsh run $REPO"
 		fi
-		eval $CMD sh -c "$2"
+		eval $CMD sh -c \""$@"\"
 	}
 	git_clone() {
 		URL="$1"
 		REPO=$(basename $MR_REPO .git)
-		execute "" "\"
+		execute "" "
 			git clone "$URL" $REPO
 			git remote rename origin rpi
 			## Not necessary
 			#git branch --set-upstream-to=rpi/master master
 			## Not used anymore
 			#git remote add github https://oliv5@github.com/oliv5/$MR_REPO
-		\""
+		"
 	}
 	git_pull() {
-		execute "" "\"
+		execute "" "
 			git stash save -q 'mrconfig_stash'
-			git remote | grep "$1" 2>/dev/null | xargs -I{} git pull --rebase {} $2
+			for REMOTE in $1; do
+				for BRANCH in $2; do
+					git pull --rebase \\\${REMOTE} \\\${BRANCH}
+				done
+			done
 			if git stash list -n 1 | grep 'mrconfig_stash' >/dev/null 2>&1; then git stash apply -q --index; git stash drop -q; fi
-		\""
+		"
 	}
 	git_push() {
-		git remote | grep "$1" 2>/dev/null | xargs -I{} sh -c 'echo -n "Push {}${2:+/$2} : "; git push {} $2' -a "$@"
+		for REMOTE in $1; do
+			for BRANCH in $2; do
+				echo -n "Push $REMOTE/$BRANCH : "
+				git push $REMOTE $BRANCH
+			done
+		done
 	}
 	git_bundle() {
 		REPO="${1:-$(basename $MR_REPO .git)}"

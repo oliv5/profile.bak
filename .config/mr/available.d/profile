@@ -3,6 +3,6 @@ checkout = vcsh_clone_remote
 annex    = annex_sync
 gitk     = gitk
 pull     = git_pull rpi master
-push     = git_push rpi master
+push     = git_push "rpi backup" master
 gc       = git gc
 bundle   = git_bundle
