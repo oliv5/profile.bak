@@ -177,7 +177,9 @@ conv_soffice() {
 # Convert to PDF
 conv_pdf() {
   # sudo apt-get install wv texlive-base texlive-latex-base ghostscript
-  wvPDF "$@"
+  for FILE in "$@"; do
+    wvPDF "$FILE" "${FILE%.*}.pdf"
+  done
 }
 
 # Merge PDFs
