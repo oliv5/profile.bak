@@ -253,7 +253,7 @@ if !exists('g:loaded_airline') && !exists('g:vimrc_nostatusline')
 	endfunction
 
 	" Hide status line
-	function! s:StatusLineHide()
+	function! s:StatuslineHide()
 		hi StatusLine ctermbg=NONE ctermfg=white
 		hi clear StatusLine
 		set laststatus=0
@@ -266,11 +266,13 @@ if !exists('g:loaded_airline') && !exists('g:vimrc_nostatusline')
 	autocmd cursorhold,bufwritepost * unlet! b:statusline_tab_warning
 
 	" Key mapping
-	noremap <silent><localleader>s  :call <SID>Statusline()<CR>
+	noremap <silent><localleader>s  :call <SID>Statusline('local')<CR>
 
-	" Set the status line once
+	" Set the status line
 	if !exists("g:loaded_vimrc")
-		call s:Statusline('local')
+		augroup vimrc_statuline
+			autocmd! BufWinEnter * windo call s:Statusline('local')
+		augroup END
 	endif
 
 endif
