@@ -133,6 +133,7 @@ git_ls() {
   git ls-tree -r ${1:-master} --name-only ${2:+| grep -F "$2"}
 }
 
+########################################
 # Amend log
 alias git_amend='git commit --amend'
 
@@ -171,11 +172,40 @@ git_amend_names() {
   git filter-branch --env-filter "$SCRIPT"
 }
 
+########################################
+# Purge a given file from history
+git_purge_file() {
+  local FILE="${1:?No path specified...}"
+  git filter-branch --force --index-filter \
+    "git rm --cached --ignore-unmatch \"$FILE\"" \
+    --prune-empty --tag-name-filter cat -- --all
+}
+
+# Forced garbage-collector (use after purge_file) 
+git_purge_gc() {
+  git for-each-ref --format='delete %(refname)' refs/original | git update-ref --stdin
+  git reflog expire --expire=now --all
+  git gc --prune=now
+}
+
+########################################
 # Git history
 git_history() {
   git log -p "$@"
 }
 
+# Git logs
+git_log() {
+  git log --name-only
+}
+git_logall() {
+  git log --name-status
+}
+git_logstat() {
+  git log --stat
+}
+
+########################################
 # Git add gitignore
 git_ignore_add() {
   grep "$1" .gitignore >/dev/null || echo "$1" >>.gitignore
@@ -192,4 +222,13 @@ git_ignore_changes() {
 }
 git_noignore_changes() {
   git update-index --no-assume-unchanged "$@"
+}
+
+########################################
+# Show branch/url
+git_url() {
+  git config --get remote.${1:-origin}.url
+}
+git_branch() {
+  git branch -a | grep -E '^\*' | cut -c 3-
 }
