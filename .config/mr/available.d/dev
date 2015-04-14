@@ -1,0 +1,8 @@
+[${HOME}/private/dev]
+checkout = git_clone_remote
+annex    = annex_sync
+gitk     = gitk
+pull     = git_pull
+push     = git_push
+gc       = git gc
+bundle   = git_bundle
