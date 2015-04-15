@@ -26,19 +26,23 @@ lib =
 		execute "" "
 			git stash save -q 'mrconfig_stash'
 			for REMOTE in $1; do
-				for BRANCH in $2; do
-					git pull --rebase \\\${REMOTE} \\\${BRANCH}
-				done
+				if git remote | grep -- \\\$REMOTE >/dev/null; then
+					for BRANCH in $2; do
+						git pull --rebase \\\$REMOTE \\\$BRANCH
+					done
+				fi
 			done
 			if git stash list -n 1 | grep 'mrconfig_stash' >/dev/null 2>&1; then git stash apply -q --index; git stash drop -q; fi
 		"
 	}
 	git_push() {
 		for REMOTE in $1; do
-			for BRANCH in $2; do
-				echo -n "Push $REMOTE/$BRANCH : "
-				git push $REMOTE $BRANCH
-			done
+			if git remote | grep -- $REMOTE >/dev/null; then
+				for BRANCH in $2; do
+					echo -n "Push $REMOTE/$BRANCH : "
+					git push $REMOTE $BRANCH
+				done
+			fi
 		done
 	}
 	git_bundle() {
