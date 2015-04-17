@@ -563,5 +563,18 @@ endif
 
 
 " *******************************************************
+" } Scratch plugin {
+" https://github.com/mtth/scratch.vim
+" *******************************************************
+if !exists('loaded_scratch')
+	let loaded_scratch = 1
+	" Options
+	let g:scratch_disable = 0
+	" Key mapping
+	noremap <localleader>c	<plug>(scratch-insert-reuse)
+endif
+
+
+" *******************************************************
 " } The end
 " *******************************************************

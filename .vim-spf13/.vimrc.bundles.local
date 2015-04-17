@@ -45,6 +45,7 @@
 	Bundle 'Raimondi/YAIFA'
 	Bundle 'vim-scripts/MultipleSearch'
 	"Bundle 'vim-scripts/highlight.vim'
+	Bundle 'mtth/scratch.vim'
 " }
 
 " Configure SPF13 plugins {
