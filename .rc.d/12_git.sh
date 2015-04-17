@@ -41,6 +41,12 @@ git_meld() {
 }
 
 ########################################
+# Svn diff with meld
+git_diffm() {
+  git difftool -y -t meld "$@"
+}
+
+########################################
 # Get git repo root directory
 git_root() {
   git rev-parse --show-toplevel
@@ -57,14 +63,26 @@ git_modified() {
 }
 
 ########################################
+# Get hash
+git_hash() {
+  git rev-parse "$@"
+}
+
+# Get short hash
+git_shorthash() {
+  git_hash "$@" | cut -c 1-7
+}
+
+########################################
 # Push changes onto stash, revert changes
-git_stash_push() {
+git_stash_save() {
   git stash save "stash-$(date +%Y%m%d-%H%M)${1:+_$1}"
 }
 
 # Push changes onto stash, does not revert anything
-git_stash_save() {
-  git_stash_push "$@" && git stash apply stash@{0} >/dev/null
+git_stash_push() {
+  local STASH="stash-$(date +%Y%m%d-%H%M)${1:+_$1}"
+  git update-ref -m "$STASH" refs/stash "$(git stash create \"$STASH\")"
 }
 
 # Pop change from stash
@@ -82,6 +100,13 @@ git_stash_diff() {
   local STASH="${1:-0}"; shift $(min 1 $#)
   git diff stash@{$STASH} "$@"
 }
+git_stash_diffm() {
+  local STASH="${1:-0}"; shift $(min 1 $#)
+  git_diffm stash@{$STASH} "$@" 
+}
+git_stash_diffl() {
+  git_stash_diff "${@:-0}" --name-only
+}
 
 #Show stash content
 git_stash_show() {
@@ -90,7 +115,6 @@ git_stash_show() {
 }
 
 # Aliases using stashes
-alias git_stash_diffl='git_stash_diff --name-only'
 alias git_export='git_stash_save'
 alias git_import='git_stash_apply'
 alias git_suspend='git_stash_push'
