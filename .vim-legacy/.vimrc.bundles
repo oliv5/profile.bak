@@ -301,8 +301,8 @@ if !exists('g:loaded_minibufexplorer')
 	FnNoremap <A-Down>  :MBEbb<CR>
 	FnNoremap <A-Up>    :MBEbf<CR>
 	if !exists("g:vimrc_useTabs")
-		FnNoremap <C-Tab>      :MBEbf<CR>
-		FnNoremap <C-S-Tab>    :MBEbb<CR>
+		FnNoremap <C-Tab>      :MBEbb<CR>
+		FnNoremap <C-S-Tab>    :MBEbf<CR>
 	endif
 
 endif
