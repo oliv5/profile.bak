@@ -15,11 +15,7 @@ lib =
 		REPO=$(basename $MR_REPO .git)
 		execute "" "
 			git clone "$URL" $REPO
-			git remote rename origin rpi
-			## Not necessary
-			#git branch --set-upstream-to=rpi/master master
-			## Not used anymore
-			#git remote add github https://oliv5@github.com/oliv5/$MR_REPO
+			if [ ! -z "$2" ]; then git remote rename origin $2; fi
 		"
 	}
 	git_pull() {
@@ -55,22 +51,13 @@ lib =
 	vcsh_clone() {
 		REPO=$(basename $MR_REPO .git)
 		vcsh init $REPO
-		git_clone "$1"
+		git_clone "$@"
 	}
 
 # Define git annex helpers
 lib =
 	annex_sync() {
 		execute "" "git annex sync"
-	}
-	
-# Our main server helpers
-lib =
-	git_clone_remote() {
-		git_clone "ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/$MR_REPO"
-	}
-	vcsh_clone_remote() {
-		vcsh_clone "ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/$MR_REPO"
 	}
 
 # Include our repositories
