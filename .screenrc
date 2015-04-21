@@ -8,7 +8,7 @@ shell $SHELL
 defscrollback 4000
 
 # create initial windows
-screen -t home 1 $SHELL -c "export DISPLAY=$SCREEN_DISPLAY; $SHELL"
+screen -t $SHELL 1 $SHELL -c "export DISPLAY=$SCREEN_DISPLAY; $SHELL"
 
 # set the caption on the bottom line:
 # from http://diveintomark.org/public/2007/03/screenrc

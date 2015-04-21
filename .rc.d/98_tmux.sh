@@ -18,6 +18,7 @@ tmux() {
 
 #alias
 alias tmux_list='tmux ls 2>/dev/null'
+alias tmux_attach='reptyr'
 
 # Re-attach session, or print the list
 if [ ! -z "$TMUX_AUTOLOAD" ] && [ -z "$ENV_LOADED" ] && shell_isinteractive && shell_islogin; then

@@ -42,6 +42,7 @@ alias screen_restore='screen -R -D'
 alias screen_quit='screen -X quit -S'
 alias screen_killdetached="screen -ls | awk -F '.' '/Detached/{print \$1}' | xargs -r kill"
 alias screen_killall="screen -ls | awk -F '.' '/pts/{print \$1}' | xargs -r kill"
+alias screen_attach='reptyr'
 
 # Re-attach session, or print the list
 if [ ! -z "$SCREEN_AUTOLOAD" ] && [ -z "$ENV_LOADED" ] && shell_isinteractive && shell_islogin; then
