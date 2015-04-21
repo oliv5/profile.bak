@@ -1,6 +1,5 @@
 [${XDG_CONFIG_HOME:-$HOME/.config}/vcsh/repo.d/profile.git]
-checkout = vcsh_clone ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/$MR_REPO rpi
-annex    = annex_sync
+checkout = vcsh_clone ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/profile.git rpi
 gitk     = gitk
 pull     = git_pull rpi master
 push     = git_push "rpi backup" master

@@ -1,7 +1,7 @@
 [${PRIVATE:-$HOME}/dev]
 skip = [ ! -d "${PRIVATE:-$HOME}/dev" ]
-checkout = git_clone ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/$MR_REPO rpi
-annex    = annex_sync
+checkout = git_clone ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/dev.git rpi
+sync     = annex_sync
 gitk     = gitk
 pull     = git_pull rpi master
 push     = git_push "rpi backup" master
