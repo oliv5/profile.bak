@@ -42,7 +42,8 @@ lib =
 		done
 	}
 	git_bundle() {
-		git bundle create "${1:-./$(basename $MR_REPO .git).bundle.$(uname -n).$(date +%Y%m%d-%H%M%S).git}" --all --tags --remotes
+		BUNDLE="${1:-./$(basename $MR_REPO .git).bundle.$(uname -n).$(date +%Y%m%d-%H%M%S).git}"
+		git bundle create "$BUNDLE" --all --tags --remotes
 	}
 
 # Define vcsh helpers
