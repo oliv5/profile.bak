@@ -174,3 +174,23 @@ mkdeb() {
 fstab2autofs() {
   awk 'NF && substr($1,0,1)!="#" {print $2 "\t-fstype="$3 "," $4 "\t" $1}' "$@"
 }
+
+################################
+# http://unix.stackexchange.com/questions/59112/preserve-directory-structure-when-moving-files-using-find
+# Move/copy by replicating directory structure
+_mkdir_exec() {
+  local EXEC="${1:-echo}"
+  local SRC="${2:-.}"
+  local DST="$(path_abs "${3:-.}")"
+  shift 3
+  _ffind "$SRC" $@ -exec sh -c '
+      EXEC="$1"
+      shift
+      for x do
+        mkdir -p "$0/${x%/*}" &&
+        $EXEC "$x" "$0/$x"
+      done
+    ' "$DST" "$EXEC" {} +
+}
+alias mkdir_cp='_mkdir_exec cp'
+alias mkdir_mv='_mkdir_exec mv'

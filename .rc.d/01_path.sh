@@ -29,3 +29,8 @@ path_cleanup() {
   PATH="$(echo "$PATH" | awk 'NF && !x[$0]++' RS='[:|\n]' ORS=':' | sed -r 's|~|'"${HOME}"'|g; s|\:\.||g; s|(^:\|:$)||')"
   export PATH
 }
+
+# Get absolute path
+path_abs() {
+  readlink -f -- "$@"
+}
