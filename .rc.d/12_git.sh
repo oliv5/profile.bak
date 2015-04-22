@@ -26,13 +26,20 @@ alias gsp='git_stash_pop'
 alias gsa='git_stash_apply'
 alias gsl='git stash list'
 # Commit aliases
-alias git_ci='git commit'
+alias gci='git commit'
 # Gitignore
 alias gil='git_ignore_list'
 alias gia='git_ignore_add'
 # git add new files
 alias gan='git add $(git ls-files -o --exclude-standard)'
 alias gau='git add $(git ls-files -o)'
+# Annex
+alias gas='git annex sync'
+alias gal='git annex log'
+alias gai='git annex info'
+alias gag='git annex get'
+alias gad='git annex drop'
+alias gast='git annex status'
 
 ########################################
 # Meld called by git
@@ -65,12 +72,18 @@ git_modified() {
 ########################################
 # Get hash
 git_hash() {
-  git rev-parse "$@"
+  git rev-parse "${@:-HEAD}"
+}
+git_allhash() {
+  git rev-list "${@:-HEAD}"
 }
 
 # Get short hash
 git_shorthash() {
   git_hash "$@" | cut -c 1-7
+}
+git_allshorthash() {
+  git_allhash "$@" | cut -c 1-7
 }
 
 ########################################
@@ -144,8 +157,9 @@ git_rollback() {
 git_clean() {
   # Confirmation
   if [ "$1" != "-y" ]; then
-    echo -n "Remove unversioned files? (y/n): "
-    local ANSWER; read ANSWER; [ "$ANSWER" != "y" -a "$ANSWER" != "Y" ] && return 0
+    ! ask_question "Remove unversioned files? (y/n) " y Y >/dev/null && return 0
+  else
+    shift
   fi
   # Clean repository
   git clean "$@"
