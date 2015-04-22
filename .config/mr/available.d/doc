@@ -4,6 +4,4 @@ checkout = git_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/repo/sync/gi
 bundle   = git_bundle "$HOME/repo/sync/git/bundle/doc.bundle.$(uname -n).$(date +%Y%m%d-%H%M%S).git"
 sync     = annex_sync
 gitk     = gitk
-pull     = true
-push     = true
 gc       = git gc

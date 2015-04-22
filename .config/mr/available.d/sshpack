@@ -5,5 +5,5 @@ bundle   = git_bundle "$HOME/repo/sync/git/bundle/sshpack.bundle.$(uname -n).$(d
 sync     = annex_sync
 gitk     = gitk
 pull     = git_pull rpi master
-push     = git_push "rpi backup" master
+push     = git_push rpi master
 gc       = git gc
