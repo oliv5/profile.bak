@@ -1,6 +1,7 @@
 [${PRIVATE:-$HOME}/doc]
-skip = [ ! -d "${PRIVATE:-$HOME}/doc" ]
+skip     = [ ! -d "${PRIVATE:-$HOME}/doc" ]
 checkout = git_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/repo/sync/git/doc.git rpi
+bundle   = git_bundle "$HOME/repo/sync/git/bundle/doc.bundle.$(uname -n).$(date +%Y%m%d-%H%M%S).git"
 sync     = annex_sync
 gitk     = gitk
 pull     = true

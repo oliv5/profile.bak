@@ -1,7 +1,7 @@
 [${XDG_CONFIG_HOME:-$HOME/.config}/vcsh/repo.d/profile.git]
 checkout = vcsh_clone ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/profile.git rpi
+bundle   = git_bundle "$HOME/repo/sync/git/bundle/profile.bundle.$(uname -n).$(date +%Y%m%d-%H%M%S).git"
 gitk     = gitk
 pull     = git_pull rpi master
 push     = git_push "rpi backup" master
 gc       = git gc
-bundle   = git_bundle

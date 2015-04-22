@@ -1,8 +1,9 @@
 [${PRIVATE:-$HOME}/dev]
 skip = [ ! -d "${PRIVATE:-$HOME}/dev" ]
 checkout = git_clone ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/dev.git rpi
+bundle   = git_bundle "$HOME/repo/sync/git/bundle/dev.bundle.$(uname -n).$(date +%Y%m%d-%H%M%S).git"
+sync     = annex_sync
 gitk     = gitk
 pull     = git_pull rpi master
 push     = git_push "rpi backup" master
 gc       = git gc
-bundle   = git_bundle
