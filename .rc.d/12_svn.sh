@@ -27,10 +27,9 @@ alias sls='svn ls --depth infinity'
 alias sdd='svn diff'
 alias sds='svn diff --summarize'
 alias sdm='svn diff --diff-cmd meld'
-# Misc aliases
-alias svn_resolve='svn_merge'
-alias svn_cla='svn cl'
-alias svn_clr='svn changelist --remove'
+# Changelist
+alias scl='svn cl'
+alias sclr='svn changelist --remove'
 # Commit aliases
 alias sci='svn ci'
 alias scid='svn ci -m "Development commit $(svn_date)"'
@@ -110,23 +109,24 @@ __svn_revarg() {
 }
 
 # Merge 3-way
+alias svn_resolve='svn_merge'
 svn_merge() {
   local FILE
   # Process each file in conflict or in command line
   svn_stx '^C' "$@" | while IFS="" read -r -d "" FILE ; do
     echo "Processing file ${FILE}"
     local CNT=0
-    if [ -f ${FILE}.working ]; then
-      CNT=$(ls -1 ${FILE}.*-right.* | wc -l)
+    if [ -f "${FILE}.working" ]; then
+      CNT=$(ls -1 "${FILE}".*-right.* | wc -l)
       for LINE in $(seq $CNT); do
-        local right="$(ls -1 ${FILE}.*-right.* | sort | sed -n ${LINE}p)"
+        local right="$(ls -1 "${FILE}".*-right.* | sort | sed -n ${LINE}p)"
         echo "  -> compare working with ${right}"
         meld "${right}" "${FILE}" "${FILE}.working" 2>/dev/null
       done
     else
-      CNT=$(ls -1 ${FILE}.r* | wc -l)
+      CNT=$(ls -1 "${FILE}".r* | wc -l)
       for LINE in $(seq $CNT); do
-        local rev="$(ls -1 ${FILE}.r* | sort | sed -n ${LINE}p)"
+        local rev="$(ls -1 "${FILE}".r* | sort | sed -n ${LINE}p)"
         echo "  -> compare mine with ${rev}"
         meld "${rev}" "${FILE}" "${FILE}.mine" 2>/dev/null
       done
@@ -352,6 +352,9 @@ __svn_diffb() {
 }
 alias svn_diffb='__svn_diffb diff'
 alias svn_diffbm='__svn_diffb meld'
+svn_diffbc() {
+  __svn_diffb "true" "$@" | grep -v "Skip" | wc -l
+}
 
 # Make an archive based on the file status
 svn_zipst() {
