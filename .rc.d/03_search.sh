@@ -52,6 +52,7 @@ alias _wfind='_wfind1'
 alias  wf='FCASE= FTYPE=  _wfind'
 alias wff='FCASE= FTYPE=f _wfind'
 alias wfd='FCASE= FTYPE=d _wfind'
+alias wfl='FCASE= FTYPE=l _wfind'
 
 # File grep implementations
 _fgrep1() {
