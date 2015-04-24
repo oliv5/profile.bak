@@ -54,7 +54,7 @@ cmd_unset which grep find
 pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
 
 # Disable console beep
-command -v xset >/dev/null 2>&1 && xset b off 2>/dev/null # From X11 window system
+command -v xset >/dev/null 2>&1 && pidof X >/dev/null && xset b off 2>/dev/null # From X11 window system
 command -v setterm >/dev/null 2>&1 && setterm -blength 0  # From the system console
 
 ################################
