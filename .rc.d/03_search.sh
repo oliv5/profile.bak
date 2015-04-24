@@ -1,93 +1,94 @@
 #!/bin/sh
-FIND_EXCLUDE="-not -path *.svn* -and -not -path *.git*"
-GREP_EXCLUDE="--exclude-dir=.svn --exclude-dir=.git"
-SED_EXCLUDE="$FIND_EXCLUDE -not -type l -and -not -path '*obj*'"
 
 # Find files implementations
-alias _ffind='_ffind1'
 _ffind1() {
   local FCASE="${FCASE:--}name"
-  local DIR="$(dirname "$1")"
-  local FILES="$FCASE $(basename "$1" | sed -e 's/;/ -o '${FCASE}' /g')"
-  (set -f; shift $(min 1 $#); find -L "$DIR" -nowarn \( $FILES \) -and $FIND_EXCLUDE "$@")
+  local DIR="$(dirname "$1 ")" # keep the extra space in $1
+  local FILES="$(basename "$1" | sed -e 's/;/ -o '${FCASE}' /g')"
+  (set -f; shift $(min 1 $#); find "$DIR" -nowarn ${FTYPE:+-type $FTYPE} \( ${FILES:+$FCASE $FILES} -true \) "$@")
 }
 _ffind2() {
   local FCASE="${FCASE:--}regex"
-  local DIR="$(dirname "$1")"
-  local FILES="$FCASE .*/$(basename "$1")"
-  (set -f; shift $(min 1 $#); find -L "$DIR" -regextype egrep -nowarn $FILES -and $FIND_EXCLUDE "$@")
+  local DIR="$(dirname "$1 ")" # keep the extra space in $1
+  local FILES=".*/$(basename "$1")"
+  (set -f; shift $(min 1 $#); find "$DIR" -regextype egrep -nowarn ${FTYPE:+-type $FTYPE} ${FILES:+$FCASE $FILES} "$@")
 }
-fff() { local ARG1="$1"; shift $(min 1 $#); (set -f; _ffind "${ARG1:-*}" -type f "$@"); }
-ffd() { local ARG1="$1"; shift $(min 1 $#); (set -f; _ffind "${ARG1:-*}" -type d "$@"); }
-alias ff='_ffind'
-alias iff='FCASE=-i ff'
-alias ifff='FCASE=-i fff'
-alias iffd='FCASE=-i ffd'
+alias _ffind='_ffind1'
+alias   ff='FCASE=   FTYPE=  _ffind'
+alias  fff='FCASE=   FTYPE=f _ffind'
+alias  ffd='FCASE=   FTYPE=d _ffind'
+alias  ffl='FCASE=   FTYPE=l _ffind'
+alias  iff='FCASE=-i FTYPE=  _ffind'
+alias ifff='FCASE=-i FTYPE=f _ffind'
+alias iffd='FCASE=-i FTYPE=d _ffind'
+alias iffl='FCASE=-i FTYPE=l _ffind'
 
 # Backward find
-_bfind() {
-  local DIR="$(dirname "$1")"
-  local NAME="$(basename "$1")"
-  local TYPE="${2:-e}"
-  local STOP="$3"
+_bfind1() {
+  local ABSPATH="$(readlink -f "${1:-$PWD}")"
+  local DIR="$(dirname "$ABSPATH")"
+  local FILE="$(basename "$ABSPATH")"
+  local FIRSTMATCH="$2"
   local FOUND=""
   while true; do
-    if eval test -$TYPE "\"$DIR/$NAME\""; then 
+    #if eval test ${BTYPE:--e} "\"$DIR/$FILE\""; then 
+    if test ${BTYPE:--e} "$DIR/$FILE"; then 
       FOUND="$DIR"
-      [ -z "$STOP" ] && break
+      [ ! -z "$FIRSTMATCH" ] && break
     fi
     [ -z "$DIR" -o "$DIR" == "." ] && break
     DIR="${DIR%/*}"
   done
   echo "$FOUND"
 }
-bff() { local ARG1="$1"; shift $(min 1 $#); (set -f; _bfind "${ARG1:-.}" "f" "$@"); }
-bfd() { local ARG1="$1"; shift $(min 1 $#); (set -f; _bfind "${ARG1:-.}" "d" "$@"); }
-alias bf='_bfind'
+alias _bfind='_bfind1'
+alias  bf='BTYPE=   _bfind'
+alias bff='BTYPE=-f _bfind'
+alias bfd='BTYPE=-d _bfind'
 
 # Find breadth-first (width-first)
-_wfind() { _ffind "${@:-*}" -printf '%d\t%p\n' | sort -nk1 | cut -f2-; }
-wff() { _wfind "${@:-*}" -type f; }
-wfd() { _wfind "${@:-*}" -type d; }
-alias wf='_wfind'
+_wfind1() { _ffind "${@:-*}" -printf '%d\t%p\n' | sort -nk1 | cut -f2-; }
+alias _wfind='_wfind1'
+alias  wf='FCASE= FTYPE=  _wfind'
+alias wff='FCASE= FTYPE=f _wfind'
+alias wfd='FCASE= FTYPE=d _wfind'
 
 # File grep implementations
-alias _fgrep='_fgrep2'
 _fgrep1() {
   command true ${1:?Nothing to do}
   local ARGS="$(shell_rtrim 1 "$@")"
   shift $(($#-1))
-  (set -f; _ffind1 "$@" -type f -print0 | eval xargs -0 grep -nH --color "$ARGS")
+  (set -f; _ffind1 "$@" -type f -print0 | eval xargs -0 grep -nH --color ${GCASE} "$ARGS")
 }
 _fgrep2() {
 	local ARGS="$(shell_rtrim 1 "$@")"
   shift $(($#-1))
 	local DIR="$(dirname "${@:-.}")"
 	local FILES="$(basename "$@" | sed -e 's/;/ --include=/g')"
-	(set -f; eval grep -RnH --color "$ARGS" --include="$FILES" "$DIR")
+	(set -f; eval grep -RnH --color ${GCASE} "$ARGS" --include="$FILES" "$DIR")
 }
-
-# Search pattern functions
-gg()  { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; _fgrep    "${ARG1:?Nothing to do}" "${ARG2:-*}" "$@"); }
-igg() { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; _fgrep -i "${ARG1:?Nothing to do}" "${ARG2:-*}" "$@"); }
-ggf() { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; _fgrep    "${ARG1:?Nothing to do}" "${ARG2:-*}" "$@" | cut -d : -f 1 | uniq); }
-iggf(){ local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; _fgrep -i "${ARG1:?Nothing to do}" "${ARG2:-*}" "$@" | cut -d : -f 1 | uniq); }
+alias _fgrep='_fgrep2'
+alias   gg='GCASE=   _fgrep'
+alias  igg='GCASE=-i _fgrep'
+ggl() {  gg "$@" | cut -d : -f 1 | uniq; }
+iggl(){ igg "$@" | cut -d : -f 1 | uniq; }
 
 # Safe search & replace
-_fsed() {
+_fsed1() {
   local SEDOPT="$(shell_rtrim 3 "$@")"; shift $(($#-3))
   local IN="$1"; local OUT="$2"; local FILES="$3"
   # Last chance to exit
   echo "Replace '$IN' by '$OUT' in files '$FILES' (opts $SEDOPT) ?"
   local _ANSWER; read -p "Press enter or Ctrl-C" _ANSWER 
   # Sed in place with no output
-  #_ffind "$FILES" -type f $SED_EXCLUDE -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
+  #eval _ffind "\"$FILES\"" $SEXCLUDE -type f -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
   # Sed in place with display
-  #_ffind "$FILES" -type f $SED_EXCLUDE -execdir sed -i $SEDOPT -e "/$IN/{w /dev/stderr" -e "}" -e "s/$IN/$OUT/g" {} \;
+  #eval _ffind "\"$FILES\"" $SEXCLUDE -type f -execdir sed -i $SEDOPT -e "/$IN/{w /dev/stderr" -e "}" -e "s/$IN/$OUT/g" {} \;
   # Sed in place with backup
-  eval _ffind "\"$FILES\"" -type f $SED_EXCLUDE -execdir sed -i _$(date +%Y%m%d-%H%M%S).bak $SEDOPT "\"s/$IN/$OUT/g\"" "{} \;"
+  eval _ffind "\"$FILES\"" $SEXCLUDE -type f -execdir sed -i _$(date +%Y%m%d-%H%M%S).bak $SEDOPT "\"s/$IN/$OUT/g\"" "{} \;"
   # Sed with confirmation about all files
-  #_ffind "$FILES" -type f $SED_EXCLUDE -exec echo "Processing file {} ?" \; -exec bash -c read \; -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
+  #eval _ffind "\"$FILES\"" $SEXCLUDE -type f -exec echo "Processing file {} ?" \; -exec bash -c read \; -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
 }
-hh()  { _fsed "$@" ;}
-alias ihh='FCASE=-i hh'
+alias _fsed='_fsed1'
+alias  hh='FCASE=   SEXCLUDE= _fsed'
+alias ihh='FCASE=-i SEXCLUDE= _fsed'
