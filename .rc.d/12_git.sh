@@ -59,7 +59,7 @@ git_root() {
   git rev-parse --show-toplevel
 }
 
-# Check commit existenz
+# Check repo existenz
 git_exists() {
   git rev-parse --verify "${1:-HEAD}" >/dev/null 2>&1
 }
@@ -67,6 +67,16 @@ git_exists() {
 # Check if a repo has been modified
 git_modified() {
   ! git diff-index --quiet HEAD --
+}
+
+# Check annex existenz
+git_annex_exists() {
+  git config --get annex.version >/dev/null
+}
+
+# Check if an annex has been modified
+git_annex_modified() {
+  test ! -z "$(git annex status)"
 }
 
 ########################################

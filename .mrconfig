@@ -42,8 +42,16 @@ lib =
 		done
 	}
 	git_bundle() {
-		BUNDLE="${1:-./$(basename $MR_REPO .git).bundle.$(uname -n).$(date +%Y%m%d-%H%M%S).git}"
+		DATE="$(date +%Y%m%d-%H%M%S)"
+		DIR="${1:-.}"
+		BUNDLE="$DIR/${2:-$(basename $MR_REPO .git).bundle.$(uname -n).$DATE.git}"
 		git bundle create "$BUNDLE" --all --tags --remotes
+		if git config --get annex.version >/dev/null; then
+			TAR="$DIR/${3:-$(basename $MR_REPO .git).annex.$(uname -n).tgz}"
+			echo "tar annex into $TAR"
+			#tar czf "$TAR" ./ -h --exclude-vcs
+			find . -type l -print0 | xargs -0 tar czf "$TAR" -h --exclude-vcs
+		fi
 	}
 
 # Define vcsh helpers
