@@ -1,5 +1,5 @@
 [${PRIVATE:-$HOME}/media/music]
-skip     = [ ! -e "${PRIVATE:-$HOME}/media/music" ]
+skip     = [ ! -e "$MR_REPO" ] || ! git --git-dir="$MR_REPO/.git" rev-parse --verify "HEAD" >/dev/null 2>&1
 checkout = annex_clone_direct ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/media/music rpi
 sync     = annex_sync
 gitk     = gitk
