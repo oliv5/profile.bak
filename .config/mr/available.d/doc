@@ -1,6 +1,6 @@
 [${PRIVATE:-$HOME}/doc]
 skip     = [ ! -d "${PRIVATE:-$HOME}/doc" ]
-checkout = git_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/repo/sync/git/doc.git rpi
+checkout = annex_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/repo/sync/git/doc.git rpi
 bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
 sync     = annex_sync
 gitk     = gitk

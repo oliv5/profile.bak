@@ -71,7 +71,7 @@ git_modified() {
 
 # Check annex existenz
 git_annex_exists() {
-  git config --get annex.version >/dev/null
+  git config --get annex.version >/dev/null 2>&1
 }
 
 # Check if an annex has been modified

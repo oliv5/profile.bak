@@ -64,6 +64,14 @@ lib =
 
 # Define git annex helpers
 lib =
+	annex_clone() {
+		git_clone "$@"
+		git annex init "$(uname -n)"
+	}
+	annex_clone_direct() {
+		annex_clone "$@"
+		git annex direct
+	}
 	annex_sync() {
 		execute "" "git annex sync"
 	}

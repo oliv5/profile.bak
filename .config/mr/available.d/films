@@ -1,0 +1,8 @@
+[${PRIVATE:-$HOME}/media/films]
+skip     = [ ! -e "${PRIVATE:-$HOME}/media/films" ]
+checkout = annex_clone_direct ssh://olivier@oliv5kta.dtdns.net:443/media/wdtv/media/films rpi
+sync     = annex_sync
+gitk     = gitk
+pull     = git_pull rpi master
+push     = git_push rpi master
+gc       = git gc
