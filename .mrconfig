@@ -1,8 +1,8 @@
 [DEFAULT]
 
-# Add few git actions
-lib =
-	execute() {
+# Global mr fct helpers
+lib = 
+	mr_execute() {
 		CMD="$1"; shift
 		if git config --bool vcsh.vcsh >/dev/null; then
 			REPO="$(basename $MR_REPO .git)"
@@ -10,16 +10,16 @@ lib =
 		fi
 		eval $CMD sh -c \""$@"\"
 	}
+# Add few git actions
+lib =
 	git_clone() {
-		URL="$1"
 		REPO=$(basename $MR_REPO .git)
-		execute "" "
-			git clone "$URL" $REPO
-			if [ ! -z "$2" ]; then git remote rename origin $2; fi
-		"
+		git clone "$1" $REPO
+		cd "$REPO"
+		if [ ! -z "$2" ]; then git remote rename origin "$2"; fi
 	}
 	git_pull() {
-		execute "" "
+		mr_execute "" "
 			git stash save -q 'mrconfig_stash'
 			for REMOTE in $1; do
 				if git remote | grep -- \\\$REMOTE >/dev/null; then
@@ -53,8 +53,8 @@ lib =
 lib =
 	vcsh_clone() {
 		REPO=$(basename $MR_REPO .git)
-		vcsh init $REPO
-		git_clone "$@"
+		vcsh clone "$@" "$REPO"
+		if [ ! -z "$2" ]; then vcsh run "$REPO" git remote rename origin "$2"; fi
 	}
 
 # Define git annex helpers

@@ -1,7 +1,9 @@
 [${XDG_CONFIG_HOME:-$HOME/.config}/vcsh/repo.d/profile.git]
-checkout = vcsh_clone ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/profile.git rpi
+clone    = vcsh_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/git/profile.git rpi
+checkout = vcsh_clone ssh://olivier@rpi:/media/wdc/git/profile.git rpi
 bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
 gitk     = gitk
 pull     = git_pull rpi master
 push     = git_push rpi master
+gdm      = git difftool -y -t meld --
 gc       = git gc

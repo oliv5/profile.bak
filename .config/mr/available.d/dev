@@ -1,8 +1,10 @@
 [${PRIVATE:-$HOME}/dev]
-skip     = [ ! -e "$MR_REPO" ] || ! git --git-dir="$MR_REPO/.git" rev-parse --verify "HEAD" >/dev/null 2>&1
-checkout = git_clone ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/dev.git rpi
+skip     = ! git --git-dir="$MR_REPO/.git" rev-parse --verify "HEAD" >/dev/null 2>&1
+clone    = git_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/git/dev.git rpi
+checkout = git_clone ssh://olivier@rpi:/media/wdc/git/dev.git rpi
 bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
 gitk     = gitk
 pull     = git_pull rpi master
 push     = git_push rpi master
+gdm      = git difftool -y -t meld --
 gc       = git gc
