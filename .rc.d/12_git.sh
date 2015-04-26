@@ -42,6 +42,18 @@ alias gad='git annex drop'
 alias gast='git annex status'
 
 ########################################
+# git wrapper
+git() {
+  if [ "$1" == "annex" ]; then
+    if [ ! -z "$(command -p git config --get vcsh.vcsh)" ]; then
+      echo "git annex is not compatible with VCSH repositories..."
+      return 1
+    fi
+  fi
+  command -p git "$@"
+}
+
+########################################
 # Meld called by git
 git_meld() {
   meld "$2" "$5"
