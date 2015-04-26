@@ -59,8 +59,8 @@ command -v setterm >/dev/null 2>&1 && setterm -blength 0  # From the system cons
 
 ################################
 # Use vim as editor
-[ -z "$EDITOR" ] && export EDITOR="$(which vim)"
-[ -z "$VISUAL" ] && export VISUAL="$(which vim)"
+[ -z "$EDITOR" ] && export EDITOR="$(which vim || which vi || which nano)"
+[ -z "$VISUAL" ] && export VISUAL="$(which vim || which vi || which nano)"
 
 # Pagers
 [ -z "$PAGER" ] && export PAGER="less -s"
