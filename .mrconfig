@@ -53,18 +53,18 @@ lib =
 lib =
 	vcsh_clone() {
 		REPO=$(basename $MR_REPO .git)
-		vcsh clone "$@" "$REPO"
+		vcsh clone "$@" "$REPO" &&
 		if [ ! -z "$2" ]; then vcsh run "$REPO" git remote rename origin "$2"; fi
 	}
 
 # Define git annex helpers
 lib =
 	annex_clone() {
-		git_clone "$@"
+		git_clone "$@" &&
 		git annex init "$(uname -n)"
 	}
 	annex_clone_direct() {
-		annex_clone "$@"
+		annex_clone "$@" &&
 		git annex direct
 	}
 	annex_sync() {

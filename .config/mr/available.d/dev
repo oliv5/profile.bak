@@ -1,7 +1,7 @@
 [${PRIVATE:-$HOME}/dev]
 skip     = ! git --git-dir="$MR_REPO/.git" rev-parse --verify "HEAD" >/dev/null 2>&1
-clone    = git_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/git/dev.git rpi
-checkout = git_clone ssh://olivier@rpi:/media/wdc/git/dev.git rpi
+checkout = git_clone ssh://olivier@rpi:/media/wdc/git/dev.git rpi 2>/dev/null || 
+           git_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/git/dev.git rpi
 bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
 gitk     = gitk
 pull     = git_pull rpi master
