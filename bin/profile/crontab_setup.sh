@@ -56,21 +56,27 @@ echo
 
 # Add home backup line in weekly script when not already there
 if ask_question "Add a weekly home backup rule in '$BACKUP.weekly.sh'? (y/n) " y Y >/dev/null; then
-	grep "##### Weekly home backup" "$BACKUP.weekly.sh" >/dev/null && echo "Rule already there, skip it." || {
+	grep "##### Weekly backup" "$BACKUP.weekly.sh" >/dev/null && echo "Rule already there, skip it." || {
 		cat >> "$BACKUP.weekly.sh" << EOF
 
-##### Weekly home backup (do not remove this line)
-EXCLUSIONS="--exclude=tmp --exclude=.cache"
+##### Weekly backup (do not remove this line)
+ARCHIVE="/var/backups/$USER/backup.weekly.tar"
+INCLUSIONS="\$HOME"
+EXCLUSIONS="--exclude-vcs --one-file-system"
+EXCLUSIONS="\$EXCLUSIONS --exclude=tmp --exclude=temp --exclude=cache"
+EXCLUSIONS="\$EXCLUSIONS --exclude=.tmp --exclude=.temp --exclude=.cache"
 
 # Delete file too old (mtime=nb days)
 find "/var/backups/$USER" -name 'backup.tar*' -maxdepth 1 -mtime +28 -type f -delete
 
 # Do the backup
-ARCHIVE="/var/backups/$USER/backup.tar.gz.\$(date +%Y%m%d_%H%M%S)"
-tar -cvpjf "\$ARCHIVE" --one-file-system \$EXCLUSIONS "$HOME" | tee "\${ARCHIVE}.log"
-##### Weekly home backup (end)
+ARCHIVE="\${ARCHIVE}.\$(date +%Y%m%d_%H%M%S)"
+tar -cvpjf "\$ARCHIVE" --one-file-system \$EXCLUSIONS \$INCLUSIONS | tee "\${ARCHIVE}.log"
+du -h -d 1 "\$(dirname "\$ARCHIVE")/*" . | tee -a "\${ARCHIVE}.log"
+##### Weekly backup (end)
 
 EOF
 	}
+	cat "$BACKUP.weekly.sh"
 fi
 echo
