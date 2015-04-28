@@ -45,12 +45,12 @@ alias gast='git annex status'
 # git wrapper
 git() {
   if [ "$1" == "annex" ]; then
-    if [ ! -z "$(command -p git config --get vcsh.vcsh)" ]; then
+    if [ ! -z "$(command git config --get vcsh.vcsh)" ]; then
       echo "git annex is not compatible with VCSH repositories..."
       return 1
     fi
   fi
-  command -p git "$@"
+  command git "$@"
 }
 
 ########################################
