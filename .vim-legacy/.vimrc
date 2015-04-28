@@ -25,11 +25,13 @@ if v:version < 700
 endif
 
 " User commands check
-if !has("user_commands") && !exists("g:reload_vimrc")
-	" Reload .vimrc silently (removes autocommands errors)
-	let g:reload_vimrc = 1
-	silent! source $MYVIMRC
-	finish
+if !exists("g:reload_vimrc")
+	if !has('user_commands') || !has('autocmd') || !has('gui')
+		" Reload .vimrc silently (removes autocommands errors)
+		let g:reload_vimrc = 1
+		silent! source $MYVIMRC
+		finish
+	endif
 endif
 
 " Security
