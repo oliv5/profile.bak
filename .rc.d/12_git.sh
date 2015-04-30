@@ -193,12 +193,13 @@ git_ls() {
   git ls-tree -r ${1:-master} --name-only ${2:+| grep -F "$2"}
 }
 
+########################################
 # Merge 1 repo as a subtree of current repo
-git_merge() {
+git_subtree_add() {
   local REPO="${1:?No repository specified}"
   local PREFIX="${2:+--prefix="$2"}"
-  local BRANCH="${3:-master}"
-  git subtree add $PREFIX "$REPO" "$BRANCH"
+  local REF="${3:-master}"
+  git subtree add $PREFIX "$REPO" "$REF"
 }
 
 ########################################
