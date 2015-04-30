@@ -43,10 +43,14 @@ lib =
 	}
 	git_bundle() {
 		DIR="${1:-.}"
-		DATE="$(date +%Y%m%d-%H%M%S)"
-		BUNDLE="$DIR/${2:-$(basename $MR_REPO .git).bundle.$(uname -n).$DATE.git}"
-		git bundle create "$BUNDLE" --all --tags --remotes
-		annex_bundle "$@"
+		if [ -d "$DIR" ]; then
+			DATE="$(date +%Y%m%d-%H%M%S)"
+			BUNDLE="$DIR/${2:-$(basename $MR_REPO .git).bundle.$(uname -n).$DATE.git}"
+			git bundle create "$BUNDLE" --all --tags --remotes
+			annex_bundle "$@"
+		else
+			echo "Target directory '$DIR' does not exists. Skip bundle creation..."
+		fi
 	}
 
 # Define vcsh helpers
