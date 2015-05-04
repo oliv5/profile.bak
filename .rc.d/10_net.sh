@@ -3,12 +3,17 @@
 # quvi alias
 alias flashdl='quvi'
 
-#wget mirror website
+# Wget mirror website
 wget_mirror() {
   local SITE=${1:?Please specify the URL}
   local DOMAIN=$(echo "$SITE" | sed -E 's;^https?://([^/]*)/.*$;\1;')
   shift $(min 1 $#)
   wget "$@" --recursive -l${LEVEL:-9999} --no-parent --no-directories --no-clobber --domains ${DOMAIN:?Found no domain} --convert-links --html-extension --page-requisites -e robots=off -U mozilla --limit-rate=${LIMITRATE:-200k} --random-wait "$SITE"
+}
+
+# Wget download specific extension
+wget_ext() {
+  wget ${3:+--domains="$3"} ${4:+--http-user "$4"} ${5:+--http-passwd "$5"} -r -l1 -H -t1 -nd -N -np --follow-ftp -A${2:?No extension specified...} -erobots=off "${1:?No url specified...}"
 }
 
 # Execute on remote host
