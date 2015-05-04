@@ -2,7 +2,7 @@
 skip     = ! git --git-dir="$MR_REPO/.git" rev-parse --verify "HEAD" >/dev/null 2>&1
 checkout = annex_clone ssh://olivier@rpi:/media/wdc/git/sshpack.git rpi 2>/dev/null || 
            annex_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/git/sshpack.git rpi
-bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
+bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle" "" "" "Olivier Lanneluc <olivier.lanneluc@gmail.com>"
 sync     = annex_sync
 gitk     = gitk
 pull     = git_pull rpi master
