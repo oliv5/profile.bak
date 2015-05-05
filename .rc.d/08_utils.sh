@@ -115,3 +115,7 @@ merge_pdf() {
   local INPUT="$(shell_rtrim 1 "$@")"; shift $(($#-1))
   eval command -p gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -sOutputFile="$@" "$INPUT"
 }
+
+# Tex to pdf
+alias tex2pdf='pdflatex --interaction nonstopmode'
+alias tex2pdf_loop='watch -n 15 "pdflatex --interaction nonstopmode >/dev/null 2>&1"'
