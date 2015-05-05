@@ -359,7 +359,7 @@ svn_diffbc() {
 # Make an archive based on the file status
 svn_zipst() {
   local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#)
-  svn_stx "${ARG2:-^(A|M|R|\~|\!)}" "$@" | xargs -0 --no-run-if-empty 7z a $OPTS_7Z -xr!.svn "${ARG1:?No archive file defined}"
+  svn_stx "${ARG2:-^(A|M|R|\~|\!)}" "$@" | xargs -0 --no-run-if-empty 7z a $OPTS_7Z -xr!.svn -xr!. "${ARG1:?No archive file defined}"
 }
 
 # Make an archive based on a diff
