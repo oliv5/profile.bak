@@ -484,8 +484,8 @@ endfunction
 " Count expression
 function! s:GrepCount(tool, path, expr)
 	let path = escape(a:path, '" *')
-	let expr = escape('"'.a:expr.'"','" *')
-	echom '!'.a:tool expr path '| wc -l'
+	let expr = '"'.escape(a:expr,'" *').'"'
+	execute '!'.a:tool expr path '| wc -l'
 endfunction
 
 " User commands
@@ -498,14 +498,16 @@ command! -nargs=1 -bar GrepCount  call <SID>GrepCount('grep -nH', expand('%'), <
 silent! unmap gx
 nnoremap <silent>g          :Wnext<CR>
 nnoremap <silent>G          :Wprev<CR>
-" RGrep key mappings
+" Grep key mappings
 FnNoremap <C-g>             :Grep<SPACE><C-r>=expand("<cword>")<CR>
 vnoremap <C-g>              "+y:Grep<SPACE><C-r>=fnameescape("<C-r>"")<CR>
-FnNoremap <A-g>             :GrepCount<SPACE><C-r><C-w>
-" Grep key mappings
+FnNoremap <A-g>             :GrepCount<SPACE><C-r>=expand("<cword>")<CR>
+vnoremap <A-g>              "+y:GrepCount<SPACE><C-r>=fnameescape("<C-r>"")<CR>
+" RGrep key mappings
 FnNoremap <C-g><C-g>        :RGrep<SPACE><C-r>=expand("<cword>")<CR>
 vnoremap <C-g><C-g>         "+y:RGrep<SPACE><C-r>=fnameescape("<C-r>"")<CR>
-FnNoremap <A-g><A-g>        :RGrepCount<SPACE><C-r><C-w>
+FnNoremap <A-g><A-g>        :RGrepCount<SPACE><C-r>=expand("<cword>")<CR>
+vnoremap <A-g><A-g>         "+y:RGrepCount<SPACE><C-r>=fnameescape("<C-r>"")<CR>
 
 " Hints to copy paste inside the key map
 "FnNoremap <C-g><C-g>        :RGrep<SPACE><C-r>=expand("<cword>")<CR>
