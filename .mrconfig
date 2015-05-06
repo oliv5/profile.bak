@@ -79,11 +79,14 @@ lib =
 		execute "" "git annex sync"
 	}
 	annex_status() {
-		if git config --get annex.version >/dev/null; then
-			git annex status
-		fi
+		git annex status
 		if ! git config --get annex.direct >/dev/null; then
 			git status -s "$@"
+		fi
+	}
+	annex_diff() {
+		if ! git config --get annex.direct >/dev/null; then
+			git diff "$@"
 		fi
 	}
 	annex_bundle() {
@@ -94,7 +97,11 @@ lib =
 				BUNDLE="$DIR/${2:-$(basename $MR_REPO .git).annex.$(uname -n).$DATE.tgz}"
 				echo "tar annex into $BUNDLE"
 				#tar czf "$BUNDLE" ./ -h --exclude-vcs
-				find . -type l -print0 | xargs -0 tar czf "$BUNDLE" -h --exclude-vcs
+				if git config --get annex.direct >/dev/null; then
+					find . -type f -not -path '*.git*' -print0 | xargs -0 tar czf "$BUNDLE" -h --exclude-vcs
+				else
+					find . -type l -print0 | xargs -0 tar czf "$BUNDLE" -h --exclude-vcs
+				fi
 				if [ ! -z "$3" ]; then
 					gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$3" "${BUNDLE}" && 
 						(wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")

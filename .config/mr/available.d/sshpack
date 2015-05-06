@@ -10,3 +10,4 @@ pull     = git_pull rpi master
 push     = git_push rpi master
 gdm      = git difftool -y -t meld --
 gc       = git gc
+diff     = annex_diff
