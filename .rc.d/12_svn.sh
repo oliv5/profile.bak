@@ -277,6 +277,15 @@ svn_amend() {
   svn propedit --revprop svn:log -r ${1?Error: please specify a revision}
 }
 
+# Set a file mime property
+# Useful for binary files
+svn_setmime() {
+  for FILE; do
+    MIME=$(mimetype -b "$FILE")
+    svn propset svn:mime-type "$MIME" "$FILE"
+  done
+}
+
 # Get a single file
 svn_get() {
   svn export "$@" "./$(filename $1)"
