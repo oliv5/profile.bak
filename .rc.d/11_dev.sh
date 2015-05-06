@@ -6,7 +6,7 @@ DSEXCLUDE="$DFEXCLUDE -not -type l"
 # Dev grep
 # Various dev search function helpers
 _dgrep() { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; shift $(min 3 $#); (set -f; _fgrep "$ARG2" ${GCASE} ${DGEXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
-alias     _c='_dgrep "*.c;*.cpp;*.cc"'
+alias _c='_dgrep "*.c;*.cpp;*.cc"'
 alias _h='_dgrep "*.h;*.hpp"'
 alias _v='_dgrep "*.vhd;*.v"'
 alias _hc='_dgrep "*.c;*.cpp;*.cc;*.h;*.hpp"'
