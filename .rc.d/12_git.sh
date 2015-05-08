@@ -44,9 +44,9 @@ alias gast='git annex status'
 ########################################
 # git wrapper
 git() {
-  if [ "$1" == "annex" ]; then
-    if [ ! -z "$(command git config --get vcsh.vcsh)" ]; then
-      echo "git annex is not compatible with VCSH repositories..."
+  if [ "$1" == "annex" -a ! -z "$(command git config --get vcsh.vcsh)" ]; then
+    if [ "$(command git config --get annex.direct)" = "true" -o "$2" = "direct" ]; then
+      echo "git annex in direct mode is not compatible with VCSH repositories..."
       return 1
     fi
   fi
