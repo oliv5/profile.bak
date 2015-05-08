@@ -7,4 +7,6 @@ sync     = annex_sync
 gitk     = gitk
 gdm      = git difftool -y -t meld --
 gc       = git gc
-diff     = true
+diff     = annex_diff
+push     = true
+pull     = true
