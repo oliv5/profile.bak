@@ -5,13 +5,13 @@ _ffind1() {
   local FCASE="${FCASE:--}name"
   local DIR="$(dirname "$1 ")" # keep the extra space in $1
   local FILES="$(basename "$1" | sed -e 's/;/ -o '${FCASE}' /g')"
-  (set -f; shift $(min 1 $#); find -L "$DIR" -nowarn ${FTYPE:+-type $FTYPE} \( ${FILES:+$FCASE $FILES} -true \) "$@")
+  (set -f; shift $(min 1 $#); find "$DIR" -nowarn ${FTYPE:+-type $FTYPE} \( ${FILES:+$FCASE $FILES} -true \) "$@")
 }
 _ffind2() {
   local FCASE="${FCASE:--}regex"
   local DIR="$(dirname "$1 ")" # keep the extra space in $1
   local FILES=".*/$(basename "$1")"
-  (set -f; shift $(min 1 $#); find -L "$DIR" -regextype egrep -nowarn ${FTYPE:+-type $FTYPE} ${FILES:+$FCASE $FILES} "$@")
+  (set -f; shift $(min 1 $#); find "$DIR" -regextype egrep -nowarn ${FTYPE:+-type $FTYPE} ${FILES:+$FCASE $FILES} "$@")
 }
 alias _ffind='_ffind1'
 alias   ff='FCASE=   FTYPE=  _ffind'
