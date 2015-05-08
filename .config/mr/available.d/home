@@ -8,3 +8,4 @@ bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
 #bundle   = git_bundle "/var/backups/${USER}"
 gdm      = git difftool -y -t meld --
 gc       = git gc
+meta     = git_meta

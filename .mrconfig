@@ -56,6 +56,10 @@ lib =
 			echo "Skip bundle creation..."
 		fi
 	}
+	git_meta() {
+		git-cache-meta.sh --store && 
+			git add "$MR_REPO/.git_cache_meta" -f
+	}
 
 # Define vcsh helpers
 lib =
