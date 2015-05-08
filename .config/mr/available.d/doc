@@ -1,10 +1,11 @@
 [${PRIVATE:-$HOME}/doc]
 skip     = ! git --git-dir="$MR_REPO/.git" rev-parse --verify "HEAD" >/dev/null 2>&1
-checkout = annex_clone ssh://olivier@rpi:/media/wdc/git/doc.git rpi 2>/dev/null || 
-           annex_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/git/doc.git rpi
+checkout = git_clone ssh://olivier@rpi:/media/wdc/git/doc.git rpi 2>/dev/null || 
+           git_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/git/doc.git rpi;
+           annex_init
 status   = annex_status
 bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle";
-           annex_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle";
+           annex_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
 sync     = annex_sync
 gitk     = gitk
 gdm      = git difftool -y -t meld --

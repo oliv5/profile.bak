@@ -1,7 +1,8 @@
 [${PRIVATE:-$HOME}/sshpack]
 skip     = ! git --git-dir="$MR_REPO/.git" rev-parse --verify "HEAD" >/dev/null 2>&1
-checkout = annex_clone ssh://olivier@rpi:/media/wdc/git/sshpack.git rpi 2>/dev/null || 
-           annex_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/git/sshpack.git rpi
+checkout = git_clone ssh://olivier@rpi:/media/wdc/git/sshpack.git rpi 2>/dev/null || 
+           git_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/git/sshpack.git rpi;
+           annex_init
 bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle" "" "Olivier Lanneluc <olivier.lanneluc@gmail.com>";
 	   annex_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
 sync     = annex_sync

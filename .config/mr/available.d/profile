@@ -1,7 +1,10 @@
 [${XDG_CONFIG_HOME:-$HOME/.config}/vcsh/repo.d/profile.git]
 checkout = vcsh_clone ssh://olivier@rpi:/media/wdc/git/profile.git rpi 2>/dev/null ||
-           vcsh_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/git/profile.git rpi
-bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
+           vcsh_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/git/profile.git rpi;
+           annex_init
+bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle";
+           annex_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
+sync     = annex_sync
 gitk     = gitk
 pull     = git_pull rpi master
 push     = git_push rpi master
