@@ -2,6 +2,7 @@
 
 # quvi alias
 alias flashdl='quvi'
+alias nc='sudo netstat -antp'
 
 # Wget mirror website
 wget_mirror() {
@@ -77,4 +78,10 @@ send_mail() {
     return 1
   fi
   return 0
+}
+
+# Redirect port using socat
+socat_bounce() {
+  #socat TCP-LISTEN:$1,bind=$2,su=nobody,fork,reuseaddr TCP:$3:$4
+  socat ${5:-TCP}-LISTEN:${1:+$1,}${2:+bind=$2},su=nobody,fork,reuseaddr ${3:+${5:-TCP}:$3${4:+:$4}}
 }
