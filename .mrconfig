@@ -1,4 +1,5 @@
 [DEFAULT]
+#skip = vcsh_exists && echo "Already in a vcsh repository"
 
 # Global mr fct helpers
 lib = 
@@ -12,6 +13,9 @@ lib =
 	}
 # Add few git actions
 lib =
+	git_exists() {
+		git --git-dir="$MR_REPO/.git" rev-parse --verify "HEAD" >/dev/null 2>&1
+	}
 	git_clone() {
 		REPO=$(basename $MR_REPO .git)
 		git clone "$1" $REPO
@@ -63,6 +67,9 @@ lib =
 
 # Define vcsh helpers
 lib =
+	vcsh_exists() {
+		git --git-dir="$MR_REPO/.git" config --get vcsh.vcsh >/dev/null 2>&1
+	}
 	vcsh_clone() {
 		REPO=$(basename $MR_REPO .git)
 		vcsh clone "$@" "$REPO" &&
@@ -71,6 +78,9 @@ lib =
 
 # Define git annex helpers
 lib =
+	annex_exists() {
+		git config --get annex.version >/dev/null 2>&1
+	}
 	annex_init() {
 		git annex init "$(uname -n)"
 	}
@@ -93,7 +103,7 @@ lib =
 		fi
 	}
 	annex_bundle() {
-		if git config --get annex.version >/dev/null; then
+		if annex_exists; then
 			DIR="${1:-.}"
 			if [ -d "$DIR" ]; then
 				DATE="$(date +%Y%m)"
