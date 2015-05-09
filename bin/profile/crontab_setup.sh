@@ -56,27 +56,17 @@ echo
 
 # Add home backup line in weekly script when not already there
 if ask_question "Add a weekly home backup rule in '$BACKUP.weekly.sh'? (y/n) " y Y >/dev/null; then
-	grep -H "##### Cron backup (do not remove this line)" "$BACKUP.weekly.sh" >/dev/null && echo "Rule already there, skip it." || {
-		cat >> "$BACKUP.weekly.sh" << EOF
-
-##### Cron backup (do not remove this line)
-ARCHIVE="/var/backups/\$USER/\${0%.*}"
-INCLUSIONS="\$HOME"
-EXCLUSIONS="--exclude-vcs --one-file-system"
-EXCLUSIONS="\$EXCLUSIONS --exclude=tmp --exclude=temp --exclude=cache"
-EXCLUSIONS="\$EXCLUSIONS --exclude=.tmp --exclude=.temp --exclude=.cache"
-
-# Delete file too old (mtime=nb days)
-find "/var/backups/\$USER" -name 'backup.tar*' -maxdepth 1 -mtime +28 -type f -delete
-
-# Do the backup
-ARCHIVE="\${ARCHIVE}.\$(date +%Y%m%d_%H%M%S).tar"
-tar -cvpjf "\$ARCHIVE" --one-file-system \$EXCLUSIONS \$INCLUSIONS | tee "\${ARCHIVE}.log"
-du -h -d 1 "\$(dirname "\$ARCHIVE")/*" . | tee -a "\${ARCHIVE}.log"
-##### Cron backup (end)
-
-EOF
-	}
+	local TEMPLATE="$(dirname "$0")/resources/cron.backup.template.sh"
+	if [ -f "$BACKUP.weekly.sh" ]; then
+		if ask_question "Append to existing file? (y/n) " y Y >/dev/null; then
+			echo >> "$BACKUP.weekly.sh"
+			tail -n +2 "$TEMPLATE" >> "$BACKUP.weekly.sh"
+		else
+			echo "Skip adding the backup rule..."
+		fi
+	else
+		cp "$TEMPLATE" "$BACKUP.weekly.sh"
+	fi
 	cat "$BACKUP.weekly.sh"
 fi
 echo
