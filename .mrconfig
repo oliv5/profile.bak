@@ -57,7 +57,7 @@ lib =
 		fi
 	}
 	git_meta() {
-		git-cache-meta.sh --store && 
+		git-cache-meta --store && 
 			git add "$MR_REPO/.git_cache_meta" -f
 	}
 
