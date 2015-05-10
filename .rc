@@ -43,7 +43,7 @@ export ENV_CNT
 
 ################################
 # Setup path
-path_prepend "$HOME/bin" "$HOME/bin/profile"
+path_prepend "$HOME/bin" "$HOME/.local/bin" "$HOME/bin/profile"
 path_append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
 path_cleanup
 
