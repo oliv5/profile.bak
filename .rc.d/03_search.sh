@@ -3,15 +3,16 @@
 # Find files implementations
 _ffind1() {
   local FCASE="${FCASE:--}name"
-  local DIR="$(dirname "$1 ")" # keep the extra space in $1
-  local FILES="$(basename "$1" | sed -e 's/;/ -o '${FCASE}' /g')"
-  (set -f; shift $(min 1 $#); find "$DIR" -nowarn ${FTYPE:+-type $FTYPE} \( ${FILES:+$FCASE $FILES} -true \) "$@")
+  local FILES="${1##*/}"
+  local DIR="${1%"$FILES"}"
+  FILES="$(echo "$FILES" | sed -e 's/;/ -o '${FCASE}' /g')"
+  (set -f; shift $(min 1 $#); find "${DIR:-.}" -nowarn ${FTYPE:+-type $FTYPE} \( ${FILES:+$FCASE $FILES} -true \) "$@")
 }
 _ffind2() {
   local FCASE="${FCASE:--}regex"
-  local DIR="$(dirname "$1 ")" # keep the extra space in $1
-  local FILES=".*/$(basename "$1")"
-  (set -f; shift $(min 1 $#); find "$DIR" -regextype egrep -nowarn ${FTYPE:+-type $FTYPE} ${FILES:+$FCASE $FILES} "$@")
+  local FILES="${1##*/}"
+  local DIR="${1%"$FILES"}"
+  (set -f; shift $(min 1 $#); find "${DIR:-.}" -regextype egrep -nowarn ${FTYPE:+-type $FTYPE} ${FILES:+$FCASE .*/$FILES} "$@")
 }
 alias _ffind='_ffind1'
 alias   ff='FCASE=   FTYPE=  _ffind'
@@ -26,13 +27,14 @@ alias iffl='FCASE=-i FTYPE=l _ffind'
 # Backward find
 _bfind1() {
   local ABSPATH="$(readlink -f "${1:-$PWD}")"
-  local DIR="$(dirname "$ABSPATH")"
-  local FILE="$(basename "$ABSPATH")"
+  local FILES="${ABSPATH##*/}"
+  local DIR="${ABSPATH%$FILES}"
+  DIR="${DIR:-.}"
   local FIRSTMATCH="$2"
   local FOUND=""
   while true; do
-    #if eval test ${BTYPE:--e} "\"$DIR/$FILE\""; then 
-    if test ${BTYPE:--e} "$DIR/$FILE"; then 
+    #if eval test ${BTYPE:--e} "\"$DIR/$FILES\""; then 
+    if test ${BTYPE:--e} "$DIR/$FILES"; then 
       FOUND="$DIR"
       [ ! -z "$FIRSTMATCH" ] && break
     fi
@@ -62,11 +64,12 @@ _fgrep1() {
   (set -f; _ffind1 "$@" -type f -print0 | eval xargs -0 grep -nH --color ${GCASE} "$ARGS")
 }
 _fgrep2() {
-	local ARGS="$(shell_rtrim 1 "$@")"
+  local ARGS="$(shell_rtrim 1 "$@")"
   shift $(($#-1))
-	local DIR="$(dirname "${@:-.}")"
-	local FILES="$(basename "$@" | sed -e 's/;/ --include=/g')"
-	(set -f; eval grep -RnH --color ${GCASE} "$ARGS" --include="$FILES" "$DIR")
+  local FILES="${1##*/}"
+  local DIR="${1%"$FILES"}"
+  FILES="$(echo "${FILES}" | sed -e 's/;/ --include=/g')"
+  (set -f; eval grep -RnH --color ${GCASE} "$ARGS" --include="$FILES" "${DIR:-.}")
 }
 alias _fgrep='_fgrep2'
 alias   gg='GCASE=   _fgrep'
