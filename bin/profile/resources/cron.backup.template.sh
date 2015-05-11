@@ -1,17 +1,24 @@
 #!/bin/sh
 
 ##### Cron backup (start)
-ARCHIVE="/var/backups/$USER/${0%.*}"
+DIR="/var/backups/$USER"
 INCLUSIONS="$HOME"
 EXCLUSIONS="--exclude-vcs --one-file-system"
 EXCLUSIONS="$EXCLUSIONS --exclude=tmp --exclude=temp --exclude=cache"
 EXCLUSIONS="$EXCLUSIONS --exclude=.tmp --exclude=.temp --exclude=.cache"
 
+# Set archive variable
+ARCHIVE="${0##*/}"
+ARCHIVE="${ARCHIVE%.*}.$(date +%Y%m%d_%H%M%S)"
+
+# Make directory
+mkdir -p "$DIR"
+chown $USER:$USER -R "$DIR"
+
 # Delete file too old (mtime=nb days)
-find "/var/backups/$USER" -name 'backup.tar*' -maxdepth 1 -mtime +28 -type f -delete
+find "$DIR" -maxdepth 1 -name 'backup.tar*' -mtime +27 -type f -delete
 
 # Do the backup
-ARCHIVE="${ARCHIVE}.$(date +%Y%m%d_%H%M%S).tar"
-tar -cvpjf "$ARCHIVE" --one-file-system $EXCLUSIONS $INCLUSIONS | tee "${ARCHIVE}.log"
-du -h -d 1 "$(dirname "$ARCHIVE")/*" . | tee -a "${ARCHIVE}.log"
+tar -cvpjf "$DIR/${ARCHIVE}.tar.bz" --one-file-system $EXCLUSIONS $INCLUSIONS | tee "$DIR/${ARCHIVE}.log"
+du -h -d 1 "$DIR/*" . | tee -a "$DIR/${ARCHIVE}.log"
 ##### Cron backup (end)
