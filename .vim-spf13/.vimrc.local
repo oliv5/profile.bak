@@ -161,6 +161,12 @@
 	endif
 " }
 
+" Use custom local config if available {
+	if filereadable(expand("~/.vimrc.local.custom"))
+		source ~/.vimrc.local.custom
+	endif
+" }
+
 " User profile end {
 	let g:loaded_vimrc = 1
 " }
