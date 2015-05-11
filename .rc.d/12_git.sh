@@ -14,10 +14,10 @@ alias gn='git ls-files -o --exclude-standard'
 alias gu='git ls-files -o'
 # Diff aliases
 alias gdd='git diff'
-alias gdm='git difftool -y -t meld --'
-alias gds='git stash show -t'
+alias gdm='git difftool -y -t meld'
+alias gds='git diff stash'
 # Merge aliases
-alias gmm='git mergetool -y -t meld --'
+alias gmm='git mergetool -y -t meld'
 # Stash aliases
 alias gsc='git_stash_push'
 alias gss='git_stash_save'
@@ -25,6 +25,7 @@ alias gsb='git_stash_save --include-untracked'
 alias gsp='git_stash_pop'
 alias gsa='git_stash_apply'
 alias gsl='git stash list'
+alias gsv='git_stash_show'
 # Commit aliases
 alias gci='git commit'
 # Gitignore
@@ -258,21 +259,11 @@ git_purge_gc() {
 }
 
 ########################################
-# Git history
-git_history() {
-  git log -p "$@"
-}
-
-# Git logs
-git_log() {
-  git log --name-only
-}
-git_logall() {
-  git log --name-status
-}
-git_logstat() {
-  git log --stat
-}
+# Git logs/history/diffs aliases
+alias git_history='git log -p'
+alias git_log='git log --name-only'
+alias git_logall='git log --name-status'
+alias git_logstat='git log --stat'
 
 ########################################
 # Git add gitignore
@@ -286,12 +277,8 @@ git_ignore_list() {
 }
 
 # Git ignore changes
-git_ignore_changes() {
-  git update-index --assume-unchanged "$@"
-}
-git_noignore_changes() {
-  git update-index --no-assume-unchanged "$@"
-}
+alias git_ignore_changes='git update-index --assume-unchanged'
+alias git_noignore_changes='git update-index --no-assume-unchanged'
 
 ########################################
 # Show branch/url
