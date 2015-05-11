@@ -1,7 +1,8 @@
 #!/bin/sh
 
-export GIT_EDITOR="vim"
-export GIT_PAGER="cat"
+# Editors
+export GIT_EDITOR="${EDITOR:-vi}"
+export GIT_PAGER="${PAGER:-cat}"
 
 ########################################
 # Status aliases

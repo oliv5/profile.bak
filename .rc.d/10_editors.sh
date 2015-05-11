@@ -1,11 +1,21 @@
 #!/bin/sh
 
 #########################
+# Default editors
+
+# Use vim as editor
+[ -z "$EDITOR" ] && export EDITOR="$(command -v vim || command -v vi || command -v nano || command -v false)"
+[ -z "$VISUAL" ] && export VISUAL="$(command -v geany || command -v gvim || command -v gedit || command -v false)"
+
+# Pagers
+[ -z "$PAGER" ] && export PAGER="less -s"
+
+#########################
 # Gedit
 if command -v gedit >/dev/null; then
   gedit() {
     local ARGS="$(echo $@ | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1 +\2/g')"
-    command -p gedit $ARGS
+    command gedit $ARGS
   }
 fi
 
@@ -14,7 +24,7 @@ fi
 if command -v geany >/dev/null; then
   geany() {
     local ARGS="$(echo $@ | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1 +\2/g')"
-    command -p geany $ARGS
+    command geany $ARGS
   }
 fi
 
@@ -31,7 +41,7 @@ if command -v gvim >/dev/null; then
     else
       ARGS="${1:+--remote-tab-silent} $ARGS"
     fi
-    command -p gvim $ARGS
+    command gvim $ARGS
   }
 fi
 

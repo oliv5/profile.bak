@@ -58,14 +58,6 @@ command -v xset >/dev/null 2>&1 && pidof X >/dev/null && xset b off 2>/dev/null 
 command -v setterm >/dev/null 2>&1 && setterm -blength 0  # From the system console
 
 ################################
-# Use vim as editor
-[ -z "$EDITOR" ] && export EDITOR="$(which vim || which vi || which nano)"
-[ -z "$VISUAL" ] && export VISUAL="$(which vim || which vi || which nano)"
-
-# Pagers
-[ -z "$PAGER" ] && export PAGER="less -s"
-
-################################
 # Alias profile
 alias profile='. "$HOME/.rc"'
 
@@ -82,15 +74,15 @@ alias p='cd ..'
 
 # Gvim
 alias e='gvim'
-alias sse='ss | cut -c 9- | xargs gvim'
-alias gse='gs | grep modified | cut -d : -f 2 | xargs gvim'
+alias sse='ss | cut -c 9- | xargs ${VISUAL:-false}'
+alias gse='gs | grep modified | cut -d : -f 2 | xargs ${VISUAL:-false}'
 ffe() {
   ff "$@" | xargs gvim
 }
 
 # Gedit/geany
 g() {
-  eval $(command -v geany || command -v gedit || command -v gvim || false) "$@"
+  eval "${VISUAL:-false}" "$@"
 }
 alias ssg='ss | cut -c 9- | xargs g'
 alias gsg='gs | grep modified | cut -d : -f 2 | xargs g'
