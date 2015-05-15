@@ -45,3 +45,9 @@ min() { echo $(($1<$2?$1:$2)); }
 max() { echo $(($1>$2?$1:$2)); }
 lim() { max $(min $1 $3) $2; }
 isint() { expr 2 "*" "$1" + 1 >/dev/null 2>&1; }
+
+################################
+# Run a command and filter stdout by another one
+shell_filter_stdout() {
+  { eval "$1" 2>&1 1>&3 | eval "$2" 1>&2; } 3>&1
+}
