@@ -1,5 +1,5 @@
 #!/bin/sh
-SRCDIR="${1:-etc}"
+SRCDIR="${1:-/etc}"
 DSTDIR="${2:-/var/backups/system}"
 GPGKEY="${3}"
 BUNDLE="$DSTDIR/$(basename "$SRCDIR").bundle.$(uname -n).$(date +%Y%m%d-%H%M%S).git"
