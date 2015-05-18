@@ -1,8 +1,19 @@
 #!/bin/sh
 
+############################
+# Network monitors
+alias ns='sudo netstat -antp'
+alias nh='sudo nethogs'
+#alias nb='sudo bmon'
+#alias ns='sudo slurm -s'
+#alias nt='sudo tcptrack'
+#alias nn='sudo bwm-ng'
+#alias nc='sudo cbm'
+#alias no='sudo speedometer'
+
+############################
 # quvi alias
 alias flashdl='quvi'
-alias nc='sudo netstat -antp'
 
 # Wget mirror website
 wget_mirror() {
