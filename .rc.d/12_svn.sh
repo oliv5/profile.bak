@@ -101,10 +101,11 @@ svn_stx() {
 __svn_rev1() { local REV="${1%%:*}"; [ ! -z "${REV}" ] && echo "${REV}"; }
 __svn_rev2() { local REV="${1##*:}"; [ ! -z "${REV}" ] && echo "${REV}"; }
 __svn_revarg() {
-  if [ "${1##*:}" = "$1" ]; then 
-    echo "${1:+${2:--}c$1}"
+  local REV="$(echo $1 | sed -r 's/-/:/g')"
+  if [ "${REV##*:}" = "$REV" ]; then 
+    echo "${REV:+${2:--}c$REV}"
   else 
-    echo "${2:--}r${1}" | sed -r 's/r:/r1:/; s/:$/:HEAD/; s/:/'"${3:-:}"'/'
+    echo "${2:--}r${REV}" | sed -r 's/r:/r1:/; s/:$/:HEAD/; s/:/'"${3:-:}"'/'
   fi
 }
 
