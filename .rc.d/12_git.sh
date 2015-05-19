@@ -289,3 +289,10 @@ git_url() {
 git_branch() {
   git branch -a | grep -E '^\*' | cut -c 3-
 }
+
+########################################
+# Remove things
+alias git_rm_tracking_branch='git branch -dr'
+alias git_rm_tracking_branch2='git fetch -p'
+alias git_rm_remote_branch='push origin -d'
+alias git_rm_branch='git branch -d'
