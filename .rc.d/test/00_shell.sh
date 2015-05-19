@@ -22,7 +22,7 @@ shell_quote() {
 }
 
 # Right trim shell parameters
-shell_rtrim() {
+arg_rtrim() {
 	local IFS="$(printf '\n\t')"
 	local LAST="$(($#-$1))"
 	for ARG in $(seq 2 $LAST); do 
@@ -43,7 +43,7 @@ shell_ltrim() {
 # Trim left&right shell parameters
 shell_trim() {
 	local IFS="$(printf '\n\t')"
-	eval set $(shell_rtrim $2 $(shell_ltrim $1 "$@"))
+	eval set $(arg_rtrim $2 $(shell_ltrim $1 "$@"))
 	#echo "$@"
 	shell_quote "$@"
 }

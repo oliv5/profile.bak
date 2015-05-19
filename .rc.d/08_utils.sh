@@ -112,7 +112,7 @@ conv_pdf() {
 
 # Merge PDFs
 merge_pdf() {
-  local INPUT="$(shell_rtrim 1 "$@")"; shift $(($#-1))
+  local INPUT="$(arg_rtrim 1 "$@")"; shift $(($#-1))
   eval command -p gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -sOutputFile="$@" "$INPUT"
 }
 

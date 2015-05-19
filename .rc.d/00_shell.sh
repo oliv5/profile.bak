@@ -4,7 +4,7 @@
 # (separated by spaces).  Any single quotes embedded in the
 # arguments are escaped.
 #
-shell_quote() {
+arg_quote() {
 	local SEP=''
 	for ARG in "$@"; do
 		SQESC=$(printf '%s\n' "${ARG}" | sed -e "s/'/'\\\\''/g")
@@ -14,7 +14,7 @@ shell_quote() {
 }
 
 # Right trim shell parameters
-shell_rtrim() {
+arg_rtrim() {
 	local IFS="$(printf '\n\t ')"
 	local LAST="$(($#-$1))"
 	for ARG in $(seq 2 $LAST); do 
@@ -37,17 +37,4 @@ shell_isinteractive() {
 shell_islogin() {
   # Test whether the caller name starts with a "-"
   [ "$(echo "$0" | cut -c 1)" = "-" ]
-}
-
-################################
-# Shell utils (used for shifts)
-min() { echo $(($1<$2?$1:$2)); }
-max() { echo $(($1>$2?$1:$2)); }
-lim() { max $(min $1 $3) $2; }
-isint() { expr 2 "*" "$1" + 1 >/dev/null 2>&1; }
-
-################################
-# Run a command and filter stdout by another one
-shell_filter_stdout() {
-  { eval "$1" 2>&1 1>&3 | eval "$2" 1>&2; } 3>&1
 }

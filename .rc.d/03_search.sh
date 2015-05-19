@@ -49,7 +49,7 @@ alias bff='BTYPE=-f _bfind'
 alias bfd='BTYPE=-d _bfind'
 
 # Find breadth-first (width-first)
-_wfind1() { _ffind "${@:-*}" -printf '%d\t%p\n' | sort -nk1 | cut -f2-; }
+_wfind1() { _ffind "${@:-*}" -prune -printf '%d\t%p\n' | sort -nk1 | cut -f2-; }
 alias _wfind='_wfind1'
 alias  wf='FCASE= FTYPE=  _wfind'
 alias wff='FCASE= FTYPE=f _wfind'
@@ -59,12 +59,12 @@ alias wfl='FCASE= FTYPE=l _wfind'
 # File grep implementations
 _fgrep1() {
   command true ${1:?Nothing to do}
-  local ARGS="$(shell_rtrim 1 "$@")"
+  local ARGS="$(arg_rtrim 1 "$@")"
   shift $(($#-1))
   (set -f; _ffind1 "$@" -type f -print0 | eval xargs -0 grep -nH --color ${GCASE} "$ARGS")
 }
 _fgrep2() {
-  local ARGS="$(shell_rtrim 1 "$@")"
+  local ARGS="$(arg_rtrim 1 "$@")"
   shift $(($#-1))
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
@@ -79,7 +79,7 @@ iggl(){ igg "$@" | cut -d : -f 1 | uniq; }
 
 # Safe search & replace
 _fsed1() {
-  local SEDOPT="$(shell_rtrim 3 "$@")"; shift $(($#-3))
+  local SEDOPT="$(arg_rtrim 3 "$@")"; shift $(($#-3))
   local IN="$1"; local OUT="$2"; local FILES="$3"
   # Last chance to exit
   echo "Replace '$IN' by '$OUT' in files '$FILES' (opts $SEDOPT) ?"
