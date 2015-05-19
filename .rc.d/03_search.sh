@@ -6,23 +6,27 @@ _ffind1() {
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
   FILES="$(echo "$FILES" | sed -e 's/;/ -o '${FCASE}' /g')"
-  (set -f; shift $(min 1 $#); find "${DIR:-.}" -nowarn ${FTYPE:+-type $FTYPE} \( ${FILES:+$FCASE $FILES} -true \) "$@")
+  (set -f; shift $(min 1 $#); find "${DIR:-.}" -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} \( ${FILES:+$FCASE $FILES} -true \) "$@")
 }
 _ffind2() {
   local FCASE="${FCASE:--}regex"
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
-  (set -f; shift $(min 1 $#); find "${DIR:-.}" -regextype egrep -nowarn ${FTYPE:+-type $FTYPE} ${FILES:+$FCASE .*/$FILES} "$@")
+  (set -f; shift $(min 1 $#); find "${DIR:-.}" -regextype egrep -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE .*/$FILES} "$@")
 }
 alias _ffind='_ffind1'
-alias   ff='FCASE=   FTYPE=  _ffind'
-alias  fff='FCASE=   FTYPE=f _ffind'
-alias  ffd='FCASE=   FTYPE=d _ffind'
-alias  ffl='FCASE=   FTYPE=l _ffind'
-alias  iff='FCASE=-i FTYPE=  _ffind'
-alias ifff='FCASE=-i FTYPE=f _ffind'
-alias iffd='FCASE=-i FTYPE=d _ffind'
-alias iffl='FCASE=-i FTYPE=l _ffind'
+alias    ff='FCASE=   FTYPE=  FXTYPE=  _ffind'
+alias   fff='FCASE=   FTYPE=f FXTYPE=  _ffind'
+alias   ffd='FCASE=   FTYPE=d FXTYPE=  _ffind'
+alias   ffl='FCASE=   FTYPE=l FXTYPE=  _ffind'
+alias  ffll='FCASE=   FTYPE=l FXTYPE=f _ffind'
+alias  fflb='FCASE=   FTYPE=l FXTYPE=l _ffind'
+alias   iff='FCASE=-i FTYPE=  FXTYPE=  _ffind'
+alias  ifff='FCASE=-i FTYPE=f FXTYPE=  _ffind'
+alias  iffd='FCASE=-i FTYPE=d FXTYPE=  _ffind'
+alias  iffl='FCASE=-i FTYPE=l FXTYPE=  _ffind'
+alias iffll='FCASE=-i FTYPE=l FXTYPE=f _ffind'
+alias ifflb='FCASE=-i FTYPE=l FXTYPE=l _ffind'
 
 # Backward find
 _bfind1() {
@@ -51,10 +55,12 @@ alias bfd='BTYPE=-d _bfind'
 # Find breadth-first (width-first)
 _wfind1() { _ffind "${@:-*}" -prune -printf '%d\t%p\n' | sort -nk1 | cut -f2-; }
 alias _wfind='_wfind1'
-alias  wf='FCASE= FTYPE=  _wfind'
-alias wff='FCASE= FTYPE=f _wfind'
-alias wfd='FCASE= FTYPE=d _wfind'
-alias wfl='FCASE= FTYPE=l _wfind'
+alias   wf='FCASE= FTYPE=  FXTYPE=  _wfind'
+alias  wff='FCASE= FTYPE=f FXTYPE=  _wfind'
+alias  wfd='FCASE= FTYPE=d FXTYPE=  _wfind'
+alias  wfl='FCASE= FTYPE=l FXTYPE=  _wfind'
+alias wfll='FCASE= FTYPE=l FXTYPE=f _wfind'
+alias wflb='FCASE= FTYPE=l FXTYPE=l _wfind'
 
 # File grep implementations
 _fgrep1() {
@@ -89,7 +95,7 @@ _fsed1() {
   # Sed in place with display
   #eval _ffind "\"$FILES\"" $SEXCLUDE -type f -execdir sed -i $SEDOPT -e "/$IN/{w /dev/stderr" -e "}" -e "s/$IN/$OUT/g" {} \;
   # Sed in place with backup
-  eval _ffind "\"$FILES\"" $SEXCLUDE -type f -execdir sed -i _$(date +%Y%m%d-%H%M%S).bak $SEDOPT "\"s/$IN/$OUT/g\"" "{} \;"
+  eval FTYPE= FXTYPE= _ffind "\"$FILES\"" $SEXCLUDE -type f -execdir sed -i _$(date +%Y%m%d-%H%M%S).bak $SEDOPT "\"s/$IN/$OUT/g\"" "{} \;"
   # Sed with confirmation about all files
   #eval _ffind "\"$FILES\"" $SEXCLUDE -type f -exec echo "Processing file {} ?" \; -exec bash -c read \; -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
 }
