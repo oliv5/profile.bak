@@ -3,6 +3,7 @@
 
 #Connect adb over wi-fi
 adb_wifi() {
+    #adb connect 192.168.8.122:5555
     adb shell setprop service.adb.tcp.port 5555 && stop adbd && start adbd
     adb connect
 }
@@ -88,4 +89,9 @@ adb_data_on() {
 #Mobile Data off
 adb_data_off() {
     adb shell svc data disable
+}
+
+# Get logcat
+adb_logcat() {
+    adb -s ${1:-192.168.8.122:5555} logcat
 }
