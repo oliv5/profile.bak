@@ -93,5 +93,5 @@ adb_data_off() {
 
 # Get logcat
 adb_logcat() {
-    adb -s ${1:-192.168.8.122:5555} logcat
+    adb shell logcat
 }
