@@ -95,7 +95,7 @@ _fsed1() {
   # Sed in place with display
   #eval _ffind "\"$FILES\"" $SEXCLUDE -type f -execdir sed -i $SEDOPT -e "/$IN/{w /dev/stderr" -e "}" -e "s/$IN/$OUT/g" {} \;
   # Sed in place with backup
-  eval FTYPE= FXTYPE= _ffind "\"$FILES\"" $SEXCLUDE -type f -execdir sed -i _$(date +%Y%m%d-%H%M%S).bak $SEDOPT "\"s/$IN/$OUT/g\"" "{} \;"
+  eval FTYPE= FXTYPE= _ffind "\"$FILES\"" $SEXCLUDE -type f -execdir sed --in-place=_$(date +%Y%m%d-%H%M%S).bak $SEDOPT "\"s/$IN/$OUT/g\"" "{} \;"
   # Sed with confirmation about all files
   #eval _ffind "\"$FILES\"" $SEXCLUDE -type f -exec echo "Processing file {} ?" \; -exec bash -c read \; -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
 }
