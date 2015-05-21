@@ -6,19 +6,34 @@ export GIT_PAGER="${PAGER:-cat}"
 
 ########################################
 # Status aliases
-alias gs='git status'
-alias gl='git ls-files'
-alias gm='git ls-files -m'
-alias gc='git ls-files -u'
-alias gd='git ls-files -d'
-alias gn='git ls-files -o --exclude-standard'
-alias gu='git ls-files -o'
+alias gt='git status -uno'
+alias gm='git status --porcelain -b | awk "NR==1 || /^(M.|.M)/"'    # modified
+alias ga='git status --porcelain -b | awk "NR==1 || /^A[ MD]/"'     # added
+alias gd='git status --porcelain -b | awk "NR==1 || /^D[ M]/"'      # deleted
+alias gr='git status --porcelain -b | awk "NR==1 || /^R[ MD]/"'     # renamed
+alias gc='git status --porcelain -b | awk "NR==1 || /^C[ MD]/"'     # copied in index
+alias gu='git status --porcelain -b | awk "NR==1 || /^[DAU][DAU]/"' # unmerged = conflict
+alias gn='git status --porcelain -b | awk "NR==1 || /^\?\?/"'       # untracked = new
+alias gi='git status --porcelain -b | awk "NR==1 || /^\!\!/"'       # ignored
+alias gz='git status --porcelain -b | awk "NR==1 || /^[MARC] /"'    # in index
+alias gs='git status --porcelain -b | awk "NR==1 || /^[^\?\?]/"'    # not untracked
+# List aliases
+alias gll='git ls-files'
+alias glm='git ls-files -m'
+alias glu='git ls-files -u' # unmerged = in conflict
+alias gld='git ls-files -d'
+alias gln='git ls-files -o --exclude-standard'
 # Diff aliases
-alias gdd='git diff'
-alias gdm='git difftool -y -t meld'
+alias gdd='git_diff'
+alias gdm='git_diffm'
 alias gds='git diff stash'
 # Merge aliases
 alias gmm='git mergetool -y -t meld'
+# Branch aliases
+alias gbc='git branch'
+alias gba='git branch -a'
+alias gbr='git branch -r'
+alias gbv='git branch -v'
 # Stash aliases
 alias gsc='git_stash_push'
 alias gss='git_stash_save'
@@ -35,6 +50,11 @@ alias gia='git_ignore_add'
 # git add new files
 alias gan='git add $(git ls-files -o --exclude-standard)'
 alias gau='git add $(git ls-files -o)'
+# Git logs/history aliases
+alias git_history='git log -p'
+alias git_log='git log --name-only'
+alias git_logall='git log --name-status'
+alias git_logstat='git log --stat'
 # Annex
 alias gas='git annex sync'
 alias gal='git annex log'
@@ -56,15 +76,28 @@ git() {
 }
 
 ########################################
+# Git status for scripts
+git_st() {
+  git status -z | awk 'BEGIN{RS="\0"; ORS="\0"}/'"${1:-^[^\?\?]}"'/{print substr($0,4)}'
+}
+
+########################################
 # Meld called by git
 git_meld() {
   meld "$2" "$5"
 }
 
 ########################################
-# Svn diff with meld
+# Svn diff staged/unstaged
+git_diff() {
+  git diff "$@" &&
+  git diff --cached "$@"
+}
+
+# Svn diff staged/unstaged with meld
 git_diffm() {
-  git difftool -y -t meld "$@"
+  git difftool -y -t meld "$@" &&
+  git difftool --cached -y -t meld "$@"
 }
 
 ########################################
@@ -258,13 +291,6 @@ git_purge_gc() {
   git reflog expire --expire=now --all
   git gc --prune=now
 }
-
-########################################
-# Git logs/history/diffs aliases
-alias git_history='git log -p'
-alias git_log='git log --name-only'
-alias git_logall='git log --name-status'
-alias git_logstat='git log --stat'
 
 ########################################
 # Git add gitignore
