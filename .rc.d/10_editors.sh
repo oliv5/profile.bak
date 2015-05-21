@@ -4,8 +4,8 @@
 # Default editors
 [ -z "$EDITOR" ] && export EDITOR="$(command -v vim || command -v vi || command -v nano || command -v false)"
 [ -z "$VISUAL" ] && export VISUAL="$EDITOR"
-[ -z "$PAGER" ] && export PAGER="less -FX"
-export LESS="-F" # Don't stop when less than 1 page
+[ -z "$PAGER" ] && export PAGER="less -FXr"
+export LESS="-FXr" # Don't stop when less than 1 page, color
 
 # Graphical editor
 export GEDITOR="$(command -v geany || command -v gvim || command -v gedit || command -v false)"
