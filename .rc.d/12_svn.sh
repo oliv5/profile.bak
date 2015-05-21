@@ -355,7 +355,7 @@ __svn_diffb() {
       echo "Skip file ${FILE}"
     } || {
       echo "Diff file ${FILE}"
-      eval "$ARG1" '"$ARG2/$FILE"' '"$FILE"'
+      eval "$ARG1" '"$FILE"' '"$ARG2/$FILE"'
       sleep 1
     }
   done
