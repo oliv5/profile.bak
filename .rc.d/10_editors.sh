@@ -2,13 +2,13 @@
 
 #########################
 # Default editors
-
-# Use vim as editor
 [ -z "$EDITOR" ] && export EDITOR="$(command -v vim || command -v vi || command -v nano || command -v false)"
-[ -z "$VISUAL" ] && export VISUAL="$(command -v geany || command -v gvim || command -v gedit || command -v false)"
+[ -z "$VISUAL" ] && export VISUAL="$EDITOR"
+[ -z "$PAGER" ] && export PAGER="less -FX"
+export LESS="-F" # Don't stop when less than 1 page
 
-# Pagers
-[ -z "$PAGER" ] && export PAGER="less -s"
+# Graphical editor
+export GEDITOR="$(command -v geany || command -v gvim || command -v gedit || command -v false)"
 
 #########################
 # Gedit

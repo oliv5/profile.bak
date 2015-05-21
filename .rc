@@ -82,7 +82,7 @@ ffe() {
 
 # Gedit/geany
 g() {
-  eval "${VISUAL:-false}" "$@"
+  eval "${GEDITOR:-false}" "$@"
 }
 alias ssg='ss | cut -c 9- | xargs g'
 alias gsg='gs | grep modified | cut -d : -f 2 | xargs g'

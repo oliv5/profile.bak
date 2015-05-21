@@ -2,7 +2,7 @@
 
 # Editors
 export GIT_EDITOR="${EDITOR:-vi}"
-export GIT_PAGER="${PAGER:-cat}"
+export GIT_PAGER="${PAGER:-less -Fs}"
 
 ########################################
 # Status aliases
