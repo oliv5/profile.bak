@@ -1,66 +1,65 @@
 #!/bin/sh
-DFEXCLUDE="-not -path *.svn* -and -not -path *.git*"
-DGEXCLUDE="--exclude-dir=.svn --exclude-dir=.git"
-DSEXCLUDE="$DFEXCLUDE -not -type l"
 
-# Dev grep
-# Various dev search function helpers
-_dgrep() { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; shift $(min 3 $#); (set -f; _fgrep "$ARG2" ${GCASE} ${DGEXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
-alias _c='_dgrep "*.c;*.cpp;*.cc"'
-alias _h='_dgrep "*.h;*.hpp"'
-alias _v='_dgrep "*.vhd;*.v"'
-alias _hc='_dgrep "*.c;*.cpp;*.cc;*.h;*.hpp"'
-alias _py='_dgrep "*.py"'
-alias _mk='_dgrep "*.mk;Makefile"'
-alias _asm='_dgrep "*.inc;*.S"'
-alias _xml='_dgrep "*.xml"'
-alias _ref='_dgrep "*.c;*.cpp;*.cc;*.h;*.hpp;*.py;*.mk;Makefile;*.sh;*.vhd;*.v;*.inc;*.S"'
-alias _shell='_dgrep "*.sh"'
-alias c='GCASE=  _c'
-alias h='GCASE=  _h'
-alias v='GCASE=  _v'
-alias hc='GCASE=  _hc'
-alias py='GCASE=  _py'
-alias mk='GCASE=  _mk'
-alias asm='GCASE=  _asm'
-alias xml='GCASE=  _xml'
-alias ref='GCASE=  _ref'
-alias shell='GCASE=  _shell'
-alias ic='GCASE=-i _c'
-alias ih='GCASE=-i _h'
-alias iv='GCASE=-i _v'
-alias ihc='GCASE=-i _hc'
-alias ipy='GCASE=-i _py'
-alias imk='GCASE=-i _mk'
-alias iasm='GCASE=-i _asm'
-alias ixml='GCASE=-i _xml'
-alias iref='GCASE=-i _ref'
-alias ishell='GCASE=-i _shell'
+# Grep based code search
+_dgrep1()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; shift $(min 3 $#); (set -f; _fgrep "$ARG2" ${_DGEXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
+_DGEXCLUDE="--exclude-dir=.svn --exclude-dir=.git"
+_DGEXT_C="*.c;*.cpp;*.cc"
+_DGEXT_H="*.h;*.hpp"
+_DGEXT_V="*.vhd;*.v"
+_DGEXT_HC="*.c;*.cpp;*.cc;*.h;*.hpp"
+_DGEXT_PY="*.py"
+_DGEXT_MK="*.mk;Makefile"
+_DGEXT_ASM="*.inc;*.S"
+_DGEXT_XML="*.xml"
+_DGEXT_SHELL="*.sh"
+_DGEXT_REF="*.c;*.cpp;*.cc;*.h;*.hpp;*.py;*.mk;Makefile;*.sh;*.vhd;*.v;*.inc;*.S"
+alias      c='GCASE=   _dgrep1 "$_DGEXT_C"'
+alias      h='GCASE=   _dgrep1 "$_DGEXT_H"'
+alias      v='GCASE=   _dgrep1 "$_DGEXT_V"'
+alias     hc='GCASE=   _dgrep1 "$_DGEXT_HC"'
+alias     py='GCASE=   _dgrep1 "$_DGEXT_PY"'
+alias     mk='GCASE=   _dgrep1 "$_DGEXT_MK"'
+alias    asm='GCASE=   _dgrep1 "$_DGEXT_ASM"'
+alias    xml='GCASE=   _dgrep1 "$_DGEXT_XML"'
+alias  shell='GCASE=   _dgrep1 "$_DGEXT_SHELL"'
+alias    ref='GCASE=   _dgrep1 "$_DGEXT_REF"'
+alias     ic='GCASE=-i _dgrep1 "$_DGEXT_C"'
+alias     ih='GCASE=-i _dgrep1 "$_DGEXT_H"'
+alias     iv='GCASE=-i _dgrep1 "$_DGEXT_V"'
+alias    ihc='GCASE=-i _dgrep1 "$_DGEXT_HC"'
+alias    ipy='GCASE=-i _dgrep1 "$_DGEXT_PY"'
+alias    imk='GCASE=-i _dgrep1 "$_DGEXT_MK"'
+alias   iasm='GCASE=-i _dgrep1 "$_DGEXT_ASM"'
+alias   ixml='GCASE=-i _dgrep1 "$_DGEXT_XML"'
+alias ishell='GCASE=-i _dgrep1 "$_DGEXT_SHELL"'
+alias   iref='GCASE=-i _dgrep1 "$_DGEXT_REF"'
 
-# Code elements search
-#REGEX_FUNC='(^|\s+|::)NAME\s*\(([^;]*$|[^\}]\})'
-REGEX_FUNC='\w+\s+NAME\s*\(\s*($|\w+\s+\w+|void)'
-REGEX_VAR='^[^\(]*\w+\s*(\*|&)*\s*NAME\s*(=.+|\(\w+\)|\[.+\])?\s*(;|,)'
-REGEX_STRUCT='(struct|union|enum|class)\s*NAME\s*(\{|$)'
-REGEX_TYPEDEF='(typedef\s+\w+\sNAME)|(^\s*NAME\s*;)'
-REGEX_DEFINE='(#define\s+NAME|^\s*NAME\s*,)|(^\s*NAME\s*=.*,)'
-_dsearch() { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; _ref "${ARG1//NAME/$ARG2}" . -E "$@"); }
-alias def='GCASE=  _dsearch "($REGEX_FUNC)|($REGEX_VAR)|($REGEX_STRUCT)|($REGEX_DEFINE)|($REGEX_TYPEDEF)"'
-alias var='GCASE=  _dsearch "$REGEX_VAR"'
-alias func='GCASE=  _dsearch "$REGEX_FUNC"'
-alias struct='GCASE=  _dsearch "$REGEX_STRUCT"'
-alias define='GCASE=  _dsearch "$REGEX_DEFINE"'
-alias typedef='GCASE=  _dsearch "$REGEX_TYPEDEF"'
-alias idef='GCASE=-i _dsearch "($REGEX_FUNC)|($REGEX_VAR)|($REGEX_STRUCT)|($REGEX_DEFINE)|($REGEX_TYPEDEF)"'
-alias ivar='GCASE=-i _dsearch "$REGEX_VAR"'
-alias ifunc='GCASE=-i _dsearch "$REGEX_FUNC"'
-alias istruct='GCASE=-i _dsearch "$REGEX_STRUCT"'
-alias idefine='GCASE=-i _dsearch "$REGEX_DEFINE"'
-alias itypedef='GCASE=-i _dsearch "$REGEX_TYPEDEF"'
+# Grep based code block search
+_dsearch1() { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; _dgrep1 $_DGEXT_REF "${ARG1//NAME/$ARG2}" . -E "$@"); }
+#_DGREGEX_FUNC='(^|\s+|::)NAME\s*\(([^;]*$|[^\}]\})'
+_DGREGEX_FUNC='\w+\s+NAME\s*\(\s*($|\w+\s+\w+|void)'
+_DGREGEX_VAR='^[^\(]*\w+\s*(\*|&)*\s*NAME\s*(=.+|\(\w+\)|\[.+\])?\s*(;|,)'
+_DGREGEX_STRUCT='(struct|union|enum|class)\s*NAME\s*(\{|$)'
+_DGREGEX_TYPEDEF='(typedef\s+\w+\sNAME)|(^\s*NAME\s*;)'
+_DGREGEX_DEFINE='(#define\s+NAME|^\s*NAME\s*,)|(^\s*NAME\s*=.*,)'
+_DGREGEX_ALL='(#define\s+NAME|^\s*NAME\s*,)|(^\s*NAME\s*=.*,)'
+alias      def='GCASE=   _dsearch "$_DGREGEX_ALL"'
+alias      var='GCASE=   _dsearch "$_DGREGEX_VAR"'
+alias     func='GCASE=   _dsearch "$_DGREGEX_FUNC"'
+alias   struct='GCASE=   _dsearch "$_DGREGEX_STRUCT"'
+alias   define='GCASE=   _dsearch "$_DGREGEX_DEFINE"'
+alias  typedef='GCASE=   _dsearch "$_DGREGEX_TYPEDEF"'
+alias     idef='GCASE=-i _dsearch "$_DGREGEX_ALL"'
+alias     ivar='GCASE=-i _dsearch "$_DGREGEX_VAR"'
+alias    ifunc='GCASE=-i _dsearch "$_DGREGEX_FUNC"'
+alias  istruct='GCASE=-i _dsearch "$_DGREGEX_STRUCT"'
+alias  idefine='GCASE=-i _dsearch "$_DGREGEX_DEFINE"'
+alias itypedef='GCASE=-i _dsearch "$_DGREGEX_TYPEDEF"'
 
 # Dev replace
-alias  dhh='SEXCLUDE="$DSEXCLUDE" hh'
-alias idhh='SEXCLUDE="$DSEXCLUDE" ihh'
+_DSEXCLUDE="-not -path *.svn* -and -not -path *.git* -and -not -type l"
+alias  dhh='SEXCLUDE="$_DSEXCLUDE" hh'
+alias idhh='SEXCLUDE="$_DSEXCLUDE" ihh'
 
 # Hexdump to txt 32 bits
 bin2hex32() {
