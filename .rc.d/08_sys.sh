@@ -159,10 +159,18 @@ mkchroot(){
 }
 
 ################################
+# apt/dpkg commands
+alias pkg_download='apt-get download'
+alias pkg_installed='dpkg -s'
+alias pkg_content='dpkg -L'
+alias pkg_search='dpkg -S'
+alias pkg_list='dpkg -l'
+alias pkg_archi='dpkg --print-architecture'
+
 # Make deb package from source
 mkdeb() {
   local ARCHIVE="${1:?No input archive specified}"
-  tar zxf "$ARCHIVE" || return 0
+  tar zxf "$ARCHIVE" "${ARCHIVE%.*}" || return 0
   cd "${ARCHIVE%.*}"
   ./configure || return 0
   dh_make -s -f "../$ARCHIVE"
