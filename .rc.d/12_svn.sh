@@ -181,7 +181,12 @@ svn_clean() {
   # Confirmation
   if ! svn_askuser "Backup unversioned files? (y/n): " n N >/dev/null; then
     # Backup
-    svn_zipst "^(\?|\I)" "$(svn_bckdir)/$(svn_bckname clean "" $(svn_rev)).7z"
+    ARCHIVE="$(svn_bckdir)/$(svn_bckname clean "" $(svn_rev)).7z"
+    svn_zipst "$ARCHIVE" "^(\?|\I)"
+    if [ ! -f "$ARCHIVE" ]; then
+      echo "Error: no archive created..."
+      return 1
+    fi
   fi
   # Remove files not in SVN
   svn_stx "^(\?|\I)" | xargs -0 -p --no-run-if-empty rm -r -v --one-file-system --
