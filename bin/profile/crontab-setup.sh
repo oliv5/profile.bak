@@ -15,12 +15,14 @@ echo
 BACKUP="$DIR/backup"
 if ask_question "Create backup scripts? (y/n) " y Y >/dev/null; then
 	touch "$BACKUP.cron"; 						chmod +x "$BACKUP.cron"
+	echo "#!/bin/sh" > "$BACKUP.minutly.sh";	chmod +x "$BACKUP.minutly.sh"
 	echo "#!/bin/sh" > "$BACKUP.hourly.sh";		chmod +x "$BACKUP.hourly.sh"
 	echo "#!/bin/sh" > "$BACKUP.daily.sh";		chmod +x "$BACKUP.daily.sh"
 	echo "#!/bin/sh" > "$BACKUP.weekly.sh";		chmod +x "$BACKUP.weekly.sh"
 	echo "#!/bin/sh" > "$BACKUP.monthly.sh";	chmod +x "$BACKUP.monthly.sh"
 	echo "#!/bin/sh" > "$BACKUP.yearly.sh";		chmod +x "$BACKUP.yearly.sh"
 	# Create rules
+	grep "$BACKUP.minutly.sh" "$BACKUP.cron" 	>/dev/null || echo "## *  * * * * $USER sh -c \"$BACKUP.minutly.sh\""	>> "$BACKUP.cron"
 	grep "$BACKUP.hourly.sh" "$BACKUP.cron" 	>/dev/null || echo "0  * * * * $USER sh -c \"$BACKUP.hourly.sh\""	>> "$BACKUP.cron"
 	grep "$BACKUP.daily.sh" "$BACKUP.cron" 		>/dev/null || echo "10 0 * * * $USER sh -c \"$BACKUP.daily.sh\""	>> "$BACKUP.cron"
 	grep "$BACKUP.weekly.sh" "$BACKUP.cron" 	>/dev/null || echo "20 0 * * 1 $USER sh -c \"$BACKUP.weekly.sh\""	>> "$BACKUP.cron"
@@ -54,19 +56,21 @@ if ask_question "Create backup directory in '$BACKUPDIR'? (y/n) " y Y >/dev/null
 fi
 echo
 
-# Add home backup line in weekly script when not already there
-if ask_question "Add a weekly home backup rule in '$BACKUP.weekly.sh'? (y/n) " y Y >/dev/null; then
-	local TEMPLATE="$(dirname "$0")/resources/cron.backup.template.sh"
-	if [ -f "$BACKUP.weekly.sh" ]; then
-		if ask_question "Append to existing file? (y/n) " y Y >/dev/null; then
-			echo >> "$BACKUP.weekly.sh"
-			tail -n +2 "$TEMPLATE" >> "$BACKUP.weekly.sh"
+# Create each backup script from the template
+for SCRIPT in "$BACKUP.minutly.sh" "$BACKUP.hourly.sh" "$BACKUP.daily.sh" "$BACKUP.weekly.sh" "$BACKUP.monthly.sh" "$BACKUP.yearly.sh"; do
+	if ask_question "Add a weekly home backup rule in '$SCRIPT'? (y/n) " y Y >/dev/null; then
+		local TEMPLATE="$(dirname "$0")/resources/cron.backup.template.sh"
+		if [ -f "$SCRIPT" ]; then
+			if ask_question "Append to existing file? (y/n) " y Y >/dev/null; then
+				echo >> "$SCRIPT"
+				tail -n +2 "$TEMPLATE" >> "$SCRIPT"
+				cat "$SCRIPT"
+			else
+				echo "Skip adding the backup rule..."
+			fi
 		else
-			echo "Skip adding the backup rule..."
+			cp "$TEMPLATE" "$SCRIPT"
 		fi
-	else
-		cp "$TEMPLATE" "$BACKUP.weekly.sh"
 	fi
-	cat "$BACKUP.weekly.sh"
-fi
-echo
+	echo
+done

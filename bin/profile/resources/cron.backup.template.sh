@@ -1,6 +1,7 @@
 #!/bin/sh
 
 ##### Cron backup (start)
+[ -z "$ENV_PROFILE" ] && . "$HOME/.profile"
 DIR="/var/backups/$USER"
 INCLUSIONS="$HOME"
 EXCLUSIONS="--exclude-vcs --one-file-system"
