@@ -48,7 +48,7 @@ path_append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
 path_cleanup
 
 # Remove some aliases/fct shortcuts
-cmd_unset which grep find
+cmd_unset which find grep awk sed xargs cut
 
 # Start ssh-agent when not already running
 pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
