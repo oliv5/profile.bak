@@ -1,5 +1,7 @@
 #!/bin/sh
 
+alias xtgz='untgz'
+
 tgz() {
   tar -cvzf "${1%*/}.tgz" "$@"
 }
