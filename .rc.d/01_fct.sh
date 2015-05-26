@@ -30,14 +30,42 @@ fct_prepend() {
 }
 
 ################################
-# Misc utils (used for shifts)
+# Run a command and filter stdout by another one
+filter_stdout() {
+  { eval "$1" 2>&1 1>&3 | eval "$2" 1>&2; } 3>&1
+}
+
+################################
+# Computations
 min() { echo $(($1<$2?$1:$2)); }
 max() { echo $(($1>$2?$1:$2)); }
 lim() { max $(min $1 $3) $2; }
 isint() { expr 2 "*" "$1" + 1 >/dev/null 2>&1; }
 
-################################
-# Run a command and filter stdout by another one
-filter_stdout() {
-  { eval "$1" 2>&1 1>&3 | eval "$2" 1>&2; } 3>&1
+# Hex to signed 32
+hex2int32() {
+  local MAX=$((1<<${2:-32}))
+  local MEAN=$(($(($MAX>>1))-1))
+  local RES=$(printf "%d" "$1")
+  [ $RES -gt $MEAN ] && RES=$((RES-MAX))
+  echo $RES
+}
+
+# Hex to signed 64
+hex2int64() {
+  local MAX=$((1<<${2:-64}))
+  local MEAN=$(($(($MAX>>1))-1))
+  local RES=$(printf "%d" "$1")
+  [ $RES -gt $MEAN ] && RES=$((RES-MAX))
+  echo $RES
+}
+
+# Hex to unsigned 64
+hex2uint32() {
+  printf "%d" "$1"
+}
+
+# Hex to unsigned 64
+uint2hex() {
+  printf "0x%x" "$1"
 }

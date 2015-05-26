@@ -61,38 +61,6 @@ mkbak() {
   cp "${1:?Please specify input file 1}" "${1}.$(date +%Y%m%d-%H%M%S).bak"
 }
 
-# Strip ANSI codes
-alias rm-ansi='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'
-
-################################
-# Hex to signed 32
-hex2int32() {
-  local MAX=$((1<<${2:-32}))
-  local MEAN=$(($(($MAX>>1))-1))
-  local RES=$(printf "%d" "$1")
-  [ $RES -gt $MEAN ] && RES=$((RES-MAX))
-  echo $RES
-}
-
-# Hex to signed 64
-hex2int64() {
-  local MAX=$((1<<${2:-64}))
-  local MEAN=$(($(($MAX>>1))-1))
-  local RES=$(printf "%d" "$1")
-  [ $RES -gt $MEAN ] && RES=$((RES-MAX))
-  echo $RES
-}
-
-# Hex to unsigned 64
-hex2uint32() {
-  printf "%d" "$1"
-}
-
-# Hex to unsigned 64
-uint2hex() {
-  printf "0x%x" "$1"
-}
-
 ################################
 # Convert to libreoffice formats
 conv_soffice() {
