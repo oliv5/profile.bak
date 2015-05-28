@@ -42,6 +42,8 @@ alias gsp='git_stash_pop'
 alias gsa='git_stash_apply'
 alias gsl='git stash list'
 alias gsv='git_stash_show'
+alias gsd='git_stash_diff'
+alias gsm='git_stash_diffm'
 # Commit aliases
 alias gci='git commit'
 # Gitignore
@@ -238,7 +240,9 @@ git_subtree_add() {
 }
 
 ########################################
-# Amend log
+# https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History
+# https://git-scm.com/docs/git-filter-branch
+# Amend last commit
 alias git_amend='git commit --amend'
 
 # Amend author/committer names & emails
@@ -248,32 +252,34 @@ git_amend_names() {
   local AUTHOR_2="${1##*:}"
   local AUTHOR_EMAIL_1="${2%%:*}"
   local AUTHOR_EMAIL_2="${2##*:}"
-  local COMMITTER_1="${3%%:*}"
-  local COMMITTER_2="${3##*:}"
-  local COMMITTER_EMAIL_1="${4%%:*}"
-  local COMMITTER_EMAIL_2="${4##*:}"
+  local AUTHOR_DATE_1="${3%%:*}"
+  local AUTHOR_DATE_2="${3##*:}"
+  local COMMITTER_1="${4%%:*}"
+  local COMMITTER_2="${4##*:}"
+  local COMMITTER_EMAIL_1="${5%%:*}"
+  local COMMITTER_EMAIL_2="${5##*:}"
+  local COMMITTER_DATE_1="${6%%:*}"
+  local COMMITTER_DATE_2="${6##*:}"
+  local REV="${7:-HEAD}"
   # Display what is going to be done
   echo "Replace author name '$AUTHOR_1' by '$AUTHOR_2'"
   echo "Replace author email '$AUTHOR_EMAIL_1' by '$AUTHOR_EMAIL_2'"
+  echo "Replace author date '$AUTHOR_DATE_1' by '$AUTHOR_DATE_2'"
   echo "Replace committer name '$COMMITTER_1' by '$COMMITTER_2'"
   echo "Replace committer email '$COMMITTER_EMAIL_1' by '$COMMITTER_EMAIL_2'"
-  # Write the script
+  echo "Replace committer date '$COMMITTER_DATE_1' by '$COMMITTER_DATE_2'"
+  read -p "Press enter to go on..."
+  # Define the replacement script
   local SCRIPT='
-    if [ -z "$AUTHOR_1" -o "$GIT_AUTHOR_NAME" = "$AUTHOR_1" ]; then
-      if [ -z "$AUTHOR_EMAIL_1" -o "$GIT_AUTHOR_NAME" = "$AUTHOR_EMAIL_1" ]; then
-        if [ -z "$COMMITTER_1" -o "$GIT_AUTHOR_NAME" = "$COMMITTER_1" ]; then
-          if [ -z "$COMMITTER_EMAIL_1" -o "$GIT_AUTHOR_NAME" = "$COMMITTER_EMAIL_1" ]; then
-            [ "$GIT_AUTHOR_NAME" = "$AUTHOR_1" ] && export GIT_AUTHOR_NAME="$AUTHOR_2" || unset GIT_AUTHOR_NAME
-            [ "$GIT_AUTHOR_EMAIL" = "$AUTHOR_EMAIL_1" ] && export GIT_AUTHOR_EMAIL="$AUTHOR_EMAIL_2" || unset GIT_AUTHOR_EMAIL
-            [ "$GIT_COMMITTER_NAME" = "$COMMITTER_1" ] && export GIT_COMMITTER_NAME="$COMMITTER_2" || unset GIT_COMMITTER_NAME
-            [ "$GIT_COMMITTER_EMAIL" = "$COMMITTER_EMAIL_1" ] && export GIT_COMMITTER_EMAIL="$COMMITTER_EMAIL_2" || unset GIT_COMMITTER_EMAIL
-          fi
-        fi
-      fi
-    fi
+    [ ! -z "$AUTHOR_1" -a "$AUTHOR_1" = "$GIT_AUTHOR_NAME" ] && export GIT_AUTHOR_NAME="$AUTHOR_2"
+    [ ! -z "$AUTHOR_EMAIL_1" -a "$AUTHOR_EMAIL_1" = "$GIT_AUTHOR_EMAIL" ] && export GIT_AUTHOR_EMAIL="$AUTHOR_EMAIL_2"
+    [ ! -z "$AUTHOR_DATE_1" -a "$AUTHOR_DATE_1" = "$GIT_AUTHOR_DATE" ] && export GIT_AUTHOR_DATE="$AUTHOR_DATE_2"
+    [ ! -z "$COMMITTER_1" -a "$COMMITTER_1" = "$GIT_COMMITTER_NAME" ] && export GIT_COMMITTER_NAME="$COMMITTER_2"
+    [ ! -z "$COMMITTER_EMAIL_1" -a "$COMMITTER_EMAIL_1" = "$GIT_COMMITTER_EMAIL" ] && export GIT_COMMITTER_EMAIL="$COMMITTER_EMAIL_2"
+    [ ! -z "$COMMITTER_DATE_1" -a "$COMMITTER_DATE_1" = "$GIT_COMMITTER_DATE" ] && export GIT_COMMITTER_DATE="$COMMITTER_DATE_2"
   '
   # Execute the script
-  git filter-branch --env-filter "$SCRIPT"
+  git filter-branch --env-filter "$SCRIPT" $REV
 }
 
 ########################################
@@ -281,8 +287,17 @@ git_amend_names() {
 git_purge_file() {
   local FILE="${1:?No path specified...}"
   git filter-branch --force --index-filter \
-    "git rm --cached --ignore-unmatch \"$FILE\"" \
+    'git rm --cached --ignore-unmatch "$FILE"' \
     --prune-empty --tag-name-filter cat -- --all
+}
+
+# Purge commits from a given author
+git_purge_author() {
+  local NAME="${1:?No name specified...}"
+  local REV="${2:-HEAD}"
+  git filter-branch --commit-filter \
+    'if [ "$GIT_AUTHOR_NAME" = "$NAME" ]; then skip_commit "$@"; else git commit-tree "$@"; fi' \
+    $REV
 }
 
 # Forced garbage-collector (use after purge_file) 
