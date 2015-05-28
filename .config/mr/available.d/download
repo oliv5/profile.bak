@@ -2,11 +2,17 @@
 checkout = git_clone ssh://olivier@rpi:/media/wdtv/download rpi 2>/dev/null || 
            git_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdtv/download rpi;
            annex_init
-status   = annex_status
-sync     = annex_sync
-gitk     = gitk
-gdm      = git difftool -y -t meld --
-gc       = git gc
-diff     = annex_diff
-push     = true
+
+bundle   = true
+
 pull     = true
+push     = true
+sync     = annex_sync
+
+status   = annex_status
+diff     = annex_diff
+gdm      = git difftool -y -t meld --
+
+gitk     = gitk
+gc       = git gc
+meta     = true

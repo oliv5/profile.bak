@@ -1,20 +1,10 @@
 [DEFAULT]
 #skip = vcsh_exists && echo "Already in a vcsh repository"
 
-# Global mr fct helpers
-lib = 
-	mr_execute() {
-		CMD="$1"; shift
-		if git config --bool vcsh.vcsh >/dev/null; then
-			REPO="$(basename $MR_REPO .git)"
-			CMD="vcsh run $REPO"
-		fi
-		eval $CMD sh -c \""$@"\"
-	}
 # Add few git actions
 lib =
 	git_exists() {
-		git --git-dir="$MR_REPO/.git" rev-parse --verify "HEAD" >/dev/null 2>&1
+		git rev-parse --verify "HEAD" >/dev/null 2>&1
 	}
 	git_clone() {
 		REPO=$(basename $MR_REPO .git)
@@ -23,7 +13,7 @@ lib =
 		if [ ! -z "$2" ]; then git remote rename origin "$2"; fi
 	}
 	git_pull() {
-		mr_execute "" "
+		vcsh_run "
 			git stash save -q 'mrconfig_stash'
 			for REMOTE in $1; do
 				if git remote | grep -- \\\$REMOTE >/dev/null; then
@@ -68,7 +58,15 @@ lib =
 # Define vcsh helpers
 lib =
 	vcsh_exists() {
-		git --git-dir="$MR_REPO/.git" config --get vcsh.vcsh >/dev/null 2>&1
+		git config --get vcsh.vcsh >/dev/null 2>&1
+	}
+	vcsh_run() {
+		local CMD=""
+		if vcsh_exists; then
+			REPO="$(basename $MR_REPO .git)"
+			CMD="vcsh run $REPO"
+		fi
+		eval $CMD sh -c \""$@"\"
 	}
 	vcsh_clone() {
 		REPO=$(basename $MR_REPO .git)
@@ -88,14 +86,16 @@ lib =
 		annex_init "$@" &&
 		git annex direct
 	}
+	annex_init_hubic() {
+		local HUBIC_PATH="${1:-$(basename "$MR_REPO" .git)}"
+		git annex initremote hubic type=external externaltype=hubic encryption=none hubic_container=annex hubic_path="$HUBIC_PATH" embedcreds=no ||
+		git annex enableremote hubic type=external externaltype=hubic encryption=none hubic_container=annex hubic_path="$HUBIC_PATH" embedcreds=no
+	}
 	annex_sync() {
-		execute "" "git annex sync"
+		git annex sync 2>/dev/null || git --git-dir="$MR_REPO" annex sync
 	}
 	annex_status() {
-		git annex status
-		if ! git config --get annex.direct >/dev/null; then
-			git status -s "$@"
-		fi
+		git annex status 2>/dev/null || git --git-dir="$MR_REPO" annex status
 	}
 	annex_diff() {
 		if ! git config --get annex.direct >/dev/null; then
@@ -103,8 +103,8 @@ lib =
 		fi
 	}
 	annex_bundle() {
+		local DIR="${1:-.}"
 		if annex_exists; then
-			DIR="${1:-.}"
 			if [ -d "$DIR" ]; then
 				DATE="$(date +%Y%m)"
 				BUNDLE="$DIR/${2:-$(basename $MR_REPO .git).annex.$(uname -n).$DATE.tgz}"
@@ -126,6 +126,22 @@ lib =
 		else
 			echo "Directory '$DIR' is not git-annex ready."
 			echo "Skip bundle creation..."
+		fi
+	}
+	annex_copy() {
+		local DIR="${1:-.}"
+		local REMOTE="${2:?No remote specified... skip annex copy}"
+		local DIRECTION="${3:-to}"
+		if annex_exists; then
+			if [ -d "$DIR" ]; then
+				eval git annex copy "$DIR" --$DIRECTION "$REMOTE"
+			else
+				echo "Target directory '$DIR' does not exists."
+				echo "Skip annex copy..."
+			fi
+		else
+			echo "Directory '$DIR' is not git-annex ready."
+			echo "Skip annex copy..."
 		fi
 	}
 
