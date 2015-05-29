@@ -9,6 +9,9 @@ pull     = true
 push     = true
 sync     = annex_sync
 
+download = true
+upload   = true
+
 status   = annex_status
 diff     = annex_diff
 gdm      = git difftool -y -t meld --

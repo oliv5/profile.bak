@@ -10,6 +10,9 @@ pull     = true
 push     = true
 sync     = annex_sync
 
+download = annex_copy . --from hubic
+upload   = annex_copy . --to hubic
+
 status   = annex_status
 diff     = annex_diff
 gdm      = git difftool -y -t meld --

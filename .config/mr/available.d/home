@@ -8,6 +8,9 @@ pull     = true
 push     = git_push backup master
 sync     = true
 
+download = true
+upload   = true
+
 status   = git status
 diff     = git diff
 gdm      = git difftool -y -t meld --
