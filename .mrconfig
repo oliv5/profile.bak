@@ -40,6 +40,7 @@ lib =
 		if [ -d "$DIR" ]; then
 			DATE="$(date +%Y%m%d-%H%M%S)"
 			BUNDLE="$DIR/${2:-$(basename $MR_REPO .git).bundle.$(uname -n).$DATE.git}"
+			echo "Git bundle into $BUNDLE"
 			git bundle create "$BUNDLE" --all --tags --remotes
 			if [ ! -z "$3" ]; then
 				gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$3" "${BUNDLE}" && 
@@ -109,9 +110,11 @@ lib =
 			if [ -d "$DIR" ]; then
 				DATE="$(date +%Y%m)"
 				BUNDLE="$DIR/${2:-$(basename $MR_REPO .git).annex.$(uname -n).$DATE.tgz}"
-				echo "tar annex into $BUNDLE"
+				echo "Tar annex into $BUNDLE"
 				#tar czf "$BUNDLE" ./ -h --exclude-vcs
-				if git config --get annex.direct >/dev/null; then
+				if vcsh_exists; then
+					vcsh_run "git annex list $(git config --get core.worktree)" | awk 'NR>5 {print $2}' | xargs tar czf "$BUNDLE" -h --exclude-vcs
+				elif git config --get annex.direct >/dev/null; then
 					find . -type f -not -path '*.git*' -print0 | xargs -0 tar czf "$BUNDLE" -h --exclude-vcs
 				else
 					find . -type l -print0 | xargs -0 tar czf "$BUNDLE" -h --exclude-vcs
