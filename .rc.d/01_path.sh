@@ -24,6 +24,16 @@ _path_append() {
   done
 }
 
+# Remove from path
+_path_remove() {
+  local VAR="${1:-PATH}"
+  shift
+  local DIR
+  for DIR; do
+    eval export $VAR="$(eval echo "\$$VAR" | sed -e "s;${DIR}:\?;;g")"
+  done
+}
+
 # Cleanup path
 _path_cleanup() {
   local VAR="${1:-PATH}"
@@ -36,6 +46,7 @@ _path_cleanup() {
 # Add to PATH
 alias path_prepend='_path_prepend PATH'
 alias path_append='_path_append PATH'
+alias path_remove='_path_remove PATH'
 alias path_cleanup='_path_cleanup PATH'
 alias path_abs='readlink -f --'
 
@@ -44,4 +55,5 @@ alias path_abs='readlink -f --'
 # see ftp://linuxmafia.com/faq/Admin/ld-lib-path.html
 alias ldlibpath_prepend='_path_prepend LD_LIBRARY_PATH'
 alias ldlibpath_append='_path_append LD_LIBRARY_PATH'
+alias ldlibpath_remove='_path_remove LD_LIBRARY_PATH'
 alias ldlibpath_cleanup='_path_cleanup LD_LIBRARY_PATH'
