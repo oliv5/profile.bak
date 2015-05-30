@@ -1,13 +1,19 @@
 [DEFAULT]
 #skip = vcsh_exists && echo "Already in a vcsh repository"
+skip = mr_skip
 
+# Mr actions
+lib = 
+	mr_skip() {
+		[ -r "$HOME/.mrskip" ] && grep "$1.\+$MR_REPO" "$HOME/.mrskip" >/dev/null 2>&1
+	}
 # Add few git actions
 lib =
 	git_exists() {
 		git rev-parse --verify "HEAD" >/dev/null 2>&1
 	}
 	git_clone() {
-		REPO=$(basename $MR_REPO .git)
+		REPO="$(basename "$MR_REPO" .git)"
 		git clone "$1" $REPO
 		cd "$REPO"
 		if [ ! -z "$2" ]; then git remote rename origin "$2"; fi
@@ -39,7 +45,7 @@ lib =
 		DIR="${1:-.}"
 		if [ -d "$DIR" ]; then
 			DATE="$(date +%Y%m%d-%H%M%S)"
-			BUNDLE="$DIR/${2:-$(basename $MR_REPO .git).bundle.$(uname -n).$DATE.git}"
+			BUNDLE="$DIR/${2:-$(basename "$MR_REPO" .git).bundle.$(uname -n).$DATE.git}"
 			echo "Git bundle into $BUNDLE"
 			git bundle create "$BUNDLE" --all --tags --remotes
 			if [ ! -z "$3" ]; then
@@ -63,14 +69,14 @@ lib =
 	}
 	vcsh_run() {
 		if vcsh_exists; then
-			REPO="$(basename $MR_REPO .git)"
+			REPO="$(basename "$MR_REPO" .git)"
 			eval vcsh run $REPO sh -c "\"$@\""
 		else
 			eval "$@"
 		fi
 	}
 	vcsh_clone() {
-		REPO=$(basename $MR_REPO .git)
+		REPO="$(basename "$MR_REPO" .git)"
 		vcsh clone "$@" "$REPO" &&
 		if [ ! -z "$2" ]; then vcsh run "$REPO" git remote rename origin "$2"; fi
 	}
@@ -79,6 +85,12 @@ lib =
 lib =
 	annex_exists() {
 		git config --get annex.version >/dev/null 2>&1
+	}
+	annex_direct() {
+		[ "$(git config --get annex.direct)" = "true" ]
+	}
+	annex_bare() {
+		[ "$(git config --get core.bare)" = "true" -a "$(git config --get core.filemode)" = "false" ]
 	}
 	annex_init() {
 		vcsh_run 'git annex init "$(uname -n)"'
@@ -109,12 +121,14 @@ lib =
 		if annex_exists; then
 			if [ -d "$DIR" ]; then
 				DATE="$(date +%Y%m)"
-				BUNDLE="$DIR/${2:-$(basename $MR_REPO .git).annex.$(uname -n).$DATE.tgz}"
+				BUNDLE="$DIR/${2:-$(basename "$MR_REPO" .git).annex.$(uname -n).$DATE.tgz}"
 				echo "Tar annex into $BUNDLE"
 				#tar czf "$BUNDLE" ./ -h --exclude-vcs
 				if vcsh_exists; then
 					vcsh_run "git annex list $(git config --get core.worktree)" | awk 'NR>5 {print $2}' | xargs tar czf "$BUNDLE" -h --exclude-vcs
-				elif git config --get annex.direct >/dev/null; then
+				elif annex_bare; then
+					tar czf "$BUNDLE" -h ./annex
+				elif annex_direct; then
 					find . -type f -not -path '*.git*' -print0 | xargs -0 tar czf "$BUNDLE" -h --exclude-vcs
 				else
 					find . -type l -print0 | xargs -0 tar czf "$BUNDLE" -h --exclude-vcs

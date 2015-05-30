@@ -20,3 +20,10 @@ gdm      = git difftool -y -t meld --
 gitk     = gitk
 gc       = git gc
 meta     = git_meta
+
+lib      =
+    fixups() {
+        find -L "$MR_REPO" -type d -execdir chmod 700 {} \;
+        find -L "$MR_REPO" -type f -execdir chmod 600 {} \;
+        find -L "$MR_REPO" -type f -name "*.sh" -execdir chmod +x {} \;
+    }
