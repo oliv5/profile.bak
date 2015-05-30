@@ -1,6 +1,6 @@
 [DEFAULT]
 #skip = vcsh_exists && echo "Already in a vcsh repository"
-skip = mr_skip
+skip = mr_skip "$@"
 
 # Mr actions
 lib = 
