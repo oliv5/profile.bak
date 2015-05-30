@@ -33,7 +33,7 @@ log "Backup - begins at $(date)"
 
 # Get args
 log "Backup - read parameters"
-while getopts "bsdntlc:h" FLAG
+while getopts "bsdntlc:hf:m" FLAG
 do
   case "$FLAG" in
     b) OPTS="${OPTS} ${OPT_BACKUP}";;
@@ -43,6 +43,8 @@ do
     t) OPTS="${OPTS} -T $(mktemp -d)";;
     l) LOGGER="logger";;
     c) CHECKDIR="${OPTARG}";;
+    f) ;; # for compatibility with old script
+    m) ;; # for compatibility with old script
     h) echo >&2 "Usage: `basename $0` [-s] [-d] [-n] [-f fuse] -[m] -- src dst ..."
        echo >&2 "-n   debug mode (no action)"
        echo >&2 "-s   show only (dry run)"
