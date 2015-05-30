@@ -12,6 +12,9 @@ lib =
 	git_exists() {
 		git rev-parse --verify "HEAD" >/dev/null 2>&1
 	}
+	git_bare() {
+		[ "$(git config --get core.bare)" = "true" ]
+	}
 	git_clone() {
 		REPO="$(basename "$MR_REPO" .git)"
 		git clone "$1" $REPO
@@ -90,7 +93,7 @@ lib =
 		[ "$(git config --get annex.direct)" = "true" ]
 	}
 	annex_bare() {
-		[ "$(git config --get core.bare)" = "true" -a "$(git config --get core.filemode)" = "false" ]
+		annex_exists && ! annex_direct && git_bare
 	}
 	annex_init() {
 		vcsh_run 'git annex init "$(uname -n)"'
