@@ -1,25 +1,23 @@
-#!/bin/bash
+#!/bin/sh
+RETRY=0
 
-# Trap interrupts and exit
-trap 'echo Interrupted after $retry trials; exit;' SIGINT SIGTERM
+# Trap interrupts
+trap 'echo Interrupted after $RETRY trials; trap - INT TERM; exit;' INT TERM
 
-# Init
-if [[ $1 =~ ^-?[0-9]+$ ]]; then
-  RETRY_MAX=$1
-  CMD="${@:2}"
-else
-  unset RETRY_MAX
-  CMD="$@"
+# Init - check if $1 is an integer => retry limit
+LIMIT=-1
+if expr 2 "*" "$1" + 1 > /dev/null 2>&1; then
+  LIMIT=$1
+  shift
 fi
-retry=0
+CMD="$@"
 
 # Loop
-false; while [ $? -ne 0 ]; do
-  [[ ! -z "$RETRY_MAX" && $retry -ge $RETRY_MAX ]] && break
-  retry=$(($retry+1))
-  #[[ $retry < 0 ]] && retry=0
-  eval $CMD
+false; while [ $? -ne 0 ] && [ $LIMIT -le 0 -o $RETRY -ne $LIMIT ]; do
+  RETRY=$(($RETRY+1))
+  eval "$CMD"
 done
 
-# Done
-echo "Ended after $retry trials"
+# Done - untrap and exit
+trap - INT TERM
+echo "Ended after $RETRY trials"
