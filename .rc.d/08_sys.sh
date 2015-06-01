@@ -1,9 +1,12 @@
 #!/bin/sh
 
 ################################
-# Syslog
-alias syslog='sudo tail /var/log/syslog'
+# TTys
+alias tty_list='ps aux|grep /usr/bin/[X]'
+alias tty_active='cat /sys/class/tty/tty0/active'
+alias tty_next='sudo fgconsole'
 
+################################
 # Processes
 alias psf='ps -faux'
 alias psd='ps -ef'
@@ -25,6 +28,9 @@ uid() {
 }
 
 ################################
+# Syslog
+alias syslog='sudo tail /var/log/syslog'
+
 # System information
 sys_iostat() {
   iostat -x 2
