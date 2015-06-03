@@ -44,6 +44,7 @@ alias gsl='git stash list'
 alias gsv='git_stash_show'
 alias gsd='git_stash_diff'
 alias gsm='git_stash_diffm'
+alias gsdm='gsm'
 # Commit aliases
 alias gci='git commit'
 # Gitignore
