@@ -41,7 +41,8 @@ alias gsb='git_stash_save --include-untracked'
 alias gsp='git_stash_pop'
 alias gsa='git_stash_apply'
 alias gsl='git stash list'
-alias gsv='git_stash_show'
+alias gsf='git_stash_show'
+alias gsv='git_stash_cat'
 alias gsd='git_stash_diff'
 alias gsm='git_stash_diffm'
 alias gsdm='gsm'
@@ -114,6 +115,11 @@ git_exists() {
   git rev-parse --verify "${1:-HEAD}" >/dev/null 2>&1
 }
 
+# Get current branch name
+git_branch() {
+  git rev-parse --abbrev-ref "${1:-HEAD}"
+}
+
 # Check if a repo has been modified
 git_modified() {
   ! git diff-index --quiet HEAD --
@@ -149,13 +155,14 @@ git_allshorthash() {
 ########################################
 # Push changes onto stash, revert changes
 git_stash_save() {
-  git stash save "stash-$(date +%Y%m%d-%H%M)${1:+_$1}"
+  git stash save "$(git_branch)-$(date +%Y%m%d-%H%M)${1:+_$1}"
 }
 
 # Push changes onto stash, does not revert anything
 git_stash_push() {
-  local STASH="stash-$(date +%Y%m%d-%H%M)${1:+_$1}"
-  git update-ref -m "$STASH" refs/stash "$(git stash create \"$STASH\")"
+  local STASH="$(git_branch)-$(date +%Y%m%d-%H%M)${1:+_$1}"
+  git update-ref -m "$STASH" refs/stash "$(git stash create)"
+  #git stash create $STASH
 }
 
 # Pop change from stash
@@ -181,8 +188,14 @@ git_stash_diffl() {
   git_stash_diff "${@:-0}" --name-only
 }
 
-#Show stash content
+#Show stash file list
 git_stash_show() {
+  local STASH="${1:-0}"; shift $(min 1 $#)
+  git stash show stash@{$STASH} "$@"
+}
+
+#Show stash file content
+git_stash_cat() {
   local STASH="${1:-0}"; shift $(min 1 $#)
   git stash show -p stash@{$STASH} "$@"
 }
