@@ -1,6 +1,7 @@
 #!/bin/sh
 DBG=""
 LOGGER="echo"
+NOLOG="true"
 CHECKDIR=""
 PATH="$PATH:/bin:/usr/bin"
 
@@ -12,24 +13,19 @@ OPT_DRYRUN="-n --progress"
 OPTS="-v -r -z -s -i --size-only"
 
 # Functions
-log() { $LOGGER "$@"; }
-run() { log "$*"; eval ${DBG} "$@"; }
+show(){ $LOGGER "$@"; }
+log() { $NOLOG $LOGGER "$@"; }
+run() { show "$*"; eval ${DBG} "$@"; }
 end() {
-    # unmount
-    log "Backup - unmount"
-    umount -f /mnt/src /mnt/dst 2>/dev/null
-    # rmdir mount directories
-    log "Backup - cleanup"
-    rmdir /mnt/src /mnt/dst 2>/dev/null
     # Log end of backup
-    log "Backup - ends at $(date)"
+    show "Backup - ends at $(date)"
     [ ! -z "$DBG" ] && set +x
     exit ${1:-0}
 }
 
 # Beginning
 [ ! -z "$DBG" ] && set -x
-log "Backup - begins at $(date)"
+show "Backup - begins at $(date)"
 
 # Get args
 log "Backup - read parameters"
@@ -41,7 +37,7 @@ do
     d) OPTS="${OPTS} ${OPT_DELETE}";;
     n) DBG="echo";;
     t) OPTS="${OPTS} -T $(mktemp -d)";;
-    l) LOGGER="logger";;
+    l) LOGGER="logger"; NOLOG="";;
     c) CHECKDIR="${OPTARG}";;
     f) ;; # for compatibility with old script
     m) ;; # for compatibility with old script
@@ -70,37 +66,22 @@ if [ "$SRC" = "$DST" ]; then
     exit 1
 fi
 
-# Create the mount directories and unmount if necessary
-log "Backup - create mount directories"
-mkdir -p /mnt/src /mnt/dst 2>/dev/null || 
-umount -f /mnt/src /mnt/dst 2>/dev/null
-
-# Mount
-log "Backup - mount directories"
-if ! mount "$SRC" /mnt/src && ! mount --bind "$SRC" /mnt/src; then
-    log "ERROR: couldn't mount $SRC -> /mnt/src"
-    end 1
-fi
-if ! mount "$DST" /mnt/dst && ! mount --bind "$DST" /mnt/dst; then
-    log "ERROR: couldn't mount $DST -> /mnt/dst"
-    end 1
-fi
-
-# Check the test file in each mount points
-log "Backup - check mounts"
-if [ ! -e "/mnt/src/$CHECKDIR" || ! -e "/mnt/dst/$CHECKDIR" ]; then
+# Check the test file in each directories
+log "Backup - check directories"
+if [ ! -e "$SRC/$CHECKDIR" -o ! -e "$DST/$CHECKDIR" ]; then
     log "ERROR: couldn't find the test file '$CHECKDIR' in the mount dir '$SRC' & '$DST'"
     end 1
 fi
 
 # Backup
 log "Backup - starts"
-run rsync ${OPTS} /mnt/src/ /mnt/dst/
+run rsync ${OPTS} "$SRC/" "$DST/"
+ERRCODE=$?
 log "Backup - done"
 
-# Sync before unmount
+# Sync before the end
 log "Backup - sync"
 sync
 
 # End
-end 0
+end $ERRCODE
