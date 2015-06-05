@@ -37,7 +37,9 @@ alias gbv='git branch -v'
 # Stash aliases
 alias gsc='git_stash_push'
 alias gss='git_stash_save'
-alias gsb='git_stash_save --include-untracked'
+alias gssa='git_stash_save_all'
+alias gssu='git_stash_save_untracked'
+alias gssl='git_stash_save_lazy'
 alias gsp='git_stash_pop'
 alias gsa='git_stash_apply'
 alias gsl='git stash list'
@@ -51,14 +53,19 @@ alias gci='git commit'
 # Gitignore
 alias gil='git_ignore_list'
 alias gia='git_ignore_add'
-# git add new files
+# Add new files
 alias gan='git add $(git ls-files -o --exclude-standard)'
 alias gau='git add $(git ls-files -o)'
-# Git logs/history aliases
+# Logs/history aliases
 alias git_history='git log -p'
 alias git_log='git log --name-only'
 alias git_logall='git log --name-status'
 alias git_logstat='git log --stat'
+# Tag aliases
+alias gts='git tag'
+alias gtl='git tag -l'
+alias gtd='git tag -d'
+alias gtc='git tag --contains'
 # Annex
 alias gas='git annex sync'
 alias gal='git annex log'
@@ -112,7 +119,7 @@ git_root() {
 
 # Check repo existenz
 git_exists() {
-  git rev-parse --verify "${1:-HEAD}" >/dev/null 2>&1
+  git ${1:+--work-tree="$1"} rev-parse --verify "HEAD" >/dev/null 2>&1
 }
 
 # Get current branch name
@@ -155,7 +162,20 @@ git_allshorthash() {
 ########################################
 # Push changes onto stash, revert changes
 git_stash_save() {
-  git stash save "$(git_branch)-$(date +%Y%m%d-%H%M)${1:+_$1}"
+  local STASH="$(git_branch)-$(date +%Y%m%d-%H%M)${1:+_$1}"; shift
+  git stash save "$STASH" "$@"
+}
+git_stash_save_all() {
+  local STASH="$(git_branch)-$(date +%Y%m%d-%H%M)${1:+_$1}"; shift
+  git stash save --all "$STASH" "$@"
+}
+git_stash_save_untracked() {
+  local STASH="$(git_branch)-$(date +%Y%m%d-%H%M)${1:+_$1}"; shift
+  git stash save --untracked "$STASH" "$@"
+}
+git_stash_save_lazy() {
+  local STASH="$(git_branch)-$(date +%Y%m%d-%H%M)${1:+_$1}"; shift
+  git stash save --keep-index "$STASH" "$@"
 }
 
 # Push changes onto stash, does not revert anything
