@@ -19,6 +19,7 @@ alias gz='git status --porcelain -b | awk "NR==1 || /^[MARC] /"'    # in index
 alias gs='git status --porcelain -b | awk "NR==1 || /^[^\?\?]/"'    # not untracked
 # List aliases
 alias gll='git ls-files'
+alias gls='git ls-files'
 alias glm='git ls-files -m'
 alias glu='git ls-files -u' # unmerged = in conflict
 alias gld='git ls-files -d'
@@ -72,7 +73,7 @@ alias gal='git annex log'
 alias gai='git annex info'
 alias gag='git annex get'
 alias gad='git annex drop'
-alias gast='git annex status'
+alias gat='git annex status'
 
 ########################################
 # git wrapper
