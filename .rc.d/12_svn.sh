@@ -73,7 +73,7 @@ svn_url() {
 # Get path to svn current root
 svn_root() {
   #echo "${PWD}$(svn_url | sed -e "s;$(svn_repo);;" -e "s;/[^\/]*;/..;g")"
-  _bfind "${1:+$1/}.svn" d shortest
+  _bfind "${1:+$1/}.svn"
 }
 
 # Get svn current branch
