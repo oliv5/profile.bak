@@ -190,6 +190,16 @@ fstab2autofs() {
 }
 
 ################################
+# Add to user crontab
+cron_useradd() {
+  (crontab -l ; echo "$@") | crontab -
+}
+# Add to system crontab
+cron_useradd() {
+  sudo sh -c 'echo "$@" >> "/etc/cron.d/$USER"'
+}
+
+################################
 # http://unix.stackexchange.com/questions/59112/preserve-directory-structure-when-moving-files-using-find
 # Move/copy by replicating directory structure
 _mkdir_exec() {
