@@ -206,7 +206,7 @@ svn_revert() {
 # Rollback to a previous revision, don't change unversionned files
 svn_rollback() {
   # Get target revision number
-  local REV="${1:-PREV:HEAD}"
+  local REV="${1:-HEAD:PREV}"
   # Check we are in a repository
   svn_exists || return 1
   # Backup
