@@ -7,7 +7,7 @@ bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
 
 pull     = git_pull rpi master
 push     = git_push rpi master
-sync     = annex_sync
+sync     = true
 
 download = annex_copy . --from hubic
 upload   = annex_copy . --to hubic
