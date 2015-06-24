@@ -1,0 +1,11 @@
+--sort=yes
+--fields=+iaS
+--extra=+qf
+
+--exclude='.svn'
+--exclude='.git'
+--exclude='tmp'
+
+--c-kinds=+p
+--c++-kinds=+p
+--python-kinds=-i

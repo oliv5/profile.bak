@@ -2,8 +2,8 @@
 # Note: this file must be independant, it can be sourced by external scripts
 DBG=""
 
-# Ctags settings
-CTAGS_OPTS="-R --sort=yes --c-kinds=+p --c++-kinds=+p --fields=+iaS --extra=+qf --exclude='.svn' --exclude='.git' --exclude='tmp'"
+# Ctags settings (see ~/.ctags)
+CTAGS_OPTS="-R"
 
 # Cscope default settings
 #CSCOPE_OPTS="-qb"
@@ -21,8 +21,9 @@ mkctags() {
   local CTAGS_OPTIONS="$CTAGS_OPTS $3"
   local CTAGS_DB="${DST}/tags"
   # Build tag file
-  ${DBG} $(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}" 2>&1 >/dev/null | \
-    grep -vE 'Warning: Language ".*" already defined'
+  #${DBG} $(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}" 2>&1 >/dev/null | \
+  #  grep -vE 'Warning: Language ".*" already defined'
+  ${DBG} $(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}" 2>&1 >/dev/null
 }
 
 # Scan directory for cscope files
@@ -49,7 +50,7 @@ mkcscope_1() {
   local CSCOPE_FILES="$DST/cscope.files"
   local CSCOPE_DB="$DST/cscope.out"
   # Build file list
-  if [ ! -e $CSCOPE_FILES ]; then
+  if [ ! -s $CSCOPE_FILES ]; then
     shift $(min 3 $#)
     scancsdir "$SRC" "$DST" "$@"
   fi
