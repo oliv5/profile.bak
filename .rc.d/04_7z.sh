@@ -1,7 +1,16 @@
 #!/bin/sh
 export OPTS_7Z="-t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off"
 
-# 7z < Tar compress
+# Aliases (fct names cannot start with digits)
+alias 7zta='_7zta'
+alias 7ztd='_7ztd'
+alias 7za='_7za'
+alias 7zd='_7zd'
+alias 7zdiff='_7zdiff'
+alias 7zdiffd='_7zdiffd'
+alias 7zdiffm='_7zdiffm'
+
+# Tar > 7z compress
 _7zta() {
   local ARCHIVE="$1.tar.7z"
   local i
@@ -36,7 +45,7 @@ _7zd() {
 }
 
 # Extract to tmp dir
-__7zd() {
+__7zdtmp() {
   local DIR="$1"
   if [ ! -d "$1" ]; then
 	  DIR="$(mktemp -d --tmpdir $(basename $1).XXXXXX)"
@@ -47,33 +56,33 @@ __7zd() {
 
 # 7z deflate and diffd
 _7zdiffd() {
-  local DIR1="$(__7zd "$1")"
+  local DIR1="$(__7zdtmp "${1:?Missing archive...}")"
   local DIR2
   shift $(min 1 $#)
   for DIR2; do
-    DIR2="$(__7zd "$DIR2")"
+    DIR2="$(__7zdtmp "$DIR2")"
     diffd "$DIR1" "$DIR2" | grep -v "Only in $DIR1"
   done
 }
 
 # 7z deflate and diff
 _7zdiff() {
-  local DIR1="$(__7zd "$1")"
+  local DIR1="$(__7zdtmp "${1:?Missing archive...}")"
   local DIR2
   shift $(min 1 $#)
   for DIR2; do
-    DIR2=$(__7zd "$DIR2")
+    DIR2=$(__7zdtmp "$DIR2")
     diff -r "$DIR1" "$DIR2" | grep -v "Only in $DIR1"
   done
 }
 
 # 7z deflate and meld
 _7zdiffm() {
-  local DIR1="$(__7zd "$1")"
+  local DIR1="$(__7zdtmp "${1:?Missing archive...}")"
   local DIR2 DIFFCNT
   shift $(min 1 $#)
   for DIR2; do
-    DIR2="$(__7zd "$DIR2")"
+    DIR2="$(__7zdtmp "$DIR2")"
     DIFFCNT=$(diffd "$DIR1" "$DIR2" | grep -v "Only in $DIR1" | wc -l)
     echo; echo "Number of diff files: $DIFFCNT"
     diffd "$DIR1" "$DIR2" | grep -v "Only in $DIR1"
