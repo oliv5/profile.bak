@@ -29,7 +29,7 @@ mkctags() {
 # Scan directory for cscope files
 scancsdir() {
   command -v >/dev/null cscope || return
-  # Get directories
+  # Get directories, remove ~/
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
   # Get options
@@ -42,7 +42,7 @@ scancsdir() {
 # Make cscope db from source list file
 mkcscope_1() {
   command -v >/dev/null cscope || return
-  # Get directories
+  # Get directories, remove ~/
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
   # Get options
@@ -63,7 +63,7 @@ mkcscope_1() {
 # It erases the old database and rebuild it
 mkcscope_2() {
   command -v >/dev/null cscope || return
-  # Get directories
+  # Get directories, remove ~/
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
   # Get options
@@ -83,9 +83,9 @@ mkcscope() {
 # Make id-utils database
 mkids() {
   command -v >/dev/null mkid || return
-  # Get directories
-  local SRC="$(eval readlink -f ${1:-$PWD})"
-  local DST="$(eval readlink -f ${2:-$PWD})"
+  # Get directories, remove ~/
+  local SRC="$(eval echo ${1:-$PWD})"
+  local DST="$(eval echo ${2:-$PWD})"
   # build db
   local _PWD="$PWD"
   cd "$SRC"
