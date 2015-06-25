@@ -779,12 +779,13 @@ endif
 " } Marks {
 " *******************************************************
 
-" Marks variables
-if !exists("s:mark_next")
+" Reset all user marks
+function! s:MarkReset()
 	let s:mark_cur=0
 	let s:mark_next=0
 	let s:mark_max=1
-endif
+	delmarks A-Z0-9
+endfunction
 
 " Set a mark
 function! s:MarkSet()
@@ -810,11 +811,6 @@ function! s:MarkPrev()
 	silent! exec printf("normal '%c", 65 + s:mark_cur)
 endfunction
 
-" Reset all user marks
-function! s:MarkReset()
-	delmarks A-Z0-9
-endfunction
-
 " User commands
 command! -nargs=0 -bar Mset   call <SID>MarkSet()
 command! -nargs=0 -bar Mnext  call <SID>MarkNext()
@@ -830,6 +826,11 @@ nmap <silent>m            :Mprev<CR>
 nmap <silent>M            :Mnext<CR>
 nmap <silent><C-m>        :Mset<CR>
 nmap <silent><A-m>        :Mreset<CR>
+
+" Reset
+if !exists("s:mark_next")
+	call s:MarkReset()
+endif
 
 
 " *******************************************************
