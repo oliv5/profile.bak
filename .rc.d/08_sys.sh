@@ -123,10 +123,15 @@ kill_mem() {
 }
 
 ################################
+# Event tester
+alias event_list='xev'
+alias event_showkey='showkey -s'
+
+################################
 # Keyboad layout
-alias keyb-list='grep ^[^#] /etc/locale.gen'
-alias keyb-set='setxkbmap -layout'
-alias keyb-setfr='setxkbmap -layout fr'
+alias keyb_list='grep ^[^#] /etc/locale.gen'
+alias keyb_set='setxkbmap -layout'
+alias keyb_setfr='setxkbmap -layout fr'
 
 ################################
 # Language selection functions
