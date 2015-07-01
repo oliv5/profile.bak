@@ -50,6 +50,13 @@ path_cleanup
 # Remove some aliases/fct shortcuts
 cmd_unset which find grep awk sed xargs cut
 
+################################
+# User anacron
+if [ -r "${HOME}/.anacron/anacrontab" ]; then
+  mkdir -p "${HOME}/.anacron/spool"
+  anacron -s -t "${HOME}/.anacron/anacrontab" -S "${HOME}/.anacron/spool"
+fi
+
 # Start ssh-agent when not already running
 pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
 
@@ -74,11 +81,14 @@ alias p='cd ..'
 
 # Gvim
 alias e='gvim'
-alias sse='ss | cut -c 9- | xargs ${VISUAL:-false}'
-alias gse='gs | grep modified | cut -d : -f 2 | xargs ${VISUAL:-false}'
-ffe() {
-  ff "$@" | xargs gvim
-}
+alias sse='ss | cut -c 9- | xargs gvim'
+alias gse='gs | grep modified | cut -d : -f 2 | xargs gvim'
+
+# Search and open
+ffe() { ff "$@" | xargs gvim; }
+ffc() { ff "$@" | xargs $PAGER; }
+ffg() { ff "$@" | xargs $GEDITOR; }
+ffo() { ff "$@" | xargs mimeopen; }
 
 # Gedit/geany
 g() {
