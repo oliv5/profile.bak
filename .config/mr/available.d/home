@@ -11,7 +11,7 @@ sync     = true
 download = true
 upload   = true
 
-status   = git status
+status   = git status -s
 diff     = git diff
 gdm      = git difftool -y -t meld --
 

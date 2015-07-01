@@ -112,6 +112,7 @@ lib =
 		vcsh_run 'git annex sync'
 	}
 	annex_status() {
+		echo "annex status:"
 		vcsh_run 'git annex status'
 	}
 	annex_diff() {
