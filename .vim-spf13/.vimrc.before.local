@@ -11,7 +11,7 @@
 	
 	" Select the buffer group
 	"let g:spf13_bundle_groups=['general', 'neocomplcache', 'programming', 'python', 'php', 'javascript', 'html', 'misc']
-	let g:spf13_bundle_groups=['general', 'neocomplcache', 'programming', 'misc']
+	let g:spf13_bundle_groups=['general', 'snipmate', 'programming', 'misc']
 
 	" http://vim.wikia.com/wiki/Restore_cursor_to_file_position_in_previous_editing_session
 	" Restore cursor to file position in previous editing session

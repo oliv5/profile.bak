@@ -65,7 +65,7 @@
 
 " Misc configuration {
 	" Autochange dir
-	"let g:vimrc_noautochdir = 1
+	let g:vimrc_autochdir = 2
 
 	" Autocompletion using completefunc (omnifunc=<c-x><c-o>)
 	imap <C-space>  <C-x><C-u>

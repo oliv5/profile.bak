@@ -121,6 +121,8 @@ au FileChangedShell * exec 'echohl WarningMsg | echo "Warning: file' expand('%')
 " File ignore
 "set wildignore+=**/.snv/**,**/.git/**,**/tmp/**,*.so,*.o,*.dll,*.a,*.tmp
 
+" Autochange directory
+let g:vimrc_autochdir = 2
 
 " *******************************************************
 " } Terminal Settings {

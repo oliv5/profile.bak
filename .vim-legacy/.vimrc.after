@@ -57,8 +57,8 @@ function! g:FindRootDir()
 endfunction
 
 " Directory autochange
-if !exists('g:vimrc_noautochdir')
-	if 1
+if exists('g:vimrc_autochdir')
+	if (g:vimrc_autochdir==1)
 		" Look for the best directory
 		augroup vimrc_autochdir
 			autocmd! BufEnter * execute "silent! lcd" g:FindRootDir()
@@ -726,7 +726,7 @@ function! s:BufSmartOpen()
 			" Search in the same directory
 			let open_file = expand(file.":r") . '.' . ext
 			if open_file!=?expand("%") && filereadable(open_file)
-				silent! execute ':e' fnameescape(open_file)
+				silent! execute ':find' fnameescape(open_file)
 				return
 			endif
 			" Search with tags and cscope
@@ -740,6 +740,8 @@ function! s:BufSmartOpen()
 				endif
 			endif
 		endfor
+		" Try to open file under the cursor
+		silent! execute ':find' fnameescape(file)
 	endfor
 endfunction
 
@@ -758,6 +760,7 @@ if !exists("g:vimrc_useTabs")
 	FnNoremap <C-F4>    :BufClose<CR>
 	FnNoremap <C-S-F4>  :BufCloseAll 1<CR>
 endif
+noremap gf            :wincmd gf<CR>
 
 " Prev/next buffer
 FnNoremap <C-b><C-n>  :bn<CR>
