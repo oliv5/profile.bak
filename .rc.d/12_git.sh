@@ -256,7 +256,7 @@ git_clean() {
     shift
   fi
   # Clean repository
-  git clean "$@"
+  git clean -d --exclude=".*" "$@"
 }
 
 ########################################

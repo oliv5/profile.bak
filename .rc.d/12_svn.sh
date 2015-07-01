@@ -188,8 +188,8 @@ svn_clean() {
       return 1
     fi
   fi
-  # Remove files not in SVN
-  svn_stx "^(\?|\I)" | xargs -0 -p --no-run-if-empty rm -r -v --one-file-system --
+  # Remove files not in SVN (exclude .*)
+  svn_stx "^(\?|\I).{7}[^.]" | xargs -0 -p --no-run-if-empty rm -r -v --one-file-system --
 }
 
 # Revert modified files, don't change unversionned files
