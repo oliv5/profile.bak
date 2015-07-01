@@ -131,18 +131,18 @@ rmtags() {
 mkalltags() {
   local _PWD="$PWD"
   local SRC
-  for TAGPATH in $(find -L "$(readlink -m "${1:-$PWD}")" -maxdepth ${2:-5} -type f -name "*.path" 2>/dev/null); do
+  for TAGPATH in $(find -L "$(readlink -m "${1:-$PWD}")" -maxdepth ${2:-5} -type f -name ".*.path" 2>/dev/null); do
     echo "** Processing file $TAGPATH"
     cd "$(dirname $TAGPATH)"
     local TAGNAME="$(basename $TAGPATH)"
-    if [ "$TAGNAME" = "tags.path" -o "$TAGNAME" = "ctags.path" ]; then
+    if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".ctags.path" ]; then
       rmctags
       for SRC in $(cat $TAGNAME); do
         echo "[ctags] add: $SRC"
         mkctags "$SRC" . "-a"
       done
     fi
-    if [ "$TAGNAME" = "tags.path" -o "$TAGNAME" = "cscope.path" ]; then
+    if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".cscope.path" ]; then
       rmcscope
       for SRC in $(cat $TAGNAME); do
         echo "[cscope] add: $SRC"
@@ -150,7 +150,7 @@ mkalltags() {
       done
       mkcscope "$SRC" .
     fi
-    if [ "$TAGNAME" = "tags.path" -o "$TAGNAME" = "id.path" ]; then
+    if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".id.path" ]; then
       rmids
       for SRC in $(cat $TAGNAME); do
         echo "[id] add: $SRC"
