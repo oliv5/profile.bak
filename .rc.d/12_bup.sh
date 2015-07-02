@@ -27,6 +27,16 @@ bup_restore() {
   bup restore -C $DST $BRANCH/$REV/$SRC "$@"
 }
 
+# Get backup list
+bup_list() {
+  local BRANCH="${1:?No backup branch specified...}"
+  shift 1
+  bup ls "$BRANCH"
+}
+
+# Protect with PAR2
+alias bup_protect='bup fsck -g'
+
 # Make a tar backup
 bup_tar() {
   local BRANCH="${1:?No backup branch specified...}"
@@ -43,10 +53,15 @@ bup_untar() {
   bup join "$BRANCH" | tar -tf -
 }
 
-# Protect with PAR2
-alias bup_protect='bup fsck -g'
+# Show tar backup list
+bup_listtar() {
+  local BRANCH="${1:?No backup branch specified...}"
+  shift 1
+  GIT_DIR=${1:-.}/.bup git log "$BRANCH"
+}
 
 # Get repo size
 bup_size() {
   du -s ${1:-.}/.bup
 }
+
