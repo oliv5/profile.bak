@@ -37,10 +37,6 @@ if [ ! -z "$BASH_VERSION" ]; then
 fi
 rc_source "$HOME/.rc.d/local"
 
-# Set load flag
-export ENV_LOADED=$ENV_CNT
-export ENV_CNT
-
 ################################
 # Setup path
 path_prepend "$HOME/bin" "$HOME/.local/bin" "$HOME/bin/profile"
@@ -51,18 +47,20 @@ path_cleanup
 cmd_unset which find grep awk sed xargs cut
 
 ################################
-# User anacron
-if [ -r "${HOME}/.anacron/anacrontab" ]; then
-  mkdir -p "${HOME}/.anacron/spool"
-  anacron -s -t "${HOME}/.anacron/anacrontab" -S "${HOME}/.anacron/spool"
+if [ -z "$ENV_LOADED" ]; then
+  # User anacron
+  if [ -r "${HOME}/.anacron/anacrontab" ]; then
+    mkdir -p "${HOME}/.anacron/spool"
+    anacron -s -t "${HOME}/.anacron/anacrontab" -S "${HOME}/.anacron/spool"
+  fi
+
+  # Start ssh-agent when not already running
+  pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
+
+  # Disable console beep
+  command -v xset >/dev/null 2>&1 && pidof X >/dev/null && xset b off 2>/dev/null # From X11 window system
+  command -v setterm >/dev/null 2>&1 && setterm -blength 0  # From the system console
 fi
-
-# Start ssh-agent when not already running
-pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
-
-# Disable console beep
-command -v xset >/dev/null 2>&1 && pidof X >/dev/null && xset b off 2>/dev/null # From X11 window system
-command -v setterm >/dev/null 2>&1 && setterm -blength 0  # From the system console
 
 ################################
 # Alias profile
@@ -106,3 +104,9 @@ alias s='si'
 # Alias misc
 alias hi='history'
 alias mo='mimeopen'
+
+################################
+# Epilogue
+# Set load flag
+export ENV_LOADED=$ENV_CNT
+export ENV_CNT
