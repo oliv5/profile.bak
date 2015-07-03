@@ -75,7 +75,7 @@ lib =
 			REPO="$(basename "$MR_REPO" .git)"
 			eval vcsh run $REPO sh -c "\"$@\""
 		else
-			eval "$@"
+			eval sh -c "\"$@\""
 		fi
 	}
 	vcsh_clone() {

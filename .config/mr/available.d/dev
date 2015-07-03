@@ -12,7 +12,7 @@ sync     = true
 download = annex_copy . --from hubic
 upload   = annex_copy . --to hubic
 
-status   = git status -s && annex_status
+status   = git status -s
 diff     = annex_diff
 gdm      = git difftool -y -t meld --
 
