@@ -47,20 +47,19 @@ path_cleanup
 cmd_unset which find grep awk sed xargs cut
 
 ################################
-if [ -z "$ENV_LOADED" ]; then
-  # User anacron
-  if [ -r "${HOME}/.anacron/anacrontab" ]; then
-    mkdir -p "${HOME}/.anacron/spool"
-    anacron -s -t "${HOME}/.anacron/anacrontab" -S "${HOME}/.anacron/spool"
-  fi
-
-  # Start ssh-agent when not already running
-  pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
-
-  # Disable console beep
-  command -v xset >/dev/null 2>&1 && pidof X >/dev/null && xset b off 2>/dev/null # From X11 window system
-  command -v setterm >/dev/null 2>&1 && setterm -blength 0  # From the system console
+# User anacron
+if [ -r "${HOME}/.anacron/anacrontab" ]; then
+  mkdir -p "${HOME}/.anacron/spool"
+  anacron -s -t "${HOME}/.anacron/anacrontab" -S "${HOME}/.anacron/spool"
 fi
+
+# Start ssh-agent when not already running
+pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
+
+# Disable console beep
+#command -v xset >/dev/null 2>&1 && pidof X >/dev/null && xset b off 2>/dev/null # From X11 window system
+command -v xset >/dev/null 2>&1 && xset b off 2>/dev/null # From X11 window system
+command -v setterm >/dev/null 2>&1 && setterm -blength 0  # From the system console
 
 ################################
 # Alias profile
