@@ -29,6 +29,16 @@ fct_prepend() {
   eval "${FCT}() { $@; $(fct_content $FCT); }"
 }
 
+# Alias each fct to a script
+fct_alias() {
+  local SCRIPT
+  for SCRIPT; do
+    perl -n -e'/^\s*([a-zA-Z_]*)\(\)/ && print "$1\n"' "$SCRIPT" | while IFS="\n" read -r FCT ; do
+      eval "alias $FCT='$SCRIPT $FCT'"
+    done
+  done
+}
+
 ################################
 # Run a command and filter stdout by another one
 filter_stdout() {
@@ -42,22 +52,23 @@ max() { echo $(($1>$2?$1:$2)); }
 lim() { max $(min $1 $3) $2; }
 isint() { expr 2 "*" "$1" + 1 >/dev/null 2>&1; }
 
-# Hex to signed 32
-hex2int32() {
-  local MAX=$((1<<${2:-32}))
+# Hex to signed int
+hex2int() {
+  local MAX=$((1<<${1:?No width specified...}))
   local MEAN=$(($(($MAX>>1))-1))
-  local RES=$(printf "%d" "$1")
+  local RES=$(printf "%d" "$2")
   [ $RES -gt $MEAN ] && RES=$((RES-MAX))
   echo $RES
 }
 
+# Hex to signed 32
+hex2int32() {
+  hex2int 32 "$@"
+}
+
 # Hex to signed 64
 hex2int64() {
-  local MAX=$((1<<${2:-64}))
-  local MEAN=$(($(($MAX>>1))-1))
-  local RES=$(printf "%d" "$1")
-  [ $RES -gt $MEAN ] && RES=$((RES-MAX))
-  echo $RES
+  hex2int 64 "$@"
 }
 
 # Hex to unsigned 64
