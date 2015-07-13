@@ -42,7 +42,7 @@ fct_content() {
 }
 
 # Create fct aliases with "-" instead of "_" character
-fct_alias() {
+fct_bashalias() {
   # Note: cannot use while here, alias not set out of the while !?
   for FCT in $(fct_ls | grep -E "^[^_].+_.+"); do
     alias $(echo $FCT | tr '_' '-')="$FCT"
@@ -50,7 +50,7 @@ fct_alias() {
 }
 
 # Remove fct aliases with "-" instead of "_" character
-fct_unalias() {
+fct_bashunalias() {
   # Note: cannot use while here, alias not set out of the while !?
   for FCT in $(fct_ls | grep -E "^[^_].+_.+"); do
     unalias $(echo $FCT | tr '_' '-')
@@ -58,7 +58,7 @@ fct_unalias() {
 }
 
 # Convert alias with "_" in their name into "-"
-alias_convert() {
+alias_bashconvert() {
   local _IFS=$IFS
   IFS=$(printf '\n')
   # Note: cannot use while here, alias not set out of the while !?

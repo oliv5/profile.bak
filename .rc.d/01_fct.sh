@@ -29,16 +29,6 @@ fct_prepend() {
   eval "${FCT}() { $@; $(fct_content $FCT); }"
 }
 
-# Alias each fct to a script
-fct_alias() {
-  local SCRIPT
-  for SCRIPT; do
-    perl -n -e'/^\s*([a-zA-Z_]*)\(\)/ && print "$1\n"' "$SCRIPT" | while IFS="\n" read -r FCT ; do
-      eval "alias $FCT='$SCRIPT $FCT'"
-    done
-  done
-}
-
 ################################
 # Run a command and filter stdout by another one
 filter_stdout() {
