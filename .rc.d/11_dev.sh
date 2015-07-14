@@ -79,8 +79,3 @@ alias itypedef='GCASE=-i _dsearch "$_DGREGEX_TYPEDEF"'
 _DSEXCLUDE="-not -path *.svn* -and -not -path *.git* -and -not -type l"
 alias  dhh='SEXCLUDE="$_DSEXCLUDE" hh'
 alias idhh='SEXCLUDE="$_DSEXCLUDE" ihh'
-
-# Hexdump to txt 32 bits
-bin2hex32() {
-  hexdump $@ -ve '1/4 "0x%.8x\n"'
-}

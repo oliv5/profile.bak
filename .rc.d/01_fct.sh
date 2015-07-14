@@ -70,3 +70,8 @@ hex2uint32() {
 uint2hex() {
   printf "0x%x" "$1"
 }
+
+# Hexdump to txt 32 bits
+bin2hex32() {
+  hexdump $@ -ve '1/4 "0x%.8x\n"'
+}
