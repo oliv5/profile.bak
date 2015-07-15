@@ -146,7 +146,7 @@ lib =
 				echo "Skip bundle creation..."
 			fi
 		else
-			echo "Directory '$DIR' is not git-annex ready."
+			echo "Host or its directory '$DIR' is not git-annex ready."
 			echo "Skip bundle creation..."
 		fi
 	}
