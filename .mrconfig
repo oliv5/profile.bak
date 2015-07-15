@@ -1,11 +1,11 @@
 [DEFAULT]
 #skip = vcsh_exists && echo "Already in a vcsh repository"
-skip = mr_skip "$@"
+skip = mr_skip
 
 # Mr actions
 lib = 
 	mr_skip() {
-		[ -r "$HOME/.mrskip" ] && grep "$1.\+$MR_REPO" "$HOME/.mrskip" >/dev/null 2>&1
+		[ ! -d "$MR_REPO" ] || { [ -r "$HOME/.mrskip" ] && grep "$1.\+$MR_REPO" "$HOME/.mrskip" >/dev/null 2>&1; }
 	}
 # Add few git actions
 lib =
