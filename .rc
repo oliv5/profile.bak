@@ -9,37 +9,46 @@ export ENV_RC=$((ENV_CNT=ENV_CNT+1))
 ################################
 # List, load and reload profile scripts
 alias rc='. "$HOME/.rc"'
-alias load='rc_sourcefile'
+alias load='rc_sourcefile "$HOME/.rc.d" 1 9999 -g=r ""'
+alias profile='rc'
+
+# Load scripts by pattern and perms
+rc_sourcefile() {
+  [ -z "$RC_SOURCEFILE" ] && RC_SOURCEFILE=1 || return 1
+  local DIR="${1:-$HOME/.rc.d}"; shift
+  local DEPTH_MIN="${1:-1}"; shift
+  local DEPTH_MAX="${1:-1}"; shift
+  local PERMS_ON="${1:--u=x}"; shift
+  local PERMS_OFF="${1}"; shift
+  local RESULT=1
+  local PATTERN
+  for PATTERN in "${@:-*}"; do
+    for SCRIPT in $(find "$DIR" ${DEPTH_MIN:+-mindepth $DEPTH_MIN} ${DEPTH_MAX:+-maxdepth $DEPTH_MAX} -path "*$PATTERN.sh" -not -path '*/test/*' ${PERMS_ON:+-perm $PERMS_ON} ${PERMS_OFF:+! -perm $PERMS_OFF} -prune -print | sort); do
+      echo "Loading $SCRIPT"
+      . "$SCRIPT" && RESULT=0 || RESULT=1
+    done
+  done
+  unset RC_SOURCEFILE
+  return $RESULT
+}
 
 # Load executable scripts from given directory
 # Declare the associated ENV_ variable
 rc_sourcedir() {
-  local DIR="$1"
-  local DIRNAME="$(basename "$DIR" | sed -r 's/\./_/g; s/^_//g; s/(.*)/\U\1/')"
-  eval "export ENV_$DIRNAME=$((ENV_CNT=ENV_CNT+1))"
-  for FILE in "$DIR/"*.sh; do
-    if [ -x "$FILE" ]; then
-      . "$FILE"
-    fi
+  for DIR; do
+    local DIRNAME="$(basename "$DIR" | sed -r 's/\./_/g; s/^_//g; s/(.*)/\U\1/')"
+    eval "export ENV_$DIRNAME=$((ENV_CNT=ENV_CNT+1))"
+    rc_sourcefile "$DIR"
   done
 }
 
-# Load scripts by pattern
-# Note: the file perms are not verified
-rc_sourcefile() {
-  local PATTERN
-  local RESULT=1
-  for PATTERN; do
-    for SCRIPT in $(find "$HOME/.rc.d" -path "*$PATTERN*.sh" -prune -printf '%d\t%p\n' | sort -nk1 | cut -f2- | head -n 1); do
-      . "$SCRIPT" && RESULT=0 || RESULT=1
-    done
-  done
-  return $RESULT
-}
-
-rc_listfile() {
+rc_list() {
+  echo "List of autoloaded scripts"
+  find "$HOME/.rc.d" -name '*.sh' -type f -perm -u=x -printf '%P\n'
+  echo "List of non-autoloaded scripts"
+  find "$HOME/.rc.d" -name '*.sh' -type f -perm -u=r ! -perm -u=x -printf '%P\n'
   echo "List of disabled scripts"
-  find "$HOME/.rc.d" -name '*.sh' -type f ! -perm -u=x -printf '%P\n'
+  find "$HOME/.rc.d" -name '*.sh' -type f ! -perm -u=r -printf '%P\n'
 }
 
 ################################
@@ -60,6 +69,11 @@ if [ ! -z "$BASH_VERSION" ]; then
   rc_sourcedir "$HOME/.rc.d/bash"
 fi
 rc_sourcedir "$HOME/.rc.d/local"
+
+# Load user-defined scripts
+if [ ! -z "$RC_AUTOLOAD" ]; then
+  rc_sourcefile "$HOME/.rc.d" 1 9999 -g=r -u=x "$RC_AUTOLOAD"
+fi
 
 ################################
 # Setup path

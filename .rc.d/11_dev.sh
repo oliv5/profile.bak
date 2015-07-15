@@ -3,7 +3,7 @@
 # Find based file search
 _dfind1() { local ARG1="$1"; shift; (set -f; _ffind "$ARG1" ${_DFEXCLUDE} "$@"); }
 alias _dfind='_dfind1'
-_DFEXCLUDE="-not -path *.svn* -and -not -path *.git* -and -not -path *.repo*"
+_DFEXCLUDE="-not -path '*.svn*' -and -not -path '*.git*' -and -not -path '*.repo*'"
 alias    dff='FCASE=   FTYPE=  FXTYPE=  _dfind'
 alias   dfff='FCASE=   FTYPE=f FXTYPE=  _dfind'
 alias   dffd='FCASE=   FTYPE=d FXTYPE=  _dfind'
@@ -76,6 +76,6 @@ alias  idefine='GCASE=-i _dsearch "$_DGREGEX_DEFINE"'
 alias itypedef='GCASE=-i _dsearch "$_DGREGEX_TYPEDEF"'
 
 # Dev replace
-_DSEXCLUDE="-not -path *.svn* -and -not -path *.git* -and -not -type l"
+_DSEXCLUDE="-not -path '*.svn*' -and -not -path '*.git*' -and -not -type l"
 alias  dhh='SEXCLUDE="$_DSEXCLUDE" hh'
 alias idhh='SEXCLUDE="$_DSEXCLUDE" ihh'
