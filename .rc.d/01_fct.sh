@@ -75,3 +75,12 @@ uint2hex() {
 bin2hex32() {
   hexdump $@ -ve '1/4 "0x%.8x\n"'
 }
+
+################################
+# Return a string with uniq words
+alias str_uniqw='str_uniq " "'
+str_uniq() {
+  local IFS="${1:- }"
+  shift
+  printf '%s\n' $@ | sort -u | xargs
+}
