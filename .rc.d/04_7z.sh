@@ -1,4 +1,7 @@
 #!/bin/sh
+# Script dependencies
+RC_DEPENDENCIES="${RC_DEPENDENCIES:+$RC_DEPENDENCIES }shell fct diff"
+
 # Note: could use "xz -9" instead of "7z x"
 # Note: could use "xzdiff" for diffs
 export OPTS_7Z="-t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off"

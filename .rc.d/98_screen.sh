@@ -50,3 +50,6 @@ if [ ! -z "$SCREEN_AUTOLOAD" ] && [ -z "$ENV_LOADED" ] && shell_isinteractive &&
 else
   screen_list
 fi
+
+# End
+return 0

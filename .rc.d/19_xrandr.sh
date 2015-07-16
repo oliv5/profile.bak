@@ -1,4 +1,6 @@
 #!/bin/sh
+# Script dependencies
+RC_DEPENDENCIES="${RC_DEPENDENCIES:+$RC_DEPENDENCIES }shell fct"
 
 # List devices
 xrandr_connected() {

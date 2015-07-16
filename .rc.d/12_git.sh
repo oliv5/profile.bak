@@ -1,4 +1,6 @@
 #!/bin/sh
+# Script dependencies
+RC_DEPENDENCIES="${RC_DEPENDENCIES:+$RC_DEPENDENCIES }shell fct diff 7z"
 
 # Editors
 export GIT_EDITOR="${EDITOR:-vi}"
@@ -25,8 +27,8 @@ alias glu='git ls-files -u' # unmerged = in conflict
 alias gld='git ls-files -d'
 alias gln='git ls-files -o --exclude-standard'
 # Diff aliases
-alias gdd='git_diff'
-alias gdm='git_diffm'
+alias gdd='git_diff_full'
+alias gdm='git_diffm_full'
 alias gds='git diff stash'
 # Merge aliases
 alias gmm='git mergetool -y -t meld'
@@ -47,8 +49,9 @@ alias gsl='git stash list'
 alias gsf='git_stash_show'
 alias gsv='git_stash_cat'
 alias gsd='git_stash_diff'
-alias gsm='git_stash_diffm'
-alias gsdm='gsm'
+alias gsdm='git_stash_diffm'
+alias gsdl='git_stash_diffl'
+alias gsm='gsdm'
 # Commit aliases
 alias gci='git commit'
 # Gitignore
@@ -102,12 +105,18 @@ git_meld() {
 ########################################
 # Svn diff staged/unstaged
 git_diff() {
+  git diff "$@"
+}
+git_diff_full() {
   git diff "$@" &&
   git diff --cached "$@"
 }
 
 # Svn diff staged/unstaged with meld
 git_diffm() {
+  git difftool -y -t meld "$@"
+}
+git_diffm_full() {
   git difftool -y -t meld "$@" &&
   git difftool --cached -y -t meld "$@"
 }

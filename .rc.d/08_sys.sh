@@ -1,4 +1,6 @@
 #!/bin/sh
+# Script dependencies
+RC_DEPENDENCIES="${RC_DEPENDENCIES:+$RC_DEPENDENCIES }shell fct"
 
 ################################
 # TTys
@@ -150,7 +152,7 @@ lang_en() {
 ################################
 # Cmd exist test
 cmd_exists() {
-  command -v ${1} >/dev/null
+  command -v "$1" >/dev/null
 }
 
 # Cmd unset

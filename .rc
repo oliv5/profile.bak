@@ -7,28 +7,51 @@
 export ENV_RC=$((ENV_CNT=ENV_CNT+1))
 
 ################################
+# Arguments
+RC_VERBOSE="true"
+while getopts "vd" FLAG; do
+  case "$FLAG" in
+    v) RC_VERBOSE="echo";;
+    *) echo >&2 "Usage: $(basename "$0") [-v]"
+       echo >&2 "-v   verbose mode"
+       kill -INT $$
+       ;;
+  esac
+done; unset FLAG
+
+################################
 # List, load and reload profile scripts
 alias rc='. "$HOME/.rc"'
-alias load='rc_sourcefile "$HOME/.rc.d" 1 9999 -g=r ""'
+alias load='RC_VERBOSE="echo" rc_sourcedep'
 alias profile='rc'
 
 # Load scripts by pattern and perms
 rc_sourcefile() {
-  [ -z "$RC_SOURCEFILE" ] && RC_SOURCEFILE=1 || return 1
-  local DIR="${1:-$HOME/.rc.d}"; shift
-  local DEPTH_MIN="${1:-1}"; shift
-  local DEPTH_MAX="${1:-1}"; shift
-  local PERMS_ON="${1:--u=x}"; shift
-  local PERMS_OFF="${1}"; shift
+  # Prevent re-entrance
+  [ -z "$RC_SOURCEFILE" ] || return 1
+  # Preamble
+  trap 'set +f; trap INT; return 1' INT # never source a file again
+  set -f
+  RC_SOURCEFILE=1
+  # Args
+  local DIR="${1:-$HOME/.rc.d}"
+  local DEPTH_MIN="${2:-1}"
+  local DEPTH_MAX="${3:-1}"
+  local PERMS_ON="${4:--u=x}"
+  local PERMS_OFF="${5}"
+  command shift 5 2>/dev/null || set --
+  # Main processing
   local RESULT=1
-  local PATTERN
-  for PATTERN in "${@:-*}"; do
+  local PATTERN="$(printf '%s\n' "${@:-*}" | sort -u)"
+  for PATTERN in $PATTERN; do
     for SCRIPT in $(find "$DIR" ${DEPTH_MIN:+-mindepth $DEPTH_MIN} ${DEPTH_MAX:+-maxdepth $DEPTH_MAX} -path "*$PATTERN.sh" -not -path '*/test/*' ${PERMS_ON:+-perm $PERMS_ON} ${PERMS_OFF:+! -perm $PERMS_OFF} -prune -print | sort); do
-      echo "Loading $SCRIPT"
+      $RC_VERBOSE "Loading $SCRIPT"
       . "$SCRIPT" && RESULT=0 || RESULT=1
     done
   done
-  unset RC_SOURCEFILE
+  # Clean up
+  eval 'set +f; unset RC_SOURCEFILE; trap INT'
+  # This is the end...
   return $RESULT
 }
 
@@ -36,10 +59,23 @@ rc_sourcefile() {
 # Declare the associated ENV_ variable
 rc_sourcedir() {
   for DIR; do
+    $RC_VERBOSE "Load $(basename "$DIR")/"
     local DIRNAME="$(basename "$DIR" | sed -r 's/\./_/g; s/^_//g; s/(.*)/\U\1/')"
     eval "export ENV_$DIRNAME=$((ENV_CNT=ENV_CNT+1))"
     rc_sourcefile "$DIR"
   done
+}
+
+# Load input scripts and their dependencies
+rc_sourcedep() {
+  $RC_VERBOSE "Load module & dependencies"
+  if [ ! -z "$@" ]; then
+    rc_sourcefile "$HOME/.rc.d" 1 9999 -g=r "" "$@"
+  fi
+  if [ ! -z "$RC_DEPENDENCIES" ]; then
+    rc_sourcefile "$HOME/.rc.d" 1 9999 -g=r -u=x "$RC_DEPENDENCIES"
+    unset RC_DEPENDENCIES
+  fi
 }
 
 rc_list() {
@@ -52,13 +88,17 @@ rc_list() {
 }
 
 ################################
+unset RC_DEPENDENCIES
+
 # Load .profile when not already done
 if [ -z "$ENV_PROFILE" ] && [ -r "$HOME/.profile" ]; then
+  $RC_VERBOSE "Load .profile"
   . "$HOME/.profile"
 fi
 
 # Load local configuration script
 if [ -r "$HOME/.rc.local" ]; then
+  $RC_VERBOSE "Load .rc.local"
   export ENV_RC_LOCAL=$((ENV_CNT=ENV_CNT+1))
   . "$HOME/.rc.local"
 fi
@@ -70,10 +110,8 @@ if [ ! -z "$BASH_VERSION" ]; then
 fi
 rc_sourcedir "$HOME/.rc.d/local"
 
-# Load user-defined scripts
-if [ ! -z "$RC_AUTOLOAD" ]; then
-  rc_sourcefile "$HOME/.rc.d" 1 9999 -g=r -u=x "$RC_AUTOLOAD"
-fi
+# Load dependencies scripts
+rc_sourcedep
 
 ################################
 # Setup path
@@ -141,6 +179,8 @@ alias mo='mimeopen'
 
 ################################
 # Epilogue
+#Cleanup
+unset RC_VERBOSE
 # Set load flag
 export ENV_LOADED=$ENV_CNT
 export ENV_CNT

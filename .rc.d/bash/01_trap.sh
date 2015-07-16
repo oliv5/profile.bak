@@ -83,15 +83,16 @@ print_callstack2() {
 }
 
 ################################
-# warn function
+# Warn function
 warn() {
-  local message="${1:-unspecified error. abort..}"
-  echo "${BASH_SOURCE[1]}: line ${BASH_LINENO[0]}: ${FUNCNAME[1]}: $message." >&2
+  echo "${BASH_SOURCE[1]}: line ${BASH_LINENO[0]}: ${FUNCNAME[1]}: ${1:-error}." >&2
 }
 
 # Die function
-# Cannot be used from within a function: it will not return from it
 die() {
-  warn "$1"
-  [[ $- = *i* ]] && return ${2:-1} || exit ${2:-1}
+  warn "${@:2}"
+  [[ $- = *i* ]] && {
+    echo "Die cannot exit the main shell. Press ctrl-c to stop."
+    read
+  } || exit ${1:-1};
 }

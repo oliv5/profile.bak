@@ -26,17 +26,54 @@ arg_rtrim() {
 
 ################################
 # https://stackoverflow.com/questions/18186929/differences-between-login-shell-and-interactive-shell
+# http://www.tldp.org/LDP/abs/html/intandnonint.html
 
 # Returns true for interactive shells
 shell_isinteractive() {
   # Test whether stdin exists
   [ -t "0" ] || [ -p /dev/stdin ]
+  # Alternate method
+  #case $- in
+  #  *i*) return 0;;
+  #  *) return 1;;
+  #esac
 }
 
 # Returns true for login shells
 shell_islogin() {
   # Test whether the caller name starts with a "-"
   [ "$(echo "$0" | cut -c 1)" = "-" ]
+}
+
+# Few shift aliases to prevent fatal error 
+# and eat all arguments when over-shifting
+# Other method: shift $(min $# number)
+alias shift1='command shift 1 2>/dev/null'
+alias shift2='command shift 2 2>/dev/null || set --'
+alias shift3='command shift 3 2>/dev/null || set --'
+alias shift4='command shift 4 2>/dev/null || set --'
+alias shift5='command shift 5 2>/dev/null || set --'
+alias shift6='command shift 6 2>/dev/null || set --'
+alias shift7='command shift 7 2>/dev/null || set --'
+alias shift8='command shift 8 2>/dev/null || set --'
+alias shift9='command shift 9 2>/dev/null || set --'
+
+################################
+# Warn function
+warn() {
+  [ $# -gt 0 ] && echo "$@" >&2
+}
+
+# Die function
+die() {
+  local ERRCODE="${1:-1}"
+  shift
+  warn "$@"
+  shell_isinteractive && {
+    echo "Die cannot exit the main shell. Press ctrl-c to stop."
+    read
+    return $ERRCODE
+  } || exit $ERRCODE;
 }
 
 ################################

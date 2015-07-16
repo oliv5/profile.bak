@@ -26,3 +26,6 @@ if [ ! -z "$TMUX_AUTOLOAD" ] && [ -z "$ENV_LOADED" ] && shell_isinteractive && s
 else
   tmux ls 2>/dev/null
 fi
+
+# End
+return 0
