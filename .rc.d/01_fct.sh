@@ -30,6 +30,13 @@ fct_prepend() {
 }
 
 ################################
+# Run a command silently (especially shell fct)
+# Note: can use "nohup" when running real prgm
+silent() {
+  local ARG1="$1"; shift
+  $ARG1 $@  >/dev/null 2>&1 &
+}
+
 # Run a command and filter stdout by another one
 filter_stdout() {
   { eval "$1" 2>&1 1>&3 | eval "$2" 1>&2; } 3>&1
@@ -78,9 +85,11 @@ bin2hex32() {
 
 ################################
 # Return a string with uniq words
-alias str_uniqw='str_uniq " "'
+alias str_uniqw='str_uniq " " " "'
 str_uniq() {
-  local IFS="${1:- }"
-  shift
-  printf '%s\n' $@ | sort -u | xargs
+  local _IFS="${1:- }"
+  local _OFS="${2}"
+  shift 2
+  #printf '%s\n' $@ | sort -u | xargs
+  printf "$@" | awk -vRS="$_IFS" -vORS="$_OFS" '!seen[$0]++ {str=str$1ORS} END{sub(ORS"$", "", str); printf "%s\n",str}'
 }

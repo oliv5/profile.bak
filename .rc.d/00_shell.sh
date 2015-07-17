@@ -77,6 +77,18 @@ die() {
 }
 
 ################################
+# Cmd exist test
+cmd_exists() {
+  command -v "$1" >/dev/null
+}
+
+# Cmd unset
+cmd_unset() {
+  unalias $* 2>/dev/null
+  unset -f $* 2>/dev/null
+}
+
+################################
 # Ansi codes
 # http://man7.org/linux/man-pages/man4/console_codes.4.html
 # https://en.wikipedia.org/wiki/ANSI_escape_code

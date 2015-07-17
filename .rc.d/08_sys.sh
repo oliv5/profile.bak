@@ -150,18 +150,6 @@ lang_en() {
 }
 
 ################################
-# Cmd exist test
-cmd_exists() {
-  command -v "$1" >/dev/null
-}
-
-# Cmd unset
-cmd_unset() {
-  unalias $* 2>/dev/null
-  unset -f $* 2>/dev/null
-}
-
-################################
 # Chroot
 mkchroot(){
   local SRC="/dev/${1:?Please specify the root device}"

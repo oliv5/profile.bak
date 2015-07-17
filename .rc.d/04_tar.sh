@@ -2,8 +2,7 @@
 
 # quick tar > gz compress/deflate
 tgz() {
-  local EXT="${1#*.}"
-  if [ "$EXT" = "tgz" ] || [ "$EXT" = "tar.gz" ]; then
+  if [ "${1##*.}" = "tgz" ] || [ "${1%.tar.gz}" != "$1" ]; then
     tar -xvzf "$@"
   else
     tar -cvzf "${1}.tgz" "$@"

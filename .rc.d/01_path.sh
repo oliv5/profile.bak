@@ -1,4 +1,6 @@
 #!/bin/sh
+# Script dependencies
+RC_DEPENDENCIES="${RC_DEPENDENCIES:+$RC_DEPENDENCIES }shell fct"
 
 # Prepend to path
 _path_prepend() {
@@ -6,7 +8,8 @@ _path_prepend() {
   shift
   local DIR
   for DIR; do
-    if [ -d "$DIR" ] && ! (eval echo "\$$VAR" | grep "${DIR}" >/dev/null); then
+    #if [ -d "$DIR" ] && ! (eval echo "\$$VAR" | grep "${DIR}" >/dev/null); then
+    if [ -d "$DIR" ]; then
       eval export $VAR="${DIR}\${$VAR:+:\$$VAR}"
     fi
   done
@@ -18,7 +21,8 @@ _path_append() {
   shift
   local DIR
   for DIR; do
-    if [ -d "$DIR" ] && ! (eval echo "\$$VAR" | grep "${DIR}" >/dev/null); then
+    #if [ -d "$DIR" ] && ! (eval echo "\$$VAR" | grep "${DIR}" >/dev/null); then
+    if [ -d "$DIR" ]; then
       eval export $VAR="\${$VAR:+\$$VAR:}${DIR}"
     fi
   done
@@ -38,9 +42,11 @@ _path_remove() {
 _path_cleanup() {
   local VAR="${1:-PATH}"
   shift
-  #PATH="${PATH//\~/${HOME}}"; PATH=${PATH//.:/}
-  #PATH="$(echo "$PATH" | sed -r 's|~|'"${HOME}"'|g; s|\.\:||g' | awk -v RS=':' -v ORS=":" '!a[$1]++')"
-  eval export $VAR="$(echo "\$$VAR" | awk 'NF && !x[$0]++' RS='[:|\n]' ORS=':' | sed -r 's|~|'"${HOME}"'|g; s|\:\.||g; s|(^:\|:$)||')"
+  #eval export $VAR="$(echo "\$$VAR" | awk 'NF && !x[$0]++' RS='[:|\n]' ORS=':' | sed -r 's|~|'"${HOME}"'|g; s|\:\.||g; s|(^:\|:$)||')"
+  export $VAR="$(
+    str_uniq : : "$(eval echo "\$$VAR")" | 
+    awk 'NF && !x[$0]++' RS='[:|\n]' ORS=':' | 
+    sed -r 's|~|'"${HOME}"'|g; s|\:\.||g; s|(^:\|:$)||')"
 }
 
 # Add to PATH

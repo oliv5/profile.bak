@@ -5,10 +5,12 @@
 ################################
 # Set load flag
 export ENV_RC=$((ENV_CNT=ENV_CNT+1))
+# Local RC variables
+RC_DEPENDENCIES="shell fct path"
+RC_VERBOSE="true"
 
 ################################
 # Arguments
-RC_VERBOSE="true"
 while getopts "vd" FLAG; do
   case "$FLAG" in
     v) RC_VERBOSE="echo";;
@@ -88,8 +90,6 @@ rc_list() {
 }
 
 ################################
-unset RC_DEPENDENCIES
-
 # Load .profile when not already done
 if [ -z "$ENV_PROFILE" ] && [ -r "$HOME/.profile" ]; then
   $RC_VERBOSE "Load .profile"
@@ -180,6 +180,7 @@ alias mo='mimeopen'
 ################################
 # Epilogue
 #Cleanup
+unset RC_DEPENDENCIES
 unset RC_VERBOSE
 # Set load flag
 export ENV_LOADED=$ENV_CNT
