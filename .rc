@@ -70,12 +70,14 @@ rc_sourcedir() {
 
 # Load input scripts and their dependencies
 rc_sourcedep() {
-  $RC_VERBOSE "Load module & dependencies"
   if [ $# -gt 0 ]; then
-    rc_sourcefile "$HOME/.rc.d" 1 9999 -g=r "" "$@"
+    $RC_VERBOSE "Load module(s) '$@'"
+    rc_sourcefile "$HOME/.rc.d" 1 9999 -g=w "" "$@"
   fi
   if [ ! -z "$RC_DEPENDENCIES" ]; then
-    rc_sourcefile "$HOME/.rc.d" 1 9999 -g=r -u=x "$RC_DEPENDENCIES"
+    RC_DEPENDENCIES="$(str_uniq " " " " "$RC_DEPENDENCIES")"
+    $RC_VERBOSE "Load dependencies '$RC_DEPENDENCIES'"
+    rc_sourcefile "$HOME/.rc.d" 1 9999 -g=w -u=x "$RC_DEPENDENCIES"
     unset RC_DEPENDENCIES
   fi
 }
@@ -181,7 +183,7 @@ alias mo='mimeopen'
 # Epilogue
 #Cleanup
 unset RC_DEPENDENCIES
-unset RC_VERBOSE
+RC_VERBOSE="true"
 # Set load flag
 export ENV_LOADED=$ENV_CNT
 export ENV_CNT
