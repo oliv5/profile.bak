@@ -454,7 +454,7 @@ vnoremap <C-h><C-h>    "+y:Sed <C-r>=fnameescape("<C-r>"")<CR>
 " Replace functions
 function! g:Replace_cmd(pattern)
 	let pattern = escape(a:pattern, '/\.*$^~[&')
-	return '.,$s/' . substitute(pattern, '\_s\+', '\\_s\\+', 'g') . '/' . pattern . "/cg|1,''-&&|norm! ``"
+	return '.,$s/' . substitute(pattern, '\_s\+', '\\_s\\+', 'g') . '/' . pattern . "/cg|silent! 1,''-&&|norm! ``"
 endfunction
 
 " Replace keymapping
@@ -464,7 +464,7 @@ FnNoremap <C-h>     :%s///cg<left><left><left><left>
 "vnoremap  <C-A-h>    "+y:%s/<C-R>"//cg<left><left>
 "vnoremap <C-h>       "+y:%s/<C-r>=fnameescape("<C-r>"")<CR>/<C-r>=fnameescape("<C-r>"")<CR>/cg<left><left><left>
 "vnoremap <C-h>      "+y:%s/<C-r>=substitute(escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR>/<C-r>=escape(@", '/\.*$^~[&')<CR>/cg<left><left><left>
-exe 'vnoremap <C-h>   "+y:<C-r>=g:Replace_cmd(@")<CR>' . repeat('<left>', 20)
+exe 'vnoremap <C-h>   "+y:<C-r>=g:Replace_cmd(@")<CR>' . repeat('<left>', 28)
 
 
 " *******************************************************
