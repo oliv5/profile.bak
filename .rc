@@ -7,34 +7,34 @@
 export ENV_RC=$((ENV_CNT=ENV_CNT+1))
 # Local RC variables
 RC_DEPENDENCIES="shell fct path"
-RC_VERBOSE="true"
+RC_VERBOSE=""
 
 ################################
 # Arguments
-while getopts "vd" FLAG; do
-  case "$FLAG" in
+while getopts vd ARG; do
+  case "$ARG" in
     v) RC_VERBOSE="echo";;
     *) echo >&2 "Usage: $(basename "$0") [-v]"
        echo >&2 "-v   verbose mode"
        kill -INT $$
        ;;
   esac
-done; unset FLAG
+done
+shift $(expr $OPTIND - 1)
 
 ################################
 # List, load and reload profile scripts
+RC_VERBOSE="${RC_VERBOSE:-true}"
 alias rc='. "$HOME/.rc"'
 alias load='RC_VERBOSE="echo" rc_sourcedep'
 alias profile='rc'
 
 # Load scripts by pattern and perms
 rc_sourcefile() {
-  # Prevent re-entrance
-  [ -z "$RC_SOURCEFILE" ] || return 1
-  # Preamble
-  trap 'set +f; trap INT; return 1' INT # never source a file again
+  # Init
+  trap 'set +f; trap INT; return 1' INT
+  trap 'set +f; trap TERM; return 1' TERM
   set -f
-  RC_SOURCEFILE=1
   # Args
   local DIR="${1:-$HOME/.rc.d}"
   local DEPTH_MIN="${2:-1}"
@@ -44,16 +44,20 @@ rc_sourcefile() {
   command shift 5 2>/dev/null || set --
   # Main processing
   local RESULT=1
-  local PATTERN="$(printf '%s\n' "${@:-*}" | sort -u)"
-  for PATTERN in $PATTERN; do
-    for SCRIPT in $(find "$DIR" ${DEPTH_MIN:+-mindepth $DEPTH_MIN} ${DEPTH_MAX:+-maxdepth $DEPTH_MAX} -path "*$PATTERN.sh" -not -path '*/test/*' ${PERMS_ON:+-perm $PERMS_ON} ${PERMS_OFF:+! -perm $PERMS_OFF} -prune -print 2>/dev/null | sort); do
+  local PATTERN="$(printf '%s\n' "$@" | sort -u)"
+  for PATTERN in ${PATTERN:-""}; do
+    for SCRIPT in $(find "$DIR" ${DEPTH_MIN:+-mindepth $DEPTH_MIN} ${DEPTH_MAX:+-maxdepth $DEPTH_MAX} \
+                                -path "*$PATTERN.sh" -not -path '*/test/*' \
+                                ${PERMS_ON:+-perm $PERMS_ON} ${PERMS_OFF:+! -perm $PERMS_OFF} \
+                                -prune -print | sort); do
       $RC_VERBOSE "Loading $SCRIPT"
+      set +f
       . "$SCRIPT" && RESULT=0 || RESULT=1
+      set -f
     done
   done
-  # Clean up
-  eval 'set +f; unset RC_SOURCEFILE; trap INT'
   # This is the end...
+  set +f; trap INT; trap TERM
   return $RESULT
 }
 
@@ -72,12 +76,12 @@ rc_sourcedir() {
 rc_sourcedep() {
   if [ $# -gt 0 ]; then
     $RC_VERBOSE "Load module(s) '$@'"
-    rc_sourcefile "$HOME/.rc.d" 1 9999 -g=w "" "$@"
+    rc_sourcefile "$HOME/.rc.d" 1 9999 -g=r "" "$@"
   fi
   if [ ! -z "$RC_DEPENDENCIES" ]; then
     RC_DEPENDENCIES="$(str_uniq " " " " "$RC_DEPENDENCIES")"
     $RC_VERBOSE "Load dependencies '$RC_DEPENDENCIES'"
-    rc_sourcefile "$HOME/.rc.d" 1 9999 -g=w -u=x "$RC_DEPENDENCIES"
+    rc_sourcefile "$HOME/.rc.d" 1 9999 -g=r -u=x "$RC_DEPENDENCIES"
     unset RC_DEPENDENCIES
   fi
 }
@@ -183,7 +187,7 @@ alias mo='mimeopen'
 # Epilogue
 #Cleanup
 unset RC_DEPENDENCIES
-RC_VERBOSE="true"
+unset RC_VERBOSE
 # Set load flag
 export ENV_LOADED=$ENV_CNT
 export ENV_CNT
