@@ -37,6 +37,7 @@ rc_sourcefile() {
   set -f
   # Args
   local DIR="${1:-$HOME/.rc.d}"
+  [ -d "$DIR" ] || return 2
   local DEPTH_MIN="${2:-1}"
   local DEPTH_MAX="${3:-1}"
   local PERMS_ON="${4:--u=x}"
