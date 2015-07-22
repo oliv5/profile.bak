@@ -10,7 +10,7 @@ EXCLUSIONS="$EXCLUSIONS --exclude=.tmp --exclude=.temp --exclude=.cache"
 
 # Set archive variable
 PREAMBLE="${0##*/}"
-PREAMBLE="${PREAMBLE%.*}"
+PREAMBLE="${PREAMBLE%.*}.$(uname -n)"
 ARCHIVE="${PREAMBLE}.$(date +%Y%m%d_%H%M%S)"
 
 # Main script redirection
