@@ -3,14 +3,14 @@ checkout = git_clone ssh://olivier@rpi:/media/wdc/media/photos rpi 2>/dev/null |
            git_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/media/photos rpi;
            annex_init && annex_init_hubic
 
-bundle   = true
+bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
 
 pull     = true
 push     = true
 sync     = annex_sync
 
-download = annex_copy . --from hubic
-upload   = annex_copy . --to hubic
+download = annex_copy . --from hubic --auto
+upload   = annex_copy . --to hubic --auto
 
 status   = annex_status
 diff     = annex_diff

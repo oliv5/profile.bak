@@ -102,10 +102,11 @@ lib =
 		vcsh_run 'annex_init && git annex direct'
 	}
 	annex_init_hubic() {
-		local HUBIC_PATH="${1:-$(basename "$MR_REPO" .git)}"
+		local REMOTE="${1:-hubic}"
+		local HUBIC_PATH="${2:-annex/$(basename "$MR_REPO" .git)}"
 		vcsh_run '
-			git annex initremote hubic type=external externaltype=hubic encryption=none hubic_container=annex hubic_path="$HUBIC_PATH" embedcreds=no ||
-			git annex enableremote hubic type=external externaltype=hubic encryption=none hubic_container=annex hubic_path="$HUBIC_PATH" embedcreds=no
+			git annex enableremote "$REMOTE" type=external externaltype=hubic encryption=none hubic_container=annex hubic_path="$HUBIC_PATH" embedcreds=no ||
+			git annex initremote "$REMOTE" type=external externaltype=hubic encryption=none hubic_container=annex hubic_path="$HUBIC_PATH" embedcreds=no
 		'
 	}
 	annex_sync() {

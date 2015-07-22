@@ -9,8 +9,8 @@ pull     = git_pull rpi master
 push     = git_push rpi master
 sync     = true
 
-download = annex_copy . --from hubic
-upload   = annex_copy . --to hubic
+download = annex_copy . --from hubic --auto
+upload   = annex_copy . --to hubic --auto
 
 status   = git status -s
 diff     = annex_diff
