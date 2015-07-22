@@ -117,6 +117,13 @@ if [ ! -z "$BASH_VERSION" ]; then
 fi
 rc_sourcedir "$HOME/.rc.d/local"
 
+# Load local configuration script
+if [ -r "$HOME/.rc.local.end" ]; then
+  $RC_VERBOSE "Load .rc.local.end"
+  export ENV_RC_LOCAL_END=$((ENV_CNT=ENV_CNT+1))
+  . "$HOME/.rc.local.end"
+fi
+
 # Load dependencies scripts
 rc_sourcedep
 
