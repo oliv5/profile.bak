@@ -35,7 +35,7 @@ export COLORTERM="xterm" # backspace bug in vim
 # Start gvim
 if command -v gvim >/dev/null; then
   gvim() {
-    local ARGS="$(echo "$@" | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/+\2 \1/g')"
+    local ARGS="$(echo "$@" | sed -re 's/([^:]*):([0-9]*):?.*/+\2 \1/g')"
     if [ -z "$VIM_USETABS" ]; then
       ARGS="${1:+--remote-silent} $ARGS"
     else
