@@ -24,7 +24,7 @@ mount_encfs() {
   local KEY="${3:?Missing encfs key...}"
   local PASSFILE="${4}"
   shift $(min 4 $#)
-  ENCFS6_CONFIG="$(readlink -f "$KEY")" encfs -o nonempty ${PASSFILE:+--extpass='cat "$PASSFILE"'} "$@" "$SRC" "$DST"
+  ENCFS6_CONFIG="$(readlink -f "$KEY")" sudo -E encfs -o nonempty ${PASSFILE:+--extpass='cat "$PASSFILE"'} "$@" "$SRC" "$DST"
 }
 
 # Mount iso
