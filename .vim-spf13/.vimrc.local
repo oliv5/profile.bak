@@ -47,6 +47,9 @@
 		set guioptions+=rb
 		set guioptions-=l
 	endif
+
+	" Autoselect (auto-copy)
+	set guioptions+=aA
 " }
 
 " Text formatting {

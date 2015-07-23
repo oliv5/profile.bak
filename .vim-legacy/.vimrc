@@ -177,6 +177,7 @@ endif
 
 " Gui options
 set guioptions-=T     " Remove toolbar
+set guioptions+=aA    " Enable autoselect (autocopy)
 
 set hlsearch          " Highlight searches
 set history=50        " History length
