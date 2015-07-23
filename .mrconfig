@@ -103,7 +103,7 @@ lib =
 	}
 	annex_init_hubic() {
 		local REMOTE="${1:-hubic}"
-		local HUBIC_PATH="${2:-annex/$(basename "$MR_REPO" .git)}"
+		local HUBIC_PATH="${2:-$(basename "$MR_REPO" .git)}"
 		vcsh_run '
 			git annex enableremote "$REMOTE" type=external externaltype=hubic encryption=none hubic_container=annex hubic_path="$HUBIC_PATH" embedcreds=no ||
 			git annex initremote "$REMOTE" type=external externaltype=hubic encryption=none hubic_container=annex hubic_path="$HUBIC_PATH" embedcreds=no
