@@ -2,7 +2,7 @@
 # Script dependencies
 RC_DEPENDENCIES="$RC_DEPENDENCIES shell fct search"
 
-# Find based file search
+# Find based code search
 _dfind1() { local ARG1="$1"; shift; (set -f; _ffind "$ARG1" ${_DFEXCLUDE} "$@"); }
 alias _dfind='_dfind1'
 _DFEXCLUDE="-not -path '*.svn*' -and -not -path '*.git*' -and -not -path '*.repo*'"
@@ -20,9 +20,11 @@ alias idffll='FCASE=-i FTYPE=l FXTYPE=f _dfind'
 alias idfflb='FCASE=-i FTYPE=l FXTYPE=l _dfind'
 
 # Grep based code search
-_dgrep1()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; shift $(min 3 $#); (set -f; _fgrep "$ARG2" ${_DGEXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
-alias _dgrep='_dgrep1'
-_DGEXCLUDE="--exclude-dir=.svn --exclude-dir=.git --exclude-dir=.repo"
+_dgrep1()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; shift $(min 3 $#); (set -f; _fgrep1 "$ARG2" "${ARG3:-.}/$ARG1 ${_DG1EXCLUDE} $@"); }
+_dgrep2()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; shift $(min 3 $#); (set -f; _fgrep2 "$ARG2" ${_DG2EXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
+alias _dgrep='_dgrep2'
+_DG1EXCLUDE="$_DFEXCLUDE"
+_DG2EXCLUDE="--exclude-dir=.svn --exclude-dir=.git --exclude-dir=.repo"
 _DGEXT_C="*.c;*.cpp;*.cc"
 _DGEXT_H="*.h;*.hpp"
 _DGEXT_V="*.vhd;*.v"

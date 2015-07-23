@@ -35,19 +35,14 @@ mount_iso() {
 # NFS unmount
 alias nfs-umountall='umount -a -t nfs'
 nfs_umount() {
+  local MOUNTPOINT="${1:?NFS mount point not specified...}"
+  local IP="${2:?NFS IP not specified...}"
+  local ITF="${3:-eth0}"
+  local TMPFS="${4:-nfstmp}"
+  #local TMPFS="${4:-fakenfs}"
   sudo sh -c "
-    ifconfig eth0:nfstmp ${2:?NFS IP not specified...} netmask 255.255.255.255
-    umount -f -l \"${1:?NFS mount point not specified...}\"
-    ifconfig eth0:nfstmp down
-  "
-}
-
-# NFS remount
-nfs_remount() {
-  sudo sh -c "
-    ifconfig eth0:fakenfs ${2:?NFS IP not specified...} netmask 255.255.255.255
-    umount -f -l \"${1:?NFS mount point not specified...}\"
-    ifconfig eth0:fakenfs down
-    mount \"$1\"
+    ifconfig $ITF:$TMPFS $IP netmask 255.255.255.255
+    umount -f -l \"$MOUNTPOINT\"
+    ifconfig $ITF:$TMPFS down
   "
 }

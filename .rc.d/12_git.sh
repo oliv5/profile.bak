@@ -46,7 +46,9 @@ alias gssl='git_stash_save_lazy'
 alias gsp='git_stash_pop'
 alias gsa='git_stash_apply'
 alias gsl='git stash list'
+alias gslc='git_stash_count'
 alias gsf='git_stash_show'
+alias gsfa='git_stash_show_all'
 alias gsv='git_stash_cat'
 alias gsd='git_stash_diff'
 alias gsdm='git_stash_diffm'
@@ -155,6 +157,7 @@ git_annex_modified() {
 
 ########################################
 # Get hash
+alias git_head='git_hash'
 git_hash() {
   git rev-parse "${@:-HEAD}"
 }
@@ -171,27 +174,32 @@ git_allshorthash() {
 }
 
 ########################################
+# Build git stash name
+_git_stash_name() {
+  echo "$(git_branch)-$(git_shorthash)-$(date +%Y%m%d-%H%M)${1:+_$1}"
+}
+
 # Push changes onto stash, revert changes
 git_stash_save() {
-  local STASH="$(git_branch)-$(date +%Y%m%d-%H%M)${1:+_$1}"; shift
+  local STASH="$(_git_stash_name "$@")"; shift
   git stash save "$STASH" "$@"
 }
 git_stash_save_all() {
-  local STASH="$(git_branch)-$(date +%Y%m%d-%H%M)${1:+_$1}"; shift
+  local STASH="$(_git_stash_name "$@")"; shift
   git stash save --all "$STASH" "$@"
 }
 git_stash_save_untracked() {
-  local STASH="$(git_branch)-$(date +%Y%m%d-%H%M)${1:+_$1}"; shift
+  local STASH="$(_git_stash_name "$@")"; shift
   git stash save --untracked "$STASH" "$@"
 }
 git_stash_save_lazy() {
-  local STASH="$(git_branch)-$(date +%Y%m%d-%H%M)${1:+_$1}"; shift
+  local STASH="$(_git_stash_name "$@")"; shift
   git stash save --keep-index "$STASH" "$@"
 }
 
 # Push changes onto stash, does not revert anything
 git_stash_push() {
-  local STASH="$(git_branch)-$(date +%Y%m%d-%H%M)${1:+_$1}"
+  local STASH="$(_git_stash_name "$@")"; shift
   git update-ref -m "$STASH" refs/stash "$(git stash create)"
   #git stash create $STASH
 }
@@ -219,13 +227,31 @@ git_stash_diffl() {
   git_stash_diff "${@:-0}" --name-only
 }
 
-#Show stash file list
+# Show stash file list
 git_stash_show() {
   local STASH="${1:-0}"; shift $(min 1 $#)
   git stash show stash@{$STASH} "$@"
 }
 
-#Show stash file content
+# Show all stashes file list
+git_stash_show_all() {
+  local TOTAL=$(git stash list | wc -l)
+  local START="${1:-0}"
+  local END="${2:-$TOTAL}"
+  shift $(min 2 $#)
+  for IDX in $(seq $START $END); do
+    echo "******************************"
+    #echo "[git] stash number $IDX/$TOTAL"
+    git stash list | awk 'NR=='$(($IDX+1))' {print $0; quit}'
+    echo "------------"
+    git_stash_show $IDX "$@"
+    echo "------------"
+    read -p "Press enter to go on..."
+    echo "******************************"
+  done
+}
+
+# Show stash file content
 git_stash_cat() {
   local STASH="${1:-0}"; shift $(min 1 $#)
   git stash show -p stash@{$STASH} "$@"
@@ -238,6 +264,7 @@ alias git_suspend='git_stash_push'
 alias git_resume='git_stash_pop'
 alias git_stash_list='git stash list'
 alias git_stash_drop='git stash drop'
+alias git_stash_count='git stash list | wc -l'
 
 ########################################
 # Hard revert to a given CL or revert a file
