@@ -27,5 +27,10 @@ find "$USER_PREFIX" -type f -name "GLOBAL.CF3" -exec cp "$REPO/GLOBAL.CF3" "{}" 
 # Copy run script into user bin
 cp "$REPO/run.sh" "$HOME/bin/si.sh"
 
+# Copy desktop file to user directory
+mkdir -p "$HOME/.local/share/applications/wine/Programs/SourceInsight"
+copy "$REPO/*.desktop" "$HOME/.local/share/applications/wine/Programs/SourceInsight"
+copy "$REPO/*.png" "$HOME/.local/share/applications/wine/Programs/SourceInsight"
+
 #WINEPREFIX="$PREFIX" reg add "HKLM\SYSTEM\CurrentControlSet\services\Service" /v "KeyName" /d "Parameters" /f
 #WINEPREFIX="$PREFIX" wine regedit
