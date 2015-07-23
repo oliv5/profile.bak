@@ -7,13 +7,14 @@
 export ENV_RC=$((ENV_CNT=ENV_CNT+1))
 # Local RC variables
 RC_DEPENDENCIES="shell fct path"
-RC_VERBOSE=""
+RC_VERBOSE="false"
+RC_LOAD="true"
 
 ################################
 # Arguments
-while getopts vd ARG; do
-  case "$ARG" in
-    v) RC_VERBOSE="echo";;
+while getopts 'vd' RC_ARG; do
+  case "$RC_ARG" in
+    v) RC_VERBOSE="true";;
     *) echo >&2 "Usage: $(basename "$0") [-v]"
        echo >&2 "-v   verbose mode"
        kill -INT $$
@@ -24,36 +25,36 @@ shift $(expr $OPTIND - 1)
 
 ################################
 # List, load and reload profile scripts
-RC_VERBOSE="${RC_VERBOSE:-true}"
 alias rc='. "$HOME/.rc"'
-alias load='RC_VERBOSE="echo" rc_sourcedep'
+alias load='RC_VERBOSE=true RC_LOAD=true rc_sourcedep'
 alias profile='rc'
 
 # Load scripts by pattern and perms
 rc_sourcefile() {
-  # Init
-  trap 'set +f; trap INT; return 1' INT
-  trap 'set +f; trap TERM; return 1' TERM
-  set -f
+  local AUTOLOAD="-perm -u=x"
+  local AVAILABLE="-perm /go=x"
+  local DISABLED="! -perm /ugo=x"
   # Args
   local DIR="${1:-$HOME/.rc.d}"
   [ -d "$DIR" ] || return 2
   local DEPTH_MIN="${2:-1}"
   local DEPTH_MAX="${3:-1}"
-  local PERMS_ON="${4:--u=x}"
-  local PERMS_OFF="${5}"
-  command shift 5 2>/dev/null || set --
+  local PERMS="$(eval echo \$${4:-AUTOLOAD})"
+  command shift 4 2>/dev/null || set --
+  # Init
+  trap 'set +f; trap INT; return 1' INT
+  trap 'set +f; trap TERM; return 1' TERM
+  set -f
   # Main processing
   local RESULT=1
   local PATTERN="$(printf '%s\n' "$@" | sort -u)"
   for PATTERN in ${PATTERN:-""}; do
     for SCRIPT in $(find "$DIR" ${DEPTH_MIN:+-mindepth $DEPTH_MIN} ${DEPTH_MAX:+-maxdepth $DEPTH_MAX} \
                                 -path "*$PATTERN.sh" -not -path '*/test/*' \
-                                ${PERMS_ON:+-perm $PERMS_ON} ${PERMS_OFF:+! -perm $PERMS_OFF} \
-                                -prune -print | sort); do
-      $RC_VERBOSE "Loading $SCRIPT"
+                                ${PERMS} -prune -print | sort); do
+      ${RC_VERBOSE:-false} && echo "Loading $SCRIPT"
       set +f
-      . "$SCRIPT" && RESULT=0 || RESULT=1
+      ${RC_LOAD:-true} && . "$SCRIPT" && RESULT=0 || RESULT=1
       set -f
     done
   done
@@ -66,7 +67,7 @@ rc_sourcefile() {
 # Declare the associated ENV_ variable
 rc_sourcedir() {
   for DIR; do
-    $RC_VERBOSE "Load $(basename "$DIR")/"
+    ${RC_VERBOSE:-false} && echo "Load $(basename "$DIR")/"
     local DIRNAME="$(basename "$DIR" | sed -r 's/\./_/g; s/^_//g; s/(.*)/\U\1/')"
     eval "export ENV_$DIRNAME=$((ENV_CNT=ENV_CNT+1))"
     rc_sourcefile "$DIR"
@@ -76,36 +77,38 @@ rc_sourcedir() {
 # Load input scripts and their dependencies
 rc_sourcedep() {
   if [ $# -gt 0 ]; then
-    $RC_VERBOSE "Load module(s) '$@'"
-    rc_sourcefile "$HOME/.rc.d" 1 9999 -g=w "" "$@"
+    ${RC_VERBOSE:-false} && echo "Load module(s) '$@'"
+    rc_sourcefile "$HOME/.rc.d" 1 9999 "AVAILABLE" "$@"
   fi
   if [ ! -z "$RC_DEPENDENCIES" ]; then
     RC_DEPENDENCIES="$(str_uniq " " " " "$RC_DEPENDENCIES")"
-    $RC_VERBOSE "Load dependencies '$RC_DEPENDENCIES'"
-    rc_sourcefile "$HOME/.rc.d" 1 9999 -g=w -u=x "$RC_DEPENDENCIES"
+    ${RC_VERBOSE:-false} && echo "Load dependencies '$RC_DEPENDENCIES'"
+    rc_sourcefile "$HOME/.rc.d" 1 9999 "AVAILABLE" "$RC_DEPENDENCIES"
     unset RC_DEPENDENCIES
   fi
 }
 
 rc_list() {
   echo "List of autoloaded scripts"
-  find "$HOME/.rc.d" -name '*.sh' -type f -perm -u=x -printf '%P\n'
-  echo "List of non-autoloaded scripts"
-  find "$HOME/.rc.d" -name '*.sh' -type f -perm -u=r ! -perm -u=x -printf '%P\n'
+  RC_VERBOSE=true RC_LOAD=false rc_sourcefile "$HOME/.rc.d" 1 9999 "AUTOLOAD"
+  echo 
+  echo "List of available scripts"
+  RC_VERBOSE=true RC_LOAD=false rc_sourcefile "$HOME/.rc.d" 1 9999 "AVAILABLE"
+  echo 
   echo "List of disabled scripts"
-  find "$HOME/.rc.d" -name '*.sh' -type f ! -perm -u=r -printf '%P\n'
+  RC_VERBOSE=true RC_LOAD=false rc_sourcefile "$HOME/.rc.d" 1 9999 "DISABLED"
 }
 
 ################################
 # Load .profile when not already done
 if [ -z "$ENV_PROFILE" ] && [ -r "$HOME/.profile" ]; then
-  $RC_VERBOSE "Load .profile"
+  ${RC_VERBOSE:-false} && echo "Load .profile"
   . "$HOME/.profile"
 fi
 
 # Load local configuration script
 if [ -r "$HOME/.rc.local" ]; then
-  $RC_VERBOSE "Load .rc.local"
+  ${RC_VERBOSE:-false} && echo "Load .rc.local"
   export ENV_RC_LOCAL=$((ENV_CNT=ENV_CNT+1))
   . "$HOME/.rc.local"
 fi
@@ -122,14 +125,14 @@ rc_sourcedep
 
 # Load main configuration end script
 if [ -r "$HOME/.rc.end" ]; then
-  $RC_VERBOSE "Load .rc.end"
+  ${RC_VERBOSE:-false} && echo "Load .rc.end"
   export ENV_RC_END=$((ENV_CNT=ENV_CNT+1))
   . "$HOME/.rc.end"
 fi
 
 # Load local configuration end script
 if [ -r "$HOME/.rc.local.end" ]; then
-  $RC_VERBOSE "Load .rc.local.end"
+  ${RC_VERBOSE:-false} && echo "Load .rc.local.end"
   export ENV_RC_LOCAL_END=$((ENV_CNT=ENV_CNT+1))
   . "$HOME/.rc.local.end"
 fi
@@ -139,6 +142,8 @@ fi
 #Cleanup
 unset RC_DEPENDENCIES
 unset RC_VERBOSE
+unset RC_LOAD
+unset RC_ARG
 # Set load flag
 export ENV_LOADED=$ENV_CNT
 export ENV_CNT
