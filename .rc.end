@@ -1,0 +1,67 @@
+#!/bin/sh
+# Main user profile end script
+# It should be compatible with all shells (dash, bash,...)
+
+################################
+# Setup path
+path_prepend "$HOME/bin" "$HOME/.local/bin" "$HOME/bin/profile"
+path_append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
+path_cleanup
+
+# Remove some aliases/fct shortcuts
+cmd_unset which find grep awk sed xargs cut
+
+################################
+# User anacron
+if [ -r "${HOME}/.anacron/anacrontab" ]; then
+  mkdir -p "${HOME}/.anacron/spool"
+  anacron -s -t "${HOME}/.anacron/anacrontab" -S "${HOME}/.anacron/spool"
+fi
+
+# Start ssh-agent when not already running
+pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
+
+# Disable console beep
+#command -v xset >/dev/null 2>&1 && pidof X >/dev/null && xset b off 2>/dev/null # From X11 window system
+command -v xset >/dev/null 2>&1 && xset b off 2>/dev/null # From X11 window system
+command -v setterm >/dev/null 2>&1 && setterm -blength 0  # From the system console
+
+################################
+# Alias ls
+alias l='ls -CF'
+alias la='ls -A'
+alias ll='ls -laF'
+alias lsg='ls | grep'
+
+# Alias cd/back
+alias b='cdb'
+alias f='cdf'
+alias p='cd ..'
+
+# Gvim
+alias e='gvim'
+alias sse='ss | cut -c 9- | xargs gvim'
+alias gse='gs | grep modified | cut -d : -f 2 | xargs gvim'
+
+# Search and open
+ffe() { ff "$@" | xargs gvim; }
+ffc() { ff "$@" | xargs $PAGER; }
+ffg() { ff "$@" | xargs $GEDITOR; }
+ffo() { ff "$@" | xargs mimeopen; }
+
+# Gedit/geany
+g() {
+  eval "${GEDITOR:-false}" "$@"
+}
+alias ssg='ss | cut -c 9- | xargs g'
+alias gsg='gs | grep modified | cut -d : -f 2 | xargs g'
+ffg() {
+  ff "$@" | xargs g
+}
+
+# Source insight
+alias s='si'
+
+# Alias misc
+alias hi='history'
+alias mo='mimeopen'
