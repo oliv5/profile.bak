@@ -7,16 +7,19 @@
 export ENV_RC=$((ENV_CNT=ENV_CNT+1))
 # Local RC variables
 RC_VERBOSE="false"
-RC_SOURCED=""
-RC_LOAD="true"
+RC_SOURCES=""
+RC_DRYRUN="false"
+RC_CLEAN="false"
 
 ################################
 # Arguments
 while getopts 'vd' RC_ARG; do
   case "$RC_ARG" in
     v) RC_VERBOSE="true";;
+    d) RC_DRYRUN="true";;
     *) echo >&2 "Usage: $(basename "$0") [-v]"
        echo >&2 "-v   verbose mode"
+       echo >&2 "-d   dry-run"
        kill -INT $$
        ;;
   esac
@@ -29,10 +32,15 @@ rc_log() {
   ${RC_VERBOSE:-false} && echo "$@"
 }
 
+# Cleanup function
+rc_clean() {
+  ${RC_CLEAN:-true} && unset RC_SOURCES
+}
+
 ################################
 # List, load and reload profile scripts
 alias rc='. "$HOME/.rc"'
-alias load='RC_VERBOSE=true RC_LOAD=true RC_SOURCED="" rc_sourcemod'
+alias load='RC_VERBOSE=true RC_DRYRUN=false RC_CLEAN=true rc_sourcemod'
 alias profile='rc'
 
 # Load scripts by pattern and perms
@@ -56,16 +64,16 @@ rc_sourcefile() {
   local PATTERN="$(printf '%s\n' "$@" | sort -u)"
   for PATTERN in ${PATTERN:-""}; do
     # Use pattern only when not already done
-    if [ "$RC_SOURCED" == "${RC_SOURCED%*$PATTERN*}" ]; then
-      RC_SOURCED="$RC_SOURCED $PATTERN"
+    if [ "$RC_SOURCES" == "${RC_SOURCES%*$PATTERN*}" ]; then
+      RC_SOURCES="$RC_SOURCES $PATTERN"
       for SCRIPT in $(find "$DIR" ${DEPTH_MIN:+-mindepth $DEPTH_MIN} ${DEPTH_MAX:+-maxdepth $DEPTH_MAX} \
                                   -path "*$PATTERN.sh" -not -path '*/test/*' \
                                   ${PERMS} -prune -print | sort); do
         # Source file only if not already done
-        if [ "$RC_SOURCED" == "${RC_SOURCED%*$(basename "$SCRIPT")*}" ]; then
+        if [ "$RC_SOURCES" == "${RC_SOURCES%*$SCRIPT*}" ]; then
           rc_log "Source $SCRIPT"
-          if ${RC_LOAD:-true}; then
-            RC_SOURCED="$RC_SOURCED $(basename "$SCRIPT")"
+          RC_SOURCES="$RC_SOURCES $SCRIPT)"
+          if ! ${RC_DRYRUN:-false}; then
             set +f
             . "$SCRIPT" && RESULT=0 || RESULT=1
             set -f
@@ -82,31 +90,35 @@ rc_sourcefile() {
 # Load executable scripts from given directory
 # Declare the associated ENV_ variable
 rc_sourcedir() {
+  rc_clean
   for DIR; do
     rc_log "[RC] Load directory $(basename "$DIR")"
     local DIRNAME="$(basename "$DIR" | sed -r 's/\./_/g; s/^_//g; s/(.*)/\U\1/')"
     eval "export ENV_$DIRNAME=$((ENV_CNT=ENV_CNT+1))"
     rc_sourcefile "$DIR"
   done
+  rc_clean
 }
 
 # Load modules or dependencies
 rc_sourcemod() {
+  rc_clean
   if [ $# -gt 0 ]; then
     rc_log "[RC] Load modules '$@'"
     rc_sourcefile "$HOME/.rc.d" 1 9999 "AVAILABLE" "$@"
   fi
+  rc_clean
 }
 
 rc_list() {
   echo "List of autoloaded scripts"
-  RC_VERBOSE=true RC_LOAD=false rc_sourcefile "$HOME/.rc.d" 1 9999 "AUTOLOAD"
+  RC_VERBOSE=true RC_DRYRUN=true rc_sourcefile "$HOME/.rc.d" 1 9999 "AUTOLOAD"
   echo 
   echo "List of available scripts"
-  RC_VERBOSE=true RC_LOAD=false rc_sourcefile "$HOME/.rc.d" 1 9999 "AVAILABLE"
+  RC_VERBOSE=true RC_DRYRUN=true rc_sourcefile "$HOME/.rc.d" 1 9999 "AVAILABLE"
   echo 
   echo "List of disabled scripts"
-  RC_VERBOSE=true RC_LOAD=false rc_sourcefile "$HOME/.rc.d" 1 9999 "DISABLED"
+  RC_VERBOSE=true RC_DRYRUN=true rc_sourcefile "$HOME/.rc.d" 1 9999 "DISABLED"
 }
 
 ################################
@@ -148,8 +160,9 @@ fi
 # Epilogue
 #Cleanup
 unset RC_VERBOSE
-unset RC_SOURCED
-unset RC_LOAD
+unset RC_SOURCES
+unset RC_DRYRUN
+unset RC_CLEAN
 unset RC_ARG
 # Set load flag
 export ENV_LOADED=$ENV_CNT
