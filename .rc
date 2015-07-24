@@ -6,8 +6,8 @@
 # Set load flag
 export ENV_RC=$((ENV_CNT=ENV_CNT+1))
 # Local RC variables
-RC_DEPENDENCIES="shell fct path"
 RC_VERBOSE="false"
+RC_SOURCED=""
 RC_LOAD="true"
 
 ################################
@@ -24,24 +24,30 @@ done
 shift $(expr $OPTIND - 1)
 
 ################################
+# Log function
+rc_log() {
+  ${RC_VERBOSE:-false} && echo "$@"
+}
+
+################################
 # List, load and reload profile scripts
 alias rc='. "$HOME/.rc"'
-alias load='RC_VERBOSE=true RC_LOAD=true rc_sourcedep'
+alias load='RC_VERBOSE=true RC_LOAD=true RC_SOURCED="" rc_sourcemod'
 alias profile='rc'
 
 # Load scripts by pattern and perms
 rc_sourcefile() {
-  local AUTOLOAD="-perm -u=x"
-  local AVAILABLE="-perm /go=x"
-  local DISABLED="! -perm /ugo=x"
   # Args
   local DIR="${1:-$HOME/.rc.d}"
   [ -d "$DIR" ] || return 2
+  local AUTOLOAD="-perm -ugo=x"
+  local AVAILABLE="-perm /go=x"
+  local DISABLED="! -perm /ugo=x"
   local DEPTH_MIN="${2:-1}"
   local DEPTH_MAX="${3:-1}"
   local PERMS="$(eval echo \$${4:-AUTOLOAD})"
   command shift 4 2>/dev/null || set --
-  # Init
+  # Set ctrl-c/term traps + disable file globering
   trap 'set +f; trap INT; return 1' INT
   trap 'set +f; trap TERM; return 1' TERM
   set -f
@@ -49,16 +55,26 @@ rc_sourcefile() {
   local RESULT=1
   local PATTERN="$(printf '%s\n' "$@" | sort -u)"
   for PATTERN in ${PATTERN:-""}; do
-    for SCRIPT in $(find "$DIR" ${DEPTH_MIN:+-mindepth $DEPTH_MIN} ${DEPTH_MAX:+-maxdepth $DEPTH_MAX} \
-                                -path "*$PATTERN.sh" -not -path '*/test/*' \
-                                ${PERMS} -prune -print | sort); do
-      ${RC_VERBOSE:-false} && echo "Loading $SCRIPT"
-      set +f
-      ${RC_LOAD:-true} && . "$SCRIPT" && RESULT=0 || RESULT=1
-      set -f
-    done
+    # Use pattern only when not already done
+    if [ "$RC_SOURCED" == "${RC_SOURCED%*$PATTERN*}" ]; then
+      RC_SOURCED="$RC_SOURCED $PATTERN"
+      for SCRIPT in $(find "$DIR" ${DEPTH_MIN:+-mindepth $DEPTH_MIN} ${DEPTH_MAX:+-maxdepth $DEPTH_MAX} \
+                                  -path "*$PATTERN.sh" -not -path '*/test/*' \
+                                  ${PERMS} -prune -print | sort); do
+        # Source file only if not already done
+        if [ "$RC_SOURCED" == "${RC_SOURCED%*$(basename "$SCRIPT")*}" ]; then
+          rc_log "Source $SCRIPT"
+          if ${RC_LOAD:-true}; then
+            RC_SOURCED="$RC_SOURCED $(basename "$SCRIPT")"
+            set +f
+            . "$SCRIPT" && RESULT=0 || RESULT=1
+            set -f
+          fi
+        fi
+      done
+    fi
   done
-  # This is the end...
+  # Remove ctrl-c/term traps + enable file globering
   set +f; trap INT; trap TERM
   return $RESULT
 }
@@ -67,24 +83,18 @@ rc_sourcefile() {
 # Declare the associated ENV_ variable
 rc_sourcedir() {
   for DIR; do
-    ${RC_VERBOSE:-false} && echo "Load $(basename "$DIR")/"
+    rc_log "[RC] Load directory $(basename "$DIR")"
     local DIRNAME="$(basename "$DIR" | sed -r 's/\./_/g; s/^_//g; s/(.*)/\U\1/')"
     eval "export ENV_$DIRNAME=$((ENV_CNT=ENV_CNT+1))"
     rc_sourcefile "$DIR"
   done
 }
 
-# Load input scripts and their dependencies
-rc_sourcedep() {
+# Load modules or dependencies
+rc_sourcemod() {
   if [ $# -gt 0 ]; then
-    ${RC_VERBOSE:-false} && echo "Load module(s) '$@'"
+    rc_log "[RC] Load modules '$@'"
     rc_sourcefile "$HOME/.rc.d" 1 9999 "AVAILABLE" "$@"
-  fi
-  if [ ! -z "$RC_DEPENDENCIES" ]; then
-    RC_DEPENDENCIES="$(str_uniq " " " " "$RC_DEPENDENCIES")"
-    ${RC_VERBOSE:-false} && echo "Load dependencies '$RC_DEPENDENCIES'"
-    rc_sourcefile "$HOME/.rc.d" 1 9999 "AVAILABLE" "$RC_DEPENDENCIES"
-    unset RC_DEPENDENCIES
   fi
 }
 
@@ -102,13 +112,13 @@ rc_list() {
 ################################
 # Load .profile when not already done
 if [ -z "$ENV_PROFILE" ] && [ -r "$HOME/.profile" ]; then
-  ${RC_VERBOSE:-false} && echo "Load .profile"
+  rc_log "[RC] Load .profile"
   . "$HOME/.profile"
 fi
 
 # Load local configuration script
 if [ -r "$HOME/.rc.local" ]; then
-  ${RC_VERBOSE:-false} && echo "Load .rc.local"
+  rc_log "[RC] Load .rc.local"
   export ENV_RC_LOCAL=$((ENV_CNT=ENV_CNT+1))
   . "$HOME/.rc.local"
 fi
@@ -120,19 +130,16 @@ if [ ! -z "$BASH_VERSION" ]; then
 fi
 rc_sourcedir "$HOME/.rc.d/local"
 
-# Load dependencies
-rc_sourcedep
-
 # Load main configuration end script
 if [ -r "$HOME/.rc.end" ]; then
-  ${RC_VERBOSE:-false} && echo "Load .rc.end"
+  rc_log "[RC] Load .rc.end"
   export ENV_RC_END=$((ENV_CNT=ENV_CNT+1))
   . "$HOME/.rc.end"
 fi
 
 # Load local configuration end script
 if [ -r "$HOME/.rc.local.end" ]; then
-  ${RC_VERBOSE:-false} && echo "Load .rc.local.end"
+  rc_log "[RC] Load .rc.local.end"
   export ENV_RC_LOCAL_END=$((ENV_CNT=ENV_CNT+1))
   . "$HOME/.rc.local.end"
 fi
@@ -140,8 +147,8 @@ fi
 ################################
 # Epilogue
 #Cleanup
-unset RC_DEPENDENCIES
 unset RC_VERBOSE
+unset RC_SOURCED
 unset RC_LOAD
 unset RC_ARG
 # Set load flag

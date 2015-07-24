@@ -1,6 +1,6 @@
 #!/bin/sh
 # Script dependencies
-RC_DEPENDENCIES="${RC_DEPENDENCIES:+$RC_DEPENDENCIES }shell fct diff"
+rc_sourcemod "shell fct diff"
 
 # Note: could use "xz -9" instead of "7z x"
 # Note: could use "xzdiff" for diffs

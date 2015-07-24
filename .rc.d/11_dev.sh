@@ -1,6 +1,6 @@
 #!/bin/sh
 # Script dependencies
-RC_DEPENDENCIES="$RC_DEPENDENCIES shell fct search"
+rc_sourcemod "shell fct search"
 
 # Find based code search
 _dfind1() { local ARG1="$1"; shift; (set -f; _ffind "$ARG1" ${_DFEXCLUDE} "$@"); }

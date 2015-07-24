@@ -1,6 +1,6 @@
 #!/bin/sh
 # Script dependencies
-RC_DEPENDENCIES="${RC_DEPENDENCIES:+$RC_DEPENDENCIES }shell fct"
+rc_sourcemod "shell fct"
 
 ################################
 # TTys
