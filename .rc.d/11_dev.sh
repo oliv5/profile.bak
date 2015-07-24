@@ -5,7 +5,7 @@ rc_sourcemod "shell fct search"
 # Find based code search
 _dfind1() { local ARG1="$1"; shift; (set -f; _ffind "$ARG1" ${_DFEXCLUDE} "$@"); }
 alias _dfind='_dfind1'
-_DFEXCLUDE="-not -path '*.svn*' -and -not -path '*.git*' -and -not -path '*.repo*'"
+_DFEXCLUDE="-and -not -path '*.svn*' -and -not -path '*.git*' -and -not -path '*.repo*'"
 alias    dff='FCASE=   FTYPE=  FXTYPE=  _dfind'
 alias   dfff='FCASE=   FTYPE=f FXTYPE=  _dfind'
 alias   dffd='FCASE=   FTYPE=d FXTYPE=  _dfind'
