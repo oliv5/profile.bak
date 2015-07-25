@@ -1,6 +1,4 @@
 #!/bin/sh
-# Script dependencies
-rc_sourcemod "shell fct diff 7z"
 
 # Editors
 export GIT_EDITOR="${EDITOR:-vi}"

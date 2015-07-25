@@ -5,23 +5,23 @@
 # arguments are escaped.
 #
 arg_quote() {
-	local SEP=''
-	for ARG in "$@"; do
-		SQESC=$(printf '%s\n' "${ARG}" | sed -e "s/'/'\\\\''/g")
-		printf '%s' "${SEP}'${SQESC}'"
-		SEP=' '
-	done
+  local SEP=''
+  for ARG in "$@"; do
+    SQESC=$(printf '%s\n' "${ARG}" | sed -e "s/'/'\\\\''/g")
+    printf '%s' "${SEP}'${SQESC}'"
+    SEP=' '
+  done
 }
 
 # Right trim shell parameters
 arg_rtrim() {
-	local IFS="$(printf '\n\t ')"
-	local LAST="$(($#-$1))"
-	for ARG in $(seq 2 $LAST); do 
-		eval ARG="\${$ARG}"
-		ARG=$(printf '%s\n' "${ARG}" | sed -e "s/'/'\\\\''/g")
-		printf '%s' "'${ARG}' "
-	done
+  local IFS="$(printf '\n\t ')"
+  local LAST="$(($#-$1))"
+  for ARG in $(seq 2 $LAST); do 
+    eval ARG="\${$ARG}"
+    ARG=$(printf '%s\n' "${ARG}" | sed -e "s/'/'\\\\''/g")
+    printf '%s' "'${ARG}' "
+  done
 }
 
 ################################

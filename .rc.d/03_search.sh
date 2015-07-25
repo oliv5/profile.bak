@@ -1,6 +1,4 @@
 #!/bin/sh
-# Script dependencies
-rc_sourcemod "shell fct"
 
 # Find files implementations
 _ffind1() {

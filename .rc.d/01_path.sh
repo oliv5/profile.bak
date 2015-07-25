@@ -1,6 +1,4 @@
 #!/bin/sh
-# Script dependencies
-rc_sourcemod "shell fct"
 
 # Prepend to path
 _path_prepend() {

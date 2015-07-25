@@ -1,6 +1,4 @@
 #!/bin/sh
-# Script dependencies
-rc_sourcemod "shell fct"
 
 # List devices
 xrandr_connected() {

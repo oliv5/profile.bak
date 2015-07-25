@@ -7,14 +7,12 @@
 export ENV_RC=$((ENV_CNT=ENV_CNT+1))
 # Local RC variables
 RC_VERBOSE="false"
-RC_SOURCES=""
 RC_DRYRUN="false"
-RC_CLEAN="false"
 
 ################################
 # Arguments
-while getopts 'vd' RC_ARG; do
-  case "$RC_ARG" in
+while getopts 'vd' _ARG; do
+  case "$_ARG" in
     v) RC_VERBOSE="true";;
     d) RC_DRYRUN="true";;
     *) echo >&2 "Usage: $(basename "$0") [-v]"
@@ -25,6 +23,7 @@ while getopts 'vd' RC_ARG; do
   esac
 done
 shift $(expr $OPTIND - 1)
+unset _ARG
 
 ################################
 # Log function
@@ -32,138 +31,59 @@ rc_log() {
   ${RC_VERBOSE:-false} && echo "$@"
 }
 
-# Cleanup function
-rc_clean() {
-  ${RC_CLEAN:-true} && unset RC_SOURCES
-}
-
 ################################
 # List, load and reload profile scripts
 alias rc='. "$HOME/.rc"'
-alias load='RC_VERBOSE=true RC_DRYRUN=false RC_CLEAN=true rc_sourcemod'
+alias load='RC_VERBOSE=true rc_sourcemods'
 alias profile='rc'
 
-# Load scripts by pattern and perms
-rc_sourcefile() {
-  # Args
-  local DIR="${1:-$HOME/.rc.d}"
-  [ -d "$DIR" ] || return 2
-  local AUTOLOAD="-perm -ugo=x"
-  local AVAILABLE="-perm /go=x"
-  local DISABLED="! -perm /ugo=x"
-  local DEPTH_MIN="${2:-1}"
-  local DEPTH_MAX="${3:-1}"
-  local PERMS="$(eval echo \$${4:-AUTOLOAD})"
-  command shift 4 2>/dev/null || set --
-  # Set ctrl-c/term traps + disable file globering
-  trap 'set +f; trap INT; return 1' INT
-  trap 'set +f; trap TERM; return 1' TERM
-  set -f
-  # Main processing
-  local RESULT=1
-  local PATTERN="$(printf '%s\n' "$@" | sort -u)"
-  for PATTERN in ${PATTERN:-""}; do
-    # Use pattern only when not already done
-    if [ "$RC_SOURCES" == "${RC_SOURCES%*$PATTERN*}" ]; then
-      RC_SOURCES="$RC_SOURCES $PATTERN"
-      for SCRIPT in $(find "$DIR" ${DEPTH_MIN:+-mindepth $DEPTH_MIN} ${DEPTH_MAX:+-maxdepth $DEPTH_MAX} \
-                                  -path "*$PATTERN.sh" -not -path '*/test/*' \
-                                  ${PERMS} -prune -print | sort); do
-        # Source file only if not already done
-        if [ "$RC_SOURCES" == "${RC_SOURCES%*$SCRIPT*}" ]; then
-          rc_log "Source $SCRIPT"
-          RC_SOURCES="$RC_SOURCES $SCRIPT)"
-          if ! ${RC_DRYRUN:-false}; then
-            set +f
-            . "$SCRIPT" && RESULT=0 || RESULT=1
-            set -f
-          fi
-        fi
-      done
+# Source files by name and perms
+rc_sourcefiles() {
+  local PERM="${1:?No permissions set}"
+  local VAR="${2?No marker variable set}"
+  shift 2
+  # Set marker
+  if [ ! -z "$VAR" ]; then
+    export $VAR=$((ENV_CNT=ENV_CNT+1))
+  fi
+  # Source all files
+  for FILE; do
+    if test $PERM "$FILE"; then
+      rc_log "Source $FILE"
+      . "$FILE"
     fi
   done
-  # Remove ctrl-c/term traps + enable file globering
-  set +f; trap INT; trap TERM
-  return $RESULT
 }
 
-# Load executable scripts from given directory
-# Declare the associated ENV_ variable
-rc_sourcedir() {
-  rc_clean
-  for DIR; do
-    rc_log "[RC] Load directory $(basename "$DIR")"
-    local DIRNAME="$(basename "$DIR" | sed -r 's/\./_/g; s/^_//g; s/(.*)/\U\1/')"
-    eval "export ENV_$DIRNAME=$((ENV_CNT=ENV_CNT+1))"
-    rc_sourcefile "$DIR"
+# Source files by partial name
+rc_sourcemods() {
+  for FILE; do
+    rc_sourcefiles "-f" "" "$HOME/.rc.d/"*$FILE*.sh
   done
-  rc_clean
-}
-
-# Load modules or dependencies
-rc_sourcemod() {
-  rc_clean
-  if [ $# -gt 0 ]; then
-    rc_log "[RC] Load modules '$@'"
-    rc_sourcefile "$HOME/.rc.d" 1 9999 "AVAILABLE" "$@"
-  fi
-  rc_clean
-}
-
-rc_list() {
-  echo "List of autoloaded scripts"
-  RC_VERBOSE=true RC_DRYRUN=true rc_sourcefile "$HOME/.rc.d" 1 9999 "AUTOLOAD"
-  echo 
-  echo "List of available scripts"
-  RC_VERBOSE=true RC_DRYRUN=true rc_sourcefile "$HOME/.rc.d" 1 9999 "AVAILABLE"
-  echo 
-  echo "List of disabled scripts"
-  RC_VERBOSE=true RC_DRYRUN=true rc_sourcefile "$HOME/.rc.d" 1 9999 "DISABLED"
 }
 
 ################################
-# Load .profile when not already done
-if [ -z "$ENV_PROFILE" ] && [ -r "$HOME/.profile" ]; then
-  rc_log "[RC] Load .profile"
-  . "$HOME/.profile"
+# Source .profile when not already done
+if [ -z "$ENV_PROFILE" ]; then
+  rc_sourcefiles "-r" "" "$HOME/.profile"
 fi
 
-# Load local configuration script
-if [ -r "$HOME/.rc.local" ]; then
-  rc_log "[RC] Load .rc.local"
-  export ENV_RC_LOCAL=$((ENV_CNT=ENV_CNT+1))
-  . "$HOME/.rc.local"
-fi
-
-# Load profile scripts
-rc_sourcedir "$HOME/.rc.d"
+# Source profile scripts in order
+rc_log "Source $HOME/.rc"
+rc_sourcefiles "-r" "ENV_RC_LOCAL" "$HOME/.rc.local"
+rc_sourcefiles "-x" "ENV_RC_D" "$HOME/.rc.d/"*.sh
 if [ ! -z "$BASH_VERSION" ]; then
-  rc_sourcedir "$HOME/.rc.d/bash"
+  rc_sourcefiles "-x" "ENV_RC_D_BASH" "$HOME/.rc.d/bash/"*.sh
 fi
-rc_sourcedir "$HOME/.rc.d/local"
-
-# Load main configuration end script
-if [ -r "$HOME/.rc.end" ]; then
-  rc_log "[RC] Load .rc.end"
-  export ENV_RC_END=$((ENV_CNT=ENV_CNT+1))
-  . "$HOME/.rc.end"
-fi
-
-# Load local configuration end script
-if [ -r "$HOME/.rc.local.end" ]; then
-  rc_log "[RC] Load .rc.local.end"
-  export ENV_RC_LOCAL_END=$((ENV_CNT=ENV_CNT+1))
-  . "$HOME/.rc.local.end"
-fi
+rc_sourcefiles "-x" "ENV_RC_D_LOCAL" "$HOME/.rc.d/local/"*.sh
+rc_sourcefiles "-r" "ENV_RC_END" "$HOME/.rc.end"
+rc_sourcefiles "-r" "ENV_RC_LOCAL_END" "$HOME/.rc.local.end"
 
 ################################
 # Epilogue
 #Cleanup
 unset RC_VERBOSE
-unset RC_SOURCES
 unset RC_DRYRUN
-unset RC_CLEAN
-unset RC_ARG
 # Set load flag
 export ENV_LOADED=$ENV_CNT
 export ENV_CNT
