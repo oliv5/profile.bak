@@ -8,16 +8,19 @@ export ENV_RC=$((ENV_CNT=ENV_CNT+1))
 # Local RC variables
 RC_VERBOSE="false"
 RC_DRYRUN="false"
+RC_AUTOLOAD="-x"
 
 ################################
 # Arguments
-while getopts 'vd' _ARG; do
+while getopts 'vdr' _ARG; do
   case "$_ARG" in
     v) RC_VERBOSE="true";;
     d) RC_DRYRUN="true";;
+    r) RC_AUTOLOAD="-r";;
     *) echo >&2 "Usage: $(basename "$0") [-v]"
        echo >&2 "-v   verbose mode"
        echo >&2 "-d   dry-run"
+       echo >&2 "-r   load all readable (def executable) scripts"
        kill -INT $$
        ;;
   esac
@@ -71,11 +74,11 @@ fi
 # Source profile scripts in order
 rc_log "Source $HOME/.rc"
 rc_sourcefiles "-r" "ENV_RC_LOCAL" "$HOME/.rc.local"
-rc_sourcefiles "-x" "ENV_RC_D" "$HOME/.rc.d/"*.sh
+rc_sourcefiles "$RC_AUTOLOAD" "ENV_RC_D" "$HOME/.rc.d/"*.sh
 if [ ! -z "$BASH_VERSION" ]; then
-  rc_sourcefiles "-x" "ENV_RC_D_BASH" "$HOME/.rc.d/bash/"*.sh
+  rc_sourcefiles "$RC_AUTOLOAD" "ENV_RC_D_BASH" "$HOME/.rc.d/bash/"*.sh
 fi
-rc_sourcefiles "-x" "ENV_RC_D_LOCAL" "$HOME/.rc.d/local/"*.sh
+rc_sourcefiles "$RC_AUTOLOAD" "ENV_RC_D_LOCAL" "$HOME/.rc.d/local/"*.sh
 rc_sourcefiles "-r" "ENV_RC_END" "$HOME/.rc.end"
 rc_sourcefiles "-r" "ENV_RC_LOCAL_END" "$HOME/.rc.local.end"
 

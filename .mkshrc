@@ -1,0 +1,2 @@
+#!${ANDROID_ROOT}/bin/sh
+. "$HOME/.rc" -r "$@"
