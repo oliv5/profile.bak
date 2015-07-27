@@ -45,12 +45,13 @@ alias gsp='git_stash_pop'
 alias gsa='git_stash_apply'
 alias gsl='git stash list'
 alias gslc='git_stash_count'
-alias gsf='git_stash_show'
-alias gsfa='git_stash_show_all'
+alias gsld='git_stash_show'
+alias gsla='git_stash_show_all'
 alias gsv='git_stash_cat'
 alias gsd='git_stash_diff'
 alias gsdm='git_stash_diffm'
 alias gsdl='git_stash_diffl'
+alias gsf='git_stash_flush'
 alias gsm='gsdm'
 # Commit aliases
 alias gci='git commit'
@@ -253,6 +254,13 @@ git_stash_show_all() {
 git_stash_cat() {
   local STASH="${1:-0}"; shift $(min 1 $#)
   git stash show -p stash@{$STASH} "$@"
+}
+
+# Flush the stash
+git_stash_flush() {
+  if ask_question "Flush the stash? (y/n): " y Y >/dev/null; then
+    git stash clear
+  fi
 }
 
 # Aliases using stashes
