@@ -27,7 +27,7 @@ do
        echo >&2 "-t   at: time of execution (man at)"
        echo >&2 "-m   at: send email upon completion"
        echo >&2 "-b   batch: execute when system load < 1.5%"
-       echo >&2 "-l   timeout: timeout length"
+       echo >&2 "-l   timeout: timeout length (s/m/h/d)"
        echo >&2 "-k   timeout: kill after N sec upon timeout"
        echo >&2 "-s   timeout: signal name to send upon timeout"
        echo >&2 "-r   retry: retry N times upon failure"
