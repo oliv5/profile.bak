@@ -28,3 +28,6 @@ fi
 # Exports
 export ENV_CNT
 export PATH
+
+# make sure this is the last line
+# to ensure a good return code

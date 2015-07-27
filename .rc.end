@@ -6,6 +6,7 @@
 # Setup path
 path_prepend "$HOME/bin" "$HOME/.local/bin" "$HOME/bin/profile"
 path_append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
+path_append "$HOME/bin/profile/mr" "$HOME/bin/profile/vcsh"
 path_cleanup
 
 # Remove some aliases/fct shortcuts
@@ -19,7 +20,7 @@ if [ -r "${HOME}/.anacron/anacrontab" ]; then
 fi
 
 # Start ssh-agent when not already running
-pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent)
+{ pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent); } 2>/dev/null
 
 # Disable console beep
 #command -v xset >/dev/null 2>&1 && pidof X >/dev/null && xset b off 2>/dev/null # From X11 window system

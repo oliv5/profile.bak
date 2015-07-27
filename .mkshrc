@@ -1,2 +1,16 @@
 #!${ANDROID_ROOT}/bin/sh
-. "$HOME/.rc" -r "$@"
+
+# check if this is really mksh  # {(( 
+case $KSH_VERSION in 
+*MIRBSD\ KSH*) ;; 
+*) return 0 ;; 
+esac                            # } 
+
+# source the system-wide mkshrc file 
+[[ -s /etc/mkshrc ]] && . /etc/mkshrc
+
+# source the main user script
+[ -r "$HOME/.rc" ] && . "$HOME/.rc" "$@"
+
+# make sure this is the last line
+# to ensure a good return code

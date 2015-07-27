@@ -5,7 +5,7 @@
 ################################
 # Set load flag
 export ENV_RC=$((ENV_CNT=ENV_CNT+1))
-# Local RC variables
+# Define local variables
 RC_VERBOSE="false"
 RC_DRYRUN="false"
 RC_AUTOLOAD="-x"
@@ -42,8 +42,8 @@ alias profile='rc'
 
 # Source files by name and perms
 rc_sourcefiles() {
-  local PERM="${1:?No permissions set}"
-  local VAR="${2?No marker variable set}"
+  local PERM="${1:-${RC_AUTOLOAD:--x}}"
+  local VAR="${2}"
   shift 2
   # Set marker
   if [ ! -z "$VAR" ]; then
@@ -61,7 +61,7 @@ rc_sourcefiles() {
 # Source files by partial name
 rc_sourcemods() {
   for FILE; do
-    rc_sourcefiles "-f" "" "$HOME/.rc.d/"*$FILE*.sh
+    rc_sourcefiles "-r" "" "$HOME/.rc.d/"*$FILE*.sh
   done
 }
 
@@ -83,10 +83,13 @@ rc_sourcefiles "-r" "ENV_RC_END" "$HOME/.rc.end"
 rc_sourcefiles "-r" "ENV_RC_LOCAL_END" "$HOME/.rc.local.end"
 
 ################################
-# Epilogue
-#Cleanup
+#Clean local variables
 unset RC_VERBOSE
 unset RC_DRYRUN
+unset RC_AUTOLOAD
 # Set load flag
 export ENV_LOADED=$ENV_CNT
 export ENV_CNT
+
+# make sure this is the last line
+# to ensure a good return code
