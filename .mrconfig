@@ -5,7 +5,12 @@ skip = mr_skip
 # Mr actions
 lib = 
 	mr_skip() {
-		[ ! -d "$MR_REPO" ] || { [ -r "$HOME/.mrskip" ] && grep "$1.\+$MR_REPO" "$HOME/.mrskip" >/dev/null 2>&1; }
+		[ ! -d "$MR_REPO" ] || {
+			[ -r "$HOME/.mrskip" ] && {
+				local MR_REPO="$(basename "${MR_REPO}")"
+				grep -E "^($HOSTNAME)?:($MR_REPO)?:($MR_ACTION)?" "$HOME/.mrskip" >/dev/null 2>&1; 
+			}
+		}
 	}
 # Add few git actions
 lib =
