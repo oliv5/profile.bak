@@ -12,7 +12,8 @@ lib =
 		{
 			[ -r "$HOME/.mrskip" ] && {
 				local MR_REPO="$(basename "${MR_REPO}")"
-				grep -E "^($HOSTNAME)?:($MR_REPO)?:($MR_ACTION)?" "$HOME/.mrskip" >/dev/null 2>&1; 
+				local HOSTNAME="$(uname -n)"
+				grep -iE "^($HOSTNAME|):($MR_REPO|):($MR_ACTION|)$" "$HOME/.mrskip" >/dev/null 2>&1; 
 			}
 		}
 	}
@@ -54,6 +55,7 @@ lib =
 		done
 	}
 	git_bundle() {
+		return 0
 		DIR="${1:-.}"
 		if [ -d "$DIR" ]; then
 			DATE="$(date +%Y%m%d-%H%M%S)"
@@ -131,6 +133,7 @@ lib =
 		fi
 	}
 	annex_bundle() {
+		return 0
 		local DIR="${1:-.}"
 		if annex_exists; then
 			if [ -d "$DIR" ]; then

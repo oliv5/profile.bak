@@ -9,7 +9,7 @@
 [ -z "$USER" ] && export USER="$(id -un)"
 [ -z "$HOME" ] && export HOME="$(grep "$USER" /etc/passwd | cut -d: -f6)"
 [ -z "$LOGNAME" ] && export LOGNAME="$USER"
-[ -z "$HOSTNAME" ] && export HOSTNAME="$(/bin/hostname)"
+[ -z "$HOSTNAME" ] && export HOSTNAME="$(/bin/hostname)"  #uname -n
 [ -z "$DOMAIN" ] && export DOMAIN="$(/bin/hostname -d)"
 [ -z "$DISPLAY" ] && export DISPLAY=":0"
 
