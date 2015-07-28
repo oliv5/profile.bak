@@ -4,8 +4,12 @@ skip = mr_skip
 
 # Mr actions
 lib = 
+	# Check whether to skip this action or not
 	mr_skip() {
-		[ ! -d "$MR_REPO" ] || {
+		{
+			[ ! -z "$VCSH_REPO_NAME" ] && echo "WARNING: Mr is run from a VCSH repo !!!!"
+		} ||
+		{
 			[ -r "$HOME/.mrskip" ] && {
 				local MR_REPO="$(basename "${MR_REPO}")"
 				grep -E "^($HOSTNAME)?:($MR_REPO)?:($MR_ACTION)?" "$HOME/.mrskip" >/dev/null 2>&1; 
