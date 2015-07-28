@@ -3,20 +3,21 @@
 # It should be compatible with all shells (dash, bash,...)
 
 ################################
-# Set load flag
+# Define global variables
 export ENV_RC=$((ENV_CNT=ENV_CNT+1))
+export RC_PERMS="${RC_PERMS:--x}"
 # Define local variables
 RC_VERBOSE="false"
 RC_DRYRUN="false"
-RC_AUTOLOAD="-x"
 
 ################################
 # Arguments
-while getopts 'vdr' _ARG; do
+while getopts 'vdrx' _ARG; do
   case "$_ARG" in
     v) RC_VERBOSE="true";;
     d) RC_DRYRUN="true";;
-    r) RC_AUTOLOAD="-r";;
+    r) RC_PERMS="-r";;
+    x) RC_PERMS="-x";;
     *) echo >&2 "Usage: $(basename "$0") [-v]"
        echo >&2 "-v   verbose mode"
        echo >&2 "-d   dry-run"
@@ -42,7 +43,7 @@ alias profile='rc'
 
 # Source files by name and perms
 rc_sourcefiles() {
-  local PERM="${1:-${RC_AUTOLOAD:--x}}"
+  local PERM="${1:-${RC_PERMS:--x}}"
   local VAR="${2}"
   shift 2
   # Set marker
@@ -74,11 +75,11 @@ fi
 # Source profile scripts in order
 rc_log "Source $HOME/.rc"
 rc_sourcefiles "-r" "ENV_RC_LOCAL" "$HOME/.rc.local"
-rc_sourcefiles "$RC_AUTOLOAD" "ENV_RC_D" "$HOME/.rc.d/"*.sh
+rc_sourcefiles "$RC_PERMS" "ENV_RC_D" "$HOME/.rc.d/"*.sh
 if [ ! -z "$BASH_VERSION" ]; then
-  rc_sourcefiles "$RC_AUTOLOAD" "ENV_RC_D_BASH" "$HOME/.rc.d/bash/"*.sh
+  rc_sourcefiles "$RC_PERMS" "ENV_RC_D_BASH" "$HOME/.rc.d/bash/"*.sh
 fi
-rc_sourcefiles "$RC_AUTOLOAD" "ENV_RC_D_LOCAL" "$HOME/.rc.d/local/"*.sh
+rc_sourcefiles "$RC_PERMS" "ENV_RC_D_LOCAL" "$HOME/.rc.d/local/"*.sh
 rc_sourcefiles "-r" "ENV_RC_END" "$HOME/.rc.end"
 rc_sourcefiles "-r" "ENV_RC_LOCAL_END" "$HOME/.rc.local.end"
 
@@ -86,10 +87,8 @@ rc_sourcefiles "-r" "ENV_RC_LOCAL_END" "$HOME/.rc.local.end"
 #Clean local variables
 unset RC_VERBOSE
 unset RC_DRYRUN
-unset RC_AUTOLOAD
 # Set load flag
 export ENV_LOADED=$ENV_CNT
 export ENV_CNT
-
 # make sure this is the last line
 # to ensure a good return code
