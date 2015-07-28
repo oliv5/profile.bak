@@ -186,9 +186,9 @@ fstab2autofs() {
 }
 
 ################################
-# Add to user crontab
+# Add to user crontab, ensure uniqness
 cron_useradd() {
-  (crontab -l ; echo "$@") | crontab -
+  (crontab -l ; echo "$@") | sort - | uniq - | crontab -
 }
 # Add to system crontab
 cron_useradd() {
