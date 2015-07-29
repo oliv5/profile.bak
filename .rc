@@ -12,8 +12,8 @@ RC_DRYRUN="false"
 
 ################################
 # Arguments
-while getopts 'vdrx' _ARG; do
-  case "$_ARG" in
+while getopts 'vdrx' ARG; do
+  case "$ARG" in
     v) RC_VERBOSE="true";;
     d) RC_DRYRUN="true";;
     r) RC_PERMS="-r";;
@@ -27,7 +27,7 @@ while getopts 'vdrx' _ARG; do
   esac
 done
 shift $(expr $OPTIND - 1)
-unset _ARG
+unset ARG OPTARG OPTIND OPTERR
 
 ################################
 # Log function
