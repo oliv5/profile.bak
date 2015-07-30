@@ -7,6 +7,7 @@ export GIT_PAGER="${PAGER:-less}"
 ########################################
 # Status aliases
 alias gt='git status -uno'
+alias gtu='git status -u'
 alias gm='git status --porcelain -b | awk "NR==1 || /^(M.|.M)/"'    # modified
 alias ga='git status --porcelain -b | awk "NR==1 || /^A[ MD]/"'     # added
 alias gd='git status --porcelain -b | awk "NR==1 || /^D[ M]/"'      # deleted
@@ -25,8 +26,8 @@ alias glu='git ls-files -u' # unmerged = in conflict
 alias gld='git ls-files -d'
 alias gln='git ls-files -o --exclude-standard'
 # Diff aliases
-alias gdd='git_diff_full'
-alias gdm='git_diffm_full'
+alias gdd='git_diff_all'
+alias gdm='git_diffm_all'
 alias gds='git diff stash'
 # Merge aliases
 alias gmm='git mergetool -y -t meld'
@@ -45,7 +46,7 @@ alias gsp='git_stash_pop'
 alias gsa='git_stash_apply'
 alias gsl='git stash list'
 alias gslc='git_stash_count'
-alias gsld='git_stash_show'
+alias gslf='git_stash_show'
 alias gsla='git_stash_show_all'
 alias gsv='git_stash_cat'
 alias gsd='git_stash_diff'
@@ -78,6 +79,9 @@ alias gai='git annex info'
 alias gag='git annex get'
 alias gad='git annex drop'
 alias gat='git annex status'
+# Patch aliases
+alias gpd='git diff -p'
+alias gpc='git show'
 
 ########################################
 # git wrapper
@@ -105,10 +109,7 @@ git_meld() {
 
 ########################################
 # Svn diff staged/unstaged
-git_diff() {
-  git diff "$@"
-}
-git_diff_full() {
+git_diff_all() {
   git diff "$@" &&
   git diff --cached "$@"
 }
@@ -117,7 +118,7 @@ git_diff_full() {
 git_diffm() {
   git difftool -y -t meld "$@"
 }
-git_diffm_full() {
+git_diffm_all() {
   git difftool -y -t meld "$@" &&
   git difftool --cached -y -t meld "$@"
 }
