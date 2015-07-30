@@ -68,6 +68,12 @@ if has("cscope")
 	cabbrev css lcs show
 	cabbrev csh lcs help
 
+	" Find cscope database
+	function! s:FindCscopeDb(dbname)
+		return findfile(g:FindRootDir()."/".a:dbname, "**", -1)
+		"return split(globpath(g:FindRootDir(),"**/a:dbname"))
+	endfunction
+
 	" Find and load cscope database
 	function! s:LoadCscopeDb(dblist)
 		for db in a:dblist
@@ -75,18 +81,22 @@ if has("cscope")
 				"set nocscopeverbose " suppress 'duplicate connection' error
 				silent! exe "cs add" db matchstr(db, ".*/")
 				silent! cs reset
+				cs show
 				"set cscopeverbose
 			endif
 		endfor
 	endfunction
 
 	" Additionnal keymap
-	nnoremap <silent> <c-d><c-l>  :call <SID>LoadCscopeDb(findfile(g:cscope_db, "**", -1))<CR>
+	nnoremap <silent> <c-d><c-l>  :call <SID>LoadCscopeDb(<SID>FindCscopeDb(g:cscope_db))<CR>
+	nnoremap <silent> <c-d><c-ù>  :echo <SID>FindCscopeDb(g:cscope_db)<CR>
+	nnoremap <silent> <c-d><c-m>  :cs show<CR>
+	nnoremap <silent> <c-d><c-k>  :cs kill 0<CR>
 	nnoremap <silent> <c-d>       <NOP>
 
 	" Autocommand
 	augroup vimrc_cscope
-		autocmd! VimEnter * call s:LoadCscopeDb([g:cscope_db])
+		"autocmd! VimEnter * call s:LoadCscopeDb(<SID>FindCscopeDb(g:cscope_db))
 		"autocmd! BufReadPost * call s:LoadCscopeDb(findfile(g:cscope_db, ".;", -1))
 	augroup END
 
@@ -415,7 +425,9 @@ if !exists('g:loaded_ctrlp')
 	\ 'dir':  '\v[\/]\.(git|hg|svn|tmp)$',
 	\ 'file': '\v\.(exe|so|dll|o|pyc|swp|zip|7z|tar|tgz)$',
 	\ }
-	let g:ctrlp_switch_buffer = 'et'
+	"let g:ctrlp_switch_buffer = 'et'
+	let g:ctrlp_switch_buffer = ''
+	let g:ctrlp_open_new_file = 'r'
 	" Key mapping
 	FnNoremap <C-l>     :CtrlPTag<CR>
 	FnNoremap <C-o>     :CtrlPMRU<CR>
