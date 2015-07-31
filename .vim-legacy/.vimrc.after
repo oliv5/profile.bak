@@ -757,10 +757,12 @@ command! -nargs=? BufClose call s:BufClose(<f-args>)
 command! -nargs=1 BufCloseByExt call s:BufCloseByExt(<f-args>)
 command! -nargs=? BufCloseAll   call s:BufCloseAll(<f-args>)
 command! -nargs=0 BufSmartOpen  call s:BufSmartOpen()
+command! -nargs=0 BufQuickfix   call setqflist(map(filter(range(1, bufnr('$')), 'buflisted(v:val)'), '{"bufnr":v:val}'))
 
 " Open/close buffer (close=:bd or :bw)
 FnNoremap <C-b>       :e<SPACE><C-R>=expand("%:p:h") . "/" <CR>
 FnNoremap <C-b><C-b>  :BufSmartOpen<CR>
+FnNoremap <C-b><C-space> :BufQuickfix<CR>
 FnNoremap <C-b><C-c>  :BufClose<CR>
 FnNoremap <C-q>       :BufClose<CR>
 if !exists("g:vimrc_useTabs")
@@ -948,8 +950,8 @@ nnoremap <silent>L        :Lprev<CR>
 " Autocommands (note: ltag is not concerned...)
 if has('quickfix')
   augroup quickfix
-"    au! QuickFixCmdPost [^l]* nested Lcopy
-"    au! QuickFixCmdPost l* nested Ccopy
+"    au! QuickFixCmdPost [^l]* nested Ccopy
+"    au! QuickFixCmdPost l* nested Lcopy
     au! QuickFixCmdPost * nested pclose
   augroup END
 endif
