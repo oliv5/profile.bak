@@ -9,9 +9,9 @@ EXCLUSIONS="$EXCLUSIONS --exclude=tmp --exclude=temp --exclude=cache"
 EXCLUSIONS="$EXCLUSIONS --exclude=.tmp --exclude=.temp --exclude=.cache"
 
 # Set archive variable
-PREAMBLE="${0##*/}"
-PREAMBLE="${PREAMBLE%.*}.$(uname -n)"
-ARCHIVE="${PREAMBLE}.$(date +%Y%m%d_%H%M%S)"
+BASENAME="${0##*/}"
+BASENAME="${BASENAME%.*}.$(uname -n)"
+ARCHIVE="${BASENAME}.$(date +%Y%m%d_%H%M%S)"
 
 # Main script redirection
 {
@@ -26,7 +26,9 @@ ARCHIVE="${PREAMBLE}.$(date +%Y%m%d_%H%M%S)"
 
     # Delete file too old (mtime=nb days)
     echo "[$0] delete old files..."
-    find "$DIR" -maxdepth 1 -name "${PREAMBLE}"'*' -mtime +27 -type f -print -delete
+    if [ $(find "$DIR" -maxdepth 1 -type f -name "${BASENAME}"'*' -not -mtime +27 -print | wc -l) -gt 0 ]; then
+      find "$DIR" -maxdepth 1 -type f -name "${BASENAME}"'*' -mtime +27 -print -delete
+    fi
     echo
 
     # Do the backup
