@@ -94,52 +94,69 @@
 " MRU using tlib {
 	let s:mru_backward=0
 	let s:mru_forward=0
-	"let s:mru_reset=1
 	if !exists('s:mru_init')
 		silent! call tlib#buffer#EnableMRU()
 		let s:mru_init=1
 	endif
 
-	"function! s:MRUreset()
-	"	if s:mru_reset!=0
-	"		let s:mru_backward=0
-	"		let s:mru_forward=0
-	"	endif
-	"	let s:mru_reset = 1
-	"endfunction
+	function! s:MRUinc()
+		" No need to check for len(tlib#buffer#GetList(0,0,'mru')[0])
+		" because it can be wrong when called by event BufAdd
+		let s:mru_backward+=1
+		let s:mru_forward+=1
+	endfunction
+	
+	function! s:MRUcycle(counter1, counter2)
+		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
+		let {a:counter2} = 0
+		if {a:counter1}<(len(l:buflist)-1)
+			let {a:counter1} = ({a:counter1}+1)
+		endif
+		exe "silent! b" l:buflist[{a:counter1}]
+	endfunction
+	
+	function! s:MRUcycle(counter1, counter2)
+		" Skip non-normal buffer
+		if getbufvar(winbufnr(0), "&buftype") != ''
+			return
+		endif
+		let {a:counter2} = 0
+		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
+		" Protection when event BufAdd increases the counters (hidden buffers...)
+		let {a:counter1} = ({a:counter1} % len(l:buflist))
+		" Find the next normal buffer starting from the next one
+		for {a:counter1} in range({a:counter1}+1, (len(l:buflist)-1))
+			if getbufvar(l:buflist[{a:counter1}], "&buftype") == ''
+				exe "silent! b" l:buflist[{a:counter1}]
+				return
+			endif
+		endfor
+		" Not found yet: maybe the last of the list or a non-normal one
+		" Try to find a normal buffer in reverse order starting from the current one
+		for {a:counter1} in range({a:counter1}, 0, -1)
+			if getbufvar(l:buflist[{a:counter1}], "&buftype") == ''
+				exe "silent! b" l:buflist[{a:counter1}]
+				return
+			endif
+		endfor
+	endfunction
 
 	function! s:MRUbackward()
-		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
-		"let s:mru_reset = 0
-		let s:mru_forward = 0
-		if s:mru_backward<(len(l:buflist)-1)
-			let s:mru_backward = (s:mru_backward+1)
-		endif
-		"let tmp = s:mru_backward
-		exe "silent! b" l:buflist[s:mru_backward]
-		"let s:mru_backward = tmp
+		return s:MRUcycle('s:mru_backward', 's:mru_forward')
 	endfunction
 
 	function! s:MRUforward()
-		let l:buflist=tlib#buffer#GetList(0,0,'mru')[0]
-		"let s:mru_reset = 0
-		let s:mru_backward = 0
-		if s:mru_forward<(len(l:buflist)-1)
-			let s:mru_forward = (s:mru_forward+1)
-		endif
-		"let tmp = s:mru_forward
-		exe "silent! b" l:buflist[s:mru_forward]
-		"let s:mru_forward = tmp
+		return s:MRUcycle('s:mru_forward', 's:mru_backward')
 	endfunction
 
 	command! -nargs=0 -bar MRUbackward	call s:MRUbackward()
 	command! -nargs=0 -bar MRUforward	call s:MRUforward()
 	command! -nargs=0 -bar MRUlist		echo tlib#buffer#GetList(0,0,'mru')[1]
 
-	"augroup MRU
-	"	au!
-	"	au BufEnter * 		call <SID>MRUreset()
-	"augroup END
+	augroup MRU
+		au!
+		au BufAdd * 	call <SID>MRUinc()
+	augroup END
 
 	FnNoremap <C-Tab>		:MRUbackward<CR>
 	FnNoremap <C-S-Tab>		:MRUforward<CR>
