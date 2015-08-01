@@ -9,6 +9,11 @@ RETRY=""
 RETRY_OPT=0
 WATCH=""
 
+# Convert the input into seconds
+toSec(){
+  echo "$1" | awk -F'[:.]' '{ for(i=0;i<2;i++){if(NF<=2){$0=":"$0}}; print ($1 * 3600) + ($2 * 60) + $3 }'
+}
+
 # Get args
 while getopts "t:mbw:l:k:s:r:p:h" FLAG
 do
@@ -17,25 +22,25 @@ do
     m) AT_OPT="${AT_OPT:+$AT_OPT }-m";;
     b) BATCH="batch";;
     
-    w) WATCH="-n ${OPTARG}";;
+    w) WATCH="-n $(toSec ${OPTARG})";;
     
-    l) TIMEOUT="${OPTARG}";;
-    k) TIMEOUT_OPT="${TIMEOUT_OPT:+$TIMEOUT_OPT }-k ${OPTARG}";;
+    l) TIMEOUT="$(toSec ${OPTARG})";;
+    k) TIMEOUT_OPT="${TIMEOUT_OPT:+$TIMEOUT_OPT }-k $(toSec ${OPTARG})";;
     s) TIMEOUT_OPT="${TIMEOUT_OPT:+$TIMEOUT_OPT }-s ${OPTARG}";;
     
     r) RETRY="${OPTARG}";;
-    p) RETRY_OPT="${OPTARG}";;
+    p) RETRY_OPT="$(toSec ${OPTARG})";;
     
-    h|*) echo >&2 "Usage: `basename $0` [-t time] [-m] [-b] [-w seconds] [-l seconds] [-k seconds] -[s signal] [-r trials] [-p pause] -- <command line...>"
+    h|*) echo >&2 "Usage: `basename $0` [-t time] [-m] [-b] [-w h:m:s] [-l h:m:s] [-k h:m:s] -[s signal] [-r trials] [-p h:m:s] -- <command line...>"
        echo >&2 "-t   at: time of execution (man at)"
        echo >&2 "-m   at: send email upon completion"
        echo >&2 "-b   batch: execute when system load < 1.5%"
-       echo >&2 "-w   watch: execute every N seconds"
-       echo >&2 "-l   timeout: timeout length in seconds"
-       echo >&2 "-k   timeout: kill after N seconds upon timeout"
-       echo >&2 "-s   timeout: signal name to send upon timeout"
-       echo >&2 "-r   retry: retry N times upon failure (-1 inf)"
-       echo >&2 "-p   retry: pause S seconds between each trial"
+       echo >&2 "-w   watch: execution time delay"
+       echo >&2 "-l   timeout: timeout length"
+       echo >&2 "-k   timeout: kill delay upon timeout"
+       echo >&2 "-s   timeout: kill signal name sent upon timeout"
+       echo >&2 "-r   retry: nb of retries upon failure (-1 inf)"
+       echo >&2 "-p   retry: pause/delay between each trial"
        echo >&2 "...  command line to execute"
        exit 1
        ;;

@@ -62,6 +62,18 @@ mkbak() {
 }
 
 ################################
+# Convert HH:mm:ss.ms into seconds
+toSec(){
+  echo "$1" | awk -F'[:.]' '{ for(i=0;i<2;i++){if(NF<=2){$0=":"$0}}; print ($1 * 3600) + ($2 * 60) + $3 }'
+}
+toSecMs(){
+  echo "$1" | awk -F: '{ for(i=0;i<2;i++){if(NF<=2){$0=":"$0}}; print ($1 * 3600) + ($2 * 60) + $3 }'
+}
+toMs(){
+  echo "$1" | awk -F: '{ for(i=0;i<2;i++){if(NF<=2){$0=":"$0}}; print (($1 * 3600) + ($2 * 60) + $3) * 1000 }'
+}
+
+################################
 # Convert to libreoffice formats
 conv_soffice() {
   local FORMAT="${1:?No output format specified}"
