@@ -55,7 +55,6 @@ lib =
 		done
 	}
 	git_bundle() {
-		return 0
 		DIR="${1:-.}"
 		if [ -d "$DIR" ]; then
 			DATE="$(date +%Y%m%d-%H%M%S)"
@@ -66,6 +65,7 @@ lib =
 				gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$3" "${BUNDLE}" && 
 					(wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
 			fi
+			ls -l "${BUNDLE}*"
 		else
 			echo "Target directory '$DIR' does not exists."
 			echo "Skip bundle creation..."
@@ -133,7 +133,6 @@ lib =
 		fi
 	}
 	annex_bundle() {
-		return 0
 		local DIR="${1:-.}"
 		if annex_exists; then
 			if [ -d "$DIR" ]; then
@@ -154,6 +153,7 @@ lib =
 					gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$3" "${BUNDLE}" && 
 						(wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
 				fi
+				ls -l "${BUNDLE}*"
 			else
 				echo "Target directory '$DIR' does not exists."
 				echo "Skip bundle creation..."
