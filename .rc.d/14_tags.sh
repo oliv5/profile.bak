@@ -3,13 +3,13 @@
 DBG=""
 
 # Ctags settings (see ~/.ctags)
-CTAGS_OPTS="-R"
+CTAGS_OPTS='-R'
 
 # Cscope default settings
-#CSCOPE_OPTS="-qb"
-CSCOPE_OPTS="-qbk"
+#CSCOPE_OPTS='-qb'
+CSCOPE_OPTS='-qbk'
 CSCOPE_REGEX='.*\.(h|c|cc|cpp|hpp|inc|S|py)$'
-CSCOPE_EXCLUDE="-not -path *.svn* -and -not -path *.git -and -not -path /tmp/"
+CSCOPE_EXCLUDE='-not -path *.svn* -and -not -path *.git -and -not -path /tmp/'
 
 # Make ctags
 mkctags() {
