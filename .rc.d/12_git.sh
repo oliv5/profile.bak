@@ -25,6 +25,7 @@ alias glm='git ls-files -m'
 alias glu='git ls-files -u' # unmerged = in conflict
 alias gld='git ls-files -d'
 alias gln='git ls-files -o --exclude-standard'
+alias gli='git ls-files -o -i --exclude-standard'
 # Diff aliases
 alias gdd='git_diff_all'
 alias gdm='git_diffm_all'
