@@ -63,9 +63,9 @@ lib =
 			git bundle create "$BUNDLE" --all --tags --remotes
 			if [ ! -z "$3" ]; then
 				gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$3" "${BUNDLE}" && 
-					(wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
+					(shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
 			fi
-			ls -l "${BUNDLE}*"
+			ls -l "${BUNDLE}"*
 		else
 			echo "Target directory '$DIR' does not exists."
 			echo "Skip bundle creation..."
@@ -139,21 +139,16 @@ lib =
 				DATE="$(date +%Y%m)"
 				BUNDLE="$DIR/${2:-$(basename "$MR_REPO" .git).annex.$(uname -n).$DATE.tgz}"
 				echo "Tar annex into $BUNDLE"
-				#tar czf "$BUNDLE" ./ -h --exclude-vcs
-				if vcsh_exists; then
-					vcsh_run "git annex list $(git config --get core.worktree)" | awk 'NR>5 {print $2}' | xargs tar czf "$BUNDLE" -h --exclude-vcs
-				elif annex_bare; then
+				if annex_bare; then
 					tar czf "$BUNDLE" -h ./annex
-				elif annex_direct; then
-					find . -type f -not -path '*.git*' -print0 | xargs -0 tar czf "$BUNDLE" -h --exclude-vcs
 				else
-					find . -type l -print0 | xargs -0 tar czf "$BUNDLE" -h --exclude-vcs
+					vcsh_run "git annex list $(git config --get core.worktree)" | awk 'NF>1 {print $2}' | xargs tar czf "$BUNDLE" -h --exclude-vcs
 				fi
 				if [ ! -z "$3" ]; then
 					gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$3" "${BUNDLE}" && 
-						(wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
+						(shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
 				fi
-				ls -l "${BUNDLE}*"
+				ls -l "${BUNDLE}"*
 			else
 				echo "Target directory '$DIR' does not exists."
 				echo "Skip bundle creation..."
