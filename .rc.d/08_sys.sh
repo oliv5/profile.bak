@@ -200,10 +200,11 @@ cron_useradd() {
 # Move/copy by replicating directory structure
 _mkdir_exec() {
   local EXEC="${1:-echo}"
-  local SRC="${2:-.}"
+  local SRC="$2"
   local DST="$(path_abs "${3:-.}")"
   shift 3
-  _ffind "$SRC" $@ -exec sh -c '
+  local BASENAME="$(basename "$SRC")"
+  find "$(dirname "$SRC")" ${BASENAME:+-name "$BASENAME"} $@ -exec sh -c '
       EXEC="$1"
       shift
       for x do
@@ -212,8 +213,8 @@ _mkdir_exec() {
       done
     ' "$DST" "$EXEC" {} +
 }
-alias mkdir_cp='_mkdir_exec cp'
-alias mkdir_mv='_mkdir_exec mv'
+alias mkdir_cp='_mkdir_exec "cp -v"'
+alias mkdir_mv='_mkdir_exec "mv -v"'
 
 ##############################
 # Add ssh dedicated command id in ~/.ssh/authorized_keys
