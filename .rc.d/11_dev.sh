@@ -31,8 +31,9 @@ _DGEXT_PY="*.py"
 _DGEXT_MK="*.mk;Makefile"
 _DGEXT_ASM="*.inc;*.S"
 _DGEXT_XML="*.xml"
+_DGEXT_TEX="*.tex"
 _DGEXT_SHELL="*.sh"
-_DGEXT_REF="*.c;*.cpp;*.cc;*.h;*.hpp;*.py;*.mk;Makefile;*.sh;*.vhd;*.v;*.inc;*.S"
+_DGEXT_REF="*.c;*.cpp;*.cc;*.h;*.hpp;*.py;*.mk;Makefile;*.sh;*.vhd;*.v;*.inc;*.S;*.tex"
 alias      c='GCASE=   _dgrep "$_DGEXT_C"'
 alias      h='GCASE=   _dgrep "$_DGEXT_H"'
 alias      v='GCASE=   _dgrep "$_DGEXT_V"'
@@ -41,6 +42,7 @@ alias     py='GCASE=   _dgrep "$_DGEXT_PY"'
 alias     mk='GCASE=   _dgrep "$_DGEXT_MK"'
 alias    asm='GCASE=   _dgrep "$_DGEXT_ASM"'
 alias    xml='GCASE=   _dgrep "$_DGEXT_XML"'
+alias    tex='GCASE=   _dgrep "$_DGEXT_TEX"'
 alias  shell='GCASE=   _dgrep "$_DGEXT_SHELL"'
 alias    ref='GCASE=   _dgrep "$_DGEXT_REF"'
 alias     ic='GCASE=-i _dgrep "$_DGEXT_C"'
@@ -51,6 +53,7 @@ alias    ipy='GCASE=-i _dgrep "$_DGEXT_PY"'
 alias    imk='GCASE=-i _dgrep "$_DGEXT_MK"'
 alias   iasm='GCASE=-i _dgrep "$_DGEXT_ASM"'
 alias   ixml='GCASE=-i _dgrep "$_DGEXT_XML"'
+alias   itex='GCASE=-i _dgrep "$_DGEXT_TEX"'
 alias ishell='GCASE=-i _dgrep "$_DGEXT_SHELL"'
 alias   iref='GCASE=-i _dgrep "$_DGEXT_REF"'
 

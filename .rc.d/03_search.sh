@@ -5,14 +5,15 @@ _ffind1() {
   local FCASE="${FCASE:--}name"
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
-  FILES="$(echo "$FILES" | sed -e 's/;/ -o '${FCASE}' /g')"
-  (set -f; shift $(min 1 $#); find "${DIR:-.}" -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} \( ${FILES:+$FCASE $FILES} -true \) "$@")
+  FILES="$(echo $FILES | sed -e 's/;/'\"' -o '${FCASE}' '\"'/g')"
+  (set -f; shift $(min 1 $#); eval find "\"${DIR:-.}\"" -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} "\(" ${FILES:+$FCASE "\"$FILES\""} -true "\)" "$@")
 }
 _ffind2() {
   local FCASE="${FCASE:--}regex"
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
-  (set -f; shift $(min 1 $#); find "${DIR:-.}" -regextype egrep -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE .*/$FILES} "$@")
+  FILES="$(echo $FILES | sed -e 's/;/|/g')"
+  (set -f; shift $(min 1 $#); find "${DIR:-.}" -regextype egrep -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*/$FILES"} "$@")
 }
 alias _ffind='_ffind1'
 alias    ff='FCASE=   FTYPE=  FXTYPE=  _ffind'
