@@ -1,0 +1,10 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Icon[fr_FR]=/
+Name[fr_FR]=xkill
+Exec=/usr/bin/xkill
+Name=xkill
+Icon=pirate.ico
