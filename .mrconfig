@@ -17,6 +17,17 @@ lib =
 			}
 		}
 	}
+	# Ask user something
+	mr_ask() {
+		local TEXT="$1"
+		local REPLY=""
+		shift
+		read -p "${TEXT}${@:+ ($@)}: " REPLY
+		if [ -z "$REPLY" ]; then
+			REPLY="$@"
+		fi
+		echo "$REPLY"
+	}
 # Add few git actions
 lib =
 	git_exists() {

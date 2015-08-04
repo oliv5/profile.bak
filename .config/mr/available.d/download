@@ -1,6 +1,5 @@
 [${PRIVATE:-$HOME}/media/download]
-checkout = git_clone ssh://olivier@rpi:/media/wdtv/download rpi 2>/dev/null || 
-           git_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdtv/download rpi;
+checkout = git_clone "$(mr_ask "Remote repo to clone")" "$(mr_ask "Remote repo name")";
            annex_init
 
 bundle   = true

@@ -1,6 +1,5 @@
 [${XDG_CONFIG_HOME:-$HOME/.config}/vcsh/repo.d/profile.git]
-checkout = vcsh_clone ssh://olivier@rpi:/media/wdc/git/profile.git rpi 2>/dev/null ||
-           vcsh_clone ssh://olivier@oliv5kta.dtdns.net:443/media/wdc/git/profile.git rpi;
+checkout = vcsh_clone "$(mr_ask "Remote repo to clone" "https://github.com/oliv5/profile.git")" "$(mr_ask "Remote repo name")";
            annex_init && annex_init_hubic
 
 bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle";
