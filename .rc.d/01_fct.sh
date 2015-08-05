@@ -30,19 +30,6 @@ fct_prepend() {
 }
 
 ################################
-# Run a command silently (especially shell fct)
-# Note: can use "nohup" when running real prgm
-silent() {
-  local ARG1="$1"; shift
-  $ARG1 $@  >/dev/null 2>&1 &
-}
-
-# Run a command and filter stdout by another one
-filter_stdout() {
-  { eval "$1" 2>&1 1>&3 | eval "$2" 1>&2; } 3>&1
-}
-
-################################
 # Computations
 min() { echo $(($1<$2?$1:$2)); }
 max() { echo $(($1>$2?$1:$2)); }

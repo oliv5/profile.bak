@@ -58,6 +58,9 @@ alias shift7='command shift 7 2>/dev/null || set --'
 alias shift8='command shift 8 2>/dev/null || set --'
 alias shift9='command shift 9 2>/dev/null || set --'
 
+# Alias to get script path
+alias shell_script='[ -n "$BASH_VERSION" ] && (builtin cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd) || readlink -f "$(dirname "$0")"'
+
 ################################
 # Warn function
 warn() {
@@ -86,6 +89,19 @@ cmd_exists() {
 cmd_unset() {
   unalias $* 2>/dev/null
   unset -f $* 2>/dev/null
+}
+
+################################
+# Run a command silently (especially shell fct)
+# Note: can use "nohup" when running real prgm
+silent() {
+  local ARG1="$1"; shift
+  $ARG1 $@  >/dev/null 2>&1 &
+}
+
+# Run a command and filter stdout by another one
+filter_stdout() {
+  { eval "$1" 2>&1 1>&3 | eval "$2" 1>&2; } 3>&1
 }
 
 ################################
