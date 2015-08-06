@@ -54,6 +54,7 @@ alias gsd='git_stash_diff'
 alias gsdm='git_stash_diffm'
 alias gsdl='git_stash_diffl'
 alias gsf='git_stash_flush'
+alias gsb='git_stash_backup'
 alias gsm='gsdm'
 # Commit aliases
 alias gci='git commit'
@@ -139,6 +140,12 @@ git_exists() {
 # Get current branch name
 git_branch() {
   git rev-parse --abbrev-ref "${1:-HEAD}"
+  #git branch -a | grep -E '^\*' | cut -c 3-
+}
+
+# Get current url
+git_url() {
+  git config --get remote.${1:-origin}.url
 }
 
 # Check if a repo has been modified
@@ -263,6 +270,20 @@ git_stash_flush() {
   if ask_question "Flush the stash? (y/n): " y Y >/dev/null; then
     git stash clear
   fi
+}
+
+# Backup stashes in .git/backup
+git_stash_backup() {
+  git_exists || return 1
+  DST="${GIT_DIR:-./.git}/backup"
+  mkdir -p "$DST"
+  for STASH in $(git stash list --date=iso | awk '{gsub(/-/,"",$1); gsub(/:/,"",$2); print $1"-"$2"}"}'); do
+    if [ ! -e "$DST/$STASH" ]; then
+      git diff -p "$STASH" "$@" > "$DST/$STASH"
+      #true
+      #read
+    fi
+  done
 }
 
 # Aliases using stashes
@@ -403,17 +424,35 @@ alias git_ignore_changes='git update-index --assume-unchanged'
 alias git_noignore_changes='git update-index --no-assume-unchanged'
 
 ########################################
-# Show branch/url
-git_url() {
-  git config --get remote.${1:-origin}.url
-}
-git_branch() {
-  git branch -a | grep -E '^\*' | cut -c 3-
-}
-
-########################################
 # Remove things
 alias git_rm_tracking_branch='git branch -dr'
 alias git_rm_tracking_branch2='git fetch -p'
 alias git_rm_remote_branch='push origin -d'
 alias git_rm_branch='git branch -d'
+
+########################################
+# https://stackoverflow.com/questions/4479960/git-checkout-to-a-specific-folder
+# Export the whole repo
+git_export() {
+  local DST="${1:?No output directory specified}"
+  shift
+  # The last '/' is important
+  git checkout-index -a -f --prefix="$DST/" "$@"
+}
+
+# Export a directory
+git_exportdir() {
+  local DST="${1:?No output directory specified}"
+  local SRC="${2:?No input directory specified}"
+  shift 2
+  # The last '/' is important
+  find "$SRC" -print0 | git checkout-index --prefix="$DST/" "$@" -f -z --stdin
+}
+
+########################################
+# Create a bundle
+git_bundle() {
+  local BUNDLE="${1:-${GIT-DIR:-.git}/bundles/bundle.$(git_branch).$(date +%Y%m%d-%H%M%S).bundle}"
+  shift
+  git bundle create "$BUNDLE" --all --tags --remotes "$@"
+}
