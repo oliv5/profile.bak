@@ -287,9 +287,7 @@ git_stash_backup() {
 }
 
 # Aliases using stashes
-alias git_export='git_stash_save'
-alias git_import='git_stash_apply'
-alias git_suspend='git_stash_push'
+alias git_suspend='git_stash_save'
 alias git_resume='git_stash_pop'
 alias git_stash_list='git stash list'
 alias git_stash_drop='git stash drop'
