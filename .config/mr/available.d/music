@@ -2,7 +2,7 @@
 checkout = git_clone "$(mr_ask "Remote repo to clone")" "$(mr_ask "Remote repo name")";
            annex_init && annex_init_hubic
 
-bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
+bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle/public"
 
 pull     = true
 push     = true
