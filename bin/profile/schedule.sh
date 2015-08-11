@@ -1,5 +1,5 @@
 #!/bin/sh
-DGB=""
+DBG=""
 AT=""
 AT_OPT="-M"
 BATCH=""
@@ -76,8 +76,8 @@ CMDLINE="${CMDLINE:-false}"
 [ ! -z "$WATCH" ] && CMDLINE="${WATCH} -- ${CMDLINE}"
 if [ ! -z "$AT" ]; then
   CMDLINE="$(printf "${AT} <<EOF\n${CMDLINE}\nEOF\n")"
-  (set -${VERBOSE}; $DBG eval "${CMDLINE}")
+  (set -${VERBOSE}; ${DBG} eval "${CMDLINE}")
 else
-  (set -${VERBOSE}; ${DGB} ${CMDLINE})
+  (set -${VERBOSE}; ${DBG} ${CMDLINE})
 fi
 exit 0
