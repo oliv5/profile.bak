@@ -66,6 +66,10 @@ ffg() {
 # Source insight
 alias s='si'
 
+# Diff
+alias d='diff'
+alias m='meld'
+
 # Alias misc
 alias hi='history'
 alias mo='mimeopen'
