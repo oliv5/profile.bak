@@ -84,6 +84,9 @@ alias gat='git annex status'
 # Patch aliases
 alias gpd='git diff -p'
 alias gpc='git show'
+# Subtree alias
+alias gsta='git_subtree_add'
+alias gstu='git_subtree_update'
 
 ########################################
 # git wrapper
@@ -330,12 +333,22 @@ git_ls() {
 }
 
 ########################################
+# Subtrees
+# See https://developer.atlassian.com/blog/2015/05/the-power-of-git-subtree/
 # Merge 1 repo as a subtree of current repo
 git_subtree_add() {
-  local REPO="${1:?No repository specified}"
-  local PREFIX="${2:+--prefix="$2"}"
+  local REPO="${1:?No remote repository specified}"
+  local PREFIX="${2:?No local destination specified}"
   local REF="${3:-master}"
-  git subtree add $PREFIX "$REPO" "$REF"
+  git subtree add --prefix="$PREFIX" "$REPO" "$REF" --squash
+}
+
+# Merge 1 repo as a subtree of current repo
+git_subtree_update() {
+  local REPO="${1:?No remote repository specified}"
+  local PREFIX="${2:?No local destination specified}"
+  local REF="${3:-master}"
+  git subtree pull --prefix="$PREFIX" "$REPO" "$REF" --squash
 }
 
 ########################################
