@@ -1,9 +1,9 @@
 " *******************************************************
 " } Select plugins and options {
 " *******************************************************
-if $VIM_USETABS != "" || !has("gui_running")
+" Use tabs when there is no graphical UI
+if !has("gui_running")
 	let g:vimrc_useTabs = 1
-	" Disable MBE plugin
 	let g:loaded_minibufexplorer = 1
 endif
 
@@ -294,6 +294,7 @@ if !exists('g:loaded_minibufexplorer')
 	let g:miniBufExplBRSplit = 0
 
 	" Colors
+	let g:did_minibufexplorer_syntax_inits = 1
 	hi MBENormal               guifg=#FFFFFF guibg=bg
 	hi MBEChanged              guifg='orange' guibg=bg
 	hi MBEVisibleNormal        guifg=#FFFFFF guibg=bg
@@ -310,7 +311,7 @@ if !exists('g:loaded_minibufexplorer')
 	" Cycle through buffers
 	FnNoremap <A-Down>  :MBEbb<CR>
 	FnNoremap <A-Up>    :MBEbf<CR>
-	if !exists("g:vimrc_useTabs")
+	if !exists('g:vimrc_useTabs')
 		FnNoremap <C-Tab>      :MBEbb<CR>
 		FnNoremap <C-S-Tab>    :MBEbf<CR>
 	endif

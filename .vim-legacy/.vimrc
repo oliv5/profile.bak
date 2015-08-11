@@ -57,48 +57,6 @@ endif
 
 
 " *******************************************************
-" } Load plugins {
-" *******************************************************
-" Disable unused plugins
-let g:loaded_bbye = 1
-let g:loaded_project = 1
-let g:loaded_taglist = 1
-"let g:loaded_tagbar = 1
-let g:loaded_srcexpl = 1
-let g:loaded_nerd_tree = 1
-let g:loaded_trinity = 1
-let g:ccvext_version = 1
-let g:loaded_yankring = 1
-let g:loaded_cctree = 1
-let g:command_t_loaded = 1
-"let g:loaded_minibufexplorer = 1
-"let g:loaded_yaifa = 1
-"let g:loaded_ctrlp = 1
-"let g:loaded_buftabs = 1
-let g:loaded_easytags = 1
-let g:c_complete_loaded = 1
-let g:syntax_complete_loaded = 1
-"let g:omnicpp_complete_loaded = 1
-let g:clang_complete_loaded = 1
-"let g:loaded_commentary = 1
-let g:loaded_bufline = 1
-
-" Load bundles config
-if filereadable(expand("~/.vimrc.bundles"))
-	source ~/.vimrc.bundles
-endif
-if filereadable(expand("~/.vimrc.bundles.local"))
-	source ~/.vimrc.bundles.local
-endif
-
-" Load plugins with pathogen
-filetype off                " force reloading *after* pathogen loaded
-runtime bundle/pathogen/autoload/pathogen.vim
-execute pathogen#infect()
-filetype plugin indent on   " enable detection, plugins and indenting in one step
-
-
-" *******************************************************
 " } Global settings {
 " *******************************************************
 set path=.,,**              " Search path: recurse from current directory
@@ -123,6 +81,7 @@ au FileChangedShell * exec 'echohl WarningMsg | echo "Warning: file' expand('%')
 
 " Autochange directory
 let g:vimrc_autochdir = 2
+
 
 " *******************************************************
 " } Terminal Settings {
@@ -288,6 +247,48 @@ nnoremap <localleader>w  :set invwrap<CR>
 set nolist              " Do not show all characters by default
 nnoremap <localleader>c  :set invlist<CR>
 "nnoremap <localleader>c  :exec &list?'set nolist':'set list'<CR>
+
+
+" *******************************************************
+" } Load plugins {
+" *******************************************************
+" Disable unused plugins
+let g:loaded_bbye = 1
+let g:loaded_project = 1
+let g:loaded_taglist = 1
+"let g:loaded_tagbar = 1
+let g:loaded_srcexpl = 1
+let g:loaded_nerd_tree = 1
+let g:loaded_trinity = 1
+let g:ccvext_version = 1
+let g:loaded_yankring = 1
+let g:loaded_cctree = 1
+let g:command_t_loaded = 1
+"let g:loaded_minibufexplorer = 1
+"let g:loaded_yaifa = 1
+"let g:loaded_ctrlp = 1
+"let g:loaded_buftabs = 1
+let g:loaded_easytags = 1
+let g:c_complete_loaded = 1
+let g:syntax_complete_loaded = 1
+"let g:omnicpp_complete_loaded = 1
+let g:clang_complete_loaded = 1
+"let g:loaded_commentary = 1
+let g:loaded_bufline = 1
+
+" Load bundles config
+if filereadable(expand("~/.vimrc.bundles"))
+	source ~/.vimrc.bundles
+endif
+if filereadable(expand("~/.vimrc.bundles.local"))
+	source ~/.vimrc.bundles.local
+endif
+
+" Load plugins with pathogen
+filetype off                " force reloading *after* pathogen loaded
+runtime bundle/pathogen/autoload/pathogen.vim
+execute pathogen#infect()
+filetype plugin indent on   " enable detection, plugins and indenting in one step
 
 
 " *******************************************************
