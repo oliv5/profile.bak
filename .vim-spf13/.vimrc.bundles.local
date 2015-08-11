@@ -39,7 +39,7 @@
 
 " Additional bundles {
 	"Bundle 'powerman/vim-plugin-AnsiEsc'
-	Bundle 'fholgado/minibufexpl.vim'
+	"Bundle 'fholgado/minibufexpl.vim'
 	Bundle 'vim-scripts/AutoTag'
 	Bundle 'hari-rangarajan/CCTree'
 	Bundle 'Raimondi/YAIFA'
@@ -59,21 +59,22 @@
 	FnNoremap <C-p><C-p>	:CtrlPFunky<CR>
 
 	" Neosnippet
-	let g:neosnippet#disable_select_mode_mappings = 0
-	imap <C-k>     <Plug>(neosnippet_expand_or_jump)
-	smap <C-k>     <Plug>(neosnippet_expand_or_jump)
-	xmap <C-k>     <Plug>(neosnippet_expand_target)
-	imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-		\ "\<Plug>(neosnippet_expand_or_jump)"
-		\: pumvisible() ? "\<C-n>" : "\<TAB>"
-	smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-		\ "\<Plug>(neosnippet_expand_or_jump)"
-	\: "\<TAB>"
-	
-	if has('conceal')
-		" For snippet_complete marker.
-		set conceallevel=2 concealcursor=i
-	endif
+	"if exists('*neosnippet#init#_initialize()')
+	"	let g:neosnippet#disable_select_mode_mappings = 0
+	"	imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+	"	smap <C-k>     <Plug>(neosnippet_expand_or_jump)
+	"	xmap <C-k>     <Plug>(neosnippet_expand_target)
+	"	imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+	"		\ "\<Plug>(neosnippet_expand_or_jump)"
+	"		\: pumvisible() ? "\<C-n>" : "\<TAB>"
+	"	smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+	"		\ "\<Plug>(neosnippet_expand_or_jump)"
+	"		\: "\<TAB>"
+	"	if has('conceal')
+	"		" For snippet_complete marker.
+	"		set conceallevel=2 concealcursor=i
+	"	endif
+	"endif
 	
 	" Syntastic
 	let g:syntastic_python_checkers = ['pylint']
