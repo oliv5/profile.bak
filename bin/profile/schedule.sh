@@ -42,10 +42,10 @@ do
     v) VERBOSE="x";;
     
     h|*) echo >&2 "Usage: `basename $0` [-t time] [-m] [-b] [-w h:m:s] [-l h:m:s] [-k h:m:s] -[s signal] [-r trials] [-p h:m:s] -- <command line...>"
-       echo >&2 "-t   at: time of execution (man at)"
+       echo >&2 "-t   at: start time (man at)"
        echo >&2 "-m   at: send email upon completion"
        echo >&2 "-b   batch: execute when system load < 1.5%"
-       echo >&2 "-w   watch: execution time delay"
+       echo >&2 "-w   watch: re-schedule interval"
        echo >&2 "-l   timeout: timeout length"
        echo >&2 "-k   timeout: kill delay upon timeout"
        echo >&2 "-s   timeout: kill signal name sent upon timeout"
