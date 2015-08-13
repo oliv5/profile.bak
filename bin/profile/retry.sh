@@ -17,11 +17,10 @@ if expr 2 "*" "$1" + 1 > /dev/null 2>&1; then
 fi
 
 # Loop
-CMD="$@"
 false; while [ $? -ne 0 ] && [ $LIMIT -le 0 -o $RETRY -ne $LIMIT ]; do
   [ $RETRY -gt 0 ] && sleep $PAUSE
   RETRY=$(($RETRY+1))
-  eval "$CMD"
+  eval "$@"
 done
 
 # Done - untrap and exit

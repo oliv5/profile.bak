@@ -1,17 +1,19 @@
 #!/bin/sh
 DBG=""
+VERBOSE=""
 AT=""
 AT_OPT="-M"
 BATCH=""
 TIMEOUT=""
-TIMEOUT_OPT=""
+TIMEOUT_OPT="--foreground"
 RETRY=""
 RETRY_OPT=0
 WATCH=""
-VERBOSE=""
+WATCH_OPT="--no-title"
+INTERVAL=""
 
 # Convert OPTARG into seconds
-arg2Sec(){
+arg_tosec(){
   OPTARG="$(echo "$OPTARG" | awk -F'[:.]' '{ for(i=0;i<2;i++){if(NF<=2){$0=":"$0}}; print ($1 * 3600) + ($2 * 60) + $3 }')"
   if [ $OPTARG -eq 0 ]; then
     echo "Invalid '-$OPTFLAG' parameter. Abort..."
@@ -19,27 +21,39 @@ arg2Sec(){
   fi
 }
 
+# Sur-quote args in parameters
+arg_quote() {
+  local SEP=''
+  for ARG in "$@"; do
+    SQESC=$(printf '%s\n' "${ARG}" | sed -e "s/'/'\\\\''/g")
+    printf '%s' "${SEP}'${SQESC}'"
+    SEP=' '
+  done
+}
+
 # Get args
 OPTIND=0
 unset OPTFLAG OPTARG OPTERR
-while getopts "t:mbw:l:k:s:r:p:hdv" OPTFLAG
+while getopts "t:mbw:i:l:k:s:r:p:hdv" OPTFLAG
 do
   case "$OPTFLAG" in
     t) AT="${OPTARG}";;
     m) AT_OPT="${AT_OPT:+$AT_OPT }-m";;
     b) BATCH="batch";;
     
-    w) arg2Sec; WATCH="-n ${OPTARG}";;
+    w) arg_tosec; WATCH="-n ${OPTARG}";;
     
-    l) arg2Sec; TIMEOUT="${OPTARG}";;
-    k) arg2Sec; TIMEOUT_OPT="${TIMEOUT_OPT:+$TIMEOUT_OPT }-k ${OPTARG}";;
+    i) arg_tosec; INTERVAL="${OPTARG}";;
+    
+    l) arg_tosec; TIMEOUT="${OPTARG}";;
+    k) arg_tosec; TIMEOUT_OPT="${TIMEOUT_OPT:+$TIMEOUT_OPT }-k ${OPTARG}";;
     s) TIMEOUT_OPT="${TIMEOUT_OPT:+$TIMEOUT_OPT }-s ${OPTARG}";;
     
     r) RETRY="${OPTARG}";;
-    p) arg2Sec; RETRY_OPT="${OPTARG}";;
+    p) arg_tosec; RETRY_OPT="${OPTARG}";;
     
     d) DBG="echo";;
-    v) VERBOSE="x";;
+    v) VERBOSE="vx";;
     
     h|*) echo >&2 "Usage: `basename $0` [-t time] [-m] [-b] [-w h:m:s] [-l h:m:s] [-k h:m:s] -[s signal] [-r trials] [-p h:m:s] -- <command line...>"
        echo >&2 "-t   at: start time (man at)"
@@ -60,24 +74,30 @@ do
 done
 shift $(($OPTIND-1))
 unset OPTFLAG OPTARG OPTERR
-CMDLINE="$@"
 OPTIND=0
+
+# Working nested commands example
+# watch -n 1 -- timeout --foreground 5 retry.sh 1 0 "\"ls -l '/tmp/toto titi/test.txt'\""
 
 # Build control command lines
 AT="${BATCH:-${AT:+at $AT $AT_OPT}}"
-WATCH="${WATCH:+watch $WATCH}"
+WATCH="${WATCH:+watch $WATCH_OPT $WATCH}"
 TIMEOUT="${TIMEOUT:+timeout $TIMEOUT_OPT $TIMEOUT}"
 RETRY="${RETRY:+retry.sh $RETRY $RETRY_OPT}"
 
+# "watch" does work with "at" when there is no terminal
+# use "interval" instead
+[ ! -z "$AT" ] && unset WATCH
+
 # Build the final command-line and execute
-CMDLINE="${CMDLINE:-false}"
-[ ! -z "$RETRY" ] && CMDLINE="${RETRY} ${CMDLINE}"
-[ ! -z "$TIMEOUT" ] && CMDLINE="${TIMEOUT} sh -c '${CMDLINE}'"
-[ ! -z "$WATCH" ] && CMDLINE="${WATCH} -- ${CMDLINE}"
-if [ ! -z "$AT" ]; then
-  CMDLINE="$(printf "${AT} <<EOF\n${CMDLINE}\nEOF\n")"
-  (set -${VERBOSE}; ${DBG} eval "${CMDLINE}")
-else
-  (set -${VERBOSE}; ${DBG} ${CMDLINE})
-fi
+CMDLINE="$(arg_quote "${@:-true}")"
+[ ! -z "$RETRY" ] &&    CMDLINE="${RETRY} \"${CMDLINE}\""
+[ ! -z "$TIMEOUT" ] &&  CMDLINE="${TIMEOUT} ${CMDLINE}"
+[ ! -z "$INTERVAL" ] && CMDLINE="while true; do ${CMDLINE}; sleep ${INTERVAL}s; done"
+[ ! -z "$WATCH" ] &&    CMDLINE="${WATCH} -- $(arg_quote "${CMDLINE}")"
+[ ! -z "$AT" ] &&       CMDLINE="$(printf "${AT} <<EOF\n${CMDLINE}\nEOF\n")"
+
+# Execute
+(set -${VERBOSE}; ${DBG} eval "$CMDLINE")
+
 exit 0
