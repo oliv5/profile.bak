@@ -46,8 +46,8 @@
   copy = <Primary><Shift>c
   paste = <Primary><Shift>v
   search = <Primary>f
-  full_screen = F11
-  edit_window_title = F12
+  full_screen = <Primary>F11
+  edit_window_title = <Primary><Shift>F11
 [profiles]
   [[default]]
     scrollback_lines = 15000
