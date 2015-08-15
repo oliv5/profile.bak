@@ -37,17 +37,23 @@ lib =
 		[ "$(git config --get core.bare)" = "true" ]
 	}
 	git_clone() {
-		REPO="$(basename "$MR_REPO" .git)"
-		git clone "$1" $REPO
-		cd "$REPO"
-		if [ ! -z "$2" ]; then git remote rename origin "$2"; fi
+		REPO="$(basename"$MR_REPO".git)"
+		for ARGS; do
+			set $ARGS
+			REMOTE="$1"
+			NAME="${2:-$REPO}"
+			BRANCH="${3:-master}"
+			git clone "$REMOTE" "$REPO" || break
+			git --git-dir="$REPO/.git" remote rename origin "$NAME"
+			git --git-dir="$REPO/.git" checkout "$BRANCH"
+		done
 	}
 	git_pull() {
 		vcsh_run "
 			git stash save -q 'mrconfig_stash'
 			for REMOTE in $1; do
 				if git remote | grep -- \\\$REMOTE >/dev/null; then
-					for BRANCH in $2; do
+					for BRANCH in ${2:-master}; do
 						git pull --rebase \\\$REMOTE \\\$BRANCH
 					done
 				fi
@@ -58,7 +64,7 @@ lib =
 	git_push() {
 		for REMOTE in $1; do
 			if git remote | grep -- $REMOTE >/dev/null; then
-				for BRANCH in $2; do
+				for BRANCH in ${2:-master}; do
 					echo -n "Push $REMOTE/$BRANCH : "
 					git push $REMOTE $BRANCH
 				done
