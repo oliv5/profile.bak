@@ -1,6 +1,6 @@
 # .mrskip allows to skip some combinations of host/repo/command
-# Format of each line is: "host" "repo" "command"
-# Empty fields are ignored but the 2 ':' characters must be there
+# Format of each line is: "host" "repo" "repo shortname" "action"
+# Empty fields match with everything and the 3 ':' characters must be there
 
 # u36sd does not bundle medias
 u36sd::books:bundle
