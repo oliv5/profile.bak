@@ -159,7 +159,9 @@ lib =
 				if annex_bare; then
 					tar czf "$BUNDLE" -h ./annex
 				else
-					vcsh_run "git annex list $(git config --get core.worktree)" | awk 'NF>1 {print $2}' | xargs tar czf "$BUNDLE" -h --exclude-vcs
+					vcsh_run "git annex list $(git config --get core.worktree)" | 
+						awk 'NF>1 {$1="";print "\""substr($0,2)"\""}' |
+						xargs tar czf "$BUNDLE" -h --exclude-vcs
 				fi
 				if [ ! -z "$3" ]; then
 					gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$3" "${BUNDLE}" && 
@@ -171,7 +173,7 @@ lib =
 				echo "Skip bundle creation..."
 			fi
 		else
-			echo "Host or its directory '$DIR' is not git-annex ready."
+			echo "Source directory '$MR_REPO' is not git-annex ready."
 			echo "Skip bundle creation..."
 		fi
 	}
