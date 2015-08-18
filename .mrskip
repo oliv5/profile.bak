@@ -3,11 +3,14 @@
 # Empty fields are ignored but the 2 ':' characters must be there
 
 # u36sd does not bundle medias
-u36sd:books:bundle
-u36sd:photos:bundle
-u36sd:videos:bundle
-u36sd:music:bundle
+u36sd::books:bundle
+u36sd::photos:bundle
+u36sd::videos:bundle
+u36sd::music:bundle
 
 # no one bundles films/download
-:films:bundle
-:download:bundle
+::films:bundle
+::download:bundle
+
+# rpi does not bundle $HOME/profile
+rpi:/home/olivier/.config/vcsh/repo.d/profile.git::bundle

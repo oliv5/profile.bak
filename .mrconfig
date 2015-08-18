@@ -11,9 +11,9 @@ lib =
 		} ||
 		{
 			[ -r "$HOME/.mrskip" ] && {
-				local MR_REPO="$(basename "${MR_REPO}")"
+				local MR_NAME="$(basename "${MR_REPO}" .git)"
 				local HOSTNAME="$(uname -n)"
-				grep -iE "^($HOSTNAME|):($MR_REPO|):($MR_ACTION|)$" "$HOME/.mrskip" >/dev/null 2>&1; 
+				grep -iE "^($HOSTNAME|):($MR_REPO|):($MR_NAME|):($MR_ACTION|)$" "$HOME/.mrskip" >/dev/null 2>&1; 
 			}
 		}
 	}
