@@ -157,11 +157,11 @@ lib =
 				BUNDLE="$DIR/${2:-$(basename "$MR_REPO" .git).annex.$(uname -n).$DATE.tgz}"
 				echo "Tar annex into $BUNDLE"
 				if annex_bare; then
-					tar czf "$BUNDLE" -h ./annex
+					tar cf "$BUNDLE" -h ./annex
 				else
 					vcsh_run "git annex list $(git config --get core.worktree)" | 
 						awk 'NF>1 {$1="";print "\""substr($0,2)"\""}' |
-						xargs tar czf "$BUNDLE" -h --exclude-vcs
+						xargs tar cf "$BUNDLE" -h --exclude-vcs
 				fi
 				if [ ! -z "$3" ]; then
 					gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$3" "${BUNDLE}" && 
