@@ -9,15 +9,15 @@
 [ -z "$USER" ] && export USER="$(id -un)"
 [ -z "$HOME" ] && export HOME="$(grep "$USER" /etc/passwd | cut -d: -f6)"
 [ -z "$LOGNAME" ] && export LOGNAME="$USER"
-[ -z "$HOSTNAME" ] && export HOSTNAME="$(/bin/hostname)"  #uname -n
-[ -z "$DOMAIN" ] && export DOMAIN="$(/bin/hostname -d)"
+[ -z "$HOSTNAME" ] && export HOSTNAME="$(hostname 2>/dev/null || uname -n)"
+[ -z "$DOMAIN" ] && export DOMAIN="$(hostname -d 2>/dev/null)"
 [ -z "$DISPLAY" ] && export DISPLAY=":0"
-
-# Load next script (dash-only)
-export ENV="$HOME/.rc"
 
 # Set load flag
 export ENV_PROFILE=$((ENV_CNT=ENV_CNT+1))
+
+# Load next script (dash-only)
+export ENV="$HOME/.rc"
 
 # Load local profile script
 if [ -r "$HOME/.profile.local" ]; then

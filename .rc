@@ -6,6 +6,7 @@
 # Define global variables
 export ENV_RC=$((ENV_CNT=ENV_CNT+1))
 export RC_PERMS="${RC_PERMS:--x}"
+export RC_DIR="${RC_DIR:-$HOME}"
 # Define local variables
 RC_VERBOSE="false"
 RC_DRYRUN="false"
@@ -37,7 +38,7 @@ rc_log() {
 
 ################################
 # List, load and reload profile scripts
-alias rc='. "$HOME/.rc"'
+alias rc='. "$RC_DIR/.rc"'
 alias load='RC_VERBOSE=true rc_sourcemods'
 alias profile='rc'
 
@@ -62,26 +63,26 @@ rc_sourcefiles() {
 # Source files by partial name
 rc_sourcemods() {
   for FILE; do
-    rc_sourcefiles "-r" "" "$HOME/.rc.d/"*$FILE*.sh
+    rc_sourcefiles "-r" "" "$RC_DIR/.rc.d/"*$FILE*.sh
   done
 }
 
 ################################
 # Source .profile when not already done
 if [ -z "$ENV_PROFILE" ]; then
-  rc_sourcefiles "-r" "" "$HOME/.profile"
+  rc_sourcefiles "-r" "" "$RC_DIR/.profile"
 fi
 
 # Source profile scripts in order
-rc_log "Source $HOME/.rc"
-rc_sourcefiles "-r" "ENV_RC_LOCAL" "$HOME/.rc.local"
-rc_sourcefiles "$RC_PERMS" "ENV_RC_D" "$HOME/.rc.d/"*.sh
+rc_log "Source $RC_DIR/.rc"
+rc_sourcefiles "-r" "ENV_RC_LOCAL" "$RC_DIR/.rc.local"
+rc_sourcefiles "$RC_PERMS" "ENV_RC_D" "$RC_DIR/.rc.d/"*.sh
 if [ ! -z "$BASH_VERSION" ]; then
-  rc_sourcefiles "$RC_PERMS" "ENV_RC_D_BASH" "$HOME/.rc.d/bash/"*.sh
+  rc_sourcefiles "$RC_PERMS" "ENV_RC_D_BASH" "$RC_DIR/.rc.d/bash/"*.sh
 fi
-rc_sourcefiles "$RC_PERMS" "ENV_RC_D_LOCAL" "$HOME/.rc.d/local/"*.sh
-rc_sourcefiles "-r" "ENV_RC_END" "$HOME/.rc.end"
-rc_sourcefiles "-r" "ENV_RC_LOCAL_END" "$HOME/.rc.local.end"
+rc_sourcefiles "$RC_PERMS" "ENV_RC_D_LOCAL" "$RC_DIR/.rc.d/local/"*.sh
+rc_sourcefiles "-r" "ENV_RC_END" "$RC_DIR/.rc.end"
+rc_sourcefiles "-r" "ENV_RC_LOCAL_END" "$RC_DIR/.rc.local.end"
 
 ################################
 #Clean local variables
