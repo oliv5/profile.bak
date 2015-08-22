@@ -1,5 +1,6 @@
 #!/system/bin/sh
 # Add content to annex and sync it
+# adb push annex.sh /sdcard/bin
 
 # Local variables
 PATH="/data/data/ga.androidterm/bin:$PATH"
@@ -10,29 +11,30 @@ ANNEX_CONTENT=""
 ANNEX_FORCE=""
 LOGFILE="&1"
 
-# Get arguments
-while getopts "dcfl:s:h" OPTFLAG
-do
-  case "$FLAG" in
-    d) set -vx; DBG="false";;
-    c) ANNEX_CONTENT="--content";;
-    f) ANNEX_FORCE="--force";;
-    l) LOGFILE="${OPTARG}";;
-    s) SRCDIR="${OPTARG}";;
-    *) echo >&2 "Usage: annex.sh [-d] [-c] [-f] [-l logfile] [-s dir]"
-       echo >&2 "-d  dry-run"
-       echo >&2 "-c  sync content"
-       echo >&2 "-f  force file addition"
-       echo >&2 "-l  log to file"
-       echo >&2 "-s  set source directory"
-       exit 1
-       ;;
-  esac
-done
-unset OPTIND OPTFLAG OPTARG
+# From now on, run in a subshell because of the exit command
+(
+    # Get arguments
+    while getopts "dcfl:s:h" OPTFLAG
+    do
+      case "$OPTFLAG" in
+        d) set -vx; DBG="false";;
+        c) ANNEX_CONTENT="--content";;
+        f) ANNEX_FORCE="--force";;
+        l) LOGFILE="${OPTARG}";;
+        s) SRCDIR="${OPTARG}";;
+        *) echo >&2 "Usage: annex.sh [-d] [-c] [-f] [-l logfile] [-s dir]"
+           echo >&2 "-d  dry-run"
+           echo >&2 "-c  sync content"
+           echo >&2 "-f  force file addition"
+           echo >&2 "-l  log to file"
+           echo >&2 "-s  set source directory"
+           exit 1
+           ;;
+      esac
+    done
+    unset OPTIND OPTFLAG OPTARG
 
-# Main script
-{
+    # Main script
     echo "Annex - begins at $(date)"
     cd "$SRCDIR"
     if ! command -v git >/dev/null 2>&1; then
@@ -51,10 +53,12 @@ unset OPTIND OPTFLAG OPTARG
         ${DBG} git config --local user.name "$USER"
         ${DBG} git config --local user.email "$USER@$HOSTNAME"
     fi
-    for FILE in "$(cat "$ANNEX_LIST")"; do
+    IFS=$'\n'
+    for FILE in $(cat "$ANNEX_LIST"); do
         ${DBG} git annex add "$FILE" $ANNEX_FORCE
     done
     ${DBG} git annex sync $ANNEX_CONTENT
     echo "Annex - ends at $(date)"
-} 2>&1 >${LOGFILE}
-exit 0
+    exit 0
+    
+) >${LOGFILE} 2>&1
