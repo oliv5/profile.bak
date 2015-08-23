@@ -6,21 +6,20 @@
 PATH="/data/data/ga.androidterm/bin:$PATH"
 DBG=""
 SRCDIR="."
-ANNEX_LIST=".annexlist"
+ANNEX_FILELIST=".gitlist"
 ANNEX_CONTENT=""
 ANNEX_FORCE=""
-LOGFILE="&1"
+LOGFILE="/dev/null"
 
 # From now on, run in a subshell because of the exit command
 (
     # Get arguments
-    while getopts "dcfl:s:h" OPTFLAG
-    do
+    while getopts "dcfl:s:h" OPTFLAG; do
       case "$OPTFLAG" in
         d) set -vx; DBG="false";;
         c) ANNEX_CONTENT="--content";;
         f) ANNEX_FORCE="--force";;
-        l) LOGFILE="${OPTARG}";;
+        l) LOGFILE="\"${OPTARG}\"";;
         s) SRCDIR="${OPTARG}";;
         *) echo >&2 "Usage: annex.sh [-d] [-c] [-f] [-l logfile] [-s dir]"
            echo >&2 "-d  dry-run"
@@ -54,11 +53,12 @@ LOGFILE="&1"
         ${DBG} git config --local user.email "$USER@$HOSTNAME"
     fi
     IFS=$'\n'
-    for FILE in $(cat "$ANNEX_LIST"); do
+    for FILE in $(cat "$ANNEX_FILELIST"); do
+        echo "Add '$FILE'"
         ${DBG} git annex add "$FILE" $ANNEX_FORCE
     done
     ${DBG} git annex sync $ANNEX_CONTENT
     echo "Annex - ends at $(date)"
     exit 0
     
-) >${LOGFILE} 2>&1
+) 2>&1 | tee "$LOGFILE"
