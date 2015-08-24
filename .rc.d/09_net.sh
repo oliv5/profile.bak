@@ -10,6 +10,26 @@ alias nh='sudo nethogs'
 #alias nn='sudo bwm-ng'
 #alias nc='sudo cbm'
 #alias no='sudo speedometer'
+alias it='iftop'
+
+############################
+# Wifi status test
+wifi_enabled() {
+  ip addr show dev ${1:-wlan0} 2>/dev/null | grep UP >/dev/null
+}
+wifi_enabled2() {
+  iw ${1:-wlan0} link 2>/dev/null | grep -v -i not >/dev/null
+}
+
+# Wifi enable
+wifi_enable() {
+  ifup ${1:-wlan0}
+}
+
+# Wifi disable
+wifi_disable() {
+  ifdown ${1:-wlan0}
+}
 
 ############################
 # quvi alias
