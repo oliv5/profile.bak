@@ -28,7 +28,9 @@ alias gln='git ls-files -o --exclude-standard'
 alias gli='git ls-files -o -i --exclude-standard'
 # Diff aliases
 alias gdd='git_diff_all'
+alias gddo='git diff'
 alias gdm='git_diffm_all'
+alias gdmo='git_diffm'
 alias gds='git diff stash'
 # Merge aliases
 alias gmm='git mergetool -y -t meld'
