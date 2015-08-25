@@ -5,15 +5,15 @@ _ffind1() {
   local FCASE="${FCASE:--}name"
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
-  FILES="$(echo $FILES | sed -e 's/;/'\"' -o '${FCASE}' '\"'/g')"
-  (set -f; shift $(min 1 $#); eval find "\"${DIR:-.}\"" -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} "\(" ${FILES:+$FCASE "\"$FILES\""} -true "\)" "$@")
+  ( set -f; FILES="$(echo $FILES | sed -e 's/;/'\"' -o '${FCASE}' '\"'/g')"; shift $(min 1 $#)
+    eval find "\"${DIR:-.}\"" -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} "\(" ${FILES:+$FCASE "\"$FILES\""} -true "\)" "$@")
 }
 _ffind2() {
   local FCASE="${FCASE:--}regex"
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
-  FILES="$(echo $FILES | sed -e 's/;/|/g')"
-  (set -f; shift $(min 1 $#); find "${DIR:-.}" -regextype egrep -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*/$FILES"} "$@")
+  ( set -f; FILES="$(echo $FILES | sed -e 's/;/|/g')"; shift $(min 1 $#)
+    find "${DIR:-.}" -regextype egrep -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*/$FILES"} "$@")
 }
 alias _ffind='_ffind1'
 alias    ff='FCASE=   FTYPE=  FXTYPE=  _ffind'
@@ -84,21 +84,24 @@ alias  igg='GCASE=-i _fgrep'
 ggl() {  gg "$@" | cut -d : -f 1 | uniq; }
 iggl(){ igg "$@" | cut -d : -f 1 | uniq; }
 
-# Safe search & replace
+# Search & replace
 _fsed1() {
+  # Get arguments
   local SEDOPT="$(arg_rtrim 3 "$@")"; shift $(($#-3))
   local IN="$1"; local OUT="$2"; local FILES="$3"
-  # Last chance to exit
-  echo "Replace '$IN' by '$OUT' in files '$FILES' (opts $SEDOPT) ?"
-  local _ANSWER; read -p "Press enter or Ctrl-C" _ANSWER 
-  # Sed in place with no output
-  #eval _ffind "\"$FILES\"" $SEXCLUDE -type f -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
-  # Sed in place with display
-  #eval _ffind "\"$FILES\"" $SEXCLUDE -type f -execdir sed -i $SEDOPT -e "/$IN/{w /dev/stderr" -e "}" -e "s/$IN/$OUT/g" {} \;
-  # Sed in place with backup
-  eval FTYPE= FXTYPE= _ffind "\"$FILES\"" $SEXCLUDE -type f -execdir sed --in-place=_$(date +%Y%m%d-%H%M%S).bak $SEDOPT "\"s/$IN/$OUT/g\"" "{} \;"
-  # Sed with confirmation about all files
-  #eval _ffind "\"$FILES\"" $SEXCLUDE -type f -exec echo "Processing file {} ?" \; -exec bash -c read \; -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
+  echo "Preparing to replace '$IN' by '$OUT' in files '$FILES' ${SEDOPT:+with options '$SEDOPT'}"
+  # Ask for options
+  local _SHOW; read -p "Show each line changed ? (Y/n)" _SHOW
+  local _BACKUP; read -p "Backup each file ? (Y/n)" _BACKUP
+  local _CONFIRM; read -p "Confirm each file change ? (Y/n)" _CONFIRM
+  # Manage options
+  [ "$_SHOW" != "n" -a "$_SHOW" != "N" ] && _SHOW="1" || unset _SHOW
+  [ "$_CONFIRM" != "n" -a "$_CONFIRM" != "N" ] && _CONFIRM=true || _CONFIRM=false
+  [ "$_BACKUP" != "n" -a "$_BACKUP" != "N" ] && _BACKUP="_$(date +%Y%m%d-%H%M%S).bak" || unset _BACKUP
+  # Call find and sed
+  FTYPE= FXTYPE= _ffind "\"$FILES\"" $SEXCLUDE -type f \
+    ${_CONFIRM:+-exec sh -c "'read -p \"Processing file {}? (enter/ctrl-c)\" DUMMY'" "\\;"} \
+    -execdir sed --in-place${_BACKUP:+=$_BACKUP} $SEDOPT ${_SHOW:+-e '"\|$IN|{w /dev/stderr"' -e '"}"'} -e '"s|$IN|$OUT|g"' "{}" "\\;"
 }
 alias _fsed='_fsed1'
 alias  hh='FCASE=   SEXCLUDE= _fsed'
