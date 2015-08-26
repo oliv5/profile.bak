@@ -17,23 +17,29 @@ LOGFILE="/dev/null"
 
 # From now on, run in a subshell because of the exit command
 (
+    # Check requirements
+    if ! command -v git >/dev/null 2>&1; then
+        echo "[error] Cannot find git. Abort..."
+        exit 1
+    fi
+    
     # Get arguments
-    while getopts "db:ascfl:w:" OPTFLAG; do
+    while getopts "db:asc:fl:w:" OPTFLAG; do
       case "$OPTFLAG" in
         d) set -vx; DBG="false";;
         b) BASEDIR="${OPTARG}";;
         a) ANNEX_ADD="";;
         s) ANNEX_SYNC="";;
-        c) ANNEX_CONTENT="--content";;
+        c) ANNEX_CONTENT="${OPTARG:-$(git remote)}";;
         f) ANNEX_FORCE="--force";;
         l) LOGFILE="\"${OPTARG}\"";;
         w) WIFIDEV="${OPTARG}";;
-        *) echo >&2 "Usage: annex.sh [-h] [-d] [-b] [-a] [-c] [-f] [-l logfile] [-s dir] [-w device]"
+        *) echo >&2 "Usage: annex.sh [-h] [-d] [-b] [-a] [-c repos] [-f] [-l logfile] [-s dir] [-w device]"
            echo >&2 "-d  dry-run"
            echo >&2 "-b  set base directory"
            echo >&2 "-a  skip adding files"
            echo >&2 "-s  skip syncing"
-           echo >&2 "-c  sync content (not with -s)"
+           echo >&2 "-c  repos for which to sync content (not with -s)"
            echo >&2 "-f  force file addition (not with -a)"
            echo >&2 "-l  log to file"
            echo >&2 "-w  sync file content only with wifi (not with -s)"
@@ -45,9 +51,9 @@ LOGFILE="/dev/null"
 
     # Main script
     echo "[annex] start at $(date)"
-    if ! command -v git >/dev/null 2>&1; then
-        echo "[error] Cannot find git. Abort..."
-        exit 1
+    if [ ! -z "$WIFIDEV" ] && ! ip addr show dev "$WIFIDEV" 2>/dev/null | grep UP >/dev/null; then
+        echo "[warning] Wifi device '$WIFIDEV' is not connected. Disable file content syncing..."
+        unset ANNEX_CONTENT
     fi
     IFS=$'\n'
     for REPO in "$BASEDIR" $(cat "$ANNEX_REPOLIST" 2>/dev/null); do
@@ -67,23 +73,23 @@ LOGFILE="/dev/null"
         fi
         if [ ! -z "$ANNEX_ADD" ]; then
             IFS=$'\n'
-            for FILE in $(cat "$ANNEX_FILELIST"); do
+            for FILE in $(cat "$ANNEX_FILELIST" 2>/dev/null); do
                 echo "[annex] Add '$FILE'"
                 ${DBG} git annex add "$FILE" $ANNEX_FORCE
             done
         fi
         if [ ! -z "$ANNEX_SYNC" ]; then
-            echo "[annex] Sync repo ${ANNEX_CONTENT:+with content}"
             if ! git config --get user.name >/dev/null 2>&1; then
+                echo "[annex] Setup local user name and email"
                 ${DBG} git config --local user.name "$USER"
                 ${DBG} git config --local user.email "$USER@$HOSTNAME"
             fi
-            if [ -z "$WIFIDEV" ] || ip addr show dev "$WIFIDEV" 2>/dev/null | grep UP >/dev/null; then
-                ${DBG} git annex sync $ANNEX_CONTENT
-            else
-                echo "[warning] Wifi device '$WIFIDEV' is not connected. Skip file content syncing..."
-                ${DBG} git annex sync
-            fi
+            echo "[annex] Sync metadata"
+            ${DBG} git annex sync
+            for REMOTE in ${ANNEX_CONTENT}; do
+                echo "[annex] Sync files content to remote '$REMOTE'"
+                ${DBG} git annex copy . --to "$REMOTE"
+            done
         fi
     done
     echo "[annex] end at $(date)"
