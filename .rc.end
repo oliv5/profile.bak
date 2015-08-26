@@ -6,7 +6,7 @@
 # Setup path
 path_prepend "$HOME/bin" "$HOME/.local/bin" "$HOME/bin/profile"
 path_append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
-path_append "$HOME/bin/profile/mr" "$HOME/bin/profile/vcsh"
+#path_append "$HOME/bin/profile/resources/mr" "$HOME/bin/profile/resources/vcsh"
 if [ ! -z "$ANDROID_SYSTEM" ]; then
   path_append "$HOME/bin/profile/android"
 fi
