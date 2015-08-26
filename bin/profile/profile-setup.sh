@@ -5,7 +5,7 @@ command -v git 2>&1 >/dev/null || (echo "Git missing, cannot go on..." && exit 1
 
 # Goto home directory
 cd "$HOME"
-mkdir bin 2>/dev/null
+mkdir -p bin/externals 2>/dev/null
 
 # Download and install vcsh if not already there
 if ! command -v vcsh >/dev/null 2>&1; then
@@ -21,9 +21,9 @@ fi
 
 # Download and install google repo if not already there
 if ! command -v repo >/dev/null 2>&1; then
-	#curl https://storage.googleapis.com/git-repo-downloads/repo > "$HOME/bin/repo" && chmod a+x "$HOME/bin/repo"
+	curl https://storage.googleapis.com/git-repo-downloads/repo > "$HOME/bin/externals/repo" && chmod a+x "$HOME/bin/externals/repo"
 	git clone https://gerrit.googlesource.com/git-repo "$HOME/bin/git-repo" && chmod a+x "$HOME/bin/git-repo/repo"
-	export PATH="$PATH:$HOME/bin/git-repo"
+	export PATH="$PATH:$HOME/bin/externals:$HOME/bin/git-repo"
 fi
 
 # Clone profile repository

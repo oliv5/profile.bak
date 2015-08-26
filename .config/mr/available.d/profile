@@ -1,6 +1,7 @@
 [${XDG_CONFIG_HOME:-$HOME/.config}/vcsh/repo.d/profile.git]
 checkout = vcsh_clone "$(mr_ask "Remote repo to clone" "https://github.com/oliv5/profile.git")" "$(mr_ask "Remote repo name" github)";
-           annex_init && annex_init_hubic
+           annex_init && annex_init_hubic;
+           repo init -u https://github.com/oliv5/manifests.git -m bin.xml
 
 bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle";
            annex_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
