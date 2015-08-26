@@ -19,6 +19,15 @@ if ! command -v mr >/dev/null 2>&1; then
 	export PATH="$PATH:$HOME/bin/mr"
 fi
 
-# Get profile repository
-vcsh clone ssh://olivier@oliv5kta.dtdns.net:443/home/olivier/git/profile.git ||
+# Download and install google repo if not already there
+if ! command -v repo >/dev/null 2>&1; then
+	#curl https://storage.googleapis.com/git-repo-downloads/repo > "$HOME/bin/repo" && chmod a+x "$HOME/bin/repo"
+	git clone https://gerrit.googlesource.com/git-repo "$HOME/bin/git-repo" && chmod a+x "$HOME/bin/git-repo/repo"
+	export PATH="$PATH:$HOME/bin/git-repo"
+fi
+
+# Clone profile repository
 vcsh clone https://github.com/oliv5/profile.git
+
+# Clone external repositories
+repo init -u https://github.com/oliv5/manifests.git -m bin.xml
