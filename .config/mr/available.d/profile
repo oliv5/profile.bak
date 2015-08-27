@@ -6,8 +6,8 @@ checkout = vcsh_clone "$(mr_ask "Remote repo to clone" "https://github.com/oliv5
 bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle";
            annex_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
 
-pull     = git_pull rpi master
-push     = git_push rpi master
+pull     = git_pull "rpi github" master
+push     = git_push "rpi github" master
 sync     = annex_sync; repo sync
 
 download = annex_copy . --from hubic --auto
