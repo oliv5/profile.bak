@@ -284,9 +284,9 @@ git_stash_backup() {
   ( IFS=$'\n'
     for DESCR in $(git stash list --pretty=format:"%h %gd %ci"); do
       local NAME="$(echo $DESCR | awk '{gsub(/-/,"",$3); gsub(/:/,"",$4); print "stash{" $3 "-" $4 "}_" $1}')"
-      local STASH="$(echo $DESCR | awk '{print $2}')"
       local FILE="$DST/${NAME}.gz"
       if [ ! -e "$FILE" ]; then
+        local STASH="$(echo $DESCR | awk '{print $2}')"
         echo "Backup $STASH in $FILE"
         git stash show -p "$STASH" "$@" | gzip --best > "$FILE"
       fi
