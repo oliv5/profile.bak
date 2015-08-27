@@ -1,5 +1,4 @@
 [DEFAULT]
-#skip = vcsh_exists && echo "Already in a vcsh repository"
 skip = mr_skip
 
 # Mr actions
@@ -28,162 +27,21 @@ lib =
 		fi
 		echo "$REPLY"
 	}
-# Add few git actions
-lib =
-	git_exists() {
-		git rev-parse --verify "HEAD" >/dev/null 2>&1
-	}
-	git_bare() {
-		[ "$(git config --get core.bare)" = "true" ]
-	}
-	git_clone() {
-		REPO="$(basename"$MR_REPO".git)"
-		for ARGS; do
-			set $ARGS
-			REMOTE="$1"
-			NAME="${2:-$REPO}"
-			BRANCH="${3:-master}"
-			git clone "$REMOTE" "$REPO" || break
-			git --git-dir="$REPO/.git" remote rename origin "$NAME"
-			git --git-dir="$REPO/.git" checkout "$BRANCH"
-		done
-	}
-	git_pull() {
-		vcsh_run "
-			git stash save -q 'mrconfig_stash'
-			for REMOTE in $1; do
-				if git remote | grep -- \\\$REMOTE >/dev/null; then
-					for BRANCH in ${2:-master}; do
-						git pull --rebase \\\$REMOTE \\\$BRANCH
-					done
-				fi
-			done
-			if git stash list -n 1 | grep 'mrconfig_stash' >/dev/null 2>&1; then git stash apply -q --index; git stash drop -q; fi
-		"
-	}
-	git_push() {
-		for REMOTE in $1; do
-			if git remote | grep -- $REMOTE >/dev/null; then
-				for BRANCH in ${2:-master}; do
-					echo -n "Push $REMOTE/$BRANCH : "
-					git push $REMOTE $BRANCH
-				done
-			fi
-		done
-	}
-	git_bundle() {
-		DIR="${1:-.}"
-		if [ -d "$DIR" ]; then
-			DATE="$(date +%Y%m%d-%H%M%S)"
-			BUNDLE="$DIR/${2:-$(basename "$MR_REPO" .git).bundle.$(uname -n).$DATE.git}"
-			echo "Git bundle into $BUNDLE"
-			git bundle create "$BUNDLE" --all --tags --remotes
-			if [ ! -z "$3" ]; then
-				gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$3" "${BUNDLE}" && 
-					(shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
-			fi
-			ls -l "${BUNDLE}"*
-		else
-			echo "Target directory '$DIR' does not exists."
-			echo "Skip bundle creation..."
-		fi
-	}
-	git_meta() {
-		git-cache-meta --store && 
-			git add "$MR_REPO/.git_cache_meta" -f
-	}
 
-# Define vcsh helpers
-lib =
-	vcsh_exists() {
-		git config --get vcsh.vcsh >/dev/null 2>&1
-	}
-	vcsh_run() {
-		if vcsh_exists; then
-			REPO="$(basename "$MR_REPO" .git)"
-			eval vcsh run $REPO sh -c "\"$@\""
-		else
-			eval sh -c "\"$@\""
-		fi
-	}
-	vcsh_clone() {
-		REPO="$(basename "$MR_REPO" .git)"
-		REMOTE="$1"
-		NAME="${2:-$REPO}"
-		BRANCH="${3:-master}"
-		vcsh clone "$REMOTE" "$REPO"
-		vcsh run "$REPO" git remote rename origin "$NAME"
-		vcsh run "$REPO" git checkout "$BRANCH"
-	}
-
-# Define git annex helpers
-lib =
-	annex_exists() {
-		git config --get annex.version >/dev/null 2>&1
-	}
-	annex_direct() {
-		[ "$(git config --get annex.direct)" = "true" ]
-	}
-	annex_bare() {
-		annex_exists && ! annex_direct && git_bare
-	}
-	annex_init() {
-		vcsh_run 'git annex init "$(uname -n)"'
-	}
-	annex_init_direct() {
-		vcsh_run 'annex_init && git annex direct'
-	}
-	annex_init_hubic() {
-		local REMOTE="${1:-hubic}"
-		local HUBIC_PATH="${2:-$(basename "$MR_REPO" .git)}"
-		vcsh_run '
-			git annex enableremote "$REMOTE" type=external externaltype=hubic encryption=none hubic_container=annex hubic_path="$HUBIC_PATH" embedcreds=no ||
-			git annex initremote "$REMOTE" type=external externaltype=hubic encryption=none hubic_container=annex hubic_path="$HUBIC_PATH" embedcreds=no
-		'
-	}
-	annex_sync() {
-		vcsh_run 'git annex sync'
-	}
-	annex_status() {
-		echo "annex status:"
-		vcsh_run 'git annex status'
-	}
-	annex_diff() {
-		if ! git config --get annex.direct >/dev/null; then
-			vcsh_run 'git diff '"$@"
-		fi
-	}
-	annex_bundle() {
-		local DIR="${1:-.}"
-		if annex_exists; then
-			if [ -d "$DIR" ]; then
-				DATE="$(date +%Y%m)"
-				BUNDLE="$DIR/${2:-$(basename "$MR_REPO" .git).annex.$(uname -n).$DATE.tgz}"
-				echo "Tar annex into $BUNDLE"
-				if annex_bare; then
-					tar cf "$BUNDLE" -h ./annex
-				else
-					vcsh_run "git annex list $(git config --get core.worktree)" | 
-						awk 'NF>1 {$1="";print "\""substr($0,2)"\""}' |
-						xargs tar cf "$BUNDLE" -h --exclude-vcs
-				fi
-				if [ ! -z "$3" ]; then
-					gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$3" "${BUNDLE}" && 
-						(shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
-				fi
-				ls -l "${BUNDLE}"*
-			else
-				echo "Target directory '$DIR' does not exists."
-				echo "Skip bundle creation..."
-			fi
-		else
-			echo "Source directory '$MR_REPO' is not git-annex ready."
-			echo "Skip bundle creation..."
-		fi
-	}
-	annex_copy() {
-		vcsh_run 'git annex copy '"$@"
-	}
+# Mr action shortcuts
+lib = 
+	annex_init() 		{ annex_cmd init "$@"; }
+	annex_init_hubic() 	{ annex_cmd init_hubic "$@"; }
+	annex_status() 		{ annex_cmd status "$@"; }
+	annex_diff() 		{ annex_cmd diff "$@"; }
+	annex_copy() 		{ annex_cmd copy "$@"; }
+	annex_sync() 		{ annex_cmd sync "$@"; }
+	annex_bundle() 		{ annex_cmd bundle "$@"; }
+	vcsh_clone() 		{ vcsh_cmd clone "$@"; }
+	git_pull() 			{ git_cmd pull "$@"; }
+	git_push() 			{ git_cmd push "$@"; }
+	git_bundle() 		{ git_cmd bundle "$@"; }
+	git_meta() 			{ git_cmd meta "$@"; }
 
 # Include our repositories
-include = cat ${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/*
+include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/"*
