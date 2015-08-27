@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# Test if repo is vcsh-ready
+vcsh_exists() {
+	git config ${1:+--git-dir="$1"} --get vcsh.vcsh >/dev/null 2>&1
+}
+
+# Execute a command by calling vcsh wrapper when necessary
+vcsh_run() {
+	local MR_REPO="${GIT_DIR:-$PWD/.git}"
+	if vcsh_exists "$MR_REPO"; then
+		local REPO="$(basename "$MR_REPO" .git)"
+		#eval vcsh run "$REPO" sh -c "\"$@\""
+		vcsh run "$REPO" sh -c "$@"
+	else
+		sh -c "$@"
+	fi
+}
+
+# Clone a vcsh repo
+vcsh_clone() {
+	local MR_REPO="${GIT_DIR:-$PWD/.git}"
+	REPO="$(basename "$MR_REPO" .git)"
+	REMOTE="${1:?No remote specified}"
+	NAME="${2:-$REPO}"
+	BRANCH="${3:-master}"
+	vcsh clone "$REMOTE" "$REPO"
+	vcsh run "$REPO" git remote rename origin "$NAME"
+	vcsh run "$REPO" git checkout "$BRANCH"
+}
+
+# Execute command when any
+[ $# -gt 0 ] && vcsh_"$@"

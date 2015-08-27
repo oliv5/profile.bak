@@ -1,0 +1,94 @@
+#!/bin/sh
+
+# Test if repo is annex-ready
+annex_exists() {
+	git ${1:+--git-dir="$1"} config --get annex.version >/dev/null 2>&1
+}
+
+# Test if repo is in direct-mode
+annex_direct() {
+	[ "$(git ${1:+--git-dir="$1"} config --get annex.direct)" = "true" ]
+}
+
+# Test if repo is bare
+annex_bare() {
+	annex_exists && ! annex_direct && git_cmd bare
+}
+
+# Init annex
+annex_init() {
+	vcsh_cmd run 'git annex init "$(uname -n)"'
+}
+
+# Init annex in direct mode
+annex_init_direct() {
+	vcsh_cmd run 'annex_init && git annex direct'
+}
+
+# Init hubic annex
+annex_init_hubic() {
+	local MR_REPO="${GIT_DIR:-$PWD/.git}"
+	local REMOTE="${1:-hubic}"
+	local HUBIC_PATH="${2:-$(basename "$MR_REPO" .git)}"
+	vcsh_cmd run "
+		git annex enableremote \"$REMOTE\" type=external externaltype=hubic encryption=none hubic_container=annex hubic_path=\"$HUBIC_PATH\" embedcreds=no ||
+		git annex initremote \"$REMOTE\" type=external externaltype=hubic encryption=none hubic_container=annex hubic_path=\"$HUBIC_PATH\" embedcreds=no
+	"
+}
+
+# Annex sync
+annex_sync() {
+	vcsh_cmd run 'git annex sync'
+}
+
+# Annex status
+annex_status() {
+	echo "annex status:"
+	vcsh_cmd run 'git annex status'
+}
+
+# Annex diff
+annex_diff() {
+	if ! git config --get annex.direct >/dev/null; then
+		vcsh_cmd run 'git diff' "$@"
+	fi
+}
+
+# Annex bundle
+annex_bundle() {
+	local MR_REPO="${GIT_DIR:-$PWD/.git}"
+	local DIR="${1:-.}"
+	if annex_exists; then
+		if [ -d "$DIR" ]; then
+			DATE="$(date +%Y%m)"
+			BUNDLE="$DIR/${2:-$(basename "$MR_REPO" .git).annex.$(uname -n).$DATE.tgz}"
+			echo "Tar annex into $BUNDLE"
+			if annex_bare; then
+				tar cf "${BUNDLE}" -h ./annex
+			else
+				vcsh_cmd run "git annex list $(git config --get core.worktree)" | 
+					awk 'NF>1 {$1="";print "\""substr($0,2)"\""}' |
+					xargs tar cf "${BUNDLE}" -h --exclude-vcs
+			fi
+			if [ ! -z "$3" ]; then
+				gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$3" "${BUNDLE}" && 
+					(shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
+			fi
+			ls -l "${BUNDLE}"*
+		else
+			echo "Target directory '$DIR' does not exists."
+			echo "Skip bundle creation..."
+		fi
+	else
+		echo "Source directory '$MR_REPO' is not git-annex ready."
+		echo "Skip bundle creation..."
+	fi
+}
+
+# Annex copy
+annex_copy() {
+	vcsh_cmd run 'git annex copy' "$@"
+}
+
+# Execute command when any
+[ $# -gt 0 ] && annex_"$@"

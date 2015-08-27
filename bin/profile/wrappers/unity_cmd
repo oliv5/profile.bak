@@ -25,6 +25,5 @@ unity_showconfig() {
   dconf dump /org/compiz/
 }
 
-# Execute command line when any
-_PREFIX="unity_"
-eval $(echo "$@" | awk 'NF>0 { print "'$_PREFIX'" $0 }')
+# Execute command when any
+[ $# -gt 0 ] && unity_"$@"

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-gnomeshell_replace() {
+gshell_replace() {
 	# Ask question
 	if [ $# -ne 0 ]; then
 		zenity --question --title "Skip resetting Gnome display ?" --timeout=10
@@ -16,6 +16,5 @@ gnomeshell_replace() {
 	date >> "$HOME/gnome-shell-replace.log"
 }
 
-# Execute command line when any
-_PREFIX="gnomeshell_"
-eval $(echo "$@" | awk 'NF>0 { print "'$_PREFIX'" $0 }')
+# Execute command when any
+[ $# -gt 0 ] && gshell_"$@"
