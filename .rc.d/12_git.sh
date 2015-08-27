@@ -276,17 +276,22 @@ git_stash_flush() {
 }
 
 # Backup stashes in .git/backup
+#git stash list --pretty=format:"%h %gd %ci" | awk '{gsub(/-/,"",$3); gsub(/:/,"",$4); print "stash{" $3 "-" $4 "}_" $1}'
 git_stash_backup() {
   git_exists || return 1
-  DST="${GIT_DIR:-./.git}/backup"
+  local DST="${GIT_DIR:-./.git}/backup"
   mkdir -p "$DST"
-  for STASH in $(git stash list --date=iso | awk '{gsub(/-/,"",$1); gsub(/:/,"",$2); print $1"-"$2"}"}'); do
-    if [ ! -e "$DST/$STASH" ]; then
-      git diff -p "$STASH" "$@" > "$DST/$STASH"
-      #true
-      #read
-    fi
-  done
+  ( IFS=$'\n'
+    for DESCR in $(git stash list --pretty=format:"%h %gd %ci"); do
+      local NAME="$(echo $DESCR | awk '{gsub(/-/,"",$3); gsub(/:/,"",$4); print "stash{" $3 "-" $4 "}_" $1}')"
+      local STASH="$(echo $DESCR | awk '{print $2}')"
+      local FILE="$DST/${NAME}.gz"
+      if [ ! -e "$FILE" ]; then
+        echo "Backup $STASH in $FILE"
+        git stash show -p "$STASH" "$@" | gzip --best > "$FILE"
+      fi
+    done
+  )
 }
 
 # Aliases using stashes
