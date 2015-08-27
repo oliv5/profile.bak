@@ -12,7 +12,7 @@ git_bare() {
 
 # Clone a git repo
 git_clone() {
-	local MR_REPO="${GIT_DIR:-$PWD/.git}"
+	local MR_REPO="${GIT_DIR:-$PWD}"
 	local REPO="$(basename "$MR_REPO" .git)"
 	for ARGS; do
 		set $ARGS
@@ -33,7 +33,6 @@ git_pull() {
 	local STASH="__git_pull_stash"
 	vcsh_cmd run "
 		git stash save -q \"$STASH\"
-		echo $REMOTES
 		for REMOTE in $REMOTES; do
 			if git remote | grep -- \"\$REMOTE\" >/dev/null; then
 				for BRANCH in $BRANCHES; do
@@ -64,7 +63,7 @@ git_push() {
 
 # Bundle a repo
 git_bundle() {
-	local MR_REPO="${GIT_DIR:-$PWD/.git}"
+	local MR_REPO="${GIT_DIR:-$PWD}"
 	local DIR="${1:-.}"
 	if [ -d "$DIR" ]; then
 		local DATE="$(date +%Y%m%d-%H%M%S)"
@@ -85,7 +84,7 @@ git_bundle() {
 
 # Cache repo metadata
 git_meta() {
-	local MR_REPO="${GIT_DIR:-$PWD/.git}"
+	local MR_REPO="${GIT_DIR:-$PWD}"
 	git-cache-meta --store && 
 		git add "$MR_REPO/.git_cache_meta" -f
 }

@@ -27,7 +27,7 @@ annex_init_direct() {
 
 # Init hubic annex
 annex_init_hubic() {
-	local MR_REPO="${GIT_DIR:-$PWD/.git}"
+	local MR_REPO="${GIT_DIR:-$PWD}"
 	local REMOTE="${1:-hubic}"
 	local HUBIC_PATH="${2:-$(basename "$MR_REPO" .git)}"
 	vcsh_cmd run "
@@ -56,7 +56,7 @@ annex_diff() {
 
 # Annex bundle
 annex_bundle() {
-	local MR_REPO="${GIT_DIR:-$PWD/.git}"
+	local MR_REPO="${GIT_DIR:-$PWD}"
 	local DIR="${1:-.}"
 	if annex_exists; then
 		if [ -d "$DIR" ]; then
