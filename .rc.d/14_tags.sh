@@ -8,7 +8,7 @@ CTAGS_OPTS='-R'
 # Cscope default settings
 #CSCOPE_OPTS='-qb'
 CSCOPE_OPTS='-qbk'
-CSCOPE_REGEX='.*\.(h|c|cc|cpp|hpp|inc|S|py)$'
+CSCOPE_REGEX='.*\.(h|c|cc|cpp|hpp|inc|S)$'
 CSCOPE_EXCLUDE='-not -path *.svn* -and -not -path *.git -and -not -path /tmp/'
 
 # Make ctags
@@ -23,7 +23,7 @@ mkctags() {
   # Build tag file
   #${DBG} $(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}" 2>&1 >/dev/null | \
   #  grep -vE 'Warning: Language ".*" already defined'
-  ${DBG} $(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}" 2>&1 >/dev/null
+  ${DBG} $(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}"
 }
 
 # Scan directory for cscope files
@@ -80,17 +80,26 @@ mkcscope() {
   mkcscope_1 "$@"
 }
 
-# Make id-utils database
+# Make id-utils db
 mkids() {
   command -v >/dev/null mkid || return
   # Get directories, remove ~/
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
   # build db
-  local _PWD="$PWD"
-  cd "$SRC"
-  mkid -o "$DST/ID"
-  cd "$_PWD"
+  ( cd "$SRC"
+    mkid -o "$DST/ID"
+  )
+}
+
+# Make pycscope db
+mkpycscope() {
+  command -v >/dev/null pycscope || return
+  # Get directories, remove ~/
+  local SRC="$(eval echo ${1:-$PWD})"
+  local DST="$(eval echo ${2:-$PWD})"
+  # Build tag file
+  pycscope -R -f "$DST/pycscope.out" "$SRC"
 }
 
 # Make tags and cscope db
@@ -98,27 +107,38 @@ mktags() {
   mkctags "$@"
   mkcscope "$@"
   mkids "$@"
+  mkpycscope "$@"
+}
+
+_rmtags() {
+  # Get directories, remove ~/
+  local PREFIX="${1:?No file prefix specified}"
+  local DIR="$(eval echo ${2:-$PWD})"
+  shift 2
+  local FILES="$DIR/$@"
+  # Rm files
+  eval rm -v "${FILES}" 2>/dev/null
 }
 
 # Clean ctags
 rmctags() {
-  local DIR="$(eval echo ${1:-$PWD})"
-  rm -v "${DIR:?No directory specified}/tags" 2>/dev/null
+  _rmtags tags "$@"
 }
 
 # Clean cscope db
 rmcscope() {
-  local DIR="$(eval echo ${1:-$PWD})"
-  local FILE="${DIR}/cscope"
-  rm -v "${FILE:?No directory specified}.out"* 2>/dev/null
-  rm -v "${FILE:?No directory specified}.files" 2>/dev/null
+  _rmtags "cscope.out*" "$@"
+  _rmtags cscope.files "$@"
 }
 
 # Clean id-utils db
 rmids() {
-  local DIR="$(eval echo ${1:-$PWD})"
-  local FILE="${DIR}/ID"
-  rm -v "${FILE:?No directory specified}" 2>/dev/null
+  _rmtags ID "$@"
+}
+
+# Clean pycscope db
+rmpycscope() {
+  _rmtags pycscope.out "$@"
 }
 
 # Clean tags and cscope db
@@ -126,38 +146,46 @@ rmtags() {
   rmctags "$@"
   rmcscope "$@"
   rmids "$@"
+  rmpycscope "$@"
 }
 
 mkalltags() {
-  local _PWD="$PWD"
-  local SRC
-  for TAGPATH in $(find -L "$(readlink -m "${1:-$PWD}")" -maxdepth ${2:-5} -type f -name ".*.path" 2>/dev/null); do
-    echo "** Processing file $TAGPATH"
-    cd "$(dirname $TAGPATH)"
-    local TAGNAME="$(basename $TAGPATH)"
-    if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".ctags.path" ]; then
-      rmctags
-      for SRC in $(cat $TAGNAME); do
-        echo "[ctags] add: $SRC"
-        mkctags "$SRC" . "-a"
-      done
-    fi
-    if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".cscope.path" ]; then
-      rmcscope
-      for SRC in $(cat $TAGNAME); do
-        echo "[cscope] add: $SRC"
-        scancsdir "$SRC" .
-      done
-      mkcscope "$SRC" .
-    fi
-    if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".id.path" ]; then
-      rmids
-      for SRC in $(cat $TAGNAME); do
-        echo "[id] add: $SRC"
-        mkids "$SRC" .
-      done
-    fi
-    echo "** Done."
-  done
-  cd "$_PWD"
+  (
+    local SRC
+    for TAGPATH in $(find -L "$(readlink -m "${1:-$PWD}")" -maxdepth ${2:-5} -type f -name ".*.path" 2>/dev/null); do
+      echo "** Processing file $TAGPATH"
+      cd "$(dirname $TAGPATH)"
+      local TAGNAME="$(basename $TAGPATH)"
+      if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".ctags.path" ]; then
+        rmctags
+        for SRC in $(cat $TAGNAME); do
+          echo "[ctags] add: $SRC"
+          mkctags "$SRC" . "-a"
+        done
+      fi
+      if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".cscope.path" ]; then
+        rmcscope
+        for SRC in $(cat $TAGNAME); do
+          echo "[cscope] add: $SRC"
+          scancsdir "$SRC" .
+        done
+        mkcscope "$SRC" .
+      fi
+      if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".id.path" ]; then
+        rmids
+        for SRC in $(cat $TAGNAME); do
+          echo "[id] add: $SRC"
+          mkids "$SRC" .
+        done
+      fi
+      if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".pycscope.path" ]; then
+        rmpycscope
+        for SRC in $(cat $TAGNAME); do
+          echo "[pycscope] add: $SRC"
+          mkpycscope "$SRC" .
+        done
+      fi
+      echo "** Done."
+    done
+  )
 }

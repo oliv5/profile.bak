@@ -44,7 +44,9 @@ FnNoremap <A-A>   <C-x>
 " Look for the best root directory
 function! g:FindRootDir()
 	" Ctags/cscope files
-	for file in ['g:tags_db', 'g:cscope_db']
+	let dblist = (exists('g:tags_db') ? g:tags_db : [])
+	let dblist += (exists('g:cscope_db') ? g:cscope_db : [])
+	for file in dblist
 		silent! let file=eval(file)
 		let file = findfile(file, ".;")
 		if (filereadable(file))
@@ -968,7 +970,7 @@ endif
 " } Tags {
 " *******************************************************
 " Set tags root
-let g:tags_db='tags'
+let g:tags_db=['tags']
 "set tags=./tags,tags;$HOME
 set tags=./tags;$HOME
 

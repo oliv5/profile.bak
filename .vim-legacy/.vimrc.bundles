@@ -52,7 +52,7 @@ endif
 
 if has("cscope")
 	" Option
-	let g:cscope_db = !empty($CSCOPE_DB) ? $CSCOPE_DB : "cscope.out"
+	let g:cscope_db = [ "cscope.out", "pycscope.out", $CSCOPE_DB ]
 	if has('quickfix')
 		set cscopequickfix=s-,c-,d-,i-,t-,e-
 	endif
@@ -68,37 +68,36 @@ if has("cscope")
 	cabbrev css lcs show
 	cabbrev csh lcs help
 
-	" Find cscope database
-	function! s:FindCscopeDb(dbname)
-		return findfile(g:FindRootDir()."/".a:dbname, "**", -1)
-		"return split(globpath(g:FindRootDir(),"**/a:dbname"))
-	endfunction
-
 	" Find and load cscope database
-	function! s:LoadCscopeDb(dblist)
-		for db in a:dblist
-			if (filereadable(db))
-				"set nocscopeverbose " suppress 'duplicate connection' error
-				silent! exe "cs add" db matchstr(db, ".*/")
-				silent! cs reset
-				cs show
-				"set cscopeverbose
+	function! s:LoadCscopeDb(dbnames)
+		let rootdir = g:FindRootDir()
+		for dbname in a:dbnames
+			if !empty(dbname)
+				for db in findfile(rootdir."/".dbname, "**", -1)
+					if (filereadable(db))
+						"set nocscopeverbose " suppress 'duplicate connection' error
+						silent! exe "cs add" db matchstr(db, ".*/")
+						silent! cs reset
+						cs show
+						"set cscopeverbose
+					endif
+				endfor
 			endif
 		endfor
 	endfunction
 
 	" Additionnal keymap
-	nnoremap <silent> <c-d><c-l>  :call <SID>LoadCscopeDb(<SID>FindCscopeDb(g:cscope_db))<CR>
-	nnoremap <silent> <c-d><c-ù>  :echo <SID>FindCscopeDb(g:cscope_db)<CR>
+	nnoremap <silent> <c-d><c-l>  :call <SID>LoadCscopeDb(g:cscope_db)<CR>
 	nnoremap <silent> <c-d><c-m>  :cs show<CR>
 	nnoremap <silent> <c-d><c-k>  :cs kill 0<CR>
 	nnoremap <silent> <c-d>       <NOP>
 
 	" Autocommand
-	augroup vimrc_cscope
-		"autocmd! VimEnter * call s:LoadCscopeDb(<SID>FindCscopeDb(g:cscope_db))
-		"autocmd! BufReadPost * call s:LoadCscopeDb(findfile(g:cscope_db, ".;", -1))
-	augroup END
+	"augroup vimrc_cscope
+	"	au!
+	"	autocmd! VimEnter * call s:LoadCscopeDb(g:cscope_db)
+	"	autocmd! BufReadPost * call s:LoadCscopeDb(g:cscope_db)
+	"augroup END
 
 endif
 
@@ -368,7 +367,7 @@ endif
 " *******************************************************
 if !exists('g:loaded_cctree')
 	" Options
-	let g:CCTreeCscopeDb = !empty($CSCOPE_DB) ? $CSCOPE_DB : "cscope.out"
+	let g:CCTreeCscopeDb = g:cscope_db[0]
 	let g:CCTreeWindowVertical = 1
 	let g:CCTreeDisplayMode = 2
 	let g:CCTreeRecursiveDepth = 1
@@ -376,17 +375,22 @@ if !exists('g:loaded_cctree')
 	let g:CCTreeKeyToggleWindow = '<localleader>cc'
 	
 	" Find and load cscope database
-	function! s:LoadCCtreeDb(dblist)
-		for db in a:dblist
-			if (filereadable(db))
-				exec "CCTreeLoadDB" db
+	function! s:LoadCCtreeDb(dbnames)
+		let rootdir = g:FindRootDir()
+		for dbname in a:dbnames
+			if !empty(dbname)
+				for db in findfile(rootdir."/".dbname, "**", -1)
+					if (filereadable(db))
+						exec "CCTreeLoadDB" db
+					endif
+				endfor
 			endif
 		endfor
 	endfunction
 
 	" Additionnal keymap
 	nnoremap <silent> <c-d>		<NOP>
-	nnoremap <c-d><c-l><c-l>  	:call <SID>LoadCCtreeDb(findfile(g:CCTreeCscopeDb, ".;", -1))<CR>
+	nnoremap <c-d><c-l><c-l>  	:call <SID>LoadCCtreeDb([g:cscope_db])<CR>
 	nnoremap <c-d><c-c><c-c>	:CCTreeWindowToggle<CR>
     nnoremap <C-d><C-r> 		:CCTreeTraceReverse <C-R>=expand("<cword>")<CR><CR>
     vnoremap <C-d><C-r> 		"+y:CCTreeTraceReverse <C-R>"<CR>
@@ -394,9 +398,10 @@ if !exists('g:loaded_cctree')
     vnoremap <C-d><C-r><C-r>	"+y:CCTreeTraceForward <C-R>"<CR>
 
 	" Autocommand
-	augroup vimrc_cctree
-		"autocmd! VimEnter * call s:LoadCscopeDb([g:CCTreeCscopeDb])
-	augroup END
+	"augroup vimrc_cctree
+	"	au!
+	"	autocmd! VimEnter * call s:LoadCCtreeDb([g:cscope_db])
+	"augroup END
 endif
 
 
