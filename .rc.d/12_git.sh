@@ -55,6 +55,7 @@ alias gsdm='git_stash_diffm'
 alias gsdl='git_stash_diffl'
 alias gsf='git_stash_flush'
 alias gsb='git_stash_backup'
+alias gsrm='git_stash_drop'
 alias gsm='gsdm'
 # Commit aliases
 alias gci='git commit'
@@ -266,6 +267,12 @@ git_stash_show_all() {
 git_stash_cat() {
   local STASH="${1:-0}"; shift $(min 1 $#)
   git stash show -p stash@{$STASH} "$@"
+}
+
+# Drop a stash
+git_stash_drop() {
+  local STASH="${1:-0}"; shift $(min 1 $#)
+  git stash drop stash@{$STASH} "$@"
 }
 
 # Flush the stash
