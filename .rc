@@ -28,7 +28,9 @@ while getopts 'vdrx' ARG; do
   esac
 done
 shift $(expr $OPTIND - 1)
-unset ARG OPTARG OPTIND OPTERR
+# The following fails in dash 0.5.7-3
+#unset OPTIND
+unset ARG OPTARG OPTERR
 
 ################################
 # Log function
