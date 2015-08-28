@@ -218,22 +218,22 @@ git_stash_push() {
 
 # Pop change from stash
 git_stash_pop() {
-  git stash pop stash@{${1:-0}}
+  git stash pop "stash@{${1:-0}}"
 }
 
 # Apply change from stash
 git_stash_apply() {
-  git stash apply stash@{${1:-0}}
+  git stash apply "stash@{${1:-0}}"
 }
 
 # Show diff between stash and local copy
 git_stash_diff() {
   local STASH="${1:-0}"; shift $(min 1 $#)
-  git diff stash@{$STASH} "$@"
+  git diff "stash@{$STASH}" "$@"
 }
 git_stash_diffm() {
   local STASH="${1:-0}"; shift $(min 1 $#)
-  git_diffm stash@{$STASH} "$@" 
+  git_diffm "stash@{$STASH}" "$@" 
 }
 git_stash_diffl() {
   git_stash_diff "${@:-0}" --name-only
@@ -242,7 +242,7 @@ git_stash_diffl() {
 # Show stash file list
 git_stash_show() {
   local STASH="${1:-0}"; shift $(min 1 $#)
-  git stash show stash@{$STASH} "$@"
+  git stash show "stash@{$STASH}" "$@"
 }
 
 # Show all stashes file list
@@ -266,13 +266,13 @@ git_stash_show_all() {
 # Show stash file content
 git_stash_cat() {
   local STASH="${1:-0}"; shift $(min 1 $#)
-  git stash show -p stash@{$STASH} "$@"
+  git stash show -p "stash@{$STASH}" "$@"
 }
 
 # Drop a stash
 git_stash_drop() {
   local STASH="${1:-0}"; shift $(min 1 $#)
-  git stash drop stash@{$STASH} "$@"
+  git stash drop "stash@{$STASH}" "$@"
 }
 
 # Flush the stash
@@ -305,7 +305,6 @@ git_stash_backup() {
 alias git_suspend='git_stash_save'
 alias git_resume='git_stash_pop'
 alias git_stash_list='git stash list'
-alias git_stash_drop='git stash drop'
 alias git_stash_count='git stash list | wc -l'
 
 ########################################
