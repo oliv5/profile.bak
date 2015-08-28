@@ -30,6 +30,9 @@ fi
 command -v xset >/dev/null 2>&1 && xset b off 2>/dev/null # From X11 window system
 command -v setterm >/dev/null 2>&1 && setterm -blength 0  # From the system console
 
+# Protect private encrypted directory
+[ -d "$HOME/.private" ] && chmod 500 "$HOME/.private"
+
 ################################
 # Alias ls
 alias l='ls -CF'

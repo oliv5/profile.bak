@@ -10,11 +10,31 @@ mount_ecryptfs() {
   local KEYLEN="${6:-32}"
   shift $(min 6 $#)
   local OPT="key=passphrase,ecryptfs_enable_filename_crypto=yes,no_sig_cache=yes,ecryptfs_passthrough=no${@:+,$@}"
-  OPT="ecryptfs_cipher=$CIPHER,ecryptfs_key_bytes=$KEYLEN,ecryptfs_sig=$KEY1,ecryptfs_fnek_sig=$KEY1,ecryptfs_unlink_sigs${OPT:+,$OPT}"
+  OPT="ecryptfs_cipher=$CIPHER,ecryptfs_key_bytes=$KEYLEN,ecryptfs_sig=$KEY1,ecryptfs_fnek_sig=$KEY2,ecryptfs_unlink_sigs${OPT:+,$OPT}"
+  if [ "$SRC" = "$DST" ]; then
+    echo "ERROR: same source and destination directories."
+    return 1
+  fi
   chmod 500 "$SRC"
   sudo ecryptfs-add-passphrase --fnek
   sudo mount -i -t ecryptfs -o "$OPT" "$SRC" "$DST"
   chmod 700 "$DST"
+}
+
+# Mount/umount ecryptfs private directory
+mount_private() {
+  local SRC="$HOME/.private"
+  local DST="$HOME/private"
+  local SIG="$HOME/.ecryptfs/private.sig"
+  local KEY="$(cat "$SIG" 2>/dev/null)"
+  mkdir -p "$DST"
+	mount_ecryptfs "$SRC" "$DST" "$KEY"
+}
+umount_private() {
+  local DST="$HOME/private"
+	if mountpoint "$DST" 2>&1 >/dev/null; then
+		sudo umount "$DST"
+	fi
 }
 
 # Mount encfs
