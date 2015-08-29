@@ -28,20 +28,8 @@ lib =
 		echo "$REPLY"
 	}
 
-# Mr action shortcuts
-lib = 
-	annex_init() 		{ annex_cmd init "$@"; }
-	annex_init_hubic() 	{ annex_cmd init_hubic "$@"; }
-	annex_status() 		{ annex_cmd status "$@"; }
-	annex_diff() 		{ annex_cmd diff "$@"; }
-	annex_copy() 		{ annex_cmd copy "$@"; }
-	annex_sync() 		{ annex_cmd sync "$@"; }
-	annex_bundle() 		{ annex_cmd bundle "$@"; }
-	vcsh_clone() 		{ vcsh_cmd clone "$@"; }
-	git_pull() 			{ git_cmd pull "$@"; }
-	git_push() 			{ git_cmd push "$@"; }
-	git_bundle() 		{ git_cmd bundle "$@"; }
-	git_meta() 			{ git_cmd meta "$@"; }
+# Load git library
+lib = . "$RC_DIR/.rc.d/12_git.sh"
 
 # Include our repositories
 include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/"*
