@@ -6,7 +6,7 @@
 #
 arg_quote() {
   local SEP=''
-  for ARG in "$@"; do
+  for ARG; do
     SQESC=$(printf '%s\n' "${ARG}" | sed -e "s/'/'\\\\''/g")
     printf '%s' "${SEP}'${SQESC}'"
     SEP=' '
