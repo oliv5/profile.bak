@@ -65,18 +65,27 @@ alias wflb='FCASE= FTYPE=l FXTYPE=l _wfind'
 
 # File grep implementations
 _fgrep1() {
-  command true ${1:?Nothing to do}
-  local ARGS="$(arg_rtrim 1 "$@")"
-  shift $(($#-1))
-  (set -f; _ffind1 "$@" -type f -print0 | eval xargs -0 grep -nH --color ${GCASE} -e "$ARGS")
+  if [ $# -gt 1 ]; then
+    local ARGS="$(arg_rtrim 1 "$@")"
+    shift $(($#-1))
+  else
+    local ARGS="$1"
+    shift $#
+  fi
+  (set -f; _ffind1 "${@:-}" -type f -print0 | eval xargs -0 grep -nH --color ${GCASE} -e "${ARGS:-''}")
 }
 _fgrep2() {
-  local ARGS="$(arg_rtrim 1 "$@")"
-  shift $(($#-1))
+  if [ $# -gt 1 ]; then
+    local ARGS="$(arg_rtrim 1 "$@")"
+    shift $(($#-1))
+  else
+    local ARGS="$1"
+    shift $#
+  fi
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
   FILES="$(echo "${FILES}" | sed -e 's/;/ --include=/g')"
-  (set -f; eval grep -RnH --color ${GCASE} -e "$ARGS" --include="$FILES" "${DIR:-.}")
+  (set -f; eval grep -RnH --color ${GCASE} -e "$ARGS" ${FILES:+--include="$FILES"} "${DIR:-.}")
 }
 alias _fgrep='_fgrep2'
 alias   gg='GCASE=   _fgrep'

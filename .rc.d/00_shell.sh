@@ -15,7 +15,7 @@ arg_quote() {
 
 # Right trim shell parameters
 arg_rtrim() {
-  local IFS="$(printf '\n\t ')"
+  local IFS=$'\n\t '
   local LAST="$(($#-$1))"
   for ARG in $(seq 2 $LAST); do 
     eval ARG="\${$ARG}"
