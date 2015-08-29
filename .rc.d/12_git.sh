@@ -88,11 +88,13 @@ alias gpc='git show'
 # Subtree alias
 alias gsta='git_subtree_add'
 alias gstu='git_subtree_update'
+# Git grep aliases
+alias ggg='git grep -n'
 
 ########################################
 # git wrapper
 git() {
-  if [ "$1" == "annex" -a ! -z "$(command git config --get vcsh.vcsh)" ]; then
+  if [ "$1" = "annex" -a ! -z "$(command git config --get vcsh.vcsh)" ]; then
     if [ "$(command git config --get annex.direct)" = "true" -o "$2" = "direct" ]; then
       echo "git annex in direct mode is not compatible with VCSH repositories..."
       return 1
@@ -102,15 +104,70 @@ git() {
 }
 
 ########################################
+# Check repo exists
+git_exists() {
+  #git ${1:+--work-tree="$1"} rev-parse --verify "HEAD" >/dev/null 2>&1
+  git ${1:+--git-dir="$1"} rev-parse >/dev/null 2>&1
+}
+
+# Check bare repo attribute
+git_bare() {
+	[ "$(git ${1:+--git-dir="$1"} config --get core.bare)" = "true" ]
+}
+
+# Get git worktree directory
+git_worktree() {
+  git ${1:+--git-dir="$1"} rev-parse --show-toplevel
+}
+
+# Get git directory (alias git-dir)
+git_dir() {
+  echo "${GIT_DIR:-$PWD/$(git rev-parse --git-dir)}"
+}
+
+# Get git-dir basename
+git_repo() {
+  local DIR="$(git_dir)"
+  [ "${DIR##*/}" != ".git" ] && basename "$DIR" .git || basename "${DIR%/*}" .git
+}
+
+# Get current branch name
+git_branch() {
+  git ${2:+--git-dir="$2"} rev-parse --abbrev-ref "${1:-HEAD}"
+  #git branch -a | grep -E '^\*' | cut -c 3-
+}
+
+# Get current url
+git_url() {
+  git ${2:+--git-dir="$2"} config --get remote.${1:-origin}.url
+}
+
+# Check if a repo has been modified
+git_modified() {
+  ! git ${1:+--git-dir="$1"} diff-index --quiet HEAD --
+}
+
 # Git status for scripts
 git_st() {
   git status -z | awk 'BEGIN{RS="\0"; ORS="\0"}/'"${1:-^[^\?\?]}"'/{print substr($0,4)}'
 }
 
 ########################################
-# Meld called by git
-git_meld() {
-  meld "$2" "$5"
+# Get hash
+alias git_head='git_hash'
+git_hash() {
+  git rev-parse "${@:-HEAD}"
+}
+git_allhash() {
+  git rev-list "${@:-HEAD}"
+}
+
+# Get short hash
+git_shorthash() {
+  git_hash "$@" | cut -c 1-8
+}
+git_allshorthash() {
+  git_allhash "$@" | cut -c 1-8
 }
 
 ########################################
@@ -129,60 +186,9 @@ git_diffm_all() {
   git difftool --cached -y -t meld "$@"
 }
 
-########################################
-# Get git repo root directory
-git_root() {
-  git rev-parse --show-toplevel
-}
-
-# Check repo existenz
-git_exists() {
-  #git ${1:+--work-tree="$1"} rev-parse --verify "HEAD" >/dev/null 2>&1
-  git ${1:+--git-dir="$1"} rev-parse >/dev/null 2>&1
-}
-
-# Get current branch name
-git_branch() {
-  git rev-parse --abbrev-ref "${1:-HEAD}"
-  #git branch -a | grep -E '^\*' | cut -c 3-
-}
-
-# Get current url
-git_url() {
-  git config --get remote.${1:-origin}.url
-}
-
-# Check if a repo has been modified
-git_modified() {
-  ! git diff-index --quiet HEAD --
-}
-
-# Check annex existenz
-git_annex_exists() {
-  git config --get annex.version >/dev/null 2>&1
-}
-
-# Check if an annex has been modified
-git_annex_modified() {
-  test ! -z "$(git annex status)"
-}
-
-########################################
-# Get hash
-alias git_head='git_hash'
-git_hash() {
-  git rev-parse "${@:-HEAD}"
-}
-git_allhash() {
-  git rev-list "${@:-HEAD}"
-}
-
-# Get short hash
-git_shorthash() {
-  git_hash "$@" | cut -c 1-7
-}
-git_allshorthash() {
-  git_allhash "$@" | cut -c 1-7
+# Meld called by git
+git_meld() {
+  meld "$2" "$5"
 }
 
 ########################################
@@ -286,7 +292,7 @@ git_stash_flush() {
 #git stash list --pretty=format:"%h %gd %ci" | awk '{gsub(/-/,"",$3); gsub(/:/,"",$4); print "stash{" $3 "-" $4 "}_" $1}'
 git_stash_backup() {
   git_exists || return 1
-  local DST="${GIT_DIR:-./.git}/backup"
+  local DST="$(git_dir)/backup"
   mkdir -p "$DST"
   ( IFS=$'\n'
     for DESCR in $(git stash list --pretty=format:"%h %gd %ci"); do
@@ -472,11 +478,84 @@ git_exportdir() {
 }
 
 ########################################
+# Batch clone
+git_clone() {
+	local REPO="$(git_repo)"
+	for ARGS; do
+		set $ARGS
+		local REMOTE="${1:?No remote specified}"
+		local NAME="${2:-$REPO}"
+		local BRANCH="${3:-master}"
+		git clone "$REMOTE" "$REPO" || break
+		git --git-dir="$REPO/.git" remote rename origin "$NAME"
+		git --git-dir="$REPO/.git" checkout "$BRANCH"
+	done
+}
+
+########################################
+# Batch pull
+# Use vcsh wrapper when necessary
+git_pull() {
+	local REMOTES="${1:?No remote specified}"
+	local BRANCHES="${2:-master}"
+	local STASH="__git_pull_stash"
+	vcsh_run "
+		git stash save -q \"$STASH\"
+		for REMOTE in $REMOTES; do
+			if git remote | grep -- \"\$REMOTE\" >/dev/null; then
+				for BRANCH in $BRANCHES; do
+					git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
+				done
+			fi
+		done
+		if git stash list -n 1 | grep \"$STASH\" >/dev/null 2>&1; then
+			git stash apply -q --index
+			git stash drop -q
+		fi
+	"
+}
+
+########################################
+# Batch push
+git_push() {
+	local REMOTES="${1:?No remote specified}"
+	local BRANCHES="${2:-master}"
+	for REMOTE in $REMOTES; do
+		if git remote | grep -- "$REMOTE" >/dev/null; then
+			for BRANCH in $BRANCHES; do
+				echo -n "Push $REMOTE/$BRANCH : "
+				git push "$REMOTE" "$BRANCH"
+			done
+		fi
+	done
+}
+
+########################################
 # Create a bundle
 git_bundle() {
-  local BUNDLE="${1:-${GIT-DIR:-.git}/bundles/bundle.$(git_branch).$(date +%Y%m%d-%H%M%S).bundle}"
-  shift
-  git bundle create "$BUNDLE" --all --tags --remotes "$@"
+	local DIR="${1:-$(git_dir)}"
+	if [ -d "$DIR" ]; then
+    DIR="${1:-$DIR/bundle}"
+		local BUNDLE="$DIR/${2:-bundle.$(uname -n).$(git_repo).$(git_branch).$(date +%Y%m%d-%H%M%S).$(git_shorthash).git}"
+		local GPG_RECIPIENT="$3"
+		echo "Git bundle into $BUNDLE"
+		git bundle create "$BUNDLE" --all --tags --remotes
+		if [ ! -z "$GPG_RECIPIENT" ]; then
+			gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "${BUNDLE}" && 
+				(shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
+		fi
+		ls -l "${BUNDLE}"*
+	else
+		echo "Target directory '$DIR' does not exists."
+		echo "Skip bundle creation..."
+	fi
+}
+
+########################################
+# Store repo metadata
+git_meta_store() {
+	git-cache-meta --store && 
+		git add "$(git_dir)/git_cache_meta" -f
 }
 
 ########################################
@@ -484,3 +563,132 @@ git_bundle() {
 git_graph() {
   git log --graph --pretty=format:'%C(blue)%h - %C(bold cyan)%an %C(bold green)(%ar)%C(bold yellow)%d%n''          %C(bold red)%s%C(reset)%n''%w(0,14,14)%b' "$@"
 }
+
+########################################
+# Check annex exists
+annex_exists() {
+  git ${1:+--git-dir="$1"} config --get annex.version >/dev/null 2>&1
+}
+
+# Check annex has been modified
+annex_modified() {
+  test ! -z "$(git ${1:+--git-dir="$1"} annex status)"
+}
+
+# Test annex direct-mode
+annex_direct() {
+	[ "$(git ${1:+--git-dir="$1"} config --get annex.direct)" = "true" ]
+}
+
+# Test annex bare
+annex_bare() {
+	annex_exists && ! annex_direct && git_bare
+}
+
+# Init annex
+annex_init() {
+	vcsh_run 'git annex init "$(uname -n)"'
+}
+
+# Init annex in direct mode
+annex_init_direct() {
+	vcsh_run 'annex_init && git annex direct'
+}
+
+# Init hubic annex
+annex_init_hubic() {
+	local REMOTE="${1:-hubic}"
+	local HUBIC_PATH="${2:-$(git_repo)}"
+	vcsh_run "
+		git annex enableremote \"$REMOTE\" type=external externaltype=hubic encryption=none hubic_container=annex hubic_path=\"$HUBIC_PATH\" embedcreds=no ||
+		git annex initremote \"$REMOTE\" type=external externaltype=hubic encryption=none hubic_container=annex hubic_path=\"$HUBIC_PATH\" embedcreds=no
+	"
+}
+
+# Annex sync
+annex_sync() {
+	vcsh_run 'git annex sync'
+}
+
+# Annex status
+annex_status() {
+	echo "annex status:"
+	vcsh_run 'git annex status'
+}
+
+# Annex diff
+annex_diff() {
+	if ! annex_direct; then
+		vcsh_run 'git diff' "$@"
+	fi
+}
+
+# Annex bundle
+annex_bundle() {
+	if annex_exists; then
+    local DIR="${1:-$(git_dir)}"
+    if [ -d "$DIR" ]; then
+      DIR="${1:-$DIR/bundle}"
+      local BUNDLE="$DIR/${2:-annex.$(uname -n).$(git_repo).$(git_branch).$(date +%Y%m%d-%H%M%S).$(git_shorthash).git}"
+			echo "Tar annex into $BUNDLE"
+			if annex_bare; then
+				tar cf "${BUNDLE}" -h ./annex
+			else
+				vcsh_run "git annex list $(git config --get core.worktree)" | 
+					awk 'NF>1 {$1="";print "\""substr($0,2)"\""}' |
+					xargs tar cf "${BUNDLE}" -h --exclude-vcs
+			fi
+			if [ ! -z "$3" ]; then
+				gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$3" "${BUNDLE}" && 
+					(shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
+			fi
+			ls -l "${BUNDLE}"*
+		else
+			echo "Target directory '$DIR' does not exists."
+			echo "Skip bundle creation..."
+		fi
+	else
+		echo "Repository '$(git_dir)' is not git-annex ready."
+		echo "Skip bundle creation..."
+	fi
+}
+
+# Annex copy
+annex_copy() {
+	vcsh_run 'git annex copy' "$@"
+}
+
+########################################
+# Test if repo is vcsh-ready
+vcsh_exists() {
+	git ${1:+--git-dir="$1"} config --get vcsh.vcsh >/dev/null 2>&1
+}
+
+# Batch clone
+vcsh_clone() {
+	local REPO="$(git_repo)"
+	for ARGS; do
+		set $ARGS
+		local REMOTE="${1:?No remote specified}"
+		local NAME="${2:-$REPO}"
+		local BRANCH="${3:-master}"
+    vcsh clone "$REMOTE" "$REPO" || break
+    vcsh run "$REPO" git remote rename origin "$NAME"
+    vcsh run "$REPO" git checkout "$BRANCH"
+	done
+}
+
+# Run a git command, call vcsh when necessary
+vcsh_run() {
+	if vcsh_exists; then
+		vcsh run "$(git_repo)" sh -c "$@"
+	else
+		sh -c "$@"
+	fi
+}
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ $# -gt 0 -a ! -z "$1" ] && "$@" || true

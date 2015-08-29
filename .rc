@@ -57,6 +57,7 @@ rc_sourcefiles() {
   # Source all files
   for FILE; do
     if test ${PERM} "$FILE" || grep -E "$REGEX$FILE" "$RC_DIR/.rcperms" >/dev/null 2>&1; then
+      set --
       rc_log "Source $FILE"
       . "$FILE"
     fi

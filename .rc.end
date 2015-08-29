@@ -73,6 +73,9 @@ alias s='si'
 alias d='diff'
 alias m='meld'
 
-# Alias misc
+# RC scripts shortcuts
+alias gitrc='. "$RC_DIR/.rc.d/12_git.sh"'
+
+# Misc
 alias hi='history'
 alias mo='mimeopen'
