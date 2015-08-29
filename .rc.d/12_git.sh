@@ -630,6 +630,7 @@ annex_bundle() {
     if [ -d "$DIR" ]; then
       DIR="${1:-$DIR/bundle}"
       local BUNDLE="$DIR/${2:-annex.$(uname -n).$(git_repo).$(git_branch).$(date +%Y%m%d-%H%M%S).$(git_shorthash).git}"
+      local GPG_RECIPIENT="$3"
 			echo "Tar annex into $BUNDLE"
 			if annex_bare; then
 				tar cf "${BUNDLE}" -h ./annex
@@ -638,8 +639,8 @@ annex_bundle() {
 					awk 'NF>1 {$1="";print "\""substr($0,2)"\""}' |
 					xargs tar cf "${BUNDLE}" -h --exclude-vcs
 			fi
-			if [ ! -z "$3" ]; then
-				gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$3" "${BUNDLE}" && 
+			if [ ! -z "$GPG_RECIPIENT" ]; then
+				gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "${BUNDLE}" && 
 					(shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
 			fi
 			ls -l "${BUNDLE}"*
@@ -685,6 +686,14 @@ vcsh_run() {
 	else
 		sh -c "$@"
 	fi
+}
+
+########################################
+# Batch bundle repos
+repo_bundle() {
+  local ARGS="\"$1\" \"$2\" \"$3\""
+  shift 3 2>/dev/null
+  eval repo forall "\"$@\"" -c git_bundle "$ARGS"
 }
 
 ########################################
