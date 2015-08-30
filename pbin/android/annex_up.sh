@@ -14,6 +14,7 @@ ANNEX_SYNC="1"
 ANNEX_ADD="1"
 WIFIDEV=""
 LOGFILE="/dev/null"
+ONCHARGE=""
 
 # From now on, run in a subshell because of the exit command
 (
@@ -24,25 +25,27 @@ LOGFILE="/dev/null"
     fi
     
     # Get arguments
-    while getopts "db:asc:fl:w:" OPTFLAG; do
+    while getopts "db:l:asc:fw:g" OPTFLAG; do
       case "$OPTFLAG" in
         d) set -vx; DBG="false";;
         b) BASEDIR="${OPTARG}";;
+        l) LOGFILE="\"${OPTARG}\"";;
         a) ANNEX_ADD="";;
         s) ANNEX_SYNC="";;
         c) ANNEX_CONTENT="${OPTARG:-$(git remote)}";;
         f) ANNEX_FORCE="--force";;
-        l) LOGFILE="\"${OPTARG}\"";;
         w) WIFIDEV="${OPTARG}";;
-        *) echo >&2 "Usage: annex.sh [-h] [-d] [-b] [-a] [-c repos] [-f] [-l logfile] [-s dir] [-w device]"
+        g) ONCHARGE="1";;
+        *) echo >&2 "Usage: annex.sh [-h] [-d] [-b] [-l logfile] [-a] [-c repos] [-f] [-s dir] [-w device] [-g]"
            echo >&2 "-d  dry-run"
            echo >&2 "-b  set base directory"
+           echo >&2 "-l  log to file"
            echo >&2 "-a  skip adding files"
            echo >&2 "-s  skip syncing"
            echo >&2 "-c  repos for which to sync content (not with -s)"
            echo >&2 "-f  force file addition (not with -a)"
-           echo >&2 "-l  log to file"
-           echo >&2 "-w  sync file content only with wifi (not with -s)"
+           echo >&2 "-w  sync file content only on wifi (not with -s)"
+           echo >&2 "-g  proceed only when in charge"
            exit 1
            ;;
       esac
@@ -51,6 +54,10 @@ LOGFILE="/dev/null"
 
     # Main script
     echo "[annex] start at $(date)"
+    if [ ! -z "$ONCHARGE" ] && [ "$(cat /sys/class/power_supply/battery/status | tr '[:upper:]' '[:lower:]')" != "charging" ]; then
+        echo "[error] Device is not in charge. Abort..."
+        exit 1
+    fi
     if [ ! -z "$WIFIDEV" ] && ! ip addr show dev "$WIFIDEV" 2>/dev/null | grep UP >/dev/null; then
         echo "[warning] Wifi device '$WIFIDEV' is not connected. Disable file content syncing..."
         unset ANNEX_CONTENT
@@ -64,12 +71,12 @@ LOGFILE="/dev/null"
         fi
         cd "$REPO"
         if ! git rev-parse --verify "HEAD" >/dev/null 2>&1; then
-            echo "[error] Directory '$PWD' is not git-ready. Abort..."
-            exit 1
+            echo "[warning] Directory '$PWD' is not git-ready. Skip it..."
+            continue
         fi
         if ! git config --get annex.version >/dev/null 2>&1; then
-            echo "[error] Directory '$PWD' is not annex-ready. Abort..."
-            exit 1
+            echo "[warning] Directory '$PWD' is not annex-ready. Skip it..."
+            continue
         fi
         if [ ! -z "$ANNEX_ADD" ]; then
             IFS=$'\n'
