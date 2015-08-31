@@ -7,8 +7,10 @@
 
   # mount directories
   mkdir -p /sdcard/abin /sdcard/pbin
-  su root -- mount -o bind,rw /sdcard/nosync/profile/pbin /sdcard/pbin
-  su root -- mount -o bind,rw /sdcard/nosync/profile/pbin/android /sdcard/abin
+  su root -- >/dev/null <<EOF
+mount -o bind,rw /sdcard/nosync/profile/pbin /sdcard/pbin
+mount -o bind,rw /sdcard/nosync/profile/pbin/android /sdcard/abin
+EOF
 
   # update repos
   (cd /sdcard/nosync/profile; git fetch; git merge)
