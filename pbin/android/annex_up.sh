@@ -55,8 +55,8 @@ ONCHARGE=""
     # Main script
     echo "[annex] start at $(date)"
     if [ ! -z "$ONCHARGE" ] && [ "$(cat /sys/class/power_supply/battery/status | tr '[:upper:]' '[:lower:]')" != "charging" ]; then
-        echo "[error] Device is not in charge. Abort..."
-        exit 1
+        echo "[warning] Device is not in charge. Disable file addition and file content syncing..."
+        unset ANNEX_CONTENT ANNEX_ADD
     fi
     if [ ! -z "$WIFIDEV" ] && ! ip addr show dev "$WIFIDEV" 2>/dev/null | grep UP >/dev/null; then
         echo "[warning] Wifi device '$WIFIDEV' is not connected. Disable file content syncing..."
