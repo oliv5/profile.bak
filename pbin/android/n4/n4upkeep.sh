@@ -15,7 +15,13 @@ EOF
   # update repos
   (cd /sdcard/nosync/profile; git fetch; git merge)
 
-  # copy files
+  # remove old backups
+  ( cd /sdcard
+    git annex numcopies 1
+    find /sdcard/backup/mybackup -type d -name 'AppsMedia_*' | 
+      sort -r | tail -n -1 | 
+      xargs echo git annex drop
+  )
 
   # annex files
   . annex_up.sh -b /sdcard -w wlan0 -c rpi -f -g
