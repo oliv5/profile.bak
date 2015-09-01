@@ -11,7 +11,7 @@ CRONTAB_DST="/etc/cron.d/crontabs/root"
 # Run in a subshell because of the exit commands
 su root <<EOF
     # Kill cron
-    if [ "$CMD" = "stop" ]; then
+    if [ "$CMD" = "stop" ]; then
         echo "[cron] stop current cron"
         pkill -x crond
         exit 0
