@@ -5,8 +5,7 @@
 CMD="$1"
 LOGFILE="/sdcard/crond.log"
 LOGLEVEL="${2:-8}"
-CRONTAB_SRC="/sdcard/crontab"
-CRONTAB_DST="/etc/cron.d/crontabs/root"
+CRONTAB="/etc/cron.d/crontabs/root"
 
 # Run in a subshell because of the exit commands
 su root <<EOF
@@ -31,26 +30,20 @@ su root <<EOF
         echo "root:x:0:0::/system/etc/cron.d/crontabs:/system/bin/sh" >> /etc/passwd
         mount -o remount,ro /etc
     fi
-
-    # Copy crontab
-    echo "[cron] setup crontab"
-    if [ ! -f "$CRONTAB_DST" ]; then
-        mount -o remount,rw /etc
-        mkdir -p "$(dirname "$CRONTAB_DST")"
-        cp "$CRONTAB_SRC" "$CRONTAB_DST"
-        mount -o remount,ro /etc
-    fi
     
     # Stop previous crond
     echo "[cron] stop previous cron"
     pkill -x crond
 
     # Start crond
-    echo "[cron] start new cron"
-    crond -b ${LOGLEVEL:+-l $LOGLEVEL} ${LOGFILE:+-L "$LOGFILE"} ${CRONTAB_DST:+-c "$(dirname "$CRONTAB_DST")"}
+    if [ -r "$CRONTAB" ]; then
+        echo "[cron] start new cron"
+        crond -b ${LOGLEVEL:+-l $LOGLEVEL} ${LOGFILE:+-L "$LOGFILE"} ${CRONTAB:+-c "$(dirname "$CRONTAB")"}
+    else
+        echo "[warning] do not start cron: no crontab file present."
+    fi
     pgrep -l crond
 
     # End
-    echo "[cron] done"
     exit 0   
 EOF

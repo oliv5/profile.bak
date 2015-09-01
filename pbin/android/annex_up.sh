@@ -16,7 +16,7 @@ WIFIDEV=""
 LOGFILE="/dev/null"
 ONCHARGE=""
 
-# From now on, run in a subshell because of the exit command
+# Run in a subshell because of the exit command
 (
     # Check requirements
     if ! command -v git >/dev/null 2>&1; then
