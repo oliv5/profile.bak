@@ -730,34 +730,27 @@ function! s:BufCloseAll(...)
 endfunction
 
 " Intelligent open related buffer
-let s:vimrc_bufopenext = ['h','cc','c']
+let s:vimrc_bufopenext = ['h','cc','cpp','c']
 function! s:BufSmartOpen()
-	for file in ['<cfile>', '%']
+	for pattern in ['<cfile>', '%']
 		" Skip non-existent files
-		if !filereadable(expand(file))
+		if !filereadable(expand(pattern))
 			continue
 		endif
 		" Try few extensions
 		for ext in s:vimrc_bufopenext
-			" Search in the same directory
-			let open_file = expand(file.":r") . '.' . ext
-			if open_file!=?expand("%") && filereadable(open_file)
-				silent! execute ':find' fnameescape(open_file)
-				return
-			endif
-			" Search with tags and cscope
-			let open_file = expand(file.":t:r") . '.' . ext
-			if open_file!=?expand("%:t")
-				silent! execute "tag" open_file | return
-				if has('cscope')
-					set nocscopeverbose
-					execute "cs f f" open_file | return
-					set cscopeverbose
+			let file = expand(pattern.":t:r") . '.' . ext
+			if file!=?expand("%:t")
+				" Search in the same directory
+				if filereadable(file)
+					silent! execute ':e' file
+					return
 				endif
+				" Search with tags and cscope
+				try | execute "tag" file | return | catch | echo | endtry
+				try | execute "cs f f" file | return | catch | echo | endtry
 			endif
 		endfor
-		" Try to open file under the cursor
-		silent! execute ':find' fnameescape(file)
 	endfor
 endfunction
 

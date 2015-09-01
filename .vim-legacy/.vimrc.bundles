@@ -437,6 +437,7 @@ if !exists('g:loaded_ctrlp')
 	" Key mapping
 	FnNoremap <C-l>     :CtrlPTag<CR>
 	FnNoremap <C-o>     :CtrlPMRU<CR>
+	FnNoremap <A-w>     :CtrlPMRU<CR>
 	FnNoremap <C-p>     :exec 'CtrlP'.g:FindRootDir()<CR>
 endif
 
