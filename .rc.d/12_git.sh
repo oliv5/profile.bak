@@ -90,6 +90,7 @@ alias gsta='git_subtree_add'
 alias gstu='git_subtree_update'
 # Git grep aliases
 alias ggg='git grep -n'
+alias iggg='git grep -ni'
 
 ########################################
 # git wrapper

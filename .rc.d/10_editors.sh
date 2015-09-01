@@ -47,8 +47,6 @@ fi
 
 #########################
 # Source insight
-if command -v si.sh >/dev/null; then
-  si() {
-    PREFIX="$HOME/.wine-sourceinsight" si.sh "$@"
-  }
-fi
+si() {
+  PREFIX="$HOME/.wine-sourceinsight" si.sh "$@"
+}
