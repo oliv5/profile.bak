@@ -1,10 +1,9 @@
 # rc file permissions
-rwx 00_shell.sh
-rwx 01_fct.sh
-rwx 01_path.sh
-rwx 02_cd.sh
-rwx 03_search.sh
-rwx 04_tar.sh
-rwx 04_xz.sh
-rwx 05_diff.sh
-rwx 06_mount.sh
+-r-w-x 00_shell.sh
+-r-w-x 01_fct.sh
+-r-w-x 01_path.sh
+-r-w-x 02_cd.sh
+-r-w-x 03_search.sh
+-r-w-x 04_tar.sh
+-r-w-x 05_diff.sh
+-r-w-x 08_sys.sh
