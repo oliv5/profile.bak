@@ -1,0 +1,19 @@
+[${PRIVATE:-$HOME}/manifests]
+checkout = repo init -u "https://github.com/oliv5/manifests.git"
+
+bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle" "" "Olivier Lanneluc <olivier.lanneluc@gmail.com>"
+
+pull     = git_pull "github rpi" master
+push     = git_push "github rpi" master
+sync     = true
+
+download = true
+upload   = true
+
+status   = git status -s
+diff     = git diff
+gdm      = git difftool -y -t meld --
+
+gitk     = gitk
+gc       = git gc
+meta     = git_meta
