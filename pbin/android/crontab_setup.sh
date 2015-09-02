@@ -2,26 +2,35 @@
 # Setup a new crontab
 
 # Variables
-CRONTAB="/etc/cron.d/crontabs/root"
+CRONTAB_SRC="$PWD/crontab"
+CRONTAB_DST="/system/etc/cron.d/crontabs/root"
 
 # Run in a root subshell
 su root <<EOF
-    # set /etc rw
-    mount -o remount,rw /etc
-    mkdir -p "$(dirname "$CRONTAB")"
-
-    # Copy crontab
-    if [ -r "./crontab" ]; then
-        echo "[crontab] copy local crontab to $CRONTAB"
-        cp "./crontab" "$CRONTAB"
-    else
-        echo "[crontab] setup new empty crontab"
-        echo -n > "$CRONTAB"
+    # setup /etc link
+    if [ ! -e /etc ]; then
+        mount -o remount,rw /
+        ln -s /system/etc /
+        mount -o remount,ro /
     fi
 
-    # reset /etc ro
-    mount -o remount,ro /etc
+    # set /system rw
+    mount -o remount,rw /system
+    mkdir -p "$(dirname "$CRONTAB_DST")"
+
+    # Copy crontab
+    if [ -r "$CRONTAB_SRC" ]; then
+        echo "[crontab] copy local crontab to $CRONTAB_DST"
+        cp "$CRONTAB_SRC" "$CRONTAB_DST"
+    else
+        echo "[crontab] setup new empty crontab"
+        echo -n > "$CRONTAB_DST"
+    fi
+
+    # reset /system ro
+    mount -o remount,ro /system
 
     # End
+    cat "$CRONTAB_DST"
     exit 0   
 EOF
