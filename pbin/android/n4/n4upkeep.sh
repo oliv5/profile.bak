@@ -1,6 +1,7 @@
 #!/system/bin/sh
 # crontab rule: 0 4 * * * /sdcard/nosync/profile/pbin/android/n4/n4upkeep.sh
 PATH="/data/data/ga.androidterm/bin:/sdcard/nosync/profile/pbin/android:$PATH"
+SDCARD="/storage/sdcard0/"
 # Run in a subshell because of exits
 (
   # init
@@ -9,8 +10,8 @@ PATH="/data/data/ga.androidterm/bin:/sdcard/nosync/profile/pbin/android:$PATH"
   # mount directories
   mkdir -p /sdcard/abin /sdcard/pbin
   su root -- >/dev/null <<EOF
-mount -o bind,rw /sdcard/nosync/profile/pbin /sdcard/pbin
-mount -o bind,rw /sdcard/nosync/profile/pbin/android /sdcard/abin
+mount -o bind,rw "$SDCARD/nosync/profile/pbin" /sdcard/pbin
+mount -o bind,rw "$SDCARD/nosync/profile/pbin/android" /sdcard/abin
 EOF
 
   # update repos
