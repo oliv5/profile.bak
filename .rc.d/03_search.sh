@@ -5,29 +5,32 @@ _ffind1() {
   local FCASE="${FCASE:--}name"
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
-  ( set -f; FILES="$(echo $FILES | sed -e 's/;/'\"' -o '${FCASE}' '\"'/g')"; shift $(min 1 $#)
-    eval find "\"${DIR:-.}\"" -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} "\(" ${FILES:+$FCASE "\"$FILES\""} -true "\)" "$@")
+  shift $(min 1 $#)
+  local REGEX='s/;!/" -o -not '${FCASE}' "/g ; s/&!/" -a -not '${FCASE}' "/g ; s/;/" -o '${FCASE}' "/g ; s/&/" -a '${FCASE}' /g'
+  ( set -f; FILES="\"$(echo $FILES | sed -e "$REGEX")\""
+    eval find "${DIR:-.}" -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} \\\( ${FILES:+$FCASE "$FILES"} -true \\\) ${FARGS} "$@")
 }
 _ffind2() {
   local FCASE="${FCASE:--}regex"
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
-  ( set -f; FILES="$(echo $FILES | sed -e 's/;/|/g')"; shift $(min 1 $#)
-    find "${DIR:-.}" -regextype egrep -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*/$FILES"} "$@")
+  shift $(min 1 $#)
+  ( set -f; FILES="$(echo $FILES | sed -e 's/;/|/g ; s/\./\\./g ; s/*/.*/g')"
+    find "${DIR:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*/($FILES)"} ${FARGS} "$@")
 }
-alias _ffind='_ffind1'
-alias    ff='FCASE=   FTYPE=  FXTYPE=  _ffind'
-alias   fff='FCASE=   FTYPE=f FXTYPE=  _ffind'
-alias   ffd='FCASE=   FTYPE=d FXTYPE=  _ffind'
-alias   ffl='FCASE=   FTYPE=l FXTYPE=  _ffind'
-alias  ffll='FCASE=   FTYPE=l FXTYPE=f _ffind'
-alias  fflb='FCASE=   FTYPE=l FXTYPE=l _ffind'
-alias   iff='FCASE=-i FTYPE=  FXTYPE=  _ffind'
-alias  ifff='FCASE=-i FTYPE=f FXTYPE=  _ffind'
-alias  iffd='FCASE=-i FTYPE=d FXTYPE=  _ffind'
-alias  iffl='FCASE=-i FTYPE=l FXTYPE=  _ffind'
-alias iffll='FCASE=-i FTYPE=l FXTYPE=f _ffind'
-alias ifflb='FCASE=-i FTYPE=l FXTYPE=l _ffind'
+alias _ffind='_ffind2'
+alias    ff='FCASE=   FTYPE=  FXTYPE=  FARGS= _ffind'
+alias   fff='FCASE=   FTYPE=f FXTYPE=  FARGS= _ffind'
+alias   ffd='FCASE=   FTYPE=d FXTYPE=  FARGS= _ffind'
+alias   ffl='FCASE=   FTYPE=l FXTYPE=  FARGS= _ffind'
+alias  ffll='FCASE=   FTYPE=l FXTYPE=f FARGS= _ffind'
+alias  fflb='FCASE=   FTYPE=l FXTYPE=l FARGS= _ffind'
+alias   iff='FCASE=-i FTYPE=  FXTYPE=  FARGS= _ffind'
+alias  ifff='FCASE=-i FTYPE=f FXTYPE=  FARGS= _ffind'
+alias  iffd='FCASE=-i FTYPE=d FXTYPE=  FARGS= _ffind'
+alias  iffl='FCASE=-i FTYPE=l FXTYPE=  FARGS= _ffind'
+alias iffll='FCASE=-i FTYPE=l FXTYPE=f FARGS= _ffind'
+alias ifflb='FCASE=-i FTYPE=l FXTYPE=l FARGS= _ffind'
 
 # Backward find
 _bfind1() {
@@ -56,12 +59,12 @@ alias bfd='BTYPE=-d _bfind'
 # Find breadth-first (width-first)
 _wfind1() { _ffind "${@:-*}" -prune -printf '%d\t%p\n' | sort -nk1 | cut -f2-; }
 alias _wfind='_wfind1'
-alias   wf='FCASE= FTYPE=  FXTYPE=  _wfind'
-alias  wff='FCASE= FTYPE=f FXTYPE=  _wfind'
-alias  wfd='FCASE= FTYPE=d FXTYPE=  _wfind'
-alias  wfl='FCASE= FTYPE=l FXTYPE=  _wfind'
-alias wfll='FCASE= FTYPE=l FXTYPE=f _wfind'
-alias wflb='FCASE= FTYPE=l FXTYPE=l _wfind'
+alias   wf='FCASE= FTYPE=  FXTYPE=  FARGS= _wfind'
+alias  wff='FCASE= FTYPE=f FXTYPE=  FARGS= _wfind'
+alias  wfd='FCASE= FTYPE=d FXTYPE=  FARGS= _wfind'
+alias  wfl='FCASE= FTYPE=l FXTYPE=  FARGS= _wfind'
+alias wfll='FCASE= FTYPE=l FXTYPE=f FARGS= _wfind'
+alias wflb='FCASE= FTYPE=l FXTYPE=l FARGS= _wfind'
 
 # File grep implementations
 _fgrep1() {
@@ -88,8 +91,8 @@ _fgrep2() {
   (set -f; eval grep -RnH --color ${GCASE} -e "$ARGS" ${FILES:+--include="$FILES"} "${DIR:-.}")
 }
 alias _fgrep='_fgrep2'
-alias   gg='GCASE=   _fgrep'
-alias  igg='GCASE=-i _fgrep'
+alias   gg='FCASE= FTYPE=  FXTYPE=  FARGS= GCASE=   _fgrep'
+alias  igg='FCASE= FTYPE=  FXTYPE=  FARGS= GCASE=-i _fgrep'
 ggl() {  gg "$@" | cut -d : -f 1 | uniq; }
 iggl(){ igg "$@" | cut -d : -f 1 | uniq; }
 
@@ -113,5 +116,5 @@ _fsed1() {
     -execdir sed --in-place${_BACKUP:+=$_BACKUP} $SEDOPT ${_SHOW:+-e '"\|$IN|{w /dev/stderr"' -e '"}"'} -e '"s|$IN|$OUT|g"' "{}" "\\;"
 }
 alias _fsed='_fsed1'
-alias  hh='FCASE=   SEXCLUDE= _fsed'
-alias ihh='FCASE=-i SEXCLUDE= _fsed'
+alias  hh='FCASE=   FTYPE=  FXTYPE= FARGS= SEXCLUDE= _fsed'
+alias ihh='FCASE=-i FTYPE=  FXTYPE= FARGS= SEXCLUDE= _fsed'
