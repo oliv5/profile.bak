@@ -4,7 +4,7 @@ checkout = git_clone "$(mr_ask "Remote repo to clone")" "$(mr_ask "Remote repo n
            git config hooks.nobinaries true;
            git annex wanted hubic 'exclude=*.gpg exclude=*.kdbx'
 
-bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle" "" "Olivier Lanneluc <olivier.lanneluc@gmail.com>";
+bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle" "" "87884760";
            annex_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
 
 pull     = git_pull rpi master

@@ -1,7 +1,7 @@
-[${PRIVATE:-$HOME}/manifests]
-checkout = repo init -u "https://github.com/oliv5/manifests.git"
+[${PRIVATE:-$HOME}/manifests/public]
+checkout = git_clone "$(mr_ask "Remote repo to clone" "https://github.com/oliv5/manifests.git")" "$(mr_ask "Remote repo name" github)";
 
-bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle" "" "Olivier Lanneluc <olivier.lanneluc@gmail.com>"
+bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle" "" ""
 
 pull     = git_pull "github rpi" master
 push     = git_push "github rpi" master

@@ -1,6 +1,6 @@
 [${PRIVATE:-$HOME}/media/music]
 checkout = git_clone "$(mr_ask "Remote repo to clone")" "$(mr_ask "Remote repo name")";
-           annex_init && annex_init_hubic
+           annex_init && annex_init_hubic2
 
 bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle/public"
 
