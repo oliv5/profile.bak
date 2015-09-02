@@ -150,6 +150,9 @@ git_modified() {
 
 # Git status for scripts
 git_st() {
+  git status -s | awk '/^[\? ]?'$1'[\? ]?/ {print "\""$2"\""}'
+}
+git_stx() {
   git status -z | awk 'BEGIN{RS="\0"; ORS="\0"}/'"${1:-^[^\?\?]}"'/{print substr($0,4)}'
 }
 
@@ -463,19 +466,18 @@ alias git_rm_branch='git branch -d'
 # https://stackoverflow.com/questions/4479960/git-checkout-to-a-specific-folder
 # Export the whole repo
 git_export() {
-  local DST="${1:?No output directory specified}"
+  local DST="${1:-$(git_dir)/backup/export.$(uname -n).$(git_repo).$(git_branch).$(date +%Y%m%d-%H%M%S).$(git_shorthash)}"
   shift
   # The last '/' is important
   git checkout-index -a -f --prefix="$DST/" "$@"
+  7z a "${DST}.7z" "$DST" && rm -rf "$DST"
 }
 
 # Export a directory
 git_exportdir() {
-  local DST="${1:?No output directory specified}"
-  local SRC="${2:?No input directory specified}"
-  shift 2
-  # The last '/' is important
-  find "$SRC" -print0 | git checkout-index --prefix="$DST/" "$@" -f -z --stdin
+  local SRC="${1:?No input directory specified}"
+  shift
+  find "$SRC" -print0 | git_export "$@" -f -z --stdin
 }
 
 ########################################
