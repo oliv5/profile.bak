@@ -22,7 +22,7 @@ EOF
     git annex numcopies 1
     find /sdcard/backup/mybackup -type d -name 'AppsMedia_*' | 
       sort -r | tail -n -1 | 
-      xargs echo git annex drop
+      xargs git annex drop
   )
 
   # annex files
@@ -30,4 +30,4 @@ EOF
 
   # end
   date
-) >/sdcard/n4upkeep.log 2>&1
+) 2>&1 | tee /sdcard/n4upkeep.log
