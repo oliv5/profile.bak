@@ -1,7 +1,4 @@
 [${PRIVATE:-$HOME}/media/films]
-checkout = git_clone "$(mr_ask "Remote repo to clone")" "$(mr_ask "Remote repo name")";
-           annex_init
-
 bundle   = true
 
 pull     = true

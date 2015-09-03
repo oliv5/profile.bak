@@ -1,6 +1,4 @@
 [${XDG_CONFIG_HOME:-$HOME/.config}/vcsh/repo.d/home.git]
-checkout = true
-
 bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
 #bundle   = git_bundle "/var/backups/${USER}"
 

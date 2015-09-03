@@ -1,8 +1,4 @@
 [${PRIVATE:-$HOME}/dev]
-checkout = git_clone "$(mr_ask "Remote repo to clone")" "$(mr_ask "Remote repo name")";
-           annex_init && annex_init_hubic;
-           repo init -u https://github.com/oliv5/manifests.git -m dev.xml
-
 bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
 
 pull     = git_pull rpi master
