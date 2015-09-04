@@ -123,7 +123,7 @@ git_worktree() {
 
 # Get git directory (alias git-dir)
 git_dir() {
-  echo "${GIT_DIR:-$PWD/$(git rev-parse --git-dir)}"
+  echo "${GIT_DIR:-$(git rev-parse --git-dir)}"
 }
 
 # Get git-dir basename
@@ -465,8 +465,8 @@ alias git_rm_branch='git branch -d'
 ########################################
 # https://stackoverflow.com/questions/4479960/git-checkout-to-a-specific-folder
 # Export the whole repo
-git_export() {
-  local DST="${1:-$(git_dir)/backup/export.$(uname -n).$(git_repo).$(git_branch).$(date +%Y%m%d-%H%M%S).$(git_shorthash)}"
+git_backup() {
+  local DST="${1:-$(git_dir)/backup/backup.$(uname -n).$(git_repo).$(git_branch).$(date +%Y%m%d-%H%M%S).$(git_shorthash)}"
   shift
   # The last '/' is important
   git checkout-index -a -f --prefix="$DST/" "$@"
@@ -474,10 +474,10 @@ git_export() {
 }
 
 # Export a directory
-git_exportdir() {
+git_backupdir() {
   local SRC="${1:?No input directory specified}"
   shift
-  find "$SRC" -print0 | git_export "$@" -f -z --stdin
+  find "$SRC" -print0 | git_backup "$@" -f -z --stdin
 }
 
 ########################################
