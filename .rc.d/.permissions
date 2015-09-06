@@ -1,0 +1,9 @@
+# rc file permissions
+-r-w-x 00_shell.sh
+-r-w-x 01_fct.sh
+-r-w-x 01_path.sh
+-r-w-x 02_cd.sh
+-r-w-x 03_search.sh
+-r-w-x 04_tar.sh
+-r-w-x 05_diff.sh
+-r-w-x 08_sys.sh

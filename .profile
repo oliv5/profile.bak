@@ -13,20 +13,21 @@
 [ -z "$DOMAIN" ] && export DOMAIN="$(hostname -d 2>/dev/null)"
 [ -z "$DISPLAY" ] && export DISPLAY=":0"
 
-# Set load flag
+# Set global variables
 export ENV_PROFILE=$((ENV_CNT=ENV_CNT+1))
+export RC_DIR="${RC_DIR:-$HOME}"
+export RC_DIR_LOCAL="${RC_DIR_LOCAL:-$HOME}"
 
 # Load next script (dash-only)
-export ENV="$HOME/.rc"
+export ENV="$RC_DIR/.rc"
 
 # Load local profile script
-if [ -r "$HOME/.profile.local" ]; then
+if [ -r "$RC_DIR_LOCAL/.profile.local" ]; then
   export ENV_PROFILE_LOCAL=$((ENV_CNT=ENV_CNT+1))
-  . "$HOME/.profile.local"
+  . "$RC_DIR_LOCAL/.profile.local"
 fi
 
 # Exports
-export ENV_CNT
 export PATH
 
 # make sure this is the last line

@@ -1,9 +1,0 @@
-# rc file permissions
--r-w-x .rc.d/00_shell.sh
--r-w-x .rc.d/01_fct.sh
--r-w-x .rc.d/01_path.sh
--r-w-x .rc.d/02_cd.sh
--r-w-x .rc.d/03_search.sh
--r-w-x .rc.d/04_tar.sh
--r-w-x .rc.d/05_diff.sh
--r-w-x .rc.d/08_sys.sh

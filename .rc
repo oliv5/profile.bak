@@ -4,25 +4,26 @@
 
 ################################
 # Define global variables
-export ENV_RC=$((ENV_CNT=ENV_CNT+1))
-export RC_PERMS="${RC_PERMS:--x}"
+export RC_PERMISSIONS="${RC_PERMISSIONS:--x}"
 export RC_DIR="${RC_DIR:-$HOME}"
+export RC_DIR_LOCAL="${RC_DIR_LOCAL:-$HOME}"
 # Define local variables
 RC_VERBOSE="false"
-RC_DRYRUN="false"
+RC_DRYRUN=""
 
 ################################
 # Arguments
-while getopts 'vdrx' ARG; do
-  case "$ARG" in
+while getopts 'vdrx' FLAGS; do
+  case "$FLAGS" in
     v) RC_VERBOSE="true";;
     d) RC_DRYRUN="true";;
-    r) RC_PERMS="-r";;
-    x) RC_PERMS="-x";;
-    *) echo >&2 "Usage: $(basename "$0") [-v]"
+    r) RC_PERMISSIONS="-r";;
+    x) RC_PERMISSIONS="-x";;
+    *) echo >&2 "Usage: .rc [-v] [-d] [-r] [-x]"
        echo >&2 "-v   verbose mode"
        echo >&2 "-d   dry-run"
-       echo >&2 "-r   load all readable (def executable) scripts"
+       echo >&2 "-r   load all readable scripts"
+       echo >&2 "-x   load all executable scripts (default)"
        kill -INT $$
        ;;
   esac
@@ -30,7 +31,8 @@ done
 shift $(expr $OPTIND - 1)
 # The following fails in dash 0.5.7-3
 #unset OPTIND
-unset ARG OPTARG OPTERR
+unset FLAGS OPTARG OPTERR
+OPTIND=""
 
 ################################
 # Log function
@@ -46,54 +48,52 @@ alias profile='rc'
 
 # Source files by name and perms
 rc_sourcefiles() {
-  local PERM="${1:-${RC_PERMS:--x}}"
-  local REGEX="^[-rwx]*$PERM[-rwx]* *"
-  local VAR="${2}"
-  shift 2
-  # Set marker
-  if [ ! -z "$VAR" ]; then
-    export $VAR=$((ENV_CNT=ENV_CNT+1))
-  fi
+  local PERMISSION="${1:-${RC_PERMISSIONS:--x}}"
+  local PERMISSION_REGEX="^[-rwx]*$PERMISSION[-rwx]* *"
+  shift
   # Source all files
   for FILE; do
-    if test ${PERM} "$FILE" || grep -e "${REGEX}${FILE##$RC_DIR/}" "$RC_DIR/.rcperms" >/dev/null 2>&1; then
-      set --
-      rc_log "Source $FILE"
-      . "$FILE"
+    if test ${PERMISSION} "$FILE" || 
+      grep -e "${PERMISSION_REGEX}${FILE##${RC_DIR}/.rc.d/}" "${RC_DIR}/.rc.d/.permissions" >/dev/null 2>&1 ||
+      grep -e "${PERMISSION_REGEX}${FILE##${RC_DIR_LOCAL}/.rc.local.d/}" "${RC_DIR_LOCAL}/.rc.local.d/.permissions" >/dev/null 2>&1; then
+        rc_log "Source $FILE"
+        set --
+        ${RC_DRYRUN} . "$FILE"
     fi
   done
 }
 
 # Source files by partial name
 rc_sourcemods() {
-  for FILE; do
-    rc_sourcefiles "-r" "" "$RC_DIR/.rc.d/"*$FILE*.sh
+  for PATTERN; do
+    rc_sourcefiles "-r" "$RC_DIR/.rc.d/"*$PATTERN*.sh
+    rc_sourcefiles "-r" "$RC_DIR_LOCAL/.rc.local.d/"*$PATTERN*.sh
   done
 }
 
 ################################
-# Source .profile when not already done
-if [ -z "$ENV_PROFILE" ]; then
-  rc_sourcefiles "-r" "" "$RC_DIR/.profile"
-fi
-
-# Source profile scripts in order
+# Source all scripts
 rc_log "Source $RC_DIR/.rc"
-rc_sourcefiles "-r" "ENV_RC_LOCAL" "$RC_DIR/.rc.local"
-rc_sourcefiles "$RC_PERMS" "ENV_RC_D" "$RC_DIR/.rc.d/"*.sh
-if [ ! -z "$BASH_VERSION" ]; then
-  rc_sourcefiles "$RC_PERMS" "ENV_RC_D_BASH" "$RC_DIR/.rc.d/bash/"*.sh
+export ENV_RC=$((ENV_CNT=ENV_CNT+1))
+# .profile when not already done
+if [ -z "$ENV_PROFILE" ]; then
+  rc_sourcefiles "-r" "$RC_DIR/.profile"
 fi
-rc_sourcefiles "$RC_PERMS" "ENV_RC_D_LOCAL" "$RC_DIR/.rc.d/local/"*.sh
-rc_sourcefiles "-r" "ENV_RC_END" "$RC_DIR/.rc.end"
-rc_sourcefiles "-r" "ENV_RC_LOCAL_END" "$RC_DIR/.rc.local.end"
+# Start scripts
+rc_sourcefiles "-r" "$RC_DIR_LOCAL/.rc.local"
+# Main scripts
+rc_sourcefiles "$RC_PERMISSIONS" "$RC_DIR/.rc.d/"*.sh
+if [ ! -z "$BASH_VERSION" ]; then
+  rc_sourcefiles "$RC_PERMISSIONS" "$RC_DIR/.rc.d/bash/"*.sh
+fi
+rc_sourcefiles "$RC_PERMISSIONS" "$RC_DIR_LOCAL/.rc.local.d/"*.sh
+# End scripts
+rc_sourcefiles "-r" "$RC_DIR/.rc.end"
+rc_sourcefiles "-r" "$RC_DIR_LOCAL/.rc.local.end"
 
 ################################
 #Clean local variables
 unset RC_VERBOSE
 unset RC_DRYRUN
-# Set load flag
-export ENV_LOADED=$ENV_CNT
-export ENV_CNT
 # make sure this is the last line
 # to ensure a good return code
