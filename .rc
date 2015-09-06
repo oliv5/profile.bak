@@ -30,9 +30,8 @@ while getopts 'vdrx' FLAGS; do
 done
 shift $(expr $OPTIND - 1)
 # The following fails in dash 0.5.7-3
-#unset OPTIND
+#unset OPTIND; OPTIND=""
 unset FLAGS OPTARG OPTERR
-OPTIND=""
 
 ################################
 # Log function
