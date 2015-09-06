@@ -1,5 +1,20 @@
 #!/bin/sh
 
+# Mount cleaner
+# Keep a number of mounts matching input regex
+mount_cleaner() {
+  local SEARCH="${1:?No mount specified...}"
+  local WANTED="${2:-0}"
+  local COUNT="$(mount | grep -e "$SEARCH" | wc -l)"
+  sudo root "
+    mount | grep -e '$SEARCH' | cut -d ' ' -f 3 | 
+      while IFS= read -r MOUNT && [ $COUNT -gt $WANTED ]; do
+        COUNT=$((COUNT - 1))
+        umount '$MOUNT'
+      done
+  "
+}
+
 # Mount ecryptfs
 mount_ecryptfs() {
   local SRC="${1:?Missing source directory...}"
