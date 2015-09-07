@@ -2,8 +2,8 @@
 bundle   = git_bundle "${PRIVATE:-$HOME}/repo/sync/git/bundle"
 #bundle   = git_bundle "/var/backups/${USER}"
 
-pull     = true
-push     = git_push backup master
+pull     = git_pull rpi master
+push     = git_push rpi master
 sync     = true
 
 download = true
