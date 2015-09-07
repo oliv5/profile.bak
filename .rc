@@ -55,9 +55,9 @@ rc_sourcefiles() {
     if test ${PERMISSION} "$FILE" || 
       grep -e "${PERMISSION_REGEX}${FILE##${RC_DIR}/.rc.d/}" "${RC_DIR}/.rc.d/.permissions" >/dev/null 2>&1 ||
       grep -e "${PERMISSION_REGEX}${FILE##${RC_DIR_LOCAL}/.rc.local.d/}" "${RC_DIR_LOCAL}/.rc.local.d/.permissions" >/dev/null 2>&1; then
-        rc_log "Source $FILE"
+        rc_log "Source '$FILE'"
         set --
-        ${RC_DRYRUN} . "$FILE"
+        [ -n "$FILE" ] && ${RC_DRYRUN} . "$FILE"
     fi
   done
 }
