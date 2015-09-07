@@ -1,2 +1,0 @@
-# nexus4 crontab
-0 4 * * * . /storage/sdcard0/nosync/profile/pbin/android/n4/n4upkeep.sh
