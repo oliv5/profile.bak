@@ -20,7 +20,7 @@ su root -- <<EOF
   # Write file content
   echo "" >>  "$MKSHRC"
   echo "$MARKER" >>  "$MKSHRC"
-  echo '. /storage/emulated/0/.mkshrc' >> "$MKSHRC"
+  echo '. /storage/sdcard0/.mkshrc' >> "$MKSHRC"
   
   # Mount /system ro
   mount -o remount,ro /system

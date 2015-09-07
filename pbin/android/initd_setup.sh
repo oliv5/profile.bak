@@ -1,8 +1,8 @@
 #!/system/bin/sh
 # Copy or write init.d scripts
 SRC=""
-DST="/system/etc/init.d"
-NAME="initd.$(date +%Y%m%d-%H%M)"
+DST="/data/local/userinit.d"
+NAME="initd.$(date +%Y%m%d-%H%M).sh"
 COMMANDS=""
 # Run in a subshell because of the exit command
 (
@@ -10,7 +10,7 @@ COMMANDS=""
     while getopts "n:f:h" OPTFLAG; do
       case "$OPTFLAG" in
         n) NAME="$(basename "${OPTARG}")";;
-        f) SRC="${OPTARG}";;
+        f) SRC="${OPTARG}"; NAME="$(basename "${OPTARG}")";;
         *) echo >&2 "Usage: initd_setup.sh [-h] [-n name] [-f file] -- <commands>"
            echo >&2 "-n  output script name ($NAME by default)"
            echo >&2 "-f  input script path"
@@ -24,7 +24,7 @@ COMMANDS=""
     
     # Set few variables
     COMMANDS="$@"
-    DST="$DST/$NAME"
+    DST="$(readlink -f "$DST/$NAME")"
     
     # Check source
     if [ -n "$SRC" ] && [ ! -f "$SRC" ]; then
@@ -42,16 +42,19 @@ COMMANDS=""
         exit 2
       fi
     fi
-
+    
     # Main root script
     su root -- <<EOF
-      # Mount /system rw
-      mount -o remount,rw /system
+      # Make dest directory
+      mkdir -p "$(dirname "$DST")"
+EOF
       
-      # Copy existing user script
+      # Copy/link existing user script
       [ -f "$SRC" ] && {
-        echo "[initd] copy script $SRC to $DST"
-        cp -v "$SRC" "$DST"
+        #echo "[initd] copy script $SRC to $DST"
+        #cp -v "$SRC" "$DST"
+        echo "[initd] link script $SRC to $DST"
+        ln -sv "$SRC" "$DST"
       }
       
       # Append additional commands to user initd script
@@ -59,8 +62,4 @@ COMMANDS=""
         echo "[initd] write script $DST"
         echo "$COMMANDS" >> "$DST"
       }
-
-      # Mount /system ro
-      mount -o remount,ro /system
-EOF
 )
