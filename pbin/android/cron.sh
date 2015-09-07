@@ -26,9 +26,9 @@ su root <<EOF
     # Install passwd
     echo "[cron] setup /etc/passwd"
     if [ ! -f "/etc/passwd" ] || ! grep root /etc/passwd >/dev/null; then
-        mount -o remount,rw /etc
+        mount -o remount,rw /system
         echo "root:x:0:0::/system/etc/cron.d/crontabs:/system/bin/sh" >> /etc/passwd
-        mount -o remount,ro /etc
+        mount -o remount,ro /system
     fi
     
     # Stop previous crond
