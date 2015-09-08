@@ -1,29 +1,20 @@
 #!/system/bin/sh
 # Add content to annex and sync it
-# adb push annex.sh /sdcard/bin
-PATH="/data/data/ga.androidterm/bin:$PATH"
-
-# Local variables
-DBG=""
-BASEDIR="."
-ANNEX_FILELIST=".gitlist"
-ANNEX_REPOLIST=".annexlist"
-ANNEX_CONTENT=""
-ANNEX_FORCE=""
-ANNEX_SYNC="1"
-ANNEX_ADD="1"
-WIFIDEV=""
-LOGFILE="/dev/null"
-ONCHARGE=""
-
-# Run in a subshell because of the exit command
 (
-    # Check requirements
-    if ! command -v git >/dev/null 2>&1; then
-        echo "[error] Cannot find git. Abort..."
-        exit 1
-    fi
-    
+    # Local variables
+    PATH="/data/data/ga.androidterm/bin:$PATH"
+    DBG=""
+    BASEDIR="."
+    ANNEX_FILELIST=".gitlist"
+    ANNEX_REPOLIST=".annexlist"
+    ANNEX_CONTENT=""
+    ANNEX_FORCE=""
+    ANNEX_SYNC="1"
+    ANNEX_ADD="1"
+    WIFIDEV=""
+    LOGFILE="/dev/null"
+    ONCHARGE=""
+
     # Get arguments
     while getopts "db:l:asc:fw:g" OPTFLAG; do
       case "$OPTFLAG" in
@@ -51,6 +42,14 @@ ONCHARGE=""
       esac
     done
     unset OPTIND OPTFLAG OPTARG
+
+  # Run in a subshell because of the exit command
+  (
+    # Check requirements
+    if ! command -v git >/dev/null 2>&1; then
+        echo "[error] Cannot find git. Abort..."
+        exit 1
+    fi
 
     # Main script
     echo "[annex] start at $(date)"
@@ -102,4 +101,5 @@ ONCHARGE=""
     echo "[annex] end at $(date)"
     exit 0
     
-) 2>&1 | tee "$LOGFILE"
+  ) 2>&1 | tee "$LOGFILE"
+)
