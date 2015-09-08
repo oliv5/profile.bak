@@ -380,39 +380,44 @@ alias git_amend='git commit --amend'
 
 # Amend author/committer names & emails
 git_amend_names() {
+ # Run in a subshell because we need to export lots of variables
+(
   # Identify who/what the amend is about
-  local AUTHOR_1="${1%%:*}"
-  local AUTHOR_2="${1##*:}"
-  local AUTHOR_EMAIL_1="${2%%:*}"
-  local AUTHOR_EMAIL_2="${2##*:}"
-  local AUTHOR_DATE_1="${3%%:*}"
-  local AUTHOR_DATE_2="${3##*:}"
-  local COMMITTER_1="${4%%:*}"
-  local COMMITTER_2="${4##*:}"
-  local COMMITTER_EMAIL_1="${5%%:*}"
-  local COMMITTER_EMAIL_2="${5##*:}"
-  local COMMITTER_DATE_1="${6%%:*}"
-  local COMMITTER_DATE_2="${6##*:}"
+  export AUTHOR_1="${1%%:*}"
+  export AUTHOR_2="${1##*:}"
+  export AUTHOR_EMAIL_1="${2%%:*}"
+  export AUTHOR_EMAIL_2="${2##*:}"
+  export AUTHOR_DATE_1="${3%%:*}"
+  export AUTHOR_DATE_2="${3##*:}"
+  export COMMITTER_1="${4%%:*}"
+  export COMMITTER_2="${4##*:}"
+  export COMMITTER_EMAIL_1="${5%%:*}"
+  export COMMITTER_EMAIL_2="${5##*:}"
+  export COMMITTER_DATE_1="${6%%:*}"
+  export COMMITTER_DATE_2="${6##*:}"
   local REV="${7:-HEAD}"
   # Display what is going to be done
-  echo "Replace author name '$AUTHOR_1' by '$AUTHOR_2'"
-  echo "Replace author email '$AUTHOR_EMAIL_1' by '$AUTHOR_EMAIL_2'"
-  echo "Replace author date '$AUTHOR_DATE_1' by '$AUTHOR_DATE_2'"
-  echo "Replace committer name '$COMMITTER_1' by '$COMMITTER_2'"
-  echo "Replace committer email '$COMMITTER_EMAIL_1' by '$COMMITTER_EMAIL_2'"
-  echo "Replace committer date '$COMMITTER_DATE_1' by '$COMMITTER_DATE_2'"
+  [ ! -z "$AUTHOR_1" ] && echo "Replace author name '$AUTHOR_1' by '$AUTHOR_2'"
+  [ ! -z "$AUTHOR_EMAIL_1" ] && echo "Replace author email '$AUTHOR_EMAIL_1' by '$AUTHOR_EMAIL_2'"
+  [ ! -z "$AUTHOR_DATE_1" ] && echo "Replace author date '$AUTHOR_DATE_1' by '$AUTHOR_DATE_2'"
+  [ ! -z "$COMMITTER_1" ] && echo "Replace committer name '$COMMITTER_1' by '$COMMITTER_2'"
+  [ ! -z "$COMMITTER_EMAIL_1" ] && echo "Replace committer email '$COMMITTER_EMAIL_1' by '$COMMITTER_EMAIL_2'"
+  [ ! -z "$COMMITTER_DATE_1" ] && echo "Replace committer date '$COMMITTER_DATE_1' by '$COMMITTER_DATE_2'"
   read -p "Press enter to go on..."
   # Define the replacement script
   local SCRIPT='
-    [ ! -z "$AUTHOR_1" -a "$AUTHOR_1" = "$GIT_AUTHOR_NAME" ] && export GIT_AUTHOR_NAME="$AUTHOR_2"
-    [ ! -z "$AUTHOR_EMAIL_1" -a "$AUTHOR_EMAIL_1" = "$GIT_AUTHOR_EMAIL" ] && export GIT_AUTHOR_EMAIL="$AUTHOR_EMAIL_2"
-    [ ! -z "$AUTHOR_DATE_1" -a "$AUTHOR_DATE_1" = "$GIT_AUTHOR_DATE" ] && export GIT_AUTHOR_DATE="$AUTHOR_DATE_2"
-    [ ! -z "$COMMITTER_1" -a "$COMMITTER_1" = "$GIT_COMMITTER_NAME" ] && export GIT_COMMITTER_NAME="$COMMITTER_2"
-    [ ! -z "$COMMITTER_EMAIL_1" -a "$COMMITTER_EMAIL_1" = "$GIT_COMMITTER_EMAIL" ] && export GIT_COMMITTER_EMAIL="$COMMITTER_EMAIL_2"
-    [ ! -z "$COMMITTER_DATE_1" -a "$COMMITTER_DATE_1" = "$GIT_COMMITTER_DATE" ] && export GIT_COMMITTER_DATE="$COMMITTER_DATE_2"
+    STATUS="no change"
+    if [ ! -z "$AUTHOR_1" -a "$AUTHOR_1" = "$GIT_AUTHOR_NAME" ]; then export GIT_AUTHOR_NAME="$AUTHOR_2"; STATUS="updated"; fi
+    if [ ! -z "$AUTHOR_EMAIL_1" -a "$AUTHOR_EMAIL_1" = "$GIT_AUTHOR_EMAIL" ]; then export GIT_AUTHOR_EMAIL="$AUTHOR_EMAIL_2"; STATUS="updated"; fi
+    if [ ! -z "$AUTHOR_DATE_1" -a "$AUTHOR_DATE_1" = "$GIT_AUTHOR_DATE" ]; then export GIT_AUTHOR_DATE="$AUTHOR_DATE_2"; STATUS="updated"; fi
+    if [ ! -z "$COMMITTER_1" -a "$COMMITTER_1" = "$GIT_COMMITTER_NAME" ]; then export GIT_COMMITTER_NAME="$COMMITTER_2"; STATUS="updated"; fi
+    if [ ! -z "$COMMITTER_EMAIL_1" -a "$COMMITTER_EMAIL_1" = "$GIT_COMMITTER_EMAIL" ]; then export GIT_COMMITTER_EMAIL="$COMMITTER_EMAIL_2"; STATUS="updated"; fi
+    if [ ! -z "$COMMITTER_DATE_1" -a "$COMMITTER_DATE_1" = "$GIT_COMMITTER_DATE" ]; then export GIT_COMMITTER_DATE="$COMMITTER_DATE_2"; STATUS="updated"; fi
+    echo " => $STATUS"
   '
   # Execute the script
-  git filter-branch --env-filter "$SCRIPT" $REV
+  git filter-branch -f --env-filter "$SCRIPT" $REV
+)
 }
 
 ########################################
