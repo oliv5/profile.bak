@@ -557,6 +557,7 @@ endif
 " } Highlight.vim plugin {
 " *******************************************************
 if !exists('loaded_highlight')
+	let g:loaded_highlight = 1
 	" Key mapping
 	FnMap <F2>		<C-h><C-f><CR>
 	FnMap <S-F2>	<C-h><C-k><CR>
@@ -568,10 +569,11 @@ endif
 " } Multisearch plugin {
 " *******************************************************
 if !exists('loaded_multiplesearch')
+	" see https://github.com/vim-scripts/MultipleSearch.git
 	" Options
-	let g:MultipleSearchMaxColors = 8
-	let g:MultipleSearchColorSequence = "yellow,blue,green,magenta,cyan,gray,brown,red"
-	let g:MultipleSearchTextColorSequence = "black,white,black,white,black,black,white,white"
+	let g:MultipleSearchMaxColors = 6
+	let g:MultipleSearchColorSequence = "blue,green,red,yellow,cyan,magenta"
+	let g:MultipleSearchTextColorSequence = "white,white,white,black,black,black"
 	" Key mapping
 	inoremap <F2>		<C-o>:execute ':Search \<'.expand('<cword>').'\>'<CR>
 	vmap <F2>			<Leader>*
