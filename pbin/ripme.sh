@@ -216,7 +216,7 @@ if [ "$TYPE" = "dvd" ]; then
 
     # Check the output file name
     if ! CheckOutputFilename "DUMPFILE"; then
-      echo >&2 "Dump: skip existing vob file '$DUMPFILE'..."
+      echo >&2 "Dump: skip existing file '$DUMPFILE'..."
       continue
     fi
 
@@ -349,7 +349,7 @@ elif [ "$TYPE" = "cdda" ]; then
 
     # Check the output file name
     if ! CheckOutputFilename "DUMPFILE"; then
-      echo >&2 "Dump: skip existing vob file '$DUMPFILE'..."
+      echo >&2 "Dump: skip existing file '$DUMPFILE'..."
       continue
     fi
 
