@@ -55,7 +55,7 @@ PKGREPO="add-apt-repository"
 PKGUPDATE="apt-get update"
 DEVINFO="/tmp/$(basename $0).$(date +%s).tmp"
 SPEED_DVD=(1 2 4 8 12 16)
-SPEED_CD=(4 8 24 32 40 48)
+SPEED_CD=(1 2 4 8 12 24)
 BINARIES="tccat mplayer mencoder vlc subtitleripper vobsub2srt cdparanoia oggenc"
 
 # Get command line options
@@ -293,6 +293,9 @@ if [ "$TYPE" = "dvd" ]; then
 
     fi
 
+    # Wait for children
+    wait
+
     # Set output files/directory ownership
     if [ ! -z "$DUMPFILE" ]; then
       $DRYRUN chown --reference="${ODIR}" "$ODIR" "$DUMPFILE"
@@ -356,6 +359,9 @@ elif [ "$TYPE" = "cdda" ]; then
     #$DRYRUN sh -c "oggenc -q 7 \"${TMPFILE}\" -o \"${DUMPFILE}\" ; rm \"${TMPFILE}\"" &
     $DRYRUN sh -c "oggenc -q 7 \"${TMPFILE}\" -o \"${DUMPFILE}\"" &
   done
+
+  # Wait for children
+  wait
 
   # Set output files/directory ownership
   $DRYRUN chown -R --reference="${ODIR}" "$ODIR"
