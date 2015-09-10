@@ -59,12 +59,14 @@ alias gsrm='git_stash_drop'
 alias gsm='gsdm'
 # Commit aliases
 alias gci='git commit'
-# Gitignore
+# Gitignore aliases
 alias gil='git_ignore_list'
 alias gia='git_ignore_add'
-# Add new files
+# Add files aliases
 alias gan='git add $(git ls-files -o --exclude-standard)'
-alias gau='git add $(git ls-files -o)'
+alias gau='git add -u'
+# Remove files aliases
+alias grm='git rm'
 # Logs/history aliases
 alias git_history='git log -p'
 alias git_log='git log --name-only'
@@ -75,7 +77,7 @@ alias gts='git tag'
 alias gtl='git tag -l'
 alias gtd='git tag -d'
 alias gtc='git tag --contains'
-# Annex
+# Annex aliases
 alias gas='git annex sync'
 alias gal='git annex log'
 alias gai='git annex info'
