@@ -57,16 +57,16 @@ alias gsf='git_stash_flush'
 alias gsb='git_stash_backup'
 alias gsrm='git_stash_drop'
 alias gsm='gsdm'
-# Commit aliases
-alias gci='git commit'
 # Gitignore aliases
 alias gil='git_ignore_list'
 alias gia='git_ignore_add'
 # Add files aliases
 alias gan='git add $(git ls-files -o --exclude-standard)'
 alias gau='git add -u'
-# Remove files aliases
+# Misc aliases
+alias gci='git commit'
 alias grm='git rm'
+alias gmv='git mv'
 # Logs/history aliases
 alias git_history='git log -p'
 alias git_log='git log --name-only'
@@ -115,7 +115,7 @@ git_exists() {
 
 # Check bare repo attribute
 git_bare() {
-	[ "$(git ${1:+--git-dir="$1"} config --get core.bare)" = "true" ]
+  [ "$(git ${1:+--git-dir="$1"} config --get core.bare)" = "true" ]
 }
 
 # Get git worktree directory
@@ -125,13 +125,15 @@ git_worktree() {
 
 # Get git directory (alias git-dir)
 git_dir() {
-  echo "${GIT_DIR:-$(git rev-parse --git-dir)}"
+  readlink -f "${GIT_DIR:-$(git rev-parse --git-dir)}"
 }
 
 # Get git-dir basename
 git_repo() {
   local DIR="$(git_dir)"
-  [ "${DIR##*/}" != ".git" ] && basename "$DIR" .git || basename "${DIR%/*}" .git
+  [ "${DIR##*/}" = ".git" ] && 
+    basename "${DIR%/*}" .git || 
+    basename "$DIR" .git
 }
 
 # Get current branch name
@@ -155,7 +157,7 @@ git_st() {
   git status -s | awk '/^[\? ]?'$1'[\? ]?/ {print "\""$2"\""}'
 }
 git_stx() {
-  git status -z | awk 'BEGIN{RS="\0"; ORS="\0"}/'"${1:-^[^\?\?]}"'/{print substr($0,4)}'
+  git status -z | awk 'BEGIN{RS="\0"; ORS="\0"}/'"^[\? ]?$1"'/{print substr($0,4)}'
 }
 
 ########################################
@@ -174,6 +176,12 @@ git_shorthash() {
 }
 git_allshorthash() {
   git_allhash "$@" | cut -c 1-8
+}
+
+########################################
+# Get git backup name
+git_name() {
+  echo "${1:+$1.}$(uname -n).$(git_repo).$(git_branch).$(date +%Y%m%d-%H%M%S).$(git_shorthash)${2:+.$2}"
 }
 
 ########################################
@@ -198,32 +206,28 @@ git_meld() {
 }
 
 ########################################
-# Build git stash name
-_git_stash_name() {
-  echo "$(git_branch)-$(git_shorthash)-$(date +%Y%m%d-%H%M)${1:+_$1}"
-}
 
 # Push changes onto stash, revert changes
 git_stash_save() {
-  local STASH="$(_git_stash_name "$@")"; shift
+  local STASH="$(git_name "" "$@")"; shift
   git stash save "$STASH" "$@"
 }
 git_stash_save_all() {
-  local STASH="$(_git_stash_name "$@")"; shift
+  local STASH="$(git_name "" "$@")"; shift
   git stash save --all "$STASH" "$@"
 }
 git_stash_save_untracked() {
-  local STASH="$(_git_stash_name "$@")"; shift
+  local STASH="$(git_name "" "$@")"; shift
   git stash save --untracked "$STASH" "$@"
 }
 git_stash_save_lazy() {
-  local STASH="$(_git_stash_name "$@")"; shift
+  local STASH="$(git_name "" "$@")"; shift
   git stash save --keep-index "$STASH" "$@"
 }
 
 # Push changes onto stash, does not revert anything
 git_stash_push() {
-  local STASH="$(_git_stash_name "$@")"; shift
+  local STASH="$(git_name "" "$@")"; shift
   git update-ref -m "$STASH" refs/stash "$(git stash create)"
   #git stash create $STASH
 }
@@ -339,14 +343,18 @@ git_rollback() {
 # Clean repo back to given CL
 # remove unversionned files
 git_clean() {
+  git_exists || return 1
   # Confirmation
   if [ "$1" != "-y" ]; then
     ! ask_question "Remove unversioned files? (y/n) " y Y >/dev/null && return 0
-  else
-    shift
   fi
+  shift
+  # Backup
+  local DST="$(git_dir)/clean"
+  mkdir -p "$DST"
+  git_stx '??' | xargs -0 7z a "$DST/clean.$(git_name).7z"
   # Clean repository
-  git clean -d --exclude=".*" "$@"
+  git clean -d -i --exclude=".*" "$@"
 }
 
 ########################################
@@ -473,7 +481,7 @@ alias git_rm_branch='git branch -d'
 # https://stackoverflow.com/questions/4479960/git-checkout-to-a-specific-folder
 # Export the whole repo
 git_backup() {
-  local DST="${1:-$(git_dir)/backup/backup.$(uname -n).$(git_repo).$(git_branch).$(date +%Y%m%d-%H%M%S).$(git_shorthash)}"
+  local DST="${1:-$(git_dir)/backup/backup.$(git_name)}"
   shift
   # The last '/' is important
   git checkout-index -a -f --prefix="$DST/" "$@"
@@ -490,82 +498,82 @@ git_backupdir() {
 ########################################
 # Batch clone
 git_clone() {
-	local REPO="$(git_repo)"
-	for ARGS; do
-		set $ARGS
-		local REMOTE="${1:?No remote specified}"
-		local NAME="${2:-$REPO}"
-		local BRANCH="${3:-master}"
-		git clone "$REMOTE" "$REPO" || break
-		git --git-dir="$REPO/.git" remote rename origin "$NAME"
-		git --git-dir="$REPO/.git" checkout "$BRANCH"
-	done
+  local REPO="$(git_repo)"
+  for ARGS; do
+    set $ARGS
+    local REMOTE="${1:?No remote specified}"
+    local NAME="${2:-$REPO}"
+    local BRANCH="${3:-master}"
+    git clone "$REMOTE" "$REPO" || break
+    git --git-dir="$REPO/.git" remote rename origin "$NAME"
+    git --git-dir="$REPO/.git" checkout "$BRANCH"
+  done
 }
 
 ########################################
 # Batch pull
 # Use vcsh wrapper when necessary
 git_pull() {
-	local REMOTES="${1:?No remote specified}"
-	local BRANCHES="${2:-master}"
-	local STASH="__git_pull_stash"
-	vcsh_run "
-		git stash save -q \"$STASH\"
-		for REMOTE in $REMOTES; do
-			if git remote | grep -- \"\$REMOTE\" >/dev/null; then
-				for BRANCH in $BRANCHES; do
-					git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
-				done
-			fi
-		done
-		if git stash list -n 1 | grep \"$STASH\" >/dev/null 2>&1; then
-			git stash apply -q --index
-			git stash drop -q
-		fi
-	"
+  local REMOTES="${1:?No remote specified}"
+  local BRANCHES="${2:-master}"
+  local STASH="__git_pull_stash"
+  vcsh_run "
+    git stash save -q \"$STASH\"
+    for REMOTE in $REMOTES; do
+      if git remote | grep -- \"\$REMOTE\" >/dev/null; then
+	for BRANCH in $BRANCHES; do
+	  git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
+	done
+      fi
+    done
+    if git stash list -n 1 | grep \"$STASH\" >/dev/null 2>&1; then
+      git stash apply -q --index
+      git stash drop -q
+    fi
+  "
 }
 
 ########################################
 # Batch push
 git_push() {
-	local REMOTES="${1:?No remote specified}"
-	local BRANCHES="${2:-master}"
-	for REMOTE in $REMOTES; do
-		if git remote | grep -- "$REMOTE" >/dev/null; then
-			for BRANCH in $BRANCHES; do
-				echo -n "Push $REMOTE/$BRANCH : "
-				git push "$REMOTE" "$BRANCH"
-			done
-		fi
-	done
+  local REMOTES="${1:?No remote specified}"
+  local BRANCHES="${2:-master}"
+  for REMOTE in $REMOTES; do
+    if git remote | grep -- "$REMOTE" >/dev/null; then
+      for BRANCH in $BRANCHES; do
+	echo -n "Push $REMOTE/$BRANCH : "
+	git push "$REMOTE" "$BRANCH"
+      done
+    fi
+  done
 }
 
 ########################################
 # Create a bundle
 git_bundle() {
-	local DIR="${1:-$(git_dir)}"
-	if [ -d "$DIR" ]; then
+  local DIR="${1:-$(git_dir)}"
+  if [ -d "$DIR" ]; then
     DIR="${1:-$DIR/bundle}"
-		local BUNDLE="$DIR/${2:-bundle.$(uname -n).$(git_repo).$(git_branch).$(date +%Y%m%d-%H%M%S).$(git_shorthash).git}"
-		local GPG_RECIPIENT="$3"
-		echo "Git bundle into $BUNDLE"
-		git bundle create "$BUNDLE" --all --tags --remotes
-		if [ ! -z "$GPG_RECIPIENT" ]; then
-			gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "${BUNDLE}" && 
-				(shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
-		fi
-		ls -l "${BUNDLE}"*
-	else
-		echo "Target directory '$DIR' does not exists."
-		echo "Skip bundle creation..."
-	fi
+    local BUNDLE="$DIR/${2:-bundle.$(git_name).git}"
+    local GPG_RECIPIENT="$3"
+    echo "Git bundle into $BUNDLE"
+    git bundle create "$BUNDLE" --all --tags --remotes
+    if [ ! -z "$GPG_RECIPIENT" ]; then
+      gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "${BUNDLE}" && 
+	(shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
+    fi
+    ls -l "${BUNDLE}"*
+  else
+    echo "Target directory '$DIR' does not exists."
+    echo "Skip bundle creation..."
+  fi
 }
 
 ########################################
 # Store repo metadata
 git_meta_store() {
-	git-cache-meta --store && 
-		git add "$(git_dir)/git_cache_meta" -f
+  git-cache-meta --store && 
+    git add "$(git_dir)/git_cache_meta" -f
 }
 
 ########################################
@@ -587,92 +595,92 @@ annex_modified() {
 
 # Test annex direct-mode
 annex_direct() {
-	[ "$(git ${1:+--git-dir="$1"} config --get annex.direct)" = "true" ]
+  [ "$(git ${1:+--git-dir="$1"} config --get annex.direct)" = "true" ]
 }
 
 # Test annex bare
 annex_bare() {
-	annex_exists && ! annex_direct && git_bare
+  annex_exists && ! annex_direct && git_bare
 }
 
 # Init annex
 annex_init() {
-	vcsh_run 'git annex init "$(uname -n)"'
+  vcsh_run 'git annex init "$(uname -n)"'
 }
 
 # Init annex in direct mode
 annex_init_direct() {
-	vcsh_run 'annex_init && git annex direct'
+  vcsh_run 'annex_init && git annex direct'
 }
 
 # Init hubic annex
 annex_init_hubic() {
-	local REMOTE="${1:-hubic}"
-	local HUBIC_PATH="${2:-$(git_repo)}"
-	vcsh_run "
-		git annex enableremote \"$REMOTE\" type=external externaltype=hubic encryption=none hubic_container=annex hubic_path=\"$HUBIC_PATH\" embedcreds=no ||
-		git annex initremote \"$REMOTE\" type=external externaltype=hubic encryption=none hubic_container=annex hubic_path=\"$HUBIC_PATH\" embedcreds=no
-	"
+  local REMOTE="${1:-hubic}"
+  local HUBIC_PATH="${2:-$(git_repo)}"
+  vcsh_run "
+    git annex enableremote \"$REMOTE\" type=external externaltype=hubic encryption=none hubic_container=annex hubic_path=\"$HUBIC_PATH\" embedcreds=no ||
+    git annex initremote \"$REMOTE\" type=external externaltype=hubic encryption=none hubic_container=annex hubic_path=\"$HUBIC_PATH\" embedcreds=no
+  "
 }
 
 # Annex sync
 annex_sync() {
-	vcsh_run 'git annex sync'
+  vcsh_run 'git annex sync'
 }
 
 # Annex status
 annex_status() {
-	echo "annex status:"
-	vcsh_run 'git annex status'
+  echo "annex status:"
+  vcsh_run 'git annex status'
 }
 
 # Annex diff
 annex_diff() {
-	if ! annex_direct; then
-		vcsh_run 'git diff' "$@"
-	fi
+  if ! annex_direct; then
+    vcsh_run 'git diff' "$@"
+  fi
 }
 
 # Annex bundle
 annex_bundle() {
-	if annex_exists; then
+  if annex_exists; then
     local DIR="${1:-$(git_dir)}"
     if [ -d "$DIR" ]; then
       DIR="${1:-$DIR/bundle}"
-      local BUNDLE="$DIR/${2:-annex.$(uname -n).$(git_repo).$(git_branch).$(date +%Y%m%d-%H%M%S).$(git_shorthash).git}"
+      local BUNDLE="$DIR/${2:-annex.$(git_name).git}"
       local GPG_RECIPIENT="$3"
-			echo "Tar annex into $BUNDLE"
-			if annex_bare; then
-				tar cf "${BUNDLE}" -h ./annex
-			else
-				vcsh_run "git annex list $(git config --get core.worktree)" | 
-					awk 'NF>1 {$1="";print "\""substr($0,2)"\""}' |
-					xargs tar cf "${BUNDLE}" -h --exclude-vcs
-			fi
-			if [ ! -z "$GPG_RECIPIENT" ]; then
-				gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "${BUNDLE}" && 
-					(shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
-			fi
-			ls -l "${BUNDLE}"*
-		else
-			echo "Target directory '$DIR' does not exists."
-			echo "Skip bundle creation..."
-		fi
-	else
-		echo "Repository '$(git_dir)' is not git-annex ready."
-		echo "Skip bundle creation..."
-	fi
+      echo "Tar annex into $BUNDLE"
+      if annex_bare; then
+	tar cf "${BUNDLE}" -h ./annex
+      else
+	vcsh_run "git annex list $(git config --get core.worktree)" | 
+	  awk 'NF>1 {$1="";print "\""substr($0,2)"\""}' |
+	  xargs tar cf "${BUNDLE}" -h --exclude-vcs
+      fi
+      if [ ! -z "$GPG_RECIPIENT" ]; then
+	gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "${BUNDLE}" && 
+	  (shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
+      fi
+      ls -l "${BUNDLE}"*
+    else
+      echo "Target directory '$DIR' does not exists."
+      echo "Skip bundle creation..."
+    fi
+  else
+    echo "Repository '$(git_dir)' is not git-annex ready."
+    echo "Skip bundle creation..."
+  fi
 }
 
 # Annex copy
 annex_copy() {
-	vcsh_run 'git annex copy' "$@"
+  vcsh_run 'git annex copy' "$@"
 }
 
 ########################################
 # Repo vcsh-ready
 vcsh_exists() {
-	git ${1:+--git-dir="$1"} config --get vcsh.vcsh >/dev/null 2>&1
+  git ${1:+--git-dir="$1"} config --get vcsh.vcsh >/dev/null 2>&1
 }
 
 # vcsh loaded
@@ -682,16 +690,16 @@ vcsh_loaded() {
 
 # Batch clone
 vcsh_clone() {
-	local REPO="$(git_repo)"
-	for ARGS; do
-		set $ARGS
-		local REMOTE="${1:?No remote specified}"
-		local NAME="${2:-$REPO}"
-		local BRANCH="${3:-master}"
+  local REPO="$(git_repo)"
+  for ARGS; do
+    set $ARGS
+    local REMOTE="${1:?No remote specified}"
+    local NAME="${2:-$REPO}"
+    local BRANCH="${3:-master}"
     vcsh clone "$REMOTE" "$REPO" || break
     vcsh run "$REPO" git remote rename origin "$NAME"
     vcsh run "$REPO" git checkout "$BRANCH"
-	done
+  done
 }
 
 # Run a git command, call vcsh when necessary
