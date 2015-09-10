@@ -5,12 +5,12 @@
     PATH="/data/data/ga.androidterm/bin:$PATH"
     DBG=""
     BASEDIR="."
-    ANNEX_FILELIST=".gitlist"
-    ANNEX_REPOLIST=".annexlist"
-    ANNEX_CONTENT=""
-    ANNEX_FORCE=""
-    ANNEX_SYNC="1"
-    ANNEX_ADD="1"
+    GLOBAL_ANNEX_REPOLIST=".annexlist"
+    GLOBAL_ANNEX_FILELIST=".gitlist"
+    GLOBAL_ANNEX_CONTENT=""
+    GLOBAL_ANNEX_FORCE=""
+    GLOBAL_ANNEX_SYNC="1"
+    GLOBAL_ANNEX_ADD="1"
     WIFIDEV=""
     LOGFILE="/dev/null"
     ONCHARGE=""
@@ -21,10 +21,10 @@
         d) set -vx; DBG="false";;
         b) BASEDIR="${OPTARG}";;
         l) LOGFILE="\"${OPTARG}\"";;
-        a) ANNEX_ADD="";;
-        s) ANNEX_SYNC="";;
-        c) ANNEX_CONTENT="${OPTARG:-$(git remote)}";;
-        f) ANNEX_FORCE="--force";;
+        a) GLOBAL_ANNEX_ADD="";;
+        s) GLOBAL_ANNEX_SYNC="";;
+        c) GLOBAL_ANNEX_CONTENT="${OPTARG}";;
+        f) GLOBAL_ANNEX_FORCE="--force";;
         w) WIFIDEV="${OPTARG}";;
         g) ONCHARGE="1";;
         *) echo >&2 "Usage: annex.sh [-h] [-d] [-b] [-l logfile] [-a] [-c repos] [-f] [-s dir] [-w device] [-g]"
@@ -53,16 +53,9 @@
 
     # Main script
     echo "[annex] start at $(date)"
-    if [ ! -z "$ONCHARGE" ] && [ "$(cat /sys/class/power_supply/battery/status | tr '[:upper:]' '[:lower:]')" != "charging" ]; then
-        echo "[warning] Device is not in charge. Disable file addition and file content syncing..."
-        unset ANNEX_CONTENT ANNEX_ADD
-    fi
-    if [ ! -z "$WIFIDEV" ] && ! ip addr show dev "$WIFIDEV" 2>/dev/null | grep UP >/dev/null; then
-        echo "[warning] Wifi device '$WIFIDEV' is not connected. Disable file content syncing..."
-        unset ANNEX_CONTENT
-    fi
     IFS=$'\n'
-    for REPO in "$BASEDIR" $(cat "$ANNEX_REPOLIST" 2>/dev/null); do
+    for REPO in "$BASEDIR" $(cat "$GLOBAL_ANNEX_REPOLIST" 2>/dev/null); do
+        # Select/check a repo
         echo "[annex] Process repo '$REPO'"
         if [ ! -d "$REPO" ]; then
             echo "[warning] Repo '$REPO' does not exists. Skip it..."
@@ -77,6 +70,22 @@
             echo "[warning] Directory '$PWD' is not annex-ready. Skip it..."
             continue
         fi
+        # Setup repo options
+        local ANNEX_FILELIST="$GLOBAL_ANNEX_FILELIST"
+        local ANNEX_ADD="$GLOBAL_ANNEX_ADD"
+        local ANNEX_FORCE="$GLOBAL_ANNEX_FORCE"
+        local ANNEX_SYNC="$GLOBAL_ANNEX_SYNC"
+        local ANNEX_CONTENT="${GLOBAL_ANNEX_CONTENT:-$(git remote)}"
+        # Check options
+        if [ ! -z "$ONCHARGE" ] && [ "$(cat /sys/class/power_supply/battery/status | tr '[:upper:]' '[:lower:]')" != "charging" ]; then
+            echo "[warning] Device is not in charge. Disable file addition and file content syncing..."
+            unset ANNEX_CONTENT ANNEX_ADD
+        fi
+        if [ ! -z "$WIFIDEV" ] && ! ip addr show dev "$WIFIDEV" 2>/dev/null | grep UP >/dev/null; then
+            echo "[warning] Wifi device '$WIFIDEV' is not connected. Disable file content syncing..."
+            unset ANNEX_CONTENT
+        fi
+        # Add files
         if [ ! -z "$ANNEX_ADD" ]; then
             IFS=$'\n'
             for FILE in $(cat "$ANNEX_FILELIST" 2>/dev/null); do
@@ -84,6 +93,7 @@
                 ${DBG} git annex add "$FILE" $ANNEX_FORCE
             done
         fi
+        # Sync files
         if [ ! -z "$ANNEX_SYNC" ]; then
             if ! git config --get user.name >/dev/null 2>&1; then
                 echo "[annex] Setup local user name and email"
