@@ -1,8 +1,5 @@
 #!/bin/sh
 # See http://www.movable-type.co.uk/scripts/latlong.html
-#adb shell svc wifi enable
-#adb shell svc wifi enable
-#adb shell dumpsys location
 
 # Run in a subshell because of the exit command
 (
@@ -22,16 +19,33 @@
         echo "pi=4*a(1); $1 * pi / 180" | bc -l
     }
 
-    # (android only) Get current google map GPS coordonates (format "LAT,LAT,LONG,LONG")
-    gm_location() {
-        [ -z "$ANDROID_ROOT" ] && echo >&2 "Not on android, cannot get current location." && echo "0,0,0,0" && return 1
-        dumpsys location | awk '/passive: Location/ {print $3}' | head -n 1
+    # (android only) Get current GPS coordonates (format "LAT.LAT,LONG.LONG")
+    android_location() {
+        [ -z "$ANDROID_ROOT" ] && echo >&2 "Not on android, cannot get current location." && echo "0.0 0.0" && return 1
+        dumpsys location | awk '/passive: Location/ {print $3}' | sed -e 's/,/./1 ; s/,/./2 ; q'
     }
 
-    # Convert google map GPS coordonates to latitude, longitude
-    gm_coordonates() {
+    # Get GPS location estimate from website
+    web_location() {
+        curl -s ipinfo.io | awk '/"loc":/{print substr($2,2,length($2)-3)}'
+    }
+    
+    # Get coordonates in variables
+    coordonates() {
         [ $# -ne 3 ] && echo >&2 "Wrong number of parameters ($#/3)" && return 1
-        eval "$(echo ${1:-0,0,0,0} | sed -r "s/([^,]*),([^,]*),([^,]*),([^,]*)/$2=\1.\2 ; $3=\3.\4/")"
+        local V1="$2"; local V2="$3"
+        IFS=','; set -- $1
+        eval "$V1=$1; $V2=$2"
+        eval "[ -z \"$1\" -o -z \"$2\" ] && echo >&2 'Bad coordonates, conversion error.' && return 1"
+    }
+
+    # Location retrieve function
+    location() {
+        if [ -n "$ANDROID_ROOT" ]; then 
+            android_location
+        else 
+            web_location
+        fi
     }
 
     # Distance computation
@@ -51,7 +65,10 @@
     #var y = (φ2-φ1);
     #var d = Math.sqrt(x*x + y*y) * R;
     dist_pythagora() {
-        [ $# -ne 4 ] && echo >&2 "Wrong number of coordonnates ($#/4)" && return 1
+        [ $# -ne 4 -a $# -ne 5 ] && echo >&2 "Wrong number of coordonnates ($#/[4-5])" && return 1
+        : ${1:?Bad coordonate LAT1} ${2:?Bad coordonate LONG1}
+        : ${3:?Bad coordonate LAT2} ${4:?Bad coordonate LONG2}
+        : ${SCALE:=${5:-2}}
         math "
             # Radian function
             define radians(degrees) {
@@ -72,12 +89,15 @@
             x = delta2 * c((phy1 + phy2) / 2)
             y = phy2 - phy1
             # Distance (2 frac. digits)
-            scale = 2
+            scale = $SCALE
             r * sqrt(x*x + y*y) / 1
         "
     }
     dist_pythagora_shell() {
-        [ $# -ne 4 ] && echo >&2 "Wrong number of coordonnates ($#/4)" && return 1
+        [ $# -ne 4 -a $# -ne 5 ] && echo >&2 "Wrong number of coordonnates ($#/[4-5])" && return 1
+        : ${1:?Bad coordonate LAT1} ${2:?Bad coordonate LONG1}
+        : ${3:?Bad coordonate LAT2} ${4:?Bad coordonate LONG2}
+        : ${SCALE:=${5:-2}}
         # Get parameters
         LAT1="$1"; LONG1="$2"; LAT2="$3"; LONG2="$4"
         # Earth radius
@@ -91,18 +111,18 @@
         # Coordonates and distance
         X=$(math "$DELTA2 * c(($PHY1 + $PHY2) / 2)")
         Y=$(math "$PHY2 - $PHY1")
-        math "scale=2; $R * sqrt($X*$X + $Y*$Y) / 1"
+        math "scale=$SCALE; $R * sqrt($X*$X + $Y*$Y) / 1"
     }
 
     # Test distance computation method
     dist_pythagora_test() {
-        local LOCATION1="48,910326,2,234379"
-        local LOCATION2="48,909986,2,233445"
+        local LOCATION1="48.910326,2.234379"
+        local LOCATION2="48.909986,2.233445"
         local DISTANCE="78.02"  #"78.02910620730578864000"
         local LAT1=0; local LONG1=0
         local LAT2=0; local LONG2=0
-        gm_coordonates "$LOCATION1" LAT1 LONG1
-        gm_coordonates "$LOCATION2" LAT2 LONG2
+        coordonates "$LOCATION1" LAT1 LONG1
+        coordonates "$LOCATION2" LAT2 LONG2
         RES=$(dist_pythagora "$LAT1" "$LONG1" "$LAT2" "$LONG2")
         echo -n "[TEST] dist_pythagora: res=$RES "
         [ "$RES" = "$DISTANCE" ] && echo "[OK]" || echo "[NOK]"
@@ -112,15 +132,14 @@
     dist() {
         local LAT1=0; local LONG1=0
         local LAT2=0; local LONG2=0
-        gm_coordonates "${1:-$(gm_location)}" LAT1 LONG1
-        gm_coordonates "${2:-$(gm_location)}" LAT2 LONG2
-        dist_pythagora "$LAT1" "$LONG1" "$LAT2" "$LONG2"
-    }
+        coordonates "${1:-$(location)}" LAT1 LONG1
+        coordonates "${2:-$(location)}" LAT2 LONG2
+        dist_pythagora "$LAT1" "$LONG1" "$LAT2" "$LONG2" $3
+    } 
 
     ########################################
     ########################################
     # Last commands in file
     # Execute function from command line
     [ $# -gt 0 -a ! -z "$1" ] && "$@" || true
-
 )
