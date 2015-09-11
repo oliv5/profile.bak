@@ -29,15 +29,6 @@
     web_location() {
         curl -s ipinfo.io | awk '/"loc":/{print substr($2,2,length($2)-3)}'
     }
-    
-    # Get coordonates in variables
-    coordonates() {
-        [ $# -ne 3 ] && echo >&2 "Wrong number of parameters ($#/3)" && return 1
-        local V1="$2"; local V2="$3"
-        IFS=','; set -- $1
-        eval "$V1=$1; $V2=$2"
-        eval "[ -z \"$1\" -o -z \"$2\" ] && echo >&2 'Bad coordonates, conversion error.' && return 1"
-    }
 
     # Location retrieve function
     location() {
@@ -46,6 +37,19 @@
         else 
             web_location
         fi
+    }
+    
+    # Get coordonates in variables
+    coordonates() {
+        [ $# -ne 3 ] && echo >&2 "Wrong number of parameters ($#/3)" && return 1
+        local V1="$2"; local V2="$3"
+        if [ "$1" = "HERE" ] || [ "$1" = "here" ]; then
+            IFS=','; set -- $(location)
+        else
+            IFS=','; set -- $1
+        fi
+        eval "$V1=$1; $V2=$2"
+        eval "[ -z \"$1\" -o -z \"$2\" ] && echo >&2 'Bad coordonates, conversion error.' && return 1"
     }
 
     # Distance computation
