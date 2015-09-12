@@ -7,13 +7,15 @@ ExitHandler() {
   set +e
   # Clean up device information file
   rm "$DEVINFO" 2>/dev/null
+  # Log conclusion
+  echo >&2 "[ripme] End at $(date)"
   # Release mutex & exit
   rm "$PIDFILE" 2>/dev/null
   # Kill running binaries
-  killall -v -9 $BINARIES 2>/dev/null
-  killall -v -9 ${@:2} 2>/dev/null
+  kill ${2:--TERM} -- -$$ 2>/dev/null
   # The end
-  exit $1
+  #exit $1
+  kill ${2:--TERM} $$
 }
 
 # Check output filename to prevent overwrites
@@ -35,7 +37,7 @@ CheckOutputFilename() {
 }
 
 # Init main variables
-VERSION=1.20
+VERSION=1.21
 TYPE="auto"
 DEVICE=""
 TRACKS="longest"
@@ -56,7 +58,6 @@ PKGUPDATE="apt-get update"
 DEVINFO="/tmp/$(basename $0).$(date +%s).tmp"
 SPEED_DVD=(1 2 4 8 12 16)
 SPEED_CD=(1 2 4 8 12 24)
-BINARIES="tccat mplayer mencoder vlc subtitleripper vobsub2srt cdparanoia oggenc"
 
 # Get command line options
 while getopts :t:d:e:m:o:u:f:c:s:a:rwnik OPTNAME
@@ -75,7 +76,7 @@ do case "$OPTNAME" in
   w)  OVERWRITE="1"; RENAME="";;
   n)  DRYRUN="echo";;
   i)  INSTALL=1;;
-  k)  ExitHandler 0 ripme;;
+  k)  ExitHandler 0 KILL;;
   [?]) echo >&2 "Ripme $VERSION - rips dvd, audio cd, extracts subtitles"
        echo >&2 "Usage: $(basename $0) [options]"
        echo >&2 "-t type    Media type: auto, dvd, cdda (auto)"
@@ -92,9 +93,11 @@ do case "$OPTNAME" in
        echo >&2 "-w         Allow output file overwrite (disabled). Exclusive with -r"
        echo >&2 "-n         No dump, simulate only"
        echo >&2 "-i         Install necessary software"
+       echo >&2 "-k         Kill all ripme processes"
        exit 1;;
   esac
 done
+ARGS="$@"
 shift $(expr $OPTIND - 1)
 unset OPTNAME OPTARG
 
@@ -105,7 +108,9 @@ flock -n 200 || exit 1
 echo $$ 1>&200
 
 # Log preamble
-echo >&2 "Start at $(date)"
+echo >&2 "[ripme] Start at $(date)"
+echo >&2 "[ripme] Command-line: ripme.sh $ARGS"
+echo >&2 "[ripme] User: $USER"
 touch "$DEVINFO"
 
 # Install necessary software
@@ -117,7 +122,6 @@ if [ ! -z "$INSTALL" ]; then
   $DRYRUN sudo $PACKAGEMANAGER hdparm
   $DRYRUN sudo $PACKAGEMANAGER transcode subtitleripper
   $DRYRUN sudo $PACKAGEMANAGER vobsub2srt libavutil-dev libtiff4-dev libtesseract-dev tesseract-ocr-eng tesseract-ocr-fra
-  #$DRYRUN sudo $PACKAGEMANAGER build-essential pkg-config cmake checkinstall
   $DRYRUN sudo $PACKAGEMANAGER qpxtool hdparm
 fi
 
@@ -127,9 +131,9 @@ if [ "$TYPE" = "auto" -o "$TYPE" = "dvd" ]; then
   lsdvd -x "$DEVICE" > "$DEVINFO" 2>/dev/null
   if [ $? -eq 0 ]; then
     TYPE="dvd"
-    echo >&2 "Detected DVD media in device '$DEVICE'"
+    echo >&2 "[ripme] Detected DVD media in device '$DEVICE'"
   elif [ "$TYPE" = "dvd" ]; then
-    echo >&2 "Error: cannot read DVD information from device '$DEVICE'..."
+    echo >&2 "[ripme] Error: cannot read DVD information from device '$DEVICE'..."
     ExitHandler 1
   fi
 fi
@@ -140,9 +144,9 @@ if [ "$TYPE" = "auto" -o "$TYPE" = "cdda" ]; then
   cdrecord dev="$DEVICE" -toc > "$DEVINFO" 2>/dev/null
   if [ $? -eq 0 ]; then
     TYPE="cdda"
-    echo >&2 "Detected audio CD media in device '$DEVICE'"
+    echo >&2 "[ripme] Detected audio CD media in device '$DEVICE'"
   elif [ "$TYPE" = "cdda" ]; then
-    echo >&2 "Error: cannot read audio CD information from device '$DEVICE'..."
+    echo >&2 "[ripme] Error: cannot read audio CD information from device '$DEVICE'..."
     ExitHandler 1
   fi
   # Get audio output directory
@@ -153,7 +157,7 @@ fi
 
 # Check device presence. Failure if not detected
 if [ ! -z "$DEVICE" -a ! -e "$DEVICE" ]; then
-  echo >&2 "Error: device '$DEVICE' is unknown..."
+  echo >&2 "[ripme] Error: device '$DEVICE' is unknown..."
   ExitHandler 1
 fi
 
@@ -161,7 +165,7 @@ fi
 echo >&1 "Using output directory '$ODIR'"
 mkdir -p "$ODIR"
 if [ ! -d "$ODIR" ]; then
-  echo >&2 "Error: directory '$ODIR' cannot be created..."
+  echo >&2 "[ripme] Error: directory '$ODIR' cannot be created..."
   ExitHandler 1
 fi
 
@@ -186,7 +190,7 @@ if [ "$TYPE" = "dvd" ]; then
   if [ -z "$TITLE" ]; then
     TITLE=$(awk '/Disc Title/ {print $3}' "$DEVINFO")
     if [ -z "$TITLE" ]; then
-      echo >&2 "Error: cannot get DVD title..."
+      echo >&2 "[ripme] Error: cannot get DVD title..."
       ExitHandler 1
     fi
   fi
@@ -194,7 +198,7 @@ if [ "$TYPE" = "dvd" ]; then
   # Select DVD tracks
   MAINTRACK=$(awk '/Longest track:/ {print $3}' "$DEVINFO")
   if [ -z "$MAINTRACK" ]; then
-    echo >&2 "Error: cannot get DVD tracks..."
+    echo >&2 "[ripme] Error: cannot get DVD tracks..."
     ExitHandler 1
   fi
   if [ "$TRACKS" = "disc" ]; then
@@ -216,7 +220,7 @@ if [ "$TYPE" = "dvd" ]; then
 
     # Check the output file name
     if ! CheckOutputFilename "DUMPFILE"; then
-      echo >&2 "Dump: skip existing file '$DUMPFILE'..."
+      echo >&2 "[ripme] Dump: skip existing file '$DUMPFILE'..."
       continue
     fi
 
@@ -271,14 +275,14 @@ if [ "$TYPE" = "dvd" ]; then
                   sed -ri -e 's/\|/l/g' -e 's/ l$/ ?/' -e 's/\.7$/?/' -e 's/^([^0-9].*)7$/\1 ?/' \"$SUBFILE.srt\" ; \
                   " &
               else
-                echo >&2 "Warning: cannot find subtitle '$LANG'..."
+                echo >&2 "[ripme] Warning: cannot find subtitle '$LANG'..."
               fi
             else
-              echo >&2 "Dump: skip existing subtitle file '$SUBFILESUB'..."
+              echo >&2 "[ripme] Dump: skip existing subtitle file '$SUBFILESUB'..."
             fi
           done
       else
-        echo >&2 "Warning: couldn't retrieve subtitle palette, cancel subtitle extraction..."
+        echo >&2 "[ripme] Warning: couldn't retrieve subtitle palette, cancel subtitle extraction..."
       fi
 
       # Dump everything
@@ -310,7 +314,7 @@ elif [ "$TYPE" = "cdda" ]; then
     # see http://hektor.umcs.lublin.pl/~mikosmul/computing/tips/cd-rom-speed.html
     # see http://manpages.ubuntu.com/manpages/precise/man1/cdvdcontrol.1.html
     SPEED=${SPEED_CD[$SPEED]}
-    #sudo cdvdcontrol -d "$DEVICE" -s --silent on --sm-cd-rd $SPEED --sm-nosave || \
+    sudo cdvdcontrol -d "$DEVICE" -s --silent on --sm-cd-rd $SPEED --sm-nosave || \
     sudo hdparm -E $SPEED "$DEVICE" || \
     sudo eject -x $SPEED "$DEVICE"
   fi
@@ -320,9 +324,10 @@ elif [ "$TYPE" = "cdda" ]; then
   LAST=$(awk '/last/ {print $4}' "$DEVINFO")
   LENGTH=$(awk "/track: +${LAST}/ {print "'$7}' "$DEVINFO")
   if [ -z "$FIRST" -o -z "$LAST" -o -z "$LENGTH" ]; then
-    echo >&2 "Error: cannot get audio CD tracks..."
+    echo >&2 "[ripme] Error: cannot get audio CD tracks..."
     ExitHandler 1
   fi
+  echo >&2 "[ripme] Found $(($LAST-$FIRST+1)) tracks for a total length of $LENGTH"
 
   # Select audio CD tracks
   if expr "$TRACKS" : '-\?[0-9]\+$' >/dev/null; then
@@ -334,7 +339,7 @@ elif [ "$TYPE" = "cdda" ]; then
   ODIR="$(echo "${ODIR}/${TITLE:-AudioCD}_${LENGTH}" | tr ':' '_')"
   mkdir -p "$ODIR"
   if [ ! -d "$ODIR" ]; then
-    echo >&2 "Error: directory '$ODIR' cannot be created..."
+    echo >&2 "[ripme] Error: directory '$ODIR' cannot be created..."
     ExitHandler 1
   fi
 
@@ -349,7 +354,7 @@ elif [ "$TYPE" = "cdda" ]; then
 
     # Check the output file name
     if ! CheckOutputFilename "DUMPFILE"; then
-      echo >&2 "Dump: skip existing file '$DUMPFILE'..."
+      echo >&2 "[ripme] Dump: skip existing file '$DUMPFILE'..."
       continue
     fi
 
@@ -368,50 +373,40 @@ elif [ "$TYPE" = "cdda" ]; then
 
 elif [ "$TYPE" = "auto" ]; then
 
-  echo >&2 "Error: cannot identify media type..."
+  echo >&2 "[ripme] Error: cannot identify media type..."
   ExitHandler 1
 
 else
-  echo >&2 "Error: device type '$TYPE' is not supported..."
+  echo >&2 "[ripme] Error: device type '$TYPE' is not supported..."
 fi
-
-# Log conclusion
-echo >&2 "End at $(date)"
 
 # Exit
 ExitHandler 0
 
 ----------------------------------------------
-
-    # Dump vob file
-    if [ ! -e "$DUMPFILE" -o ! -z "$OVERWRITE" ]; then
-      $DRYRUN mplayer dvd://${TRACK} ${DEVICE:+-dvd-device "$DEVICE"} -dumpstream -dumpfile "$DUMPFILE"
-    else
-      echo >&2 "Dump: skip existing vob file '$DUMPFILE'..."
-    fi
-    # Dump subtitles
-    for LANG in ${SLANGS//,/ }; do
-      SUBFILE="${DUMPFILE%.*}_${LANG}"
-      if [ ! -e "$SUBFILE.sub" -o ! -z "$OVERWRITE" ]; then
-        SUBINDEX=$(awk -F ' |,' '/Subtitle:.*Language: '$LANG'/ {print $14}' "$DEVINFO" | head -n 1)
-        if [ ! -z "$SUBINDEX" ]; then
-          $DRYRUN rm "$SUBFILE.*" 2>/dev/null
-          $DRYRUN mencoder dvd://${TRACK} ${DEVICE:+-dvd-device "$DEVICE"} -nosound -ovc frameno -sid $SUBINDEX -vobsubout "$SUBFILE" -vobsuboutid $LANG -o /dev/null 2>/dev/null
-          if [ -s "$SUBFILE.sub" ]; then
-            echo >&2 "Dump: failed to extract subtitles, try alternative method..."
-            $DRYRUN sh -c "tccat -i \"$DEVICE\" -T ${TRACK},-1 | tcextract -x ps1 -t vob -a $SUBINDEX > \"$SUBFILE.tmp\""
-            $DRYRUN subtitle2vobsub -p "$SUBFILE.tmp" -o "$SUBFILE"
-            $DRYRUN rm "$SUBFILE.tmp"
-          fi
-          $DRYRUN sh -c " \
-            vobsub2srt --lang $LANG \"$SUBFILE\" ; \
-            sed -ri -e 's/\|/l/g' -e 's/ l$/ ?/' -e 's/\.7$/?/' -e 's/^([^0-9].*)7$/\1 ?/' \"$SUBFILE.srt\" ; \
-            " &
-        else
-          echo >&2 "Warning: cannot find subtitle '$LANG'..."
-        fi
-      else
-        echo >&2 "Dump: skip existing subtitle file '$SUBFILE.sub'..."
+# Alternate method to dumb subtitles
+# Dump subtitles
+for LANG in ${SLANGS//,/ }; do
+  SUBFILE="${DUMPFILE%.*}_${LANG}"
+  if [ ! -e "$SUBFILE.sub" -o ! -z "$OVERWRITE" ]; then
+    SUBINDEX=$(awk -F ' |,' '/Subtitle:.*Language: '$LANG'/ {print $14}' "$DEVINFO" | head -n 1)
+    if [ ! -z "$SUBINDEX" ]; then
+      $DRYRUN rm "$SUBFILE.*" 2>/dev/null
+      $DRYRUN mencoder dvd://${TRACK} ${DEVICE:+-dvd-device "$DEVICE"} -nosound -ovc frameno -sid $SUBINDEX -vobsubout "$SUBFILE" -vobsuboutid $LANG -o /dev/null 2>/dev/null
+      if [ -s "$SUBFILE.sub" ]; then
+        echo >&2 "[ripme] Dump: failed to extract subtitles, try alternative method..."
+        $DRYRUN sh -c "tccat -i \"$DEVICE\" -T ${TRACK},-1 | tcextract -x ps1 -t vob -a $SUBINDEX > \"$SUBFILE.tmp\""
+        $DRYRUN subtitle2vobsub -p "$SUBFILE.tmp" -o "$SUBFILE"
+        $DRYRUN rm "$SUBFILE.tmp"
       fi
-    done
-
+      $DRYRUN sh -c " \
+        vobsub2srt --lang $LANG \"$SUBFILE\" ; \
+        sed -ri -e 's/\|/l/g' -e 's/ l$/ ?/' -e 's/\.7$/?/' -e 's/^([^0-9].*)7$/\1 ?/' \"$SUBFILE.srt\" ; \
+        " &
+    else
+      echo >&2 "[ripme] Warning: cannot find subtitle '$LANG'..."
+    fi
+  else
+    echo >&2 "[ripme] Dump: skip existing subtitle file '$SUBFILE.sub'..."
+  fi
+done
