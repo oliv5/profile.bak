@@ -10,13 +10,24 @@
     fi
 
     # Math fct
-    math() {
+    bc_calc() {
         echo "$@" | bc -l
     }
 
     # Convert degrees to radians
-    radians() {
-        echo "pi=4*a(1); $1 * pi / 180" | bc -l
+    bc_radians() {
+        # Pi = 4 * atan(1)
+        bc_calc "pi=4*a(1); $1 * pi / 180"
+    }
+
+    # Math fct
+    awk_calc() {
+        echo | eval awk -v CONVFMT=%.${SCALE:-17}g "'{print $@;}'"
+    }
+
+     # Convert degrees to radians
+    awk_radians() {
+        awk_calc "$1 * 4 * atan2(1,1) / 180"
     }
 
     # (android only) Get current GPS coordonates (format "LAT.LAT,LONG.LONG")
@@ -73,7 +84,7 @@
         : ${1:?Bad coordonate LAT1} ${2:?Bad coordonate LONG1}
         : ${3:?Bad coordonate LAT2} ${4:?Bad coordonate LONG2}
         : ${SCALE:=${5:-2}}
-        math "
+        bc_calc "
             # Radian function
             define radians(degrees) {
                 auto pi; pi = 4 * a(1)
@@ -97,7 +108,7 @@
             r * sqrt(x*x + y*y) / 1
         "
     }
-    dist_pythagora_shell() {
+    dist_pythagora_awk() {
         [ $# -ne 4 -a $# -ne 5 ] && echo >&2 "Wrong number of coordonnates ($#/[4-5])" && return 1
         : ${1:?Bad coordonate LAT1} ${2:?Bad coordonate LONG1}
         : ${3:?Bad coordonate LAT2} ${4:?Bad coordonate LONG2}
@@ -107,33 +118,45 @@
         # Earth radius
         R=6371000
         # Latitude
-        PHY1=$(radians $LAT1)
-        PHY2=$(radians $LAT2)
+        PHY1=$(awk_radians $LAT1)
+        PHY2=$(awk_radians $LAT2)
         # Deltas latitude and longitude
-        DELTA1=$(radians $(math $LAT2 - $LAT1))
-        DELTA2=$(radians $(math $LONG2 - $LONG1))
+        DELTA1=$(awk_radians $(awk_calc $LAT2 - $LAT1))
+        DELTA2=$(awk_radians $(awk_calc $LONG2 - $LONG1))
         # Coordonates and distance
-        X=$(math "$DELTA2 * c(($PHY1 + $PHY2) / 2)")
-        Y=$(math "$PHY2 - $PHY1")
-        math "scale=$SCALE; $R * sqrt($X*$X + $Y*$Y) / 1"
+        X=$(awk_calc "$DELTA2 * cos(($PHY1 + $PHY2) / 2)")
+        Y=$(awk_calc "$PHY2 - $PHY1")
+        awk_calc "$R * sqrt($X*$X + $Y*$Y) / 1"
     }
 
     # Test distance computation method
-    dist_pythagora_test() {
+    dist_test() {
+        local METHOD="${1:-dist_pythagora_test}"
         local LOCATION1="48.910326,2.234379"
         local LOCATION2="48.909986,2.233445"
-        local DISTANCE="78.02"  #"78.02910620730578864000"
+        local DISTANCE="${2:-78.02910620730578864000}"
         local LAT1=0; local LONG1=0
         local LAT2=0; local LONG2=0
         coordonates "$LOCATION1" LAT1 LONG1
         coordonates "$LOCATION2" LAT2 LONG2
-        RES=$(dist_pythagora "$LAT1" "$LONG1" "$LAT2" "$LONG2")
-        echo -n "[TEST] dist_pythagora: res=$RES "
+        eval "RES=$($METHOD "$LAT1" "$LONG1" "$LAT2" "$LONG2")"
+        echo -n "[TEST] $METHOD: res=$RES exp=$DISTANCE "
         [ "$RES" = "$DISTANCE" ] && echo "[OK]" || echo "[NOK]"
+    }
+
+    # Test distance computation methods
+    dist_pythagora_test() {
+        dist_test dist_pythagora 78.02
+    }
+    dist_pythagora_awk_test() {
+        dist_test dist_pythagora_awk 78.2336
     }
 
     # Distance computation
     dist() {
+        command -v bc >/dev/null && 
+            local METHOD="dist_pythagora" || 
+            local METHOD="dist_pythagora_awk"
         local LAT1=0; local LONG1=0
         local LAT2=0; local LONG2=0
         coordonates "${1:-$(location)}" LAT1 LONG1
