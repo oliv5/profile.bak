@@ -3,12 +3,6 @@
 
 # Run in a subshell because of the exit command
 (
-    # Check prerequisites
-    if ! command -v bc >/dev/null 2>&1; then
-        echo >&2 "[error] Cannot find bc. Abort..."
-        exit 1
-    fi
-
     # Math fct
     bc_calc() {
         echo "$@" | bc -l
