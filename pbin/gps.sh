@@ -155,7 +155,7 @@
         local LAT2=0; local LONG2=0
         coordonates "${1:-$(location)}" LAT1 LONG1
         coordonates "${2:-$(location)}" LAT2 LONG2
-        dist_pythagora "$LAT1" "$LONG1" "$LAT2" "$LONG2" $3
+        $METHOD "$LAT1" "$LONG1" "$LAT2" "$LONG2" $3
     } 
 
     ########################################
