@@ -27,7 +27,7 @@
     # (android only) Get current GPS coordonates (format "LAT.LAT,LONG.LONG")
     android_location() {
         [ -z "$ANDROID_ROOT" ] && echo >&2 "Not on android, cannot get current location." && echo "0.0 0.0" && return 1
-        dumpsys location | awk '/passive: Location/ {print $3}' | sed -e 's/,/./1 ; s/,/./2 ; q'
+        su root -- dumpsys location | awk '/passive: Location/ {print $3}' | sed -e 's/,/./1 ; s/,/./2 ; q'
     }
 
     # Get GPS location estimate from website
@@ -54,7 +54,7 @@
             IFS=','; set -- $1
         fi
         eval "$V1=$1; $V2=$2"
-        eval "[ -z \"$1\" -o -z \"$2\" ] && echo >&2 'Bad coordonates, conversion error.' && return 1"
+        eval "[ -z \"$1\" -o -z \"$2\" ] && echo >&2 'Bad coordonates format [lat,long]' && return 1"
     }
 
     # Distance computation
