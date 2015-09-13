@@ -1,8 +1,9 @@
 #!/system/bin/sh
 # Setup user mkshrc script
-MARKER="# load user .mkshrc"
-MKSHRC="/system/etc/mkshrc"
 su root -- <<EOF
+  MARKER="# load user .mkshrc"
+  SDCARD="/storage/sdcard0"
+  MKSHRC="/system/etc/mkshrc"
   
   # Check prerequisites
   if [ ! -r "$MKSHRC" ]; then
@@ -20,7 +21,7 @@ su root -- <<EOF
   # Write file content
   echo "" >>  "$MKSHRC"
   echo "$MARKER" >>  "$MKSHRC"
-  echo '. /storage/sdcard0/.mkshrc' >> "$MKSHRC"
+  echo '. $SDCARD/.mkshrc' >> "$MKSHRC"
   
   # Mount /system ro
   mount -o remount,ro /system
