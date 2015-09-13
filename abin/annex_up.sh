@@ -42,11 +42,6 @@
       esac
     done
     unset OPTIND OPTFLAG OPTARG
-    
-    # Git wrapper
-    git() {
-        git "$@" 2>&1 | grep -v WARNING
-    }
 
   # Run in a subshell because of the exit command
   (
@@ -55,6 +50,11 @@
         echo "[error] Cannot find git. Abort..."
         exit 1
     fi
+
+    # Git wrapper
+    git() {
+        git "$@" 2>&1 | grep -v WARNING
+    }
 
     # Main script
     echo "[annex] start at $(date)"
@@ -109,7 +109,8 @@
             ${DBG} git annex sync
             for REMOTE in ${ANNEX_CONTENT}; do
                 echo "[annex] Sync files content to remote '$REMOTE'"
-                ${DBG} git annex copy . --to "$REMOTE"
+                ${DBG} git fetch "$REMOTE" &&
+                  ${DBG} git annex copy . --to "$REMOTE"
             done
         fi
     done
