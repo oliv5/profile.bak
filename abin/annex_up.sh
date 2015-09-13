@@ -42,6 +42,11 @@
       esac
     done
     unset OPTIND OPTFLAG OPTARG
+    
+    # Git wrapper
+    git() {
+        git "$@" 2>&1 | grep -v WARNING
+    }
 
   # Run in a subshell because of the exit command
   (
