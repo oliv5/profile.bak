@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 
 ###################
 # Check prerequisites
@@ -8,9 +7,11 @@ if ! command -v git 2>&1 >/dev/null; then
 	exit 1
 fi
 
+###################
 # Ask for private directory
 read -p "Enter private data directory in \$HOME: " PRIVATE
 export PRIVATE="$HOME/$PRIVATE"
+mkdir -p "$PRIVATE"
 
 ###################
 # Download and install vcsh if not already there
