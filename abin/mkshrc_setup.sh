@@ -1,10 +1,9 @@
 #!/system/bin/sh
 # Setup user mkshrc script
+MARKER="# load user .mkshrc"
+SDCARD="/storage/sdcard0"
+MKSHRC="/system/etc/mkshrc"
 su root -- <<EOF
-  MARKER="# load user .mkshrc"
-  SDCARD="/storage/sdcard0"
-  MKSHRC="/system/etc/mkshrc"
-  
   # Check requirements
   echo "[mkshrc] check requirements"
   if [ ! -f "$MKSHRC" ]; then
