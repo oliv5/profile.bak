@@ -33,3 +33,4 @@ lib = . "$RC_DIR/.rc.d/12_git.sh"
 
 # Include our repositories
 include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/"*
+include = [ -r ".mrconfig.local" ] && cat .mrconfig.local || true
