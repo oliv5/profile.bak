@@ -20,8 +20,9 @@ adb push "$PRIVATE/sshpack/.ssh/config" "$ADB_HOME/.ssh/"
 
 # Upload setup script
 echo "[bootstrap] upload setup script"
-adb push "$PRIVATE/home/home-nexus4/bin/n4setup.sh" "$ADB_HOME/"
+adb push "$PRIVATE/home/home-nexus4/bin/git.sh" "$ADB_HOME/"
+adb push "$PRIVATE/home/home-nexus4/bin/setup.sh" "$ADB_HOME/"
 
 # Run setup script
 echo "[bootstrap] run setup script"
-adb shell su -c 'export HOME=\"$ADB_HOME\"; . \"$ADB_HOME/n4setup.sh\" -a'
+adb shell su -c 'export HOME=\"$ADB_HOME\"; . \"$ADB_HOME/setup.sh\" -a'
