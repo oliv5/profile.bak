@@ -4,7 +4,7 @@
 (
   SRC=""
   DST="/data/local/userinit.d"
-  NAME="initd.$(date +%Y%m%d-%H%M).sh"
+  NAME="noname.sh"
   COMMANDS=""
 
   # Get arguments
