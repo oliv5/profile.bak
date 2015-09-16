@@ -3,7 +3,7 @@
 DBG=""
 
 # Ctags settings (see ~/.ctags)
-CTAGS_OPTS='-R'
+CTAGS_OPTS='-R --extra=f'
 
 # Cscope default settings
 #CSCOPE_OPTS='-qb'
