@@ -16,7 +16,8 @@
 
     # Math fct
     awk_calc() {
-        echo | eval awk -v CONVFMT=%.${SCALE:-17}g "'{print $@;}'"
+        #echo | eval awk -v CONVFMT=%.${AWK_PRECISION:-17}g "'{\$1=$@;}{print}'"
+        echo | eval awk "'{printf \"%."${AWK_PRECISION:-17}"f\n\",$@}'"
     }
 
      # Convert degrees to radians
@@ -77,7 +78,9 @@
         [ $# -ne 4 -a $# -ne 5 ] && echo >&2 "Wrong number of coordonnates ($#/[4-5])" && return 1
         : ${1:?Bad coordonate LAT1} ${2:?Bad coordonate LONG1}
         : ${3:?Bad coordonate LAT2} ${4:?Bad coordonate LONG2}
-        : ${SCALE:=${5:-2}}
+        # Get parameters
+        local PRECISION="${5:-2}"
+        # Compute
         bc_calc "
             # Radian function
             define radians(degrees) {
@@ -98,7 +101,7 @@
             x = delta2 * c((phy1 + phy2) / 2)
             y = phy2 - phy1
             # Distance (2 frac. digits)
-            scale = $SCALE
+            scale = $PRECISION
             r * sqrt(x*x + y*y) / 1
         "
     }
@@ -106,21 +109,21 @@
         [ $# -ne 4 -a $# -ne 5 ] && echo >&2 "Wrong number of coordonnates ($#/[4-5])" && return 1
         : ${1:?Bad coordonate LAT1} ${2:?Bad coordonate LONG1}
         : ${3:?Bad coordonate LAT2} ${4:?Bad coordonate LONG2}
-        : ${SCALE:=${5:-2}}
         # Get parameters
-        LAT1="$1"; LONG1="$2"; LAT2="$3"; LONG2="$4"
+        local LAT1="$1"; local LONG1="$2"; local LAT2="$3"; local LONG2="$4"
+        local PRECISION="${5:-2}"
         # Earth radius
-        R=6371000
+        local R=6371000
         # Latitude
-        PHY1=$(awk_radians $LAT1)
-        PHY2=$(awk_radians $LAT2)
+        local PHY1=$(awk_radians $LAT1)
+        local PHY2=$(awk_radians $LAT2)
         # Deltas latitude and longitude
-        DELTA1=$(awk_radians $(awk_calc $LAT2 - $LAT1))
-        DELTA2=$(awk_radians $(awk_calc $LONG2 - $LONG1))
+        local DELTA1=$(awk_radians $(awk_calc $LAT2 - $LAT1))
+        local DELTA2=$(awk_radians $(awk_calc $LONG2 - $LONG1))
         # Coordonates and distance
-        X=$(awk_calc "$DELTA2 * cos(($PHY1 + $PHY2) / 2)")
-        Y=$(awk_calc "$PHY2 - $PHY1")
-        awk_calc "$R * sqrt($X*$X + $Y*$Y) / 1"
+        local X=$(awk_calc "$DELTA2 * cos(($PHY1 + $PHY2) / 2)")
+        local Y=$(awk_calc "$PHY2 - $PHY1")
+        AWK_PRECISION=$PRECISION awk_calc "$R * sqrt($X*$X + $Y*$Y) / 1"
     }
 
     # Test distance computation method
