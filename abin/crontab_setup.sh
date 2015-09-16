@@ -2,7 +2,7 @@
 # Setup a new crontab
 
 # Variables
-CRONTAB_SRC="${1:-$PWD/crontab}"
+CRONTAB_SRC="$(readlink -f "${1:-crontab}" 2>/dev/null)"
 CRONTAB_DST="/system/etc/cron.d/crontabs/root"
 
 # Run in a root subshell
