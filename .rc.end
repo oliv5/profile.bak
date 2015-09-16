@@ -7,9 +7,6 @@
 path_prepend "$HOME/bin" "$HOME/.local/bin" "$HOME/pbin" "$HOME/pbin/wrappers"
 path_append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
 path_append "$HOME/pbin/externals"
-if [ ! -z "$ANDROID_SYSTEM" ]; then
-  path_append "$HOME/pbin/android"
-fi
 path_cleanup
 
 # Remove some aliases/fct shortcuts
