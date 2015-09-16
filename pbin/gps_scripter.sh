@@ -28,4 +28,4 @@
                 fi
             fi
         done
-) > "${2:-/dev/stdout}"
+) | tee ${2:+"$2"}
