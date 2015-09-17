@@ -5,6 +5,7 @@
 (
     # Variables
     LOCATION_FILE="${1:-.locations}"
+    echo "[gps] $(date)"
     
     # Check prerequisites
     if [ -z "$ANDROID_ROOT" ] && ! command -v gps.sh >/dev/null 2>&1; then
