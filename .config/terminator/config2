@@ -1,0 +1,59 @@
+[global_config]
+  enabled_plugins = ,
+[keybindings]
+  close_term = <Super><Shift>t
+  close_window = <Ctrl><Shift>w
+  copy = <Ctrl><Shift>c
+  full_screen = <Ctrl>F11
+  go_down = <Ctrl>Down
+  go_left = <Ctrl>Left
+  go_right = <Ctrl>Right
+  go_up = <Ctrl>Up
+  group_all = <Super>g
+  group_tab = <Super>t
+  hide_window = <Ctrl><Shift>h
+  next_tab = <Ctrl>Page_Up
+  new_tab = <Ctrl>t
+  new_terminator = <Super>t
+  new_window = <Ctrl>w
+  paste = <Ctrl><Shift>v
+  prev_tab = <Ctrl>Page_Down
+  reset = <Ctrl><Shift>r
+  reset_clear = <Super><Shift>r
+  resize_down = <Ctrl><Shift>Down
+  resize_left = <Ctrl><Shift>Left
+  resize_right = <Ctrl><Shift>Right
+  resize_up = <Ctrl><Shift>Up
+  search = <Ctrl>f
+  split_horiz = <Ctrl><Shift>o
+  split_vert = <Ctrl><Shift>e
+  switch_to_tab_1 = <Ctrl>1
+  switch_to_tab_2 = <Ctrl>2
+  switch_to_tab_3 = <Ctrl>3
+  switch_to_tab_4 = <Ctrl>4
+  switch_to_tab_5 = <Ctrl>5
+  switch_to_tab_6 = <Ctrl>6
+  switch_to_tab_7 = <Ctrl>7
+  switch_to_tab_8 = <Ctrl>8
+  switch_to_tab_9 = <Ctrl>9
+  switch_to_tab_10 = <Ctrl>0
+  toggle_scrollbar = <Ctrl>s
+  toggle_zoom = <Ctrl>x
+  ungroup_all = <Super><Shift>g
+  ungroup_tab = <Super><Shift>t
+  zoom_in = <Ctrl>KP_Add
+  zoom_normal = <Ctrl>KP_Multiply
+  zoom_out = <Ctrl>KP_Subtract
+[profiles]
+  [[default]]
+    scrollback_lines = 15000
+    background_image = None
+[layouts]
+  [[default]]
+    [[[child1]]]
+      type = Terminal
+      parent = window0
+    [[[window0]]]
+      type = Window
+      parent = ""
+[plugins]

@@ -1,0 +1,63 @@
+[global_config]
+  enabled_plugins = ,
+[keybindings]
+  close_tab = <Primary><Shift>t
+  close_term = <Super><Shift>t
+  close_window = <Primary><Shift>w
+  copy = <Primary><Shift>c
+  edit_window_title = <Primary><Shift>F11
+  full_screen = <Primary>F11
+  go_down = <Primary>Down
+  go_left = <Primary>Left
+  go_right = <Primary>Right
+  go_up = <Primary>Up
+  group_all = <Super>g
+  group_tab = <Super>t
+  hide_window = <Primary><Shift>h
+  next_tab = <Primary>Page_Up
+  new_tab = <Primary>t
+  new_terminator = <Super>t
+  new_window = <Primary>w
+  paste = <Primary><Shift>v
+  prev_tab = <Primary>Page_Down
+  reset = <Primary><Shift>r
+  reset_clear = <Super><Shift>r
+  resize_down = <Primary><Shift>Down
+  resize_left = <Primary><Shift>Left
+  resize_right = <Primary><Shift>Right
+  resize_up = <Primary><Shift>Up
+  rotate_cw = <Super>r
+  rotate_ccw = <Super><Shift>r
+  search = <Primary>f
+  split_horiz = <Primary><Shift>o
+  split_vert = <Primary><Shift>e
+  switch_to_tab_1 = <Primary>1
+  switch_to_tab_2 = <Primary>2
+  switch_to_tab_3 = <Primary>3
+  switch_to_tab_4 = <Primary>4
+  switch_to_tab_5 = <Primary>5
+  switch_to_tab_6 = <Primary>6
+  switch_to_tab_7 = <Primary>7
+  switch_to_tab_8 = <Primary>8
+  switch_to_tab_9 = <Primary>9
+  switch_to_tab_10 = <Primary>0
+  toggle_scrollbar = <Primary>s
+  toggle_zoom = <Primary>x
+  ungroup_all = <Super><Shift>g
+  ungroup_tab = <Super><Shift>t
+  zoom_in = <Primary>KP_Add
+  zoom_normal = <Primary>KP_Multiply
+  zoom_out = <Primary>KP_Subtract
+[profiles]
+  [[default]]
+    scrollback_lines = 15000
+    background_image = None
+[layouts]
+  [[default]]
+    [[[child1]]]
+      type = Terminal
+      parent = window0
+    [[[window0]]]
+      type = Window
+      parent = ""
+[plugins]
