@@ -39,10 +39,11 @@
     # Location retrieve function
     location() {
         if [ -n "$ANDROID_ROOT" ]; then 
-            android_location
+            local LOCATION="$(android_location)"
         else 
-            web_location
+            local LOCATION="$(web_location)"
         fi
+        echo "${LOCATION:-0.0,0.0}"
     }
     
     # Get coordonates in variables
