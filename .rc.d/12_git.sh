@@ -61,6 +61,8 @@ alias gsm='gsdm'
 alias gil='git_ignore_list'
 alias gia='git_ignore_add'
 # Add files aliases
+alias gadd='git add'
+alias gad='git add'
 alias gan='git add $(git ls-files -o --exclude-standard)'
 alias gau='git add -u'
 # Misc aliases
@@ -87,12 +89,16 @@ alias gat='git annex status'
 # Patch aliases
 alias gpd='git diff -p'
 alias gpc='git show'
-# Subtree alias
+# Subtree aliases
 alias gsta='git_subtree_add'
 alias gstu='git_subtree_update'
 # Git grep aliases
 alias ggg='git grep -n'
 alias iggg='git grep -ni'
+# Checkout aliases
+alias gco='git checkout'
+# Reset aliases
+alias gre='git reset'
 
 ########################################
 # git wrapper
@@ -158,6 +164,16 @@ git_st() {
 }
 git_stx() {
   git status -z | awk 'BEGIN{RS="\0"; ORS="\0"}/'"^[\? ]?$1"'/{print substr($0,4)}'
+}
+
+# Get local branches names
+git_branches() {
+  git ${2:+--git-dir="$2"} for-each-ref --format='%(refname:short)' refs/heads/
+}
+
+# Get remote names
+git_remotes() {
+  git ${2:+--git-dir="$2"} remote | xargs echo
 }
 
 ########################################
@@ -496,34 +512,49 @@ git_backupdir() {
 }
 
 ########################################
-# Batch clone
-git_clone() {
-  local REPO="$(git_repo)"
+# Repo init
+git_init() {
+  local DIR="$1"
+  shift 2>/dev/null
+  mkdir -p "$DIR"
+  cd "$DIR" || return 1
+  [ ! -d ".git" ] && git init
   for ARGS; do
-    set $ARGS
-    local REMOTE="${1:?No remote specified}"
-    local NAME="${2:-$REPO}"
-    local BRANCH="${3:-master}"
-    git clone "$REMOTE" "$REPO" || break
-    git --git-dir="$REPO/.git" remote rename origin "$NAME"
-    git --git-dir="$REPO/.git" checkout "$BRANCH"
+    set -- $ARGS
+    git remote add "$@"
   done
 }
 
-########################################
-# Batch pull
+# Repo clone
+git_clone() {
+  local URL="${1:?No URL specified}"
+  local REMOTE="${2:-origin}"
+  local BRANCH="${3:-master}"
+  local DIR="$(basename "$URL" .git)"
+  shift 3 2>/dev/null
+  git clone "$URL" "$DIR" || break
+  git --git-dir="$DIR/.git" remote rename origin "$REMOTE"
+  git --git-dir="$DIR/.git" checkout "$BRANCH"
+  for ARGS; do
+    set -- $ARGS
+    git remote add "$@"
+  done
+}
+
+# Batch remote/branch pull
 # Use vcsh wrapper when necessary
 git_pull() {
-  local REMOTES="${1:?No remote specified}"
-  local BRANCHES="${2:-master}"
+  local REMOTES="${1:-$(git_remotes)}"
+  local BRANCHES="${2:-$(git_branches)}"
   local STASH="__git_pull_stash"
   vcsh_run "
     git stash save -q \"$STASH\"
     for REMOTE in $REMOTES; do
       if git remote | grep -- \"\$REMOTE\" >/dev/null; then
-	for BRANCH in $BRANCHES; do
-	  git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
-	done
+        for BRANCH in $BRANCHES; do
+          git checkout \"\$BRANCH\" &&
+          git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
+        done
       fi
     done
     if git stash list -n 1 | grep \"$STASH\" >/dev/null 2>&1; then
@@ -533,16 +564,15 @@ git_pull() {
   "
 }
 
-########################################
-# Batch push
+# Batch remote/branch push
 git_push() {
-  local REMOTES="${1:?No remote specified}"
-  local BRANCHES="${2:-master}"
+  local REMOTES="${1:-$(git_remotes)}"
+  local BRANCHES="${2:-$(git_branches)}"
   for REMOTE in $REMOTES; do
     if git remote | grep -- "$REMOTE" >/dev/null; then
       for BRANCH in $BRANCHES; do
-	echo -n "Push $REMOTE/$BRANCH : "
-	git push "$REMOTE" "$BRANCH"
+        echo -n "Push $REMOTE/$BRANCH : "
+        git push "$REMOTE" "$BRANCH"
       done
     fi
   done
@@ -560,7 +590,7 @@ git_bundle() {
     git bundle create "$BUNDLE" --all --tags --remotes
     if [ ! -z "$GPG_RECIPIENT" ]; then
       gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "${BUNDLE}" && 
-	(shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
+        (shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
     fi
     ls -l "${BUNDLE}"*
   else
@@ -651,15 +681,15 @@ annex_bundle() {
       local GPG_RECIPIENT="$3"
       echo "Tar annex into $BUNDLE"
       if annex_bare; then
-	tar cf "${BUNDLE}" -h ./annex
+        tar cf "${BUNDLE}" -h ./annex
       else
-	vcsh_run "git annex list $(git config --get core.worktree)" | 
-	  awk 'NF>1 {$1="";print "\""substr($0,2)"\""}' |
-	  xargs tar cf "${BUNDLE}" -h --exclude-vcs
+        vcsh_run "git annex list $(git config --get core.worktree)" | 
+          awk 'NF>1 {$1="";print "\""substr($0,2)"\""}' |
+          xargs tar cf "${BUNDLE}" -h --exclude-vcs
       fi
       if [ ! -z "$GPG_RECIPIENT" ]; then
-	gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "${BUNDLE}" && 
-	  (shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
+        gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "${BUNDLE}" && 
+          (shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
       fi
       ls -l "${BUNDLE}"*
     else
@@ -688,17 +718,30 @@ vcsh_loaded() {
   [ ! -z "$VCSH_REPO_NAME" ]
 }
 
-# Batch clone
-vcsh_clone() {
-  local REPO="$(git_repo)"
+# vcsh init
+vcsh_init() {
+  local REPO="$1"
+  shift 2>/dev/null
+  vcsh init "$REPO" || return 1
   for ARGS; do
-    set $ARGS
-    local REMOTE="${1:?No remote specified}"
-    local NAME="${2:-$REPO}"
-    local BRANCH="${3:-master}"
-    vcsh clone "$REMOTE" "$REPO" || break
-    vcsh run "$REPO" git remote rename origin "$NAME"
-    vcsh run "$REPO" git checkout "$BRANCH"
+    set -- $ARGS
+    vcsh run "$REPO" git remote add "$@"
+  done
+}
+
+# vcsh clone
+vcsh_clone() {
+  local URL="${1:?No URL specified}"
+  local REMOTE="${2:-origin}"
+  local BRANCH="${3:-master}"
+  local REPO="$(basename "$URL" .git)"
+  shift 3 2>/dev/null
+  vcsh clone "$URL" "$REPO" || break
+  vcsh run "$REPO" git remote rename origin "$REMOTE"
+  vcsh run "$REPO" git checkout "$BRANCH"
+  for ARGS; do
+    set -- $ARGS
+    vcsh run "$REPO" git remote add "$@"
   done
 }
 
