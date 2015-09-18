@@ -18,8 +18,8 @@ alias idffll='FCASE=-i FTYPE=l FXTYPE=f FARGS= _dfind'
 alias idfflb='FCASE=-i FTYPE=l FXTYPE=l FARGS= _dfind'
 
 # Grep based code search
-_dgrep1()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; shift $(min 3 $#); (set -f; FARGS="${_DFEXCLUDE} $@" _fgrep1 "$ARG2" "${ARG3:-.}/$ARG1"); }
-_dgrep2()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; shift $(min 3 $#); (set -f; FARGS= _fgrep2 "$ARG2" ${_DG2EXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
+_dgrep1()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; shift $(min 3 $#); (set -f; FARGS="${_DFEXCLUDE} $@" GARGS= _fgrep1 "$ARG2" "${ARG3:-.}/$ARG1"); }
+_dgrep2()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; shift $(min 3 $#); (set -f; FARGS= GARGS= _fgrep2 "$ARG2" ${_DG2EXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
 alias _dgrep='_dgrep1'
 _DG1EXCLUDE="$_DFEXCLUDE"
 _DG2EXCLUDE="--exclude-dir=.svn --exclude-dir=.git --exclude-dir=.repo"
@@ -34,28 +34,28 @@ _DGEXT_XML="*.xml"
 _DGEXT_TEX="*.tex"
 _DGEXT_SHELL="*.sh"
 _DGEXT_REF="*.c;*.cpp;*.cc;*.h;*.hpp;*.py;*.mk;Makefile;*.sh;*.vhd;*.v;*.inc;*.S;*.tex"
-alias      c='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dgrep "$_DGEXT_C"'
-alias      h='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dgrep "$_DGEXT_H"'
-alias      v='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dgrep "$_DGEXT_V"'
-alias     hc='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dgrep "$_DGEXT_HC"'
-alias     py='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dgrep "$_DGEXT_PY"'
-alias     mk='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dgrep "$_DGEXT_MK"'
-alias    asm='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dgrep "$_DGEXT_ASM"'
-alias    xml='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dgrep "$_DGEXT_XML"'
-alias    tex='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dgrep "$_DGEXT_TEX"'
-alias  shell='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dgrep "$_DGEXT_SHELL"'
-alias    ref='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dgrep "$_DGEXT_REF"'
-alias     ic='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dgrep "$_DGEXT_C"'
-alias     ih='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dgrep "$_DGEXT_H"'
-alias     iv='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dgrep "$_DGEXT_V"'
-alias    ihc='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dgrep "$_DGEXT_HC"'
-alias    ipy='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dgrep "$_DGEXT_PY"'
-alias    imk='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dgrep "$_DGEXT_MK"'
-alias   iasm='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dgrep "$_DGEXT_ASM"'
-alias   ixml='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dgrep "$_DGEXT_XML"'
-alias   itex='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dgrep "$_DGEXT_TEX"'
-alias ishell='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dgrep "$_DGEXT_SHELL"'
-alias   iref='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dgrep "$_DGEXT_REF"'
+alias      c='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_C"'
+alias      h='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_H"'
+alias      v='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_V"'
+alias     hc='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_HC"'
+alias     py='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_PY"'
+alias     mk='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_MK"'
+alias    asm='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_ASM"'
+alias    xml='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_XML"'
+alias    tex='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_TEX"'
+alias  shell='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_SHELL"'
+alias    ref='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_REF"'
+alias     ic='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_C"'
+alias     ih='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_H"'
+alias     iv='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_V"'
+alias    ihc='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_HC"'
+alias    ipy='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_PY"'
+alias    imk='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_MK"'
+alias   iasm='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_ASM"'
+alias   ixml='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_XML"'
+alias   itex='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_TEX"'
+alias ishell='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_SHELL"'
+alias   iref='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_REF"'
 
 # Grep based code block search
 _dsearch1() { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; _dgrep $_DGEXT_REF "${ARG1//NAME/$ARG2}" . -E "$@"); }
@@ -67,18 +67,18 @@ _DGREGEX_STRUCT='(struct|union|enum|class)\s*NAME\s*(\{|$)'
 _DGREGEX_TYPEDEF='(typedef\s+\w+\sNAME)|(^\s*NAME\s*;)'
 _DGREGEX_DEFINE='(#define\s+NAME|^\s*NAME\s*,)|(^\s*NAME\s*=.*,)'
 _DGREGEX_ALL='(#define\s+NAME|^\s*NAME\s*,)|(^\s*NAME\s*=.*,)'
-alias      def='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dsearch "$_DGREGEX_ALL"'
-alias      var='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dsearch "$_DGREGEX_VAR"'
-alias     func='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dsearch "$_DGREGEX_FUNC"'
-alias   struct='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dsearch "$_DGREGEX_STRUCT"'
-alias   define='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dsearch "$_DGREGEX_DEFINE"'
-alias  typedef='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   _dsearch "$_DGREGEX_TYPEDEF"'
-alias     idef='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dsearch "$_DGREGEX_ALL"'
-alias     ivar='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dsearch "$_DGREGEX_VAR"'
-alias    ifunc='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dsearch "$_DGREGEX_FUNC"'
-alias  istruct='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dsearch "$_DGREGEX_STRUCT"'
-alias  idefine='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dsearch "$_DGREGEX_DEFINE"'
-alias itypedef='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i _dsearch "$_DGREGEX_TYPEDEF"'
+alias      def='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dsearch "$_DGREGEX_ALL"'
+alias      var='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dsearch "$_DGREGEX_VAR"'
+alias     func='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dsearch "$_DGREGEX_FUNC"'
+alias   struct='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dsearch "$_DGREGEX_STRUCT"'
+alias   define='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dsearch "$_DGREGEX_DEFINE"'
+alias  typedef='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dsearch "$_DGREGEX_TYPEDEF"'
+alias     idef='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGEX_ALL"'
+alias     ivar='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGEX_VAR"'
+alias    ifunc='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGEX_FUNC"'
+alias  istruct='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGEX_STRUCT"'
+alias  idefine='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGEX_DEFINE"'
+alias itypedef='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGEX_TYPEDEF"'
 
 # Dev replace
 _DSEXCLUDE="-not -path '*.svn*' -and -not -path '*.git*' -and -not -type l"

@@ -75,7 +75,7 @@ _fgrep1() {
     local ARGS="$1"
     shift $#
   fi
-  (set -f; _ffind1 "${@:-}" -type f -print0 | eval xargs -0 grep -nH --color ${GCASE} -e "${ARGS:-''}")
+  (set -f; _ffind1 "${@:-}" -type f -print0 | eval xargs -0 grep -nH --color ${GCASE} ${GARGS} -e "${ARGS:-''}")
 }
 _fgrep2() {
   if [ $# -gt 1 ]; then
@@ -88,13 +88,15 @@ _fgrep2() {
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
   FILES="$(echo "${FILES}" | sed -e 's/;/ --include=/g')"
-  (set -f; eval grep -RnH --color ${GCASE} -e "$ARGS" ${FILES:+--include="$FILES"} "${DIR:-.}")
+  (set -f; eval grep -RnH --color ${GCASE} ${GARGS} -e "$ARGS" ${FILES:+--include="$FILES"} "${DIR:-.}")
 }
 alias _fgrep='_fgrep2'
-alias   gg='FCASE= FTYPE=  FXTYPE=  FARGS= GCASE=   _fgrep'
-alias  igg='FCASE= FTYPE=  FXTYPE=  FARGS= GCASE=-i _fgrep'
-ggl() {  gg "$@" | cut -d : -f 1 | uniq; }
-iggl(){ igg "$@" | cut -d : -f 1 | uniq; }
+alias   gg='FCASE= FTYPE=  FXTYPE=  FARGS= GCASE=   GARGS=   _fgrep'
+alias  igg='FCASE= FTYPE=  FXTYPE=  FARGS= GCASE=-i GARGS=   _fgrep'
+alias  ggl='FCASE= FTYPE=  FXTYPE=  FARGS= GCASE=   GARGS=-l _fgrep'
+alias iggl='FCASE= FTYPE=  FXTYPE=  FARGS= GCASE=-i GARGS=-l _fgrep'
+#ggl() {  gg "$@" | cut -d : -f 1 | uniq; }
+#iggl(){ igg "$@" | cut -d : -f 1 | uniq; }
 
 # Search & replace
 _fsed1() {
