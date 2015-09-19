@@ -1,0 +1,340 @@
+#!/usr/bin/env python
+"""Web sharing tool : Woofy
+
+This module is based on SimpleHTTPServer and uses BaseHTTPServer 
+to implement the standard GET and HEAD requests to transfer files
+Inspired from Woof python script
+
+"""
+
+import sys
+import os
+import posixpath
+import BaseHTTPServer
+import socket
+import urllib
+import cgi
+import shutil
+import mimetypes
+import re
+
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO import StringIO
+
+# Initialise globals
+__all__ = ["SharingHTTPRequestHandler"]
+__version__ = "0.8"
+__title__ = "woofy"
+version = __title__ + " v" + __version__
+users=-1
+ip='0.0.0.0'
+port=80
+files=[]
+httpd=None
+
+class SharingHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+
+    """Sharing file HTTP server with GET and HEAD commands.
+
+    This serves files from the current directory and any of its
+    subdirectories.  The MIME type for files is determined by
+    calling the .guess_type() method.
+
+    The GET and HEAD requests are identical except that the HEAD
+    request omits the actual contents of the file.
+
+    """
+
+
+    def do_GET(self):
+        """Serve a GET request."""
+        f = self.send_head()
+        if f:
+            self.copyfile(f, self.wfile)
+            f.close()
+
+    def do_HEAD(self):
+        """Serve a HEAD request."""
+        f = self.send_head()
+        if f:
+            f.close()
+
+    def send_head(self):
+        global httpd, users
+        global files
+        """Common code for GET and HEAD commands.
+
+        This sends the response code and MIME headers.
+
+        Return value is either a file object (which has to be copied
+        to the outputfile by the caller unless the command was HEAD,
+        and must be closed by the caller under all circumstances), or
+        None, in which case the caller has nothing further to do.
+
+        """
+
+        # OLA ++
+        # Get the local path, based on the current directory
+        # This means it is always in the allowed dir/file list
+        httppath = self.path
+        localpath = self.translate_path(httppath)
+        #print "Check#1 Httppath: " + httppath
+        #print "Check#1 Localpath: " + localpath
+
+        # if this is a directory
+        if httppath.endswith('/'):
+
+            # Select the only shared file
+            if len(files)==1:
+                httppath = httppath + os.path.basename(files[0])
+
+            # Look for index.htm[l] files
+            if len(files)==0:
+                for index in "index.html", "index.htm":
+                    indexpath = self.translate_path(httppath)
+                    if os.path.exists(os.path.join(indexpath, index)):
+                        httppath = httppath + index
+                        break
+
+        # Get the local path
+        localpath = self.translate_path(httppath)
+        #print "Check#2 Httppath: " + httppath
+        #print "Check#2 Localpath: " + localpath
+
+        # List directory
+        if os.path.isdir(localpath):
+            return self.list_directory(localpath)
+
+        # Apply redirection if file changed
+        if httppath!=self.path:
+            self.send_response(301)
+            self.send_header("Location", httppath)
+            self.end_headers()
+            return None
+
+        # Check files for authorisation
+        print "File transfer: " + localpath
+        if len(files)>0 and not localpath in files:
+            self.send_error(403, "Unauthorized access")
+            return None
+
+        if users>0:
+            users=users-1
+            print "User tickets: " + str(users)
+        if users==0:
+            print "User limit reached. Stop server asap..."
+            httpd.server_close()
+        # OLA --
+
+        f = None
+        ctype = self.guess_type(localpath)
+        try:
+            # Always read in binary mode. Opening files in text mode may cause
+            # newline translations, making the actual size of the content
+            # transmitted *less* than the content-length!
+            f = open(localpath, 'rb')
+        except IOError:
+            self.send_error(404, "File not found")
+            return None
+        self.send_response(200)
+        self.send_header("Content-type", ctype)
+        fs = os.fstat(f.fileno())
+        self.send_header("Content-Length", str(fs[6]))
+        self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
+        self.end_headers()
+        return f
+
+    def list_directory(self, path):
+        """Helper to produce a directory listing (absent index.html).
+
+        Return value is either a file object, or None (indicating an
+        error).  In either case, the headers are sent, making the
+        interface the same as for send_head().
+
+        """
+        try:
+            list = os.listdir(path)
+        except os.error:
+            self.send_error(404, "No permission to list directory")
+            return None
+        list.sort(key=lambda a: a.lower())
+        f = StringIO()
+        displaypath = cgi.escape(urllib.unquote(self.path))
+        f.write('<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">')
+        f.write("<html>\n<title>Directory listing for %s</title>\n" % displaypath)
+        f.write("<body>\n<h2>Directory listing for %s</h2>\n" % displaypath)
+        f.write("<hr>\n<ul>\n")
+        for name in list:
+            fullname = os.path.join(path, name)
+            displayname = linkname = name
+            # Append / for directories or @ for symbolic links
+            if os.path.isdir(fullname):
+                displayname = name + "/"
+                linkname = name + "/"
+            if os.path.islink(fullname):
+                displayname = name + "@"
+                # Note: a link to a directory displays with @ and links with /
+            f.write('<li><a href="%s">%s</a>\n'
+                    % (urllib.quote(linkname), cgi.escape(displayname)))
+        f.write("</ul>\n<hr>\n</body>\n</html>\n")
+        length = f.tell()
+        f.seek(0)
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.send_header("Content-Length", str(length))
+        self.end_headers()
+        return f
+
+    def translate_path(self, path):
+        """Translate a /-separated PATH to the local filename syntax.
+
+        Components that mean special things to the local file system
+        (e.g. drive or directory names) are ignored.  (XXX They should
+        probably be diagnosed.)
+
+        """
+        # abandon query parameters
+        path = path.split('?',1)[0]
+        path = path.split('#',1)[0]
+        path = posixpath.normpath(urllib.unquote(path))
+        words = path.split('/')
+        words = filter(None, words)
+        path = os.getcwd()
+        for word in words:
+            drive, word = os.path.splitdrive(word)
+            head, word = os.path.split(word)
+            if word in (os.curdir, os.pardir): continue
+            path = os.path.join(path, word)
+        return path
+
+    def copyfile(self, source, outputfile):
+        """Copy all data between two file objects.
+
+        The SOURCE argument is a file object open for reading
+        (or anything with a read() method) and the DESTINATION
+        argument is a file object open for writing (or
+        anything with a write() method).
+
+        The only reason for overriding this would be to change
+        the block size or perhaps to replace newlines by CRLF
+        -- note however that this the default server uses this
+        to copy binary data as well.
+
+        """
+        shutil.copyfileobj(source, outputfile)
+
+    def guess_type(self, path):
+        """Guess the type of a file.
+
+        Argument is a PATH (a filename).
+
+        Return value is a string of the form type/subtype,
+        usable for a MIME Content-type header.
+
+        The default implementation looks the file's extension
+        up in the table self.extensions_map, using application/octet-stream
+        as a default; however it would be permissible (if
+        slow) to look inside the data to make a better guess.
+
+        """
+
+        base, ext = posixpath.splitext(path)
+        if ext in self.extensions_map:
+            return self.extensions_map[ext]
+        ext = ext.lower()
+        if ext in self.extensions_map:
+            return self.extensions_map[ext]
+        else:
+            return self.extensions_map['']
+
+    if not mimetypes.inited:
+        mimetypes.init() # try to read system mime.types
+    extensions_map = mimetypes.types_map.copy()
+    extensions_map.update({
+        '': 'application/octet-stream', # Default
+        '.py': 'text/plain',
+        '.c': 'text/plain',
+        '.h': 'text/plain',
+        })
+
+    # OLA ++
+    def close():
+        """Close server """
+
+def test(HandlerClass = SharingHTTPRequestHandler,
+         ServerClass = BaseHTTPServer.HTTPServer):
+
+    # Globals
+    global users, ip, port, files, httpd
+    
+    # Banner
+    print version + " - Simple file sharing tool"
+    print "usage: " + __title__ + " [-c num] [-i ip[:port]] [-p port] [files...]"
+    
+    # Process command line arguments
+    while len(sys.argv)>1:
+        if sys.argv[1]=="-c":
+            if len(sys.argv)>2:
+                users=int(sys.argv[2])
+                sys.argv.pop(1)
+            else:
+                print "Missing argument for option '"+ sys.argv[1] +"'"
+            sys.argv.pop(1)
+       
+        elif sys.argv[1]=="-p":
+            if len(sys.argv)>2:
+                port=int(sys.argv[2])
+                sys.argv.pop(1)
+            else:
+                print "Missing argument for option '"+ sys.argv[1] +"'"
+            sys.argv.pop(1)
+                
+        elif sys.argv[1]=="-i":
+            if len(sys.argv)>2:
+                m = re.search('([^:]*):?(.*)', sys.argv[2])
+                if m:
+                  if len(m.group(1))>0:
+                      ip=m.group(1)
+                  if len(m.group(2))>0:
+                      port=m.group(2)
+                sys.argv.pop(1)
+            else:
+                print "Missing argument for option '"+ sys.argv[1] +"'"
+            sys.argv.pop(1)
+
+# OLA ++
+        else:
+            file = os.path.abspath(sys.argv.pop(1))
+            if not os.path.exists(file):
+                print "File '" + str(file) + "' does not exist. Aborting..."
+                sys.exit(-1)
+            os.chdir(os.path.dirname(file))
+            files.append(file)
+# OLA --
+
+    # Display configuration
+    #print "server IP: "+ip+":"+str(port)
+    #print "users #  : "+str(users)
+    #print "files #  : "+str(files)
+    #sys.exit(0)
+    
+    # Set port in argv[1] for BaseHTTPServer constuctor
+    print "Starting HTTP server..."
+    httpd = ServerClass((ip, port), HandlerClass)
+    HandlerClass.protocol_version = "HTTP/1.0"
+    sa = httpd.socket.getsockname()
+    print "Serving HTTP on", sa[0], "port", sa[1], "..."
+    try:
+        httpd.serve_forever()
+    except (socket.error, KeyboardInterrupt), msg:
+        # Hide exception backtrace
+        httpd = None
+        
+    # Old way to start server
+    #sys.argv.append(port)
+    #BaseHTTPServer.test(HandlerClass, ServerClass)
+
+if __name__ == '__main__':
+    test()

@@ -67,9 +67,9 @@ mount_iso() {
   sudo mount -o loop -t iso9660 "$@"
 }
 
-# NFS unmount
-alias nfs-umountall='umount -a -t nfs'
-nfs_umount() {
+# Unmount nfs
+alias umountall_nfs='umount -a -t nfs'
+umount_nfs() {
   local MOUNTPOINT="${1:?NFS mount point not specified...}"
   local IP="${2:?NFS IP not specified...}"
   local ITF="${3:-eth0}"
