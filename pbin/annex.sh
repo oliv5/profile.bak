@@ -104,7 +104,6 @@
                 ${DBG} git annex sync
                 for REMOTE in ${ANNEX_CONTENT}; do
                     echo "[annex] Sync files content to remote '$REMOTE'"
-                    ${DBG} git fetch "$REMOTE" &&
                     ${DBG} git annex copy . --to "$REMOTE"
                 done
             fi
