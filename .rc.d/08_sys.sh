@@ -8,15 +8,22 @@ alias tty_next='sudo fgconsole'
 
 ################################
 # Processes
-alias psf='ps -faux'
-alias psd='ps -ef'
-alias psg='ps -ef | grep -i'
-alias psu='ps -fu $USER'
-alias pg='pgrep -fl'
-alias pgu='pgrep -flu $(id -u $USER)'
-alias lsg='ls | grep -i'
-alias llg='ll | grep -i'
-alias lsofg='lsof | grep -i'
+if [ -n "$ANDROID_ROOT" ]; then
+  alias psg='ps -x | grep -i'
+  alias pg='pgrep -fl'
+  alias lsg='ls | grep -i'
+  alias llg='ll | grep -i'
+else
+  alias psf='ps -faux'
+  alias pse='ps -ef'
+  alias psg='ps -ef | grep -i'
+  alias psu='ps -fu $USER'
+  alias pg='pgrep -fl'
+  alias pgu='pgrep -flu $(id -u $USER)'
+  alias lsg='ls | grep -i'
+  alias llg='ll | grep -i'
+  alias lsofg='lsof | grep -i'
+fi
 
 pid() {
   for NAME; do
