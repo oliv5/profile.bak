@@ -573,7 +573,7 @@ if !exists('loaded_multiplesearch')
 	" Options
 	let g:MultipleSearchMaxColors = 6
 	let g:MultipleSearchColorSequence = "blue,green,red,yellow,cyan,magenta"
-	let g:MultipleSearchTextColorSequence = "white,white,white,black,black,black"
+	let g:MultipleSearchTextColorSequence = "white,black,white,black,black,black"
 	" Key mapping
 	inoremap <F2>		<C-o>:execute ':Search \<'.expand('<cword>').'\>'<CR>
 	vmap <F2>			<Leader>*
