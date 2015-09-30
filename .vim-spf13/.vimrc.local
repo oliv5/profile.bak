@@ -8,8 +8,10 @@
 	cmap w!! w !sudo tee % >/dev/null
 	
 	" Autoreload changed files
-	set autoread
-	au FileChangedShell * exec 'echohl WarningMsg | echo "Warning: file' expand('%') 'changed on disk" | echohl None'
+	"set autoread
+	augroup vimrc_autoread
+		au! FileChangedShell * exec 'echohl WarningMsg | echo "Warning: file' expand('%') 'changed on disk" | echohl None'
+	augroup END
 " }
 
 " UI settings, theme & color scheme {
