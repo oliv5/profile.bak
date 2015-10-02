@@ -59,8 +59,8 @@
 	FnNoremap <C-p><C-p>	:CtrlPFunky<CR>
 
 	" Neosnippet
-	"if exists('*neosnippet#init#_initialize()')
-	"	let g:neosnippet#disable_select_mode_mappings = 0
+	if exists('*neosnippet#init#_initialize()')
+		let g:neosnippet#disable_select_mode_mappings = 0
 	"	imap <C-k>     <Plug>(neosnippet_expand_or_jump)
 	"	smap <C-k>     <Plug>(neosnippet_expand_or_jump)
 	"	xmap <C-k>     <Plug>(neosnippet_expand_target)
@@ -74,7 +74,7 @@
 	"		" For snippet_complete marker.
 	"		set conceallevel=2 concealcursor=i
 	"	endif
-	"endif
+	endif
 	
 	" Syntastic
 	let g:syntastic_python_checkers = ['pylint']
