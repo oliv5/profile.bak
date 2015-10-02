@@ -1,6 +1,10 @@
 #!/bin/sh
 
 ################################
+# Sudo
+command -v sudo >/dev/null 2>&1 || alias sudo = 'su root --'
+
+################################
 # TTys
 alias tty_list='ps aux|grep /usr/bin/[X]'
 alias tty_active='cat /sys/class/tty/tty0/active'

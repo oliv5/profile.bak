@@ -82,7 +82,10 @@ die() {
 ################################
 # Cmd exist test
 cmd_exists() {
-  command -v "$1" >/dev/null
+  for CMD; do
+    command -v "$CMD" >/dev/null 2>&1 || return 1
+  done
+  return 0
 }
 
 # Cmd unset

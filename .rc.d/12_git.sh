@@ -65,8 +65,11 @@ alias gadd='git add'
 alias gad='git add'
 alias gan='git add $(git ls-files -o --exclude-standard)'
 alias gau='git add -u'
-# Misc aliases
+# Commit aliases
 alias gci='git commit'
+alias gcm='git commit -m'
+alias gcam='git commit -am'
+# Misc aliases
 alias grm='git rm'
 alias gmv='git mv'
 # Logs/history aliases
