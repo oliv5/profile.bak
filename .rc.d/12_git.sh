@@ -650,11 +650,21 @@ annex_init_direct() {
 # Init hubic annex
 annex_init_hubic() {
   local REMOTE="${1:-hubic}"
-  local HUBIC_PATH="${2:-$(git_repo)}"
-  vcsh_run "
-    git annex enableremote \"$REMOTE\" type=external externaltype=hubic encryption=none hubic_container=annex hubic_path=\"$HUBIC_PATH\" embedcreds=no ||
-    git annex initremote \"$REMOTE\" type=external externaltype=hubic encryption=none hubic_container=annex hubic_path=\"$HUBIC_PATH\" embedcreds=no
-  "
+  local RPATH="${2:-$(git_repo)}"
+  local ENCRYPTION="${3:-none}"
+  local CMDARGS="\"$REMOTE\" type=external externaltype=hubic encryption=\"$ENCRYPTION\" hubic_container=annex hubic_path=\"$RPATH\" embedcreds=no"
+  vcsh_run "git annex enableremote $CMDARGS || git annex initremote $CMDARGS"
+}
+
+# Init gdrive annex
+annex_init_gdrive() {
+  local REMOTE="${1:-gdrive}"
+  local RPATH="${2:-$(git_repo)}"
+  local ENCRYPTION="${3:-none}"
+  local CMDARGS="git annex enableremote \"$REMOTE\" type=external externaltype=googledrive encryption=\"$ENCRYPTION\" folder=\"$RPATH\""
+  vcsh_run "git annex enableremote $CMDARGS || git annex initremote $CMDARGS"
+  local KEY; read -p "Enter the OAUTH key: " KEY
+  vcsh_run "OAUTH='$KEY' git annex enableremote $CMDARGS || OAUTH='$KEY' git annex initremote $CMDARGS"
 }
 
 # Annex sync
