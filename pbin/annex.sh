@@ -88,14 +88,14 @@
             # Add files
             if [ ! -z "$ANNEX_ADD" ]; then
                 if [ -r "$ANNEX_FILELIST" ]; then
-                    echo "[annex] Add files from '$ANNEX_FILELIST'"
+                    echo "[annex] Add files from '$ANNEX_FILELIST' ${ANNEX_FORCE:+(force)}"
                     IFS=$'\n'
                     for FILE in $(cat "$ANNEX_FILELIST" 2>/dev/null); do
                         echo "[annex] Add '$FILE'"
                         ${DBG} git annex add "$FILE" $ANNEX_FORCE
                     done
                 else
-                    echo "[annex] Add all files"
+                    echo "[annex] Add all files ${ANNEX_FORCE:+(force)}"
                     ${DBG} git annex add . $ANNEX_FORCE
                 fi
             fi
