@@ -61,31 +61,6 @@ exec_remote() {
   fi
 }
 
-# Get public external IP
-get_extip() {
-  local DNSLOOKUP="ifconfig.me/ip"
-  if command -v curl >/dev/null; then
-    curl $DNSLOOKUP
-  elif command -v wget >/dev/null; then
-    wget -qO- $DNSLOOKUP
-  else
-    local HOST="${DNSLOOKUP%%/*}"
-    local URL="${DNSLOOKUP#*/}"
-    exec 3</dev/tcp/$HOST/80
-    #sed 's/ *//' <<< "
-    #  GET /$URL HTTP/1.1
-    #  connection: close
-    #  host: $HOST
-    #  " >&3
-    echo >&3 << EOL
-GET /$URL HTTP/1.1
-connection: close
-host: $HOST
-EOL
-    grep -oE '([0-9]+\.){3}[0-9]+' <&3
-  fi
-}
-
 # Send email using mutt or mail
 send_mail() {
   local DEST="${1:?No dest email address specified}"
@@ -115,4 +90,66 @@ send_mail() {
 socat_bounce() {
   #socat TCP-LISTEN:$1,bind=$2,su=nobody,fork,reuseaddr TCP:$3:$4
   socat ${5:-TCP}-LISTEN:${1:+$1,}${2:+bind=$2},su=nobody,fork,reuseaddr ${3:+${5:-TCP}:$3${4:+:$4}}
+}
+
+# Get public external IP
+get_extip() {
+  local DNSLOOKUP="ifconfig.me/ip"
+  if command -v curl >/dev/null 2>&1; then
+    curl -s "$DNSLOOKUP"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -qO- "$DNSLOOKUP"
+  else
+    local HOST="${DNSLOOKUP%%/*}"
+    local URL="${DNSLOOKUP#*/}"
+    exec 3</dev/tcp/$HOST/80
+    #sed 's/ *//' <<< "
+    #  GET /$URL HTTP/1.1
+    #  connection: close
+    #  host: $HOST
+    #  " >&3
+    echo >&3 << EOL
+GET /$URL HTTP/1.1
+connection: close
+host: $HOST
+EOL
+    grep -oE '([0-9]+\.){3}[0-9]+' <&3
+  fi
+}
+
+# Check opened TCP outgoing ports
+opened_port_out() {
+  for PORT; do
+    if command -v nc >/dev/null 2>&1; then
+      nc -v portquiz.net "$PORT"
+    elif command -v telnet >/dev/null 2>&1; then
+      telnet portquiz.net "$PORT"
+    elif command -v curl >/dev/null 2>&1; then
+      curl "portquiz.net:$PORT"
+    elif command -v wget >/dev/null 2>&1; then
+      wget -qO- "portquiz.net:$PORT"
+    elif command -v mimeopen >/dev/null 2>&1; then
+      mimeopen "http://portquiz.net:$PORT"
+    else
+      echo "No suitable command found."
+      echo "Open your borwser at: http://portquiz.net:$PORT"
+    fi
+  done
+}
+
+# Check opened TCP input ports
+opened_port_in() {
+  local HOST="${1:-$(get_extip)}"
+  local PORT1="${2:-80}"
+  local PORT2="${3:-$PORT1}"
+  
+  if command -v curl >/dev/null 2>&1; then
+    curl -s --request POST 'http://www.ipfingerprints.com/scripts/getPortsInfo.php' \
+      --data "remoteHost=$HOST" --data "start_port=$PORT1" --data "end_port=$PORT2" \
+      -d normalScan=Yes -d scan_type=connect -d ping_type=none \
+    | grep -o open
+  else
+    echo "No suitable command found."
+    echo "Open your borwser at: http://www.ipfingerprints.com/portscan.php"
+  fi
 }
