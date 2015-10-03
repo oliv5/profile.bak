@@ -30,6 +30,9 @@ lib =
 
 # Load git library
 lib = . "$RC_DIR/.rc.d/12_git.sh"
+	  . "$RC_DIR/.rc.d/13_vcsh.sh"
+	  . "$RC_DIR/.rc.d/13_annex.sh"
+	  . "$RC_DIR/.rc.d/13_repo.sh"
 
 # Include our repositories
 include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/"*

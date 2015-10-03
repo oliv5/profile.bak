@@ -60,3 +60,9 @@ vcsh_run() {
     sh -c "$ARGS"
   fi
 }
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ $# -gt 0 -a ! -z "$1" ] && "$@" || true

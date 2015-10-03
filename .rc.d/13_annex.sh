@@ -35,7 +35,7 @@ annex_init_hubic() {
   local REMOTE="${1:-hubic}"
   local RPATH="${2:-$(git_repo)}"
   local ENCRYPTION="${3:-none}"
-  local CMDARGS="\"$REMOTE\" type=external externaltype=hubic encryption=\"$ENCRYPTION\" hubic_container=annex hubic_path=\"$RPATH\" embedcreds=no"
+  local CMDARGS="\"$REMOTE\" encryption=\"$ENCRYPTION\" type=external externaltype=hubic hubic_container=annex hubic_path=\"$RPATH\" embedcreds=no"
   vcsh_run "git annex enableremote $CMDARGS || git annex initremote $CMDARGS"
 }
 
@@ -44,10 +44,19 @@ annex_init_gdrive() {
   local REMOTE="${1:-gdrive}"
   local RPATH="${2:-$(git_repo)}"
   local ENCRYPTION="${3:-none}"
-  local CMDARGS="git annex enableremote \"$REMOTE\" type=external externaltype=googledrive encryption=\"$ENCRYPTION\" folder=\"$RPATH\""
+  local CMDARGS="\"$REMOTE\" encryption=\"$ENCRYPTION\" type=external externaltype=googledrive folder=\"$RPATH\""
   vcsh_run "git annex enableremote $CMDARGS || git annex initremote $CMDARGS"
   local KEY; read -p "Enter the OAUTH key: " KEY
   vcsh_run "OAUTH='$KEY' git annex enableremote $CMDARGS || OAUTH='$KEY' git annex initremote $CMDARGS"
+}
+
+# Init bup annex
+annex_init_bup() {
+  local REMOTE="${1:-bup}"
+  local RPATH="${2:-$(git_repo)}"
+  local ENCRYPTION="${3:-none}"
+  local CMDARGS="\"$REMOTE\" encryption=\"$ENCRYPTION\" type=bup buprepo=\"$RPATH\""
+  vcsh_run "git annex enableremote $CMDARGS || git annex initremote $CMDARGS"
 }
 
 # Annex sync
@@ -103,3 +112,9 @@ annex_bundle() {
 annex_copy() {
   vcsh_run 'git annex copy' "$@"
 }
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ $# -gt 0 -a ! -z "$1" ] && "$@" || true
