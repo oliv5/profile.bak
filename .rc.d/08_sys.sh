@@ -2,7 +2,7 @@
 
 ################################
 # Sudo
-command -v sudo >/dev/null 2>&1 || alias sudo = 'su root --'
+command -v sudo >/dev/null 2>&1 || alias sudo='su root --'
 
 ################################
 # TTys
@@ -44,6 +44,7 @@ uid() {
 ################################
 # Syslog
 alias syslog='sudo tail /var/log/syslog'
+alias auth='sudo tail /var/log/auth.log'
 
 # System information
 sys_iostat() {
