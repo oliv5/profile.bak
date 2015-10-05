@@ -2,7 +2,13 @@
 
 ################################
 # Sudo
-command -v sudo >/dev/null 2>&1 || alias sudo='su root --'
+if command -v sudo >/dev/null 2>&1; then
+  # Sudo now supports alias expansion
+  # http://www.shellperson.net/using-sudo-with-an-alias/
+  alias sudo='sudo '
+else 
+  alias sudo='su root --'
+fi
 
 ################################
 # TTys
