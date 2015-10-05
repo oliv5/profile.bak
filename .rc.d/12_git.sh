@@ -556,7 +556,7 @@ git_pull() {
     for REMOTE in $REMOTES; do
       if git remote | grep -- \"\$REMOTE\" >/dev/null; then
         for BRANCH in $BRANCHES; do
-          git checkout \"\$BRANCH\" &&
+          git checkout -q \"\$BRANCH\" &&
           git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
         done
       fi
