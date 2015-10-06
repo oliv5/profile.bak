@@ -201,7 +201,7 @@ git_allshorthash() {
 ########################################
 # Get git backup name
 git_name() {
-  echo "${1:+$1.}$(uname -n).$(git_repo).$(git_branch).$(date +%Y%m%d-%H%M%S).$(git_shorthash)${2:+.$2}"
+  echo "${1:+$1.}$(uname -n).$(git_repo).$(git_branch | tr '/' '_').$(date +%Y%m%d-%H%M%S).$(git_shorthash)${2:+.$2}"
 }
 
 ########################################
