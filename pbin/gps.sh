@@ -28,7 +28,7 @@
     # (android only) Get current GPS coordonates (format "LAT.LAT,LONG.LONG")
     android_location() {
         [ -z "$ANDROID_ROOT" ] && echo >&2 "Not on android, cannot get current location." && echo "0.0 0.0" && return 1
-        su root -- dumpsys location | awk '/network|passive: Location/ {print $3}' | sed -e 's/,/./1 ; s/,/./2 ; q'
+        su root -- dumpsys location | awk '/(network|passive): Location/ {print $3}' | sed -e 's/,/./1 ; s/,/./2 ; q'
     }
 
     # Get GPS location estimate from website
