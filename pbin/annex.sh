@@ -12,7 +12,7 @@
     GLOBAL_ANNEX_ADD="1"
     WIFIDEV=""
     LOGFILE="/dev/null"
-    ONCHARGE=""
+    INCHARGE=""
 
     # Get arguments
     while getopts "db:l:asc:fw:g" OPTFLAG; do
@@ -25,7 +25,7 @@
         c) GLOBAL_ANNEX_CONTENT="${OPTARG}";;
         f) GLOBAL_ANNEX_FORCE="--force";;
         w) WIFIDEV="${OPTARG}";;
-        g) ONCHARGE="1";;
+        g) INCHARGE="1";;
         *) echo >&2 "Usage: annex.sh [-h] [-d] [-b] [-l logfile] [-a] [-c repos] [-f] [-s dir] [-w device] [-g]"
            echo >&2 "-d  dry-run"
            echo >&2 "-b  set base directory"
@@ -77,8 +77,10 @@
             local ANNEX_SYNC="$GLOBAL_ANNEX_SYNC"
             local ANNEX_CONTENT="${GLOBAL_ANNEX_CONTENT:-$(git remote)}"
             # Check options
-            if [ ! -z "$ONCHARGE" ] && [ "$(cat /sys/class/power_supply/battery/status | tr '[:upper:]' '[:lower:]')" != "charging" ]; then
-                echo "[warning] Device is not in charge. Disable file addition and file content syncing..."
+            local CHARGE_STATUS="$(cat /sys/class/power_supply/battery/status 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+            #local CHARGE_LEVEL="$(dumpsys battery | awk '/level:/ {print $2}')"
+            if [ ! -z "$INCHARGE" ] && [ "$CHARGE_STATUS" != "charging" -a "$CHARGE_STATUS" != "full" ]; then
+                echo "[warning] Device is not in charge, nor full battery. Disable file addition and file content syncing..."
                 unset ANNEX_CONTENT ANNEX_ADD
             fi
             if [ ! -z "$WIFIDEV" ] && ! ip addr show dev "$WIFIDEV" 2>/dev/null | grep UP >/dev/null; then
