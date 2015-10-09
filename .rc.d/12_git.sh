@@ -344,19 +344,23 @@ alias git_stash_list='git stash list'
 alias git_stash_count='git stash list | wc -l'
 
 ########################################
-# Hard revert to a given CL or revert a file
+# Revert files to a given ref
 git_revert() {
-  if [ -f "$1" -o -f "$2" ]; then
-    git checkout -- "$@"
-  else
-    local REV="${1:-HEAD}"; shift $(min 1 $#)
-    git reset --hard "$REV" "$@"
+  local REV="HEAD"
+  if [ ! -f "$1" ]; then
+    REV="$1"
+    shift 2>/dev/null
   fi
+  git reset "$REV" -- "$@"
+  git checkout "$REV" -- "$@"
 }
+
+# Hard reset files to a given rev
+alias git_reset='git reset --hard'
 
 # Soft revert to a given CL, won't change modified files
 git_rollback() {
-  local REV="${1:-HEAD}"; shift $(min 1 $#)
+  local REV="${1:-HEAD}"; shift 2>/dev/null
   git reset "$REV" "$@"
 }
 
@@ -380,7 +384,7 @@ git_clean() {
 ########################################
 # List files
 git_ls() {
-  git ls-tree -r ${1:-master} --name-only ${2:+| grep -F "$2"}
+  git ls-tree -r ${1:-$(git_branch)} --name-only ${2:+| grep -F "$2"}
 }
 
 ########################################
