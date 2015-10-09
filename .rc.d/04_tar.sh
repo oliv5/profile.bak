@@ -5,7 +5,7 @@ tgz() {
   if [ "${1##*.}" = "tgz" ] || [ "${1%.tar.gz}" != "$1" ]; then
     tar -xvzf "$@"
   else
-    tar -cvzf "${1}.tgz" "$@"
+    tar -cvzf "${1%%/*}.tgz" "$@"
   fi
 }
 
