@@ -15,6 +15,7 @@
     INCHARGE=""
 
     # Get arguments
+    echo "[annex] called with args: $@"
     while getopts "db:l:asc:fw:g" OPTFLAG; do
       case "$OPTFLAG" in
         d) set -vx; DBG="false";;
