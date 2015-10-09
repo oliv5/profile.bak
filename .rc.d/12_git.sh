@@ -201,7 +201,7 @@ git_allshorthash() {
 ########################################
 # Get git backup name
 git_name() {
-  echo "${1:+$1.}$(uname -n).$(git_repo).$(git_branch | tr '/' '_').$(date +%Y%m%d-%H%M%S).$(git_shorthash)${2:+.$2}"
+  echo "$(git_repo).${1:+$1.}$(uname -n).$(git_branch | tr '/' '_').$(date +%Y%m%d-%H%M%S).$(git_shorthash)"
 }
 
 ########################################
@@ -229,25 +229,25 @@ git_meld() {
 
 # Push changes onto stash, revert changes
 git_stash_save() {
-  local STASH="$(git_name "" "$@")"; shift
+  local STASH="$(git_name).$1"; shift 2>/dev/null
   git stash save "$STASH" "$@"
 }
 git_stash_save_all() {
-  local STASH="$(git_name "" "$@")"; shift
+  local STASH="$(git_name).$1"; shift 2>/dev/null
   git stash save --all "$STASH" "$@"
 }
 git_stash_save_untracked() {
-  local STASH="$(git_name "" "$@")"; shift
+  local STASH="$(git_name).$1"; shift 2>/dev/null
   git stash save --untracked "$STASH" "$@"
 }
 git_stash_save_lazy() {
-  local STASH="$(git_name "" "$@")"; shift
+  local STASH="$(git_name).$1"; shift 2>/dev/null
   git stash save --keep-index "$STASH" "$@"
 }
 
 # Push changes onto stash, does not revert anything
 git_stash_push() {
-  local STASH="$(git_name "" "$@")"; shift
+  local STASH="$(git_name).$1"; shift 2>/dev/null
   git update-ref -m "$STASH" refs/stash "$(git stash create)"
   #git stash create $STASH
 }
@@ -264,11 +264,11 @@ git_stash_apply() {
 
 # Show diff between stash and local copy
 git_stash_diff() {
-  local STASH="${1:-0}"; shift $(min 1 $#)
+  local STASH="${1:-0}"; shift 2>/dev/null
   git diff "stash@{$STASH}" "$@"
 }
 git_stash_diffm() {
-  local STASH="${1:-0}"; shift $(min 1 $#)
+  local STASH="${1:-0}"; shift 2>/dev/null
   git_diffm "stash@{$STASH}" "$@" 
 }
 git_stash_diffl() {
@@ -277,7 +277,7 @@ git_stash_diffl() {
 
 # Show stash file list
 git_stash_show() {
-  local STASH="${1:-0}"; shift $(min 1 $#)
+  local STASH="${1:-0}"; shift 2>/dev/null
   git stash show "stash@{$STASH}" "$@"
 }
 
@@ -286,7 +286,7 @@ git_stash_show_all() {
   local TOTAL=$(git stash list | wc -l)
   local START="${1:-0}"
   local END="${2:-$TOTAL}"
-  shift $(min 2 $#)
+  shift 2 2>/dev/null
   for IDX in $(seq $START $END); do
     echo "******************************"
     #echo "[git] stash number $IDX/$TOTAL"
@@ -301,13 +301,13 @@ git_stash_show_all() {
 
 # Show stash file content
 git_stash_cat() {
-  local STASH="${1:-0}"; shift $(min 1 $#)
+  local STASH="${1:-0}"; shift 2>/dev/null
   git stash show -p "stash@{$STASH}" "$@"
 }
 
 # Drop a stash
 git_stash_drop() {
-  local STASH="${1:-0}"; shift $(min 1 $#)
+  local STASH="${1:-0}"; shift 2>/dev/null
   git stash drop "stash@{$STASH}" "$@"
 }
 
@@ -592,7 +592,7 @@ git_bundle() {
   local DIR="${1:-$(git_dir)}"
   if [ -d "$DIR" ]; then
     DIR="${1:-$DIR/bundle}"
-    local BUNDLE="$DIR/${2:-bundle.$(git_name).git}"
+    local BUNDLE="$DIR/${2:-$(git_name "bundle").git}"
     local GPG_RECIPIENT="$3"
     echo "Git bundle into $BUNDLE"
     git bundle create "$BUNDLE" --all --tags --remotes

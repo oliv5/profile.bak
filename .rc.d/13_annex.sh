@@ -100,7 +100,7 @@ annex_bundle() {
     local DIR="${1:-$(git_dir)}"
     if [ -d "$DIR" ]; then
       DIR="${1:-$DIR/bundle}"
-      local BUNDLE="$DIR/${2:-annex.$(git_name).git}"
+      local BUNDLE="$DIR/${2:-$(git_name "annex").tgz}"
       local GPG_RECIPIENT="$3"
       echo "Tar annex into $BUNDLE"
       if annex_bare; then
