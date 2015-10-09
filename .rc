@@ -89,6 +89,7 @@ rc_sourcefiles "$RC_PERMISSIONS" "$RC_DIR_LOCAL/.rc.local.d/"*.sh
 # End scripts
 rc_sourcefiles "-r" "$RC_DIR/.rc.end"
 rc_sourcefiles "-r" "$RC_DIR_LOCAL/.rc.local.end"
+export ENV_RC_END=$ENV_CNT
 
 ################################
 #Clean local variables

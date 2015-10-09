@@ -2,8 +2,10 @@
 # Do not load when not installed
 command -v screen >/dev/null || return 1
 
-# Variables
-#SCREEN_AUTOLOAD=""
+# SSH autoload
+if [ -z "$STY" -a -n "$SSH_CONNECTION" -a "${SCREEN_AUTOLOAD#*ssh}" != "$SCREEN_AUTOLOAD" ]; then
+  SCREEN_AUTOLOAD="yes"
+fi
 
 # Wrapper function
 screen() {
@@ -18,18 +20,18 @@ screen() {
 }
 
 # Send a command to a running screen
-screen_cmd() {
+screen_send() {
   local SESSION="${1:?No session specified...}"; shift $(min 1 $#)
   command -p screen -S "$SESSION" -X stuff "^C\n${@}\n"
 }
 
 # Set $DISPLAY
 screen_setdisplay() {
-  screen-cmd "$1" "export DISPLAY=$DISPLAY"
+  screen_send "$1" "export DISPLAY=$DISPLAY"
 }
 
 # List screen sessions
-screen_list() {
+screen_ls() {
   command -p screen -q -ls
   if [ $? -ne 9 ]; then
     screen -ls
@@ -42,14 +44,15 @@ alias screen_restore='screen -R -D'
 alias screen_quit='screen -X quit -S'
 alias screen_killdetached="screen -ls | awk -F '.' '/Detached/{print \$1}' | xargs -r kill"
 alias screen_killall="screen -ls | awk -F '.' '/pts/{print \$1}' | xargs -r kill"
+alias screen_clean='screen -wipe'
 alias screen_attach='reptyr'
+alias screen_fork='screen -d -m'
 
 # Re-attach session, or print the list
-if [ ! -z "$SCREEN_AUTOLOAD" ] && [ -z "$ENV_LOADED" ] && shell_isinteractive && shell_islogin; then
-  screen 2> /dev/null
-else
-  screen_list
+if [ -z "$STY" -a -z "$ENV_RC_END" ]; then
+  if [ "$SCREEN_AUTOLOAD" = "yes" ] && shell_isinteractive && shell_islogin; then
+    screen 2> /dev/null
+  fi
+#else
+#  screen_ls
 fi
-
-# End
-return 0
