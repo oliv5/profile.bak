@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Source Insight 3.5
 Type=Application
-Exec=env WINEPREFIX="$HOME/.wine-sourceinsight" wine "$HOME/.wine-sourceinsight/drive_c/Program\ Files/Source\ Insight\ 3/Insight3.exe"
-Path="$HOME/.wine-sourceinsight/drive_c/Program\ Files/Source\ Insight
+Exec=env WINEPREFIX="$HOME/.wine-sourceinsight" wine "$HOME/.wine-sourceinsight/drive_c/Program Files/Source Insight 3/Insight3.exe"
+Path="$HOME/.wine-sourceinsight/drive_c/Program Files/Source Insight 3"
 StartupNotify=true
 Icon=si.png
