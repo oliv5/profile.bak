@@ -651,6 +651,11 @@ git_graph() {
   git log --graph --pretty=format:'%C(blue)%h - %C(bold cyan)%an %C(bold green)(%ar)%C(bold yellow)%d%n''          %C(bold red)%s%C(reset)%n''%w(0,14,14)%b' "$@"
 }
 
+# Search for a string in a commit
+git_search() {
+  git log -S "${1:?nothing to search for...}" --source --all
+}
+
 ########################################
 ########################################
 # Last commands in file
