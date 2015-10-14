@@ -38,8 +38,10 @@ alias gmerge='gmm'
 # Branch aliases
 alias gbc='git branch'
 alias gba='git branch -a'
-alias gbr='git branch -r'
+alias gbr='git branch -r'   # list tracking
 alias gbv='git branch -v'
+alias gbrm='git branch -d'
+alias gbrd='git branch -rd' # remove tracking
 alias gbranch='git branch'
 # Stash aliases
 alias gsc='git_stash_push'
@@ -196,6 +198,11 @@ git_remotes() {
   git ${2:+--git-dir="$2"} remote | xargs echo
 }
 
+# Get git backup name
+git_name() {
+  echo "$(git_repo).${1:+$1.}$(uname -n).$(git_branch | tr '/' '_').$(date +%Y%m%d-%H%M%S).$(git_shorthash)"
+}
+
 ########################################
 # Get hash
 alias git_head='git_hash'
@@ -215,9 +222,90 @@ git_allshorthash() {
 }
 
 ########################################
-# Get git backup name
-git_name() {
-  echo "$(git_repo).${1:+$1.}$(uname -n).$(git_branch | tr '/' '_').$(date +%Y%m%d-%H%M%S).$(git_shorthash)"
+# Repo init
+git_init() {
+  local DIR="$1"
+  shift 2>/dev/null
+  mkdir -p "$DIR"
+  cd "$DIR" || return 1
+  [ ! -d ".git" ] && git init
+  for ARGS; do
+    set -- $ARGS
+    git remote add "$@"
+  done
+}
+
+# Repo clone
+git_clone() {
+  local URL="${1:?No URL specified}"
+  local REMOTE="${2:-origin}"
+  local BRANCH="${3:-master}"
+  local DIR="$(basename "$URL" .git)"
+  shift 3 2>/dev/null
+  git clone "$URL" "$DIR" || break
+  git --git-dir="$DIR/.git" remote rename origin "$REMOTE"
+  git --git-dir="$DIR/.git" checkout "$BRANCH"
+  for ARGS; do
+    set -- $ARGS
+    git remote add "$@"
+  done
+}
+
+# Batch remote/branch pull
+# Use vcsh wrapper when necessary
+git_pull() {
+  local REMOTES="${1:-$(git_remotes)}"
+  local BRANCHES="${2:-$(git_branches)}"
+  local STASH="__git_pull_stash"
+  vcsh_run "
+    git stash save -q \"$STASH\"
+    for REMOTE in $REMOTES; do
+      if git remote | grep -- \"\$REMOTE\" >/dev/null; then
+        for BRANCH in $BRANCHES; do
+          git checkout -q \"\$BRANCH\" &&
+          git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
+        done
+      fi
+    done
+    if git stash list -n 1 | grep \"$STASH\" >/dev/null 2>&1; then
+      git stash apply -q --index
+      git stash drop -q
+    fi
+  "
+}
+
+# Batch remote/branch push
+git_push() {
+  local REMOTES="${1:-$(git_remotes)}"
+  local BRANCHES="${2:-$(git_branches)}"
+  for REMOTE in $REMOTES; do
+    if git remote | grep -- "$REMOTE" >/dev/null; then
+      for BRANCH in $BRANCHES; do
+        echo -n "Push $REMOTE/$BRANCH : "
+        git push "$REMOTE" "$BRANCH"
+      done
+    fi
+  done
+}
+
+# Create a bundle
+git_bundle() {
+  local DIR="${1:-$(git_dir)}"
+  if [ -d "$DIR" ]; then
+    DIR="${1:-$DIR/bundle}"
+    local BUNDLE="$DIR/${2:-$(git_name "bundle").git}"
+    local GPG_RECIPIENT="$3"
+    echo "Git bundle into $BUNDLE"
+    git bundle create "$BUNDLE" --all --tags --remotes
+    if [ ! -z "$GPG_RECIPIENT" ]; then
+      gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "${BUNDLE}" && 
+        (shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
+    fi
+    ls -l "${BUNDLE}"*
+  else
+    echo "Target directory '$DIR' does not exists."
+    echo "Skip bundle creation..."
+  fi
 }
 
 ########################################
@@ -511,11 +599,17 @@ alias git_ignore_changes='git update-index --assume-unchanged'
 alias git_noignore_changes='git update-index --no-assume-unchanged'
 
 ########################################
-# Remove things
+# Remove branches
 alias git_rm_tracking_branch='git branch -dr'
-alias git_rm_tracking_branch2='git fetch -p'
+alias git_rm_unexisting_tracking_branch='git fetch -p'
 alias git_rm_remote_branch='push origin -d'
 alias git_rm_branch='git branch -d'
+
+# Create a new branch from current one
+# with a single commit in it
+git_branch() {
+  git branch "${1:?No branch name specified}" $(echo "${2:-Initial commit.}" | git commit-tree HEAD^{tree})
+}
 
 ########################################
 # https://stackoverflow.com/questions/4479960/git-checkout-to-a-specific-folder
@@ -533,94 +627,6 @@ git_backupdir() {
   local SRC="${1:?No input directory specified}"
   shift
   find "$SRC" -print0 | git_backup "$@" -f -z --stdin
-}
-
-########################################
-# Repo init
-git_init() {
-  local DIR="$1"
-  shift 2>/dev/null
-  mkdir -p "$DIR"
-  cd "$DIR" || return 1
-  [ ! -d ".git" ] && git init
-  for ARGS; do
-    set -- $ARGS
-    git remote add "$@"
-  done
-}
-
-# Repo clone
-git_clone() {
-  local URL="${1:?No URL specified}"
-  local REMOTE="${2:-origin}"
-  local BRANCH="${3:-master}"
-  local DIR="$(basename "$URL" .git)"
-  shift 3 2>/dev/null
-  git clone "$URL" "$DIR" || break
-  git --git-dir="$DIR/.git" remote rename origin "$REMOTE"
-  git --git-dir="$DIR/.git" checkout "$BRANCH"
-  for ARGS; do
-    set -- $ARGS
-    git remote add "$@"
-  done
-}
-
-# Batch remote/branch pull
-# Use vcsh wrapper when necessary
-git_pull() {
-  local REMOTES="${1:-$(git_remotes)}"
-  local BRANCHES="${2:-$(git_branches)}"
-  local STASH="__git_pull_stash"
-  vcsh_run "
-    git stash save -q \"$STASH\"
-    for REMOTE in $REMOTES; do
-      if git remote | grep -- \"\$REMOTE\" >/dev/null; then
-        for BRANCH in $BRANCHES; do
-          git checkout -q \"\$BRANCH\" &&
-          git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
-        done
-      fi
-    done
-    if git stash list -n 1 | grep \"$STASH\" >/dev/null 2>&1; then
-      git stash apply -q --index
-      git stash drop -q
-    fi
-  "
-}
-
-# Batch remote/branch push
-git_push() {
-  local REMOTES="${1:-$(git_remotes)}"
-  local BRANCHES="${2:-$(git_branches)}"
-  for REMOTE in $REMOTES; do
-    if git remote | grep -- "$REMOTE" >/dev/null; then
-      for BRANCH in $BRANCHES; do
-        echo -n "Push $REMOTE/$BRANCH : "
-        git push "$REMOTE" "$BRANCH"
-      done
-    fi
-  done
-}
-
-########################################
-# Create a bundle
-git_bundle() {
-  local DIR="${1:-$(git_dir)}"
-  if [ -d "$DIR" ]; then
-    DIR="${1:-$DIR/bundle}"
-    local BUNDLE="$DIR/${2:-$(git_name "bundle").git}"
-    local GPG_RECIPIENT="$3"
-    echo "Git bundle into $BUNDLE"
-    git bundle create "$BUNDLE" --all --tags --remotes
-    if [ ! -z "$GPG_RECIPIENT" ]; then
-      gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "${BUNDLE}" && 
-        (shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
-    fi
-    ls -l "${BUNDLE}"*
-  else
-    echo "Target directory '$DIR' does not exists."
-    echo "Skip bundle creation..."
-  fi
 }
 
 ########################################
