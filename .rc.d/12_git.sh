@@ -583,6 +583,15 @@ git_purge_gc() {
   git gc --prune=now
 }
 
+# Truncate history from a given commit
+# Warning: it rewrites everything
+git_truncate() {
+  echo "${1:?No commit specified}" > "$(git_dir)/info/grafts"
+  echo "Check the repo history. Go on ? (enter/ctrl-c)"
+  read
+  git filter-branch --tag-name-filter cat -- --all
+}
+
 ########################################
 # Git add gitignore
 git_ignore_add() {
