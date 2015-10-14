@@ -563,7 +563,7 @@ git_amend_names() {
 git_purge_file() {
   local FILE="${1:?No path specified...}"
   git filter-branch --force --index-filter \
-    'git rm --cached --ignore-unmatch "$FILE"' \
+    "git rm --cached --ignore-unmatch '$FILE'" \
     --prune-empty --tag-name-filter cat -- --all
 }
 
