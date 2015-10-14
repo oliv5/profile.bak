@@ -18,6 +18,7 @@ alias gn='git status --porcelain -b | awk "NR==1 || /^\?\?/"'       # untracked 
 alias gi='git status --porcelain -b | awk "NR==1 || /^\!\!/"'       # ignored
 alias gz='git status --porcelain -b | awk "NR==1 || /^[MARC] /"'    # in index
 alias gs='git status --porcelain -b | awk "NR==1 || /^[^\?\?]/"'    # not untracked
+alias gstatus='git status'
 # List aliases
 alias gll='git ls-files'
 alias gls='git ls-files'
@@ -30,13 +31,16 @@ alias gli='git ls-files -o -i --exclude-standard'
 alias gdd='git_diff_all'
 alias gdm='git_diffm_all'
 alias gds='git diff stash'
+alias gdiff='git diff'
 # Merge aliases
 alias gmm='git mergetool -y -t meld'
+alias gmerge='gmm'
 # Branch aliases
 alias gbc='git branch'
 alias gba='git branch -a'
 alias gbr='git branch -r'
 alias gbv='git branch -v'
+alias gbranch='git branch'
 # Stash aliases
 alias gsc='git_stash_push'
 alias gss='git_stash_save'
@@ -57,31 +61,35 @@ alias gsf='git_stash_flush'
 alias gsb='git_stash_backup'
 alias gsrm='git_stash_drop'
 alias gsm='gsdm'
+alias gstash='git stash'
 # Gitignore aliases
 alias gil='git_ignore_list'
 alias gia='git_ignore_add'
 # Add files aliases
-alias gadd='git add'
 alias gad='git add'
 alias gan='git add $(git ls-files -o --exclude-standard)'
 alias gau='git add -u'
+alias gadd='git add'
 # Commit aliases
 alias gci='git commit'
 alias gcm='git commit -m'
 alias gcam='git commit -am'
+alias gcommit='git commit'
 # Misc aliases
 alias grm='git rm'
 alias gmv='git mv'
 # Logs/history aliases
-alias git_history='git log -p'
-alias git_log='git log --name-only'
-alias git_logall='git log --name-status'
-alias git_logstat='git log --stat'
+alias glh='git log -p'
+alias gln='git log --name-only'
+alias gla='git log --name-status'
+alias gls='git log --stat'
+alias glog='git log'
 # Tag aliases
 alias gts='git tag'
 alias gtl='git tag -l'
 alias gtd='git tag -d'
 alias gtc='git tag --contains'
+alias gtag='git tag'
 # Annex aliases
 alias gat='git annex status'
 alias gal='git annex list'
@@ -90,6 +98,7 @@ alias gag='git annex get'
 alias gac='git annex copy'
 alias gad='git annex drop'
 alias gai='git annex info'
+alias gannex='git annex'
 # Patch aliases
 alias gpd='git diff -p'
 alias gpc='git show'
@@ -99,10 +108,17 @@ alias gstu='git_subtree_update'
 # Git grep aliases
 alias ggg='git grep -n'
 alias iggg='git grep -ni'
+alias ggrep='git grep'
 # Checkout aliases
 alias gco='git checkout'
+alias gcheckout='git checkout'
 # Reset aliases
 alias gre='git reset'
+alias greset='git reset'
+# Rebase aliases
+alias grb='git rebase'
+alias grbi='git rebase -i'
+alias grebase='git rebase'
 
 ########################################
 # git wrapper
@@ -378,7 +394,7 @@ git_clean() {
   mkdir -p "$DST"
   git_stx '??' | xargs -0 7z a "$DST/clean.$(git_name).7z"
   # Clean repository
-  git clean -d -i --exclude=".*" "$@"
+  git clean -d --exclude=".*" "$@"
 }
 
 ########################################
