@@ -1,6 +1,122 @@
 #!/bin/sh
 
 ################################
+# Get sys info
+# http://jeffskinnerbox.me/posts/2014/Mar/31/howto-linux-maintenance-and-filesystem-hygiene/
+alias kernel_name='uname -sr'
+alias kernel_ver='uname -v'
+alias dist_name='cat /etc/*-release'
+alias dist_ver='lsb_release -a'
+alias disk_info='sudo lshw -class disk -class storage -short'
+alias disk_drive='hwinfo --disk --short'
+alias rpi_fw='/opt/vc/bin/vcgencmd version'
+
+# RPI System update
+rpi_update() {
+  if ! command -v rpi-update >/dev/null; then
+    sudo apt-get install rpi-update
+    if [ $? -nq 0 ]; then
+      # install tools to upgrade Raspberry Pi's firmware
+      sudo wget https://raw.github.com/Hexxeh/rpi-update/master/rpi-update -O /usr/bin/rpi-update
+      sudo chmod +x /usr/bin/rpi-update
+    fi
+  fi
+  sudo BRANCH=next rpi-update
+}
+
+# Smartmontools checks
+smart_basicstest() {
+  local DEV="${1:?No device specified...}"
+  # Check SMART support
+  sudo smartctl -i "$DEV" || { echo "Device does not support SMARTs"; exit 1; }
+  # Turn on some SMART features
+  sudo smartctl -s on -o on -S on "$DEV"
+  # Check the disk's overall health
+  sudo smartctl -H "$DEV"
+}
+
+smart_shorttest() {
+  local DEV="${1:?No device specified...}"
+  # Check SMART support
+  sudo smartctl -i "$DEV" || { echo "Device does not support SMARTs"; exit 1; }
+  # Turn on some SMART features
+  sudo smartctl -s on -o on -S on "$DEV"
+  # Short, but more extensive test
+  sudo smartctl -t short "$DEV"
+}
+
+smart_longtest() {
+  local DEV="${1:?No device specified...}"
+  # Check SMART support
+  sudo smartctl -i "$DEV" || { echo "Device does not support SMARTs"; exit 1; }
+  # Turn on some SMART features
+  sudo smartctl -s on -o on -S on "$DEV"
+  # Long test
+  sudo smartctl -t short "$DEV"
+  # Check results
+  sudo smartctl -l selftest "$DEV"
+}
+
+# Filesystem commands
+fsck_force(){
+  sudo touch /forcefsck
+}
+fsck_repair() {
+  local DEV="${1:?No device specified...}"
+  if mountpoint "$DEV" >/dev/null && ! sudo umount "$DEV"; then
+    echo "Cannot umount '$DEV'. Abort..."
+    return 1
+  fi
+  sudo fsck -y "$DEV"
+}
+
+# Find garbage
+tmp_list() {
+  ( set -vx
+    printf "Home garbage\n"
+    find "$HOME" -type f -name "*~" -print
+    ls "${HOME}"/.macromedia/* "${HOME}"/.adobe/*
+    printf "\nSystem coredumps\n"
+    sudo find /var -type f -name "core" -print
+    printf "\nTemporary files\n"
+    sudo ls /tmp
+    sudo ls /var/tmp
+    printf "\nLogs\n"
+    sudo du -a -b /var/log | sort -n -r | head -n 10
+    sudo ls /var/log/*.gz
+    printf "\nOpened but deleted\n"
+    sudo lsof -nP | grep '(deleted)'
+    sudo lsof -nP | awk '/deleted/ { sum+=$8 } END { print sum }'
+    sudo lsof -nP | grep '(deleted)' | awk '{ print $2 }' | sort | uniq
+  )
+}
+
+lsof_close(){
+  # For all open but deleted files associated with process 2746, trunctate the file to 0 bytes
+  local PID="${1:?No PID specified...}"
+  cd /proc/$PID/fd 
+  ls -l | grep '(deleted)' | awk '{ print $9 }' | while read FILE; do :> /proc/$PID/fd/$FILE; done
+}
+
+# Cleanup packages
+pkg_clean() {
+  sudo apt-get autoclean
+  sudo apt-get clean
+  sudo apt-get autoremove
+}
+
+# Cleanup old kernels
+kernel_ls() {
+  dpkg -l 'linux-*'
+}
+kernel_current() {
+  uname -r | sed "s/\(.*\)-\([^0-9]\+\)/\1/"
+}
+kernel_others() {
+  dpkg -l 'linux-*' | sed '/^ii/!d;/'"$(uname -r | sed "s/\(.*\)-\([^0-9]\+\)/\1/")"'/d;s/^[^ ]* [^ ]* \([^ ]*\).*/\1/;/[0-9]/!d'
+}
+
+################################
 # Sudo
 if command -v sudo >/dev/null 2>&1; then
   # Sudo now supports alias expansion
