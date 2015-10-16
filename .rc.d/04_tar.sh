@@ -12,8 +12,7 @@ tgz() {
 # tar > gz compress
 tgza() {
   local ARCHIVE="${1:?No archive to create...}"
-  shift 1
-  [ $# -eq 0 ] && echo "No file to process..." && return 1
+  shift
   tar -cvzf "$ARCHIVE" "$@"
 }
 
@@ -21,11 +20,10 @@ tgza() {
 tgzd() {
   local DST="${1:?No output directory specified...}"
   local SRC
-  shift 1s
-  [ $# -eq 0 ] && echo "No file to process..." && return 1
-  mkdir -p "$DST"
+  shift
+  [ -n "$DST" ] && mkdir -p "$DST"
   for SRC; do
-    tar -xvzf "$SRC" -C "$DST"
+    tar -xvzf "$SRC" ${DST:+-C "$DST"}
   done
 }
 
@@ -34,7 +32,6 @@ tga(){
   local ARCHIVE="${1:?No archive to create...}"
   local KEY="${2:?No encryption key specified...}"
   shift 2
-  [ $# -eq 0 ] && echo "No file to process..." && return 1
   tar -cf - "$@" | gpg --encrypt --recipient "$KEY" > "$ARCHIVE"
 }
 
@@ -43,7 +40,6 @@ tgd(){
   local DST="${1:?No output directory specified...}"
   local SRC
   shift 1
-  [ $# -eq 0 ] && echo "No file to process..." && return 1
   mkdir -p "$DST"
   for SRC; do
     gpg --decrypt "$SRC" | tar -xvf -C "$DST"
