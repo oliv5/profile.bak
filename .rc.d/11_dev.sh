@@ -18,8 +18,8 @@ alias idffll='FCASE=-i FTYPE=l FXTYPE=f FARGS= _dfind'
 alias idfflb='FCASE=-i FTYPE=l FXTYPE=l FARGS= _dfind'
 
 # Grep based code search
-_dgrep1()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; shift $(min 3 $#); (set -f; FARGS="${_DFEXCLUDE} $@" GARGS= _fgrep1 "$ARG2" "${ARG3:-.}/$ARG1"); }
-_dgrep2()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; shift $(min 3 $#); (set -f; FARGS= GARGS= _fgrep2 "$ARG2" ${_DG2EXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
+_dgrep1()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; shift $(min 3 $#); (set -f; FARGS="${_DFEXCLUDE} $@" _fgrep1 "$ARG2" "${ARG3:-.}/$ARG1"); }
+_dgrep2()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; shift $(min 3 $#); (set -f; _fgrep2 "$ARG2" ${_DG2EXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
 alias _dgrep='_dgrep1'
 _DG1EXCLUDE="$_DFEXCLUDE"
 _DG2EXCLUDE="--exclude-dir=.svn --exclude-dir=.git --exclude-dir=.repo"
@@ -58,7 +58,7 @@ alias ishell='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_SHEL
 alias   iref='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_REF"'
 
 # Grep based code block search
-_dsearch1() { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; _dgrep $_DGEXT_REF "${ARG1//NAME/$ARG2}" . -E "$@"); }
+_dsearch1() { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; GARGS=-E _dgrep $_DGEXT_REF "${ARG1//NAME/$ARG2}" "$@"); }
 alias _dsearch='_dsearch1'
 #_DGREGEX_FUNC='(^|\s+|::)NAME\s*\(([^;]*$|[^\}]\})'
 _DGREGEX_FUNC='\w+\s+NAME\s*\(\s*($|\w+\s+\w+|void)'

@@ -5,7 +5,7 @@ _ffind1() {
   local FCASE="${FCASE:--}name"
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
-  shift $(min 1 $#)
+  shift 2>/dev/null
   local REGEX='s/;!/" -o -not '${FCASE}' "/g ; s/&!/" -a -not '${FCASE}' "/g ; s/;/" -o '${FCASE}' "/g ; s/&/" -a '${FCASE}' /g'
   ( set -f; FILES="\"$(echo $FILES | sed -e "$REGEX")\""
     eval find "${DIR:-.}" -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} \\\( ${FILES:+$FCASE "$FILES"} -true \\\) ${FARGS} "$@")
@@ -14,7 +14,7 @@ _ffind2() {
   local FCASE="${FCASE:--}regex"
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
-  shift $(min 1 $#)
+  shift 2>/dev/null
   ( set -f; FILES="$(echo $FILES | sed -e 's/;/|/g ; s/\./\\./g ; s/*/.*/g')"
     find "${DIR:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*/($FILES)"} ${FARGS} "$@")
 }
