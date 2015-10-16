@@ -49,10 +49,13 @@ alias screen_attach='reptyr'
 alias screen_fork='screen -d -m'
 
 # Re-attach session, or print the list
-if [ -z "$STY" -a -z "$ENV_RC_END" ]; then
+if [ -z "$STY" -a -z "$SCREEN_LOADED" ]; then
   if [ "$SCREEN_AUTOLOAD" = "yes" ] && shell_isinteractive && shell_islogin; then
     screen 2> /dev/null
   fi
 #else
 #  screen_ls
 fi
+
+# Flag
+export SCREEN_LOADED=1

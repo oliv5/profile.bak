@@ -23,10 +23,13 @@ alias tmux_ls='tmux ls 2>/dev/null'
 alias tmux_attach='reptyr'
 
 # Re-attach session, or print the list
-if [ -z "$TMUX" -a -z "$ENV_RC_END" ]; then
+if [ -z "$TMUX" -a -z "$TMUX_LOADED" ]; then
   if [ "$TMUX_AUTOLOAD" = "yes" ] && shell_isinteractive && shell_islogin; then
     tmux 2>/dev/null
   fi
 #else
 #  tmux_ls
 fi
+
+# Flag
+export TMUX_LOADED=1
