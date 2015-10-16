@@ -609,14 +609,14 @@ alias git_noignore_changes='git update-index --no-assume-unchanged'
 
 ########################################
 # Remove branches
-alias git_rm_tracking_branch='git branch -dr'
-alias git_rm_unexisting_tracking_branch='git fetch -p'
-alias git_rm_remote_branch='push origin -d'
 alias git_rm_branch='git branch -d'
+alias git_rm_branch_remote='git push :'
+alias git_rm_tracking='git branch -dr'
+alias git_rm_tracking_old='git fetch -p'
 
 # Create a new branch from current one
 # with a single commit in it
-git_branch() {
+git_split() {
   git branch "${1:?No branch name specified}" $(echo "${2:-Initial commit.}" | git commit-tree HEAD^{tree})
 }
 
