@@ -12,9 +12,9 @@ alias gm='git status --porcelain -b | awk "NR==1 || /^(M.|.M)/"'    # modified
 alias ga='git status --porcelain -b | awk "NR==1 || /^A[ MD]/"'     # added
 alias gd='git status --porcelain -b | awk "NR==1 || /^D[ M]/"'      # deleted
 alias gr='git status --porcelain -b | awk "NR==1 || /^R[ MD]/"'     # renamed
-alias gc='git status --porcelain -b | awk "NR==1 || /^C[ MD]/"'     # copied in index
-alias gu='git status --porcelain -b | awk "NR==1 || /^[DAU][DAU]/"' # unmerged = conflict
-alias gn='git status --porcelain -b | awk "NR==1 || /^\?\?/"'       # untracked = new
+#alias gc='git status --porcelain -b | awk "NR==1 || /^C[ MD]/"'     # copied in index
+alias gc='git status --porcelain -b | awk "NR==1 || /^[DAU][DAU]/"' # unmerged = conflict
+alias gu='git status --porcelain -b | awk "NR==1 || /^\?\?/"'       # untracked = new
 alias gi='git status --porcelain -b | awk "NR==1 || /^\!\!/"'       # ignored
 alias gz='git status --porcelain -b | awk "NR==1 || /^[MARC] /"'    # in index
 alias gs='git status --porcelain -b | awk "NR==1 || /^[^\?\?]/"'    # not untracked
@@ -121,6 +121,9 @@ alias greset='git reset'
 alias grb='git rebase'
 alias grbi='git rebase -i'
 alias grebase='git rebase'
+# Pull/push aliases
+alias gp='git pull'
+alias gpr='git pull --rebase'
 
 ########################################
 # git wrapper

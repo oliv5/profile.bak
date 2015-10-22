@@ -21,6 +21,7 @@ tmux() {
 #alias
 alias tmux_ls='tmux ls 2>/dev/null'
 alias tmux_attach='reptyr'
+alias tmux_kill='tmux kill-session'
 
 # Re-attach session, or print the list
 if [ -z "$TMUX" -a -z "$TMUX_LOADED" ]; then
