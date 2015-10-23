@@ -2,23 +2,23 @@
 " } Source vimrc {
 " *******************************************************
 " Resource vimrc
-noremap  <leader>s      :source $MYVIMRC<CR>
-cnoreabbrev reload source $MYVIMRC
+noremap  <leader>s  :source $MYVIMRC<CR>
+cnoreabbrev reload  source $MYVIMRC
 
 
 " *******************************************************
-" } Function keys {
+" } Help {
 " *******************************************************
-" Map F1 to the help
-FnNoremap <F1>    :vert help<SPACE>
+" Abreviation
+cnoreabbrev	h       vert help
 
 
 " *******************************************************
 " } Sessions {
 " *******************************************************
 " Key mapping
-FnNoremap <C-F9>    :mksession! ~/.vimsession<CR>
-FnNoremap <F9>      :source! ~/.vimsession<CR>
+FnNoremap <C-F12>   :mksession! ~/.vimsession<CR>
+FnNoremap <F12>     :source! ~/.vimsession<CR>
 
 
 " *******************************************************
@@ -764,6 +764,9 @@ command! -nargs=0 BufSmartOpen  call s:BufSmartOpen()
 command! -nargs=0 BufQuickfix   call setqflist(map(filter(range(1, bufnr('$')), 'buflisted(v:val)'), '{"bufnr":v:val}'))
 
 " Open/close buffer (close=:bd or :bw)
+FnNoremap <F5>        :e<CR>
+FnNoremap <S-F5>      :e!<CR>
+FnNoremap <C-F5>      :e<SPACE><C-R>=expand("%:p:h") . "/" <CR>
 FnNoremap <C-b>       :e<SPACE><C-R>=expand("%:p:h") . "/" <CR>
 FnNoremap <C-b><C-b>  :BufSmartOpen<CR>
 FnNoremap <C-b><C-space> :BufQuickfix<CR>
@@ -834,10 +837,10 @@ command! -nargs=0 -bar Mprev  call <SID>MarkPrev()
 command! -nargs=0 -bar Mreset call <SID>MarkReset()
 
 " Mark key maps
-FnNoremap <silent><F5>    :Mnext<CR>
-FnNoremap <silent><S-F5>  :Mprev<CR>
-FnNoremap <silent><C-F5>  :Mset<CR>
-FnNoremap <silent><A-F5>  :Mreset<CR>
+FnNoremap <silent><F1>    :Mnext<CR>
+FnNoremap <silent><S-F1>  :Mprev<CR>
+FnNoremap <silent><C-F1>  :Mset<CR>
+FnNoremap <silent><A-F1>  :Mreset<CR>
 nmap <silent>m            :Mprev<CR>
 nmap <silent>M            :Mnext<CR>
 nmap <silent><C-m>        :Mset<CR>
