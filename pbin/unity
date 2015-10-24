@@ -25,5 +25,13 @@ unity_showconfig() {
   dconf dump /org/compiz/
 }
 
+unity_setup_scopes() {
+  # http://www.webupd8.org/2013/10/how-to-disable-amazon-shopping.html
+  # Remove shopping scope
+  sudo apt-get remove unity-lens-shopping
+  # disable on-line sugestions
+  gsettings set com.canonical.Unity.Lenses disabled-scopes "['more_suggestions-amazon.scope', 'more_suggestions-u1ms.scope', 'more_suggestions-populartracks.scope', 'music-musicstore.scope', 'more_suggestions-ebay.scope', 'more_suggestions-ubuntushop.scope', 'more_suggestions-skimlinks.scope']"
+}
+
 # Execute command when any
 [ $# -gt 0 ] && unity_"$@"
