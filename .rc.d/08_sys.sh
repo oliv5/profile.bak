@@ -337,3 +337,18 @@ alias mkdir_mv='_mkdir_exec "mv -v"'
 ssh_copy_cmd_id() {
   ssh ${1:?No host specified} -p ${2:?No port specified...} -- sh -c "cat 'command=\"${3:?No command specified...},no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ${SSH_ORIGINAL_COMMAND#* }\" ${4:?No ssh key specified...}' >> '$HOME/.ssh/authorized_keys'"
 }
+
+##############################
+# Find duplicate files
+alias ff_dup='find_duplicates'
+find_duplicates() {
+  local TMP1="$(tempfile)"
+  local TMP2="$(tempfile)"
+  find / -type f -exec md5sum {} \; > "$TMP1"
+  awk '{print $1}' "$TMP1" | sort | uniq -d > "$TMP2"
+  while read d; do
+    echo "---"
+    grep $d "$TMP1" | cut -d ' ' -f 2-
+  done < "$TMP2"
+  rm "$TMP1" "$TMP2" 2>/dev/null
+}
