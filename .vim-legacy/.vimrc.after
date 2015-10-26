@@ -764,9 +764,6 @@ command! -nargs=0 BufSmartOpen  call s:BufSmartOpen()
 command! -nargs=0 BufQuickfix   call setqflist(map(filter(range(1, bufnr('$')), 'buflisted(v:val)'), '{"bufnr":v:val}'))
 
 " Open/close buffer (close=:bd or :bw)
-FnNoremap <F5>        :e<CR>
-FnNoremap <S-F5>      :e!<CR>
-FnNoremap <C-F5>      :e<SPACE><C-R>=expand("%:p:h") . "/" <CR>
 FnNoremap <C-b>       :e<SPACE><C-R>=expand("%:p:h") . "/" <CR>
 FnNoremap <C-b><C-b>  :BufSmartOpen<CR>
 FnNoremap <C-b><C-space> :BufQuickfix<CR>
@@ -792,6 +789,21 @@ endif
 if bufname('%') == ''
 	set bufhidden=wipe
 endif
+
+
+" *******************************************************
+" } Autoread/reload buffer {
+" Whether or not enabling autoread is up to each .vimrc
+" *******************************************************
+" Key mapping
+FnNoremap <F5>        :e<CR>
+FnNoremap <S-F5>      :e!<CR>
+FnNoremap <A-F5>      :set autoread?<CR>
+FnNoremap <C-F5>      :set autoread!<CR>:set autoread?<CR>
+" Autocommand
+augroup vimrc_autoread
+	au! FileChangedShell * exec 'echohl WarningMsg | echo "Warning: file' expand('%') 'changed on disk" | echohl None'
+augroup END
 
 
 " *******************************************************

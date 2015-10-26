@@ -73,8 +73,7 @@ set shell=/bin/bash\ --rcfile\ ~/.bashrc\ -i    " Set shell, load user profile
 cmap w!! w !sudo tee % >/dev/null
 
 " Autoreload changed files
-set autoread
-au FileChangedShell * exec 'echohl WarningMsg | echo "Warning: file' expand('%') 'changed on disk" | echohl None'
+set noautoread
 
 " File ignore
 "set wildignore+=**/.snv/**,**/.git/**,**/tmp/**,*.so,*.o,*.dll,*.a,*.tmp
