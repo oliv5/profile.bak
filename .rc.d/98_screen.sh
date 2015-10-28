@@ -38,7 +38,7 @@ screen_ls() {
   fi
 }
 
-# Alias
+# Long aliases
 alias screen_recall='screen -r'
 alias screen_restore='screen -R -D'
 alias screen_quit='screen -X quit -S'
@@ -47,6 +47,11 @@ alias screen_killall="screen -ls | awk -F '.' '/pts/{print \$1}' | xargs -r kill
 alias screen_clean='screen -wipe'
 alias screen_attach='reptyr'
 alias screen_fork='screen -d -m'
+
+# Short aliases
+alias scls='screen_ls'
+alias scr='screen_restore'
+alias sck='screen_quit'
 
 # Re-attach session, or print the list
 if [ -z "$STY" -a -z "$SCREEN_LOADED" ]; then
