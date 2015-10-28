@@ -69,21 +69,17 @@ alias wflb='FCASE= FTYPE=l FXTYPE=l FARGS= _wfind'
 # File grep implementations
 _fgrep1() {
   if [ $# -gt 1 ]; then
-    local ARGS="$(arg_rtrim 1 "$@")"
-    shift $(($#-1))
+    local ARGS="$(arg_rtrim 1 "$@")"; shift $(($#-1))
   else
-    local ARGS="$1"
-    shift $#
+    local ARGS="$1"; shift $#
   fi
   (set -f; _ffind1 "${@:-}" -type f -print0 | eval xargs -0 grep -nH --color ${GCASE} ${GARGS} -e "${ARGS:-''}")
 }
 _fgrep2() {
   if [ $# -gt 1 ]; then
-    local ARGS="$(arg_rtrim 1 "$@")"
-    shift $(($#-1))
+    local ARGS="$(arg_rtrim 1 "$@")"; shift $(($#-1))
   else
-    local ARGS="$1"
-    shift $#
+    local ARGS="$1"; shift $#
   fi
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
@@ -105,17 +101,18 @@ _fsed1() {
   local IN="$1"; local OUT="$2"; local FILES="$3"
   echo "Preparing to replace '$IN' by '$OUT' in files '$FILES' ${SEDOPT:+with options '$SEDOPT'}"
   # Ask for options
-  local _SHOW; read -p "Show each line changed ? (Y/n)" _SHOW
-  local _BACKUP; read -p "Backup each file ? (Y/n)" _BACKUP
-  local _CONFIRM; read -p "Confirm each file change ? (Y/n)" _CONFIRM
+  local _SHOW; read -p "Show each line changed ? (Y/n) " _SHOW
+  local _BACKUP; read -p "Backup each file ? (Y/n) " _BACKUP
+  local _CONFIRM; read -p "Confirm each file change ? (Y/n) " _CONFIRM
   # Manage options
-  [ "$_SHOW" != "n" -a "$_SHOW" != "N" ] && _SHOW="1" || unset _SHOW
-  [ "$_CONFIRM" != "n" -a "$_CONFIRM" != "N" ] && _CONFIRM=true || _CONFIRM=false
-  [ "$_BACKUP" != "n" -a "$_BACKUP" != "N" ] && _BACKUP="_$(date +%Y%m%d-%H%M%S).bak" || unset _BACKUP
+  [ "$_SHOW" != "n" -a "$_SHOW" != "N" ] && _SHOW=1 || unset _SHOW
+  [ "$_CONFIRM" != "n" -a "$_CONFIRM" != "N" ] && _CONFIRM=1 || unset _CONFIRM
+  [ "$_BACKUP" != "n" -a "$_BACKUP" != "N" ] && _BACKUP=".$(date +%Y%m%d-%H%M%S).bak" || unset _BACKUP
   # Call find and sed
-  FTYPE= FXTYPE= _ffind "\"$FILES\"" $SEXCLUDE -type f \
-    ${_CONFIRM:+-exec sh -c "'read -p \"Processing file {}? (enter/ctrl-c)\" DUMMY'" "\\;"} \
-    -execdir sed --in-place${_BACKUP:+=$_BACKUP} $SEDOPT ${_SHOW:+-e '"\|$IN|{w /dev/stderr"' -e '"}"'} -e '"s|$IN|$OUT|g"' "{}" "\\;"
+  _ffind "$FILES" $SEXCLUDE -type f \
+    ${_CONFIRM:+-exec sh -c 'read -p "Processing file {} ? (enter/ctrl-c)" DUMMY' \;} \
+    ${_BACKUP:+-execdir sh -c "grep '$IN' '{}' >/dev/null" \;} \
+    -execdir sed $SEDOPT --in-place${_BACKUP:+=$_BACKUP} ${_SHOW:+-e "\|$IN|{w /dev/stderr" -e "}"} -e "s|$IN|$OUT|g" "{}" \;
 }
 alias _fsed='_fsed1'
 alias  hh='FCASE=   FTYPE=  FXTYPE= FARGS= SEXCLUDE= _fsed'
