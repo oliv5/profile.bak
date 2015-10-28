@@ -336,25 +336,25 @@ git_meld() {
 
 # Push changes onto stash, revert changes
 git_stash_save() {
-  local STASH="$(git_name).$1"; shift 2>/dev/null
+  local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
   git stash save "$STASH" "$@"
 }
 git_stash_save_all() {
-  local STASH="$(git_name).$1"; shift 2>/dev/null
+  local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
   git stash save --all "$STASH" "$@"
 }
 git_stash_save_untracked() {
-  local STASH="$(git_name).$1"; shift 2>/dev/null
+  local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
   git stash save --untracked "$STASH" "$@"
 }
 git_stash_save_lazy() {
-  local STASH="$(git_name).$1"; shift 2>/dev/null
+  local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
   git stash save --keep-index "$STASH" "$@"
 }
 
 # Push changes onto stash, does not revert anything
 git_stash_push() {
-  local STASH="$(git_name).$1"; shift 2>/dev/null
+  local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
   git update-ref -m "$STASH" refs/stash "$(git stash create)"
   #git stash create $STASH
 }
@@ -432,13 +432,15 @@ git_stash_backup() {
   local DST="$(git_dir)/backup"
   mkdir -p "$DST"
   ( IFS=$'\n'
-    for DESCR in $(git stash list --pretty=format:"%h %gd %ci"); do
-      local NAME="$(echo $DESCR | awk '{gsub(/-/,"",$3); gsub(/:/,"",$4); print "stash{" $3 "-" $4 "}_" $1}')"
-      local FILE="$DST/${NAME}.gz"
+    #for DESCR in $(git stash list --pretty=format:"%h %gd %ci"); do
+    #  local NAME="$(echo $DESCR | awk '{gsub(/-/,"",$3); gsub(/:/,"",$4); print "stash{" $3 "-" $4 "}_" $1}')"
+    for DESCR in $(git stash list --oneline); do
+      local NAME="$(echo $DESCR | awk '{print $NF}' | sed 's/[^0-9a-zA-Z._-]/_/g')"
+      local HASH="$(echo $DESCR | awk '{print $1}')"
+      local FILE="$DST/stash_${HASH}_${NAME}.gz"
       if [ ! -e "$FILE" ]; then
-        local STASH="$(echo $DESCR | awk '{print $2}')"
-        echo "Backup $STASH in $FILE"
-        git stash show -p "$STASH" "$@" | gzip --best > "$FILE"
+        echo "Backup $HASH in $FILE"
+        git stash show -p "$HASH" "$@" | gzip --best > "$FILE"
       fi
     done
   )
