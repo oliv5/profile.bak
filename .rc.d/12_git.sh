@@ -264,11 +264,17 @@ git_clone() {
   done
 }
 
+# Vcsh wrapper, should be overwritten
+# by vcsh main script
+vcsh_run() {
+  eval "$@"
+}
+
 # Batch remote/branch pull
-# Use vcsh wrapper when necessary
 git_pull() {
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
+  local CURRENT="$(git_branch)"
   local STASH="__git_pull_stash"
   vcsh_run "
     git stash save -q \"$STASH\"
@@ -277,9 +283,12 @@ git_pull() {
         for BRANCH in $BRANCHES; do
           git checkout -q \"\$BRANCH\" &&
           git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
+          #git fetch "$REMOTE" "$BRANCH" &&
+          #git merge --ff-only "$REMOTE/$BRANCH"
         done
       fi
     done
+    git checkout -q \"\$CURRENT\"
     if git stash list -n 1 | grep \"$STASH\" >/dev/null 2>&1; then
       git stash apply -q --index
       git stash drop -q
