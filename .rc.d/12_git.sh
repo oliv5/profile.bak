@@ -126,6 +126,16 @@ alias gp='git pull'
 alias gpr='git pull --rebase'
 
 ########################################
+# Env setup
+git_setup() {
+  git config merge.tool mymeld
+  git config merge.conflictstyle diff3
+  git config mergetool.mymeld.cmd \
+    'meld --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --diff "$LOCAL" "$MERGED" "$REMOTE"'
+  git config rerere.enabled 1
+}
+
+########################################
 # git wrapper
 git() {
   if [ "$1" = "annex" -a ! -z "$(command git config --get vcsh.vcsh)" ]; then
@@ -320,16 +330,11 @@ git_diff_all() {
 
 # Svn diff staged/unstaged with meld
 git_diffm() {
-  git difftool -y -t meld "$@"
+  git difftool -y "$@"
 }
 git_diffm_all() {
-  git difftool -y -t meld "$@" &&
-  git difftool --cached -y -t meld "$@"
-}
-
-# Meld called by git
-git_meld() {
-  meld "$2" "$5"
+  git difftool -y "$@" &&
+  git difftool --cached -y "$@"
 }
 
 ########################################
