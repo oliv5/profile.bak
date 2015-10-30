@@ -187,6 +187,10 @@ set undodir=~/.vimdata/vimundo
 execute 'set listchars+=tab:' . nr2char(187) . nr2char(183)
 
 " Jump to the last cursor position
+" Don't do it when the position is invalid or when inside an event handler
+" (happens when dropping a file on gvim).
+" Also don't do it when the mark is in the first line, that is the default
+" position when opening a file.
 augroup vimrc_cursor_lastpos
 	autocmd! BufReadPost *
 		\ if line("'\"") > 0 && line ("'\"") <= line("$") |
