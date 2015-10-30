@@ -449,7 +449,7 @@ git_stash_backup() {
     #for DESCR in $(git stash list --pretty=format:"%h %gd %ci"); do
     #  local NAME="$(echo $DESCR | awk '{gsub(/-/,"",$3); gsub(/:/,"",$4); print "stash{" $3 "-" $4 "}_" $1}')"
     for DESCR in $(git stash list --oneline); do
-      local NAME="$(echo $DESCR | awk '{print $NF}' | sed 's/[^0-9a-zA-Z._-]/_/g')"
+      local NAME="$(echo $DESCR | sed 's/^[^:]*:[^:]*: // ; s/[^0-9a-zA-Z._-:]/_/g')"
       local HASH="$(echo $DESCR | awk '{print $1}')"
       local FILE="$DST/stash_${HASH}_${NAME}.gz"
       if [ ! -e "$FILE" ]; then
