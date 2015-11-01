@@ -33,7 +33,7 @@ alias gdm='git_diffm_all'
 alias gds='git diff stash'
 alias gdiff='git diff'
 # Merge aliases
-alias gmm='git mergetool -y -t meld'
+alias gmm='git mergetool -y'
 alias gmerge='gmm'
 # Branch aliases
 alias gbc='git branch'
@@ -75,6 +75,7 @@ alias gadd='git add'
 # Commit aliases
 alias gci='git commit'
 alias gcm='git commit -m'
+alias gcim='git commit -m'
 alias gcam='git commit -am'
 alias gcommit='git commit'
 # Misc aliases
@@ -122,7 +123,7 @@ alias grb='git rebase'
 alias grbi='git rebase -i'
 alias grebase='git rebase'
 # Pull/push aliases
-alias gp='git pull'
+alias gpu='git pull'
 alias gpr='git pull --rebase'
 
 ########################################
@@ -337,7 +338,7 @@ git_diff_all() {
   git diff --cached "$@"
 }
 
-# Svn diff staged/unstaged with meld
+# Svn diff staged/unstaged changes
 git_diffm() {
   git difftool -y "$@"
 }
