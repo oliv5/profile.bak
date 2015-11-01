@@ -123,7 +123,8 @@ alias grb='git rebase'
 alias grbi='git rebase -i'
 alias grebase='git rebase'
 # Pull/push aliases
-alias gpu='git pull'
+alias gps='git push'
+alias gpl='git pull'
 alias gpr='git pull --rebase'
 
 ########################################
