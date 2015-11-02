@@ -54,7 +54,7 @@ vcsh_run() {
       arg_quote "$@"
     )"
   fi
-  if vcsh_exists; then
+  if vcsh_exists && ! vcsh_loaded; then
     vcsh run "$(git_repo)" sh -c "$ARGS"
   else
     sh -c "$ARGS"

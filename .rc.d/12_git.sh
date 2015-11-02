@@ -205,7 +205,7 @@ git_stx() {
 
 # Get local branches names
 git_branches() {
-  git ${2:+--git-dir="$2"} for-each-ref --format='%(refname:short)' refs/heads/
+  git ${2:+--git-dir="$2"} for-each-ref --format='%(refname:short)' refs/heads/ | xargs echo
 }
 
 # Get remote names
@@ -277,26 +277,27 @@ git_pull() {
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   local CURRENT="$(git_branch)"
-  local STASH="__git_pull_stash"
+  local STASH="__git_pull_stash.$(date +%Y%m%d-%H%M%S)"
   vcsh_run "
     git stash save -q \"$STASH\"
-    for REMOTE in $REMOTES; do
-      if git remote | grep -- \"\$REMOTE\" >/dev/null; then
-        for BRANCH in $BRANCHES; do
-          git checkout -q \"\$BRANCH\" &&
+    for BRANCH in $BRANCHES; do
+      git checkout -q \"\$BRANCH\" || continue
+      for REMOTE in $REMOTES; do
+        if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
           git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
-          #git fetch "$REMOTE" "$BRANCH" &&
-          #git merge --ff-only "$REMOTE/$BRANCH"
-        done
-      fi
+          #git fetch \"\$REMOTE\" \"\$BRANCH\" &&
+          #git merge --ff-only \"\$REMOTE/\$BRANCH\"
+        fi
+      done
     done
-    git checkout -q \"\$CURRENT\"
+    git checkout -q \"$CURRENT\"
     if git stash list -n 1 | grep \"$STASH\" >/dev/null 2>&1; then
       git stash apply -q --index
       git stash drop -q
     fi
   "
 }
+
 
 # Batch remote/branch push
 git_push() {
@@ -451,7 +452,7 @@ git_stash_backup() {
     #for DESCR in $(git stash list --pretty=format:"%h %gd %ci"); do
     #  local NAME="$(echo $DESCR | awk '{gsub(/-/,"",$3); gsub(/:/,"",$4); print "stash{" $3 "-" $4 "}_" $1}')"
     for DESCR in $(git stash list --oneline); do
-      local NAME="$(echo $DESCR | sed 's/^[^:]*:[^:]*: // ; s/[^0-9a-zA-Z._-:]/_/g')"
+      local NAME="$(echo $DESCR | sed 's/^.*: // ; s/[^0-9a-zA-Z._-:]/_/g')"
       local HASH="$(echo $DESCR | awk '{print $1}')"
       local FILE="$DST/stash_${HASH}_${NAME}.gz"
       if [ ! -e "$FILE" ]; then
