@@ -38,6 +38,8 @@ alias gmerge='gmm'
 # Branch aliases
 alias gbc='git branch'
 alias gba='git branch -a'
+alias gbl='git branch -a'
+alias gbls='git branch -a'
 alias gbr='git branch -r'   # list tracking
 alias gbv='git branch -v'
 alias gbrm='git branch -d'
@@ -130,9 +132,10 @@ alias gpr='git pull --rebase'
 ########################################
 # Env setup
 git_setup() {
-  git config merge.tool mymeld
+  git config diff.tool meld
+  git config merge.tool mymerge
   git config merge.conflictstyle diff3
-  git config mergetool.mymeld.cmd \
+  git config mergetool.mymerge.cmd \
     'meld --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --diff "$LOCAL" "$MERGED" "$REMOTE"'
   git config rerere.enabled 1
 }
@@ -169,6 +172,11 @@ git_worktree() {
 # Get git directory (alias git-dir)
 git_dir() {
   readlink -f "${GIT_DIR:-$(git rev-parse --git-dir)}"
+}
+
+# Get git exec-path
+git_exp() {
+  git --exec-path
 }
 
 # Get git-dir basename
@@ -216,6 +224,15 @@ git_remotes() {
 # Get git backup name
 git_name() {
   echo "$(git_repo).${1:+$1.}$(uname -n).$(git_branch | tr '/' '_').$(date +%Y%m%d-%H%M%S).$(git_shorthash)"
+}
+
+# Check a set of commands exist
+git_cmd() {
+  local EXECPATH="$(git_exp)"
+  for CMD; do
+    [ -x "${EXECPATH}/git-${CMD}" ] || return 1
+  done
+  return 0
 }
 
 ########################################
@@ -272,44 +289,62 @@ vcsh_run() {
   eval "$@"
 }
 
-# Batch remote/branch pull
+# Batch pull existing remote/branches
 git_pull() {
+  git_exists || return 1
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   local CURRENT="$(git_branch)"
-  local STASH="__git_pull_stash.$(date +%Y%m%d-%H%M%S)"
+  local COUNT=$(($(git stash list | wc -l) + 1))
   vcsh_run "
-    git stash save -q \"$STASH\"
+    git stash save -q \"__git_pull_stash\"
     for BRANCH in $BRANCHES; do
       git checkout -q \"\$BRANCH\" || continue
       for REMOTE in $REMOTES; do
         if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
-          git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
-          #git fetch \"\$REMOTE\" \"\$BRANCH\" &&
-          #git merge --ff-only \"\$REMOTE/\$BRANCH\"
+          if git_cmd pull; then
+            git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
+          else
+            git fetch \"\$REMOTE\" \"\$BRANCH\" &&
+            git merge --ff-only \"\$REMOTE/\$BRANCH\"
+          fi
         fi
       done
     done
     git checkout -q \"$CURRENT\"
-    if git stash list -n 1 | grep \"$STASH\" >/dev/null 2>&1; then
+    if [ \$(git stash list | wc -l) -eq $COUNT ]; then
       git stash apply -q --index
       git stash drop -q
     fi
   "
 }
 
-
-# Batch remote/branch push
-git_push() {
+# Batch push existing remote/branches
+alias git_push='git_push_existing'
+git_push_existing() {
+  git_exists || return 1
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   for REMOTE in $REMOTES; do
-    if git remote | grep -- "$REMOTE" >/dev/null; then
-      for BRANCH in $BRANCHES; do
+    for BRANCH in $BRANCHES; do
+      if git branch -r | grep -- "$REMOTE/$BRANCH" >/dev/null; then
         echo -n "Push $REMOTE/$BRANCH : "
         git push "$REMOTE" "$BRANCH"
-      done
-    fi
+      fi
+    done
+  done
+}
+
+# Batch push all local branches to remotes
+git_push_all() {
+  git_exists || return 1
+  local REMOTES="${1:-$(git_remotes)}"
+  local BRANCHES="${2:-$(git_branches)}"
+  for REMOTE in $REMOTES; do
+    for BRANCH in $BRANCHES; do
+      echo -n "Push $REMOTE/$BRANCH : "
+      git push "$REMOTE" "$BRANCH"
+    done
   done
 }
 
@@ -452,7 +487,7 @@ git_stash_backup() {
     #for DESCR in $(git stash list --pretty=format:"%h %gd %ci"); do
     #  local NAME="$(echo $DESCR | awk '{gsub(/-/,"",$3); gsub(/:/,"",$4); print "stash{" $3 "-" $4 "}_" $1}')"
     for DESCR in $(git stash list --oneline); do
-      local NAME="$(echo $DESCR | sed 's/^.*: // ; s/[^0-9a-zA-Z._-:]/_/g')"
+      local NAME="$(echo $DESCR | sed 's/^.*: // ; s/[^0-9a-zA-Z._:]/_/g')"
       local HASH="$(echo $DESCR | awk '{print $1}')"
       local FILE="$DST/stash_${HASH}_${NAME}.gz"
       if [ ! -e "$FILE" ]; then
