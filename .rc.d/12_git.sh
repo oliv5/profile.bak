@@ -295,14 +295,16 @@ git_pull() {
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   local CURRENT="$(git_branch)"
-  local COUNT=$(($(git stash list | wc -l) + 1))
   vcsh_run "
-    git stash save -q \"__git_pull_stash\"
+    STASH=\$(git stash create 2>/dev/null)
+    if [ -n \"\$STASH\" ]; then
+      git reset --hard HEAD --
+    fi
     for BRANCH in $BRANCHES; do
       git checkout -q \"\$BRANCH\" || continue
       for REMOTE in $REMOTES; do
         if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
-          if git_cmd pull; then
+          if [ -x \"\$(git --exec-path)/git-pull\" ]; then
             git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
           else
             git fetch \"\$REMOTE\" \"\$BRANCH\" &&
@@ -312,9 +314,8 @@ git_pull() {
       done
     done
     git checkout -q \"$CURRENT\"
-    if [ \$(git stash list | wc -l) -eq $COUNT ]; then
-      git stash apply -q --index
-      git stash drop -q
+    if [ -n \"\$STASH\" ]; then
+      git stash apply -q --index \"\$STASH\"
     fi
   "
 }
@@ -407,8 +408,8 @@ git_stash_save_lazy() {
 # Push changes onto stash, does not revert anything
 git_stash_push() {
   local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
-  git update-ref -m "$STASH" refs/stash "$(git stash create)"
-  #git stash create $STASH
+  #git update-ref -m "$STASH" refs/stash "$(git stash create)"
+  git stash store -m "$STASH" "$(git stash create)"
 }
 
 # Pop change from stash
