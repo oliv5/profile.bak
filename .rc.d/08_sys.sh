@@ -132,6 +132,11 @@ alias tty_list='ps aux|grep /usr/bin/[X]'
 alias tty_active='cat /sys/class/tty/tty0/active'
 alias tty_next='sudo fgconsole'
 
+# Find display
+show_display() {
+  ps ps a | awk '/[X]org/ {print $6}'
+}
+
 ################################
 # Processes
 if [ -n "$ANDROID_ROOT" ]; then
