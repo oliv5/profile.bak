@@ -156,7 +156,7 @@ git() {
 # Check repo exists
 git_exists() {
   #git ${1:+--work-tree="$1"} rev-parse --verify "HEAD" >/dev/null 2>&1
-  git ${1:+--git-dir="$1"} rev-parse >/dev/null 2>&1
+  git ${1:+--git-dir="$1"} rev-parse HEAD >/dev/null 2>&1
 }
 
 # Check bare repo attribute
@@ -301,7 +301,8 @@ git_pull() {
       git reset --hard HEAD --
     fi
     for BRANCH in $BRANCHES; do
-      git checkout -q \"\$BRANCH\" || continue
+      #git checkout -q \"\$BRANCH\" || continue
+      git checkout \"\$BRANCH\" >/dev/null || continue
       for REMOTE in $REMOTES; do
         if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
           if [ -x \"\$(git --exec-path)/git-pull\" ]; then
