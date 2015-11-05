@@ -81,3 +81,8 @@ umount_nfs() {
     ifconfig $ITF:$TMPFS down
   "
 }
+
+# Mount sshfs
+alias umount_sshfs='fusermount -u'
+alias mount_sshfs='sshfs -o cache=yes -o kernel_cache -o compression=no -o large_read'
+alias mount_sshfs_fast='sshfs -o cache=yes -o kernel_cache -o compression=no -o large_read -o Ciphers=arcfour'
