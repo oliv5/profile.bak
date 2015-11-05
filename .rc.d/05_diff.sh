@@ -36,3 +36,17 @@ diffh() {
   true ${1:?No file 1 specified} ${2:?No file 2 specified}
   cmp -l "$1" "$2" | gawk '{printf "%08X %02X %02X\n", $1-'${3:-0}', strtonum(0$2), strtonum(0$3)}'
 }
+
+# Diff using rsync
+diffr() {
+  rsync -avsn "$@"
+}
+diffrd() {
+  rsync -avsn --delete "$@" | grep "^delet"
+}
+diffru() {
+  rsync -avsn --existing "$@"
+}
+diffrn() {
+  rsync -avsn --ignore-existing "$@"
+}
