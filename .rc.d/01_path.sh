@@ -36,6 +36,20 @@ _path_remove() {
   done
 }
 
+# Remove given fs from path
+_path_removefs() {
+  local VAR="${1:-PATH}"
+  local FS="${2:-cifs|fusefs|nfs}"
+  export $VAR="$(
+  eval echo "\$$VAR:" | 
+    while read -d: D; do
+      if [ -z "$(stat -f -c %T "$D" | grep "$FS")" ]; then
+        printf "$D:"
+      fi
+    done
+  )"
+}
+
 # Cleanup path
 _path_cleanup() {
   local VAR="${1:-PATH}"
@@ -51,6 +65,7 @@ _path_cleanup() {
 alias path_prepend='_path_prepend PATH'
 alias path_append='_path_append PATH'
 alias path_remove='_path_remove PATH'
+alias path_removefs='_path_removefs PATH'
 alias path_cleanup='_path_cleanup PATH'
 alias path_abs='readlink -f --'
 
@@ -60,4 +75,5 @@ alias path_abs='readlink -f --'
 alias ldlibpath_prepend='_path_prepend LD_LIBRARY_PATH'
 alias ldlibpath_append='_path_append LD_LIBRARY_PATH'
 alias ldlibpath_remove='_path_remove LD_LIBRARY_PATH'
+alias ldlibpath_removefs='_path_removefs LD_LIBRARY_PATH'
 alias ldlibpath_cleanup='_path_cleanup LD_LIBRARY_PATH'
