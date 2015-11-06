@@ -134,7 +134,7 @@ alias tty_next='sudo fgconsole'
 
 # Find display
 show_display() {
-  ps ps a | awk '/[X]org/ {print $6}'
+  ps a | awk '/[X]org/ {print $6}'
 }
 
 ################################
