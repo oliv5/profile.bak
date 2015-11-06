@@ -296,33 +296,6 @@ git_pull() {
   local BRANCHES="${2:-$(git_branches)}"
   local CURRENT="$(git_branch)"
   vcsh_run "
-    set -e
-    set -vx
-    startup() {
-      trap 'end' INT TERM EXIT
-      STASH=\$(git stash create 2>/dev/null)
-      if [ -n \"\$STASH\" ]; then
-        git reset --hard HEAD --
-      fi
-    }
-
-    main() {
-      for BRANCH in $BRANCHES; do
-        #git checkout -q \"\$BRANCH\" || continue
-        git checkout \"\$BRANCH\" >/dev/null || continue
-        for REMOTE in $REMOTES; do
-          if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
-            if [ -x \"\$(git --exec-path)/git-pull\" ]; then
-              git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
-            else
-              git fetch \"\$REMOTE\" \"\$BRANCH\" &&
-              git merge --ff-only \"\$REMOTE/\$BRANCH\"
-            fi
-          fi
-        done
-      done
-    }
-
     end() {
       git checkout -q \"$CURRENT\"
       if [ -n \"\$STASH\" ]; then
@@ -330,9 +303,26 @@ git_pull() {
       fi
       trap - INT TERM EXIT
     }  
-
-    startup
-    main
+    set -e
+    trap 'end' INT TERM EXIT
+    STASH=\$(git stash create 2>/dev/null)
+    if [ -n \"\$STASH\" ]; then
+      git reset --hard HEAD --
+    fi
+    for BRANCH in $BRANCHES; do
+      #git checkout -q \"\$BRANCH\" || continue
+      git checkout \"\$BRANCH\" >/dev/null || continue
+      for REMOTE in $REMOTES; do
+        if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
+          if [ -x \"\$(git --exec-path)/git-pull\" ]; then
+            git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
+          else
+            git fetch \"\$REMOTE\" \"\$BRANCH\" &&
+            git merge --ff-only \"\$REMOTE/\$BRANCH\"
+          fi
+        fi
+      done
+    done
     end
   "
 }
