@@ -156,7 +156,7 @@ git() {
 # Check repo exists
 git_exists() {
   #git ${1:+--work-tree="$1"} rev-parse --verify "HEAD" >/dev/null 2>&1
-  git ${1:+--git-dir="$1"} rev-parse HEAD >/dev/null 2>&1
+  git ${1:+--git-dir="$1"} rev-parse --verify HEAD >/dev/null 2>&1
 }
 
 # Check bare repo attribute
@@ -296,28 +296,44 @@ git_pull() {
   local BRANCHES="${2:-$(git_branches)}"
   local CURRENT="$(git_branch)"
   vcsh_run "
-    STASH=\$(git stash create 2>/dev/null)
-    if [ -n \"\$STASH\" ]; then
-      git reset --hard HEAD --
-    fi
-    for BRANCH in $BRANCHES; do
-      #git checkout -q \"\$BRANCH\" || continue
-      git checkout \"\$BRANCH\" >/dev/null || continue
-      for REMOTE in $REMOTES; do
-        if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
-          if [ -x \"\$(git --exec-path)/git-pull\" ]; then
-            git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
-          else
-            git fetch \"\$REMOTE\" \"\$BRANCH\" &&
-            git merge --ff-only \"\$REMOTE/\$BRANCH\"
+    set -e
+    set -vx
+    startup() {
+      trap 'end' INT TERM EXIT
+      STASH=\$(git stash create 2>/dev/null)
+      if [ -n \"\$STASH\" ]; then
+        git reset --hard HEAD --
+      fi
+    }
+
+    main() {
+      for BRANCH in $BRANCHES; do
+        #git checkout -q \"\$BRANCH\" || continue
+        git checkout \"\$BRANCH\" >/dev/null || continue
+        for REMOTE in $REMOTES; do
+          if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
+            if [ -x \"\$(git --exec-path)/git-pull\" ]; then
+              git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
+            else
+              git fetch \"\$REMOTE\" \"\$BRANCH\" &&
+              git merge --ff-only \"\$REMOTE/\$BRANCH\"
+            fi
           fi
-        fi
+        done
       done
-    done
-    git checkout -q \"$CURRENT\"
-    if [ -n \"\$STASH\" ]; then
-      git stash apply -q --index \"\$STASH\"
-    fi
+    }
+
+    end() {
+      git checkout -q \"$CURRENT\"
+      if [ -n \"\$STASH\" ]; then
+        git stash apply -q --index \"\$STASH\"
+      fi
+      trap - INT TERM EXIT
+    }  
+
+    startup
+    main
+    end
   "
 }
 
@@ -409,8 +425,9 @@ git_stash_save_lazy() {
 # Push changes onto stash, does not revert anything
 git_stash_push() {
   local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
-  #git update-ref -m "$STASH" refs/stash "$(git stash create)"
-  git stash store -m "$STASH" "$(git stash create)"
+  local REF="$(git stash create)"
+  git stash store -m "$STASH" "$REF" 2>/dev/null || 
+    git update-ref -m "$STASH" refs/stash "$REF"
 }
 
 # Pop change from stash
