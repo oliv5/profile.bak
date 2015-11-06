@@ -84,3 +84,22 @@ alias itypedef='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGE
 _DSEXCLUDE="-not -path '*.svn*' -and -not -path '*.git*' -and -not -type l"
 alias  dhh='FCASE=   FTYPE= FXTYPE= FARGS= SEXCLUDE="$_DSEXCLUDE" _fsed'
 alias idhh='FCASE=-i FTYPE= FXTYPE= FARGS= SEXCLUDE="$_DSEXCLUDE" _fsed'
+
+# Parallel make (needs ipcmd tool)
+# https://code.google.com/p/ipcmd/wiki/ParallelMake
+pmake() {
+    if cmd_exists ipcmd; then
+	# Call make protected by semaphores
+	local AR="ipcmd semop -u -1 : ar"
+	local RANLIB="ipcmd semop -u -1 : ranlib"
+	local PYTHON="ipcmd semop -u -1 : python"
+	export IPCMD_SEMID=$(ipcmd semget)
+	ipcmd semctl setall 1
+	make AR="$AR" RANLIB="$RANLIB" PYTHON="$PYTHON" "$@"
+	ipcrm -s $IPCMD_SEMID
+	unset IPCMD_SEMID
+    else
+	# Call make directly
+	make "$@"
+    fi
+}
