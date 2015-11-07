@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # Basic implementation of cd/back/forward functions
-cda() { builtin cd "$@"; }
-cdb() { builtin cd "$OLD_PWD"; }
+cda() { command cd "$@"; }
+cdb() { command cd "$OLDPWD"; }
 cdf() { cdb "$@"; }
 
 # Replace cd

@@ -18,8 +18,8 @@ export ENV_PROFILE=$((ENV_CNT=ENV_CNT+1))
 export RC_DIR="${RC_DIR:-$HOME}"
 export RC_DIR_LOCAL="${RC_DIR_LOCAL:-$HOME}"
 
-# Load next script (dash-only)
-export ENV="$RC_DIR/.rc"
+# Declare user script (dash-only)
+export ENV="$RC_DIR/.dashrc"
 
 # Load local profile script
 if [ -r "$RC_DIR_LOCAL/.profile.local" ]; then

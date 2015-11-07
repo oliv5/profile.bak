@@ -137,6 +137,9 @@ show_display() {
   ps a | awk '/[X]org/ {print $6}'
 }
 
+# Env
+alias envg='env | grep -i'
+
 ################################
 # Processes
 if [ -n "$ANDROID_ROOT" ]; then

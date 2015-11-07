@@ -13,6 +13,11 @@ path_cleanup
 cmd_unset which find grep awk sed xargs cut
 
 ################################
+# Default prompt
+if [ ${#PS1} -lt 5 ]; then
+  export PS1='$USER@${HOSTNAME:-$(/bin/hostname)}: $PWD\$ '
+fi
+
 # User anacron
 if [ -r "${HOME}/.anacron/anacrontab" ]; then
   mkdir -p "${HOME}/.anacron/spool"
