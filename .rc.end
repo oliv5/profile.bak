@@ -24,8 +24,25 @@ if [ -r "${HOME}/.anacron/anacrontab" ]; then
   anacron -s -t "${HOME}/.anacron/anacrontab" -S "${HOME}/.anacron/spool"
 fi
 
-# Start ssh-agent when not already running
-{ pgrep -u $USER ssh-agent >/dev/null || eval $(ssh-agent); } 2>/dev/null
+# SSH-agent
+ssh-add -l &>/dev/null
+if [ "$?" == 2 ]; then
+  test -r $HOME/.ssh-agent-info && \
+    eval "$(<$HOME/.ssh-agent-info)" >/dev/null
+  ssh-add -l &>/dev/null
+  if [ "$?" == 2 ]; then
+    (umask 066; ssh-agent > $HOME/.ssh-agent-info)
+    eval "$(<$HOME/.ssh-agent-info)" >/dev/null
+  fi
+fi
+
+# GPG agent
+if test -f $HOME/.gpg-agent-info && kill -0 $(cut -d: -f 2 $HOME/.gpg-agent-info) 2>/dev/null; then
+  export GPG_AGENT_INFO=$(< $HOME/.gpg-agent-info)
+else
+  eval $(gpg-agent --daemon)
+  echo $GPG_AGENT_INFO > $HOME/.gpg-agent-info
+fi
 
 # Disable console beep
 #command -v xset >/dev/null 2>&1 && pidof X >/dev/null && xset b off 2>/dev/null # From X11 window system
@@ -33,7 +50,7 @@ command -v xset >/dev/null 2>&1 && xset b off 2>/dev/null # From X11 window syst
 command -v setterm >/dev/null 2>&1 && setterm -blength 0  # From the system console
 
 # Protect private encrypted directory
-[ -d "$HOME/.private" ] && chmod 500 "$HOME/.private"
+[ -e "$HOME/.private" ] && chmod 500 "$HOME/.private"
 
 ################################
 # Alias ls
