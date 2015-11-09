@@ -7,3 +7,5 @@
 -r-w-x 04_tar.sh
 -r-w-x 05_diff.sh
 -r-w-x 08_sys.sh
+-r-w-x android/01_shell.sh
+-r-w-x android/08_sys.sh
