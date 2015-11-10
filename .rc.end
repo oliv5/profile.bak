@@ -25,23 +25,28 @@ if [ -r "${HOME}/.anacron/anacrontab" ]; then
 fi
 
 # SSH-agent
-ssh-add -l &>/dev/null
-if [ "$?" == 2 ]; then
-  test -r $HOME/.ssh-agent-info && \
-    eval "$(<$HOME/.ssh-agent-info)" >/dev/null
+if command -v ssh-agent >/dev/null 2>&1; then
   ssh-add -l &>/dev/null
   if [ "$?" == 2 ]; then
-    (umask 066; ssh-agent > $HOME/.ssh-agent-info)
-    eval "$(<$HOME/.ssh-agent-info)" >/dev/null
+    test -r $HOME/.ssh-agent-info && \
+      eval "$(<$HOME/.ssh-agent-info)" >/dev/null
+    ssh-add -l &>/dev/null
+    if [ "$?" == 2 ]; then
+      (umask 066; ssh-agent > $HOME/.ssh-agent-info)
+      eval "$(<$HOME/.ssh-agent-info)" >/dev/null
+    fi
   fi
 fi
 
+
 # GPG agent
-if test -f $HOME/.gpg-agent-info && kill -0 $(cut -d: -f 2 $HOME/.gpg-agent-info) 2>/dev/null; then
-  export GPG_AGENT_INFO=$(< $HOME/.gpg-agent-info)
-else
-  eval $(gpg-agent --daemon)
-  echo $GPG_AGENT_INFO > $HOME/.gpg-agent-info
+if command -v ssh-agent >/dev/null 2>&1; then
+  if test -f $HOME/.gpg-agent-info && kill -0 $(cut -d: -f 2 $HOME/.gpg-agent-info) 2>/dev/null; then
+    export GPG_AGENT_INFO=$(<$HOME/.gpg-agent-info)
+  else
+    eval $(gpg-agent --daemon)
+    echo $GPG_AGENT_INFO > $HOME/.gpg-agent-info
+  fi
 fi
 
 # Disable console beep
