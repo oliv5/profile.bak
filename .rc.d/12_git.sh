@@ -297,22 +297,20 @@ git_pull() {
   local CURRENT="$(git_branch)"
   vcsh_run "
     end() {
-      #git checkout -q \"$CURRENT\"
-      git checkout \"$CURRENT\" >/dev/null
+      git checkout -q \"$CURRENT\"
       if [ -n \"\$STASH\" ]; then
         git stash apply -q --index \"\$STASH\"
       fi
       trap - INT TERM EXIT
     }  
-    set -e
+    set +e
     trap 'end' INT TERM EXIT
     STASH=\$(git stash create 2>/dev/null)
     if [ -n \"\$STASH\" ]; then
       git reset --hard HEAD --
     fi
     for BRANCH in $BRANCHES; do
-      #git checkout -q \"\$BRANCH\" || continue
-      git checkout \"\$BRANCH\" >/dev/null || continue
+      git checkout -q \"\$BRANCH\" || continue
       for REMOTE in $REMOTES; do
         if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
           if [ -x \"\$(git --exec-path)/git-pull\" ]; then
