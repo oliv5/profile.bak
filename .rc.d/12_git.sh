@@ -297,7 +297,8 @@ git_pull() {
   local CURRENT="$(git_branch)"
   vcsh_run "
     end() {
-      git checkout -q \"$CURRENT\"
+      #git checkout -q \"$CURRENT\"
+      git checkout \"$CURRENT\" >/dev/null
       if [ -n \"\$STASH\" ]; then
         git stash apply -q --index \"\$STASH\"
       fi
