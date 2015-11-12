@@ -119,6 +119,7 @@ alias gco='git checkout'
 alias gcheckout='git checkout'
 # Reset aliases
 alias gre='git reset'
+alias grh='git reset HEAD'
 alias greset='git reset'
 # Rebase aliases
 alias grb='git rebase'
