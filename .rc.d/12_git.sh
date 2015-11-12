@@ -310,7 +310,7 @@ git_pull() {
       git reset --hard HEAD --
     fi
     for BRANCH in $BRANCHES; do
-      git checkout -q \"\$BRANCH\" || continue
+      git checkout \"\$BRANCH\" >/dev/null|| continue
       for REMOTE in $REMOTES; do
         if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
           if [ -x \"\$(git --exec-path)/git-pull\" ]; then
