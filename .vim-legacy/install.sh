@@ -1,17 +1,21 @@
-#!/bin/bash
+#!/bin/sh
+
+# Create backup directory
+BACKUP_DIR=~/.vimdata/config/$(date +%Y%m%d)
+mkdir -p "$BACKUP_DIR"
 
 # Backup current config
-TODAY=`date +%Y%m%d`
-mkdir -p ~/.vimdata/vimbackup
-for FILE in ~/.vim ~/.vimrc*; do
-	if [ ! -h $FILE ]; then
-		mv -v $FILE ~/.vimdata/vimbackup/$(basename $FILE).$TODAY.bak
+for SRC in ~/.vim ~/.vimrc*; do
+	if [ -h "$SRC" ]; then
+		# Delete links
+		rm -v "$SRC"
 	else
-		rm -v $FILE
+		# Move existing config files
+		mv -v "$SRC" "$BACKUP_DIR/$(basename $SRC)"
 	fi
 done
 
 # Make links
-SRC=$( cd "$( dirname "${BASH_SOURCE[0]}" )" ; pwd )
-ln -fsv $SRC/.vim* ~/
-
+ln -fsv ~/.vim-legacy/.vim* ~/
+ln -fsv ~/.vimftdetect ~/.vim/ftdetect
+ln -fsv ~/.vimsyntax ~/.vim/syntax
