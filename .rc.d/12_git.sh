@@ -308,7 +308,7 @@ git_pull() {
     trap 'end' INT TERM EXIT
     STASH=\$(git stash create 2>/dev/null)
     if [ -n \"\$STASH\" ]; then
-      git reset --hard HEAD --
+      git reset --hard HEAD -q --
     fi
     for BRANCH in $BRANCHES; do
       git checkout \"\$BRANCH\" >/dev/null|| continue
