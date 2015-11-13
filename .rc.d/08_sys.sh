@@ -184,33 +184,15 @@ sys_cpu() {
 
 ################################
 # Memory information
-mem() {
-  free -mt --si
-}
-
-mem_free() {
-  free | awk '{if (FNR==2){sum+=$4} else if (FNR==3){sum-=$4}} END {print sum}'
-}
-
-swap_free() {
-  free | awk 'FNR==4 {print $4}'
-}
-
-mem_used() {
-  free | awk '{if (FNR==2){sum+=$3} else if (FNR==3){sum-=$3}} END {print sum}'
-}
-
-swap_used() {
-  free | awk 'FNR==4 {print $3}'
-}
-
-mem_total() {
-  free | awk 'FNR==2 {print $2}'
-}
-
-swap_total() {
-  free | awk 'FNR==4 {print $2}'
-}
+mem() { free -mt --si; }
+mem_free()   { free | awk 'FNR==2 {print $4}'; }
+swap_free()  { free | awk 'FNR==4 {print $4}'; }
+mem_used()   { free | awk 'FNR==2 {print $3}'; }
+swap_used()  { free | awk 'FNR==4 {print $3}'; }
+mem_total()  { free | awk 'FNR==2 {print $2}'; }
+swap_total() { free | awk 'FNR==4 {print $2}'; }
+mem_free_cache() { free | awk '{if (FNR==2){sum+=$4} else if (FNR==3){sum-=$4}} END {print sum}'; }
+mem_used_cache() { free | awk '{if (FNR==2){sum+=$3} else if (FNR==3){sum-=$3}} END {print sum}'; }
 
 ################################
 # Processes information
