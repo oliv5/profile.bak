@@ -133,12 +133,12 @@ alias gpr='git pull --rebase'
 ########################################
 # Env setup
 git_setup() {
-  git config diff.tool meld
-  git config merge.tool mymerge
-  git config merge.conflictstyle diff3
-  git config mergetool.mymerge.cmd \
+  git config --global diff.tool meld
+  git config --global merge.tool mymerge
+  git config --global merge.conflictstyle diff3
+  git config --global mergetool.mymerge.cmd \
     'meld --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --diff "$LOCAL" "$MERGED" "$REMOTE"'
-  git config rerere.enabled 1
+  git config --global rerere.enabled 1
 }
 
 ########################################
