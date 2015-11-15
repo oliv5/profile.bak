@@ -1,5 +1,25 @@
 #!/bin/sh
 
+########################
+# tar
+ta() {
+  local ARCHIVE="${1:?No archive to create...}"
+  shift
+  tar -cvf "$ARCHIVE" "$@"
+}
+
+# untar
+td() {
+  local DST="${1:?No output directory specified...}"
+  local SRC
+  shift
+  [ -n "$DST" ] && mkdir -p "$DST"
+  for SRC; do
+    tar -xvf "$SRC" ${DST:+-C "$DST"}
+  done
+}
+
+########################
 # quick tar > gz compress/deflate
 tgz() {
   if [ "${1##*.}" = "tgz" ] || [ "${1%.tar.gz}" != "$1" ]; then
@@ -27,6 +47,7 @@ tgzd() {
   done
 }
 
+########################
 # tar > gpg compress
 tga(){
   local ARCHIVE="${1:?No archive to create...}"
