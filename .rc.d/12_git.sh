@@ -379,8 +379,8 @@ git_bundle() {
 ########################################
 # Svn diff staged/unstaged
 git_diff_all() {
-  git diff --cached "$@" &&
-  git diff "$@"
+  git diff "$@" 2>/dev/null
+  git diff --cached "$@"
 }
 
 # Svn diff staged/unstaged changes
@@ -388,8 +388,8 @@ git_diffm() {
   git difftool -y "$@"
 }
 git_diffm_all() {
-  git difftool --cached -y "$@" &&
-  git difftool -y "$@"
+  git difftool -y "$@" 2>/dev/null
+  git difftool --cached -y "$@"
 }
 
 ########################################

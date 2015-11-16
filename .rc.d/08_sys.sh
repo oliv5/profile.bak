@@ -243,6 +243,12 @@ kill_mem() {
 }
 
 ################################
+# IPC management
+sem_purge() {
+  ipcs -s | awk '/0/ {print $2}' | xargs -n 1 ipcrm -s
+}
+
+################################
 # Event tester
 alias event_list='xev'
 alias event_showkey='showkey -s'

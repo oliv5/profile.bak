@@ -23,7 +23,7 @@ mkctags() {
   # Build tag file
   #${DBG} $(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}" 2>&1 >/dev/null | \
   #  grep -vE 'Warning: Language ".*" already defined'
-  ${DBG} $(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}"
+  ${DBG} command ctags $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}"
 }
 
 # Scan directory for cscope files
@@ -55,7 +55,7 @@ mkcscope_1() {
     scancsdir "$SRC" "$DST" "$@"
   fi
   # Build tag file
-  ${DBG} $(which cscope) $CSCOPE_OPTIONS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
+  ${DBG} command cscope $CSCOPE_OPTIONS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
 }
 
 # Scan and make cscope db
@@ -72,7 +72,7 @@ mkcscope_2() {
   shift $(min 3 $#)
   # Build tag file
   find "$SRC" $CSCOPE_EXCLUDE "$@" -regextype posix-egrep -regex "$CSCOPE_REGEX" -type f -printf '"%p"\n' | \
-    ${DBG} $(which cscope) $CSCOPE_OPTIONS -i '-' -f "$CSCOPE_DB"
+    ${DBG} command cscope $CSCOPE_OPTIONS -i '-' -f "$CSCOPE_DB"
 }
 
 # Cscope alias - use a fct because aliases are not exported to other fct
@@ -88,7 +88,7 @@ mkids() {
   local DST="$(eval echo ${2:-$PWD})"
   # build db
   ( cd "$SRC"
-    mkid -o "$DST/ID"
+    command mkid -o "$DST/ID"
   )
 }
 
@@ -99,7 +99,7 @@ mkpycscope() {
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
   # Build tag file
-  pycscope -R -f "$DST/pycscope.out" "$SRC"
+  command pycscope -R -f "$DST/pycscope.out" "$SRC"
 }
 
 # Make tags and cscope db
@@ -110,35 +110,24 @@ mktags() {
   mkpycscope "$@"
 }
 
-_rmtags() {
-  # Get directories, remove ~/
-  local PREFIX="${1:?No file prefix specified}"
-  local DIR="$(eval echo ${2:-$PWD})"
-  shift 2
-  local FILES="$DIR/$@"
-  # Rm files
-  eval rm -v "${FILES}" 2>/dev/null
-}
-
 # Clean ctags
 rmctags() {
-  _rmtags tags "$@"
+  rm -v tags .tags 2>/dev/null
 }
 
 # Clean cscope db
 rmcscope() {
-  _rmtags "cscope.out*" "$@"
-  _rmtags cscope.files "$@"
+  rm -v cscope.out* cscope.files 2>/dev/null
 }
 
 # Clean id-utils db
 rmids() {
-  _rmtags ID "$@"
+  rm -v ID 2>/dev/null
 }
 
 # Clean pycscope db
 rmpycscope() {
-  _rmtags pycscope.out "$@"
+  rm -v pycscope.out 2>/dev/null
 }
 
 # Clean tags and cscope db
