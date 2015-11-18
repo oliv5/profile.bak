@@ -1,6 +1,5 @@
 [
     // Disabled keymaps
-    { "keys": ["ctrl+t"], "command": "none" },
     // Interface
     { "keys": ["ctrl+e"], "command": "toggle_side_bar" },
     { "keys": ["alt+shift+e"], "command": "toggle_side_bar" },
@@ -19,33 +18,14 @@
     // Jump back/forward
     { "keys": ["alt+left"], "command": "jump_back" },
     { "keys": ["alt+right"], "command": "jump_forward" },
+    // Alignement plugin
+    { "keys": ["ctrl+shift+a"], "command": "alignment" },
     // CTags plugin
-    {
-        "command": "navigate_to_definition",
-        "keys": ["ctrl+enter"]
-    },
-    {
-        "command": "search_for_definition",
-        "keys": ["ctrl+backspace"]
-    },
-    {
-        "command": "jump_prev",
-        "keys": ["ctrl+equal"]
-    },
-    {
-        "command": "navigate_to_definition",
-        "keys": ["ctrl+t"]
-    },
-    {
-        "command": "search_for_definition",
-        "keys": ["ctrl+t", "ctrl+t"]
-    },
-    {
-        "command": "jump_prev",
-        "keys": ["ctrl+t", "ctrl+p"]
-    },
-    {
-        "command": "rebuild_tags",
-        "keys": ["ctrl+t", "ctrl+r"]
-    },
+    { "keys": ["ctrl+enter"], "command": "navigate_to_definition" },
+    { "keys": ["ctrl+backspace"], "command": "search_for_definition" },
+    { "keys": ["ctrl+equal"], "command": "jump_prev" },
+    { "keys": ["ctrl+t"], "command": "navigate_to_definition" },
+    { "keys": ["ctrl+t", "ctrl+t"], "command": "search_for_definition" },
+    { "keys": ["ctrl+t", "ctrl+p"], "command": "jump_prev" },
+    { "keys": ["ctrl+t", "ctrl+r"], "command": "rebuild_tags" },
 ]
