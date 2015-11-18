@@ -5,7 +5,8 @@
     { "keys": ["alt+shift+e"], "command": "toggle_side_bar" },
     { "keys": ["f12"], "command": "toggle_full_screen" },
     { "keys": ["shift+f12"], "command": "toggle_distraction_free" },
-    // Globals
+    // Globals search
+    { "keys": ["ctrl+f"], "command": "show_panel", "args": {"panel": "incremental_find", "reverse": false} },
     { "keys": ["ctrl+j"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":"} },
     { "keys": ["ctrl+g"], "command": "show_panel", "args": {"panel": "find_in_files"} },
     { "keys": ["ctrl+shift+g"], "command": "goto_symbol_in_project" },
