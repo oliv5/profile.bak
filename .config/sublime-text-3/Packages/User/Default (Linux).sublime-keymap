@@ -18,6 +18,9 @@
     // Jump back/forward
     { "keys": ["alt+left"], "command": "jump_back" },
     { "keys": ["alt+right"], "command": "jump_forward" },
+    // File history plugin
+    { "keys": ["ctrl+o"], "command": "open_recently_closed_file", "args": {"show_quick_panel": true, "current_project_only": false} },
+    { "keys": ["ctrl+shift+o"], "command": "prompt_open_file" },
     // Alignement plugin
     { "keys": ["ctrl+shift+a"], "command": "alignment" },
     // CTags plugin
@@ -27,5 +30,6 @@
     { "keys": ["ctrl+t"], "command": "navigate_to_definition" },
     { "keys": ["ctrl+t", "ctrl+t"], "command": "search_for_definition" },
     { "keys": ["ctrl+t", "ctrl+p"], "command": "jump_prev" },
+    { "keys": ["ctrl+t", "ctrl+n"], "command": "jump_next" },
     { "keys": ["ctrl+t", "ctrl+r"], "command": "rebuild_tags" },
 ]
