@@ -16,12 +16,14 @@
 		"GitGutter",
 		"GotoDocumentation",
 		"Move By Symbols",
+		"Package Control",
 		"PackageResourceViewer",
 		"SideBarEnhancements",
 		"SublimeLinter",
 		"SublimeLinter-cppcheck",
 		"SublimeREPL",
 		"Terminal",
+		"Theme - Spacegray",
 		"Trimmer"
 	]
 }

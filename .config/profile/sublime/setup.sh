@@ -1,9 +1,12 @@
 #!/bin/sh
 # http://docs.sublimetext.info/en/latest/getting_started/install.html
 tar -xvjf sublime_text_3_build_3083_x64.tar.bz2
-sudo mv sublime_text_3 /opt/
-sudo ln -s /opt/sublime_text_3/sublime_text /usr/bin/sublime
-sudo cat > /usr/share/applications/sublime.desktop <<EOF
+#sudo rm -rf /opt/sublime_text_3
+#sudo mv -fv sublime_text_3/ /opt/
+sudo cp -rv sublime_text_3/ /opt/
+sudo rm -rf sublime_text_3/
+sudo ln -sfv /opt/sublime_text_3/sublime_text /usr/bin/sublime
+sudo sh -c "cat > /usr/share/applications/sublime.desktop <<EOF
 [Desktop Entry]
 Version=1.0
 Name=Sublime Text 3
@@ -22,4 +25,5 @@ X-Ayatana-Desktop-Shortcuts=NewWindow
 Name=New Window
 Exec=sublime -n
 TargetEnvironment=Unity
-EOF
+EOF"
+
