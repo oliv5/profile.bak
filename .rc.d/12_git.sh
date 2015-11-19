@@ -139,6 +139,7 @@ git_setup() {
   git config --global mergetool.mymerge.cmd \
     'meld --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --diff "$LOCAL" "$MERGED" "$REMOTE"'
   git config --global rerere.enabled 1
+  git config --global core.excludesfile '~/.gitignore'
 }
 
 ########################################
