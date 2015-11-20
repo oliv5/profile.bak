@@ -988,9 +988,9 @@ endif
 " } Tags {
 " *******************************************************
 " Set tags root
-let g:tags_db=['tags']
-"set tags=./tags,tags;$HOME
-set tags=./tags;$HOME
+let g:tags_db=['.tags']
+"set tags=./.tags,.tags;$HOME
+set tags=./.tags;$HOME
 
 " User commands
 command! -nargs=0 -bar Tnext    call s:Wnext('t')

@@ -1,15 +1,23 @@
 #!/bin/sh
 # Note: this file must be independant, it can be sourced by external scripts
-DBG=""
 
-# Ctags settings (see ~/.ctags)
-CTAGS_OPTS='-R --extra=f'
+# Ctags settings
+_CTAGS_OPTS='-R --extra=f'
+_CTAGS_OUT='.tags'
 
-# Cscope default settings
-#CSCOPE_OPTS='-qb'
-CSCOPE_OPTS='-qbk'
-CSCOPE_REGEX='.*\.(h|c|cc|cpp|hpp|inc|S)$'
-CSCOPE_EXCLUDE='-not -path *.svn* -and -not -path *.git -and -not -path /tmp/'
+# Cscope settings
+#_CSCOPE_OPTS='-qb'
+_CSCOPE_OPTS='-qbk'
+_CSCOPE_REGEX='.*\.(h|c|cc|cpp|hpp|inc|S)$'
+_CSCOPE_EXCLUDE='-not -path *.svn* -and -not -path *.git -and -not -path /tmp/'
+_CSCOPE_OUT='.cscope.out'
+_CSCOPE_FILES='.cscope.files'
+
+# ID settings
+_ID_OUT='.id'
+
+# pycscope settings
+_PYCSCOPE_OUT='.pycscope.out'
 
 # Make ctags
 mkctags() {
@@ -18,25 +26,23 @@ mkctags() {
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
   # Get options
-  local CTAGS_OPTIONS="$CTAGS_OPTS $3"
-  local CTAGS_DB="${DST}/tags"
+  local CTAGS_OPTIONS="$_CTAGS_OPTS $3"
+  local CTAGS_DB="${DST}/${_CTAGS_OUT}"
   # Build tag file
-  #${DBG} $(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}" 2>&1 >/dev/null | \
+  #$(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}" 2>&1 >/dev/null | \
   #  grep -vE 'Warning: Language ".*" already defined'
-  ${DBG} command ctags $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}"
+  command ctags $CTAGS_OPTIONS -f "${CTAGS_DB}" "${SRC}"
 }
 
 # Scan directory for cscope files
 scancsdir() {
-  command -v >/dev/null cscope || return
   # Get directories, remove ~/
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
   # Get options
-  local CSCOPE_FILES="$DST/cscope.files"
-  shift $(min 2 $#)
+  local CSCOPE_FILES="$DST/${_CSCOPE_FILES}"
   # Scan directory
-  ( set -f; find "$SRC" $CSCOPE_EXCLUDE "$@" -regextype posix-egrep -regex "$CSCOPE_REGEX" -type f -printf '"%p"\n' >> "$CSCOPE_FILES" )
+  ( set -f; find "$SRC" $_CSCOPE_EXCLUDE -regextype posix-egrep -regex "$_CSCOPE_REGEX" -type f -printf '"%p"\n' >> "$CSCOPE_FILES" )
 }
 
 # Make cscope db from source list file
@@ -46,16 +52,15 @@ mkcscope_1() {
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
   # Get options
-  local CSCOPE_OPTIONS="$CSCOPE_OPTS $3"
-  local CSCOPE_FILES="$DST/cscope.files"
-  local CSCOPE_DB="$DST/cscope.out"
+  local CSCOPE_OPTIONS="$_CSCOPE_OPTS $3"
+  local CSCOPE_FILES="$DST/${_CSCOPE_FILES}"
+  local CSCOPE_DB="$DST/${_CSCOPE_OUT}"
   # Build file list
-  if [ ! -s $CSCOPE_FILES ]; then
-    shift $(min 3 $#)
-    scancsdir "$SRC" "$DST" "$@"
+  if [ ! -e $CSCOPE_FILES ]; then
+    scancsdir "$SRC" "$DST"
   fi
   # Build tag file
-  ${DBG} command cscope $CSCOPE_OPTIONS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
+  command cscope $CSCOPE_OPTIONS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
 }
 
 # Scan and make cscope db
@@ -67,12 +72,11 @@ mkcscope_2() {
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
   # Get options
-  local CSCOPE_OPTIONS="$CSCOPE_OPTS $3"
-  local CSCOPE_DB="$DST/cscope.out"
-  shift $(min 3 $#)
+  local CSCOPE_OPTIONS="$_CSCOPE_OPTS $3"
+  local CSCOPE_DB="$DST/${_CSCOPE_OUT}"
   # Build tag file
-  find "$SRC" $CSCOPE_EXCLUDE "$@" -regextype posix-egrep -regex "$CSCOPE_REGEX" -type f -printf '"%p"\n' | \
-    ${DBG} command cscope $CSCOPE_OPTIONS -i '-' -f "$CSCOPE_DB"
+  find "$SRC" $_CSCOPE_EXCLUDE -regextype posix-egrep -regex "$_CSCOPE_REGEX" -type f -printf '"%p"\n' | \
+    command cscope $CSCOPE_OPTIONS -i '-' -f "$CSCOPE_DB"
 }
 
 # Cscope alias - use a fct because aliases are not exported to other fct
@@ -88,7 +92,7 @@ mkids() {
   local DST="$(eval echo ${2:-$PWD})"
   # build db
   ( cd "$SRC"
-    command mkid -o "$DST/ID"
+    command mkid -o "$DST/${_ID_OUT}"
   )
 }
 
@@ -99,7 +103,7 @@ mkpycscope() {
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
   # Build tag file
-  command pycscope -R -f "$DST/pycscope.out" "$SRC"
+  command pycscope -R -f "$DST/${_PYCSCOPE_OUT}" "$SRC"
 }
 
 # Make tags and cscope db
@@ -112,22 +116,30 @@ mktags() {
 
 # Clean ctags
 rmctags() {
-  rm -v tags .tags 2>/dev/null
+  # Get directories, remove ~/
+  local DIR="$(eval echo ${1:-$PWD})"
+  rm -v "${DIR}/${_CTAGS_OUT}" 2>/dev/null
 }
 
 # Clean cscope db
 rmcscope() {
-  rm -v cscope.out* cscope.files 2>/dev/null
+  # Get directories, remove ~/
+  local DIR="$(eval echo ${1:-$PWD})"
+  rm -v "${DIR}/${_CSCOPE_OUT}"* "${DIR}/${_CSCOPE_FILES}" 2>/dev/null
 }
 
 # Clean id-utils db
 rmids() {
-  rm -v ID 2>/dev/null
+  # Get directories, remove ~/
+  local DIR="$(eval echo ${1:-$PWD})"
+  rm -v "${DIR}/${_ID_OUT}" 2>/dev/null
 }
 
 # Clean pycscope db
 rmpycscope() {
-  rm -v pycscope.out 2>/dev/null
+  # Get directories, remove ~/
+  local DIR="$(eval echo ${1:-$PWD})"
+  rm -v "${DIR}/${_PYCSCOPE_OUT}" 2>/dev/null
 }
 
 # Clean tags and cscope db

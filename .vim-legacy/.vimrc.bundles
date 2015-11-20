@@ -52,7 +52,7 @@ endif
 
 if has("cscope")
 	" Option
-	let g:cscope_db = [ "cscope.out", "pycscope.out", $CSCOPE_DB ]
+	let g:cscope_db = [ ".cscope.out", ".pycscope.out", $_CSCOPE_DB ]
 	if has('quickfix')
 		set cscopequickfix=s-,c-,d-,i-,t-,e-
 	endif
