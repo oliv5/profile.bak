@@ -2,31 +2,10 @@
 	"color_scheme": "Packages/User/SublimeLinter/base16-ocean.dark (SL).tmTheme",
 	"file_exclude_patterns":
 	[
-		"*.pyc",
-		"*.pyo",
-		"*.exe",
-		"*.dll",
-		"*.obj",
-		"*.o",
-		"*.a",
-		"*.lib",
-		"*.so",
-		"*.dylib",
-		"*.ncb",
-		"*.sdf",
-		"*.suo",
-		"*.pdb",
-		"*.idb",
-		"*.class",
-		"*.psd",
-		"*.db",
-		".DS_Store",
-		"*.sublime-workspace",
-		"*.sublime-project",
-		"tags",
-		".tags*",
-		"cscope.*",
-		".git*"
+		"*.pyc", "*.pyo", "*.exe", "*.dll", "*.obj", "*.o", "*.a", "*.lib", "*.so", "*.dylib", "*.ncb", "*.sdf", "*.suo", "*.pdb", "*.idb", "*.class", "*.psd", "*.db",
+		"*.sublime-workspace", "*.sublime-project",
+		"tags", ".tags*", ".id", ".cscope.*", ".pycscope.*",
+		".git*", ".svn"
 	],
 	"ignored_packages":
 	[
