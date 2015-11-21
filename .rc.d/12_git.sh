@@ -553,9 +553,25 @@ git_clean() {
 }
 
 ########################################
-# List files
+# List local files
 git_ls() {
   git ls-tree -r ${1:-$(git_branch)} --name-only ${2:+| grep -F "$2"}
+}
+
+# List files in commit
+git_list() {
+  #git show --pretty="format:" --name-only "${@:-HEAD}"
+  git diff-tree --no-commit-id --name-only -r "${@:-HEAD}"
+}
+
+# Cat a file
+git_cat() {
+  #git show ${1:-HEAD}:"$2"
+  local REV="${1:-HEAD}"
+  shift 2>/dev/null
+  for FILE in "${@:-}"; do
+    git show ${REV}:"$FILE"
+  done
 }
 
 ########################################
