@@ -1,5 +1,4 @@
 {
-	"color_scheme": "Packages/User/SublimeLinter/base16-ocean.dark (SL).tmTheme",
 	"file_exclude_patterns":
 	[
 		"*.pyc", "*.pyo", "*.exe", "*.dll", "*.obj", "*.o", "*.a", "*.lib", "*.so", "*.dylib", "*.ncb", "*.sdf", "*.suo", "*.pdb", "*.idb", "*.class", "*.psd", "*.db",
@@ -11,5 +10,11 @@
 	[
 		"Vintage"
 	],
-	"theme": "Spacegray.sublime-theme"
+	"theme": "Aristocat.sublime-theme",
+	//"theme": "Asphalt.sublime-theme",
+	"theme_asphalt_show_input_dropdowon": true,
+	"theme_asphalt_show_panel_close": false,
+	"theme_asphalt_status_bar_brighter": false,
+	"theme_asphalt_tabs_small": true,
+	"color_scheme": "Packages/User/SublimeLinter/Harper (SL).tmTheme",
 }
