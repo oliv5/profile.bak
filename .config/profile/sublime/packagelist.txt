@@ -1,0 +1,68 @@
+Package manager
+https://packagecontrol.io/installation
+import urllib.request,os,hashlib; h = '2915d1851351e5ee549c20394736b442' + '8bc59f460fa1548d1514676163dafc88'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)
+
+==========================
+Tags
+https://github.com/SublimeText/CTags.git
+
+==========================
+Git
+https://github.com/kemayo/sublime-text-git
+https://github.com/jisaacks/GitGutter
+
+==========================
+Sublime​Linter
+https://packagecontrol.io/packages/SublimeLinter
+https://github.com/SublimeLinter
+https://github.com/SublimeLinter/SublimeLinter3
+https://github.com/SublimeLinter/SublimeLinter-cppcheck
+https://github.com/SublimeLinter/SublimeLinter-cpplint
+https://github.com/SublimeLinter/SublimeLinter-chktex
+https://github.com/SublimeLinter/SublimeLinter-phplint
+
+==========================
+Code editing
+https://github.com/wbond/sublime_alignment
+https://github.com/jonlabelle/Trimmer
+DISABLED: https://github.com/SublimeText-Markdown/MarkdownEditing
+DISABLED: https://github.com/revolunet/sublimetext-markdown-preview
+DISABLED: https://sublime.wbond.net/packages/Emmet
+https://github.com/colinta/SublimeFileDiffs
+
+==========================
+Autocompletion
+DISABLED: https://github.com/alienhard/SublimeAllAutocomplete
+DISABLED: https://github.com/ternjs/tern_for_sublime
+
+==========================
+Documentation
+https://github.com/spadgos/sublime-jsdocs
+https://github.com/kemayo/sublime-text-2-goto-documentation
+
+==========================
+Snippets
+https://github.com/Rapptz/cpp-sublime-snippet.git
+
+==========================
+# Languages env
+https://github.com/DamnWidget/anaconda.git
+
+==========================
+Themes & colorschemes
+https://github.com/kkga/spacegray.git
+https://github.com/Orlmente/Theme-Asphalt.git
+https://github.com/ddeville/aristocat-theme.git
+https://github.com/idleberg/Harper.tmTheme
+
+==========================
+Interface
+https://github.com/titoBouzout/SideBarEnhancements/tree/st3
+
+==========================
+Miscellaneous
+https://github.com/skuroda/PackageResourceViewer
+https://github.com/wuub/SublimeREPL
+https://github.com/wbond/sublime_terminal
+https://github.com/abusalimov/SublimeMoveBySymbols.git
+https://github.com/FichteFoll/FileHistory.git
