@@ -243,6 +243,24 @@ kill_mem() {
 }
 
 ################################
+# Zombies processes management
+# List zombies
+zombie_ls() {
+  ps aux | awk '"[Zz]" ~ $8 { print $2; }'
+}
+
+# Try to kill zombies by detaching them from their parent
+zombie_kill() {
+  local _PID _PPID
+  ps -e -o pid,ppid,state,comm |
+    awk '"[Zz]" ~ $3 { printf("%d %d %s\n", $1, $2, $4); }' |
+      while IFS=$' \n' read _PID _PPID _NAME; do
+        echo "Kill zombie $_NAME (PID: $_PID PPID: $_PPID)"
+        gdb -q -nx -ex "attach $_PPID" -ex "call waitpid($_PID, 0, 0)" -ex "detach"
+      done
+}
+
+################################
 # IPC management
 sem_purge() {
   ipcs -s | awk '/0/ {print $2}' | xargs -n 1 ipcrm -s
