@@ -10,11 +10,11 @@
 	[
 		"Vintage"
 	],
+	"color_scheme": "Packages/colorschemes/Harper.tmTheme",
 	"theme": "Aristocat.sublime-theme",
 	//"theme": "Asphalt.sublime-theme",
 	"theme_asphalt_show_input_dropdowon": true,
 	"theme_asphalt_show_panel_close": false,
 	"theme_asphalt_status_bar_brighter": false,
 	"theme_asphalt_tabs_small": true,
-	"color_scheme": "Packages/User/SublimeLinter/Harper (SL).tmTheme",
 }
