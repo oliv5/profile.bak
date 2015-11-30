@@ -80,6 +80,11 @@ alias  istruct='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGE
 alias  idefine='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGEX_DEFINE"'
 alias itypedef='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGEX_TYPEDEF"'
 
+# Alias to cut part of search result
+alias c1='cut -d: -f 1'
+alias c2='cut -d: -f 2'
+alias c3='cut -d: -f 3'
+
 # Dev replace
 _DSEXCLUDE="-not -path '*.svn*' -and -not -path '*.git*' -and -not -type l"
 alias  dhh='FCASE=   FTYPE= FXTYPE= FARGS= SEXCLUDE="$_DSEXCLUDE" _fsed'
