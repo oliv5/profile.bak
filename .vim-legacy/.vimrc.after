@@ -855,16 +855,19 @@ command! -nargs=0 -bar Mset   call <SID>MarkSet()
 command! -nargs=0 -bar Mnext  call <SID>MarkNext()
 command! -nargs=0 -bar Mprev  call <SID>MarkPrev()
 command! -nargs=0 -bar Mreset call <SID>MarkReset()
+command! -nargs=0 -bar Mlist  marks
 
 " Mark key maps
-FnNoremap <silent><F1>    :Mnext<CR>
-FnNoremap <silent><S-F1>  :Mprev<CR>
-FnNoremap <silent><C-F1>  :Mset<CR>
-FnNoremap <silent><A-F1>  :Mreset<CR>
-nmap <silent>m            :Mprev<CR>
-nmap <silent>M            :Mnext<CR>
-nmap <silent><C-m>        :Mset<CR>
-nmap <silent><A-m>        :Mreset<CR>
+FnNoremap <silent><F1>      :Mnext<CR>
+FnNoremap <silent><S-F1>    :Mprev<CR>
+FnNoremap <silent><C-F1>    :Mset<CR>
+FnNoremap <silent><A-F1>    :Mreset<CR>
+FnNoremap <silent><C-S-F1>  :Mlist<CR>
+nmap <silent>m              :Mprev<CR>
+nmap <silent>M              :Mnext<CR>
+nmap <silent><C-m>          :Mset<CR>
+nmap <silent><A-m>          :Mreset<CR>
+nmap <silent><C-A-m>        :Mlist<CR>
 
 " Reset
 if !exists("s:mark_next")
