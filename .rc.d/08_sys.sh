@@ -267,6 +267,17 @@ sem_purge() {
 }
 
 ################################
+# EINTR retry fct
+#http://unix.stackexchange.com/questions/16455/interruption-of-system-calls-when-a-signal-is-caught
+eintr() {
+  local EINTR=4
+  eval "$@"
+  while [ $? -eq $EINTR ]; do
+    eval "$@"
+  done
+}
+
+################################
 # Event tester
 alias event_list='xev'
 alias event_showkey='showkey -s'
