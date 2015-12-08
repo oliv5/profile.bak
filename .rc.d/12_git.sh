@@ -38,13 +38,12 @@ alias gdiff='git diff'
 alias gmm='git mergetool -y'
 alias gmerge='gmm'
 # Branch aliases
-alias gbc='git branch'
 alias gba='git branch -a'
-alias gbl='git branch -a'
-alias gbls='git branch -a'
+alias gbv='git branch -v'   # verbose list branch
+alias gbva='git branch -va' # verbose list branch
+alias gbd='git branch -d'   # branch delete
+alias gbdf='git branch -D'  # forced branch delete
 alias gbr='git branch -r'   # list tracking
-alias gbv='git branch -v'
-alias gbrm='git branch -d'
 alias gbrd='git branch -rd' # remove tracking
 alias gbranch='git branch'
 # Stash aliases
