@@ -266,6 +266,10 @@ sem_purge() {
   ipcs -s | awk '/0/ {print $2}' | xargs -n 1 ipcrm -s
 }
 
+shm_purge() {
+  ipcs -m | awk '/0/ {print $2}' | xargs -n 1 ipcrm -m
+}
+
 ################################
 # EINTR retry fct
 #http://unix.stackexchange.com/questions/16455/interruption-of-system-calls-when-a-signal-is-caught
