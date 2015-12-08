@@ -15,7 +15,7 @@ cmd_unset which find grep awk sed xargs cut
 ################################
 # Default prompt
 if [ ${#PS1} -lt 5 ]; then
-  export PS1='$USER@${HOSTNAME:-$(/bin/hostname)}: $PWD\$ '
+  export PS1='${USER}${HOSTNAME:+@$HOSTNAME}: $PWD\$ '
 fi
 
 # User anacron
@@ -26,12 +26,12 @@ fi
 
 # SSH-agent
 if command -v ssh-agent >/dev/null 2>&1; then
-  ssh-add -l &>/dev/null
-  if [ "$?" == 2 ]; then
+  ssh-add -l >/dev/null
+  if [ $? -eq 2 ]; then
     test -r $HOME/.ssh-agent-info && \
       eval "$(<$HOME/.ssh-agent-info)" >/dev/null
-    ssh-add -l &>/dev/null
-    if [ "$?" == 2 ]; then
+    ssh-add -l >/dev/null
+    if [ $? -eq 2 ]; then
       (umask 066; ssh-agent > $HOME/.ssh-agent-info)
       eval "$(<$HOME/.ssh-agent-info)" >/dev/null
     fi
@@ -70,25 +70,20 @@ alias f='cdf'
 alias p='cd ..'
 
 # Gvim
-alias e='gvim'
-alias sse='ss | cut -c 9- | xargs gvim'
-alias gse='gs | grep modified | cut -d : -f 2 | xargs gvim'
+alias v='gvim'
+alias ssv='ss | cut -c 9- | xargs gvim'
+alias gsv='gs | grep modified | cut -d : -f 2 | xargs gvim'
 
 # Search and open
-ffe() { ff "$@" | xargs gvim; }
-ffc() { ff "$@" | xargs $PAGER; }
-ffg() { ff "$@" | xargs $GEDITOR; }
+ffv() { ff "$@" | xargs gvim; }
+ffc() { ff "$@" | xargs ${PAGER:-false}; }
+ffe() { ff "$@" | xargs ${GEDITOR:-false}; }
 ffo() { ff "$@" | xargs mimeopen; }
 
 # Gedit/geany
-g() {
-  eval "${GEDITOR:-false}" "$@"
-}
-alias ssg='ss | cut -c 9- | xargs g'
-alias gsg='gs | grep modified | cut -d : -f 2 | xargs g'
-ffg() {
-  ff "$@" | xargs g
-}
+alias e='${GEDITOR:-false}'
+alias sse='ss | cut -c 9- | xargs ${GEDITOR:-false}'
+alias gse='gs | grep modified | cut -d : -f 2 | xargs ${GEDITOR:-false}'
 
 # Source insight
 alias s='si'
@@ -97,8 +92,9 @@ alias s='si'
 alias d='diff'
 alias m='meld'
 
-# RC scripts shortcuts
-alias gitrc='. "$RC_DIR/.rc.d/12_git.sh"'
+# Grep
+alias g='grep'
+alias ig='grep -i'
 
 # Misc
 alias hi='history'
