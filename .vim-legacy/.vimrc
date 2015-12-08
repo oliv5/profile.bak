@@ -278,6 +278,7 @@ let g:syntax_complete_loaded = 1
 let g:clang_complete_loaded = 1
 "let g:loaded_commentary = 1
 let g:loaded_bufline = 1
+let g:loaded_buftabs = 1
 
 " Load bundles config
 if filereadable(expand("~/.vimrc.bundles"))

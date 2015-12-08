@@ -494,6 +494,26 @@ if !exists('g:loaded_buftabs')
 	"let g:buftabs_marker_end = ']]'
 	let g:buftabs_separator = ":"
 	"let g:buftabs_active_highlight_group="Visual"
+	" OLA Custom options
+	let g:buftabs_enabled = 1
+endif
+
+
+" *******************************************************
+" } bufline plugin {
+" *******************************************************
+if !exists('g:loaded_bufline')
+	let g:bufline_left_arrow = ' ◀ '
+	let g:bufline_right_arrow = ' ▶ '
+	let g:bufline_arrows_placement = 0
+	let g:bufline_show_inactive_arrows = 0
+	let g:bufline_modified_sign = ''
+	let g:bufline_default_filter = '.*'
+	let g:bufline_show_filter = 1
+	let g:bufline_filtering = 1
+	let g:bufline_autoscroll = 1
+	let g:bufline_bufname_maxlength = 0
+	let g:bufline_case_sensitivity = 0
 endif
 
 

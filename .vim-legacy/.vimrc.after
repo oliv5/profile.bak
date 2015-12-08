@@ -256,12 +256,11 @@ if !exists('g:loaded_airline') && !exists('g:vimrc_nostatusline')
 	" Set status line content
 	function! s:Statusline(local)
 		if has("statusline") && &modifiable
-			"if exists('g:loaded_buftabs')
-			"	set statusline=\ %{buftabs#statusline(-45)}
-			"else
-			"	set statusline=[%n]\ %<%F
-			"endif
-			exe "set" . a:local "statusline=\\ %{exists('g:loaded_buftabs')?buftabs#statusline(-45):'[%n]\\ %<%F'}"
+			if exists('g:buftabs_enabled')
+				exe "set" . a:local "statusline=\\ %{buftabs#statusline(-45)}"
+			else
+				exe "set" . a:local "statusline=\\ [%n]\\ %<%F"
+			endif
 			exe "set" . a:local "statusline+=\\ %="
 			exe "set" . a:local "statusline+=\\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r"
 			exe "set" . a:local "statusline+=\\ [%{&expandtab==0?'tabs':'space'}%{b:StatuslineWarning()}]"
