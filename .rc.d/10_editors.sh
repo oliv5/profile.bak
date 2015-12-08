@@ -14,7 +14,7 @@ export GEDITOR="$(command -v geany || command -v gvim || command -v gedit || com
 # Gedit
 if command -v gedit >/dev/null; then
   gedit() {
-    local ARGS="$(echo $@ | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1 +\2/g')"
+    local ARGS="$(echo $@ | sed -re 's/([^ :]*):([0-9]*)(:[^ ]*)?/+\2 \1/g')"
     command gedit $ARGS
   }
 fi
@@ -23,7 +23,7 @@ fi
 # Geany
 if command -v geany >/dev/null; then
   geany() {
-    local ARGS="$(echo $@ | sed -e 's/\([^:]*\):\([0-9]*\)\(:.*\)\?/\1 +\2/g')"
+    local ARGS="$(echo $@ | sed -re 's/([^ :]*):([0-9]*)(:[^ ]*)?/+\2 \1/g')"
     command geany $ARGS
   }
 fi
@@ -35,7 +35,7 @@ export COLORTERM="xterm" # backspace bug in vim
 # Start gvim
 if command -v gvim >/dev/null; then
   gvim() {
-    local ARGS="$(echo "$@" | sed -re 's/([^:]*):([0-9]*):?.*/+\2 \1/g')"
+    local ARGS="$(echo $@ | sed -re 's/([^ :]*):([0-9]*)(:[^ ]*)?/+\2 \1/g')"
     if [ -z "$VIM_USETABS" ]; then
       ARGS="${1:+--remote-silent} $ARGS"
     else
