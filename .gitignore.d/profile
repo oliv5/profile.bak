@@ -1,35 +1,35 @@
 *
-!/[Bash
 !/.bash_login
 !/.bash_logout
 !/.bash_profile
 !/.bashrc
-!/builtin
-!/command
 !/.config
-!/.config/applications
-!/.config/applications/install.sh
-!/.config/applications/pirate.ico
-!/.config/applications/xkill.desktop
 !/.config/geany
 !/.config/geany/geany.conf
 !/.config/geany/keybindings.conf
 !/.config/mr
+!/.config/mr/available.d
+!/.config/mr/available.d/profile.default
 !/.config/mr/config.d
-!/.config/mr/config.d/profile
+!/.config/mr/config.d/profile.default
 !/.config/profile
+!/.config/profile/applications
+!/.config/profile/applications/install.sh
+!/.config/profile/applications/pirate.ico
+!/.config/profile/applications/si.desktop
+!/.config/profile/applications/si.png
+!/.config/profile/applications/xkill.desktop
 !/.config/profile/backup
+!/.config/profile/backup/git-cache-meta-9645c54c.zip
+!/.config/profile/backup/git-prune-8684c0cf.zip
+!/.config/profile/backup/git-remote-gcrypt-79b99738.zip
+!/.config/profile/backup/git-repo-dc2545ca.tgz
+!/.config/profile/backup/git-up-9c57366d.zip
+!/.config/profile/backup/myrepos-f53fcb7e.zip
+!/.config/profile/backup/pycscope_github_70c3241a.zip
+!/.config/profile/backup/vcsh-d5c11e43.zip
 !/.config/profile/backup/vim-spf13_20150811_122254.7z
 !/.config/profile/backup/vim-spf13_backup.sh
-!/.config/profile/bin
-!/.config/profile/bin/git-cache-meta-9645c54c.zip
-!/.config/profile/bin/git-prune-8684c0cf.zip
-!/.config/profile/bin/git-remote-gcrypt-79b99738.zip
-!/.config/profile/bin/git-repo-dc2545ca.tgz
-!/.config/profile/bin/git-up-9c57366d.zip
-!/.config/profile/bin/myrepos-f53fcb7e.zip
-!/.config/profile/bin/pycscope_github_70c3241a.zip
-!/.config/profile/bin/vcsh-d5c11e43.zip
 !/.config/profile/sourceinsight
 !/.config/profile/sourceinsight/backup.sh
 !/.config/profile/sourceinsight/GLOBAL_2015-01-06.CF3
@@ -65,27 +65,64 @@
 !/.config/profile/sourceinsight/macros/sample/wordstar.em
 !/.config/profile/sourceinsight/macros.sh
 !/.config/profile/sourceinsight/macros/snippet.em
-!/.config/profile/sourceinsight/serial.7z
 !/.config/profile/sourceinsight/Si3572Setup.exe.7z
-!/.config/profile/sourceinsight/si.desktop
-!/.config/profile/sourceinsight/si.png
+!/.config/profile/sourceinsight/Si3581Setup.exe.7z
 !/.config/profile/sourceinsight/UserManual.pdf
+!/.config/profile/sublime
+!/.config/profile/sublime/packagelist.txt
+!/.config/profile/sublime/packages
+!/.config/profile/sublime/packages/Installed Packages
+!/.config/profile/sublime/packages/Installed Packages/0_package_control_loader.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/Alignment.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/BracketHighlighter.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/C++ Snippets.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/CTags.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/DocBlockr.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/FileDiffs.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/File History.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/GitGutter.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/GotoDocumentation.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/Move By Symbols.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/Package Control.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/PackageResourceViewer.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/SideBarEnhancements.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/SublimeLinter-cppcheck.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/Theme - Aristocat.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/Theme - Asphalt.sublime-package
+!/.config/profile/sublime/packages/Installed Packages/Trimmer.sublime-package
+!/.config/profile/sublime/packages/Packages
+!/.config/profile/sublime/packages/Packages/Anaconda.7z
+!/.config/profile/sublime/packages/Packages/bz2.7z
+!/.config/profile/sublime/packages/Packages/ssl-linux.7z
+!/.config/profile/sublime/packages/Packages/SublimeLinter.7z
+!/.config/profile/sublime/packages/Packages/SublimeREPL.7z
+!/.config/profile/sublime/packages/Packages/Terminal.7z
+!/.config/profile/sublime/packages/Packages/Theme - Spacegray.7z
+!/.config/profile/sublime/setup.sh
+!/.config/profile/sublime/sublime_text_3_build_3083_x64.tar.bz2
+!/.config/profile/sublime/Sublime-Text-3-Full-Documentation.7z
+!/.config/sublime-text-3
+!/.config/sublime-text-3/Packages
+!/.config/sublime-text-3/Packages/colorschemes
+!/.config/sublime-text-3/Packages/colorschemes/Harper.tmTheme
+!/.config/sublime-text-3/Packages/colorschemes/Made of Code.tmTheme
+!/.config/sublime-text-3/Packages/User
+!/.config/sublime-text-3/Packages/User/CTags.sublime-settings
+!/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap
+!/.config/sublime-text-3/Packages/User/Default (Linux).sublime-mousemap
+!/.config/sublime-text-3/Packages/User/Package Control.sublime-settings
+!/.config/sublime-text-3/Packages/User/Preferences.sublime-settings
 !/.config/terminator
 !/.config/terminator/config1
 !/.config/terminator/config2
-!/.config/unity
-!/.config/unity/ccsm-gnome-basic.profile
-!/.config/unity/ccsm-unity.profile
 !/.ctags
+!/.dashrc
 !/.exrc
-!/.gitglobalconfig
 !/.gitignore.d
 !/.gitignore.d/profile
-!/Hackers
 !/.inputrc
 !/.mkshrc
 !/.mrconfig
-!/.mrskip
 !/pbin
 !/pbin/annex.sh
 !/pbin/bootstrap_desktop.sh
@@ -106,12 +143,14 @@
 !/pbin/externals/git-cache-meta
 !/pbin/externals/git-prune
 !/pbin/externals/git-remote-gcrypt
+!/pbin/externals/ipcmd
 !/pbin/externals/mr
 !/pbin/externals/mr/mr
 !/pbin/externals/mr/README
 !/pbin/externals/mr/url.txt
 !/pbin/externals/mr/webcheckout
 !/pbin/externals/repo
+!/pbin/externals/svnmerge.py
 !/pbin/externals/vcsh
 !/pbin/externals/vcsh/README.md
 !/pbin/externals/vcsh/url.txt
@@ -146,6 +185,7 @@
 !/.rc.d/04_7z.sh
 !/.rc.d/04_tar.sh
 !/.rc.d/04_xz.sh
+!/.rc.d/04_zip.sh
 !/.rc.d/05_diff.sh
 !/.rc.d/06_mount.sh
 !/.rc.d/08_pwr.sh
@@ -168,6 +208,10 @@
 !/.rc.d/25_adb.sh
 !/.rc.d/98_screen.sh
 !/.rc.d/98_tmux.sh
+!/.rc.d/android
+!/.rc.d/android/01_shell.sh
+!/.rc.d/android/03_search.sh
+!/.rc.d/android/08_sys.sh
 !/.rc.d/bash
 !/.rc.d/bash/01_stack.sh
 !/.rc.d/bash/01_trap.sh
@@ -177,12 +221,6 @@
 !/.rc.d/bash/08_sys.sh
 !/.rc.d/bash/10_misc.sh
 !/.rc.d/bash/11_dev.sh
-!/.rc.d/doc
-!/.rc.d/doc/DashAsBinSh_UbuntuWiki.pdf
-!/.rc.d/doc/Fixing_Unix_Linux_POSIX_Filenames.pdf
-!/.rc.d/doc/sed1line.pdf
-!/.rc.d/doc/The
-!/.rc.d/doc/tips.txt
 !/.rc.d/.permissions
 !/.rc.d/test
 !/.rc.d/test/00_shell.sh
@@ -190,7 +228,6 @@
 !/.rc.d/test/trap_test.sh
 !/.rc.end
 !/.screenrc
-!/set
 !/.tmux.conf
 !/.tmux.faq
 !/.vim-legacy
@@ -829,4 +866,3 @@
 !/.vim-spf13/.vimrc.bundles.local
 !/.vim-spf13/.vimrc.local
 !/.wgetrc
-!/Wiki].pdf
