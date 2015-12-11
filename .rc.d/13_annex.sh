@@ -96,6 +96,7 @@ annex_diff() {
 
 # Annex bundle
 annex_bundle() {
+  git_exists || return 1
   if annex_exists; then
     local DIR="${1:-$(git_dir)}"
     if [ -d "$DIR" ]; then
@@ -126,8 +127,26 @@ annex_bundle() {
 }
 
 # Annex copy
-annex_copy() {
-  vcsh_run 'git annex copy' "$@"
+alias annex_copy='vcsh_run "git annex copy"'
+
+# Annex download
+annex_download() {
+  git_exists || return 1
+  local REMOTES="${1:-$(git_remotes)}"
+  [ $# -ge 1 ] && shift
+  for REMOTE in $REMOTES; do
+    vcsh_run 'git annex copy --from' "$REMOTE" "${@:-.}"
+  done
+}
+
+# Annex upload
+annex_upload() {
+  git_exists || return 1
+  local REMOTES="${1:-$(git_remotes)}"
+  [ $# -ge 1 ] && shift
+  for REMOTE in $REMOTES; do
+    vcsh_run 'git annex copy --to' "$REMOTE" "${@:-.}"
+  done
 }
 
 ########################################
