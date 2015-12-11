@@ -129,8 +129,21 @@ alias grbi='git rebase -i'
 alias grebase='git rebase'
 # Pull/push aliases
 alias gps='git push'
+alias gpush='git push'
 alias gpl='git pull'
+alias gpull='git pull'
 alias gpr='git pull --rebase'
+# Config aliases
+alias gcl='git config -l'
+alias gcll='git config -l --local'
+alias gclg='git config -l --global'
+alias gcls='git config -l --system'
+alias gcfl='git config --local'
+alias gcfg='git config --global'
+alias gcfs='git config --system'
+alias gcbt='git config --set core.bare true'
+alias gcbf='git config --set core.bare false'
+alias gconfig='git config'
 
 ########################################
 # Env setup
@@ -287,10 +300,16 @@ git_clone() {
   done
 }
 
-# Vcsh wrapper, should be overwritten
-# by vcsh main script
+# Wrapper: vcsh run
+# Overwritten by vcsh main script
 vcsh_run() {
   eval "$@"
+}
+
+# Wrapper: git annex direct mode
+# Overwritten by annex main script
+annex_direct() {
+  false
 }
 
 # Batch pull existing remote/branches
@@ -299,35 +318,41 @@ git_pull() {
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   local CURRENT="$(git_branch)"
-  vcsh_run "
-    end() {
-      git checkout -q \"$CURRENT\"
-      if [ -n \"\$STASH\" ]; then
-        git stash apply -q --index \"\$STASH\"
-      fi
-      trap - INT TERM EXIT
-    }  
-    set +e
-    trap 'end' INT TERM EXIT
-    STASH=\"\$(git stash create 2>/dev/null)\"
-    if [ -n \"\$STASH\" ]; then
-      git reset --hard HEAD -q --
-    fi
-    for BRANCH in $BRANCHES; do
-      git checkout \"\$BRANCH\" >/dev/null|| continue
-      for REMOTE in $REMOTES; do
-        if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
-          if [ -x \"\$(git --exec-path)/git-pull\" ]; then
-            git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
-          else
-            git fetch \"\$REMOTE\" \"\$BRANCH\" &&
-            git merge --ff-only \"\$REMOTE/\$BRANCH\"
-          fi
+  if annex_direct; then
+    # Note: git annex repos in direct mode
+    # are not compatible with vcsh
+    git annex sync
+  else
+    vcsh_run "
+      end() {
+        git checkout -q \"$CURRENT\"
+        if [ -n \"\$STASH\" ]; then
+          git stash apply -q --index \"\$STASH\"
         fi
+        trap - INT TERM EXIT
+      }
+      set +e
+      trap 'end' INT TERM EXIT
+      STASH=\"\$(git stash create 2>/dev/null)\"
+      if [ -n \"\$STASH\" ]; then
+        git reset --hard HEAD -q --
+      fi
+      for BRANCH in $BRANCHES; do
+        git checkout \"\$BRANCH\" >/dev/null|| continue
+        for REMOTE in $REMOTES; do
+          if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
+            if [ -x \"\$(git --exec-path)/git-pull\" ]; then
+              git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
+            else
+              git fetch \"\$REMOTE\" \"\$BRANCH\" &&
+              git merge --ff-only \"\$REMOTE/\$BRANCH\"
+            fi
+          fi
+        done
       done
-    done
-    end
-  "
+      end
+    "
+  fi
 }
 
 # Batch push existing remote/branches
