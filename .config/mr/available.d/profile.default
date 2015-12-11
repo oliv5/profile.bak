@@ -1,0 +1,15 @@
+[${XDG_CONFIG_HOME:-$HOME/.config}/vcsh/repo.d/profile.git]
+pull     = git_pull
+push     = git_push
+sync     = annex_sync; repo sync
+
+download = annex_download
+upload   = annex_upload
+
+status   = git status -s && annex_status
+diff     = annex_diff
+gdm      = git difftool -y -t meld --
+
+gitk     = gitk
+gc       = git gc
+meta     = git_meta
