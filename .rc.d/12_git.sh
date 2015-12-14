@@ -252,6 +252,11 @@ git_cmd() {
   return 0
 }
 
+# Check a remote repo exists
+git_ping() {
+  git ls-remote "${1:-$(git_dir)}" &> /dev/null
+}
+
 ########################################
 # Get hash
 alias git_head='git_hash'
