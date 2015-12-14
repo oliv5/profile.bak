@@ -56,6 +56,9 @@ _notify_proc() {
 
   # Kill the coproc child process
   kill $INOTIFY_PID 2>/dev/null
+
+  # Remove traps
+  trap - 0 1 2 3 6 15
 }
 
 # Main notification method enhencement to support file moves

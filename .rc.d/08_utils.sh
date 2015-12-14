@@ -49,9 +49,9 @@ ask_file() {
 # Get password
 ask_passwd() {
   local PASSWD
-  trap "stty echo; trap SIGINT" SIGINT; stty -echo
+  trap "stty echo; trap INT" INT; stty -echo
   read -p "${1:-Password: }" PASSWD; echo
-  stty echo; trap SIGINT
+  stty echo; trap - INT
   echo $PASSWD
 }
 

@@ -18,6 +18,8 @@ alias gu='git status --porcelain -b | awk "NR==1 || /^\?\?/"'       # untracked 
 alias gi='git status --porcelain -b | awk "NR==1 || /^\!\!/"'       # ignored
 alias gz='git status --porcelain -b | awk "NR==1 || /^[MARC] /"'    # in index
 alias gs='git status --porcelain -b | awk "NR==1 || /^[^\?\?]/"'    # not untracked
+alias gst='git_st'
+alias gstx='git_stx'
 alias gstatus='git status'
 # List aliases
 alias gll='git ls-files'
