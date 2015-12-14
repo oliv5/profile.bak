@@ -302,14 +302,14 @@ git_clone() {
 
 # Wrapper: vcsh run
 # Overwritten by vcsh main script
-command -v "vcsh_run" >/dev/null 2>&1 &&
+command -v "vcsh_run" >/dev/null 2>&1 ||
 vcsh_run() {
   eval "$@"
 }
 
 # Wrapper: git annex direct mode
 # Overwritten by annex main script
-command -v "annex_direct" >/dev/null 2>&1 &&
+command -v "annex_direct" >/dev/null 2>&1 ||
 annex_direct() {
   false
 }
