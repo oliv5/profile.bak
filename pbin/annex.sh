@@ -112,8 +112,10 @@
                 echo "[annex] Sync metadata"
                 ${DBG} git annex sync
                 for REMOTE in ${ANNEX_CONTENT}; do
-                    echo "[annex] Sync files content to remote '$REMOTE'"
-                    ${DBG} git annex copy . --to "$REMOTE"
+                    if git ls-remote "$REMOTE" >/dev/null; then
+                        echo "[annex] Sync files content to remote '$REMOTE'"
+                        ${DBG} git annex copy . --to "$REMOTE"
+                    fi
                 done
             fi
         done
