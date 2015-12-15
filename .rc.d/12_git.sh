@@ -348,11 +348,13 @@ git_pull() {
         git checkout \"\$BRANCH\" >/dev/null|| continue
         for REMOTE in $REMOTES; do
           if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
-            if [ -x \"\$(git --exec-path)/git-pull\" ]; then
-              git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
-            else
-              git fetch \"\$REMOTE\" \"\$BRANCH\" &&
-              git merge --ff-only \"\$REMOTE/\$BRANCH\"
+            if git ls-remote \"\$REMOTE\" | grep \"heads/\$BRANCH\" >/dev/null; then
+              if [ -x \"\$(git --exec-path)/git-pull\" ]; then
+                git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
+              else
+                git fetch \"\$REMOTE\" \"\$BRANCH\" &&
+                git merge --ff-only \"\$REMOTE/\$BRANCH\"
+              fi
             fi
           fi
         done
