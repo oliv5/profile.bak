@@ -296,7 +296,7 @@ git_clone() {
   local URL="${1:?No URL specified}"
   local REMOTE="${2:-origin}"
   local BRANCH="${3:-master}"
-  local DIR="$(basename "$URL" .git)"
+  local DIR="${4:-$(basename "$URL" .git)}"
   shift 3 2>/dev/null
   git clone "$URL" "$DIR" || break
   git --git-dir="$DIR/.git" remote rename origin "$REMOTE"
@@ -579,7 +579,8 @@ git_clean() {
   git_exists || return 1
   # Confirmation
   if [ "$1" != "-y" ]; then
-    ! ask_question "Remove unversioned files? (y/n) " y Y >/dev/null && return 0
+    git clean -n --exclude=".*" "$@"
+    ! ask_question "Proceed? (y/n) " y Y >/dev/null && return 0
   fi
   shift
   # Backup
@@ -587,7 +588,7 @@ git_clean() {
   mkdir -p "$DST"
   git_stx '??' | xargs -0 7z a "$DST/clean.$(git_name).7z"
   # Clean repository
-  git clean -d --exclude=".*" "$@"
+  git clean -df --exclude=".*" "$@"
 }
 
 ########################################
