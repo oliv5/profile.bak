@@ -3,7 +3,8 @@
 # Find based code search
 _dfind1() { local ARG1="$1"; shift; (set -f; _ffind "$ARG1" ${_DFEXCLUDE} "$@"); }
 alias _dfind='_dfind1'
-_DFEXCLUDE="-and -not -path '*.svn*' -and -not -path '*.git*' -and -not -path '*.repo*'"
+#_DFEXCLUDE="-and -not -path */.svn* -and -not -path */.git* -and -not -path */.repo*"
+_DFEXCLUDE="-and -not -path */.*"
 alias    dff='FCASE=   FTYPE=  FXTYPE=  FARGS= _dfind'
 alias   dfff='FCASE=   FTYPE=f FXTYPE=  FARGS= _dfind'
 alias   dffd='FCASE=   FTYPE=d FXTYPE=  FARGS= _dfind'
@@ -22,7 +23,8 @@ _dgrep1()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; shift $(min 3 $
 _dgrep2()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; shift $(min 3 $#); (set -f; _fgrep2 "$ARG2" ${_DG2EXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
 alias _dgrep='_dgrep1'
 _DG1EXCLUDE="$_DFEXCLUDE"
-_DG2EXCLUDE="--exclude-dir=.svn --exclude-dir=.git --exclude-dir=.repo"
+#_DG2EXCLUDE="--exclude-dir=.svn --exclude-dir=.git --exclude-dir=.repo"
+_DG2EXCLUDE="--exclude-dir=.*"
 _DGEXT_C="*.c;*.cpp;*.cc"
 _DGEXT_H="*.h;*.hpp"
 _DGEXT_V="*.vhd;*.v"
@@ -85,7 +87,8 @@ alias c2='cut -d: -f 2'
 alias c3='cut -d: -f 3'
 
 # Dev replace
-_DSEXCLUDE="-not -path '*.svn*' -and -not -path '*.git*' -and -not -type l"
+#_DSEXCLUDE="-not -path */.svn* -and -not -path */.git* -and -not -type l"
+_DSEXCLUDE="-not -path */.* -and -not -type l"
 alias  dhh='FCASE=   FTYPE= FXTYPE= FARGS= SEXCLUDE="$_DSEXCLUDE" _fsed'
 alias idhh='FCASE=-i FTYPE= FXTYPE= FARGS= SEXCLUDE="$_DSEXCLUDE" _fsed'
 
@@ -105,7 +108,7 @@ pmake() {
 		ipcrm -s $IPCMD_SEMID
 		unset IPCMD_SEMID
 		return $RETCODE
-    	else
+	else
 		command make "$@"
 	fi
 }
