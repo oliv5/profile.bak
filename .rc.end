@@ -38,9 +38,8 @@ if command -v ssh-agent >/dev/null 2>&1; then
   fi
 fi
 
-
 # GPG agent
-if command -v ssh-agent >/dev/null 2>&1; then
+if command -v gpg-agent >/dev/null 2>&1; then
   if test -f $HOME/.gpg-agent-info && kill -0 $(cut -d: -f 2 $HOME/.gpg-agent-info) 2>/dev/null; then
     export GPG_AGENT_INFO=$(<$HOME/.gpg-agent-info)
   else
