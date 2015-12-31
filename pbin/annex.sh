@@ -9,6 +9,7 @@
     GLOBAL_ANNEX_CONTENT=""
     GLOBAL_ANNEX_FORCE=""
     GLOBAL_ANNEX_SYNC="1"
+    GLOBAL_ANNEX_FAST=""
     GLOBAL_ANNEX_ADD="1"
     GLOBAL_WIFIDEV=""
     GLOBAL_INCHARGE=""
@@ -16,7 +17,7 @@
 
     # Get arguments
     echo "[annex] called with args: $@"
-    while getopts "db:l:asc:fw:g" OPTFLAG; do
+    while getopts "db:l:asc:fuw:g" OPTFLAG; do
       case "$OPTFLAG" in
         d) set -vx; DBG="false";;
         b) BASEDIR="${OPTARG}";;
@@ -25,17 +26,19 @@
         s) GLOBAL_ANNEX_SYNC="";;
         c) GLOBAL_ANNEX_CONTENT="${OPTARG}";;
         f) GLOBAL_ANNEX_FORCE="--force";;
+        u) GLOBAL_ANNEX_FAST="--fast";;
         w) GLOBAL_WIFIDEV="${OPTARG}";;
         g) GLOBAL_INCHARGE="1";;
-        *) echo >&2 "Usage: annex.sh [-h] [-d] [-b] [-l logfile] [-a] [-c repos] [-f] [-s dir] [-w device] [-g]"
+        *) echo >&2 "Usage: annex.sh [-h] [-d] [-b dir] [-l logfile] [-a] [-c repos] [-f] [-u] [-s] [-w device] [-g]"
            echo >&2 "-d  dry-run"
            echo >&2 "-b  set base directory"
            echo >&2 "-l  log to file"
            echo >&2 "-a  skip adding files"
            echo >&2 "-s  skip syncing"
            echo >&2 "-c  repos for which to sync content (not with -s)"
-           echo >&2 "-f  force file addition (not with -a)"
+           echo >&2 "-f  force adding file (not with -a)"
            echo >&2 "-w  sync file content only on wifi (not with -s)"
+           echo >&2 "-u  fast sync file content (not with -s)"
            echo >&2 "-g  proceed only when in charge"
            exit 1
            ;;
@@ -76,13 +79,16 @@
             local ANNEX_ADD="$GLOBAL_ANNEX_ADD"
             local ANNEX_FORCE="$GLOBAL_ANNEX_FORCE"
             local ANNEX_SYNC="$GLOBAL_ANNEX_SYNC"
+            local ANNEX_FAST="$GLOBAL_ANNEX_FAST"
             local ANNEX_CONTENT="${GLOBAL_ANNEX_CONTENT:-$(git remote)}"
             # Check options
-            local CHARGE_STATUS="$(cat /sys/class/power_supply/battery/status 2>/dev/null | tr '[:upper:]' '[:lower:]')"
-            #local CHARGE_LEVEL="$(dumpsys battery | awk '/level:/ {print $2}')"
-            if [ -n "$GLOBAL_INCHARGE" ] && [ "$CHARGE_STATUS" != "charging" -a "$CHARGE_STATUS" != "full" ]; then
-                echo "[warning] Device is not in charge, nor full battery. Disable file addition and file content syncing..."
-                unset ANNEX_CONTENT ANNEX_ADD
+            if [ -n "$GLOBAL_INCHARGE" ]; then
+                local CHARGE_STATUS="$(cat /sys/class/power_supply/battery/status 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+                #local CHARGE_LEVEL="$(dumpsys battery | awk '/level:/ {print $2}')"
+                if [ "$CHARGE_STATUS" != "charging" -a "$CHARGE_STATUS" != "full" ]; then
+                    echo "[warning] Device is not in charge, nor full battery. Disable file addition and file content syncing..."
+                    unset ANNEX_CONTENT ANNEX_ADD
+                fi
             fi
             if [ -n "$GLOBAL_WIFIDEV" ] && ! ip addr show dev "$GLOBAL_WIFIDEV" 2>/dev/null | grep UP >/dev/null; then
                 echo "[warning] Wifi device '$GLOBAL_WIFIDEV' is not connected. Disable file content syncing..."
@@ -114,7 +120,7 @@
                 for REMOTE in ${ANNEX_CONTENT}; do
                     if git ls-remote "$REMOTE" >/dev/null; then
                         echo "[annex] Sync files content to remote '$REMOTE'"
-                        ${DBG} git annex copy . --to "$REMOTE"
+                        ${DBG} git annex copy . --to "$REMOTE" ${ANNEX_FAST}
                     fi
                 done
             fi
