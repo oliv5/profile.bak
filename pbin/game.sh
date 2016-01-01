@@ -89,6 +89,11 @@ dosbox_delete() {
     rm "$GAMESCRIPT" "$GAMECONF"
 }
 
+# Playonlinux
+playonlinux() {
+    optirun playonlinux ${GAME:+--run "$GAME"}
+}
+
 # Run game
 run() {
     eval "$GAMESCRIPT" "$@"
@@ -97,11 +102,11 @@ run() {
 ########################################
 ########################################
 # Main
-GAME="${1:?No name for the game...}"
+GAME="$1"
 GAMESROOT="$HOME/games"
 GAMEDIR="$GAMESROOT/${GAME}"
 GAMESCRIPT="$GAMESROOT/${GAME}.sh"
-shift
+shift $((1<$#?1:$#))
 # Last commands in file
 # Execute function from command line
 [ $# -gt 0 -a ! -z "$1" ] && "$@" || true
