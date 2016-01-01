@@ -13,6 +13,12 @@ wine_test() {
         echo "Prefix '$GAME' does not exist."
 }
 
+# Wine run command
+wine_cmd() {
+    local WINEPREFIX="$GAMESROOT/wine/.wine_$GAME"
+    WINEPREFIX="$WINEPREFIX" optirun wine "$@"
+}
+
 # Wine setup
 wine_setup() {
     local WINEPREFIX="$GAMESROOT/wine/.wine_$GAME"
