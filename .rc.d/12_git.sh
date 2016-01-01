@@ -139,14 +139,9 @@ alias gpull='git pull'
 alias gpr='git pull --rebase'
 # Config aliases
 alias gcl='git config -l'
-alias gcll='git config -l --local'
-alias gclg='git config -l --global'
-alias gcls='git config -l --system'
-alias gcfl='git config --local'
-alias gcfg='git config --global'
-alias gcfs='git config --system'
-alias gcbt='git config --set core.bare true'
-alias gcbf='git config --set core.bare false'
+alias gcg='git config --get'
+alias gcs='git config --set'
+alias gcfg='git config'
 alias gconfig='git config'
 
 ########################################
