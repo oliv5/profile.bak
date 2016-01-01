@@ -1,7 +1,20 @@
 #!/bin/sh
 
+# Wine list prefix
+wine_list() {
+    ls -d "$GAMESROOT/wine/.wine_"*
+}
+
+# Wine test prefix
+wine_test() {
+    local WINEPREFIX="$GAMESROOT/wine/.wine_$GAME"
+    [ -d "$WINEPREFIX" ] && 
+        echo "Prefix '$GAME' exists." ||
+        echo "Prefix '$GAME' does not exist."
+}
+
 # Wine setup
-winesetup() {
+wine_setup() {
     local WINEPREFIX="$GAMESROOT/wine/.wine_$GAME"
 
     # Write/edit launch script
@@ -39,8 +52,14 @@ EOF
     fi
 }
 
+# Wine delete prefix
+wine_delete() {
+    local WINEPREFIX="$GAMESROOT/wine/.wine_$GAME"
+    rm -r "$GAMESCRIPT" "$WINEPREFIX"
+}
+
 # Dosbox setup
-dosboxsetup() {
+dosbox_setup() {
     local GAMECONF="$GAMESROOT/${GAME}.conf"
     cat >"$GAMESCRIPT" <<EOF
 #!/bin/sh
@@ -62,6 +81,12 @@ c:
 cd "$GAME"
 ${GAME}
 EOF
+}
+
+# Dosbox delete
+dosbox_delete() {
+    local GAMECONF="$GAMESROOT/${GAME}.conf"
+    rm "$GAMESCRIPT" "$GAMECONF"
 }
 
 # Run game
