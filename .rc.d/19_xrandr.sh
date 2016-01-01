@@ -22,8 +22,13 @@ xrandr_getres() {
 # Set screen resolution
 xrandr_setres() {
   local ARG1="$1"; shift $(min 1 $#)
-  xrandr -s "${ARG1:?No resolution specified, like 1280x1024}" "$@"
+  xrandr -s "${ARG1:-0}" "$@"
 }
+alias xrandr_refresh='xrandr_setres 0'
+alias xrandr_1280='xrandr_setres 1280x1024'
+alias xrandr_1024='xrandr_setres 1024x768'
+alias xrandr_800='xrandr_setres 800x600'
+alias xrandr_640='xrandr_setres 640x480'
 
 # Enable display
 xrandr_en() {
