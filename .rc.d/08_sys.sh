@@ -366,11 +366,12 @@ alias ff_dup='find_duplicates'
 find_duplicates() {
   local TMP1="$(tempfile)"
   local TMP2="$(tempfile)"
-  find / -type f -exec md5sum {} \; > "$TMP1"
+  for DIR in "${@:-.}"; do
+    find "${DIR:-.}" -type f -exec md5sum {} \; >> "$TMP1"
+  done
   awk '{print $1}' "$TMP1" | sort | uniq -d > "$TMP2"
-  while read d; do
-    echo "---"
-    grep $d "$TMP1" | cut -d ' ' -f 2-
+  while read SUM; do
+    grep "$SUM" "$TMP1" | cut -d ' ' -f 2- | xargs
   done < "$TMP2"
   rm "$TMP1" "$TMP2" 2>/dev/null
 }

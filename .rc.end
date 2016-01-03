@@ -26,25 +26,30 @@ fi
 
 # SSH-agent
 if command -v ssh-agent >/dev/null 2>&1; then
-  ssh-add -l >/dev/null
+  SSH_AGENT_FILE="$HOME/.ssh-agent-info"
+  ssh-add -l >/dev/null 2>&1
   if [ $? -eq 2 ]; then
-    test -r $HOME/.ssh-agent-info && \
-      eval "$(<$HOME/.ssh-agent-info)" >/dev/null
-    ssh-add -l >/dev/null
+    test -r "$SSH_AGENT_FILE" && \
+      eval "$(cat "$SSH_AGENT_FILE")" >/dev/null
+    ssh-add -l >/dev/null 2>&1
     if [ $? -eq 2 ]; then
-      (umask 066; ssh-agent > $HOME/.ssh-agent-info)
-      eval "$(<$HOME/.ssh-agent-info)" >/dev/null
+      eval $(gpg-agent) >/dev/null
+      echo "$SSH_AGENT_INFO" > "$SSH_AGENT_FILE"
+      #(umask 066; ssh-agent > "$SSH_AGENT_FILE")
+      #eval "$(cat "$SSH_AGENT_FILE")" >/dev/null
     fi
   fi
 fi
 
 # GPG agent
 if command -v gpg-agent >/dev/null 2>&1; then
-  if test -f $HOME/.gpg-agent-info && kill -0 $(cut -d: -f 2 $HOME/.gpg-agent-info) 2>/dev/null; then
-    export GPG_AGENT_INFO=$(<$HOME/.gpg-agent-info)
+  GPG_AGENT_FILE="$HOME/.gpg-agent-info"
+  if test -f "$GPG_AGENT_FILE" && \
+      kill -0 $(cut -d: -f 2 "$GPG_AGENT_FILE") 2>/dev/null; then
+    export GPG_AGENT_INFO=$(cat "$GPG_AGENT_FILE")
   else
-    eval $(gpg-agent --daemon)
-    echo $GPG_AGENT_INFO > $HOME/.gpg-agent-info
+    eval $(gpg-agent --daemon) >/dev/null
+    echo "$GPG_AGENT_INFO" > "$GPG_AGENT_FILE"
   fi
 fi
 
