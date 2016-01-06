@@ -47,6 +47,6 @@ fi
 
 #########################
 # Source insight
-si() {
-  PREFIX="$HOME/.wine-sourceinsight" si.sh "$@"
-}
+alias si='PREFIX="$HOME/.wine-sourceinsight" si.sh'
+alias si2='PREFIX="$HOME/.wine-sourceinsight2" si.sh'
+alias si3='PREFIX="$HOME/.wine-sourceinsight3" si.sh'

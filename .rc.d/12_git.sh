@@ -34,6 +34,8 @@ alias gdd='git diff'
 alias gdm='git_diffm'
 alias gdda='git_diff_all'
 alias gdma='git_diffm_all'
+alias gddc='git_diff_cached'
+alias gdmc='git_diffm_cached'
 alias gds='git diff stash'
 alias gdiff='git diff'
 # Merge aliases
@@ -418,10 +420,16 @@ git_diff_all() {
   git diff "$@" 2>/dev/null
   git diff --cached "$@"
 }
+git_diff_cached() {
+  git diff --cached "$@"
+}
 
 # Svn diff staged/unstaged changes
 git_diffm() {
   git difftool -y "$@"
+}
+git_diffm_cached() {
+  git difftool --cached -y "$@"
 }
 git_diffm_all() {
   git difftool -y "$@" 2>/dev/null
