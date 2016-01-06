@@ -54,7 +54,7 @@ fi
 # Disable console beep
 #command -v xset >/dev/null 2>&1 && pidof X >/dev/null && xset b off 2>/dev/null # From X11 window system
 command -v xset >/dev/null 2>&1 && xset b off 2>/dev/null # From X11 window system
-command -v setterm >/dev/null 2>&1 && setterm -blength 0  # From the system console
+command -v setterm >/dev/null 2>&1 && setterm -blength 0 2>/dev/null # From the system console
 
 # Protect private encrypted directory
 [ -e "$HOME/.private" ] && chmod 500 "$HOME/.private"
