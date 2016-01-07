@@ -97,6 +97,12 @@ alias m='meld'
 # Grep
 alias g='grep'
 alias ig='grep -i'
+alias pg='pgrep -l'
+
+# Kill
+alias k='kill'
+alias pk='pkill'
+alias ka='killall'
 
 # Misc
 alias hi='history'
