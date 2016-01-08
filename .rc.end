@@ -96,7 +96,9 @@ alias m='meld'
 
 # Grep
 alias g='grep'
+alias gv='grep -v'
 alias ig='grep -i'
+alias igv='grep -iv'
 alias pg='pgrep -l'
 
 # Kill
