@@ -435,9 +435,8 @@ if !exists('g:loaded_ctrlp')
 	let g:ctrlp_switch_buffer = ''
 	let g:ctrlp_open_new_file = 'r'
 	" Key mapping
-	FnNoremap <C-l>     :CtrlPTag<CR>
+	FnNoremap <C-i>     :CtrlPTag<CR>
 	FnNoremap <C-o>     :CtrlPMRU<CR>
-	FnNoremap <A-w>     :CtrlPMRU<CR>
 	FnNoremap <C-p>     :exec 'CtrlP'.g:FindRootDir()<CR>
 endif
 
@@ -561,6 +560,9 @@ endif
 if !exists('loaded_commentary')
 	" Options
 	autocmd FileType c,cpp set commentstring=//%s
+	autocmd FileType py,sh set commentstring=#%s
+	" Key mapping
+	FnMap <c-l>		:normal! gc
 endif
 
 

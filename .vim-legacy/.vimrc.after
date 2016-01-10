@@ -1,3 +1,9 @@
+" Note: <C-[> is Esc
+" Note: <C-c> visual -> normal (temporary)
+" Note: <C-c> select -> visual (temporary)
+" Note: <C-g> select -> visual (definitly)
+" Note: <C-o> insert -> normal
+
 " *******************************************************
 " } Source vimrc {
 " *******************************************************
@@ -235,8 +241,8 @@ noremap Y y$
 nnoremap <silent> <leader>" viw<esc>a"<esc>hbi"<esc>lel
 
 " Upper/lower case
-vnoremap <C-u>      U
-vnoremap <C-l>      L
+vnoremap <leader>u      U
+vnoremap <leader>l      L
 
 
 " *******************************************************
@@ -588,12 +594,17 @@ map <localleader>n  :set nu!<CR>
 FnNoremap  <C-j> :
 vnoremap <C-j>  <C-c>:
 
+" Prev/next cursor jump location
+" :help jump-motions
+FnNoremap <A-Left>  <C-o>
+FnNoremap <A-Right> <C-i>
+vnoremap <A-Left>   <C-c><C-o>
+vnoremap <A-Right>  <C-c><C-i>
+
 " Prev/next cursor location
-" Note: <C-[> is Esc, <C-c> exits visual mode
-FnNoremap <A-Left>  <C-O>
-FnNoremap <A-Right> <C-I>
-vnoremap <A-Left>   <C-c><C-O>
-vnoremap <A-Right>  <C-c><C-I>
+" :help mark-motions
+FnNoremap <A-Left>  ``
+vnoremap <A-Left>   <C-c>``
 
 
 " *******************************************************
