@@ -25,6 +25,11 @@ annex_init() {
   vcsh_run 'git annex init "$(uname -n)"'
 }
 
+# Uninit annex
+annex_uninit() {
+  vcsh_run 'git annex uninit && git config --replace-all core.bare false'
+}
+
 # Init annex in direct mode
 annex_init_direct() {
   vcsh_run 'annex_init && git annex direct'
