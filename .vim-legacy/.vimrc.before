@@ -14,6 +14,8 @@
 function! s:FnMap(prefix, args)
 	let args = matchlist(a:args,'\(<silent>\s\+\)\?\(.\{-}\)\s\+\(.*\)')
 	execute a:prefix.'map' args[1] args[2] '<C-c>'.args[3]
+	execute 'v'.a:prefix.'map' args[1] args[2] '<C-c>'.args[3]
+	execute 's'.a:prefix.'map' args[1] args[2] '<C-c>'.args[3]
 	"execute 'i'.a:prefix.'map' args[1] args[2] '<C-o>'.args[3]
 	execute 'i'.a:prefix.'map <expr>' args[1] args[2] '(pumvisible() ? "\<C-e>" : "")."<C-O>'.args[3].'"'
 endfunction

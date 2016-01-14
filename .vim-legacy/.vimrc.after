@@ -240,9 +240,10 @@ noremap Y y$
 " Word quote
 nnoremap <silent> <leader>" viw<esc>a"<esc>hbi"<esc>lel
 
-" Upper/lower case
-vnoremap <leader>u      U
-vnoremap <leader>l      L
+" Upper (U)/lower (u)/switch (~) case
+FnNoremap <C-u>		<C-c>g~iw
+snoremap <C-u>      <C-g>~
+vnoremap <C-u>      ~
 
 
 " *******************************************************

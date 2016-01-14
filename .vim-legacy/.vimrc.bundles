@@ -435,9 +435,9 @@ if !exists('g:loaded_ctrlp')
 	let g:ctrlp_switch_buffer = ''
 	let g:ctrlp_open_new_file = 'r'
 	" Key mapping
-	FnNoremap <C-i>     :CtrlPTag<CR>
-	FnNoremap <C-o>     :CtrlPMRU<CR>
 	FnNoremap <C-p>     :exec 'CtrlP'.g:FindRootDir()<CR>
+	FnNoremap <C-o>     :CtrlPMRU<CR>
+	FnNoremap <C-A-o>   :CtrlPTag<CR>
 endif
 
 
