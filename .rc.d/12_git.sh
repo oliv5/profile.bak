@@ -89,6 +89,7 @@ alias gcam='git commit -am'
 alias gcommit='git commit'
 # Misc aliases
 alias grm='git rm'
+alias grmu='git clean -fn'
 alias gmv='git mv'
 # Logs/history aliases
 alias glh='git log -p'
@@ -129,6 +130,7 @@ alias gcheckout='git checkout'
 # Reset aliases
 alias gre='git reset'
 alias grh='git reset HEAD'
+alias grha='git reset HEAD --hard'
 alias greset='git reset'
 # Rebase aliases
 alias grb='git rebase'
