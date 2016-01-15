@@ -1,7 +1,7 @@
 #!/bin/sh
 
 ################################
-# Get sys info
+# Get system info
 # http://jeffskinnerbox.me/posts/2014/Mar/31/howto-linux-maintenance-and-filesystem-hygiene/
 alias kernel_name='uname -sr'
 alias kernel_ver='uname -v'
@@ -11,20 +11,8 @@ alias disk_info='sudo lshw -class disk -class storage -short'
 alias disk_drive='hwinfo --disk --short'
 alias rpi_fw='/opt/vc/bin/vcgencmd version'
 
-# RPI System update
-rpi_update() {
-  if ! command -v rpi-update >/dev/null; then
-    sudo apt-get install rpi-update
-    if [ $? -nq 0 ]; then
-      # install tools to upgrade Raspberry Pi's firmware
-      sudo wget https://raw.github.com/Hexxeh/rpi-update/master/rpi-update -O /usr/bin/rpi-update
-      sudo chmod +x /usr/bin/rpi-update
-    fi
-  fi
-  sudo BRANCH=next rpi-update
-}
-
-# Smartmontools checks
+################################
+# Smartmontools HD checks
 smart_basicstest() {
   local DEV="${1:?No device specified...}"
   # Check SMART support
@@ -57,6 +45,7 @@ smart_longtest() {
   sudo smartctl -l selftest "$DEV"
 }
 
+################################
 # Filesystem commands
 fsck_force(){
   sudo touch /forcefsck
@@ -71,7 +60,7 @@ fsck_repair() {
 }
 
 # Find garbage
-tmp_list() {
+ff_garbage() {
   ( set -vx
     printf "Home garbage\n"
     find "$HOME" -type f -name "*~" -print
@@ -89,6 +78,10 @@ tmp_list() {
     sudo lsof -nP | awk '/deleted/ { sum+=$8 } END { print sum }'
     sudo lsof -nP | grep '(deleted)' | awk '{ print $2 }' | sort | uniq
   )
+}
+
+lsof_deleted() {
+    sudo lsof -nP | grep '(deleted)'
 }
 
 lsof_close(){
@@ -325,10 +318,10 @@ fstab2autofs() {
 ################################
 # Add to user crontab, ensure uniqness
 cron_useradd() {
-  (crontab -l ; echo "$@") | sort - | uniq - | crontab -
+  (crontab -l; echo "$@") | sort - | uniq - | crontab -
 }
 # Add to system crontab
-cron_useradd() {
+cron_sysadd() {
   sudo sh -c 'echo "$@" >> "/etc/cron.d/$USER"'
 }
 

@@ -8,18 +8,18 @@ export GIT_PAGER="${PAGER:-less}"
 # Status aliases
 alias gt='git status -uno'
 alias gtu='git status -u'
-alias gm='git status --porcelain -b | awk "NR==1 || /^(M.|.M)/"'    # modified
-alias ga='git status --porcelain -b | awk "NR==1 || /^A[ MD]/"'     # added
-alias gd='git status --porcelain -b | awk "NR==1 || /^D[ M]/"'      # deleted
-alias gr='git status --porcelain -b | awk "NR==1 || /^R[ MD]/"'     # renamed
-#alias gc='git status --porcelain -b | awk "NR==1 || /^C[ MD]/"'     # copied in index
-alias gc='git status --porcelain -b | awk "NR==1 || /^[DAU][DAU]/"' # unmerged = conflict
-alias gu='git status --porcelain -b | awk "NR==1 || /^\?\?/"'       # untracked = new
-alias gi='git status --porcelain -b | awk "NR==1 || /^\!\!/"'       # ignored
-alias gz='git status --porcelain -b | awk "NR==1 || /^[MARC] /"'    # in index
-alias gs='git status --porcelain -b | awk "NR==1 || /^[^\?\?]/"'    # not untracked
 alias gst='git_st'
 alias gstx='git_stx'
+alias gstm='git status --porcelain -b | awk "NR==1 || /^(M.|.M)/"'    # modified
+alias gsta='git status --porcelain -b | awk "NR==1 || /^A[ MD]/"'     # added
+alias gstd='git status --porcelain -b | awk "NR==1 || /^D[ M]/"'      # deleted
+alias gstr='git status --porcelain -b | awk "NR==1 || /^R[ MD]/"'     # renamed
+#alias gstc='git status --porcelain -b | awk "NR==1 || /^C[ MD]/"'     # copied in index
+alias gstc='git status --porcelain -b | awk "NR==1 || /^[DAU][DAU]/"' # unmerged = conflict
+alias gstu='git status --porcelain -b | awk "NR==1 || /^\?\?/"'       # untracked = new
+alias gsti='git status --porcelain -b | awk "NR==1 || /^\!\!/"'       # ignored
+alias gstz='git status --porcelain -b | awk "NR==1 || /^[MARC] /"'    # in index
+alias gsts='git status --porcelain -b | awk "NR==1 || /^[^\?\?]/"'    # not untracked
 alias gstatus='git status'
 # List aliases
 alias gll='git ls-files'
@@ -77,7 +77,7 @@ alias gstash='git stash'
 alias gil='git_ignore_list'
 alias gia='git_ignore_add'
 # Add files aliases
-alias gad='git add'
+alias ga='git add'
 alias gan='git add $(git ls-files -o --exclude-standard)'
 alias gau='git add -u'
 alias gadd='git add'
