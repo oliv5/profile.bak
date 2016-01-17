@@ -67,6 +67,20 @@ mount_iso() {
   sudo mount -o loop -t iso9660 "$@"
 }
 
+# Mount dd img
+mount_img() {
+  local SRC="${1:?No image specified...}"
+  local OFFSET="${2:?No byte offset specified. See fdisk -l '$SRC'}"
+  local DST="${3:-/mnt}"
+  sudo mkdir -p "$DST"
+  sudo mount -o ro,loop,offset=$OFFSET "$SRC" "$DST"
+}
+umount_img() {
+  local DST="${1:-/mnt}"
+  sudo umount "$DST"
+  [ "$(readlink -f "$DST")" != "/mnt" ] && sudo rmdir "$DST"
+}
+
 # Unmount nfs
 alias umountall_nfs='umount -a -t nfs'
 umount_nfs() {

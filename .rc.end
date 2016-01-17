@@ -3,6 +3,24 @@
 # It should be compatible with all shells (dash, bash,...)
 
 ################################
+# Setup locales
+#   dpkg -l locales || sudo apt-get locales
+#   sudo dpkg-reconfigure locales
+#   locale
+[ -z "$LANG" ] && export LANG="fr_FR.UTF-8"
+[ -z "$LANGUAGE" ] && export LANGUAGE="$LANG"
+[ -z "$LC_ALL" ] && export LC_ALL="$LANG"
+[ -z "$LC_TIME" ] && export LC_TIME="$LANG"
+[ -z "$LC_MONETARY" ] && export LC_MONETARY="$LANG"
+[ -z "$LC_ADDRESS" ] && export LC_ADDRESS="$LANG"
+[ -z "$LC_TELEPHONE" ] && export LC_TELEPHONE="$LANG"
+[ -z "$LC_NAME" ] && export LC_NAME="$LANG"
+[ -z "$LC_MEASUREMENT" ] && export LC_MEASUREMENT="$LANG"
+[ -z "$LC_IDENTIFICATION" ] && export LC_IDENTIFICATION="$LANG"
+[ -z "$LC_NUMERIC" ] && export LC_NUMERIC="$LANG"
+[ -z "$LC_PAPER" ] && export LC_PAPER="$LANG"
+
+################################
 # Setup path
 path_prepend "$HOME/bin" "$HOME/.local/bin" "$HOME/pbin" "$HOME/pbin/wrappers"
 path_append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
