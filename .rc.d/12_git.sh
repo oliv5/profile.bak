@@ -359,6 +359,8 @@ git_pull() {
                 git fetch \"\$REMOTE\" \"\$BRANCH\" &&
                 git merge --ff-only \"\$REMOTE/\$BRANCH\"
               fi
+            else
+              echo \"Cannot access repo '\$REMOTE/\$BRANCH'...\"
             fi
           fi
         done
