@@ -126,6 +126,7 @@ alias pk='pkill'
 alias pk9='pkill -9'
 alias ka='killall'
 alias ka9='killall -9'
+alias xk='xkill'
 
 # Misc
 alias hi='history'
