@@ -31,6 +31,18 @@ alias  iffd='FCASE=-i FTYPE=d FXTYPE=  FARGS= _ffind'
 alias  iffl='FCASE=-i FTYPE=l FXTYPE=  FARGS= _ffind'
 alias iffll='FCASE=-i FTYPE=l FXTYPE=f FARGS= _ffind'
 alias ifflb='FCASE=-i FTYPE=l FXTYPE=l FARGS= _ffind'
+alias    ffs='ff    2>/dev/null'
+alias   fffs='fff   2>/dev/null'
+alias   ffds='ffd   2>/dev/null'
+alias   ffls='ffl   2>/dev/null'
+alias  fflls='ffll  2>/dev/null'
+alias  fflbs='fflb  2>/dev/null'
+alias   iffs='iff   2>/dev/null'
+alias  ifffs='ifff  2>/dev/null'
+alias  iffds='iffd  2>/dev/null'
+alias  iffls='iffl  2>/dev/null'
+alias ifflls='iffll 2>/dev/null'
+alias ifflbs='ifflb 2>/dev/null'
 
 # Backward find
 _bfind1() {
