@@ -160,7 +160,8 @@ git_setup() {
   git config --global merge.conflictstyle diff3
   git config --global mergetool.mymerge.cmd \
     'meld --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --diff "$LOCAL" "$MERGED" "$REMOTE"'
-  git config --global rerere.enabled 1
+  git config --global mergetool.mymerge.trustExitCode true
+  git config --global rerere.enabled true
   git config --global core.excludesfile '~/.gitignore'
 }
 
