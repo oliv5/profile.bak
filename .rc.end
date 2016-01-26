@@ -7,18 +7,23 @@
 #   dpkg -l locales || sudo apt-get locales
 #   sudo dpkg-reconfigure locales
 #   locale
-[ -z "$LANG" ] && export LANG="fr_FR.UTF-8"
-[ -z "$LANGUAGE" ] && export LANGUAGE="$LANG"
-[ -z "$LC_ALL" ] && export LC_ALL="$LANG"
-[ -z "$LC_TIME" ] && export LC_TIME="$LANG"
-[ -z "$LC_MONETARY" ] && export LC_MONETARY="$LANG"
-[ -z "$LC_ADDRESS" ] && export LC_ADDRESS="$LANG"
-[ -z "$LC_TELEPHONE" ] && export LC_TELEPHONE="$LANG"
-[ -z "$LC_NAME" ] && export LC_NAME="$LANG"
-[ -z "$LC_MEASUREMENT" ] && export LC_MEASUREMENT="$LANG"
-[ -z "$LC_IDENTIFICATION" ] && export LC_IDENTIFICATION="$LANG"
-[ -z "$LC_NUMERIC" ] && export LC_NUMERIC="$LANG"
-[ -z "$LC_PAPER" ] && export LC_PAPER="$LANG"
+for LOCALE in fr_FR.UTF-8 fr_FR.utf8 $(locale -a | head -n 1); do
+  if locale -a | grep "$LOCALE" >/dev/null; then
+    [ -z "$LANG" ] && export LANG="$LOCALE"
+    [ -z "$LANGUAGE" ] && export LANGUAGE="$LOCALE"
+    [ -z "$LC_ALL" ] && export LC_ALL="$LOCALE"
+    [ -z "$LC_TIME" ] && export LC_TIME="$LOCALE"
+    [ -z "$LC_MONETARY" ] && export LC_MONETARY="$LOCALE"
+    [ -z "$LC_ADDRESS" ] && export LC_ADDRESS="$LOCALE"
+    [ -z "$LC_TELEPHONE" ] && export LC_TELEPHONE="$LOCALE"
+    [ -z "$LC_NAME" ] && export LC_NAME="$LOCALE"
+    [ -z "$LC_MEASUREMENT" ] && export LC_MEASUREMENT="$LOCALE"
+    [ -z "$LC_IDENTIFICATION" ] && export LC_IDENTIFICATION="$LOCALE"
+    [ -z "$LC_NUMERIC" ] && export LC_NUMERIC="$LOCALE"
+    [ -z "$LC_PAPER" ] && export LC_PAPER="$LOCALE"
+  fi
+done
+unset LOCALE
 
 ################################
 # Setup path
