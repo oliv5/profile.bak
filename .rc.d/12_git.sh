@@ -781,6 +781,14 @@ git_meta_store() {
     git add "$(git_dir)/git_cache_meta" -f
 }
 
+# Reset file permissions
+git_perms_reset() {
+  git diff -p \
+      | grep -E '^(diff|old mode|new mode)' \
+      | sed -e 's/^old/NEW/;s/^new/old/;s/^NEW/new/' \
+      | git apply
+}
+
 ########################################
 # Display commit graph
 git_graph() {
