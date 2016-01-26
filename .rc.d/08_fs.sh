@@ -100,6 +100,8 @@ find_duplicates() {
 ################################
 # http://unix.stackexchange.com/questions/59112/preserve-directory-structure-when-moving-files-using-find
 # Move/copy by replicating directory structure
+alias mkdir_cp='_mkdir_exec "cp -v"'
+alias mkdir_mv='_mkdir_exec "mv -v"'
 _mkdir_exec() {
   local EXEC="${1:-echo}"
   local SRC="$2"
@@ -115,6 +117,11 @@ _mkdir_exec() {
       done
     ' "$DST" "$EXEC" {} +
 }
-alias mkdir_cp='_mkdir_exec "cp -v"'
-alias mkdir_mv='_mkdir_exec "mv -v"'
 
+##############################
+# Backup directory or file
+bak() {
+  for FILE; do
+    cp -v "$FILE" "${FILE}.$(ls -1 "$FILE".* | wc -l)"
+  done
+}

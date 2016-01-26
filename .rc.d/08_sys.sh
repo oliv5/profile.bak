@@ -71,10 +71,3 @@ cron_useradd() {
 cron_sysadd() {
   sudo sh -c 'echo "$@" >> "/etc/cron.d/$USER"'
 }
-
-##############################
-# Add ssh dedicated command id in ~/.ssh/authorized_keys
-# Use ssh-copy-id for std login shells
-ssh_copy_cmd_id() {
-  ssh ${1:?No host specified} -p ${2:?No port specified...} -- sh -c "cat 'command=\"${3:?No command specified...},no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ${SSH_ORIGINAL_COMMAND#* }\" ${4:?No ssh key specified...}' >> '$HOME/.ssh/authorized_keys'"
-}

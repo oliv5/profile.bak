@@ -96,6 +96,15 @@ umount_nfs() {
   "
 }
 
+# Check logged on users have a local home
+check_nfs() {
+	for LOGGED_USERS in $(who | awk '{print $1}' | sort | uniq); do
+		if ! grep $LOGGED_USERS /etc/exports >/dev/null; then
+			echo "WARNING: user $LOGGED_USERS is logged in using a remote home..."
+		fi
+	done
+}
+
 # Mount sshfs
 alias umount_sshfs='fusermount -u'
 alias mount_sshfs='sshfs -o cache=yes -o kernel_cache -o compression=no -o large_read'
