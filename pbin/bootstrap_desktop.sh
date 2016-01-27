@@ -46,13 +46,19 @@ if ! command -v repo >/dev/null 2>&1; then
 	export PATH="$PATH:$HOME/bin/externals:$HOME/bin/git-repo"
 fi
 
-# Init bin repositories
-mkdir -p "$HOME/bin"
-cd "$HOME/bin"
-repo init -u https://github.com/oliv5/manifests.git -m bin.xml
+# Setup bin repos
+read -p "Setup bin repos ? (y/n)" REPLY
+if [ "$REPLY" == "y" ] || [ "$REPLY" == "Y" ]; then
+	mkdir -p "$HOME/bin"
+	cd "$HOME/bin"
+	repo init -u https://github.com/oliv5/manifests.git -m bin.xml
+	repo sync -c
+fi
 
-###################
-# Init dev repositories
-mkdir -p "$PRIVATE/dev"
-cd "$PRIVATE/dev"
-repo init -u https://github.com/oliv5/manifests.git -m dev.xml
+# Setup dev repos
+read -p "Setup dev repos ? (y/n)" REPLY
+if [ "$REPLY" == "y" ] || [ "$REPLY" == "Y" ]; then
+	mkdir -p "${PRIVATE:-$HOME}/dev"
+	cd "${PRIVATE:-$HOME}/dev"
+	repo init -u https://github.com/oliv5/manifests.git -m dev.xml
+fi
