@@ -36,7 +36,9 @@ wifi_disable() {
 alias flashdl='quvi'
 
 # Wget mirror website
-wget_mirror() {
+#alias wget_mirror='wget -mkEpnp'
+alias wget_mirror='wget --mirror --convert-links --adjust-extension --page-requisites --no-parent'
+wget_mirror_legacy() {
   local SITE=${1:?Please specify the URL}
   local DOMAIN=$(echo "$SITE" | sed -E 's;^https?://([^/]*)/.*$;\1;')
   shift $(min 1 $#)
