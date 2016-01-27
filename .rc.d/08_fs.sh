@@ -125,3 +125,9 @@ bak() {
     cp -v "$FILE" "${FILE}.$(ls -1 "$FILE".* | wc -l)"
   done
 }
+
+################################
+# dd utils
+dd_status() {
+  kill -10 $(pgrep '^dd$')
+}
