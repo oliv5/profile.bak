@@ -8,6 +8,13 @@ alias pkg_search='dpkg -S'
 alias pkg_list='dpkg -l'
 alias pkg_archi='dpkg --print-architecture'
 
+# Cleanup packages
+pkg_clean() {
+  sudo apt-get autoclean
+  sudo apt-get clean
+  sudo apt-get autoremove
+}
+
 # Make deb package from source
 deb_make() {
   local ARCHIVE="${1:?No input archive specified}"
@@ -40,4 +47,15 @@ aptitude_lock(){
 }
 aptitude_unlock(){
   sudo aptitude unhold "${1:?No package specified...}"
+}
+
+# Cleanup old kernels
+kernel_ls() {
+  dpkg -l 'linux-*'
+}
+kernel_current() {
+  uname -r | sed "s/\(.*\)-\([^0-9]\+\)/\1/"
+}
+kernel_others() {
+  dpkg -l 'linux-*' | sed '/^ii/!d;/'"$(uname -r | sed "s/\(.*\)-\([^0-9]\+\)/\1/")"'/d;s/^[^ ]* [^ ]* \([^ ]*\).*/\1/;/[0-9]/!d'
 }
