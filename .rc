@@ -65,7 +65,7 @@ rc_sourcefiles() {
 # Source files by partial name
 rc_source() {
   if [ $# -eq 0 ]; then
-    . "$RC_DIR/.rc"
+    . "${RC_DIR:-.}/.rc"
   else
     for PATTERN; do
       rc_sourcefiles "-r" "$RC_DIR/.rc.d/"*$PATTERN*.sh
