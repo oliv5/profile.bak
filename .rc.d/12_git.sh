@@ -55,7 +55,7 @@ alias gbr='git branch -r'   # list tracking
 alias gbrd='git branch -rd' # remove tracking
 alias gbranch='git branch'
 # Stash aliases
-alias gsc='git_stash_push'
+alias gsc='git_stash_create'
 alias gss='git_stash_save'
 alias gssa='git_stash_save_all'
 alias gssu='git_stash_save_untracked'
@@ -64,14 +64,13 @@ alias gsp='git_stash_pop'
 alias gsa='git_stash_apply'
 alias gsl='git stash list'
 alias gslc='git_stash_count'
-alias gslf='git_stash_show'
-alias gsla='git_stash_show_all'
-alias gsv='git_stash_cat'
+alias gsf='git_stash_show'
+alias gsfa='git_stash_show_all'
+alias gsfc='git_stash_cat'
 alias gsd='git_stash_diff'
 alias gsdd='git_stash_diff'
 alias gsdm='git_stash_diffm'
 alias gsdl='git_stash_diffl'
-alias gsf='git_stash_flush'
 alias gsb='git_stash_backup'
 alias gsrm='git_stash_drop'
 alias gsm='gsdm'
@@ -466,7 +465,7 @@ git_stash_save_lazy() {
 }
 
 # Push changes onto stash, does not revert anything
-git_stash_push() {
+git_stash_create() {
   local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
   local REF="$(git stash create)"
   git stash store -m "$STASH" "$REF" 2>/dev/null || 
