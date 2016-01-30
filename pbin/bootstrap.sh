@@ -22,14 +22,20 @@ mkdir -p "$PRIVATE"
 ###################
 # Download and install vcsh if not already there
 if ! command -v vcsh >/dev/null 2>&1; then
-	git clone https://github.com/RichiH/vcsh.git "$HOME/bin/vcsh"
+	read -p "Clone vcsh ? (y/n) " REPLY
+	if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
+		git clone --depth 1 https://github.com/RichiH/vcsh.git "$HOME/bin/vcsh"
+	fi
 fi
 
 # Clone profile repository
 cd "$HOME"
-vcsh clone https://github.com/oliv5/profile.git || 
-	{vcsh profile pull; vcsh profile reset --hard;} || 
-	exit 0
+read -p "Clone profile ? (y/n) " REPLY
+if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
+	vcsh clone https://github.com/oliv5/profile.git || 
+		{ vcsh profile pull; vcsh profile reset --hard; } || 
+		exit 0
+fi
 #{
 #	TMPDIR="$(mktemp -d)"
 #	echo "Move existing files into backup directory: $TMPDIR"
@@ -43,12 +49,11 @@ vcsh clone https://github.com/oliv5/profile.git ||
 ###################
 # Download and install mr if not already there
 if ! command -v mr >/dev/null 2>&1; then
-	git clone https://github.com/joeyh/myrepos.git "$HOME/bin/mr"
+	read -p "Clone mr ? (y/n) " REPLY
+	if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
+		git clone --depth 1 https://github.com/joeyh/myrepos.git "$HOME/bin/mr"
+	fi
 fi
-
-# Checkout mr repositories
-cd "$HOME"
-mr checkout || true
 
 ###################
 # Download and install google repo if not already there
