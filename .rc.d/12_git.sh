@@ -404,6 +404,7 @@ git_push_all() {
 
 # Create a bundle
 git_bundle() {
+  git_exists || return 1
   local DIR="${1:-$(git_dir)}"
   if [ -d "$DIR" ]; then
     DIR="${1:-$DIR/bundle}"
@@ -419,6 +420,20 @@ git_bundle() {
   else
     echo "Target directory '$DIR' does not exists."
     echo "Skip bundle creation..."
+  fi
+}
+
+# Git upkeep
+git_upkeep() {
+  git_exists || return 1
+  vcsh_run git status
+  if [ "$1" = "-y" ] || ask_question "Commit new files? (y/n): " y Y >/dev/null; then
+    vcsh_run git add -u
+    vcsh_run git commit -m '[upkeep] auto-commit'
+  fi
+  shift
+  if [ "$1" = "-y" ] || ask_question "Push to remotes? (y/n): " y Y >/dev/null; then
+    vcsh_run git push
   fi
 }
 

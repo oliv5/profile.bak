@@ -1,5 +1,12 @@
 #!/bin/sh
 
+# Wrapper: vcsh run
+# Overwritten by vcsh main script
+command -v "vcsh_run" >/dev/null 2>&1 ||
+vcsh_run() {
+  eval "$@"
+}
+
 # Check annex exists
 annex_exists() {
   git ${1:+--git-dir="$1"} config --get annex.version >/dev/null 2>&1
@@ -86,6 +93,11 @@ annex_sync() {
   vcsh_run 'git annex sync'
 }
 
+# Annex sync content
+annex_sync_content() {
+  vcsh_run 'git annex sync --content --fast'
+}
+
 # Annex status
 annex_status() {
   echo "annex status:"
@@ -157,6 +169,20 @@ annex_upload_all() {
 }
 annex_upload() {
   annex_copy "to" "$@" --fast
+}
+
+# Annex upkeep
+annex_upkeep() {
+  git_exists || return 1
+  vcsh_run git annex status
+  if [ "$1" = "-y" ] || ask_question "Sync new files? (y/n): " y Y >/dev/null; then
+    vcsh_run git annex add .
+    vcsh_run git annex sync
+  fi
+  shift
+  if [ "$1" = "-y" ] || ask_question "Sync files content? (y/n): " y Y >/dev/null; then
+    vcsh_run git annex sync --content --fast
+  fi
 }
 
 ########################################
