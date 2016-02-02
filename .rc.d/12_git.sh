@@ -152,16 +152,34 @@ alias gcfg='git config'
 alias gconfig='git config'
 
 ########################################
-# Env setup
-git_setup() {
-  git config --global diff.tool meld
-  git config --global merge.tool mymerge
-  git config --global merge.conflictstyle diff3
-  git config --global mergetool.mymerge.cmd \
-    'meld --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --diff "$LOCAL" "$MERGED" "$REMOTE"'
-  git config --global mergetool.mymerge.trustExitCode true
-  git config --global rerere.enabled true
-  git config --global core.excludesfile '~/.gitignore'
+# Dependencies
+
+# Wrapper: vcsh run
+# Overwritten by vcsh main script
+command -v "vcsh_run" >/dev/null 2>&1 ||
+vcsh_run() {
+  eval "$@"
+}
+
+# Wrapper: git annex direct mode
+# Overwritten by annex main script
+command -v "annex_direct" >/dev/null 2>&1 ||
+annex_direct() {
+  false
+}
+
+# Ask question
+command -v "ask_question" >/dev/null 2>&1 ||
+ask_question() {
+  local ANSWER
+  echo -n "$1 "
+  read ANSWER
+  echo "$ANSWER"
+  shift
+  for ARG; do
+    [ "$ARG" = "$ANSWER" ] && return 0
+  done
+  return 1
 }
 
 ########################################
@@ -174,6 +192,19 @@ git() {
     fi
   fi
   command git "$@"
+}
+
+########################################
+# Env setup
+git_setup() {
+  git config --global diff.tool meld
+  git config --global merge.tool mymerge
+  git config --global merge.conflictstyle diff3
+  git config --global mergetool.mymerge.cmd \
+    'meld --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --diff "$LOCAL" "$MERGED" "$REMOTE"'
+  git config --global mergetool.mymerge.trustExitCode true
+  git config --global rerere.enabled true
+  git config --global core.excludesfile '~/.gitignore'
 }
 
 ########################################
@@ -312,20 +343,6 @@ git_clone() {
   done
 }
 
-# Wrapper: vcsh run
-# Overwritten by vcsh main script
-command -v "vcsh_run" >/dev/null 2>&1 ||
-vcsh_run() {
-  eval "$@"
-}
-
-# Wrapper: git annex direct mode
-# Overwritten by annex main script
-command -v "annex_direct" >/dev/null 2>&1 ||
-annex_direct() {
-  false
-}
-
 # Batch pull existing remote/branches
 git_pull() {
   git_exists || return 1
@@ -431,8 +448,7 @@ git_upkeep() {
     vcsh_run git add -u
     vcsh_run git commit -m '[upkeep] auto-commit'
   fi
-  shift
-  if [ "$1" = "-y" ] || ask_question "Push to remotes? (y/n): " y Y >/dev/null; then
+  if [ "$2" = "-y" ] || ask_question "Push to remotes? (y/n): " y Y >/dev/null; then
     vcsh_run git push
   fi
 }
