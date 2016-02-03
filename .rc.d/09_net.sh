@@ -3,6 +3,7 @@
 ############################
 # Network monitors
 alias ns='sudo netstat -antp'
+alias nsg='sudo netstat -antp | grep'
 alias nh='sudo nethogs'
 #alias nb='sudo bmon'
 #alias ns='sudo slurm -s'
