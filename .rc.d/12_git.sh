@@ -172,9 +172,9 @@ annex_direct() {
 command -v "ask_question" >/dev/null 2>&1 ||
 ask_question() {
   local ANSWER
-  echo -n "$1 "
+  echo -n "$1 " >&2
   read ANSWER
-  echo "$ANSWER"
+  echo "$ANSWER" >&2
   shift
   for ARG; do
     [ "$ARG" = "$ANSWER" ] && return 0
@@ -444,7 +444,7 @@ git_bundle() {
 git_upkeep() {
   git_exists || return 1
   vcsh_run git status
-  if [ "$1" = "-y" ] || ask_question "Commit new files? (y/n): " y Y >/dev/null; then
+  if [ "$1" = "-y" ] || ask_question "Add and commit new files? (y/n): " y Y >/dev/null; then
     vcsh_run git add -u
     vcsh_run git commit -m '[upkeep] auto-commit'
   fi

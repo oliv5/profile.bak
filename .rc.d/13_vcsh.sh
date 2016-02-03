@@ -1,5 +1,16 @@
 #!/bin/sh
 
+# Requirements
+command -v arg_quote >/dev/null 2>&1 ||
+arg_quote() {
+  local SEP=''
+  for ARG; do
+    SQESC=$(printf '%s\n' "${ARG}" | sed -e "s/'/'\\\\''/g")
+    printf '%s' "${SEP}'${SQESC}'"
+    SEP=' '
+  done
+}
+
 # Repo vcsh-ready
 vcsh_exists() {
   git ${1:+--git-dir="$1"} config --get vcsh.vcsh >/dev/null 2>&1
@@ -42,17 +53,7 @@ vcsh_run() {
   if [ $# -le 1 ]; then
     local ARGS="$1"
   else    
-    local ARGS="$(
-      arg_quote() {
-        local SEP=''
-        for ARG; do
-          SQESC=$(printf '%s\n' "${ARG}" | sed -e "s/'/'\\\\''/g")
-          printf '%s' "${SEP}'${SQESC}'"
-          SEP=' '
-        done
-      }
-      arg_quote "$@"
-    )"
+    local ARGS="$(arg_quote "$@")"
   fi
   if vcsh_exists && ! vcsh_loaded; then
     vcsh run "$(git_repo)" sh -c "$ARGS"
