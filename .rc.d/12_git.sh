@@ -445,7 +445,7 @@ git_upkeep() {
   git_exists || return 1
   vcsh_run git status
   if [ "$1" = "-y" ] || ask_question "Add and commit new files? (y/n): " y Y >/dev/null; then
-    vcsh_run git add -u
+    vcsh_run git add -u :/
     vcsh_run git commit -m '[upkeep] auto-commit'
   fi
   if [ "$2" = "-y" ] || ask_question "Push to remotes? (y/n): " y Y >/dev/null; then
