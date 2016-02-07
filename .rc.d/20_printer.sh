@@ -25,7 +25,8 @@ prn_options() {
 }
 
 # Aliases
-alias prn_default='lpoptions -d -p'
+alias prn_ls='lpstat -t'
+alias prn_default='lpoptions -d'
 alias prn_print='lp'
 alias prn_enable='cupsenable'
 alias prn_disable='cupsdisable'

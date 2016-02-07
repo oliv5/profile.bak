@@ -91,8 +91,8 @@ send_mail() {
 
 # Redirect port using socat
 socat_bounce() {
-  #socat TCP-LISTEN:$1,bind=$2,su=nobody,fork,reuseaddr TCP:$3:$4
-  socat ${5:-TCP}-LISTEN:${1:+$1,}${2:+bind=$2},su=nobody,fork,reuseaddr ${3:+${5:-TCP}:$3${4:+:$4}}
+  #socat tcp-listen:port,bind=addr,su=nobody,fork,reuseaddr tcp:addr:port
+  socat ${5:-tcp}-listen:${1:+$1,}${2:+bind=$2},su=nobody,fork,reuseaddr ${3:+${5:-tcp}:$3${4:+:$4}}
 }
 
 # Get public external IP
