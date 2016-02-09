@@ -97,6 +97,10 @@ find_duplicates() {
   rm "$TMP1" "$TMP2" 2>/dev/null
 }
 
+# Find empty directories
+alias fd_empty='find . -type d -empty'
+alias ff_empty='find . -type f -empty'
+
 ################################
 # http://unix.stackexchange.com/questions/59112/preserve-directory-structure-when-moving-files-using-find
 # Move/copy by replicating directory structure
