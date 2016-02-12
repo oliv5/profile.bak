@@ -107,12 +107,15 @@ filter_stdout() {
   { eval "$1" 2>&1 1>&3 | eval "$2" 1>&2; } 3>&1
 }
 
-# Implement which when missing
+# which replacement when missing
 cmd_exists which ||
 which() {
-  echo "$PATH" | while IFS=: read DIR; do
-    ls "$DIR/$1" 2>/dev/null && return 0
-  done
+  local IFS=:
+  [ $# -gt 0 ] &&
+    for DIR in $PATH; do
+        ls -1 "$DIR/$1" 2>/dev/null && return 0
+    done
+  return 1
 }
 
 ################################
