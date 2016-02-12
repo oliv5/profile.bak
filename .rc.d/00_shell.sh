@@ -107,6 +107,14 @@ filter_stdout() {
   { eval "$1" 2>&1 1>&3 | eval "$2" 1>&2; } 3>&1
 }
 
+# Implement which when missing
+cmd_exists which ||
+which() {
+  echo "$PATH" | while IFS=: read DIR; do
+    ls "$DIR/$1" 2>/dev/null && return 0
+  done
+}
+
 ################################
 # Ansi codes
 # http://man7.org/linux/man-pages/man4/console_codes.4.html
