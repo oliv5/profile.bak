@@ -108,14 +108,15 @@ filter_stdout() {
 }
 
 # which replacement when missing
-cmd_exists which ||
-which() {
-  local IFS=:
-  [ $# -gt 0 ] &&
-    for DIR in $PATH; do
-        ls -1 "$DIR/$1" 2>/dev/null && return 0
-    done
-  return 1
+cmd_exists which || {
+  which() {
+    local IFS=:
+    [ $# -gt 0 ] &&
+      for DIR in $PATH; do
+          ls -1 "$DIR/$1" 2>/dev/null && return 0
+      done
+    return 1
+  }
 }
 
 ################################
