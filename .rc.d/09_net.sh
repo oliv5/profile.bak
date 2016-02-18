@@ -2,16 +2,15 @@
 
 ############################
 # Network monitors
-alias ns='sudo netstat -antp'
-alias nsg='sudo netstat -antp | grep'
-alias nh='sudo nethogs'
+#alias ns='sudo netstat'
+#alias nh='sudo nethogs'
 #alias nb='sudo bmon'
 #alias ns='sudo slurm -s'
 #alias nt='sudo tcptrack'
 #alias nn='sudo bwm-ng'
 #alias nc='sudo cbm'
 #alias no='sudo speedometer'
-alias it='iftop'
+#alias it='iftop'
 
 ############################
 # Wifi status test

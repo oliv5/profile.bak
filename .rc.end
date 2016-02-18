@@ -135,6 +135,21 @@ alias ka='killall'
 alias ka9='killall -9'
 alias xk='xkill'
 
+# du
+alias duh='du -h'
+alias duh0='du -h -d0'
+alias duh1='du -h -d1'
+
+# Network monitors
+alias ns='sudo netstat -an'
+alias nst='sudo netstat -antp'
+alias nsu='sudo netstat -anup'
+alias nsg='sudo netstat -an | grep'
+alias nstg='sudo netstat -antp | grep'
+alias nsug='sudo netstat -anup | grep'
+alias nh='sudo nethogs'
+alias it='iftop'
+
 # Misc
 alias hi='history'
 alias mo='mimeopen'
