@@ -106,6 +106,7 @@ alias gta='git tag -a'
 alias gtl='git tag -l'
 alias gtd='git tag -d'
 alias gtc='git tag --contains'
+alias gtls='git log --tags --simplify-by-decoration --pretty="format:%ai %d"'
 alias gtg='git tag'
 alias gtag='git tag'
 # Annex aliases
@@ -535,19 +536,13 @@ git_stash_show() {
 
 # Show all stashes file list
 git_stash_show_all() {
-  local TOTAL=$(git stash list | wc -l)
   local START="${1:-0}"
-  local END="${2:-$TOTAL}"
+  local NUM="${2:-$(git stash list | wc -l)}"
   shift 2 2>/dev/null
-  for IDX in $(seq $START $END); do
-    echo "******************************"
-    #echo "[git] stash number $IDX/$TOTAL"
-    git stash list | awk 'NR=='$(($IDX+1))' {print $0; quit}'
-    echo "------------"
-    git_stash_show $IDX "$@"
-    echo "------------"
-    read -p "Press enter to go on..."
-    echo "******************************"
+  while git stash list --skip $START -n 1; do
+    git_stash_show $START
+    START=$((START+1))
+    eval "${1:-echo}"
   done
 }
 
