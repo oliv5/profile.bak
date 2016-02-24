@@ -123,11 +123,22 @@ _mkdir_exec() {
 }
 
 ##############################
-# Backup directory or file
+# Backup file or directory
 bak() {
   for FILE; do
     cp -v "$FILE" "${FILE}.$(ls -1 "$FILE".* | wc -l)"
   done
+}
+
+# Swap files or directories
+swap() {
+  local FILE1="${1:?Nothing to swap...}"
+  local FILE2="${2:?Nothing to swap...}"
+  local TMP
+  [ -d "$FILE2" ] && TMP="$(mktemp -d)" || TMP="$(mktemp)"
+  mv "$FILE2" "$TMP"
+  mv "$FILE1" "$FILE2"
+  mv "$TMP" "$FILE1"
 }
 
 ################################
