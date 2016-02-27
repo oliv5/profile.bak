@@ -18,7 +18,7 @@ OPTS="-v -r -z -s -i --size-only"
     # Functions
     log() { $VERBOSE $LOGGER "$@"; }
     end() { log "Backup - ends at $(date)"; exit ${1:-0}; }
-    sync(){ ([ -z "$VERBOSE" ] && set -vx; ${DBG} rsync ${OPTS} "$SRC/" "$DST/"); }
+    dosync(){ ([ -z "$VERBOSE" ] && set -vx; ${DBG} rsync ${OPTS} "$SRC/" "$DST/"); }
     diff() {
         local DIFFFILE="$(mktemp)"
         echo "Output file: $DIFFFILE"
@@ -84,7 +84,7 @@ OPTS="-v -r -z -s -i --size-only"
 
     # Backup
     #log "Backup - starts"
-    [ -n "$DIFF" -a -z "$VERBOSE" ] && diff || sync
+    if [ -n "$DIFF" -a -z "$VERBOSE" ]; then diff; else dosync; fi
     ERRCODE=$?
     #log "Backup - done"
 
