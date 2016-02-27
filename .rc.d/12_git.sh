@@ -593,16 +593,10 @@ alias git_stash_list='git stash list'
 alias git_stash_count='git stash list | wc -l'
 
 ########################################
-# Revert files to a given ref
-git_revert() {
-  local REV="HEAD"
-  if [ ! -f "$1" ]; then
-    REV="$1"
-    shift 2>/dev/null
-  fi
-  git reset "$REV" -- "$@"
-  git checkout "$REV" -- "$@"
-}
+# Revert a commit by making a new one
+# Use -m 1,2... to select the wanted
+# parent branch of a merge commit
+alias git_revert='git revert'
 
 # Hard reset files to a given rev
 alias git_reset='git reset --hard'
