@@ -81,7 +81,8 @@ alias bff='BTYPE=-f _bfind'
 alias bfd='BTYPE=-d _bfind'
 
 # Find breadth-first (width-first)
-_wfind1() { _ffind "${@:-*}" -prune -printf '%d\t%p\n' | sort -nk1 | cut -f2-; }
+#_wfind1() { _ffind "${@:-*}" -prune -printf '%d\t%p\n' | sort -nk1 | cut -f2-; }
+_wfind1() { _ffind "${@:-*}" -depth; }
 alias _wfind='_wfind1'
 alias   wf='FCASE= FTYPE=  FXTYPE=  FARGS= _wfind'
 alias  wff='FCASE= FTYPE=f FXTYPE=  FARGS= _wfind'

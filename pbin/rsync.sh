@@ -3,6 +3,7 @@ DBG=""
 LOGGER="echo"
 VERBOSE="false"
 CHECKMOUNT=""
+DIFF=""
 PATH="$PATH:/bin:/usr/bin"
 
 # Rsync options
@@ -17,9 +18,20 @@ OPTS="-v -r -z -s -i --size-only"
     # Functions
     log() { $VERBOSE $LOGGER "$@"; }
     end() { log "Backup - ends at $(date)"; exit ${1:-0}; }
+    sync(){ ([ -z "$VERBOSE" ] && set -vx; ${DBG} rsync ${OPTS} "$SRC/" "$DST/"); }
+    diff() {
+        local DIFFFILE="$(mktemp)"
+        echo "Output file: $DIFFFILE"
+        sync > "$DIFFFILE"
+        echo -n "Created: "
+        grep '>f+++++++' "$DIFFFILE" | wc -l
+        echo -n "Deleted: "
+        grep deleting "$DIFFFILE" | wc -l
+        more "$DIFFFILE"
+    }
 
     # Get args
-    while getopts "bsdtlvc:hf:m" FLAG
+    while getopts "bsdtlvc:hf:mp" FLAG
     do
       case "$FLAG" in
         b) OPTS="${OPTS} ${OPT_BACKUP}";;
@@ -31,8 +43,10 @@ OPTS="-v -r -z -s -i --size-only"
         c) CHECKMOUNT="${OPTARG}";;
         f) ;; # for compatibility with old script
         m) ;; # for compatibility with old script
-        h) echo >&2 "Usage: `basename $0` [-s] [-d] [-f fuse] [-m] [-l] [-v] [-c dir] -- src dst ..."
+        p) DIFF="1"; OPTS="${OPTS} ${OPT_DRYRUN} ${OPT_DELETE}";; 
+        h) echo >&2 "Usage: `basename $0` [-s] [-d] [-l] [-v] [-c dir] [-p] -- src dst ..."
            echo >&2 "-s   show only (dry run)"
+           echo >&2 "-p   make a diff only"
            echo >&2 "-d   delete unknown destination files"
            echo >&2 "-t   use /tmp as temporary storage"
            echo >&2 "-l   use system logger instead of stdout"
@@ -70,7 +84,7 @@ OPTS="-v -r -z -s -i --size-only"
 
     # Backup
     #log "Backup - starts"
-    ( [ -n "$VERBOSE" ] && set -vx; ${DBG} rsync ${OPTS} "$SRC/" "$DST/")
+    [ -n "$DIFF" -a -z "$VERBOSE" ] && diff || sync
     ERRCODE=$?
     #log "Backup - done"
 
