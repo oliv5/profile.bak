@@ -50,6 +50,7 @@ alias gba='git branch -a'   # all branches
 alias gbl='git branch -l'   # local branches
 alias gbv='git branch -v'   # verbose list branch
 alias gbva='git branch -va' # verbose list branch
+alias gbav='git branch -va' # verbose list branch
 alias gbd='git branch -d'   # branch delete
 alias gbdf='git branch -D'  # forced branch delete
 alias gbr='git branch -r'   # list tracking
