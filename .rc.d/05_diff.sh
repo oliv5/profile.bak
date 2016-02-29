@@ -6,6 +6,20 @@ diffd() {
   diff -rq "$@" | grep -ve $DIFF_EXCLUDE
 }
 
+# Diff tree
+difft() {
+  local TEMP="$(mktemp)"
+  find "$1" -type d -printf "%P\n" | sort > "$TEMP"
+  find "$2" -type d -printf "%P\n" | sort | diff - "$TEMP"
+  rm "$TEMP"
+}
+difftt() {
+  local TEMP="$(mktemp)"
+  tree -i "$1" > "$TEMP"
+  tree -i "$2" | diff - "$TEMP"
+  rm "$TEMP"
+}
+
 # Count number of lines which differs
 diffc() {
   diff -U 0 "$1" "$2" | grep '^+[^+]' | wc -l
