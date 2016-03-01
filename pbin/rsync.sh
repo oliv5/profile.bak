@@ -1,10 +1,10 @@
 #!/bin/sh
+PATH="$PATH:/bin:/usr/bin"
 DBG=""
 LOGGER="echo"
 VERBOSE="false"
 CHECKMOUNT=""
 DIFF=""
-PATH="$PATH:/bin:/usr/bin"
 
 # Rsync options
 # Note RSYNC option -x prevent deleting files when using symbolic links
@@ -22,7 +22,7 @@ OPTS="-v -r -z -s -i --size-only"
     diff() {
         local DIFFFILE="$(mktemp)"
         echo "Output file: $DIFFFILE"
-        sync > "$DIFFFILE"
+        dosync > "$DIFFFILE"
         echo -n "Created: "
         grep '>f+++++++' "$DIFFFILE" | wc -l
         echo -n "Deleted: "
@@ -43,7 +43,7 @@ OPTS="-v -r -z -s -i --size-only"
         c) CHECKMOUNT="${OPTARG}";;
         f) ;; # for compatibility with old script
         m) ;; # for compatibility with old script
-        p) DIFF="1"; OPTS="${OPTS} ${OPT_DRYRUN} ${OPT_DELETE}";; 
+        p) DIFF="1"; OPTS="${OPTS} ${OPT_DRYRUN} ${OPT_DELETE}";;
         h) echo >&2 "Usage: `basename $0` [-s] [-d] [-l] [-v] [-c dir] [-p] -- src dst ..."
            echo >&2 "-s   show only (dry run)"
            echo >&2 "-p   make a diff only"
