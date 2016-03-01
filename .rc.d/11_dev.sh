@@ -98,17 +98,16 @@ pmake() {
 	# Call make protected by semaphores when ipcmd is available
 	# Otherwise call make directly
 	if command -v ipcmd >/dev/null; then
-		local AR="ipcmd semop -u -1 : ar"
-		local RANLIB="ipcmd semop -u -1 : ranlib"
-		local PYTHON="ipcmd semop -u -1 : python"
-		export IPCMD_SEMID=$(ipcmd semget)
-		ipcmd semctl setall 1
-		command make AR="$AR" RANLIB="$RANLIB" PYTHON="$PYTHON" "$@"
+		local IPCMD_SEMID="$(ipcmd semget)"
+		local AR="ipcmd semop -s $IPCMD_SEMID -u -1 : ar"
+		local RANLIB="ipcmd semop -s $IPCMD_SEMID -u -1 : ranlib"
+		local PYTHON="ipcmd semop -s $IPCMD_SEMID -u -1 : python"
+		ipcmd semctl -s "$IPCMD_SEMID" setall 1
+		make AR="$AR" RANLIB="$RANLIB" PYTHON="$PYTHON" "$@"
 		local RETCODE=$?
-		ipcrm -s $IPCMD_SEMID
-		unset IPCMD_SEMID
+		ipcrm -s "$IPCMD_SEMID"
 		return $RETCODE
 	else
-		command make "$@"
+		make "$@"
 	fi
 }

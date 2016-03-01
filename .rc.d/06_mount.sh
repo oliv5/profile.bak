@@ -85,8 +85,8 @@ umount_img() {
 alias umountall_nfs='umount -a -t nfs'
 umount_nfs() {
   local MOUNTPOINT="${1:?NFS mount point not specified...}"
-  local IP="${2:?NFS IP not specified...}"
-  local ITF="${3:-eth0}"
+  local ITF="${2:-eth0}"
+  local IP="${3:-192.168.0.1}"
   local TMPFS="${4:-nfstmp}"
   #local TMPFS="${4:-fakenfs}"
   sudo sh -c "
