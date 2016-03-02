@@ -81,8 +81,8 @@
 	let g:syntastic_python_pylint_args='--max-line-length=120 --max-module-lines=5000 --indent-string=""'
 
 	" Nerdcommenter
-	FnMap <C-l>     <plug>NERDCommenterToggle
-	vmap <C-l>      <plug>NERDCommenterToggle
-	imap <C-l>      <plug>NERDCommenterInsert
-	snoremap <C-l>  <C-g> " From select to visual mode and stay there
+	FnMap <C-x>     <plug>NERDCommenterToggle
+	vmap <C-x>      <plug>NERDCommenterToggle
+	imap <C-x>      <plug>NERDCommenterInsert
+	snoremap <C-x>  <C-g> " From select to visual mode and stay there
 " }

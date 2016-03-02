@@ -46,8 +46,8 @@ FnNoremap <localleader>s	:windo set scrollbind!<CR>
 " *******************************************************
 
 " Increment/decrement numbers
-FnNoremap <A-a>   <C-a>
-FnNoremap <A-A>   <C-x>
+FnNoremap <A-x>   <C-a>
+FnNoremap <A-X>   <C-x>
 
 
 " *******************************************************

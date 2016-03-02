@@ -288,8 +288,8 @@ if !exists('g:loaded_minibufexplorer')
 	let g:miniBufExplSplitToEdge = 1
 	let g:miniBufExplTabWrap = 1
 	let g:miniBufExplMinSize = 1
-	let g:miniBufExplMaxSize = 1
-	let g:miniBufExplSortBy = 'mru'  "'number'
+	let g:miniBufExplMaxSize = 2
+	let g:miniBufExplSortBy = 'number' "'mru'
 	let g:miniBufExplBRSplit = 0
 
 	" Colors
@@ -562,7 +562,7 @@ if !exists('loaded_commentary')
 	autocmd FileType c,cpp set commentstring=//%s
 	autocmd FileType py,sh set commentstring=#%s
 	" Key mapping
-	FnMap <c-l>		:normal! gc
+	FnMap <c-x>		:normal! gc
 endif
 
 
