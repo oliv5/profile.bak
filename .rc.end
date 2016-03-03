@@ -3,25 +3,20 @@
 # It should be compatible with all shells (dash, bash,...)
 
 ################################
-# Setup locales
+# Setup locales (https://www.gnu.org/software/gettext/manual/html_node/Locale-Environment-Variables.html#Locale-Environment-Variables)
 #   dpkg -l locales || sudo apt-get locales
 #   sudo dpkg-reconfigure locales
 #   locale
 if command -v "locale" >/dev/null 2>&1; then
+  ## Order of priority: LANGUAGE LC_ALL LC_xxx LANG
+  unset LANGUAGE LC_ALL LC_NAME LC_TIME LC_CTYPE
+  unset LC_MONETARY LC_ADDRESS LC_TELEPHONE
+  unset LC_MEASUREMENT LC_IDENTIFICATION 
+  unset LC_NUMERIC LC_PAPER LC_COLLATE LC_MESSAGES
   for LOCALE in fr_FR.UTF-8 fr_FR.utf8 $(locale -a | head -n 1); do
     if locale -a | grep "$LOCALE" >/dev/null; then
+      # Set the default only
       [ -z "$LANG" ] && export LANG="$LOCALE"
-      [ -z "$LANGUAGE" ] && export LANGUAGE="$LOCALE"
-      [ -z "$LC_ALL" ] && export LC_ALL="$LOCALE"
-      [ -z "$LC_TIME" ] && export LC_TIME="$LOCALE"
-      [ -z "$LC_MONETARY" ] && export LC_MONETARY="$LOCALE"
-      [ -z "$LC_ADDRESS" ] && export LC_ADDRESS="$LOCALE"
-      [ -z "$LC_TELEPHONE" ] && export LC_TELEPHONE="$LOCALE"
-      [ -z "$LC_NAME" ] && export LC_NAME="$LOCALE"
-      [ -z "$LC_MEASUREMENT" ] && export LC_MEASUREMENT="$LOCALE"
-      [ -z "$LC_IDENTIFICATION" ] && export LC_IDENTIFICATION="$LOCALE"
-      [ -z "$LC_NUMERIC" ] && export LC_NUMERIC="$LOCALE"
-      [ -z "$LC_PAPER" ] && export LC_PAPER="$LOCALE"
     fi
   done
   unset LOCALE
@@ -89,6 +84,10 @@ command -v setterm >/dev/null 2>&1 && setterm -blength 0 2>/dev/null # From the 
 alias l='ls -CF'
 alias la='ls -A'
 alias ll='ls -laF'
+alias llh='ls -laFh'
+alias lls='ls -laFS'
+alias lln='ls -laF | awk "\$5==0 {print \$0}"'
+alias llN='ls -laF | awk "\$5!=0 {print \$0}"'
 alias lsg='ls | grep'
 
 # Alias cd/back
