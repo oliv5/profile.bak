@@ -32,14 +32,15 @@ alias gli='git ls-files -o -i --exclude-standard'
 # Diff aliases
 alias gd='git diff'
 alias gdd='git diff'
-alias gdm='git_diffm'
+alias gdm='git difftool -y'
 alias gda='git_diff_all'
 alias gdda='git_diff_all'
 alias gdma='git_diffm_all'
-alias gdc='git_diff_cached'
-alias gddc='git_diff_cached'
-alias gdmc='git_diffm_cached'
+alias gdc='git diff --cached'
+alias gddc='git diff --cached'
+alias gdmc='git difftool -y --cached'
 alias gdl='git diff --name-status'
+alias gdls='git diff --name-status'
 alias gds='git diff stash'
 alias gdiff='git diff'
 # Merge aliases
@@ -56,6 +57,11 @@ alias gbdf='git branch -D'  # forced branch delete
 alias gbr='git branch -r'   # list tracking
 alias gbrd='git branch -rd' # remove tracking
 alias gbranch='git branch'
+# Branch removal
+alias git_branch_rm='git branch -d'
+alias git_branch_rm_remote='git push :'
+alias git_branch_rm_tracking='git branch -dr'
+alias git_branch_rm_tracking_old='git fetch -p'
 # Stash aliases
 alias gsc='git_stash_create'
 alias gss='git_stash_save'
@@ -65,7 +71,7 @@ alias gssl='git_stash_save_lazy'
 alias gsp='git_stash_pop'
 alias gsa='git_stash_apply'
 alias gsl='git stash list'
-alias gslc='git_stash_count'
+alias gslc='git stash list | wc -l'
 alias gsf='git_stash_show'
 alias gsfa='git_stash_show_all'
 alias gsfc='git_stash_cat'
@@ -77,6 +83,8 @@ alias gsb='git_stash_backup'
 alias gsrm='git_stash_drop'
 alias gsm='gsdm'
 alias gstash='git stash'
+alias git_suspend='git_stash_save'
+alias git_resume='git_stash_pop'
 # Gitignore aliases
 alias gil='git_ignore_list'
 alias gia='git_ignore_add'
@@ -138,6 +146,13 @@ alias gre='git reset'
 alias grh='git reset HEAD'
 alias grha='git reset HEAD --hard'
 alias greset='git reset'
+alias git_rollback='git reset'
+# Revert a commit by making a new one
+# Use -m 1,2... to select the wanted
+# parent branch of a merge commit
+alias git_revert='git revert'
+# Amend last commit
+alias git_amend='git commit --amend'
 # Rebase aliases
 alias grb='git rebase'
 alias grbi='git rebase -i'
@@ -148,12 +163,18 @@ alias gpush='git push'
 alias gpl='git pull'
 alias gpull='git pull'
 alias gpr='git pull --rebase'
+alias git_push='git_push_existing'
 # Config aliases
 alias gcl='git config -l'
 alias gcg='git config --get'
 alias gcs='git config --set'
 alias gcfg='git config'
 alias gconfig='git config'
+# Info aliases
+alias git_head='git_hash'
+# Git ignore changes
+alias git_ignore_changes='git update-index --assume-unchanged'
+alias git_noignore_changes='git update-index --no-assume-unchanged'
 
 ########################################
 # Dependencies
@@ -301,7 +322,6 @@ git_ping() {
 
 ########################################
 # Get hash
-alias git_head='git_hash'
 git_hash() {
   git rev-parse "${@:-HEAD}"
 }
@@ -395,7 +415,6 @@ git_pull() {
 }
 
 # Batch push existing remote/branches
-alias git_push='git_push_existing'
 git_push_existing() {
   git_exists || return 1
   local REMOTES="${1:-$(git_remotes)}"
@@ -458,22 +477,12 @@ git_upkeep() {
 }
 
 ########################################
-# Git diff
+# Git diff all files
 git_diff_all() {
   git diff "$@" 2>/dev/null
   git diff --cached "$@"
 }
-git_diff_cached() {
-  git diff --cached "$@"
-}
-
-# Git diff with meld
-git_diffm() {
-  git difftool -y "$@"
-}
-git_diffm_cached() {
-  git difftool --cached -y "$@"
-}
+# Git diff all files with meld
 git_diffm_all() {
   git difftool -y "$@" 2>/dev/null
   git difftool --cached -y "$@"
@@ -524,7 +533,7 @@ git_stash_diff() {
 }
 git_stash_diffm() {
   local STASH="${1:-0}"; shift 2>/dev/null
-  git_diffm "stash@{$STASH}" "$@" 
+  git difftool -y "stash@{$STASH}" "$@" 
 }
 git_stash_diffl() {
   git_stash_diff "${@:-0}" --name-only
@@ -588,27 +597,7 @@ git_stash_backup() {
   )
 }
 
-# Aliases using stashes
-alias git_suspend='git_stash_save'
-alias git_resume='git_stash_pop'
-alias git_stash_list='git stash list'
-alias git_stash_count='git stash list | wc -l'
-
 ########################################
-# Revert a commit by making a new one
-# Use -m 1,2... to select the wanted
-# parent branch of a merge commit
-alias git_revert='git revert'
-
-# Hard reset files to a given rev
-alias git_reset='git reset --hard'
-
-# Soft revert to a given CL, won't change modified files
-git_rollback() {
-  local REV="${1:-HEAD}"; shift 2>/dev/null
-  git reset "$REV" "$@"
-}
-
 # Clean repo back to given CL
 # remove unversionned files
 git_clean() {
@@ -671,13 +660,11 @@ git_subtree_update() {
 ########################################
 # https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History
 # https://git-scm.com/docs/git-filter-branch
-# Amend last commit
-alias git_amend='git commit --amend'
 
 # Amend author/committer names & emails
 git_amend_names() {
- # Run in a subshell because we need to export lots of variables
 (
+  # Run in a subshell because we need to export lots of variables
   # Identify who/what the amend is about
   export AUTHOR_1="${1%%:*}"
   export AUTHOR_2="${1##*:}"
@@ -761,16 +748,7 @@ git_ignore_list() {
   git status -s --ignored 2>/dev/null || git clean -ndX
 }
 
-# Git ignore changes
-alias git_ignore_changes='git update-index --assume-unchanged'
-alias git_noignore_changes='git update-index --no-assume-unchanged'
-
 ########################################
-# Remove branches
-alias git_rm_branch='git branch -d'
-alias git_rm_branch_remote='git push :'
-alias git_rm_tracking='git branch -dr'
-alias git_rm_tracking_old='git fetch -p'
 
 # Create a new branch from current one
 # with a single commit in it
