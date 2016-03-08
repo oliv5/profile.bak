@@ -103,24 +103,29 @@ alias ff_empty='find . -type f -empty'
 
 ################################
 # http://unix.stackexchange.com/questions/59112/preserve-directory-structure-when-moving-files-using-find
-# Move/copy by replicating directory structure
-alias mkdir_cp='_mkdir_exec "cp -v"'
-alias mkdir_mv='_mkdir_exec "mv -v"'
-_mkdir_exec() {
-  local EXEC="${1:-echo}"
-  local SRC="$2"
-  local DST="$(path_abs "${3:-.}")"
-  shift 3
+# Move by replicating directory structure
+mkdir_mv() {
+  local SRC="$1"
+  local DST="$(path_abs "${2:-.}")"
+  shift 2
   local BASENAME="$(basename "$SRC")"
-  find "$(dirname "$SRC")" ${BASENAME:+-name "$BASENAME"} $@ -exec sh -c '
-      EXEC="$1"
-      shift
-      for x do
+  find "$(dirname "$SRC")" -name "${BASENAME:-*}" $@ -exec sh -c '
+      for x; do
         mkdir -p "$0/${x%/*}" &&
-        $EXEC "$x" "$0/$x"
+        mv "$x" "$0/$x"
       done
-    ' "$DST" "$EXEC" {} +
+    ' "$DST" {} +
 }
+
+################################
+# Rsync replicate tree (without files)
+alias rsync_mktree='rsync -a -f"+ */" -f"- *"'
+# Rsync copy tree (with files)
+alias rsync_cptree='rsync -a'
+# Rsync copy file (with tree)
+alias rsync_cp='rsync -R'
+# Rsync move file (with tree)
+alias rsync_mv='rsync -R --remove-source-files'
 
 ##############################
 # Backup file or directory
