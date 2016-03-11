@@ -52,10 +52,12 @@ alias gbl='git branch -l'   # local branches
 alias gbv='git branch -v'   # verbose list branch
 alias gbva='git branch -va' # verbose list branch
 alias gbav='git branch -va' # verbose list branch
-alias gbd='git branch -d'   # branch delete
-alias gbdf='git branch -D'  # forced branch delete
+alias gbd='git branch -d'   # delete branch (only merged branch)
+alias gbD='git branch -D'   # forced delete branch
+alias gbm='git branch --merged'    # list merged branches
+alias gbM='git branch --no-merged' # list unmerged branches
 alias gbr='git branch -r'   # list tracking
-alias gbrd='git branch -rd' # remove tracking
+alias gbdr='git branch -rd' # remove tracking
 alias gbranch='git branch'
 # Branch removal
 alias git_branch_rm='git branch -d'
