@@ -154,10 +154,10 @@ annex_bundle() {
 #  done
 #}
 annex_copy() {
-  vcsh_run "git annex copy --fast" "$@"
+  vcsh_run git annex copy --fast "$@"
 }
 annex_copy_all() {
-  vcsh_run "git annex copy" "$@"
+  vcsh_run git annex copy "$@"
 }
 
 # Annex download
