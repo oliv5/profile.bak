@@ -50,6 +50,7 @@ vcsh_clone() {
 
 # Run a git command, call vcsh when necessary
 vcsh_run() {
+  git_exists || return 1
   if [ $# -le 1 ]; then
     local ARGS="$1"
   else    

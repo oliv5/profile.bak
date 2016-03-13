@@ -297,6 +297,11 @@ git_stx() {
 git_branches() {
   git ${2:+--git-dir="$2"} for-each-ref --format='%(refname:short)' refs/heads/ | xargs echo
 }
+git_branches_info() {
+  for branch in $(git branch -r $@ | grep -v HEAD); do 
+    echo -e $(git show --format="%ci %cr %an" $branch | head -n 1) \\t$branch
+  done | sort -r
+}
 
 # Get remote names
 git_remotes() {

@@ -144,31 +144,36 @@ annex_bundle() {
 }
 
 # Annex copy
+#annex_copy() {
+#  git_exists || return 1
+#  local DIRECTION="${1:-from}"
+#  local REMOTES="${2:-$(git_remotes)}"
+#  shift $(($#<2?$#:2))
+#  for REMOTE in $REMOTES; do
+#    vcsh_run 'git annex copy' "--$DIRECTION" "$REMOTE" "${@:-.}"
+#  done
+#}
 annex_copy() {
-  git_exists || return 1
-  local DIRECTION="${1:-from}"
-  local REMOTES="${2:-$(git_remotes)}"
-  shift $(($#<2?$#:2))
-  for REMOTE in $REMOTES; do
-    vcsh_run 'git annex copy' "--$DIRECTION" "$REMOTE" "${@:-.}"
-  done
+  vcsh_run "git annex copy --fast" "$@"
 }
-alias annex_cp='vcsh_run "git annex copy"'
+annex_copy_all() {
+  vcsh_run "git annex copy" "$@"
+}
 
 # Annex download
-annex_download_all() {
-  annex_copy "from" "$@"
-}
 annex_download() {
-  annex_copy "from" "$@" --fast
+  annex_copy --from "$@"
+}
+annex_download_all() {
+  annex_copy_all --from "$@"
 }
 
 # Annex upload
-annex_upload_all() {
-  annex_copy "to" "$@"
-}
 annex_upload() {
-  annex_copy "to" "$@" --fast
+  annex_copy --to "$@"
+}
+annex_upload_all() {
+  annex_copy_all --to "$@"
 }
 
 # Annex upkeep

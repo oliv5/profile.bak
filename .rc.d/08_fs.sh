@@ -151,3 +151,50 @@ swap() {
 dd_status() {
   kill -10 $(pgrep '^dd$')
 }
+
+################################
+# Make iso from block device
+mk_iso() {
+  dd if="${1:-/dev/cdrom}" of="${2:-./myimage.iso}" conv=noerror
+}
+
+# Make iso from filesystem
+mk_isofs() {
+  mkisofs -o "${2:-./myimage.iso}" "${1:?No input directory specified...}"
+}
+
+# Diff iso versus source
+diff_iso() {
+  local SRC="${1:?No iso specified...}"
+  local REF="${2:?No filesystem to check against...}"
+  local MOUNT="${3:-/mnt}"
+  mount_iso "$SRC" "$MOUNT"
+  diff -rq "$MOUNT" "$REF"
+  local RES=$?
+  sudo umount "$MOUNT"
+  return $RES
+}
+
+# Check iso file read
+check_iso() {
+  local SRC="${1:?No iso specified...}"
+  local MOUNT="${2:-/mnt}"
+  mount_iso "$SRC" "$MOUNT"
+  find "$MOUNT" -type f -print0 | xargs -0 -n1 -I{} cat "{}" > /dev/null
+  local RES=$?
+  sudo umount "$MOUNT"
+  return $RES
+}
+check_alliso() {
+  local MOUNT="${MOUNT:-/mnt}"
+  local FAILED=""
+  sudo true
+  for SRC; do
+    echo -n "Check '$SRC' ... "
+    if check_iso "$SRC" "$MOUNT" 2>/dev/null; then
+      echo "success."
+    else
+      echo "FAILURE."
+    fi
+  done
+}
