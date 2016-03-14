@@ -47,23 +47,20 @@ alias gdiff='git diff'
 alias gmm='git mergetool -y'
 alias gmerge='gmm'
 # Branch aliases
-alias gba='git branch -a'   # all branches
-alias gbl='git branch -l'   # local branches
-alias gbv='git branch -v'   # verbose list branch
-alias gbva='git branch -va' # verbose list branch
-alias gbav='git branch -va' # verbose list branch
-alias gbd='git branch -d'   # delete branch (only merged branch)
-alias gbD='git branch -D'   # forced delete branch
+alias gba='git branch -a'   # list all
+alias gbl='git branch -l'   # list local
+alias gbv='git branch -v'   # verbose list local
+alias gbva='git branch -va' # verbose list all
+alias gbav='git branch -va' # verbose list all
 alias gbm='git branch --merged'    # list merged branches
 alias gbM='git branch --no-merged' # list unmerged branches
-alias gbr='git branch -r'   # list tracking
-alias gbdr='git branch -rd' # remove tracking
-alias gbranch='git branch'
-# Branch removal
-alias git_branch_rm='git branch -d'
-alias git_branch_rm_remote='git push :'
-alias git_branch_rm_tracking='git branch -dr'
-alias git_branch_rm_tracking_old='git fetch -p'
+alias gbr='git branch -r'   # list remote
+alias gbd='git branch -d'   # delete branch (merged only)
+alias gbD='git branch -D'   # delete branch (any)
+alias gbdr='git branch -rd' # remove remote branch (merged only)
+alias gbDr='git push :'     # remove remote branch (any)
+alias gbdro='git fetch -p'  # remote all old remotes
+alias gb='git branch'
 # Stash aliases
 alias gsc='git_stash_create'
 alias gss='git_stash_save'
@@ -273,6 +270,11 @@ git_repo() {
 git_branch() {
   git ${2:+--git-dir="$2"} rev-parse --abbrev-ref "${1:-HEAD}"
   #git branch -a | grep -E '^\*' | cut -c 3-
+}
+
+# Get all local branches
+git_branches() {
+  git ${1:+--git-dir="$1"} for-each-ref --shell refs/heads/ --format='%(refname:short)'
 }
 
 # Get current url
