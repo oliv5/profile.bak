@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # Wifi on/off
-alias bt_on='wifi_enable'
-alias bt_off='wifi_disable'
+alias wifi_on='wifi_enable'
+alias wifi_off='wifi_disable'
 
 # Wifi enable
 wifi_enable() {
