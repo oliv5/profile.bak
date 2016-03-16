@@ -120,6 +120,17 @@ cmd_exists which || {
 }
 
 ################################
+# EINTR retry fct
+#http://unix.stackexchange.com/questions/16455/interruption-of-system-calls-when-a-signal-is-caught
+eintr() {
+  local EINTR=4
+  eval "$@"
+  while [ $? -eq $EINTR ]; do
+    eval "$@"
+  done
+}
+
+################################
 # Ansi codes
 # http://man7.org/linux/man-pages/man4/console_codes.4.html
 # https://en.wikipedia.org/wiki/ANSI_escape_code

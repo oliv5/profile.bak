@@ -147,10 +147,10 @@ zombie_kill() {
 
 ################################
 # IPC management
-sem_purge() {
+ipc_sempurge() {
   ipcs -s | awk '/0/ {print $2}' | xargs -n 1 ipcrm -s
 }
 
-shm_purge() {
+ipc_shmpurge() {
   ipcs -m | awk '/0/ {print $2}' | xargs -n 1 ipcrm -m
 }

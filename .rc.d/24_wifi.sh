@@ -6,17 +6,19 @@ alias wifi_off='wifi_disable'
 
 # Wifi enable
 wifi_enable() {
+    sudo rfkill unblock wifi
     sudo ifconfig "${1:-wlan0}" up
-    wifi_connect "$@"
+    [ $# -gt 1 ] && wifi_connect "$@"
 }
 
 # Wifi disable
 wifi_disable() {
     sudo ifconfig "${1:-wlan0}" down
+    sudo rfkill block wifi
 }
 
 # List networks
-wifi_list() {
+wifi_scan() {
     sudo iwlist "${1:-wlan0}" scan
 }
 

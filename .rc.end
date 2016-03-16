@@ -114,6 +114,9 @@ alias gse='gs | grep modified | cut -d : -f 2 | xargs ${GEDITOR:-false}'
 # Source insight
 alias s='si'
 
+# Move
+alias mv="mv -i"
+
 # Diff
 alias d='diff'
 alias m='meld'

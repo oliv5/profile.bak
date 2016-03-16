@@ -11,17 +11,6 @@ else
 fi
 
 ################################
-# EINTR retry fct
-#http://unix.stackexchange.com/questions/16455/interruption-of-system-calls-when-a-signal-is-caught
-eintr() {
-  local EINTR=4
-  eval "$@"
-  while [ $? -eq $EINTR ]; do
-    eval "$@"
-  done
-}
-
-################################
 # Event tester
 alias event_list='xev'
 alias event_showkey='showkey -s'
@@ -31,17 +20,6 @@ alias event_showkey='showkey -s'
 alias keyb_list='grep ^[^#] /etc/locale.gen'
 alias keyb_set='setxkbmap -layout'
 alias keyb_setfr='setxkbmap -layout fr'
-
-################################
-# Language selection functions
-lang_fr() {
-  export LANGUAGE="fr:en"
-  export LC_ALL="fr_FR.UTF-8"
-}
-lang_en() {
-  unset LANGUAGE
-  export LC_ALL="en_US.UTF-8"
-}
 
 ################################
 # Chroot
