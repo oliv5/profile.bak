@@ -116,7 +116,7 @@ alias gtl='git tag -l'
 alias gtd='git tag -d'
 alias gtc='git tag --contains'
 alias gtls='git log --tags --simplify-by-decoration --pretty="format:%ai %d"'
-alias gtg='git tag autotag_$(date +%Y%m%d-%H%M%S)'
+alias gtg='git tag tag_$(date +%Y%m%d-%H%M%S)'
 alias gtag='git tag'
 # Annex aliases
 alias gat='git annex status'

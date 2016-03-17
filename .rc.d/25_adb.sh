@@ -96,9 +96,13 @@ adb_logcat() {
     adb shell logcat
 }
 
-# Nandroid backup
+# Android backup
 adb_backup() {
     local DST="${1:-./nandroid_backup.$(date +%Y%m%d-%H%M).dat}"
-    adb backup -all -apk -no-shared -system -f "$DST"
+    eval "${1:+shift}"
+    adb backup -all -apk -shared "$@" -f "$DST"
     7z a "${DST}.7z" "$DST" && rm "$DST"
+}
+adb_backup_system() {
+    adb_backup -system
 }

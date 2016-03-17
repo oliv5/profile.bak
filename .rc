@@ -34,10 +34,6 @@ shift $(expr $OPTIND - 1)
 unset FLAGS OPTARG OPTERR
 
 ################################
-# Cleanup env
-unalias -a
-
-################################
 # Log function
 rc_log() {
   ${RC_VERBOSE:-false} && echo "$@"

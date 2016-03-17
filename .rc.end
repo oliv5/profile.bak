@@ -81,7 +81,6 @@ command -v setterm >/dev/null 2>&1 && setterm -blength 0 2>/dev/null # From the 
 
 ################################
 # Alias ls
-alias ls='ls --color=auto'
 alias l='ls -CF'
 alias la='ls -A'
 alias ll='ls -laF'
