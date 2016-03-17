@@ -46,13 +46,17 @@
 	Bundle 'vim-scripts/MultipleSearch'
 	"Bundle 'vim-scripts/highlight.vim'
 	Bundle 'mtth/scratch.vim'
+	Bundle 'airblade/vim-gitgutter'
+" }
+
+" Disable unwanted bundles {
+	UnBundle 'bling/vim-bufferline'
+	UnBundle 'spf13/vim-autoclose'
+	UnBundle 'mhinz/vim-signify'
+	UnBundle 'scrooloose/syntastic'
 " }
 
 " Configure SPF13 plugins {
-	" Disable unwanted SPF13 plugins
-	UnBundle 'bling/vim-bufferline'
-	UnBundle 'spf13/vim-autoclose'
-
 	" CtrlpFunky
 	let g:ctrlp_funky_syntax_highlight = 1
 	FnNoremap <C-o><C-o>	:CtrlPFunky<CR>
