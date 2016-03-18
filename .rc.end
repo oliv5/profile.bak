@@ -100,11 +100,13 @@ alias v='gvim'
 alias ssv='ss | cut -c 9- | xargs gvim'
 alias gsv='gs | grep modified | cut -d : -f 2 | xargs gvim'
 
-# Search and open
-ffv() { ff "$@" | xargs gvim; }
-ffc() { ff "$@" | xargs ${PAGER:-false}; }
-ffe() { ff "$@" | xargs ${GEDITOR:-false}; }
-ffo() { ff "$@" | xargs mimeopen; }
+# Search and process
+ffv() { ff "$@" -print0 | xargs -0 ${EDITOR:-false}; }
+ffp() { ff "$@" -print0 | xargs -0 ${PAGER:-false}; }
+ffe() { ff "$@" -print0 | xargs -0 ${GEDITOR:-false}; }
+ffo() { ff "$@" -print0 | xargs -0 mimeopen; }
+ffx() { ff "$1" -print0 | xargs -0 $(eval echo \${$#}); }
+ffc() { ff "$@" -print  | wc -l; }
 
 # Gedit/geany
 alias e='${GEDITOR:-false}'

@@ -20,7 +20,6 @@ alias gstu='git status --porcelain -b | awk "NR==1 || /^\?\?/"'       # untracke
 alias gsti='git status --porcelain -b | awk "NR==1 || /^\!\!/"'       # ignored
 alias gstz='git status --porcelain -b | awk "NR==1 || /^[MARC] /"'    # in index
 alias gsts='git status --porcelain -b | awk "NR==1 || /^[^\?\?]/"'    # not untracked
-alias gstatus='git status'
 # List aliases
 alias gll='git ls-files'
 alias gls='git ls-files'
@@ -42,10 +41,8 @@ alias gdmc='git difftool -y --cached'
 alias gdl='git diff --name-status'
 alias gdls='git diff --name-status'
 alias gds='git diff stash'
-alias gdiff='git diff'
 # Merge aliases
 alias gmm='git mergetool -y'
-alias gmerge='gmm'
 # Branch aliases
 alias gba='git branch -a'   # list all
 alias gbl='git branch -l'   # list local
@@ -81,23 +78,16 @@ alias gsdl='git_stash_diffl'
 alias gsb='git_stash_backup'
 alias gsrm='git_stash_drop'
 alias gsm='gsdm'
-alias gstash='git stash'
 alias git_suspend='git_stash_save'
 alias git_resume='git_stash_pop'
 # Gitignore aliases
 alias gil='git_ignore_list'
 alias gia='git_ignore_add'
-# Add files aliases
-alias ga='git add'
-alias gan='git add $(git ls-files -o --exclude-standard)'
-alias gau='git add -u'
-alias gadd='git add'
 # Commit aliases
 alias gci='git commit'
 alias gcm='git commit -m'
 alias gcim='git commit -m'
 alias gcam='git commit -am'
-alias gcommit='git commit'
 # Misc aliases
 alias grm='git rm'
 alias grmu='git clean -fn'
@@ -107,7 +97,6 @@ alias glh='git log -p'
 alias gln='git log --name-only'
 alias gla='git log --name-status'
 alias gls='git log --stat'
-alias glg='git log'
 alias glog='git log'
 alias git_history='git log -p'
 # Tag aliases
@@ -118,14 +107,18 @@ alias gtc='git tag --contains'
 alias gtls='git log --tags --simplify-by-decoration --pretty="format:%ai %d"'
 alias gtg='git tag tag_$(date +%Y%m%d-%H%M%S)'
 alias gtag='git tag'
+# Add aliases
+alias ga='git add'
+alias gan='git add $(git ls-files -o --exclude-standard)'
+alias gau='git add -u'
 # Annex aliases
-alias gat='git annex status'
-alias gal='git annex list'
-alias gas='git annex sync'
-alias gag='git annex get'
-alias gac='git annex copy'
-alias gad='git annex drop'
-alias gai='git annex info'
+alias gant='git annex status'
+alias ganl='git annex list'
+alias gans='git annex sync'
+alias gang='git annex get'
+alias ganc='git annex copy'
+alias gand='git annex drop'
+alias gani='git annex info'
 alias gannex='git annex'
 # Patch aliases
 alias gpd='git diff -p'
@@ -139,12 +132,10 @@ alias iggg='git grep -ni'
 alias ggrep='git grep'
 # Checkout aliases
 alias gco='git checkout'
-alias gcheckout='git checkout'
 # Reset aliases
 alias gre='git reset'
 alias grh='git reset HEAD'
-alias grha='git reset HEAD --hard'
-alias greset='git reset'
+alias grhh='git reset HEAD --hard'
 alias git_rollback='git reset'
 # Revert a commit by making a new one
 # Use -m 1,2... to select the wanted
@@ -155,22 +146,16 @@ alias git_amend='git commit --amend'
 # Rebase aliases
 alias grb='git rebase'
 alias grbi='git rebase -i'
-alias grebase='git rebase'
 # Pull/push aliases
 alias gps='git push'
-alias gpush='git push'
 alias gpl='git pull'
-alias gpull='git pull'
 alias gpr='git pull --rebase'
-alias git_push='git_push_existing'
 # Config aliases
 alias gcl='git config -l'
 alias gcg='git config --get'
 alias gcs='git config --set'
 alias gcfg='git config'
 alias gconfig='git config'
-# Info aliases
-alias git_head='git_hash'
 # Git ignore changes
 alias git_ignore_changes='git update-index --assume-unchanged'
 alias git_noignore_changes='git update-index --no-assume-unchanged'
