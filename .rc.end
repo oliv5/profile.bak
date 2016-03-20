@@ -62,6 +62,7 @@ fi
 # GPG agent
 if command -v gpg-agent >/dev/null 2>&1; then
   GPG_AGENT_FILE="$HOME/.gpg-agent-info"
+  export GPG_TTY=$(tty)
   if test -f "$GPG_AGENT_FILE" && \
       kill -0 $(cut -d: -f 2 "$GPG_AGENT_FILE") 2>/dev/null; then
     export GPG_AGENT_INFO=$(cat "$GPG_AGENT_FILE")

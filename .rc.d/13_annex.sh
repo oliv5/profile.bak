@@ -181,12 +181,19 @@ annex_upkeep() {
   git_exists || return 1
   vcsh_run git annex status
   if [ "$1" = "-y" ] || ask_question "Sync new files? (y/n): " y Y >/dev/null; then
-    vcsh_run git annex add .
-    vcsh_run git annex sync
+    vcsh_run git annex add . --fast
+    vcsh_run git annex sync --fast
   fi
   shift
   if [ "$1" = "-y" ] || ask_question "Sync files content? (y/n): " y Y >/dev/null; then
     vcsh_run git annex sync --content --fast
+  fi
+  shift
+  if [ "$1" = "-y" ] || ask_question "Push files content? (y/n): " y Y >/dev/null; then
+    vcsh_run git annex copy . --fast --auto
+  fi
+  if [ "$1" = "-y" ] || ask_question "Pull files content? (y/n): " y Y >/dev/null; then
+    vcsh_run git annex get . --fast --auto
   fi
 }
 
