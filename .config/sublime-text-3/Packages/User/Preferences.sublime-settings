@@ -35,7 +35,6 @@
 		"Vintage"
 	],
 	"theme": "Aristocat.sublime-theme",
-	//"theme": "Asphalt.sublime-theme",
 	"theme_asphalt_show_input_dropdowon": true,
 	"theme_asphalt_show_panel_close": false,
 	"theme_asphalt_status_bar_brighter": false,
