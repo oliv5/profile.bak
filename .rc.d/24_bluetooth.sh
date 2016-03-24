@@ -1,15 +1,31 @@
 #!/bin/sh
 
-# Bluetooth on/off
+# On/off
 alias bt_on='bt_enable'
 alias bt_off='bt_disable'
 
-# Bluetooth enable
-bt_enable() {
-    rfkill unblock bluetooth
+# Install packages
+bt_install() {
+    sudo apt-get install bluez bluez-utils "$@"
 }
 
-# Bluetooth disable
+# Enable
+bt_enable() {
+    sudo modprobe btusb
+    sudo rfkill unblock bluetooth
+    sudo service bluetooth start
+}
+
+# Disable
 bt_disable() {
-    rfkill block bluetooth
+    sudo service bluetooth stop
+    sudo rfkill block bluetooth
+    sudo rmmod btusb
+}
+
+# Get config
+bt_getconfig() {
+    sudo hciconfig
+    sudo hcitool dev
+    sudo hcitool scan
 }
