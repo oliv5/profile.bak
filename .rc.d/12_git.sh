@@ -112,6 +112,7 @@ alias ga='git add'
 alias gan='git add $(git ls-files -o --exclude-standard)'
 alias gau='git add -u'
 # Annex aliases
+alias gana='git annex add'
 alias gant='git annex status'
 alias ganl='git annex list'
 alias gans='git annex sync'
@@ -252,8 +253,9 @@ git_repo() {
 }
 
 # Get current branch name
+# Hide errors when ref is unknown
 git_branch() {
-  git ${2:+--git-dir="$2"} rev-parse --abbrev-ref "${1:-HEAD}"
+  git ${2:+--git-dir="$2"} rev-parse --abbrev-ref "${1:-HEAD}" -- 2>/dev/null
   #git branch -a | grep -E '^\*' | cut -c 3-
 }
 
