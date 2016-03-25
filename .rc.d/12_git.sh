@@ -255,7 +255,7 @@ git_repo() {
 # Get current branch name
 # Hide errors when ref is unknown
 git_branch() {
-  git ${2:+--git-dir="$2"} rev-parse --abbrev-ref "${1:-HEAD}" -- 2>/dev/null
+  git ${2:+--git-dir="$2"} rev-parse --abbrev-ref "${1:-HEAD}" 2>/dev/null
   #git branch -a | grep -E '^\*' | cut -c 3-
 }
 
