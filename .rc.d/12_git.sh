@@ -363,8 +363,11 @@ git_clone() {
   done
 }
 
+# Batch pull the current branch from all remotes
+alias git_pull='git_pull_all "" "$(git_branch)"'
+
 # Batch pull existing remote/branches
-git_pull() {
+git_pull_all() {
   git_exists || return 1
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
@@ -410,30 +413,20 @@ git_pull() {
   fi
 }
 
-# Batch push existing remote/branches
-git_push_existing() {
-  git_exists || return 1
-  local REMOTES="${1:-$(git_remotes)}"
-  local BRANCHES="${2:-$(git_branches)}"
-  for REMOTE in $REMOTES; do
-    for BRANCH in $BRANCHES; do
-      if git branch -r | grep -- "$REMOTE/$BRANCH" >/dev/null; then
-        echo -n "Push $REMOTE/$BRANCH : "
-        git push "$REMOTE" "$BRANCH"
-      fi
-    done
-  done
-}
+# Batch push the current branch to all remotes
+alias git_push='git_push_all "" "$(git_branch)"'
 
-# Batch push all local branches to remotes
+# Batch push existing remote/branches
 git_push_all() {
   git_exists || return 1
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   for REMOTE in $REMOTES; do
     for BRANCH in $BRANCHES; do
-      echo -n "Push $REMOTE/$BRANCH : "
-      git push "$REMOTE" "$BRANCH"
+      #if git branch -r | grep -- "$REMOTE/$BRANCH" >/dev/null; then
+        echo -n "Push $REMOTE/$BRANCH : "
+        git push "$REMOTE" "$BRANCH"
+      #fi
     done
   done
 }
@@ -447,6 +440,7 @@ git_bundle() {
     local BUNDLE="$DIR/${2:-$(git_name "bundle").git}"
     local GPG_RECIPIENT="$3"
     echo "Git bundle into $BUNDLE"
+    mkdir -p "$DIR" || return 1
     git bundle create "$BUNDLE" --all --tags --remotes
     if [ ! -z "$GPG_RECIPIENT" ]; then
       gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "${BUNDLE}" && 

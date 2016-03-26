@@ -90,13 +90,12 @@ annex_init_gcrypt() {
 
 # Annex sync
 annex_sync() {
-  vcsh_run 'git annex sync'
+  vcsh_run 'git annex sync "$@"'
 }
 
 # Annex sync content
-annex_sync_content() {
-  vcsh_run 'git annex sync --content --fast'
-}
+alias annex_sync_content='annex_sync --content'
+alias annex_sync_content_fast='annex_sync --content --fast'
 
 # Annex status
 annex_status() {
@@ -143,42 +142,37 @@ annex_bundle() {
   fi
 }
 
+# Annex get
+alias annex_get_fast='annex_get --fast'
+alias annex_get_auto='annex_get --auto'
+alias annex_get='vcsh_run git annex get'
+
 # Annex copy
-#annex_copy() {
-#  git_exists || return 1
-#  local DIRECTION="${1:-from}"
-#  local REMOTES="${2:-$(git_remotes)}"
-#  shift $(($#<2?$#:2))
-#  for REMOTE in $REMOTES; do
-#    vcsh_run 'git annex copy' "--$DIRECTION" "$REMOTE" "${@:-.}"
-#  done
-#}
+alias annex_copy_fast='annex_copy --fast'
+alias annex_copy_auto='annex_copy --auto'
 annex_copy() {
-  vcsh_run git annex copy --fast "$@"
-}
-annex_copy_all() {
-  vcsh_run git annex copy "$@"
+  annex_exists || return 1
+  for LAST; do true; done
+  if [ "$LAST" = "--from" ] || [ "$LAST" = "--to" ]; then
+    for REMOTE in $(git_remotes); do
+      vcsh_run git annex copy "$@" "$REMOTE"
+    done
+  else
+    vcsh_run git annex copy "$@"
+  fi
 }
 
 # Annex download
-annex_download() {
-  annex_copy --from "$@"
-}
-annex_download_all() {
-  annex_copy_all --from "$@"
-}
+alias annex_download='annex_copy --from'
+alias annex_download_fast='annex_copy_fast --from'
 
 # Annex upload
-annex_upload() {
-  annex_copy --to "$@"
-}
-annex_upload_all() {
-  annex_copy_all --to "$@"
-}
+alias annex_upload='annex_copy --to'
+alias annex_upload_fast='annex_copy_fast --to'
 
 # Annex upkeep
 annex_upkeep() {
-  git_exists || return 1
+  annex_exists || return 1
   vcsh_run git annex status
   if [ "$1" = "-y" ] || ask_question "Sync new files? (y/n): " y Y >/dev/null; then
     vcsh_run git annex add . --fast
