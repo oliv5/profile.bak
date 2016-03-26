@@ -181,13 +181,15 @@ annex_upkeep() {
   shift
   if [ "$1" = "-y" ] || ask_question "Sync files content? (y/n): " y Y >/dev/null; then
     vcsh_run git annex sync --content --fast
-  fi
-  shift
-  if [ "$1" = "-y" ] || ask_question "Push files content? (y/n): " y Y >/dev/null; then
-    vcsh_run git annex copy . --fast --auto
-  fi
-  if [ "$1" = "-y" ] || ask_question "Pull files content? (y/n): " y Y >/dev/null; then
-    vcsh_run git annex get . --fast --auto
+  else
+    shift
+    if [ "$1" = "-y" ] || ask_question "Push files content? (y/n): " y Y >/dev/null; then
+      vcsh_run git annex copy . --auto --fast
+    fi
+    shift
+    if [ "$1" = "-y" ] || ask_question "Pull files content? (y/n): " y Y >/dev/null; then
+      vcsh_run git annex get . --fast
+    fi
   fi
 }
 
