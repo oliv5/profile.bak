@@ -434,13 +434,11 @@ git_push_all() {
 # Create a bundle
 git_bundle() {
   git_exists || return 1
-  local DIR="${1:-$(git_dir)}"
+  local DIR="${1:-$(git_dir)/bundle}"
   if [ -d "$DIR" ]; then
-    DIR="${1:-$DIR/bundle}"
     local BUNDLE="$DIR/${2:-$(git_name "bundle").git}"
     local GPG_RECIPIENT="$3"
     echo "Git bundle into $BUNDLE"
-    mkdir -p "$DIR" || return 1
     git bundle create "$BUNDLE" --all --tags --remotes
     if [ ! -z "$GPG_RECIPIENT" ]; then
       gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "${BUNDLE}" && 

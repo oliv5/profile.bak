@@ -114,9 +114,8 @@ annex_diff() {
 annex_bundle() {
   git_exists || return 1
   if annex_exists; then
-    local DIR="${1:-$(git_dir)}"
+    local DIR="${1:-$(git_dir)/bundle}"
     if [ -d "$DIR" ]; then
-      DIR="${1:-$DIR/bundle}"
       local BUNDLE="$DIR/${2:-$(git_name "annex").tgz}"
       local GPG_RECIPIENT="$3"
       echo "Tar annex into $BUNDLE"
@@ -125,7 +124,7 @@ annex_bundle() {
       else
         vcsh_run "git annex list $(git config --get core.worktree)" | 
           awk 'NF>1 {$1="";print "\""substr($0,2)"\""}' |
-          xargs tar cf "${BUNDLE}" -h --exclude-vcs
+          xargs tar cf "${BUNDLE}" -h --exclude-vcs --
       fi
       if [ ! -z "$GPG_RECIPIENT" ]; then
         gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" "${BUNDLE}" && 
