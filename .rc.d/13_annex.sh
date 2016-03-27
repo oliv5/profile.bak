@@ -172,23 +172,36 @@ alias annex_upload_fast='annex_copy_fast --to'
 # Annex upkeep
 annex_upkeep() {
   annex_exists || return 1
-  vcsh_run git annex status
-  if [ "$1" = "-y" ] || ask_question "Sync new files? (y/n): " y Y >/dev/null; then
+  # Get args
+  local ADD=""
+  local SYNC=""
+  local DL=""
+  local UL=""
+  local FLAG OPTIND OPTARG
+  while getopts "vasdu" FLAG; do
+    case "$FLAG" in
+      v) vcsh_run git annex status;;
+      a) ADD=1; annex_direct && SYNC=1;;
+      s) SYNC=1;;
+      d) DL=1;;
+      u) UL=1;;
+    esac
+  done
+  # Run
+  if [ -n "$ADD" ]; then
     vcsh_run git annex add . --fast
-    vcsh_run git annex sync --fast
+    if ! annex_direct; then
+      vcsh_run git commit -m '[upkeep] auto-commit'
+    fi
   fi
-  shift
-  if [ "$1" = "-y" ] || ask_question "Sync files content? (y/n): " y Y >/dev/null; then
-    vcsh_run git annex sync --content --fast
-  else
-    shift
-    if [ "$1" = "-y" ] || ask_question "Push files content? (y/n): " y Y >/dev/null; then
-      vcsh_run git annex copy . --auto --fast
-    fi
-    shift
-    if [ "$1" = "-y" ] || ask_question "Pull files content? (y/n): " y Y >/dev/null; then
-      vcsh_run git annex get . --fast
-    fi
+  if [ -n "$SYNC" ]; then
+    vcsh_run git annex sync
+  fi
+  if [ -n "$DL" ]; then
+    vcsh_run git annex get
+  fi
+  if [ -n "$UL" ]; then
+    annex_upload_fast
   fi
 }
 

@@ -119,6 +119,7 @@ alias gans='git annex sync'
 alias gang='git annex get'
 alias ganc='git annex copy'
 alias gand='git annex drop'
+alias gandd='git annex forget --drop-dead'
 alias gani='git annex info'
 alias gannex='git annex'
 # Patch aliases
@@ -454,12 +455,29 @@ git_bundle() {
 # Git upkeep
 git_upkeep() {
   git_exists || return 1
-  vcsh_run git status
-  if [ "$1" = "-y" ] || ask_question "Add and commit new files? (y/n): " y Y >/dev/null; then
-    vcsh_run git add -u :/
+  # Get args
+  local ADD=""
+  local DL=""
+  local UL=""
+  local FLAG OPTIND OPTARG
+  while getopts "vasdu" FLAG; do
+    case "$FLAG" in
+      v) vcsh_run git status;;
+      a) ADD=1;;
+      s) DL=1; UL=1;;
+      d) DL=1;;
+      u) UL=1;;
+    esac
+  done
+  # Run
+  if [ -n "$ADD" ]; then
+    vcsh_run git add -v -u :/
     vcsh_run git commit -m '[upkeep] auto-commit'
   fi
-  if [ "$2" = "-y" ] || ask_question "Push to remotes? (y/n): " y Y >/dev/null; then
+  if [ -n "$DL" ]; then
+    git_pull
+  fi
+  if [ -n "$UL" ]; then
     vcsh_run git push
   fi
 }
