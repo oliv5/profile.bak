@@ -177,21 +177,23 @@ annex_upkeep() {
   local SYNC=""
   local DL=""
   local UL=""
+  local MSG="[upkeep] auto-commit"
   local FLAG OPTIND OPTARG
-  while getopts "vasdu" FLAG; do
+  while getopts "vasdum" FLAG; do
     case "$FLAG" in
       v) vcsh_run git annex status;;
       a) ADD=1; annex_direct && SYNC=1;;
       s) SYNC=1;;
       d) DL=1;;
       u) UL=1;;
+      m) MSG="$OPTARG";;
     esac
   done
   # Run
   if [ -n "$ADD" ]; then
     vcsh_run git annex add . --fast
     if ! annex_direct; then
-      vcsh_run git commit -m '[upkeep] auto-commit'
+      vcsh_run git commit -m "$MSG"
     fi
   fi
   if [ -n "$SYNC" ]; then
