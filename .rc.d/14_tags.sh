@@ -32,6 +32,7 @@ mkctags() {
   #$(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}" 2>&1 >/dev/null | \
   #  grep -vE 'Warning: Language ".*" already defined'
   command ctags $CTAGS_OPTIONS -f "${CTAGS_DB}" "${SRC}"
+  ln -s "${CTAGS_DB}" "${DST}/tags"
 }
 
 # Scan directory for cscope files
@@ -106,9 +107,24 @@ mkpycscope() {
   command pycscope -R -f "$DST/${_PYCSCOPE_OUT}" "$SRC"
 }
 
+# Make gtags files
+mkgtags() {
+  command -v >/dev/null gtags || return
+  # Get directories, remove ~/
+  local SRC="$(eval echo ${1:-$PWD})"
+  local DST="$(eval echo ${2:-$PWD})"
+  # Build tag file
+  if [ -z "$1" ]; then
+    gtags "$DST"
+  else
+    find "$SRC" -type f -print | gtags -f - "$DST"
+  fi
+}
+
 # Make tags and cscope db
 mktags() {
   mkctags "$@"
+  mkgtags "$@"
   mkcscope "$@"
   mkids "$@"
   mkpycscope "$@"
@@ -118,7 +134,7 @@ mktags() {
 rmctags() {
   # Get directories, remove ~/
   local DIR="$(eval echo ${1:-$PWD})"
-  rm -v "${DIR}/${_CTAGS_OUT}" 2>/dev/null
+  rm -v "${DIR}/${_CTAGS_OUT}" "${DIR}/tags" 2>/dev/null
 }
 
 # Clean cscope db
@@ -142,9 +158,17 @@ rmpycscope() {
   rm -v "${DIR}/${_PYCSCOPE_OUT}" 2>/dev/null
 }
 
+# Clean gtags files
+rmgtags() {
+  # Get directories, remove ~/
+  local DIR="$(eval echo ${1:-$PWD})"
+  rm -v "${DIR}/GPATH" "${DIR}/GRTAGS" "${DIR}/GSYMS" "${DIR}/GTAGS" 2>/dev/null
+}
+
 # Clean tags and cscope db
 rmtags() {
   rmctags "$@"
+  rmgtags "$@"
   rmcscope "$@"
   rmids "$@"
   rmpycscope "$@"
