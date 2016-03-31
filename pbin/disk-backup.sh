@@ -1,12 +1,10 @@
 #!/bin/sh
 set -e # exit upon failure
-title="disk-backup"
+title="db"
 src="${1:?No source device specified...}"
 dst="${2:?No destination device specified...}"
-delete=""
-dryrun=""
 norun=""
-skip=""
+options=""
 shift 2
 
 # End function
@@ -44,37 +42,25 @@ echo "[$title] Mount devices"
 sudo mount -v "$src" "$mount1"
 sudo mount -v "$dst" "$mount2"
 
-# Check source for the delete flag
-if [ -f "$mount1/.${title}.delete" ]; then
-	echo "[$title] Delete flag is ON"
-	delete=1
-fi
-
-# Check source for the dryrun flag
-if [ -f "$mount1/.${title}.dryrun" ]; then
-	echo "[$title] Dryrun flag is ON"
-	dryrun=1
-fi
-
-# Check source for the norun flag
+# Look for the norun flag in source directory
 if [ -f "$mount1/.${title}.norun" ]; then
 	echo "[$title] Norun flag is ON"
 	norun=1
 fi
 
-# Check source for the skip flag
-if [ -f "$mount1/.${title}.skip" ]; then
-	echo "[$title] Skip flag is ON"
-	skip=1
+# Read rsync options in source directory
+if [ -f "$mount1/.${title}.options" ]; then
+	options="$(cat "$mount1/.${title}.options")"
+	echo "[$title] Rsync options: $options"
 fi
 
 # Main
 if [ -z "$norun" ]; then
 	# For each directory
 	for dir; do
-		if [ -d "$mount1/$dir" ] && ([ -z "$skip" ] || grep "$mount1/$dir" "$mount1/.${title}.skip"); then
+		if [ -d "$mount1/$dir" ]; then
 			echo "[$title] Process $mount1/$dir"
-			rsync -av ${dryrun:+--dry-run} ${delete:+--delete} -- "$mount1" "$mount2"
+			rsync -av "$options" -- "$mount1/$dir/" "$mount2/$dir/"
 		else
 			echo "[$title] Skip missing directory $mount1/$dir ..."
 		fi
