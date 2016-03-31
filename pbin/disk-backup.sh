@@ -4,27 +4,45 @@ title="disk-backup"
 src="${1:?No source device specified...}"
 dst="${2:?No destination device specified...}"
 delete=""
+dryrun=""
 norun=""
 skip=""
 shift 2
+
+# End function
+end() {
+	# Untrap (first instruction of the trap or double trap is possible)
+	trap - KILL INT EXIT
+	# Disable error check
+	set +e
+	# Wait for child process
+	wait; sleep 1 # for rsync children
+	# Umount both disks
+	echo "[$title] Umount devices"
+	sudo umount -l "$mount1" "$mount2"
+	# Delete mount points
+	echo "[$title] Remove mountpoints"
+	rmdir "$mount1" "$mount2" "$tmpdir" 2>/dev/null
+	echo "[$title] Done at $(date)"
+}
 
 # Start
 echo "[$title] Start at $(date)"
 
 # Create temp mountpoints
 echo "[$title] Make mountpoints"
-mount1="$(mktemp -d)"
-mount2="$(mktemp -d)"
+tmpdir="$(mktemp -d)"
+mount1="$tmpdir/src"
+mount2="$tmpdir/dst"
+mkdir "$mount1" "$mount2"
 
 # Error trap
-trap "echo '[$title] Error cleanup...'; 
-	sudo umount '$mount1' '$mount2' 2>/dev/null; 
-	rm -r -- '$mount1' '$mount2' 2>/dev/null" EXIT
+trap "end" KILL INT EXIT
 
 # Mount both disks
 echo "[$title] Mount devices"
-sudo mount "$src" "$mount1"
-sudo mount "$dst" "$mount2"
+sudo mount -v "$src" "$mount1"
+sudo mount -v "$dst" "$mount2"
 
 # Check source for the delete flag
 if [ -f "$mount1/.${title}.delete" ]; then
@@ -32,9 +50,15 @@ if [ -f "$mount1/.${title}.delete" ]; then
 	delete=1
 fi
 
+# Check source for the dryrun flag
+if [ -f "$mount1/.${title}.dryrun" ]; then
+	echo "[$title] Dryrun flag is ON"
+	dryrun=1
+fi
+
 # Check source for the norun flag
 if [ -f "$mount1/.${title}.norun" ]; then
-	echo "[$title] Skip flag is ON"
+	echo "[$title] Norun flag is ON"
 	norun=1
 fi
 
@@ -50,25 +74,12 @@ if [ -z "$norun" ]; then
 	for dir; do
 		if [ -d "$mount1/$dir" ] && ([ -z "$skip" ] || grep "$mount1/$dir" "$mount1/.${title}.skip"); then
 			echo "[$title] Process $mount1/$dir"
-			(set -vx; rsync -av ${delete:+--delete} -- "$mount1" "$mount2")
+			rsync -av ${dryrun:+--dry-run} ${delete:+--delete} -- "$mount1" "$mount2"
 		else
 			echo "[$title] Skip missing directory $mount1/$dir ..."
 		fi
 	done
 fi
 
-# Umount both disks
-echo "[$title] Umount devices"
-sudo umount "$mount1"
-sudo umount "$mount2"
-
-# Delete mount points
-echo "[$title] Remove mountpoints"
-rmdir "$mount1"
-rmdir "$mount2"
-
-# Untrap
-trap - EXIT
-
-# The end
-echo "[$title] Done at $(date)"
+# End
+end
