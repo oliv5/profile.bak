@@ -60,12 +60,6 @@ ask_passwd() {
 }
 
 ################################
-# Create file backup
-mkbak() {
-  cp "${1:?Please specify input file 1}" "${1}.$(date +%Y%m%d-%H%M%S).bak"
-}
-
-################################
 # Convert HH:mm:ss.ms into seconds
 toSec(){
   echo "$1" | awk -F'[:.]' '{ for(i=0;i<2;i++){if(NF<=2){$0=":"$0}}; print ($1 * 3600) + ($2 * 60) + $3 }'
