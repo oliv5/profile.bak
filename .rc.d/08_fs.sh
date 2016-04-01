@@ -128,10 +128,18 @@ alias rsync_cp='rsync -R'
 alias rsync_mv='rsync -R --remove-source-files'
 
 ##############################
-# Backup file or directory
+# Duplicate file or directory with incremental num
 bak() {
   for FILE; do
-    cp -v "$FILE" "${FILE}.$(ls -1 "$FILE".* | wc -l)"
+    cp -v "$FILE" "${FILE}.$(ls -1 "$FILE".* 2>/dev/null | wc -l)"
+  done
+}
+
+# Duplicate files or directory with date
+bak_date() {
+  local DATE="$(date +%Y%m%d-%H%M%S)"
+  for FILE; do
+    cp -v "$FILE" "${FILE}.${DATE}.bak"
   done
 }
 
