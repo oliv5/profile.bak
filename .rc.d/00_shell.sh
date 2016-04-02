@@ -104,12 +104,12 @@ cmd_unset() {
 }
 
 ################################
-# Run a command silently (especially shell fct)
-# Note: can use "nohup" when running real prgm
-silent() {
-  local ARG1="$1"; shift
-  $ARG1 $@  >/dev/null 2>&1 &
-}
+# Run a command silently
+alias noerror='2>/dev/null'
+alias noerr='2>/dev/null'
+alias noout='>/dev/null'
+alias silent='>/dev/null 2>&1'
+alias silent2='nohup'
 
 # Run a command and filter stdout by another one
 filter_stdout() {
@@ -119,12 +119,12 @@ filter_stdout() {
 # which replacement when missing
 cmd_exists which ||
 which() {
-local IFS=:
-[ $# -gt 0 ] &&
-  for DIR in $PATH; do
-    ls -1 "$DIR/$1" 2>/dev/null && return 0
-  done
-return 1
+  local IFS=:
+  [ $# -gt 0 ] &&
+    for DIR in $PATH; do
+      ls -1 "$DIR/$1" 2>/dev/null && return 0
+    done
+  return 1
 }
 
 ################################
