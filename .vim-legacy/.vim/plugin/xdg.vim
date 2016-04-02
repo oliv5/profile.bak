@@ -34,9 +34,10 @@ endif
 set directory=$XDG_CACHE_HOME/vim/swap//,/var/tmp//,/tmp//
 set backupdir=$XDG_CACHE_HOME/vim/backup//,/var/tmp//,/tmp//
 set undodir=$XDG_CACHE_HOME/vim/undo//,/var/tmp//,/tmp//
-set viminfo+=$XDG_CACHE_HOME/vim/viminfo
-set runtimepath-=~/.vim
-set runtimepath-=~/.vim/after
+set viewdir=$XDG_CACHE_HOME/vim/view
+set viminfo='10,\"100,:20,n$XDG_CACHE_HOME/vim/viminfo
+"set runtimepath-=~/.vim
+"set runtimepath-=~/.vim/after
 set runtimepath^=$XDG_CONFIG_HOME/vim
 set runtimepath+=$XDG_CONFIG_HOME/vim/after
 
