@@ -196,10 +196,15 @@ map <leader>=   :AlignStatement<CR>
 set diffopt=vertical,filler,context:4
 
 " Color scheme change
-silent! highlight DiffAdd cterm=none ctermfg=bg ctermbg=Green gui=none guifg=bg guibg=Green
-silent! highlight DiffDelete cterm=none ctermfg=bg ctermbg=Red gui=none guifg=bg guibg=Red
-silent! highlight DiffChange cterm=none ctermfg=bg ctermbg=Yellow gui=none guifg=bg guibg=Yellow
-silent! highlight DiffText cterm=none ctermfg=bg ctermbg=Magenta gui=none guifg=bg guibg=Magenta
+"silent! highlight DiffAdd cterm=bold ctermfg=10 ctermbg=17 gui=bold guifg=10 guibg=17
+"silent! highlight DiffDelete cterm=bold ctermfg=10 ctermbg=17 gui=bold guifg=10 guibg=17
+"silent! highlight DiffChange cterm=bold ctermfg=10 ctermbg=17 gui=bold guifg=10 guibg=17
+"silent! highlight DiffText cterm=bold ctermfg=10 ctermbg=88 gui=bold guifg=10 guibg=88
+
+" Change diff mode colorscheme
+augroup diffmode
+	au! FilterWritePre * if &diff | colorscheme default | endif
+augroup END
 
 " Convenient command to see the difference between the current buffer and the
 " file it was loaded from, thus the changes you made.
