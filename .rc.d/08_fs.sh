@@ -143,6 +143,13 @@ bak_date() {
   done
 }
 
+# Unlink - overwrites the unlink legacy tool
+unlink() {
+  for FILE; do
+    cp --remove-destination "$(readlink "$FILE")" "$FILE"
+  done
+}
+
 # Swap files or directories
 swap() {
   local FILE1="${1:?Nothing to swap...}"
