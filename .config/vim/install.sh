@@ -10,6 +10,10 @@ common_setup() {
 
 # SPF13 setup
 spf13_setup() {
+	if [ ! -d "$spf13_dir/spf13-vim" ] ; then
+		echo "SPF13 is not installed. Please run vim-spf13/setup.sh..."
+		return 1
+	fi
 	ln -fsv "$spf13_dir/spf13-vim/.vim"* ~/
 	ln -fsv "$spf13_dir/.vimrc"* ~/
 	mkdir -p ~/.vim/plugin
