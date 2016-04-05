@@ -71,16 +71,21 @@ alias shift9='command shift 9 2>/dev/null || set --'
 alias shell_script='[ -n "$BASH_VERSION" ] && (builtin cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd) || readlink -f "$(dirname "$0")"'
 
 ################################
-# Warn function
-warn() {
-  [ $# -gt 0 ] && echo "$@" >&2
+# Success display function
+msg_success() {
+  printf "\33[32m[✔]\33[0m" "$@"
+}
+
+# Error display function
+msg_error() {
+  printf "\33[31m[✘]\33[0m" "$@"
 }
 
 # Die function
 die() {
   local ERRCODE="${1:-1}"
   shift
-  warn "$@"
+  printf "$@"
   shell_isinteractive && {
     echo "Die cannot exit the main shell. Press ctrl-c to stop."
     read
