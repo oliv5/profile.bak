@@ -42,6 +42,14 @@ set noexrc
 let mapleader = ";"         " Leader key
 let maplocalleader = ","    " Local leader key
 
+" Environment directories
+if empty($XDG_CACHE_HOME)
+	let $XDG_CACHE_HOME = expand("$HOME") . '/.cache'
+endif
+if empty($XDG_CONFIG_HOME)
+	let $XDG_CONFIG_HOME = expand("$HOME") . '/.config'
+endif
+
 
 " *******************************************************
 " } Before scripts {
@@ -69,6 +77,12 @@ set novisualbell            " No visual bells too
 set updatetime=1000         " Swap file write / event CursorHold delay (in ms)
 set shell=/bin/bash\ --rcfile\ ~/.bashrc\ -i    " Set shell, load user profile
 
+" Set directories - old-school setup, may be overwritten later
+set backupdir=$XDG_CACHE_HOME/vim/vimbackup
+set viewdir=$XDG_CACHE_HOME/vim/vimview
+set directory=$XDG_CACHE_HOME/vim/vimswap
+set undodir=$XDG_CACHE_HOME/vim/vimundo
+
 " Save/restore part of edit session
 "  /10  :  search items
 "  '10  :  marks in 10 previously edited files
@@ -77,13 +91,7 @@ set shell=/bin/bash\ --rcfile\ ~/.bashrc\ -i    " Set shell, load user profile
 "  :20  :  20 lines of command-line history
 "  %    :  buffer list
 "  n... :  viminfo file location
-set viminfo='10,\"100,:20,n~/.vimdata/viminfo
-
-" Set directories - old-school setup, may be overwritten later
-set backupdir=~/.vimdata/vimbackup
-set viewdir=~/.vimdata/vimview
-set directory=~/.vimdata/vimswap
-set undodir=~/.vimdata/vimundo
+set viminfo='10,\"100,:20,n$XDG_CACHE_HOME/vim/viminfo
 
 " Force write with sudo after opening the file
 cmap w!! w !sudo tee % >/dev/null

@@ -11,32 +11,34 @@
 " - http://tlvince.com/vim-respect-xdg
 "
 
-" Setup few variables
+" Environment directories
 if empty($XDG_CACHE_HOME)
-  let $XDG_CACHE_HOME = '~/.cache'
+	let $XDG_CACHE_HOME = expand("$HOME") . '/.cache'
 endif
 if empty($XDG_CONFIG_HOME)
-  let $XDG_CONFIG_HOME = '~/.config'
+	let $XDG_CONFIG_HOME = expand("$HOME") . '/.config'
 endif
 
-" Create directories
+" Create environment directories
 if !isdirectory($XDG_CACHE_HOME . "/vim/swap")
-  call mkdir($XDG_CACHE_HOME . "/vim/swap", "p")
+	call mkdir($XDG_CACHE_HOME . "/vim/swap", "p")
 endif
 if !isdirectory($XDG_CACHE_HOME . "/vim/backup")
-  call mkdir($XDG_CACHE_HOME . "/vim/backup", "p")
+	call mkdir($XDG_CACHE_HOME . "/vim/backup", "p")
 endif
 if !isdirectory($XDG_CACHE_HOME . "/vim/undo")
-  call mkdir($XDG_CACHE_HOME . "/vim/undo", "p")
+	call mkdir($XDG_CACHE_HOME . "/vim/undo", "p")
 endif
 
-" Setup vim runpath directories
+" Setup vim cache directories
 set directory=$XDG_CACHE_HOME/vim/swap//,/var/tmp//,/tmp//
 set backupdir=$XDG_CACHE_HOME/vim/backup//,/var/tmp//,/tmp//
 set undodir=$XDG_CACHE_HOME/vim/undo//,/var/tmp//,/tmp//
 set viewdir=$XDG_CACHE_HOME/vim/view//
-"set runtimepath-=~/.vim
-"set runtimepath-=~/.vim/after
+
+" Setup vim runpath directory
+set runtimepath-=$HOME/.vim
+set runtimepath-=$HOME/.vim/after
 set runtimepath^=$XDG_CONFIG_HOME/vim
 set runtimepath+=$XDG_CONFIG_HOME/vim/after
 
@@ -49,4 +51,5 @@ set undofile
 au BufWritePre * let &backupext='@'.substitute(substitute(substitute(expand('%:p:h'), '/', '%', 'g'), '\', '%', 'g'), ':', '', 'g')
 
 " Load .vimrc
+"source $XDG_CONFIG_HOME/vim/.vimrc
 "source ~/.vimrc

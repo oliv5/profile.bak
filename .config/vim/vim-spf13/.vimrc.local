@@ -4,6 +4,8 @@
 	set secure      " Security mode
 	set noexrc      " don't read .vimrc in current directory
 
+	" backupdir/viewdir/directory/undodir directories are set by spf13 directly
+  " viminfo is not set by spf13
 	" Save/restore part of edit session
 	"  /10  :  search items
 	"  '10  :  marks in 10 previously edited files
@@ -12,13 +14,7 @@
 	"  :20  :  20 lines of command-line history
 	"  %    :  buffer list
 	"  n... :  viminfo file location
-	set viminfo='10,\"100,:20,n~/.vimdata/viminfo
-
-	" Set directories - old-school setup, may be overwritten later
-	set backupdir=~/.vimdata/vimbackup
-	set viewdir=~/.vimdata/vimview
-	set directory=~/.vimdata/vimswap
-	set undodir=~/.vimdata/vimundo
+	set viminfo='10,\"100,:20,n$XDG_CACHE_HOME/vim/viminfo
 
 	" Force write with sudo after opening the file
 	cmap w!! w !sudo tee % >/dev/null
@@ -196,8 +192,8 @@
 " }
 
 " Use legacy after config if available {
-	if filereadable(expand("~/.vim-legacy/.vimrc.after"))
-		source ~/.vim-legacy/.vimrc.after
+	if filereadable(expand("$XDG_CONFIG_HOME/vim/vim-legacy/.vimrc.after"))
+		source $XDG_CONFIG_HOME/vim/vim-legacy/.vimrc.after
 	endif
 " }
 

@@ -139,7 +139,7 @@ if !exists('g:omnicpp_complete_loaded')
 	" Enable completion
 	set omnifunc=omni#cpp#complete#Main
 	filetype plugin on
-	set nocp
+	"set nocp
 	set completeopt=menuone,menu,longest
 	"set completeopt=menuone,menu,longest,preview
 
