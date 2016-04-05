@@ -23,8 +23,8 @@ cnoreabbrev	h       vert help
 " } Sessions {
 " *******************************************************
 " Key mapping
-FnNoremap <C-F12>   :mksession! ~/.vimsession<CR>
-FnNoremap <F12>     :source! ~/.vimsession<CR>
+FnNoremap <C-F12>   :mksession! ~/.vimdata/vimsession<CR>
+FnNoremap <F12>     :source! ~/.vimdata/vimsession<CR>
 
 
 " *******************************************************

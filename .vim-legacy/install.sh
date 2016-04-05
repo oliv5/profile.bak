@@ -10,10 +10,10 @@ common_setup() {
 
 # SPF13 setup
 spf13_setup() {
-	ln -fsv ~/.vim-spf13/spf13-vim/.vim* ~/
-	ln -fsv ~/.vim-spf13/.vimrc* ~/
+	ln -fsv "$spf13_root/spf13-vim/.vim"* ~/
+	ln -fsv "$spf13_root/.vimrc"* ~/
 	mkdir -p ~/.vim/plugin
-	for plugin in ~/.vim-legacy/.vim/plugin/*; do
+	for plugin in "$legacy_root/.vim/plugin/"*; do
 		ln -fsv "$plugin" ~/.vim/plugin/
 	done
 	rm ~/.gvimrc 2>/dev/null
@@ -22,8 +22,8 @@ spf13_setup() {
 
 # Legacy setup
 legacy_setup() {
-	ln -fsv ~/.vim-legacy/.vim* ~/
-	ln -fsv ~/.vim-legacy/.vimrc* ~/
+	ln -fsv "$legacy_root/.vim"* ~/
+	ln -fsv "$legacy_root/.vimrc"* ~/
 	rm ~/.gvimrc 2>/dev/null
 	common_setup
 }
@@ -34,7 +34,7 @@ sfp13_legacy_setup() {
 	rm ~/.vimrc 2>/dev/null
 	cat > ~/.vimrc <<EOF
 if has("gui_running")
-	source ~/.vim-spf13/spf13-vim/.vimrc
+	source "$spf13_root/spf13-vim/.vimrc"
 else
 	set runtimepath-=~/.vim
 	set runtimepath-=~/.vim/after
@@ -63,7 +63,9 @@ legacy_raw_setup() {
 ############
 # Main
 date="$(date +%Y%m%d-%H%M%S)"
-backup_dir="~/.vim-backup"
+backup_dir="$HOME/.vim-backup"
+spf13_root="$HOME/.vim-spf13"
+legacy_root="$HOME/.vim-legacy"
 gvim="${1:-legacy}"
 vim="${2:-$gvim}"
 
