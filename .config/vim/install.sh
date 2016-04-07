@@ -2,10 +2,11 @@
 ############
 # Functions
 
-# Common setup
-common_setup() {
-	ln -fsv ~/.vimftdetect ~/.vim/ftdetect
-	ln -fsv ~/.vimsyntax ~/.vim/syntax
+# Finalize setup
+finalize_setup() {
+	mkdir -p ~/.vim/ftdetect ~/.vim/syntax
+	[ -d ~/.vimftdetect ] && ln -fsv ~/.vimftdetect/* ~/.vim/ftdetect/
+	[ -d ~/.vimsyntax ] && ln -fsv ~/.vimsyntax/* ~/.vim/syntax/
 }
 
 # SPF13 setup
@@ -21,7 +22,7 @@ spf13_setup() {
 		ln -fsv "$plugin" ~/.vim/plugin/
 	done
 	rm ~/.gvimrc 2>/dev/null
-	common_setup
+	finalize_setup
 }
 
 # Legacy setup
@@ -29,7 +30,7 @@ legacy_setup() {
 	ln -fsv "$legacy_dir/.vim"* ~/
 	ln -fsv "$legacy_dir/.vimrc"* ~/
 	rm ~/.gvimrc 2>/dev/null
-	common_setup
+	finalize_setup
 }
 
 # SPF13/legacy setup: gvim=spf13, vim=legacy
