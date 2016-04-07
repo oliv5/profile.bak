@@ -154,11 +154,11 @@ unlink() {
 swap() {
   local FILE1="${1:?Nothing to swap...}"
   local FILE2="${2:?Nothing to swap...}"
-  local TMP
-  [ -d "$FILE2" ] && TMP="$(mktemp --tmpdir="$PWD" -d)" || TMP="$(mktemp --tmpdir="$PWD")"
-  mv "$FILE2" "$TMP"
-  mv "$FILE1" "$FILE2"
-  mv "$TMP" "$FILE1"
+  local TMP=""; [ -d "$FILE2" ] && TMP="-d"
+  TMP="$(mktemp --tmpdir="$PWD" $TMP)"
+  mv -fT "$FILE2" "$TMP"
+  mv -fT "$FILE1" "$FILE2"
+  mv -fT "$TMP" "$FILE1"
 }
 
 ################################
