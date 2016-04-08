@@ -130,6 +130,10 @@ alias duh1='du -h -d1'
 # Env | grep
 alias envg='env | grep -i'
 
+# Head/tail
+alias h='head'
+alias t='tail'
+
 # Network monitors
 alias ns='sudo netstat -an'
 alias nst='sudo netstat -antp'

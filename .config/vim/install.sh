@@ -4,6 +4,10 @@
 
 # Finalize setup
 finalize_setup() {
+	mkdir -p ${XDG_CACHE_HOME:-~/.cache}/vim/vimbackup
+	mkdir -p ${XDG_CACHE_HOME:-~/.cache}/vim/vimview
+	mkdir -p ${XDG_CACHE_HOME:-~/.cache}/vim/vimswap
+	mkdir -p ${XDG_CACHE_HOME:-~/.cache}/vim/vimundo
 	mkdir -p ~/.vim/ftdetect ~/.vim/syntax
 	[ -d ~/.vimftdetect ] && ln -fsv ~/.vimftdetect/* ~/.vim/ftdetect/
 	[ -d ~/.vimsyntax ] && ln -fsv ~/.vimsyntax/* ~/.vim/syntax/
