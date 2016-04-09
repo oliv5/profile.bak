@@ -172,24 +172,55 @@ alias annex_upload_fast='annex_copy_fast --to'
 # Annex upkeep
 annex_upkeep() {
   annex_exists || return 1
-  vcsh_run git annex status
-  if [ "$1" = "-y" ] || ask_question "Sync new files? (y/n): " y Y >/dev/null; then
+  # Get args
+  local ADD=""
+  local SYNC=""
+  local DL=""
+  local UL=""
+  local MSG="[upkeep] auto-commit"
+  local FLAG OPTIND OPTARG
+  while getopts "vasdum" FLAG; do
+    case "$FLAG" in
+      v) vcsh_run git annex status;;
+      a) ADD=1; annex_direct && SYNC=1;;
+      s) SYNC=1;;
+      d) DL=1;;
+      u) UL=1;;
+      m) MSG="$OPTARG";;
+    esac
+  done
+  # Run
+  if [ -n "$ADD" ]; then
     vcsh_run git annex add . --fast
-    vcsh_run git annex sync --fast
-  fi
-  shift
-  if [ "$1" = "-y" ] || ask_question "Sync files content? (y/n): " y Y >/dev/null; then
-    vcsh_run git annex sync --content --fast
-  else
-    shift
-    if [ "$1" = "-y" ] || ask_question "Push files content? (y/n): " y Y >/dev/null; then
-      vcsh_run git annex copy . --auto --fast
-    fi
-    shift
-    if [ "$1" = "-y" ] || ask_question "Pull files content? (y/n): " y Y >/dev/null; then
-      vcsh_run git annex get . --fast
+    if ! annex_direct; then
+      vcsh_run git commit -m "$MSG"
     fi
   fi
+  if [ -n "$SYNC" ]; then
+    vcsh_run git annex sync
+  fi
+  if [ -n "$DL" ]; then
+    vcsh_run git annex get
+  fi
+  if [ -n "$UL" ]; then
+    annex_upload_fast
+  fi
+}
+
+# Find aliases
+alias annex_wantget='git annex find --want-get --not --in'
+alias annex_wantdrop='git annex find --want-drop --in'
+
+# Missing files
+alias annex_missing='git annex list | grep "^_"'
+alias annex_missing_all='git annex list | grep "^_+ "'
+
+# Find annex
+annex_find() {
+	ff_git0 "${1:-.}" |
+		while read -d $'\0' DIR; do
+			annex_exists "$DIR" && printf "'%s'\n" "$DIR"
+		done 
 }
 
 ########################################

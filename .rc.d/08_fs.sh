@@ -128,10 +128,25 @@ alias rsync_cp='rsync -R'
 alias rsync_mv='rsync -R --remove-source-files'
 
 ##############################
-# Backup file or directory
+# Duplicate file or directory with incremental num
 bak() {
   for FILE; do
-    cp -v "$FILE" "${FILE}.$(ls -1 "$FILE".* | wc -l)"
+    cp -v "$FILE" "${FILE}.$(ls -1 "$FILE".* 2>/dev/null | wc -l)"
+  done
+}
+
+# Duplicate files or directory with date
+bak_date() {
+  local DATE="$(date +%Y%m%d-%H%M%S)"
+  for FILE; do
+    cp -v "$FILE" "${FILE}.${DATE}.bak"
+  done
+}
+
+# Unlink - overwrites the unlink legacy tool
+unlink() {
+  for FILE; do
+    cp --remove-destination "$(readlink "$FILE")" "$FILE"
   done
 }
 
@@ -139,11 +154,11 @@ bak() {
 swap() {
   local FILE1="${1:?Nothing to swap...}"
   local FILE2="${2:?Nothing to swap...}"
-  local TMP
-  [ -d "$FILE2" ] && TMP="$(mktemp --tmpdir="$PWD" -d)" || TMP="$(mktemp --tmpdir="$PWD")"
-  mv "$FILE2" "$TMP"
-  mv "$FILE1" "$FILE2"
-  mv "$TMP" "$FILE1"
+  local TMP=""; [ -d "$FILE2" ] && TMP="-d"
+  TMP="$(mktemp --tmpdir="$PWD" $TMP)"
+  mv -fT "$FILE2" "$TMP"
+  mv -fT "$FILE1" "$FILE2"
+  mv -fT "$TMP" "$FILE1"
 }
 
 ################################

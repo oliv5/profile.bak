@@ -32,8 +32,8 @@
 	let g:vimrc_nostatusline = 1
 
 	" Load additional bundle config
-	if filereadable(expand("~/.vim-legacy/.vimrc.bundles"))
-		source ~/.vim-legacy/.vimrc.bundles
+	if filereadable(expand("$XDG_CONFIG_HOME/vim/vim-legacy/.vimrc.bundles"))
+		source $XDG_CONFIG_HOME/vim/vim-legacy/.vimrc.bundles
 	endif
 " }
 

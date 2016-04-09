@@ -71,16 +71,21 @@ alias shift9='command shift 9 2>/dev/null || set --'
 alias shell_script='[ -n "$BASH_VERSION" ] && (builtin cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd) || readlink -f "$(dirname "$0")"'
 
 ################################
-# Warn function
-warn() {
-  [ $# -gt 0 ] && echo "$@" >&2
+# Success display function
+msg_success() {
+  printf "\33[32m[✔]\33[0m" "$@"
+}
+
+# Error display function
+msg_error() {
+  printf "\33[31m[✘]\33[0m" "$@"
 }
 
 # Die function
 die() {
   local ERRCODE="${1:-1}"
   shift
-  warn "$@"
+  printf "$@"
   shell_isinteractive && {
     echo "Die cannot exit the main shell. Press ctrl-c to stop."
     read
@@ -104,12 +109,12 @@ cmd_unset() {
 }
 
 ################################
-# Run a command silently (especially shell fct)
-# Note: can use "nohup" when running real prgm
-silent() {
-  local ARG1="$1"; shift
-  $ARG1 $@  >/dev/null 2>&1 &
-}
+# Run a command silently
+alias noerror='2>/dev/null'
+alias noerr='2>/dev/null'
+alias noout='>/dev/null'
+alias silent='>/dev/null 2>&1'
+alias silent2='nohup'
 
 # Run a command and filter stdout by another one
 filter_stdout() {
@@ -119,12 +124,12 @@ filter_stdout() {
 # which replacement when missing
 cmd_exists which ||
 which() {
-local IFS=:
-[ $# -gt 0 ] &&
-  for DIR in $PATH; do
-    ls -1 "$DIR/$1" 2>/dev/null && return 0
-  done
-return 1
+  local IFS=:
+  [ $# -gt 0 ] &&
+    for DIR in $PATH; do
+      ls -1 "$DIR/$1" 2>/dev/null && return 0
+    done
+  return 1
 }
 
 ################################

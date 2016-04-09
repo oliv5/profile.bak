@@ -119,6 +119,7 @@ alias gans='git annex sync'
 alias gang='git annex get'
 alias ganc='git annex copy'
 alias gand='git annex drop'
+alias gandd='git annex forget --drop-dead'
 alias gani='git annex info'
 alias gannex='git annex'
 # Patch aliases
@@ -454,12 +455,31 @@ git_bundle() {
 # Git upkeep
 git_upkeep() {
   git_exists || return 1
-  vcsh_run git status
-  if [ "$1" = "-y" ] || ask_question "Add and commit new files? (y/n): " y Y >/dev/null; then
-    vcsh_run git add -u :/
-    vcsh_run git commit -m '[upkeep] auto-commit'
+  # Get args
+  local ADD=""
+  local DL=""
+  local UL=""
+  local MSG="[upkeep] auto-commit"
+  local FLAG OPTIND OPTARG
+  while getopts "vasdum" FLAG; do
+    case "$FLAG" in
+      v) vcsh_run git status;;
+      a) ADD=1;;
+      s) DL=1; UL=1;;
+      d) DL=1;;
+      u) UL=1;;
+      m) MSG="$OPTARG";;
+    esac
+  done
+  # Run
+  if [ -n "$ADD" ]; then
+    vcsh_run git add -v -u :/
+    vcsh_run git commit -m "$MSG"
   fi
-  if [ "$2" = "-y" ] || ask_question "Push to remotes? (y/n): " y Y >/dev/null; then
+  if [ -n "$DL" ]; then
+    git_pull
+  fi
+  if [ -n "$UL" ]; then
     vcsh_run git push
   fi
 }
@@ -786,6 +806,26 @@ git_graph() {
 # Search for a string in a commit
 git_search() {
   git log -S "${1:?nothing to search for...}" --source --all
+}
+
+########################################
+# Find git directory
+ff_git() {
+	for DIR in "${@:-.}"; do
+		find ${DIR:-.} -type d -name '*.git' -prune
+	done
+}
+ff_git0() {
+	for DIR in "${@:-.}"; do
+		find ${DIR:-.} -type d -name '*.git' -prune -print0
+	done
+}
+# Find git repo
+git_find() {
+	ff_git0 "${1:-.}" |
+		while read -d $'\0' DIR; do
+			git_exists "$DIR" && printf "'%s'\n" "$DIR"
+		done 
 }
 
 ########################################

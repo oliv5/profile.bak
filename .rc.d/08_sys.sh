@@ -88,3 +88,13 @@ user_rename() {
     return 0
   fi
 }
+
+################################
+# Wait for process
+waitany(){
+  for pid; do
+    while kill -0 "$pid" 2>/dev/null; do
+      sleep 0.5
+    done
+  done
+}

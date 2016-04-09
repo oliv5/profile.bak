@@ -42,6 +42,14 @@ set noexrc
 let mapleader = ";"         " Leader key
 let maplocalleader = ","    " Local leader key
 
+" Environment directories
+if empty($XDG_CACHE_HOME)
+	let $XDG_CACHE_HOME = expand("$HOME") . '/.cache'
+endif
+if empty($XDG_CONFIG_HOME)
+	let $XDG_CONFIG_HOME = expand("$HOME") . '/.config'
+endif
+
 
 " *******************************************************
 " } Before scripts {
@@ -68,6 +76,22 @@ set noerrorbells            " No bells (!!)
 set novisualbell            " No visual bells too
 set updatetime=1000         " Swap file write / event CursorHold delay (in ms)
 set shell=/bin/bash\ --rcfile\ ~/.bashrc\ -i    " Set shell, load user profile
+
+" Set directories - old-school setup, may be overwritten later
+set backupdir=$XDG_CACHE_HOME/vim/vimbackup
+set viewdir=$XDG_CACHE_HOME/vim/vimview
+set directory=$XDG_CACHE_HOME/vim/vimswap
+set undodir=$XDG_CACHE_HOME/vim/vimundo
+
+" Save/restore part of edit session
+"  /10  :  search items
+"  '10  :  marks in 10 previously edited files
+"  r/mnt/zip,r/mnt/floppy : excluded locations
+"  "100 :  100 lines for each register
+"  :20  :  20 lines of command-line history
+"  %    :  buffer list
+"  n... :  viminfo file location
+set viminfo='10,\"100,:20,n$XDG_CACHE_HOME/vim/viminfo
 
 " Force write with sudo after opening the file
 cmap w!! w !sudo tee % >/dev/null
@@ -121,7 +145,8 @@ endif
 if has('syntax')
 	syntax on     " Syntax highlight
 	" Color scheme
-	if (&term=="builtin_gui" || has("gui_running") || &t_Co>2)
+	"if (&term=="builtin_gui" || has("gui_running") || &t_Co>2)
+	if (has("gui_running") && (&term=="builtin_gui" || &t_Co>2))
 		colorscheme torte
 	else
 		colorscheme default
@@ -165,22 +190,6 @@ set matchpairs+=<:>   " '%' bounce between brackets
 " Backspace delete line breaks, over the start of the
 " current insertion, and over indentations
 set backspace=indent,eol,start
-
-" Save/restore part of edit session
-"  /10  :  search items
-"  '10  :  marks in 10 previously edited files
-"  r/mnt/zip,r/mnt/floppy : excluded locations
-"  "100 :  100 lines for each register
-"  :20  :  20 lines of command-line history
-"  %    :  buffer list
-"  n... :  viminfo file location
-set viminfo='10,\"100,:20,n~/.vimdata/viminfo
-
-" Set directories
-set backupdir=~/.vimdata/vimbackup
-set viewdir=~/.vimdata/vimview
-set directory=~/.vimdata/vimswap
-set undodir=~/.vimdata/vimundo
 
 " When using list, keep tabs at their full width and display `arrows':
 " (Character 187 is a right double-chevron, and 183 a mid-dot.)

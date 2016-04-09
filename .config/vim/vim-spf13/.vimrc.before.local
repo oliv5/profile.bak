@@ -1,6 +1,15 @@
+" Environment directories {
+	if empty($XDG_CACHE_HOME)
+		let $XDG_CACHE_HOME = expand("$HOME") . '/.cache'
+	endif
+	if empty($XDG_CONFIG_HOME)
+		let $XDG_CONFIG_HOME = expand("$HOME") . '/.config'
+	endif
+" }
+
 " Use legacy before config if available {
-	if filereadable(expand("~/.vim-legacy/.vimrc.before"))
-		source ~/.vim-legacy/.vimrc.before
+	if filereadable(expand("$XDG_CONFIG_HOME/vim/vim-legacy/.vimrc.before"))
+		source $XDG_CONFIG_HOME/vim/vim-legacy/.vimrc.before
 	endif
 " }
 
@@ -54,7 +63,7 @@
 
 	" vim files directory
 	"   let g:spf13_consolidated_directory = <full path to desired directory>
-	let g:spf13_consolidated_directory = $HOME . '/.vimdata/'
+	let g:spf13_consolidated_directory = $XDG_CACHE_HOME . '/vim/'
 
 	" This makes the completion popup strictly passive.
 	" Keypresses acts normally. <ESC> takes you of insert mode, words don't
