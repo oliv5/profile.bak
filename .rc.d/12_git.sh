@@ -809,6 +809,26 @@ git_search() {
 }
 
 ########################################
+# Find git directory
+ff_git() {
+	for DIR in "${@:-.}"; do
+		find ${DIR:-.} -type d -name '*.git' -prune
+	done
+}
+ff_git0() {
+	for DIR in "${@:-.}"; do
+		find ${DIR:-.} -type d -name '*.git' -prune -print0
+	done
+}
+# Find git repo
+git_find() {
+	ff_git0 "${1:-.}" |
+		while read -d $'\0' DIR; do
+			git_exists "$DIR" && printf "'%s'\n" "$DIR"
+		done 
+}
+
+########################################
 ########################################
 # Last commands in file
 # Execute function from command line

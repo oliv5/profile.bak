@@ -208,12 +208,20 @@ annex_upkeep() {
 }
 
 # Find aliases
-alias annex_wantget='git annex --want-get --not --in'
-alias annex_wantdrop='git annex --want-drop --in'
+alias annex_wantget='git annex find --want-get --not --in'
+alias annex_wantdrop='git annex find --want-drop --in'
 
 # Missing files
 alias annex_missing='git annex list | grep "^_"'
 alias annex_missing_all='git annex list | grep "^_+ "'
+
+# Find annex
+annex_find() {
+	ff_git0 "${1:-.}" |
+		while read -d $'\0' DIR; do
+			annex_exists "$DIR" && printf "'%s'\n" "$DIR"
+		done 
+}
 
 ########################################
 ########################################
