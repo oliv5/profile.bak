@@ -157,6 +157,8 @@ alias gcl='git config -l'
 alias gcg='git config --get'
 alias gcs='git config --set'
 alias gcfg='git config'
+alias gcfgl='git config -l'
+alias gcfgg='git config -g'
 alias gconfig='git config'
 # Git ignore changes
 alias git_ignore_changes='git update-index --assume-unchanged'
@@ -827,6 +829,9 @@ git_find() {
 			git_exists "$DIR" && printf "'%s'\n" "$DIR"
 		done 
 }
+
+# Git gc all
+alias git_gc='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; git gc"'
 
 ########################################
 ########################################

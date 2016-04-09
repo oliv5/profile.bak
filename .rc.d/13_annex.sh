@@ -223,6 +223,10 @@ annex_find() {
 		done 
 }
 
+# Fsck/check all
+alias annex_fsck='annex_find | xargs -I {} -n 1 sh -c "cd \"{}/..\"; pwd; git annex fsck"'
+alias annex_check='annex_find | xargs -I {} -n 1 sh -c "cd \"{}/..\"; pwd; git annex list | grep \"^_\""'
+
 ########################################
 ########################################
 # Last commands in file
