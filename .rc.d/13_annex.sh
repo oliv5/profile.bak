@@ -207,6 +207,14 @@ annex_upkeep() {
   fi
 }
 
+# Find aliases
+alias annex_wantget='git annex --want-get --not --in'
+alias annex_wantdrop='git annex --want-drop --in'
+
+# Missing files
+alias annex_missing='git annex list | grep "^_"'
+alias annex_missing_all='git annex list | grep "^_+ "'
+
 ########################################
 ########################################
 # Last commands in file
