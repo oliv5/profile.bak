@@ -38,9 +38,9 @@ mount_ecryptfs() {
 
 # Mount/umount ecryptfs private directory
 mount_private() {
-  local SRC="$HOME/.private"
-  local DST="$HOME/private"
-  local SIG="$HOME/.ecryptfs/private.sig"
+  local SRC="${1:-$HOME/.private}"
+  local DST="${2:-$HOME/private}"
+  local SIG="${3:-$HOME/.ecryptfs/private.sig}"
   local KEY="$(cat "$SIG" 2>/dev/null)"
   mkdir -p "$DST"
 	mount_ecryptfs "$SRC" "$DST" "$KEY"
