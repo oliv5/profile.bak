@@ -143,11 +143,31 @@ zombie_kill() {
 }
 
 ################################
-# IPC management
-ipc_sempurge() {
-  ipcs -s | awk '/0/ {print $2}' | xargs -n 1 ipcrm -s
+# User list - uid can be specified
+user_list() {
+  getent passwd "$@"
+}
+# User name - uid can be specified
+user_name() {
+  getent passwd "$@" | awk -F: '{print $1}'
 }
 
+################################
+# IPC management
+ipc_sempurge() {
+  ipcs -s | awk '/0/ {print $2}' | xargs -r -n 1 ipcrm -s
+}
 ipc_shmpurge() {
-  ipcs -m | awk '/0/ {print $2}' | xargs -n 1 ipcrm -m
+  ipcs -m | awk '/0/ {print $2}' | xargs -r -n 1 ipcrm -m
+}
+ipc_semuser() {
+  awk '$5~/[0-9]+/ {print $5}' /proc/sysvipc/sem | sort | uniq | xargs getent passwd | awk -F: '{print $1}'
+}
+ipc_semstat() {
+  echo -e "uid\tnum"
+  awk '$5~/[0-9]+/ {print $5}' /proc/sysvipc/sem | sort | uniq -c | sort -r | awk '{print $2 "\t" $1}'
+}
+ipc_semstatn() {
+  #awk '$5~/[0-9]+/ {print $5}' /proc/sysvipc/sem | sort | uniq -c | sort -r | awk '{system("getent passwd " $2 " | cut -d: -f 1"); print $1}'
+  awk '$5~/[0-9]+/ {print $5}' /proc/sysvipc/sem | sort | uniq -c | sort -r | awk '{printf $1; "getent passwd " $2 " | cut -d: -f 1" | getline; print " "$1}'
 }
