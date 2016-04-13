@@ -68,8 +68,8 @@ alias gsp='git_stash_pop'
 alias gsa='git_stash_apply'
 alias gsl='git stash list'
 alias gslc='git stash list | wc -l'
-alias gsf='git_stash_show'
-alias gsfa='git_stash_show_all'
+alias gsf='git_stash_file'
+alias gsfa='git_stash_file_all'
 alias gsfc='git_stash_cat'
 alias gsd='git_stash_diff'
 alias gsdd='git_stash_diff'
@@ -123,8 +123,11 @@ alias gandd='git annex forget --drop-dead'
 alias gani='git annex info'
 alias gannex='git annex'
 # Patch aliases
-alias gpd='git diff -p'
 alias gpc='git show'
+alias gpd='git diff -p'
+alias gpm='git format-patch -1'
+alias gps='git_stash_cat'
+alias gpa='git apply'
 # Subtree aliases
 alias gsta='git_subtree_add'
 alias gstu='git_subtree_update'
@@ -318,6 +321,9 @@ git_cmd() {
 git_ping() {
   git ls-remote "${1:-$(git_dir)}" &> /dev/null
 }
+
+# Get number of commits
+alias git_count='git rev-list --all --count'
 
 ########################################
 # Get hash
@@ -550,24 +556,23 @@ git_stash_diffl() {
 }
 
 # Show stash file list
-git_stash_show() {
+git_stash_file() {
   local STASH="${1:-0}"; shift 2>/dev/null
   git stash show "stash@{$STASH}" "$@"
 }
-
-# Show all stashes file list
-git_stash_show_all() {
+git_stash_file_all() {
   local START="${1:-0}"
   local NUM="${2:-$(git stash list | wc -l)}"
   shift 2 2>/dev/null
   while git stash list --skip $START -n 1; do
-    git_stash_show $START
+    git_stash_file $START
     START=$((START+1))
     eval "${1:-echo}"
   done
 }
 
 # Show stash file content
+alias git_stash_patch='git_stash_cat'
 git_stash_cat() {
   local STASH="${1:-0}"; shift 2>/dev/null
   git stash show -p "stash@{$STASH}" "$@"
@@ -614,16 +619,18 @@ git_clean() {
   git_exists || return 1
   # Confirmation
   if [ "$1" != "-y" ]; then
-    git clean -n --exclude=".*" "$@"
+    git clean -d -n --exclude=".*" "$@"
     ! ask_question "Proceed? (y/n) " y Y >/dev/null && return 0
   fi
   shift
   # Backup
-  local DST="$(git_dir)/clean"
-  mkdir -p "$DST"
-  git_stx '??' | xargs -0 7z a "$DST/clean.$(git_name).7z"
+  if [ "$2" != "-y" ] && ask_question "Backup? (y/n) " y Y >/dev/null; then
+    local DST="$(git_dir)/clean"
+    mkdir -p "$DST"
+    git_stx '??' | xargs -0 7z a "$DST/clean.$(git_name).7z"
+  fi
   # Clean repository
-  git clean -df --exclude=".*" "$@"
+  git clean -d -f --exclude=".*" "$@"
 }
 
 ########################################
