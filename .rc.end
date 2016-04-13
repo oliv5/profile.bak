@@ -71,6 +71,7 @@ alias lsg='ls | grep'
 alias b='cdb'
 alias f='cdf'
 alias p='cd ..'
+alias r='if svn_exists; then cd "$(svn_root)"; elif git_exists; then cd "$(git_worktree)"; fi'
 
 # Gvim
 alias v='gvim'

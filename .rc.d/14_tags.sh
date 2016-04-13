@@ -32,7 +32,7 @@ mkctags() {
   #$(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}" 2>&1 >/dev/null | \
   #  grep -vE 'Warning: Language ".*" already defined'
   command ctags $CTAGS_OPTIONS -f "${CTAGS_DB}" "${SRC}"
-  ln -s "${CTAGS_DB}" "${DST}/tags"
+  ln -fs "${CTAGS_DB}" "${DST}/tags"
 }
 
 # Scan directory for cscope files
