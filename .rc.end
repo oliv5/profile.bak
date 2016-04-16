@@ -45,8 +45,8 @@ if [ -r "${HOME}/.anacron/anacrontab" ]; then
 fi
 
 # GPG/SSH agents
-ssh_agent
-gpg_agent
+command -v ssh_agent >/dev/null && ssh_agent
+command -v gpg_agent >/dev/null && gpg_agent
 
 # Disable console beep
 #command -v xset >/dev/null 2>&1 && pidof X >/dev/null && xset b off 2>/dev/null # From X11 window system
