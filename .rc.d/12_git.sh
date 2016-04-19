@@ -57,6 +57,7 @@ alias gbD='git branch -D'   # delete branch (any)
 alias gbdr='git branch -rd' # remove remote branch (merged only)
 alias gbDr='git push :'     # remove remote branch (any)
 alias gbdro='git fetch -p'  # remote all old remotes
+alias gbu='git branch --set-upstream-to '  # set branch upstream
 alias gb='git branch'
 # Stash aliases
 alias gsc='git_stash_create'
@@ -66,6 +67,7 @@ alias gssu='git_stash_save_untracked'
 alias gssl='git_stash_save_lazy'
 alias gsp='git_stash_pop'
 alias gsa='git_stash_apply'
+alias gsab='git_stash_apply_branch'
 alias gsl='git stash list'
 alias gslc='git stash list | wc -l'
 alias gsf='git_stash_file'
@@ -506,6 +508,11 @@ git_diffm_all() {
 
 ########################################
 
+# Get stash name by index
+git_stash_name() {
+  git stash list | awk "NR==$((${1:-0}+1)){print \$2}"
+}
+
 # Push changes onto stash, revert changes
 git_stash_save() {
   local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
@@ -528,6 +535,7 @@ git_stash_save_lazy() {
 git_stash_create() {
   local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
   local REF="$(git stash create)"
+  true "${REF:?Nothing to stash...}"
   git stash store -m "$STASH" "$REF" 2>/dev/null || 
     git update-ref -m "$STASH" refs/stash "$REF"
 }
@@ -540,6 +548,9 @@ git_stash_pop() {
 # Apply change from stash
 git_stash_apply() {
   git stash apply "stash@{${1:-0}}"
+}
+git_stash_apply_branch() {
+  git stash branch "$(git_stash_name "${1:-0}")" "stash@{${1:-0}}"
 }
 
 # Show diff between stash and local copy
