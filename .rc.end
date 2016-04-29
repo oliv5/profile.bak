@@ -91,9 +91,6 @@ alias e='${GEDITOR:-false}'
 alias sse='ss | cut -c 9- | xargs ${GEDITOR:-false}'
 alias gse='gs | grep modified | cut -d : -f 2 | xargs ${GEDITOR:-false}'
 
-# Source insight
-alias s='si'
-
 # Move
 alias mv="mv -i"
 
@@ -130,6 +127,8 @@ alias duh1='du -h -d1'
 
 # Env | grep
 alias envg='env | grep -i'
+alias dpkgl='dpkg -l'
+alias dpkgg='dpkg -l | grep -i'
 
 # Head/tail
 alias h='head'
@@ -148,3 +147,4 @@ alias it='iftop'
 # Misc
 alias hi='history'
 alias mo='mimeopen'
+alias s='silent'
