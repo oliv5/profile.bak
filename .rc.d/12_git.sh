@@ -157,6 +157,7 @@ alias grbi='git rebase -i'
 alias gps='git push'
 alias gpl='git pull'
 alias gpr='git pull --rebase'
+alias gup='git_pull'
 # Config aliases
 alias gcl='git config -l'
 alias gcg='git config --get'
