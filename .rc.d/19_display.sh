@@ -42,3 +42,15 @@ xrandr_dis() {
   local ARG1="$1"; shift $(min 1 $#)
   xrandr --output "${ARG1:?No display specified}" --off "$@"
 }
+
+# Set backlight
+alias backlight_350='backlight 350'
+alias backlight_500='backlight 500'
+alias backlight_1000='backlight 1000'
+backlight() {
+	sudo sh -c "
+		echo ${1:-500} > /sys/class/backlight/intel_backlight/brightness
+		echo 1 > /sys/class/backlight/acpi_video0/brightness
+		echo 1 > /sys/class/backlight/acpi_video1/brightness
+"
+}

@@ -1,6 +1,12 @@
 #!/bin/sh
 
 ################################
+# Set cpu governor
+alias cpu_powersave='sudo sh -c "echo powersave > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"'
+alias cpu_performence='sudo sh -c "echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"'
+alias cpu_ondemand='sudo sh -c "echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"'
+
+################################
 # Sudo
 if command -v sudo >/dev/null 2>&1; then
   # Sudo now supports alias expansion

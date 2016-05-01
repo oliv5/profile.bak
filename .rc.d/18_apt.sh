@@ -1,12 +1,14 @@
 #!/bin/sh
 
 # apt/dpkg commands
+alias pkg_archi='dpkg --print-architecture'
 alias pkg_download='apt-get download'
 alias pkg_installed='dpkg -s'
 alias pkg_content='dpkg -L'
 alias pkg_search='dpkg -S'
-alias pkg_list='dpkg -l'
-alias pkg_archi='dpkg --print-architecture'
+alias pkg_ls='dpkg -l'
+alias pkg_lsconf='dpkg -l | grep -E ^rc'
+alias pkg_cleanconf='dpkg -l | grep -E ^rc | xargs sudo apt-get purge'
 
 # Cleanup packages
 pkg_clean() {
@@ -28,6 +30,7 @@ deb_make() {
 # Lock/unlock packages
 # https://askubuntu.com/questions/18654/how-to-prevent-updating-of-a-specific-package
 dpkg_status() {
+  # Install/lock/uninstall
   eval dpkg --get-selections ${1:+| grep "$1"}
 }
 dpkg_lock() {
@@ -36,18 +39,11 @@ dpkg_lock() {
 dpkg_unlock() {
   echo "${1:?No package specified...} install" | sudo dpkg --set-selections
 }
-apt_lock(){
-  sudo apt-mark hold "${1:?No package specified...}"
-}
-apt_unlock(){
-  sudo apt-mark unhold "${1:?No package specified...}"
-}
-aptitude_lock(){
-  sudo aptitude hold "${1:?No package specified...}"
-}
-aptitude_unlock(){
-  sudo aptitude unhold "${1:?No package specified...}"
-}
+alias apt_lock='sudo apt-mark hold'
+alias apt_unlock='sudo apt-mark unhold'
+alias apt_lslock='sudo apt-mark showhold'
+alias aptitude_lock='sudo aptitude hold'
+alias aptitude_unlock='sudo aptitude unhold'
 
 # Cleanup old kernels
 kernel_ls() {

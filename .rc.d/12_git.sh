@@ -12,7 +12,7 @@ alias gst='git_st'
 alias gstx='git_stx'
 alias gstm='git status --porcelain -b | awk "NR==1 || /^(M.|.M)/"'    # modified
 alias gsta='git status --porcelain -b | awk "NR==1 || /^A[ MD]/"'     # added
-alias gstd='git status --porcelain -b | awk "NR==1 || /^D[ M]/"'      # deleted
+alias gstd='git status --porcelain -b | awk "NR==1 || /^D[ M]|^ D/"'  # deleted
 alias gstr='git status --porcelain -b | awk "NR==1 || /^R[ MD]/"'     # renamed
 #alias gstc='git status --porcelain -b | awk "NR==1 || /^C[ MD]/"'     # copied in index
 alias gstc='git status --porcelain -b | awk "NR==1 || /^[DAU][DAU]/"' # unmerged = conflict
