@@ -376,7 +376,9 @@ git_clone() {
 }
 
 # Batch pull the current branch from all remotes
-alias git_pull='git_pull_all "" "$(git_branch)"'
+git_pull() {
+	git_pull_all "${@:-}" "$(git_branch)"
+}
 
 # Batch pull existing remote/branches
 git_pull_all() {
@@ -426,7 +428,9 @@ git_pull_all() {
 }
 
 # Batch push the current branch to all remotes
-alias git_push='git_push_all "" "$(git_branch)"'
+git_push() {
+	git_push_all "${@:-}" "$(git_branch)"
+}
 
 # Batch push existing remote/branches
 git_push_all() {
