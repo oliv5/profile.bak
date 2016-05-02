@@ -44,13 +44,16 @@ xrandr_dis() {
 }
 
 # Set backlight
+alias backlight_250='backlight 250'
 alias backlight_350='backlight 350'
 alias backlight_500='backlight 500'
 alias backlight_1000='backlight 1000'
-backlight() {
+backlight_reset() {
 	sudo sh -c "
-		echo ${1:-500} > /sys/class/backlight/intel_backlight/brightness
 		echo 1 > /sys/class/backlight/acpi_video0/brightness
 		echo 1 > /sys/class/backlight/acpi_video1/brightness
 "
+}
+backlight() {
+	sudo sh -c "echo ${1:-500} > /sys/class/backlight/intel_backlight/brightness"
 }
