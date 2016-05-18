@@ -321,25 +321,29 @@ endif
 function! s:Tab2Space() range
 	let firstline = a:firstline == a:lastline ? 0 : a:firstline
 	let lastline = a:firstline == a:lastline ? line('$') : a:lastline
-	execute ':'.firstline.','.lastline.'s#^\t\+#\=repeat(" ", len(submatch(0))*' . &ts . ')'
+	execute ':silent! '.firstline.','.lastline.'s#^\t\+#\=repeat(" ", len(submatch(0))*' . &ts . ')'
 endfunction
 
 " Space to tab
 function! s:Space2Tab() range
 	let firstline = a:firstline == a:lastline ? 0 : a:firstline
 	let lastline = a:firstline == a:lastline ? line('$') : a:lastline
-	execute ':'.firstline.','.lastline.'s#^\( \{'.&ts.'\}\)\+#\=repeat("\t", len(submatch(0))/' . &ts . ')'
+	execute ':silent! '.firstline.','.lastline.'s#^\( \{'.&ts.'\}\)\+#\=repeat("\t", len(submatch(0))/' . &ts . ')'
 endfunction
 
 " Intelligent tab to spaces
 function! s:Tabfix() abort
 	if &expandtab==0
 		call s:Tab2Space()
+		set expandtab
 	else
 		call s:Space2Tab()
+		set noexpandtab
 	endif
 	update
-	YAIFAMagic
+	if exists(':YAIFAMagic')
+		normal! YAIFAMagic
+	endif
 endfunction
 
 " User commands
