@@ -1,17 +1,6 @@
 #!/bin/sh
 
 ################################
-# To lower
-toLower() {
-  echo "${@}" | tr "[:upper:]" "[:lower:]"
-}
-
-# To upper
-toUpper() {
-  echo "${@}" | tr "[:lower:]" "[:upper:]"
-}
-
-################################
 # Ask question and expect one of the given answer
 # ask_question [fd number] [question] [expected replies]
 ask_question() {
@@ -58,42 +47,3 @@ ask_passwd() {
   stty echo; trap - INT
   echo $PASSWD
 }
-
-################################
-# Convert HH:mm:ss.ms into seconds
-toSec(){
-  echo "$1" | awk -F'[:.]' '{ for(i=0;i<2;i++){if(NF<=2){$0=":"$0}}; print ($1 * 3600) + ($2 * 60) + $3 }'
-}
-toSecMs(){
-  echo "$1" | awk -F: '{ for(i=0;i<2;i++){if(NF<=2){$0=":"$0}}; print ($1 * 3600) + ($2 * 60) + $3 }'
-}
-toMs(){
-  echo "$1" | awk -F: '{ for(i=0;i<2;i++){if(NF<=2){$0=":"$0}}; print (($1 * 3600) + ($2 * 60) + $3) * 1000 }'
-}
-
-################################
-# Convert to libreoffice formats
-conv_soffice() {
-  local FORMAT="${1:?No output format specified}"
-  shift $(min 1 $#)
-  unoconv -f "$FORMAT" "$@" ||
-    soffice --headless --convert-to "$FORMAT" "$@"
-}
-
-# Convert to PDF
-conv_pdf() {
-  # sudo apt-get install wv texlive-base texlive-latex-base ghostscript
-  for FILE in "$@"; do
-    wvPDF "$FILE" "${FILE%.*}.pdf"
-  done
-}
-
-# Merge PDFs
-merge_pdf() {
-  local INPUT="$(arg_rtrim 1 "$@")"; shift $(($#-1))
-  eval command -p gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -sOutputFile="$@" "$INPUT"
-}
-
-# Tex to pdf
-alias tex2pdf='pdflatex --interaction nonstopmode'
-alias tex2pdf_loop='watch -n 15 "pdflatex --interaction nonstopmode >/dev/null 2>&1"'
