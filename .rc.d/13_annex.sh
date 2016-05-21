@@ -148,6 +148,7 @@ alias annex_get='vcsh_run git annex get'
 
 # Annex copy
 alias annex_copy_fast='annex_copy --fast'
+alias annex_copy_all='annex_copy --all'
 alias annex_copy_auto='annex_copy --auto'
 annex_copy() {
   annex_exists || return 1
@@ -164,10 +165,14 @@ annex_copy() {
 # Annex download
 alias annex_download='annex_copy --from'
 alias annex_download_fast='annex_copy_fast --from'
+alias annex_download_all='annex_copy_all --from'
+alias annex_download_auto='annex_copy_auto --from'
 
 # Annex upload
 alias annex_upload='annex_copy --to'
 alias annex_upload_fast='annex_copy_fast --to'
+alias annex_upload_all='annex_copy_all --to'
+alias annex_upload_auto='annex_copy_auto --to'
 
 # Annex upkeep
 annex_upkeep() {
