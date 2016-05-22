@@ -193,6 +193,7 @@ annex_bundle() {
 # Annex get
 alias annex_get_fast='annex_get --fast'
 alias annex_get_auto='annex_get --auto'
+alias annex_get_missing='annex_missing | xargs annex_get'
 alias annex_get='vcsh_run git annex get'
 
 # Annex copy
