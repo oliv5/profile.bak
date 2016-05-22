@@ -42,51 +42,100 @@ annex_init_direct() {
   vcsh_run 'annex_init && git annex direct'
 }
 
-# Init annex special
-annex_init_special() {
-  local PREFIX="$1"
-  local CMDLINE="$2"
-  local REMOTE="${3:-noname}"
-  local ENCRYPTION="${4:-none}"
-  local REMOTEPATH="${5:-$(git_repo)}"
-  shift 5
-  local CMDARGS="$(printf "$CMDLINE" "$REMOTE" "$ENCRYPTION" "$REMOTEPATH" "$@")"
-  vcsh_run "${PREFIX:+$PREFIX }git annex enableremote $CMDARGS 2>/dev/null || ${PREFIX:+$PREFIX }git annex initremote $CMDARGS"
-  #echo $CMDARGS
-}
-
 # Init hubic annex
 annex_init_hubic() {
-  local NAME="${1:-hubic}"; shift
-  annex_init_special "" "%s encryption=%s type=external externaltype=hubic hubic_container=annex hubic_path='%s' embedcreds=no" "$NAME" "$@"
+  local NAME="${1:-hubic}"
+  local ENCRYPTION="${2:-none}"
+  local REMOTEPATH="${3:-$(git_repo)}"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no
 }
 
 # Init gdrive annex
 annex_init_gdrive() {
-  local NAME="${1:-gdrive}"; shift
-  annex_init_special "" "%s encryption=%s type=external externaltype=googledrive folder='%s'" "$NAME" "$@"
-  local KEY; read -p "Enter the OAUTH key: " KEY
-  annex_init_special "OAUTH='$KEY'" "%s encryption=%s type=external externaltype=googledrive folder='%s'" "$NAME" "$@"
+  local NAME="${1:-gdrive}"
+  local ENCRYPTION="${2:-none}"
+  local REMOTEPATH="${3:-$(git_repo)}"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH"
 }
 
 # Init bup annex
 annex_init_bup() {
-  local NAME="${1:-bup}"; shift
-  annex_init_special "" "%s encryption=%s type=bup buprepo='%s'" "$NAME" "$@"
+  local NAME="${1:-bup}"
+  local ENCRYPTION="${2:-none}"
+  local REMOTEPATH="${3:-$(git_repo)}"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH"
 }
 
 # Init rsync annex
 annex_init_rsync() {
-  local NAME="${1:-rsync}"; shift
-  annex_init_special "" "%s encryption=%s type=rsync rsyncurl='%s' keyid='%s'" "$NAME" "$@"
+  local NAME="${1:-rsync}"
+  local ENCRYPTION="${2:-none}"
+  local REMOTEPATH="${3:-$(git_repo)}"
+  local KEYID="$4"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" keyid="$KEYID" ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" keyid="$KEYID"
   git config --add annex.sshcaching false
 }
 
 # Init gcrypt annex
 annex_init_gcrypt() {
-  local NAME="${1:-gcrypt}"; shift
-  annex_init_special "" "%s encryption=%s type=gcrypt gitrepo='%s' keyid='%s'" "$NAME" "$@"
+  local NAME="${1:-gcrypt}"
+  local ENCRYPTION="${2:-none}"
+  local REMOTEPATH="${3:-$(git_repo)}"
+  local KEYID="$4"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" keyid="$KEYID" ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" keyid="$KEYID"
+  git config --add annex.sshcaching false
 }
+
+#~ # Init annex special
+#~ annex_init_special() {
+  #~ local PREFIX="$1"
+  #~ local CMDLINE="$2"
+  #~ local REMOTE="${3:-noname}"
+  #~ local ENCRYPTION="${4:-none}"
+  #~ local REMOTEPATH="${5:-$(git_repo)}"
+  #~ shift 5
+  #~ local CMDARGS="$(printf "$CMDLINE" "$REMOTE" "$ENCRYPTION" "$REMOTEPATH" "$@")"
+  #~ vcsh_run "${PREFIX:+$PREFIX }git annex enableremote $CMDARGS 2>/dev/null || ${PREFIX:+$PREFIX }git annex initremote $CMDARGS"
+  #~ #echo $CMDARGS
+#~ }
+
+#~ # Init hubic annex
+#~ annex_init_hubic() {
+  #~ local NAME="${1:-hubic}"; shift
+  #~ annex_init_special "" "%s encryption=%s type=external externaltype=hubic hubic_container=annex hubic_path='%s' embedcreds=no" "$NAME" "$@"
+#~ }
+
+#~ # Init gdrive annex
+#~ annex_init_gdrive() {
+  #~ local NAME="${1:-gdrive}"; shift
+  #~ annex_init_special "" "%s encryption=%s type=external externaltype=googledrive folder='%s'" "$NAME" "$@"
+  #~ local KEY; read -p "Enter the OAUTH key: " KEY
+  #~ annex_init_special "OAUTH='$KEY'" "%s encryption=%s type=external externaltype=googledrive folder='%s'" "$NAME" "$@"
+#~ }
+
+#~ # Init bup annex
+#~ annex_init_bup() {
+  #~ local NAME="${1:-bup}"; shift
+  #~ annex_init_special "" "%s encryption=%s type=bup buprepo='%s'" "$NAME" "$@"
+#~ }
+
+#~ # Init rsync annex
+#~ annex_init_rsync() {
+  #~ local NAME="${1:-rsync}"; shift
+  #~ annex_init_special "" "%s encryption=%s type=rsync rsyncurl='%s' keyid='%s'" "$NAME" "$@"
+  #~ git config --add annex.sshcaching false
+#~ }
+
+#~ # Init gcrypt annex
+#~ annex_init_gcrypt() {
+  #~ local NAME="${1:-gcrypt}"; shift
+  #~ annex_init_special "" "%s encryption=%s type=gcrypt gitrepo='%s' keyid='%s'" "$NAME" "$@"
+#~ }
 
 # Annex sync
 annex_sync() {
