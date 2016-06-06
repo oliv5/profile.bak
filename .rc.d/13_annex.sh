@@ -152,6 +152,11 @@ annex_status() {
   vcsh_run 'git annex status'
 }
 
+# Git status for scripts
+annex_st() {
+  vcsh_run 'git annex status' | awk '/^[\? ]?'$1'[\? ]?/ {print "\""$2"\""}'
+}
+
 # Annex diff
 annex_diff() {
   if ! annex_direct; then

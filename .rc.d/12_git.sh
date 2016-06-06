@@ -7,6 +7,7 @@ export GIT_PAGER="${PAGER:-less}"
 ########################################
 # Status aliases
 alias gt='git status -uno'
+alias gtu='gstu'
 alias gst='git_st'
 alias gstm='git status --porcelain -b | awk "NR==1 || /^(M.|.M)/"'    # modified
 alias gsta='git status --porcelain -b | awk "NR==1 || /^A[ MD]/"'     # added
@@ -125,6 +126,7 @@ alias gau='git add -u'
 # Annex aliases
 alias gana='git annex add'
 alias gant='git annex status'
+alias ganst='annex_st'
 alias ganl='git annex list'
 alias gans='git annex sync'
 alias gang='git annex get'
@@ -142,8 +144,8 @@ alias gpm='git format-patch -1'
 alias gps='git_stash_cat'
 alias gpa='git apply'
 # Subtree aliases
-alias gsta='git_subtree_add'
-alias gstu='git_subtree_update'
+alias gsbta='git_subtree_add'
+alias gsbtu='git_subtree_update'
 # Git grep aliases
 alias ggg='git grep -n'
 alias iggg='git grep -ni'
