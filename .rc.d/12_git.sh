@@ -7,9 +7,8 @@ export GIT_PAGER="${PAGER:-less}"
 ########################################
 # Status aliases
 alias gt='git status -uno'
-alias gtu='git status -u'
+alias gtu='gstu'
 alias gst='git_st'
-alias gstx='git_stx'
 alias gstm='git status --porcelain -b | awk "NR==1 || /^(M.|.M)/"'    # modified
 alias gsta='git status --porcelain -b | awk "NR==1 || /^A[ MD]/"'     # added
 alias gstd='git status --porcelain -b | awk "NR==1 || /^D[ M]|^ D/"'  # deleted
@@ -20,7 +19,18 @@ alias gstu='git status --porcelain -b | awk "NR==1 || /^\?\?/"'       # untracke
 alias gsti='git status --porcelain -b | awk "NR==1 || /^\!\!/"'       # ignored
 alias gstz='git status --porcelain -b | awk "NR==1 || /^[MARC] /"'    # in index
 alias gsts='git status --porcelain -b | awk "NR==1 || /^[^\?\?]/"'    # not untracked
-# List aliases
+alias gstx='git_stx'
+alias gstxm='git_stx "^(M.|.M)"'    # modified
+alias gstxa='git_stx "^A[ MD]"'     # added
+alias gstxd='git_stx "^D[ M]|^ D"'  # deleted
+alias gstxr='git_stx "^R[ MD]"'     # renamed
+#alias gstxc='git_stx "^C[ MD]"'     # copied in index
+alias gstxc='git_stx "^[DAU][DAU]"' # unmerged = conflict
+alias gstxu='git_stx "^\?\?"'       # untracked = new
+alias gstxi='git_stx "^\!\!"'       # ignored
+alias gstxz='git_stx "^[MARC] "'    # in index
+alias gstxs='git_stx "^[^\?\?]"'    # not untracked# List aliases
+# List files
 alias gll='git ls-files'
 alias gls='git ls-files'
 alias glm='git ls-files -m'
@@ -116,6 +126,7 @@ alias gau='git add -u'
 # Annex aliases
 alias gana='git annex add'
 alias gant='git annex status'
+alias ganst='annex_st'
 alias ganl='git annex list'
 alias gans='git annex sync'
 alias gang='git annex get'
@@ -133,8 +144,8 @@ alias gpm='git format-patch -1'
 alias gps='git_stash_cat'
 alias gpa='git apply'
 # Subtree aliases
-alias gsta='git_subtree_add'
-alias gstu='git_subtree_update'
+alias gsbta='git_subtree_add'
+alias gsbtu='git_subtree_update'
 # Git grep aliases
 alias ggg='git grep -n'
 alias iggg='git grep -ni'
