@@ -612,9 +612,16 @@ vnoremap <A-Left>   <C-c><C-o>
 vnoremap <A-Right>  <C-c><C-i>
 
 " Prev/next cursor location
-" :help mark-motions
-FnNoremap <A-Left>  ``
-vnoremap <A-Left>   <C-c>``
+" :help restore-position
+FnNoremap <A-S-Left>  ``
+vnoremap <A-S-Left>   <C-c>``
+
+" Prev/next cursor edit location
+" :help change-list-jump
+FnNoremap <C-A-Left>  g;
+FnNoremap <C-A-Right> g,
+vnoremap <C-A-Left>   <C-c>g;
+vnoremap <C-A-Right>  <C-c>g,
 
 
 " *******************************************************
