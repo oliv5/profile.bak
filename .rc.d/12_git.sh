@@ -339,7 +339,10 @@ git_ping() {
 }
 
 # Get number of commits
-alias git_count='git rev-list --all --count'
+alias git_count_all='git_count --all'
+git_count() {
+  git rev-list ${1:-HEAD} --count
+}
 
 ########################################
 # Get hash
