@@ -118,6 +118,8 @@ alias gtd='git tag -d'
 alias gtc='git tag --contains'
 alias gtls='git log --tags --simplify-by-decoration --pretty="format:%ai %d"'
 alias gtg='git tag tag_$(date +%Y%m%d-%H%M%S)'
+alias gtda='git tag -l | xargs git tag -d'
+alias gtdl='git tag -l | xargs git tag -d; git fetch'
 alias gtag='git tag'
 # Add aliases
 alias ga='git add'
