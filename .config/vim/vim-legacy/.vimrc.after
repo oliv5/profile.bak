@@ -811,7 +811,6 @@ FnNoremap <C-b><C-b>  :BufSmartOpen<CR>
 FnNoremap <C-b><C-space> :BufQuickfix<CR>
 FnNoremap <C-b><C-c>  :BufClose<CR>
 FnNoremap <C-b><C-d>  :BufClose<CR>
-FnNoremap <C-q>       :BufClose<CR>
 if !exists("g:vimrc_useTabs")
 	FnNoremap <C-F4>    :BufClose<CR>
 	FnNoremap <C-S-F4>  :BufCloseAll 1<CR>

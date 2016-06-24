@@ -52,7 +52,8 @@ imap <S-Insert>   <C-V>
 vmap <S-Insert>   <C-V>
 
 " Use CTRL-Q to do what CTRL-V used to do
-noremap <C-Q>   <C-V>
+"noremap <C-Q>     <C-V>
+noremap <C-A-V>   <C-V>
 
 " Use CTRL-S for saving, also in Insert mode
 noremap <C-S>   :update<CR>
