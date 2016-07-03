@@ -287,6 +287,14 @@ annex_find() {
 alias annex_fsck='annex_find | xargs -I {} -n 1 sh -c "cd \"{}/..\"; pwd; git annex fsck"'
 alias annex_check='annex_find | xargs -I {} -n 1 sh -c "cd \"{}/..\"; pwd; git annex list | grep \"^_\""'
 
+# Rename special remotes
+annex_rename_special() {
+	git config remote.$1.fetch dummy
+	git remote rename "$1" "$2"
+	git config --unset remote.$2.fetch
+	git annex initremote "$1" name="$2"
+}
+
 ########################################
 ########################################
 # Last commands in file
