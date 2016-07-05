@@ -1,11 +1,20 @@
 // Personal key bindings
 // Oliv5 at caramail dot com
 [
+//
 // Test
+//
 { "key": "q", "command":"" },
 { "key": "ctrl+\\",          "command": "editor.fold", "when": "editorFocus" },
 { "key": "ctrl+shift+\\",          "command": "editor.unfold", "when": "editorFocus" },
 
+//
+// Disable defaults
+//
+
+//
+// OLA legacy config
+//
 // Panels bindings
 { "key": "ctrl+alt+d",            "command": "workbench.view.debug" },
 { "key": "ctrl+alt+e",            "command": "workbench.view.explorer" },
@@ -59,4 +68,5 @@
 { "key": "ctrl+alt+d",            "command": "editor.action.openDeclarationToTheSide", "when": "editorTextFocus" },
 
 // END
+{ "key": "",                      "command": "" }
 ]
