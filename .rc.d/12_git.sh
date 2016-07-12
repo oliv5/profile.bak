@@ -117,7 +117,7 @@ alias gtl='git tag -l'
 alias gtd='git tag -d'
 alias gtc='git tag --contains'
 alias gtls='git log --tags --simplify-by-decoration --pretty="format:%ai %d"'
-alias gtg='git tag tag_$(date +%Y%m%d-%H%M%S)'
+alias gtg='git_tag_create'
 alias gtda='git tag -l | xargs git tag -d'
 alias gtdl='git tag -l | xargs git tag -d; git fetch'
 alias gtag='git tag'
@@ -873,6 +873,12 @@ git_find() {
 
 # Git gc all
 alias git_gc='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; git gc"'
+
+########################################
+# Create a tag
+git_tag_create() {
+  git tag "tag_$(date +%Y%m%d-%H%M%S)${1:+_$1}"
+}
 
 ########################################
 ########################################

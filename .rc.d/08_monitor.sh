@@ -27,19 +27,31 @@ show_display() {
 alias psf='ps -faux'
 alias pse='ps -ef'
 alias psg='ps -ef | grep -i'
-alias psu='ps -fu $USER'
 alias pg='pgrep -fl'
-alias pgu='pgrep -flu $(id -u $USER)'
 alias lsg='ls | grep -i'
 alias llg='ll | grep -i'
 alias lsofg='lsof | grep -i'
 
+# User processes
+psu() {
+  ps -fu "${1:-$USER}"
+}
+pgu() {
+  pgrep -flu "$(id -u ${1:-$USER})"
+}
+psgu() {
+  local USER="${1:-$USER}"
+  shift
+  psu "$USER" | grep -i "$@"
+}
+
+# List of PIDs
 pid() {
   for NAME; do
     ps -C "$@" -o pid=
   done
 }
-
+# List of UIDs
 uid() {
   for NAME; do
     ps -C "$@" -o user=
