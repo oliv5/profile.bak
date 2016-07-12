@@ -48,7 +48,8 @@ str_uniq() {
   local _OFS="${2}"
   shift 2
   #printf -- '%s\n' $@ | sort -u | xargs
-  printf -- "$@" | awk -vRS="$_IFS" -vORS="$_OFS" '!seen[$0]++ {str=str$1ORS} END{sub(ORS"$", "", str); printf "%s\n",str}'
+  #printf -- "$@"
+  printf '%s' "$@" | awk -vRS="$_IFS" -vORS="$_OFS" '!seen[$0]++ {str=str$1ORS} END{sub(ORS"$", "", str); printf "%s\n",str}'
 }
 
 ################################
