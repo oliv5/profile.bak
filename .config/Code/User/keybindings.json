@@ -4,32 +4,60 @@
 //
 // Test
 //
-{ "key": "q", "command":"" },
-{ "key": "ctrl+\\",          "command": "editor.fold", "when": "editorFocus" },
-{ "key": "ctrl+shift+\\",          "command": "editor.unfold", "when": "editorFocus" },
+{ "key": "alt+q",                 "command":"workbench.action.output.toggleOutput" },
 
 //
 // Disable defaults
 //
+{ "key": "ctrl+w",                "command": "" }
 
 //
-// OLA legacy config
+// User config
 //
-// Panels bindings
+// Files
+{ "key": "ctrl+f5",               "command": "workbench.action.reloadWindow" },
+
+// Panels
 { "key": "ctrl+alt+d",            "command": "workbench.view.debug" },
 { "key": "ctrl+alt+e",            "command": "workbench.view.explorer" },
 { "key": "ctrl+alt+g",            "command": "workbench.view.git" },
 { "key": "ctrl+alt+s",            "command": "workbench.view.search" },
 { "key": "ctrl+alt+f",            "command": "workbench.action.toggleFullScreen" },
 { "key": "ctrl+alt+p",            "command": "workbench.action.togglePanel" },
+{ "key": "ctrl+alt+b",            "command": "workbench.action.toggleSidebarVisibility" },
+{ "key": "ctrl+alt+h",            "command": "workbench.action.output.toggleOutput" },
+
+// Close panels
+{ "key": "escape",                "command": "workbench.action.toggleSidebarVisibility", "when": "searchViewletVisible" },
+
 // Panels quick bindings
 { "key": "f12",                   "command": "workbench.action.toggleFullScreen" },
-{ "key": "ctrl+f12",              "command": "workbench.action.toggleSidebarVisibility" },
 { "key": "shift+f12",             "command": "workbench.action.togglePanel" },
+{ "key": "ctrl+f12",              "command": "workbench.action.toggleSidebarVisibility" },
+{ "key": "ctrl+shift+f12",        "command":"workbench.action.toggleSidebarPosition" },
+{ "key": "ctrl+b",                "command": "workbench.view.toggleSidebarVisibility" },
+{ "key": "ctrl+e",                "command": "workbench.view.explorer" },
+
+// Editors management
+{ "key": "ctrl+shift+n",          "command": "workbench.action.newWindow" },
+{ "key": "ctrl+shift+tab",        "command": "workbench.action.openPreviousEditor" },
+{ "key": "ctrl+tab",              "command": "workbench.action.openPreviousEditor" },
+{ "key": "ctrl+p",                "command": "workbench.action.quickOpen" },
+
+{ "key": "ctrl+shift+tab",        "command": "workbench.action.openPreviousEditor" },
+{ "key": "ctrl+tab",              "command": "workbench.action.openPreviousEditor" },
+
+// Split editor
+{ "key": "ctrl+w ctrl+s",         "command": "workbench.action.splitEditor" },
+{ "key": "ctrl+w ctrl+c",         "command": "workbench.action.closeActiveEditor" },
+{ "key": "ctrl+f4",               "command": "workbench.action.closeActiveEditor" },
+{ "key": "ctrl++",                "command": "workbench.action.zoomIn" },
+{ "key": "ctrl+-",                "command": "workbench.action.zoomOut" },
 
 // Undo/redo
 { "key": "ctrl+z",                "command": "undo", "when": "editorTextFocus" },
 { "key": "ctrl+y",                "command": "redo", "when": "editorTextFocus" },
+{ "key": "ctrl+shift+z",          "command": "redo", "when": "editorTextFocus" },
 
 // Search & replace
 { "key": "ctrl+f",                "command": "actions.find" },
@@ -37,17 +65,20 @@
 { "key": "ctrl+h",                "command": "editor.action.startFindReplaceAction" },
 { "key": "ctrl+shift+f",          "command": "workbench.action.search.toggleQueryDetails" },
 { "key": "ctrl+shift+g",          "command": "workbench.action.search.toggleQueryDetails" },
-
-// Cursor navigation
-{ "key": "alt+left",              "command": "workbench.action.navigateBack" },
-{ "key": "alt+right",             "command": "workbench.action.navigateForward" },
-{ "key": "ctrl+j",                "command": "workbench.action.gotoLine" },
+{ "key": "alt+c",                 "command": "toggleFindCaseSensitive", "when": "editorFocus" },
+{ "key": "alt+r",                 "command": "toggleFindRegex", "when": "editorFocus" },
+{ "key": "alt+w",                 "command": "toggleFindWholeWord", "when": "editorFocus" },
 
 // Search navigation
 { "key": "f3",                    "command": "editor.action.nextMatchFindAction", "when": "editorFocus" },
 { "key": "shift+f3",              "command": "editor.action.previousMatchFindAction", "when": "editorFocus" },
 { "key": "f4",                    "command": "editor.action.nextSelectionMatchFindAction", "when": "editorFocus" },
 { "key": "shift+f4",              "command": "editor.action.previousSelectionMatchFindAction", "when": "editorFocus" },
+
+// Cursor navigation
+{ "key": "alt+left",              "command": "workbench.action.navigateBack" },
+{ "key": "alt+right",             "command": "workbench.action.navigateForward" },
+{ "key": "ctrl+j",                "command": "workbench.action.gotoLine" },
 
 // Error markers
 { "key": "f2",                    "command": "editor.action.marker.next", "when": "editorFocus" },
@@ -64,8 +95,13 @@
 { "key": "ctrl+shift+t",          "command": "workbench.action.gotoSymbol" },
 { "key": "ctrl+alt+t",            "command": "editor.action.previewDeclaration", "when": "editorTextFocus" },
 { "key": "ctrl+d",                "command": "editor.action.goToDeclaration", "when": "editorTextFocus" },
+{ "key": "ctrl+enter",            "command": "editor.action.goToDeclaration", "when": "editorTextFocus" },
 { "key": "ctrl+shift+d",          "command": "editor.action.goToTypeDeclaration", "when": "editorTextFocus" },
 { "key": "ctrl+alt+d",            "command": "editor.action.openDeclarationToTheSide", "when": "editorTextFocus" },
+
+// Comments
+{ "key": "ctrl+q",                "command": "editor.action.commentLine", "when": "editorTextFocus" },
+{ "key": "ctrl+shift+q",          "command": "editor.action.blockComment", "when": "editorTextFocus" },
 
 // END
 { "key": "",                      "command": "" }
