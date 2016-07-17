@@ -32,6 +32,10 @@ wifi_disable() {
 }
 
 ############################
+# Ip client
+alias ip_renew='sudo dhclient -r; sudo dhclient -1'
+
+############################
 # quvi alias
 alias flashdl='quvi'
 
@@ -50,8 +54,9 @@ wget_ext() {
   wget ${3:+--domains="$3"} ${4:+--http-user "$4"} ${5:+--http-passwd "$5"} -r -l1 -H -t1 -nd -N -np --follow-ftp -A${2:?No extension specified...} -erobots=off "${1:?No url specified...}"
 }
 
+############################
 # Execute on remote host
-alias exec-rem='exec-remote'
+alias remote_exec='exec-remote'
 exec_remote() {
   local HOST="${1:?No host specified}"
   shift $(min 1 $#)
@@ -63,6 +68,7 @@ exec_remote() {
   fi
 }
 
+############################
 # Send email using mutt or mail
 send_mail() {
   local DEST="${1:?No dest email address specified}"
@@ -88,6 +94,7 @@ send_mail() {
   return 0
 }
 
+############################
 # Redirect port using socat
 socat_bounce() {
   #socat tcp-listen:port,bind=addr,su=nobody,fork,reuseaddr tcp:addr:port
