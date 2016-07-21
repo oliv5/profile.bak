@@ -2,7 +2,7 @@
 # Note: this file must be independant, it can be sourced by external scripts
 
 # Ctags settings
-_CTAGS_OPTS='-R --extra=f'
+_CTAGS_OPTS='-R --c++-kinds=+p --fields=+iaS --extra=+qf'
 _CTAGS_OUT='.tags'
 
 # Cscope settings
