@@ -86,7 +86,7 @@
                 local CHARGE_STATUS="$(cat /sys/class/power_supply/battery/status 2>/dev/null | tr '[:upper:]' '[:lower:]')"
                 #local CHARGE_LEVEL="$(dumpsys battery | awk '/level:/ {print $2}')"
                 if [ "$CHARGE_STATUS" != "charging" -a "$CHARGE_STATUS" != "full" ]; then
-                    echo "[warning] Device is not in charge, nor full battery. Disable file addition and file content syncing..."
+                    echo "[warning] Device is not in charge. Disable file addition and file content syncing..."
                     unset ANNEX_CONTENT ANNEX_ADD
                 fi
             fi
