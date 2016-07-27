@@ -177,11 +177,13 @@ alias git_amend='git commit --amend'
 # Rebase aliases
 alias grb='git rebase'
 alias grbi='git rebase -i'
-# Pull/push aliases
+# Fetch/pull/push aliases
 alias gps='git push'
 alias gpl='git pull'
 alias gpr='git pull --rebase'
 alias gup='git_pull'
+alias gfe='git fetch'
+alias gfa='git fetch --all'
 # Config aliases
 alias gcl='git config -l'
 alias gcg='git config --get'
