@@ -97,6 +97,7 @@ conv_libreoffice() {
   soffice --headless --convert-to "$FORMAT" "$@"
 }
 
+################################
 # Convert to PDF using wvpdf
 conv_wvpdf() {
   # sudo apt-get install wv texlive-base texlive-latex-base ghostscript
@@ -117,3 +118,10 @@ alias tex2pdf_loop='watch -n 15 "pdflatex --interaction nonstopmode >/dev/null 2
 
 # PDF to booklet
 alias pdf2booklet='pdfbook --short-edge'
+
+# Search into pdf
+pdfsearch() {
+  local PATTERN="$1"
+  shift
+  ff "$@/*.pdf" -exec sh -c 'pdftotext "{}" - | grep --with-filename --label="{}" --color '"$PATTERN" \;
+}
