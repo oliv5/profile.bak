@@ -9,4 +9,4 @@ if ls -d ./spf13-vim*/ >/dev/null 2>&1; then
 fi
 
 # Download the setup script and run it
-(curl https://j.mp/spf13-vim3 -L | APP_PATH="$PWD/spf13-vim" HOME="$APP_PATH" sh)
+(curl https://j.mp/spf13-vim3 -L | APP_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/vim/vim-spf13/spf13-vim" HOME="$APP_PATH" sh)
