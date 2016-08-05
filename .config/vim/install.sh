@@ -39,18 +39,20 @@ legacy_setup() {
 
 # SPF13/legacy setup: gvim=spf13, vim=legacy
 sfp13_legacy_setup() {
+	echo "Warning: this is not working yet !!!"
+	read
 	spf13_setup
-	rm ~/.vimrc 2>/dev/null
+	mv ~/.vimrc ~/.gvimrc
 	cat > ~/.vimrc <<EOF
-if has("gui_running")
-	source "$spf13_dir/spf13-vim/.vimrc"
-else
+if !has("gui_running")
 	set runtimepath-=~/.vim
 	set runtimepath-=~/.vim/after
-	let \$HOME="$HOME/.vim-legacy"
+	source $legacy_dir/xdg.vim
+	let \$HOME="$legacy_dir"
+	source $legacy_dir/.vimrc
+	let \$HOME="$HOME"
 	set runtimepath+=~/.vim
 	set runtimepath+=~/.vim/after
-	source ~/.vimrc
 endif
 EOF
 }
@@ -72,6 +74,7 @@ legacy_raw_setup() {
 ############
 # Main
 date="$(date +%Y%m%d-%H%M%S)"
+vim_dir="${XDG_CACHE_HOME:-$HOME/.cache}/vim"
 backup_dir="${XDG_CACHE_HOME:-$HOME/.cache}/vim/backup"
 spf13_dir="${XDG_CONFIG_HOME:-$HOME/.config}/vim/vim-spf13"
 legacy_dir="${XDG_CONFIG_HOME:-$HOME/.config}/vim/vim-legacy"
@@ -85,9 +88,8 @@ mkdir -p "$backup_dir"
 echo "Backup and remove current setup."
 for file in ~/.vim* ~/.vimrc.* ~/.gvim*; do
 	if [ -f "$file" ]; then
-		cp -v "$file" "$backup_dir/$(basename "$file").$date.bak"
+		mv -v "$file" "$backup_dir/$(basename "$file").$date.bak"
 	fi
-	rm -v "$file" 2>/dev/null
 done
 
 # Proceed with installation

@@ -257,7 +257,7 @@ vnoremap <C-u>      ~
 if !exists('g:loaded_airline') && !exists('g:vimrc_nostatusline')
 
 	" Returns "mixed" when indentation is mixed
-	function! b:StatuslineWarning()
+	function! StatuslineWarning()
 		if !exists("b:statusline_tab_warning")
 			let tabs = search('^\t', 'nw')
 			let spaces = search('^ \+[^\*]', 'nw')
@@ -282,7 +282,7 @@ if !exists('g:loaded_airline') && !exists('g:vimrc_nostatusline')
 			endif
 			exe "set" . a:local "statusline+=\\ %="
 			exe "set" . a:local "statusline+=\\ [%{strlen(&fenc)?&fenc:'none'},%{&ff}]%h%m%r"
-			exe "set" . a:local "statusline+=\\ [%{&expandtab==0?'tabs':'space'}%{b:StatuslineWarning()}]"
+			exe "set" . a:local "statusline+=\\ [%{&expandtab==0?'tabs':'space'}%{StatuslineWarning()}]"
 			exe "set" . a:local "statusline+=\\ %y\\ %c,%l/%L\\ %P"
 		endif
 	endfunction
