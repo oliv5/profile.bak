@@ -113,8 +113,15 @@ merge_pdf() {
 }
 
 # Tex to pdf
-alias tex2pdf='pdflatex --interaction nonstopmode'
-alias tex2pdf_loop='watch -n 15 "pdflatex --interaction nonstopmode >/dev/null 2>&1"'
+latex2pdf() {
+  for FILE in "$@"; do
+    pdflatex --interaction nonstopmode -output-directory="$(dirname "$FILE")" "$FILE"
+  done
+}
+
+latex2pdf_loop() {
+  watch -n 15 "tex2pdf "$@">/dev/null 2>&1"
+}
 
 # PDF to booklet
 alias pdf2booklet='pdfbook --short-edge'

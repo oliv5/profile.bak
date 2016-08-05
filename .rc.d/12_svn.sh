@@ -2,6 +2,7 @@
 
 # Environment
 export SVN_EDITOR=vim
+export SVN_MERGE=meld
 
 # Show svn aliases
 alias salias='alias | grep -re " s..\?="'
