@@ -1,4 +1,5 @@
 #!/bin/sh
+# Run with cmd: (curl https://raw.githubusercontent.com/oliv5/profile/master/pbin/bootstrap.sh -L | sh)
 set -e
 
 ###################
@@ -44,6 +45,7 @@ fi
 #			[ -e "$F" ] && mv "$F" "$TMPDIR/"
 #		done
 #	vcsh profile pull
+#	vcsh profile reset --hard
 #}
 
 ###################
@@ -56,7 +58,7 @@ if ! command -v mr >/dev/null 2>&1; then
 fi
 
 ###################
-# Download and install google repo if not already there
+ Download and install google repo if not already there
 if ! command -v repo >/dev/null 2>&1; then
 	mkdir -p bin/externals
 	curl https://storage.googleapis.com/git-repo-downloads/repo > "$HOME/bin/externals/repo" && 
@@ -66,18 +68,18 @@ if ! command -v repo >/dev/null 2>&1; then
 fi
 
 # Setup bin repos
-read -p "Setup bin repos ? (y/n) " REPLY
-if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
-	mkdir -p "$HOME/bin"
-	cd "$HOME/bin"
-	repo init -u https://github.com/oliv5/manifests.git -m bin.xml
-	repo sync -c
-fi
+#read -p "Setup bin repos ? (y/n) " REPLY
+#if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
+#	mkdir -p "$HOME/bin"
+#	cd "$HOME/bin"
+#	repo init -u https://github.com/oliv5/manifests.git -m bin.xml
+#	repo sync -c
+#fi
 
 # Setup dev repos
-read -p "Setup dev repos ? (y/n) " REPLY
-if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
-	mkdir -p "${PRIVATE:-$HOME}/dev"
-	cd "${PRIVATE:-$HOME}/dev"
-	repo init -u https://github.com/oliv5/manifests.git -m dev.xml
-fi
+#read -p "Setup dev repos ? (y/n) " REPLY
+#if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
+#	mkdir -p "${PRIVATE:-$HOME}/dev"
+#	cd "${PRIVATE:-$HOME}/dev"
+#	repo init -u https://github.com/oliv5/manifests.git -m dev.xml
+#fi
