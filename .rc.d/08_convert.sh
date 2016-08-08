@@ -113,6 +113,7 @@ merge_pdf() {
 }
 
 # Tex to pdf
+alias tex2pdf='latex2pdf'
 latex2pdf() {
   for FILE in "$@"; do
     pdflatex --interaction nonstopmode -output-directory="$(dirname "$FILE")" "$FILE"

@@ -182,9 +182,11 @@ alias grb='git rebase'
 alias grbi='git rebase -i'
 # Fetch/pull/push aliases
 alias gps='git push'
+alias gpsa='git_push'
 alias gpl='git pull'
+alias gpla='git_pull'
 alias gpr='git pull --rebase'
-alias gup='git_pull'
+alias gup='git pull --rebase --autostash'
 alias gfe='git fetch'
 alias gfa='git fetch --all'
 # Config aliases
