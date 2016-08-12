@@ -839,9 +839,9 @@ endif
 " *******************************************************
 " Key mapping
 FnNoremap <F5>        :e<CR>
-FnNoremap <S-F5>      :e!<CR>
+FnNoremap <C-F5>      :e!<CR>
 FnNoremap <A-F5>      :set autoread?<CR>
-FnNoremap <C-F5>      :set autoread!<CR>:set autoread?<CR>
+FnNoremap <S-F5>      :set autoread!<CR>:set autoread?<CR>
 " Autocommand
 augroup vimrc_autoread
 	au! FileChangedShell * exec 'echohl WarningMsg | echo "Warning: file' expand('%') 'changed on disk" | echohl None'
