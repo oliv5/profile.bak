@@ -60,7 +60,8 @@ export PRIVATE="${PRIVATE:-${HOME}/private}"
 [ -e "$HOME/.ecryptfs" ] && chmod 500 "$HOME/.ecryptfs"
 
 ################################
-# Alias ls
+# Alias ls - take care with --color=auto because this may hang with nfs/sshfs directories
+#unalias ls
 alias l='ls -CF'
 alias la='ls -A'
 alias ll='ls -laF'
