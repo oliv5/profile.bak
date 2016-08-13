@@ -53,9 +53,8 @@ command -v gpg_agent >/dev/null && gpg_agent
 command -v xset >/dev/null 2>&1 && xset b off 2>/dev/null # From X11 window system
 command -v setterm >/dev/null 2>&1 && setterm -blength 0 2>/dev/null # From the system console
 
-# Setup private vault
-export PRIVATE="${PRIVATE:-${HOME}/private}"
-# Protect private encrypted directory
+# Protect private directories
+[ -e "$HOME/private" ] && chmod 500 "$HOME/private"
 [ -e "$HOME/.private" ] && chmod 500 "$HOME/.private"
 [ -e "$HOME/.ecryptfs" ] && chmod 500 "$HOME/.ecryptfs"
 
