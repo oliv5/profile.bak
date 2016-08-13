@@ -47,8 +47,9 @@ annex_init_hubic() {
   local NAME="${1:-hubic}"
   local ENCRYPTION="${2:-none}"
   local REMOTEPATH="${3:-$(git_repo)}"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no
+  local KEYID="$4"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no keyid="$KEYID" ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no keyid="$KEYID" 
 }
 
 # Init gdrive annex
@@ -56,8 +57,9 @@ annex_init_gdrive() {
   local NAME="${1:-gdrive}"
   local ENCRYPTION="${2:-none}"
   local REMOTEPATH="${3:-$(git_repo)}"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH"
+  local KEYID="$4"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" keyid="$KEYID" ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" keyid="$KEYID" 
 }
 
 # Init bup annex
@@ -65,8 +67,9 @@ annex_init_bup() {
   local NAME="${1:-bup}"
   local ENCRYPTION="${2:-none}"
   local REMOTEPATH="${3:-$(git_repo)}"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH"
+  local KEYID="$4"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" keyid="$KEYID" ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" keyid="$KEYID" 
 }
 
 # Init rsync annex
