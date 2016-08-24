@@ -1,5 +1,5 @@
 #!/bin/sh
-REPO="$HOME/.config/sourceinsight"
+PROFILE="$HOME/.config/profile"
 PREFIX="$HOME/.wine-sourceinsight"
 USER_PREFIX="$PREFIX/drive_c/users/$USER"
 USER_APP="$HOME/.local/share/applications/wine/Programs/SourceInsight"
@@ -22,22 +22,6 @@ if [ ! -z "$EXE" ]; then
 fi
 
 # Link the configuration file to the repository
-#ln -sf "$REPO/GLOBAL.CF3" "$USER_PREFIX/Mes documents/Source Insight/Settings/GLOBAL.CF3"
-find "$USER_PREFIX" -type f -name "GLOBAL.CF3" -exec cp "$REPO/GLOBAL.CF3" "{}" \;
+#ln -sf "$PWD/GLOBAL.CF3" "$USER_PREFIX/Mes documents/Source Insight/Settings/GLOBAL.CF3"
+find "$USER_PREFIX" -type f -name "GLOBAL.CF3" -exec cp "$PWD/GLOBAL.CF3" "{}" \;
 
-# Copy run script into user bin
-cp "$REPO/run.sh" "$HOME/bin/si.sh"
-
-# Copy desktop file to user app directory
-mkdir -p "$USER_APP"
-ln -s "$REPO/*.desktop" "$USER_APP/"
-ln -s "$REPO/*.png" "$USER_APP/"
-
-# Setup registry
-#WINEPREFIX="$PREFIX" reg add "HKLM\SYSTEM\CurrentControlSet\services\Service" /v "KeyName" /d "Parameters" /f
-#WINEPREFIX="$PREFIX" wine regedit
-
-# Setup macro files
-mkdir -p "$USER_PREFIX/My\ Documents/Source\ Insight/Projects/Base/"
-ln -fsv "$(readlink -f "$REPO/*.em")" "$USER_PREFIX/My\ Documents/Source\ Insight/Projects/Base/"
-ln -fsv "$(readlink -f "$REPO/sample/*.em")" "$USER_PREFIX/My\ Documents/Source\ Insight/Projects/Base/"

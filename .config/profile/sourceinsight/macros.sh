@@ -1,6 +1,6 @@
 #!/bin/sh
 PREFIX="$HOME/.wine-sourceinsight"
-SRC="$HOME/.config/sourceinsight/macros"
+SRC="$HOME/.config/profile/sourceinsight/macros"
 DST="$PREFIX/drive_c/users/$USER/My Documents/Source Insight/Projects/Base"
 URL="http://www.sourceinsight.com/public/macros/"
 
