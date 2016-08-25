@@ -188,6 +188,7 @@ alias gpl='git pull'
 alias gpla='git_pull'
 alias gpr='git pull --rebase'
 alias gup='git pull --rebase --autostash'
+alias git_up='git_pull_all'
 alias gfe='git fetch'
 alias gfa='git fetch --all'
 # Config aliases
@@ -259,6 +260,12 @@ git_setup() {
 }
 
 ########################################
+# Get git version
+git_version() {
+  local VERSION="${1:-$(git --version | cut -d' ' -f 3)}"
+  expr $(echo $VERSION | awk -F'.' '{printf "%.d%.2d%.2d%.2d",$1,$2,$3,$4}')
+}
+
 # Check repo exists
 git_exists() {
   #git ${1:+--work-tree="$1"} rev-parse --verify "HEAD" >/dev/null 2>&1
@@ -416,6 +423,35 @@ git_pull() {
 }
 
 # Batch pull existing remote/branches
+if [ $(git_version) -gt $(git_version 2.9) ]; then
+git_pull_all() {
+  git_exists || return 1
+  local REMOTES="${1:-$(git_remotes)}"
+  local BRANCHES="${2:-$(git_branches)}"
+  local CURRENT="$(git_branch)"
+  if annex_direct; then
+    # Note: git annex repos in direct mode
+    # are not compatible with vcsh
+    git annex sync
+  else
+    vcsh_run "
+      set +e
+      for BRANCH in $BRANCHES; do
+        git checkout \"\$BRANCH\" >/dev/null|| continue
+        for REMOTE in $REMOTES; do
+          if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
+            if git ls-remote \"\$REMOTE\" | grep \"heads/\$BRANCH\" >/dev/null; then
+              git pull --rebase --autostash \"\$REMOTE\" \"\$BRANCH\"
+            else
+              echo \"Cannot access repo '\$REMOTE/\$BRANCH'...\"
+            fi
+          fi
+        done
+      done
+    "
+  fi
+}
+else
 git_pull_all() {
   git_exists || return 1
   local REMOTES="${1:-$(git_remotes)}"
@@ -461,6 +497,7 @@ git_pull_all() {
     "
   fi
 }
+fi
 
 # Batch push the current branch to all remotes
 git_push() {
