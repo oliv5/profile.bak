@@ -435,12 +435,15 @@ git_pull_all() {
     git annex sync
   else
     vcsh_run "
-      set +e
+      git stash save
+      set -e
+      CURRENT=\"$(git rev-parse --abbrev-ref HEAD)\"
       for BRANCH in $BRANCHES; do
-        git checkout \"\$BRANCH\" >/dev/null|| continue
+        git checkout \"\$BRANCH\" >/dev/null || continue
         for REMOTE in $REMOTES; do
           if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
             if git ls-remote \"\$REMOTE\" | grep \"heads/\$BRANCH\" >/dev/null; then
+              git fetch \"\$REMOTE\" \"\$BRANCH\"
               git pull --rebase --autostash \"\$REMOTE\" \"\$BRANCH\"
             else
               echo \"Cannot access repo '\$REMOTE/\$BRANCH'...\"
@@ -448,6 +451,9 @@ git_pull_all() {
           fi
         done
       done
+      git checkout -q \"$CURRENT\"
+      set +e
+      git stash pop
     "
   fi
 }
@@ -477,10 +483,11 @@ git_pull_all() {
         git reset --hard HEAD -q --
       fi
       for BRANCH in $BRANCHES; do
-        git checkout \"\$BRANCH\" >/dev/null|| continue
+        git checkout \"\$BRANCH\" >/dev/null || continue
         for REMOTE in $REMOTES; do
           if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
             if git ls-remote \"\$REMOTE\" | grep \"heads/\$BRANCH\" >/dev/null; then
+              git fetch \"\$REMOTE\" \"\$BRANCH\"
               if [ -x \"\$(git --exec-path)/git-pull\" ]; then
                 git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
               else
