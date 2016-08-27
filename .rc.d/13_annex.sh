@@ -200,15 +200,17 @@ annex_bundle() {
 }
 
 # Annex get
-alias annex_get_fast='annex_get --fast'
 alias annex_get_auto='annex_get --auto'
+alias annex_get_fast='annex_get --fast'
+alias annex_get_fast_auto='annex_get --fast --auto'
 alias annex_get_missing='annex_missing | xargs annex_get'
 alias annex_get='vcsh_run git annex get'
 
 # Annex copy
-alias annex_copy_fast='annex_copy --fast'
 alias annex_copy_all='annex_copy --all'
 alias annex_copy_auto='annex_copy --auto'
+alias annex_copy_fast='annex_copy --fast'
+alias annex_copy_fast_auto='annex_copy --fast --auto'
 annex_copy() {
   annex_exists || return 1
   for LAST; do true; done
