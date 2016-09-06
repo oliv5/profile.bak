@@ -47,14 +47,32 @@ psgu() {
 
 # List of PIDs
 pid() {
-  for NAME; do
-    ps -C "$@" -o pid=
-  done
+  # Use xargs to trim leading spaces
+  [ $# -gt 0 ] && ps -C "$@" -o pid= | xargs
 }
 # List of UIDs
 uid() {
-  for NAME; do
-    ps -C "$@" -o user=
+  # Use xargs to trim leading spaces
+  [ $# -gt 0 ] && ps -C "$@" -o user= | xargs
+}
+# List of PPIDs
+ppid() {
+  # Use xargs to trim leading spaces
+  [ $# -gt 0 ] && ps -C "$@" -o ppid= | xargs
+}
+# List of PPIDs from PIDs
+pppid() {
+  # Use xargs to trim leading spaces
+  [ $# -gt 0 ] && ps -p "$@" -o ppid= | xargs
+}
+
+################################
+# Wait for process (even not our children)
+waitpid(){
+  for pid; do
+    while kill -0 "$pid" 2>/dev/null; do
+      sleep 0.5
+    done
   done
 }
 
