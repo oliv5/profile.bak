@@ -130,6 +130,9 @@ alias xk='xkill'
 alias duh='du -h'
 alias duh0='du -h -d0'
 alias duh1='du -h -d1'
+alias duhl='du -hL'
+alias duhl0='du -hL -d0'
+alias duhl1='du -hL -d1'
 
 # Env | grep
 alias envg='env | grep -i'
