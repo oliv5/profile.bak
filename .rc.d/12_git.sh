@@ -169,6 +169,7 @@ alias ggrep='git grep'
 alias gco='git checkout'
 # Reset aliases
 alias gre='git reset'
+alias greh='git reset --hard'
 alias grh='git reset HEAD'
 alias grhh='git reset HEAD --hard'
 alias git_rollback='git reset'
@@ -182,13 +183,11 @@ alias git_amend='git commit --amend'
 alias grb='git rebase'
 alias grbi='git rebase -i'
 # Fetch/pull/push aliases
-alias gps='git push'
-alias gpsa='git_push'
-alias gpl='git pull'
-alias gpla='git_pull'
+alias gps='git_push'
+alias gpl='git_pull'
 alias gpr='git pull --rebase'
 alias gup='git pull --rebase --autostash'
-alias git_up='git_pull_all'
+alias gupa='git_pull_all'
 alias gfe='git fetch'
 alias gfa='git fetch --all'
 # Config aliases
@@ -372,6 +371,7 @@ git_count() {
 
 ########################################
 # Get hash
+alias git_sha1='git_hash'
 git_hash() {
   git rev-parse "${@:-HEAD}"
 }
@@ -380,6 +380,7 @@ git_allhash() {
 }
 
 # Get short hash
+alias git_ssha1='git_shorthash'
 git_shorthash() {
   git_hash "$@" | cut -c 1-8
 }
