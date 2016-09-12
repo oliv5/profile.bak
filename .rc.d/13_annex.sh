@@ -1,5 +1,29 @@
 #!/bin/sh
 
+# Annex aliases
+alias gana='git annex add'
+alias gant='git annex status'
+alias ganst='annex_st'
+alias ganl='git annex list'
+alias ganlc='git annex find | wc -l'
+alias ganf='git annex find'
+alias ganfc='git annex find | wc -l'
+alias gans='git annex sync'
+alias gang='git annex get'
+alias ganc='git annex copy'
+alias ganca='git annex copy --all'
+alias gancf='git annex copy --fast'
+alias ganct='git annex copy --to'
+alias gancat='git annex copy --all --to'
+alias gancft='git annex copy --fast --to'
+alias gancf='git annex copy --from'
+alias gancaf='git annex copy --all --from'
+alias gancff='git annex copy --fast --from'
+alias gand='git annex drop'
+alias gandd='git annex forget --drop-dead'
+alias gani='git annex info'
+alias gannex='git annex'
+
 # Wrapper: vcsh run
 # Overwritten by vcsh main script
 command -v "vcsh_run" >/dev/null 2>&1 ||
@@ -228,12 +252,14 @@ alias annex_download='annex_copy --from'
 alias annex_download_fast='annex_copy_fast --from'
 alias annex_download_all='annex_copy_all --from'
 alias annex_download_auto='annex_copy_auto --from'
+alias annex_download_fast_auto='annex_copy_fast_auto --from'
 
 # Annex upload
 alias annex_upload='annex_copy --to'
 alias annex_upload_fast='annex_copy_fast --to'
 alias annex_upload_all='annex_copy_all --to'
 alias annex_upload_auto='annex_copy_auto --to'
+alias annex_upload_fast_auto='annex_copy_fast_auto --to'
 
 # Annex upkeep
 annex_upkeep() {
