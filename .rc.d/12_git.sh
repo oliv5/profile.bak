@@ -288,6 +288,16 @@ git_branches() {
   git ${1:+--git-dir="$1"} for-each-ref --shell refs/heads/ --format='%(refname:short)'
 }
 
+# Check a branch exist
+git_branch_exists() {
+#  local SLASH="${1%%*/*}"
+#  local REMOTE="${1%/*}"
+#  local BRANCH="${1##*/}"
+#  [ -n "$SLASH" ] && REMOTE="."
+#  git ls-remote --heads "${REMOTE}" | grep "/${BRANCH}$" >/dev/null
+  git ls-remote . | grep "/${1:?No ref specified}$" >/dev/null
+}
+
 # Get current url
 git_url() {
   git ${2:+--git-dir="$2"} config --get remote.${1:-origin}.url
@@ -497,9 +507,10 @@ git_push_all() {
   for REMOTE in $REMOTES; do
     for BRANCH in $BRANCHES; do
       #if git branch -r | grep -- "$REMOTE/$BRANCH" >/dev/null; then
+      if git_branch_exists "$REMOTE/$BRANCH"; then
         echo -n "Push $REMOTE/$BRANCH : "
         git push "$REMOTE" "$BRANCH"
-      #fi
+      fi
     done
   done
 }
