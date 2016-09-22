@@ -295,7 +295,8 @@ git_branch_exists() {
 #  local BRANCH="${1##*/}"
 #  [ -n "$SLASH" ] && REMOTE="."
 #  git ls-remote --heads "${REMOTE}" | grep "/${BRANCH}$" >/dev/null
-  git ls-remote . | grep "/${1:?No ref specified}$" >/dev/null
+#  git ls-remote . | grep "/${1:?No ref specified}$" >/dev/null
+  git branch -a | grep "/${1:?No ref specified}$" >/dev/null
 }
 
 # Get current url
