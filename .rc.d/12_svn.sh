@@ -58,7 +58,7 @@ svn_bckname() {
 
 # Retrieve svn version
 svn_version() {
-  svn --version | head -n 1 | awk '{print $3}' | cut -d. -f ${1:-1-}
+  IFS=$'.' svn --version | awk '{print $3; exit}' | cut -d. -f "${1:-1-}"
 }
 
 # Retrieve date
@@ -68,7 +68,7 @@ svn_date() {
 
 # Get svn repository path
 svn_repo() {
-  if [ "$(svn_version 2)" == "1.6" ]; then
+  if [ "$(svn_version 1-2)" == "1.6" ]; then
     svn info "$@" | awk 'NR==3 {print $NF}'
   else
     svn info "$@" | awk 'NR==4 {print $NF}' | cut -c 2-
@@ -77,7 +77,7 @@ svn_repo() {
 
 # Get svn url name
 svn_url() {
-  if [ "$(svn_version 2)" == "1.6" ]; then
+  if [ "$(svn_version 1-2)" == "1.6" ]; then
     svn info "$@" | awk 'NR==2 {print $NF}'
   else
     svn info "$@" | awk 'NR==3 {print $NF}'
@@ -92,7 +92,7 @@ svn_root() {
 
 # Get svn current branch
 svn_branch() {
-  if [ "$(svn_version 2)" == "1.6" ]; then
+  if [ "$(svn_version 1-2)" == "1.6" ]; then
     svn_url | sed -e "s;$(svn_repo);;"
   else
     # svn relative url
