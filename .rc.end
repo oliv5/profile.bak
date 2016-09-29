@@ -81,6 +81,12 @@ alias v='gvim'
 alias ssv='ss | cut -c 9- | xargs gvim'
 alias gsv='gs | grep modified | cut -d : -f 2 | xargs gvim'
 
+# Gedit/geany
+alias e='${GEDITOR:-false}'
+alias ge='${GEDITOR:-false}'
+alias sse='ss | cut -c 9- | xargs ${GEDITOR:-false}'
+alias gse='gs | grep modified | cut -d : -f 2 | xargs ${GEDITOR:-false}'
+
 # Search and process
 ffv()  { ff "$@" -print0       | xargs -0 ${EDITOR:-false}; }
 ffv1() { ff "$@" -print0 -quit | xargs -0 ${EDITOR:-false}; }
@@ -92,17 +98,13 @@ ffo()  { ff "$@" -print0       | xargs -0 mimeopen; }
 ffo1() { ff "$@" -print0 -quit | xargs -0 mimeopen; }
 ffc()  { ff "$@" -print        | wc -l; }
 
-# Gedit/geany
-alias e='${GEDITOR:-false}'
-alias sse='ss | cut -c 9- | xargs ${GEDITOR:-false}'
-alias gse='gs | grep modified | cut -d : -f 2 | xargs ${GEDITOR:-false}'
-
 # Move
 alias mv="mv -i"
 
 # Diff
 alias d='diff'
-alias m='meld'
+alias di='diff'
+alias me='meld'
 
 # Grep
 alias g='grep'
@@ -142,6 +144,10 @@ alias dpkgg='dpkg -l | grep -i'
 # Head/tail
 alias h='head'
 alias t='tail'
+
+# More/less
+alias m='more'
+alias l='less'
 
 # Network monitors
 alias ns='sudo netstat -an'
