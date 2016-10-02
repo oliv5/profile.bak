@@ -27,20 +27,6 @@ lib =
 		fi
 		echo "$REPLY"
 	}
-	# Mount drives & run rsync
-	mr_rsync() {
-		set +e
-		local DRIVE1="${1:?No source specified...}"
-		shift; [ "$1" = "rsync.sh" -o "$1" = "--" ] && shift
-		sudo mount "$DRIVE1" >/dev/null 2>&1
-		MOUNT_DRIVE1=$?
-		if mountpoint "$DRIVE1" >/dev/null 2>&1; then
-			rsync.sh "$@"
-			if [ $MOUNT_DRIVE1 -eq 0 ]; then
-			    sudo umount $DRIVE1
-			fi
-		fi
-	}
 
 # Load git library
 lib = . "$RC_DIR/.rc.d/12_git.sh"
@@ -51,4 +37,4 @@ lib = . "$RC_DIR/.rc.d/12_git.sh"
 # Include our repositories
 include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/lib.d/null" 2>/dev/null || true
 include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/"* || true
-include = [ -r ".mrconfig.local" ] && cat .mrconfig.local || true
+include = cat .mrconfig.local 2>/dev/null || true
