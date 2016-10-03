@@ -424,8 +424,6 @@ git_pull_all() {
     git annex sync
   else
     vcsh_run "
-      git stash save
-      set -e
       CURRENT=\"$(git rev-parse --abbrev-ref HEAD)\"
       for BRANCH in $BRANCHES; do
         git checkout \"\$BRANCH\" >/dev/null || continue
@@ -441,8 +439,6 @@ git_pull_all() {
         done
       done
       git checkout -q \"$CURRENT\"
-      set +e
-      git stash pop
     "
   fi
 }
