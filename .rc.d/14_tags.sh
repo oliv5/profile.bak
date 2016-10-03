@@ -43,7 +43,7 @@ scancsdir() {
   # Get options
   local CSCOPE_FILES="$DST/${_CSCOPE_FILES}"
   # Scan directory
-  ( set -f; find "$SRC" $_CSCOPE_EXCLUDE -regextype posix-egrep -regex "$_CSCOPE_REGEX" -type f -printf '"%p"\n' >> "$CSCOPE_FILES" )
+  ( set -f; find -L "$SRC" $_CSCOPE_EXCLUDE -regextype posix-egrep -regex "$_CSCOPE_REGEX" -type f -execdir readlink -f "{}" \; > "$CSCOPE_FILES" )
 }
 
 # Make cscope db from source list file
@@ -57,9 +57,7 @@ mkcscope_1() {
   local CSCOPE_FILES="$DST/${_CSCOPE_FILES}"
   local CSCOPE_DB="$DST/${_CSCOPE_OUT}"
   # Build file list
-  if [ ! -e $CSCOPE_FILES ]; then
-    scancsdir "$SRC" "$DST"
-  fi
+  scancsdir "$SRC" "$DST"
   # Build tag file
   command cscope $CSCOPE_OPTIONS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
 }
@@ -76,8 +74,9 @@ mkcscope_2() {
   local CSCOPE_OPTIONS="$_CSCOPE_OPTS $3"
   local CSCOPE_DB="$DST/${_CSCOPE_OUT}"
   # Build tag file
-  find "$SRC" $_CSCOPE_EXCLUDE -regextype posix-egrep -regex "$_CSCOPE_REGEX" -type f -printf '"%p"\n' | \
-    command cscope $CSCOPE_OPTIONS -i '-' -f "$CSCOPE_DB"
+  #find -L "$SRC" $_CSCOPE_EXCLUDE -regextype posix-egrep -regex "$_CSCOPE_REGEX" -type f -printf '"%p"\n'
+  ( set -f; find -L "$SRC" $_CSCOPE_EXCLUDE -regextype posix-egrep -regex "$_CSCOPE_REGEX" -type f -execdir readlink -f "{}" \; |\
+    command cscope $CSCOPE_OPTIONS -i '-' -f "$CSCOPE_DB" )
 }
 
 # Cscope alias - use a fct because aliases are not exported to other fct
