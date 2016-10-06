@@ -5,181 +5,6 @@ export GIT_EDITOR="${EDITOR:-vi}"
 export GIT_PAGER="${PAGER:-less}"
 
 ########################################
-# Status aliases
-alias gt='git status -uno'
-alias gtu='gstu'
-alias gst='git_st'
-alias gstm='git status --porcelain -b | awk "NR==1 || /^(M.|.M)/"'    # modified
-alias gsta='git status --porcelain -b | awk "NR==1 || /^A[ MD]/"'     # added
-alias gstd='git status --porcelain -b | awk "NR==1 || /^D[ M]|^ D/"'  # deleted
-alias gstr='git status --porcelain -b | awk "NR==1 || /^R[ MD]/"'     # renamed
-#alias gstc='git status --porcelain -b | awk "NR==1 || /^C[ MD]/"'     # copied in index
-alias gstc='git status --porcelain -b | awk "NR==1 || /^[DAU][DAU]/"' # unmerged = conflict
-alias gstu='git status --porcelain -b | awk "NR==1 || /^\?\?/"'       # untracked = new
-alias gsti='git status --porcelain -b | awk "NR==1 || /^\!\!/"'       # ignored
-alias gstz='git status --porcelain -b | awk "NR==1 || /^[MARC] /"'    # in index
-alias gsts='git status --porcelain -b | awk "NR==1 || /^[^\?\?]/"'    # not untracked
-alias gstx='git_stx'
-alias gstxm='git_stx "^(M.|.M)"'    # modified
-alias gstxa='git_stx "^A[ MD]"'     # added
-alias gstxd='git_stx "^D[ M]|^ D"'  # deleted
-alias gstxr='git_stx "^R[ MD]"'     # renamed
-#alias gstxc='git_stx "^C[ MD]"'     # copied in index
-alias gstxc='git_stx "^[DAU][DAU]"' # unmerged = conflict
-alias gstxu='git_stx "^\?\?"'       # untracked = new
-alias gstxi='git_stx "^\!\!"'       # ignored
-alias gstxz='git_stx "^[MARC] "'    # in index
-alias gstxs='git_stx "^[^\?\?]"'    # not untracked# List aliases
-# List files
-alias gll='git ls-files'
-alias gls='git ls-files'
-alias glm='git ls-files -m'
-alias glu='git ls-files -u' # unmerged = in conflict
-alias gld='git ls-files -d'
-alias gln='git ls-files -o --exclude-standard'
-alias gli='git ls-files -o -i --exclude-standard'
-# Diff aliases
-alias gd='git diff'
-alias gdd='git diff'
-alias gdm='git difftool -y'
-alias gda='git_diff_all'
-alias gdda='git_diff_all'
-alias gdma='git_diffm_all'
-alias gdc='git diff --cached'
-alias gddc='git diff --cached'
-alias gdmc='git difftool -y --cached'
-alias gdl='git diff --name-status'
-alias gdls='git diff --name-status'
-alias gds='git diff stash'
-# Merge aliases
-alias gmm='git mergetool -y'
-# Branch aliases
-alias gba='git branch -a'   # list all
-alias gbl='git branch -l'   # list local
-alias gbv='git branch -v'   # verbose list local
-alias gbva='git branch -va' # verbose list all
-alias gbav='git branch -va' # verbose list all
-alias gbm='git branch --merged'    # list merged branches
-alias gbM='git branch --no-merged' # list unmerged branches
-alias gbr='git branch -r'   # list remote
-alias gbd='git branch -d'   # delete branch (merged only)
-alias gbD='git branch -D'   # delete branch (any)
-alias gbdr='git branch -rd' # remove remote branch (merged only)
-alias gbDr='git push :'     # remove remote branch (any)
-alias gbdro='git fetch -p'  # remote all old remotes
-alias gbu='git branch --set-upstream-to '  # set branch upstream
-alias gb='git branch'
-# Stash aliases
-alias gsc='git_stash_create'
-alias gss='git_stash_save'
-alias gssa='git_stash_save_all'
-alias gssu='git_stash_save_untracked'
-alias gssl='git_stash_save_lazy'
-alias gsp='git_stash_pop'
-alias gsa='git_stash_apply'
-alias gsab='git_stash_apply_branch'
-alias gsl='git stash list'
-alias gslc='git stash list | wc -l'
-alias gsf='git_stash_file'
-alias gsfa='git_stash_file_all'
-alias gsfc='git_stash_cat'
-alias gsd='git_stash_diff'
-alias gsdd='git_stash_diff'
-alias gsdm='git_stash_diffm'
-alias gsdl='git_stash_diffl'
-alias gsb='git_stash_backup'
-alias gsrm='git_stash_drop'
-alias gsm='gsdm'
-alias git_suspend='git_stash_save'
-alias git_resume='git_stash_pop'
-# Gitignore aliases
-alias gil='git_ignore_list'
-alias gia='git_ignore_add'
-# Commit aliases
-alias gci='git commit'
-alias gcm='git commit -m'
-alias gcim='git commit -m'
-alias gcam='git commit -am'
-# Misc aliases
-alias grm='git rm'
-alias grmu='git clean -fn'
-alias gmv='git mv'
-# Logs/history aliases
-alias gln='git log -n'
-alias gl1='git log -n 1'
-alias gl2='git log -n 2'
-alias glh='git log -p'
-alias glo='git log --name-only'
-alias gla='git log --name-status'
-alias gls='git log --stat'
-alias glog='git log'
-alias git_history='git log -p'
-# Tag aliases
-alias gta='git tag -a'
-alias gtl='git tag -l'
-alias gtd='git tag -d'
-alias gtc='git_tag_create'
-alias gtf='git tag --contains'
-alias gtls='git log --tags --simplify-by-decoration --pretty="format:%ai %d"'
-alias gtda='git tag -l | xargs git tag -d'
-alias gtdl='git tag -l | xargs git tag -d; git fetch'
-alias gtg='git tag'
-alias gtag='git tag'
-# Add aliases
-alias ga='git add'
-alias gan='git add $(git ls-files -o --exclude-standard)'
-alias gau='git add -u'
-# Patch aliases
-alias gpc='git show'
-alias gpd='git diff -p'
-alias gpm='git format-patch -1'
-alias gps='git_stash_cat'
-alias gpa='git apply'
-# Subtree aliases
-alias gsbta='git_subtree_add'
-alias gsbtu='git_subtree_update'
-# Git grep aliases
-alias ggg='git grep -n'
-alias iggg='git grep -ni'
-alias ggrep='git grep'
-# Checkout aliases
-alias gco='git checkout'
-# Reset aliases
-alias gre='git reset'
-alias greh='git reset --hard'
-alias grh='git reset HEAD'
-alias grhh='git reset HEAD --hard'
-alias git_rollback='git reset'
-# Revert a commit by making a new one
-# Use -m 1,2... to select the wanted
-# parent branch of a merge commit
-alias git_revert='git revert'
-# Amend last commit
-alias git_amend='git commit --amend'
-# Rebase aliases
-alias grb='git rebase'
-alias grbi='git rebase -i'
-# Fetch/pull/push aliases
-alias gps='git_push'
-alias gpl='git_pull'
-alias gpr='git pull --rebase'
-alias gup='git pull --rebase --autostash'
-alias gupa='git_pull_all'
-alias gfe='git fetch'
-alias gfa='git fetch --all'
-# Config aliases
-alias gcl='git config -l'
-alias gcg='git config --get'
-alias gcs='git config --set'
-alias gcfg='git config'
-alias gcfgl='git config -l'
-alias gcfgg='git config -g'
-alias gconfig='git config'
-# Git ignore changes
-alias git_ignore_changes='git update-index --assume-unchanged'
-alias git_noignore_changes='git update-index --no-assume-unchanged'
-
-########################################
 # Dependencies
 
 # Wrapper: vcsh run
@@ -471,8 +296,9 @@ git_pull_all() {
         git checkout \"\$BRANCH\" >/dev/null || continue
         for REMOTE in $REMOTES; do
           if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
+            git fetch \"\$REMOTE\"
             if git ls-remote \"\$REMOTE\" | grep \"heads/\$BRANCH\" >/dev/null; then
-              git fetch \"\$REMOTE\" \"\$BRANCH\"
+              #git fetch \"\$REMOTE\" \"\$BRANCH\"
               if [ -x \"\$(git --exec-path)/git-pull\" ]; then
                 git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
               else
@@ -927,6 +753,181 @@ alias git_gc='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; git gc"'
 git_tag_create() {
   git tag "tag_$(date +%Y%m%d-%H%M%S)${1:+_$1}"
 }
+
+########################################
+# Status aliases
+alias gt='git status -uno'
+alias gtu='gstu'
+alias gst='git_st'
+alias gstm='git status --porcelain -b | awk "NR==1 || /^(M.|.M)/"'    # modified
+alias gsta='git status --porcelain -b | awk "NR==1 || /^A[ MD]/"'     # added
+alias gstd='git status --porcelain -b | awk "NR==1 || /^D[ M]|^ D/"'  # deleted
+alias gstr='git status --porcelain -b | awk "NR==1 || /^R[ MD]/"'     # renamed
+#alias gstc='git status --porcelain -b | awk "NR==1 || /^C[ MD]/"'     # copied in index
+alias gstc='git status --porcelain -b | awk "NR==1 || /^[DAU][DAU]/"' # unmerged = conflict
+alias gstu='git status --porcelain -b | awk "NR==1 || /^\?\?/"'       # untracked = new
+alias gsti='git status --porcelain -b | awk "NR==1 || /^\!\!/"'       # ignored
+alias gstz='git status --porcelain -b | awk "NR==1 || /^[MARC] /"'    # in index
+alias gsts='git status --porcelain -b | awk "NR==1 || /^[^\?\?]/"'    # not untracked
+alias gstx='git_stx'
+alias gstxm='git_stx "^(M.|.M)"'    # modified
+alias gstxa='git_stx "^A[ MD]"'     # added
+alias gstxd='git_stx "^D[ M]|^ D"'  # deleted
+alias gstxr='git_stx "^R[ MD]"'     # renamed
+#alias gstxc='git_stx "^C[ MD]"'     # copied in index
+alias gstxc='git_stx "^[DAU][DAU]"' # unmerged = conflict
+alias gstxu='git_stx "^\?\?"'       # untracked = new
+alias gstxi='git_stx "^\!\!"'       # ignored
+alias gstxz='git_stx "^[MARC] "'    # in index
+alias gstxs='git_stx "^[^\?\?]"'    # not untracked# List aliases
+# List files
+alias gll='git ls-files'
+alias gls='git ls-files'
+alias glm='git ls-files -m'
+alias glu='git ls-files -u' # unmerged = in conflict
+alias gld='git ls-files -d'
+alias gln='git ls-files -o --exclude-standard'
+alias gli='git ls-files -o -i --exclude-standard'
+# Diff aliases
+alias gd='git diff'
+alias gdd='git diff'
+alias gdm='git difftool -y'
+alias gda='git_diff_all'
+alias gdda='git_diff_all'
+alias gdma='git_diffm_all'
+alias gdc='git diff --cached'
+alias gddc='git diff --cached'
+alias gdmc='git difftool -y --cached'
+alias gdl='git diff --name-status'
+alias gdls='git diff --name-status'
+alias gds='git diff stash'
+# Merge aliases
+alias gmm='git mergetool -y'
+# Branch aliases
+alias gba='git branch -a'   # list all
+alias gbl='git branch -l'   # list local
+alias gbv='git branch -v'   # verbose list local
+alias gbva='git branch -va' # verbose list all
+alias gbav='git branch -va' # verbose list all
+alias gbm='git branch --merged'    # list merged branches
+alias gbM='git branch --no-merged' # list unmerged branches
+alias gbr='git branch -r'   # list remote
+alias gbd='git branch -d'   # delete branch (merged only)
+alias gbD='git branch -D'   # delete branch (any)
+alias gbdr='git branch -rd' # remove remote branch (merged only)
+alias gbDr='git push :'     # remove remote branch (any)
+alias gbdro='git fetch -p'  # remote all old remotes
+alias gbu='git branch --set-upstream-to '  # set branch upstream
+alias gb='git branch'
+# Stash aliases
+alias gsc='git_stash_create'
+alias gss='git_stash_save'
+alias gssa='git_stash_save_all'
+alias gssu='git_stash_save_untracked'
+alias gssl='git_stash_save_lazy'
+alias gsp='git_stash_pop'
+alias gsa='git_stash_apply'
+alias gsab='git_stash_apply_branch'
+alias gsl='git stash list'
+alias gslc='git stash list | wc -l'
+alias gsf='git_stash_file'
+alias gsfa='git_stash_file_all'
+alias gsfc='git_stash_cat'
+alias gsd='git_stash_diff'
+alias gsdd='git_stash_diff'
+alias gsdm='git_stash_diffm'
+alias gsdl='git_stash_diffl'
+alias gsb='git_stash_backup'
+alias gsrm='git_stash_drop'
+alias gsm='gsdm'
+alias git_suspend='git_stash_save'
+alias git_resume='git_stash_pop'
+# Gitignore aliases
+alias gil='git_ignore_list'
+alias gia='git_ignore_add'
+# Commit aliases
+alias gci='git commit'
+alias gcm='git commit -m'
+alias gcim='git commit -m'
+alias gcam='git commit -am'
+# Misc aliases
+alias grm='git rm'
+alias grmu='git clean -fn'
+alias gmv='git mv'
+# Logs/history aliases
+alias gln='git log -n'
+alias gl1='git log -n 1'
+alias gl2='git log -n 2'
+alias glh='git log -p'
+alias glo='git log --name-only'
+alias gla='git log --name-status'
+alias gls='git log --stat'
+alias glog='git log'
+alias git_history='git log -p'
+# Tag aliases
+alias gta='git tag -a'
+alias gtl='git tag -l'
+alias gtd='git tag -d'
+alias gtc='git_tag_create'
+alias gtf='git tag --contains'
+alias gtls='git log --tags --simplify-by-decoration --pretty="format:%ai %d"'
+alias gtda='git tag -l | xargs git tag -d'
+alias gtdl='git tag -l | xargs git tag -d; git fetch'
+alias gtg='git tag'
+alias gtag='git tag'
+# Add aliases
+alias ga='git add'
+alias gan='git add $(git ls-files -o --exclude-standard)'
+alias gau='git add -u'
+# Patch aliases
+alias gpm='git diff -p'
+alias gpf='git format-patch -1'
+alias gpa='git apply'
+# Subtree aliases
+alias gsbta='git_subtree_add'
+alias gsbtu='git_subtree_update'
+# Git grep aliases
+alias ggg='git grep -n'
+alias iggg='git grep -ni'
+alias ggrep='git grep'
+# Checkout aliases
+alias gco='git checkout'
+# Reset aliases
+alias gre='git reset'
+alias greh='git reset --hard'
+alias grh='git reset HEAD'
+alias grhh='git reset HEAD --hard'
+alias git_rollback='git reset'
+# Revert a commit by making a new one
+# Use -m 1,2... to select the wanted
+# parent branch of a merge commit
+alias git_revert='git revert'
+# Amend last commit
+alias git_amend='git commit --amend'
+# Rebase aliases
+alias grb='git rebase'
+alias grbi='git rebase -i'
+# Fetch/pull/push aliases
+alias gpu='git_push'
+if [ $(git_version) -gt $(git_version 2.9) ]; then
+  alias gup='git pull --rebase --autostash'
+else
+  alias gup='git pull --rebase'
+fi
+alias gupa='git_pull_all'
+alias gfe='git fetch'
+alias gfa='git fetch --all'
+# Config aliases
+alias gcl='git config -l'
+alias gcg='git config --get'
+alias gcs='git config --set'
+alias gcfg='git config'
+alias gcfgl='git config -l'
+alias gcfgg='git config -g'
+alias gconfig='git config'
+# Git ignore changes
+alias git_ignore_changes='git update-index --assume-unchanged'
+alias git_noignore_changes='git update-index --no-assume-unchanged'
 
 ########################################
 ########################################
