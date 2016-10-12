@@ -329,13 +329,12 @@ svn_history() {
   local REV2="$(__svn_rev2 "$2" || echo $(svn_rev))"
   svn log -q "$URL" | awk '/^r/ {REV=substr($1,2); if (REV>='$REV1' && REV<='$REV2') print REV}' | {
     # Show diffs
-    while read r
-    do
+    while read r; do
       echo
       svn log -r$r "$URL" 2>/dev/null
       svn diff -c$r "$URL" 2>/dev/null
       echo
-    done
+    done | more
   }
 }
 
