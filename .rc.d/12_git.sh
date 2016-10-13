@@ -110,7 +110,8 @@ git_branch() {
 
 # Get all local branches
 git_branches() {
-  git ${1:+--git-dir="$1"} for-each-ref --shell refs/heads/ --format='%(refname:short)'
+  #git ${1:+--git-dir="$1"} for-each-ref --shell refs/heads/ --format='%(refname:short)'
+  git ${1:+--git-dir="$1"} for-each-ref --shell refs/heads/ --format='%(refname:short)' | sed -e 's;heads/;;' | xargs echo 
 }
 
 # Check a branch exist
