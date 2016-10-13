@@ -81,15 +81,14 @@ alias v='gvim'
 alias ssv='ss | cut -c 9- | xargs gvim'
 alias gsv='gs | grep modified | cut -d : -f 2 | xargs gvim'
 
-# Gedit/geany
+# Graphical editor
 alias e='${GEDITOR:-false}'
-alias ge='${GEDITOR:-false}'
 alias sse='ss | cut -c 9- | xargs ${GEDITOR:-false}'
 alias gse='gs | grep modified | cut -d : -f 2 | xargs ${GEDITOR:-false}'
 
 # Search and process
-ffv()  { ff "$@" -print0       | xargs -0 ${EDITOR:-false}; }
-ffv1() { ff "$@" -print0 -quit | xargs -0 ${EDITOR:-false}; }
+ffv()  { ff "$@" -print0       | xargs -0 gvim; }
+ffv1() { ff "$@" -print0 -quit | xargs -0 gvim; }
 ffp()  { ff "$@" -print0       | xargs -0 ${PAGER:-false}; }
 ffp1() { ff "$@" -print0 -quit | xargs -0 ${PAGER:-false}; }
 ffe()  { ff "$@" -print0       | xargs -0 ${GEDITOR:-false}; }

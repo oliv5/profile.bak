@@ -2,8 +2,8 @@
 
 #########################
 # Default editors
-[ -z "$EDITOR" ] && export EDITOR="$(command -v vim || command -v vi || command -v nano || command -v false)"
-[ -z "$VISUAL" ] && export VISUAL="$EDITOR"
+[ -z "$EDITOR" ] && export EDITOR="$(command -v vi -e || command -v false)"
+[ -z "$VISUAL" ] && export VISUAL="$(command -v vim || command -v vi || command -v nano || command -v false)"
 [ -z "$PAGER" ] && export PAGER="less -FXr"
 export LESS="-FXr" # Don't stop when less than 1 page, color
 
