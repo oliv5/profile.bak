@@ -243,6 +243,7 @@ git_pull_all() {
   git_exists || return 1
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
+  local FORCE="$([ "$3" = "-f" ] && echo "-f")"
   local CURRENT="$(git_branch)"
   if annex_direct; then
     # Note: git annex repos in direct mode
@@ -252,7 +253,7 @@ git_pull_all() {
     vcsh_run "
       CURRENT=\"$(git rev-parse --abbrev-ref HEAD)\"
       for BRANCH in $BRANCHES; do
-        git checkout \"\$BRANCH\" >/dev/null || continue
+        git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
         for REMOTE in $REMOTES; do
           if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
             if git ls-remote \"\$REMOTE\" | grep \"heads/\$BRANCH\" >/dev/null; then
@@ -273,6 +274,7 @@ git_pull_all() {
   git_exists || return 1
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
+  local FORCE="$([ "$3" = "-f" ] && echo "-f")"
   local CURRENT="$(git_branch)"
   if annex_direct; then
     # Note: git annex repos in direct mode
@@ -294,7 +296,7 @@ git_pull_all() {
         git reset --hard HEAD -q --
       fi
       for BRANCH in $BRANCHES; do
-        git checkout \"\$BRANCH\" >/dev/null || continue
+        git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
         for REMOTE in $REMOTES; do
           if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
             git fetch \"\$REMOTE\"
