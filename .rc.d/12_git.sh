@@ -85,7 +85,7 @@ git_worktree() {
 
 # Get git directory (alias git-dir)
 git_dir() {
-  readlink -f "${GIT_DIR:-$(git rev-parse --git-dir)}"
+  readlink -f "${1:-${GIT_DIR:-$(git rev-parse --git-dir)}}"
 }
 
 # Get git exec-path
@@ -99,6 +99,11 @@ git_repo() {
   [ "${DIR##*/}" = ".git" ] && 
     basename "${DIR%/*}" .git || 
     basename "$DIR" .git
+}
+
+# Get git root (git-dir for bare repos or worktree for non-bare repos)
+git_root() {
+  git_bare "$@" && git_dir "$@" || git_worktree "$@"
 }
 
 # Get current branch name
@@ -758,6 +763,8 @@ git_tag_create() {
 }
 
 ########################################
+# CD aliases
+alias gr='cd "$(git_root)"'
 # Status aliases
 alias gt='git status -uno'
 alias gtu='gstu'
