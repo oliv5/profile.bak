@@ -204,8 +204,8 @@ annex_bundle() {
       if annex_bare; then
         tar cf "${BUNDLE}" -h ./annex
       else
-        vcsh_run "git annex list $(git config --get core.worktree)" | 
-          awk 'NF>1 {$1="";print "\""substr($0,2)"\""}' |
+        vcsh_run "git annex find" | 
+          awk '{print "\""$0"\""}' |
           xargs tar cf "${BUNDLE}" -h --exclude-vcs --
       fi
       if [ ! -z "$GPG_RECIPIENT" ]; then
