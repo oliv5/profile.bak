@@ -257,17 +257,18 @@ git_pull_all() {
   else
     vcsh_run "
       CURRENT=\"$(git rev-parse --abbrev-ref HEAD)\"
-      for BRANCH in $BRANCHES; do
-        git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
-        for REMOTE in $REMOTES; do
+      git fetch --all
+      for REMOTE in $REMOTES; do
+        #git fetch \"\$REMOTE\"
+        for BRANCH in $BRANCHES; do
+          git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
+          #if git ls-remote \"\$REMOTE\" | grep -- \"heads/\$BRANCH\" >/dev/null; then
           if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
-            if git ls-remote \"\$REMOTE\" | grep \"heads/\$BRANCH\" >/dev/null; then
-              git fetch \"\$REMOTE\" \"\$BRANCH\"
-              git pull --rebase --autostash \"\$REMOTE\" \"\$BRANCH\"
-            else
-              echo \"Cannot access repo '\$REMOTE/\$BRANCH'...\"
-            fi
+            git pull --rebase --autostash \"\$REMOTE\" \"\$BRANCH\"
+          else
+            echo \"Warning : cannot access repo '\$REMOTE/\$BRANCH'...\"
           fi
+          echo \"-----\"
         done
       done
       git checkout -q \"$CURRENT\"
@@ -295,31 +296,31 @@ git_pull_all() {
         trap - INT TERM EXIT
       }
       set +e
+      STASH=\"\"
       trap 'end' INT TERM EXIT
       STASH=\"\$(git stash create 2>/dev/null)\"
       if [ -n \"\$STASH\" ]; then
         git reset --hard HEAD -q --
       fi
-      for BRANCH in $BRANCHES; do
-        git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
-        for REMOTE in $REMOTES; do
+      git fetch --all
+      for REMOTE in $REMOTES; do
+        #git fetch \"\$REMOTE\"
+        for BRANCH in $BRANCHES; do
+          git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
+          #if git ls-remote \"\$REMOTE\" | grep -- \"heads/\$BRANCH\" >/dev/null; then
           if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
-            git fetch \"\$REMOTE\"
-            if git ls-remote \"\$REMOTE\" | grep \"heads/\$BRANCH\" >/dev/null; then
-              #git fetch \"\$REMOTE\" \"\$BRANCH\"
-              if [ -x \"\$(git --exec-path)/git-pull\" ]; then
-                git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
-              else
-                git fetch \"\$REMOTE\" \"\$BRANCH\" &&
-                git merge --ff-only \"\$REMOTE/\$BRANCH\"
-              fi
+            if [ -x \"\$(git --exec-path)/git-pull\" ]; then
+              git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
             else
-              echo \"Cannot access repo '\$REMOTE/\$BRANCH'...\"
+              #git fetch \"\$REMOTE\" \"\$BRANCH\" &&
+              git merge --ff-only \"\$REMOTE/\$BRANCH\"
             fi
+          else
+            echo \"Warning : cannot access repo '\$REMOTE/\$BRANCH'...\"
           fi
+          echo \"-----\"
         done
       done
-      end
     "
   fi
 }
