@@ -120,9 +120,21 @@ svn_stx() {
 # Get svn revision numbers
 __svn_rev1() { local REV="${1%%:*}"; [ ! -z "${REV}" ] && echo "${REV}"; }
 __svn_rev2() { local REV="${1##*:}"; [ ! -z "${REV}" ] && echo "${REV}"; }
+__svn_revsingle() {
+  local REV="$(echo $1 | sed -r 's/-/:/g')"
+  if [ "${REV##*:}" = "$REV" ]; then
+    echo "${REV:+${2:--}c$REV}"
+  fi
+}
+__svn_revrange() {
+  local REV="$(echo $1 | sed -r 's/-/:/g')"
+  if [ "${REV##*:}" != "$REV" ]; then
+    echo "${2:--}r${REV}" | sed -r 's/r:/r1:/; s/:$/:HEAD/; s/:/'"${3:-:}"'/'
+  fi
+}
 __svn_revarg() {
   local REV="$(echo $1 | sed -r 's/-/:/g')"
-  if [ "${REV##*:}" = "$REV" ]; then 
+  if [ "${REV##*:}" = "$REV" ]; then
     echo "${REV:+${2:--}c$REV}"
   else 
     echo "${2:--}r${REV}" | sed -r 's/r:/r1:/; s/:$/:HEAD/; s/:/'"${3:-:}"'/'
@@ -324,17 +336,22 @@ svn_config() {
 
 # Print the history of a file
 svn_history() {
-  local URL="$1"
-  local REV1="$(__svn_rev1 "$2" || echo 1)"
-  local REV2="$(__svn_rev2 "$2" || echo $(svn_rev))"
-  svn log -q "$URL" | awk '/^r/ {REV=substr($1,2); if (REV>='$REV1' && REV<='$REV2') print REV}' | {
+  local REV="$1"
+  local URL="$2"
+  local LIMIT=""
+  if [ "${REV##*:}" = "$REV" ]; then
+    LIMIT="${REV:-1}"
+    REV=""
+  fi
+  # Get the expected revisions number
+  svn log -q "$URL" ${REV:+-r $REV} ${LIMIT:+-l $LIMIT} | awk '/^r/ {print substr($1,2)}' | {
     # Show diffs
     while read r; do
       echo
       svn log -r$r "$URL" 2>/dev/null
       svn diff -c$r "$URL" 2>/dev/null
       echo
-    done | more
+    done # | more
   }
 }
 
