@@ -257,18 +257,22 @@ git_pull_all() {
   else
     vcsh_run "
       CURRENT=\"$(git rev-parse --abbrev-ref HEAD)\"
-      git fetch --all
+      git fetch --all 2>/dev/null
       for BRANCH in $BRANCHES; do
-        for REMOTE in $REMOTES; do
-          #git fetch \"\$REMOTE\"
-          #if git ls-remote \"\$REMOTE\" | grep -- \"heads/\$BRANCH\" >/dev/null; then
-          #if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
-          if git for-each-ref refs/remotes | grep -- \"remotes/\$REMOTE/\$BRANCH\" >/dev/null; then
-            git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
-            git pull --rebase --autostash \"\$REMOTE\" \"\$BRANCH\"
-            echo \"-----\"
-          fi
-        done
+        # Is there a remote with this branch ?
+        if git for-each-ref refs/heads | grep -- \"refs/heads/\$BRANCH\" >/dev/null; then
+          git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
+          for REMOTE in $REMOTES; do
+            #git fetch \"\$REMOTE\"
+            # Does this remote have this branch ?
+            #if git ls-remote \"\$REMOTE\" | grep -- \"heads/\$BRANCH\" >/dev/null; then
+            #if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
+            if git for-each-ref refs/remotes | grep -- \"remotes/\$REMOTE/\$BRANCH\" >/dev/null; then
+              git pull --rebase --autostash \"\$REMOTE\" \"\$BRANCH\"
+              echo \"-----\"
+            fi
+          done
+        fi
       done
       git checkout -q \"$CURRENT\"
     "
@@ -301,23 +305,27 @@ git_pull_all() {
       if [ -n \"\$STASH\" ]; then
         git reset --hard HEAD -q --
       fi
-      git fetch --all
+      git fetch --all 2>/dev/null
       for BRANCH in $BRANCHES; do
-        for REMOTE in $REMOTES; do
-          #git fetch \"\$REMOTE\"
-          #if git ls-remote \"\$REMOTE\" | grep -- \"heads/\$BRANCH\" >/dev/null; then
-          #if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
-          if git for-each-ref refs/remotes | grep -- \"remotes/\$REMOTE/\$BRANCH\" >/dev/null; then
-            git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
-            if [ -x \"\$(git --exec-path)/git-pull\" ]; then
-              git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
-            else
-              #git fetch \"\$REMOTE\" \"\$BRANCH\" &&
-              git merge --ff-only \"\$REMOTE/\$BRANCH\"
+        # Is there a remote with this branch ?
+        if git for-each-ref refs/heads | grep -- \"refs/heads/\$BRANCH\" >/dev/null; then
+          git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
+          for REMOTE in $REMOTES; do
+            #git fetch \"\$REMOTE\"
+            # Does this remote have this branch ?
+            #if git ls-remote \"\$REMOTE\" | grep -- \"heads/\$BRANCH\" >/dev/null; then
+            #if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
+            if git for-each-ref refs/remotes | grep -- \"remotes/\$REMOTE/\$BRANCH\" >/dev/null; then
+              if [ -x \"\$(git --exec-path)/git-pull\" ]; then
+                git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
+              else
+                #git fetch \"\$REMOTE\" \"\$BRANCH\" &&
+                git merge --ff-only \"\$REMOTE/\$BRANCH\"
+              fi
+              echo \"-----\"
             fi
-            echo \"-----\"
-          fi
-        done
+          done
+        fi
       done     
     "
   fi
