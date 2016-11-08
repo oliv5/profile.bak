@@ -258,17 +258,16 @@ git_pull_all() {
     vcsh_run "
       CURRENT=\"$(git rev-parse --abbrev-ref HEAD)\"
       git fetch --all
-      for REMOTE in $REMOTES; do
-        #git fetch \"\$REMOTE\"
-        for BRANCH in $BRANCHES; do
-          git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
+      for BRANCH in $BRANCHES; do
+        for REMOTE in $REMOTES; do
+          #git fetch \"\$REMOTE\"
           #if git ls-remote \"\$REMOTE\" | grep -- \"heads/\$BRANCH\" >/dev/null; then
-          if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
+          #if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
+          if git for-each-ref refs/remotes | grep -- \"remotes/\$REMOTE/\$BRANCH\" >/dev/null; then
+            git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
             git pull --rebase --autostash \"\$REMOTE\" \"\$BRANCH\"
-          else
-            echo \"Warning : cannot access repo '\$REMOTE/\$BRANCH'...\"
+            echo \"-----\"
           fi
-          echo \"-----\"
         done
       done
       git checkout -q \"$CURRENT\"
@@ -303,24 +302,23 @@ git_pull_all() {
         git reset --hard HEAD -q --
       fi
       git fetch --all
-      for REMOTE in $REMOTES; do
-        #git fetch \"\$REMOTE\"
-        for BRANCH in $BRANCHES; do
-          git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
+      for BRANCH in $BRANCHES; do
+        for REMOTE in $REMOTES; do
+          #git fetch \"\$REMOTE\"
           #if git ls-remote \"\$REMOTE\" | grep -- \"heads/\$BRANCH\" >/dev/null; then
-          if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
+          #if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
+          if git for-each-ref refs/remotes | grep -- \"remotes/\$REMOTE/\$BRANCH\" >/dev/null; then
+            git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
             if [ -x \"\$(git --exec-path)/git-pull\" ]; then
               git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
             else
               #git fetch \"\$REMOTE\" \"\$BRANCH\" &&
               git merge --ff-only \"\$REMOTE/\$BRANCH\"
             fi
-          else
-            echo \"Warning : cannot access repo '\$REMOTE/\$BRANCH'...\"
+            echo \"-----\"
           fi
-          echo \"-----\"
         done
-      done
+      done     
     "
   fi
 }
