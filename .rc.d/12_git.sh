@@ -119,6 +119,11 @@ git_branches() {
   git ${1:+--git-dir="$1"} for-each-ref --shell refs/heads/ --format='%(refname:short)' | sed -e 's;heads/;;' | xargs echo 
 }
 
+# Get the remote tracking branch
+git_tracking() {
+  git ${2:+--git-dir="$2"} rev-parse --abbrev-ref "${1:-HEAD}" --symbolic-full-name @{u} 2>/dev/null | grep -- 'origin/'
+}
+
 # Check a branch exist
 git_branch_exists() {
 #  local SLASH="${1%%*/*}"
@@ -237,19 +242,21 @@ git_clone() {
   done
 }
 
-# Batch pull the current branch from all remotes
+# Batch pull the selected branches from their remote tracking
 git_pull() {
-	git_pull_all "${@:-}" "$(git_branch)"
+	git_pull_branches "$(git_branch)" "$@"
 }
 
-# Batch pull existing remote/branches
-if [ $(git_version) -gt $(git_version 2.9) ]; then
 git_pull_all() {
+	git_pull_branches "" "$@"
+}
+
+# Batch pull existing branches from their remote tracking
+if [ $(git_version) -gt $(git_version 2.9) ]; then
+git_pull_branches() {
   git_exists || return 1
-  local REMOTES="${1:-$(git_remotes)}"
-  local BRANCHES="${2:-$(git_branches)}"
-  local FORCE="$([ "$3" = "-f" ] && echo "-f")"
-  local CURRENT="$(git_branch)"
+  local BRANCHES="${1:-$(git_branches)}"
+  local FORCE="$([ "$2" = "-f" ] && echo "-f")"
   if annex_direct; then
     # Note: git annex repos in direct mode
     # are not compatible with vcsh
@@ -260,18 +267,10 @@ git_pull_all() {
       git fetch --all 2>/dev/null
       for BRANCH in $BRANCHES; do
         # Is there a remote with this branch ?
-        if git for-each-ref refs/heads | grep -- \"refs/heads/\$BRANCH\" >/dev/null; then
+        if git for-each-ref refs/remotes | grep -- \"refs/remotes/[^\\/]*/\$BRANCH\" >/dev/null; then
           git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
-          for REMOTE in $REMOTES; do
-            #git fetch \"\$REMOTE\"
-            # Does this remote have this branch ?
-            #if git ls-remote \"\$REMOTE\" | grep -- \"heads/\$BRANCH\" >/dev/null; then
-            #if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
-            if git for-each-ref refs/remotes | grep -- \"remotes/\$REMOTE/\$BRANCH\" >/dev/null; then
-              git pull --rebase --autostash \"\$REMOTE\" \"\$BRANCH\"
-              echo \"-----\"
-            fi
-          done
+          git pull --rebase --autostash
+          echo \"-----\"
         fi
       done
       git checkout -q \"$CURRENT\"
@@ -279,7 +278,7 @@ git_pull_all() {
   fi
 }
 else
-git_pull_all() {
+git_pull_branches() {
   git_exists || return 1
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
@@ -305,17 +304,98 @@ git_pull_all() {
       if [ -n \"\$STASH\" ]; then
         git reset --hard HEAD -q --
       fi
+      CURRENT=\"$(git rev-parse --abbrev-ref HEAD)\"
       git fetch --all 2>/dev/null
       for BRANCH in $BRANCHES; do
         # Is there a remote with this branch ?
-        if git for-each-ref refs/heads | grep -- \"refs/heads/\$BRANCH\" >/dev/null; then
+        if git for-each-ref refs/remotes | grep -- \"refs/remotes/[^\\/]*/\$BRANCH\" >/dev/null; then
+          git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
+          if [ -x \"\$(git --exec-path)/git-pull\" ]; then
+            git pull --rebase
+          else
+            git merge --ff-only \"$(git_tracking)\"
+          fi
+          echo \"-----\"
+        fi
+      done     
+    "
+  fi
+}
+fi
+
+# Batch pull existing remote branches
+if [ $(git_version) -gt $(git_version 2.9) ]; then
+git_pull_remotes() {
+  git_exists || return 1
+  local REMOTES="${1:-$(git_remotes)}"
+  local BRANCHES="${2:-$(git_branches)}"
+  local FORCE="$([ "$3" = "-f" ] && echo "-f")"
+  if annex_direct; then
+    # Note: git annex repos in direct mode
+    # are not compatible with vcsh
+    git annex sync
+  else
+    vcsh_run "
+      CURRENT=\"$(git rev-parse --abbrev-ref HEAD)\"
+      git fetch --all 2>/dev/null
+      for BRANCH in $BRANCHES; do
+        # Is there a remote with this branch ?
+        if git for-each-ref refs/remotes | grep -- \"refs/remotes/[^\\/]*/\$BRANCH\" >/dev/null; then
           git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
           for REMOTE in $REMOTES; do
             #git fetch \"\$REMOTE\"
             # Does this remote have this branch ?
             #if git ls-remote \"\$REMOTE\" | grep -- \"heads/\$BRANCH\" >/dev/null; then
             #if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
-            if git for-each-ref refs/remotes | grep -- \"remotes/\$REMOTE/\$BRANCH\" >/dev/null; then
+            if git for-each-ref refs/remotes | grep -- \"refs/remotes/\$REMOTE/\$BRANCH\" >/dev/null; then
+              git pull --rebase --autostash \"\$REMOTE\" \"\$BRANCH\"
+              echo \"-----\"
+            fi
+          done
+        fi
+      done
+      git checkout -q \"$CURRENT\"
+    "
+  fi
+}
+else
+git_pull_remotes() {
+  git_exists || return 1
+  local REMOTES="${1:-$(git_remotes)}"
+  local BRANCHES="${2:-$(git_branches)}"
+  local FORCE="$([ "$3" = "-f" ] && echo "-f")"
+  if annex_direct; then
+    # Note: git annex repos in direct mode
+    # are not compatible with vcsh
+    git annex sync
+  else
+    vcsh_run "
+      end() {
+        git checkout -q \"$CURRENT\"
+        if [ -n \"\$STASH\" ]; then
+          git stash apply -q --index \"\$STASH\"
+        fi
+        trap - INT TERM EXIT
+      }
+      set +e
+      STASH=\"\"
+      trap 'end' INT TERM EXIT
+      STASH=\"\$(git stash create 2>/dev/null)\"
+      if [ -n \"\$STASH\" ]; then
+        git reset --hard HEAD -q --
+      fi
+      CURRENT=\"$(git rev-parse --abbrev-ref HEAD)\"
+      git fetch --all 2>/dev/null
+      for BRANCH in $BRANCHES; do
+        # Is there a remote with this branch ?
+        if git for-each-ref refs/remotes | grep -- \"refs/remotes/[^\\/]*/\$BRANCH\" >/dev/null; then
+          git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
+          for REMOTE in $REMOTES; do
+            #git fetch \"\$REMOTE\"
+            # Does this remote have this branch ?
+            #if git ls-remote \"\$REMOTE\" | grep -- \"heads/\$BRANCH\" >/dev/null; then
+            #if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
+            if git for-each-ref refs/remotes | grep -- \"refs/remotes/\$REMOTE/\$BRANCH\" >/dev/null; then
               if [ -x \"\$(git --exec-path)/git-pull\" ]; then
                 git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
               else
@@ -770,8 +850,6 @@ git_tag_create() {
 }
 
 ########################################
-# CD aliases
-alias gr='cd "$(git_root)"'
 # Status aliases
 alias gt='git status -uno'
 alias gtu='gstu'
@@ -915,10 +993,6 @@ alias greh='git reset --hard'
 alias grh='git reset HEAD'
 alias grhh='git reset HEAD --hard'
 alias git_rollback='git reset'
-# Revert a commit by making a new one
-# Use -m 1,2... to select the wanted
-# parent branch of a merge commit
-alias git_revert='git revert'
 # Amend last commit
 alias git_amend='git commit --amend'
 # Rebase aliases
@@ -945,6 +1019,10 @@ alias gconfig='git config'
 # Git ignore changes
 alias git_ignore_changes='git update-index --assume-unchanged'
 alias git_noignore_changes='git update-index --no-assume-unchanged'
+# cd aliases
+alias gr='cd "$(git_root)"'
+# gitk aliases
+alias gk='gitk'
 
 ########################################
 ########################################
