@@ -280,10 +280,8 @@ git_pull_branches() {
 else
 git_pull_branches() {
   git_exists || return 1
-  local REMOTES="${1:-$(git_remotes)}"
-  local BRANCHES="${2:-$(git_branches)}"
-  local FORCE="$([ "$3" = "-f" ] && echo "-f")"
-  local CURRENT="$(git_branch)"
+  local BRANCHES="${1:-$(git_branches)}"
+  local FORCE="$([ "$2" = "-f" ] && echo "-f")"
   if annex_direct; then
     # Note: git annex repos in direct mode
     # are not compatible with vcsh
