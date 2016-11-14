@@ -119,25 +119,20 @@ git_branches() {
   git ${1:+--git-dir="$1"} for-each-ref --shell refs/heads/ --format='%(refname:short)' | sed -e 's;heads/;;' | xargs echo 
 }
 
-# Get the remote tracking branch
+# Get the remote tracking branch of the current branch
 git_tracking() {
-  git ${2:+--git-dir="$2"} rev-parse --abbrev-ref "${1:-HEAD}" --symbolic-full-name @{u} 2>/dev/null | grep -- 'origin/'
+  git ${1:+--git-dir="$1"} rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null
+  #git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD) 2>/dev/null
 }
 
 # Check a branch exist
 git_branch_exists() {
-#  local SLASH="${1%%*/*}"
-#  local REMOTE="${1%/*}"
-#  local BRANCH="${1##*/}"
-#  [ -n "$SLASH" ] && REMOTE="."
-#  git ls-remote --heads "${REMOTE}" | grep "/${BRANCH}$" >/dev/null
-#  git ls-remote . | grep "/${1:?No ref specified}$" >/dev/null
-  git branch -a | grep "/${1:?No ref specified}$" >/dev/null
+  [ -n "$(git ${2:+--git-dir="$2"} for-each-ref --shell refs/heads/${1})" ]
 }
 
-# Get current url
+# Get remote url
 git_url() {
-  git ${2:+--git-dir="$2"} config --get remote.${1:-origin}.url
+  git ${2:+--git-dir="$2"} config --get remote.${1}.url
 }
 
 # Check if a repo has been modified
@@ -265,11 +260,13 @@ git_pull_branches() {
     vcsh_run "
       CURRENT=\"$(git rev-parse --abbrev-ref HEAD)\"
       git fetch --all 2>/dev/null
+      set -vx
       for BRANCH in $BRANCHES; do
         # Is there a remote with this branch ?
         if git for-each-ref refs/remotes | grep -- \"refs/remotes/[^\\/]*/\$BRANCH\" >/dev/null; then
           git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
-          git pull --rebase --autostash
+          git pull --rebase --autostash || \
+            echo \"Branch '\$BRANCH' has maybe no remote tracking branch.\nUse 'git branch -u origin/\$BRANCH \$BRANCH' to set it up.\"
           echo \"-----\"
         fi
       done
@@ -309,9 +306,11 @@ git_pull_branches() {
         if git for-each-ref refs/remotes | grep -- \"refs/remotes/[^\\/]*/\$BRANCH\" >/dev/null; then
           git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
           if [ -x \"\$(git --exec-path)/git-pull\" ]; then
-            git pull --rebase
+            git pull --rebase || \
+            echo \"Branch '\$BRANCH' has maybe no remote tracking branch.\nUse 'git branch -u origin/\$BRANCH \$BRANCH' to set it up.\"
           else
-            git merge --ff-only \"$(git_tracking)\"
+            git merge --ff-only \"$(git_tracking)\" || \
+            echo \"Branch '\$BRANCH' has maybe no remote tracking branch.\nUse 'git branch -u origin/\$BRANCH \$BRANCH' to set it up.\"
           fi
           echo \"-----\"
         fi
