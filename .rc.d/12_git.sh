@@ -440,7 +440,7 @@ git_bundle() {
     local GPG_RECIPIENT="$3"
     local GPG_TRUST="${4:+--trust-model always}"
     echo "Git bundle into $BUNDLE"
-    git bundle create "$BUNDLE" --all --tags --remotes
+    git bundle create "$BUNDLE" --all
     if [ ! -z "$GPG_RECIPIENT" ]; then
       gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${BUNDLE}" &&
         (shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
