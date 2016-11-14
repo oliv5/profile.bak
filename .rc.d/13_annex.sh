@@ -202,11 +202,11 @@ annex_bundle() {
       local GPG_TRUST="${4:+--trust-model always}"
       echo "Tar annex into $BUNDLE"
       if annex_bare; then
-        tar cf "${BUNDLE}" -h ./annex
+        tar zcf "${BUNDLE}" -h ./annex
       else
         vcsh_run "git annex find" | 
           awk '{print "\""$0"\""}' |
-          xargs tar cf "${BUNDLE}" -h --exclude-vcs --
+          xargs tar zcf "${BUNDLE}" -h --exclude-vcs --
       fi
       if [ ! -z "$GPG_RECIPIENT" ]; then
         gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${BUNDLE}" &&
