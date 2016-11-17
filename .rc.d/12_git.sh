@@ -271,7 +271,7 @@ git_pull_branches() {
           echo \"-----\"
         fi
       done
-      git checkout -q \"\$CURRENT\"
+      git checkout -fq \"\$CURRENT\"
     "
   fi
 }
@@ -287,16 +287,15 @@ git_pull_branches() {
   else
     vcsh_run "
       end() {
-        git checkout -q \"\$CURRENT\"
+        trap - INT TERM
+        git checkout -fq \"\$CURRENT\"
         if [ -n \"\$STASH\" ]; then
           git stash apply -q --index \"\$STASH\"
         fi
-        trap - INT TERM
       }
       set +e
-      STASH=\"\"
-      trap 'end' INT TERM
       STASH=\"\$(git stash create 2>/dev/null)\"
+      trap end INT TERM
       if [ -n \"\$STASH\" ]; then
         git reset --hard HEAD -q --
       fi
@@ -347,7 +346,7 @@ git_pull_remotes() {
           done
         fi
       done
-      git checkout -q \"\$CURRENT\"
+      git checkout -fq \"\$CURRENT\"
     "
   fi
 }
@@ -364,16 +363,15 @@ git_pull_remotes() {
   else
     vcsh_run "
       end() {
-        git checkout -q \"\$CURRENT\"
+        trap - INT TERM
+        git checkout -fq \"\$CURRENT\"
         if [ -n \"\$STASH\" ]; then
           git stash apply -q --index \"\$STASH\"
         fi
-        trap - INT TERM
       }
       set +e
-      STASH=\"\"
-      trap 'end' INT TERM
       STASH=\"\$(git stash create 2>/dev/null)\"
+      trap end INT TERM
       if [ -n \"\$STASH\" ]; then
         git reset --hard HEAD -q --
       fi
