@@ -96,6 +96,16 @@ umount_nfs() {
   "
 }
 
+# Toggle autofs
+autofs_toggle() {
+  sudo service autofs stop
+  for MOUNT; do
+    sudo umount -l "$MOUNT"
+  done
+  sleep 5s
+  sudo service autofs start   
+}
+
 # Check logged on users have a local home
 check_nfs() {
 	for LOGGED_USERS in $(who | awk '{print $1}' | sort | uniq); do

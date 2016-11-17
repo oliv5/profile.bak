@@ -125,9 +125,12 @@ git_tracking() {
   #git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD) 2>/dev/null
 }
 
-# Check a branch exist
+# Check a branch exists
 git_branch_exists() {
-  [ -n "$(git ${2:+--git-dir="$2"} for-each-ref --shell refs/heads/${1})" ]
+  local BRANCH="${1}/"
+  local REMOTE="${BRANCH#*/}"
+  echo "$1" | grep -- '/' >/dev/null && BRANCH="remotes/$1" || BRANCH="heads/$1"
+  [ -n "$(git ${2:+--git-dir="$2"} for-each-ref --shell refs/${BRANCH})" ]
 }
 
 # Get remote url
@@ -263,10 +266,9 @@ git_pull_branches() {
       set -vx
       for BRANCH in $BRANCHES; do
         # Is there a remote with this branch ?
-        if git for-each-ref refs/remotes | grep -- \"refs/remotes/[^\\/]*/\$BRANCH\" >/dev/null; then
+        if git for-each-ref --shell \"refs/remotes/*/\$BRANCH\" >/dev/null; then
           git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
-          git pull --rebase --autostash || \
-            echo \"Branch '\$BRANCH' has maybe no remote tracking branch.\nUse 'git branch -u origin/\$BRANCH \$BRANCH' to set it up.\"
+          git pull --rebase --autostash
           echo \"-----\"
         fi
       done
@@ -303,14 +305,12 @@ git_pull_branches() {
       git fetch --all 2>/dev/null
       for BRANCH in $BRANCHES; do
         # Is there a remote with this branch ?
-        if git for-each-ref refs/remotes | grep -- \"refs/remotes/[^\\/]*/\$BRANCH\" >/dev/null; then
+        if git for-each-ref --shell \"refs/remotes/*/\$BRANCH\" >/dev/null; then
           git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
           if [ -x \"\$(git --exec-path)/git-pull\" ]; then
-            git pull --rebase || \
-            echo \"Branch '\$BRANCH' has maybe no remote tracking branch.\nUse 'git branch -u origin/\$BRANCH \$BRANCH' to set it up.\"
+            git pull --rebase
           else
-            git merge --ff-only \"$(git_tracking)\" || \
-            echo \"Branch '\$BRANCH' has maybe no remote tracking branch.\nUse 'git branch -u origin/\$BRANCH \$BRANCH' to set it up.\"
+            git merge --ff-only \"$(git_tracking)\"
           fi
           echo \"-----\"
         fi
@@ -337,14 +337,12 @@ git_pull_remotes() {
       git fetch --all 2>/dev/null
       for BRANCH in $BRANCHES; do
         # Is there a remote with this branch ?
-        if git for-each-ref refs/remotes | grep -- \"refs/remotes/[^\\/]*/\$BRANCH\" >/dev/null; then
+        if git for-each-ref refs/remotes | grep -- \"refs/remotes/[^\\/]*/\$BRANCH\\$\" >/dev/null; then
           git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
           for REMOTE in $REMOTES; do
             #git fetch \"\$REMOTE\"
             # Does this remote have this branch ?
-            #if git ls-remote \"\$REMOTE\" | grep -- \"heads/\$BRANCH\" >/dev/null; then
-            #if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
-            if git for-each-ref refs/remotes | grep -- \"refs/remotes/\$REMOTE/\$BRANCH\" >/dev/null; then
+            if git for-each-ref --shell \"refs/remotes/\$REMOTE/\$BRANCH\" >/dev/null; then
               git pull --rebase --autostash \"\$REMOTE\" \"\$BRANCH\"
               echo \"-----\"
             fi
@@ -385,14 +383,12 @@ git_pull_remotes() {
       git fetch --all 2>/dev/null
       for BRANCH in $BRANCHES; do
         # Is there a remote with this branch ?
-        if git for-each-ref refs/remotes | grep -- \"refs/remotes/[^\\/]*/\$BRANCH\" >/dev/null; then
+        if git for-each-ref refs/remotes | grep -- \"refs/remotes/[^\\/]*/\$BRANCH\\$\" >/dev/null; then
           git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
           for REMOTE in $REMOTES; do
             #git fetch \"\$REMOTE\"
             # Does this remote have this branch ?
-            #if git ls-remote \"\$REMOTE\" | grep -- \"heads/\$BRANCH\" >/dev/null; then
-            #if git branch -r | grep -- \"\$REMOTE/\$BRANCH\" >/dev/null; then
-            if git for-each-ref refs/remotes | grep -- \"refs/remotes/\$REMOTE/\$BRANCH\" >/dev/null; then
+            if git for-each-ref --shell \"refs/remotes/\$REMOTE/\$BRANCH\" >/dev/null; then
               if [ -x \"\$(git --exec-path)/git-pull\" ]; then
                 git pull --rebase \"\$REMOTE\" \"\$BRANCH\"
               else
@@ -427,6 +423,20 @@ git_push_all() {
         git push "$REMOTE" "$BRANCH"
       fi
     done
+  done
+}
+
+# Set default upstream on all branches
+git_set_tracking() {
+  git_exists || return 1
+  local BRANCHES="${1:-$(git_branches)}"
+  local REMOTE="${2:-origin}"
+  git fetch --all 2>/dev/null
+  set -vx
+  for BRANCH in $BRANCHES; do
+    if git for-each-ref "refs/remotes/$REMOTE" | grep -- "refs/remotes/$REMOTE/$BRANCH\$" >/dev/null; then
+      git branch --set-upstream "$BRANCH" "$REMOTE/$BRANCH"
+    fi
   done
 }
 
@@ -843,7 +853,7 @@ alias git_gc='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; git gc"'
 ########################################
 # Create a tag
 git_tag_create() {
-  git tag "tag_$(date +%Y%m%d-%H%M%S)${1:+_$1}"
+  git tag "tag.$(git_branch).$(date +%Y%m%d-%H%M%S)${1:+_$1}"
 }
 
 ########################################
