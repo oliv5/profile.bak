@@ -414,7 +414,6 @@ git_push_all() {
   local BRANCHES="${2:-$(git_branches)}"
   for REMOTE in $REMOTES; do
     for BRANCH in $BRANCHES; do
-      #if git branch -r | grep -- "$REMOTE/$BRANCH" >/dev/null; then
       if git_branch_exists "$REMOTE/$BRANCH"; then
         echo -n "Push $REMOTE/$BRANCH : "
         git push "$REMOTE" "$BRANCH"
@@ -429,7 +428,6 @@ git_set_tracking() {
   local BRANCHES="${1:-$(git_branches)}"
   local REMOTE="${2:-origin}"
   git fetch --all 2>/dev/null
-  set -vx
   for BRANCH in $BRANCHES; do
     if git for-each-ref "refs/remotes/$REMOTE" | grep -- "refs/remotes/$REMOTE/$BRANCH\$" >/dev/null; then
       git branch --set-upstream "$BRANCH" "$REMOTE/$BRANCH"
