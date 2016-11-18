@@ -423,12 +423,12 @@ git_push_all() {
 # Set default upstream on all branches
 git_set_tracking() {
   git_exists || return 1
-  local BRANCHES="${1:-$(git_branches)}"
-  local REMOTE="${2:-origin}"
+  local REMOTE="${1:-origin}"
+  local BRANCHES="${2:-$(git_branches)}"
   git fetch --all 2>/dev/null
   for BRANCH in $BRANCHES; do
     if git for-each-ref "refs/remotes/$REMOTE" | grep -- "refs/remotes/$REMOTE/$BRANCH\$" >/dev/null; then
-      git branch --set-upstream "$BRANCH" "$REMOTE/$BRANCH"
+      git branch -u "$REMOTE/$BRANCH" "$BRANCH"
     fi
   done
 }
@@ -935,8 +935,6 @@ alias gsdl='git_stash_diffl'
 alias gsb='git_stash_backup'
 alias gsrm='git_stash_drop'
 alias gsm='gsdm'
-alias git_suspend='git_stash_save'
-alias git_resume='git_stash_pop'
 # Gitignore aliases
 alias gil='git_ignore_list'
 alias gia='git_ignore_add'

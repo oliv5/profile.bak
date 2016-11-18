@@ -9,7 +9,7 @@ _CTAGS_OUT='.tags'
 #_CSCOPE_OPTS='-qb'
 _CSCOPE_OPTS='-qbk'
 _CSCOPE_REGEX='.*\.(h|c|cc|cpp|hpp|inc|S)$'
-_CSCOPE_EXCLUDE='-not -path *.svn* -and -not -path *.git -and -not -path /tmp/'
+_CSCOPE_EXCLUDE='-not -path "*.svn*" -and -not -path "*.git" -and -not -path "/tmp/*"'
 _CSCOPE_OUT='.cscope.out'
 _CSCOPE_FILES='.cscope.files'
 
