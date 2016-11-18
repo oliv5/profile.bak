@@ -90,7 +90,7 @@
                     unset ANNEX_CONTENT ANNEX_ADD
                 fi
             fi
-            if [ -n "$GLOBAL_WIFIDEV" ] && ! ip addr show dev "$GLOBAL_WIFIDEV" 2>/dev/null | grep UP >/dev/null; then
+            if [ -n "$GLOBAL_WIFIDEV" ] && ! ip addr show dev "$GLOBAL_WIFIDEV" 2>/dev/null | grep "state UP" >/dev/null; then
                 echo "[warning] Wifi device '$GLOBAL_WIFIDEV' is not connected. Disable file content syncing..."
                 unset ANNEX_CONTENT
             fi
