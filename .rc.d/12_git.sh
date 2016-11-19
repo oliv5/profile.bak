@@ -119,12 +119,6 @@ git_branches() {
   git ${1:+--git-dir="$1"} for-each-ref --shell refs/heads/ --format='%(refname:short)' | sed -e 's;heads/;;' | xargs echo 
 }
 
-# Get the remote tracking branch of the current branch
-git_tracking() {
-  git ${1:+--git-dir="$1"} rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null
-  #git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD) 2>/dev/null
-}
-
 # Check a branch exists
 git_branch_exists() {
   local BRANCH="${1}/"
@@ -132,6 +126,23 @@ git_branch_exists() {
   echo "$1" | grep -- '/' >/dev/null && BRANCH="remotes/$1" || BRANCH="heads/$1"
   #[ -n "$(git ${2:+--git-dir="$2"} for-each-ref --shell refs/${BRANCH})" ]
   git ${2:+--git-dir="$2"} show-ref "refs/${BRANCH}" >/dev/null
+}
+
+# Delete local untracked branch (safely)
+git_branch_delete() {
+  local BRANCHES="${1:-$(git_branch "$2")}"
+  for BRANCH in $BRANCHES; do
+    if ask_question 2 "Delete local branch $BRANCH ? (y/n) " y Y >/dev/null; then
+      git ${2:+--git-dir="$2"} tag "delete_$BRANCH_$(date +%Y%m%d-%H%M%S)" &&
+      git ${2:+--git-dir="$2"} branch -d "$BRANCH"
+    fi
+  done
+}
+
+# Get current branch tracking
+git_tracking() {
+  git ${1:+--git-dir="$1"} rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null
+  #git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD) 2>/dev/null
 }
 
 # Get remote url
@@ -307,7 +318,7 @@ git_pull_branches() {
           if [ -x \"\$(git --exec-path)/git-pull\" ]; then
             git pull --rebase || exit \$?
           else
-            git merge --ff-only \"$(git_tracking)\" || exit \$?
+            git merge --ff-only \"$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)\" || exit \$?
           fi
           echo \"-----\"
         fi
@@ -821,6 +832,9 @@ git_search() {
 }
 
 ########################################
+# Git gc all
+alias git_gc='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; git gc"'
+
 # Find git directory
 ff_git() {
 	for DIR in "${@:-.}"; do
@@ -839,9 +853,6 @@ git_find() {
 			git_exists "$DIR" && printf "'%s'\n" "$DIR"
 		done 
 }
-
-# Git gc all
-alias git_gc='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; git gc"'
 
 ########################################
 # Create a tag
@@ -902,6 +913,7 @@ alias gmm='git mergetool -y'
 alias gba='git branch -a'   # list all
 alias gbl='git branch -l'   # list local
 alias gbv='git branch -v'   # verbose list local
+alias gbvv='git branch -v'  # double-verbose list local
 alias gbva='git branch -va' # verbose list all
 alias gbav='git branch -va' # verbose list all
 alias gbm='git branch --merged'    # list merged branches
