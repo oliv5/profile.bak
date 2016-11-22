@@ -434,7 +434,7 @@ git_push_all() {
 # Set default upstream on all branches
 git_set_tracking() {
   git_exists || return 1
-  local REMOTE="${1:-origin}"
+  local REMOTE="${1:?No remote specified. Possible remotes are: $(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   git fetch --all 2>/dev/null
   for BRANCH in $BRANCHES; do
@@ -857,7 +857,7 @@ git_find() {
 ########################################
 # Create a tag
 git_tag_create() {
-  git tag "tag.$(git_branch).$(date +%Y%m%d-%H%M%S)${1:+_$1}"
+  git tag "tag_$(date +%Y%m%d-%H%M%S).$(git_branch)${1:+_$1}"
 }
 
 ########################################
