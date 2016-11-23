@@ -118,52 +118,6 @@ annex_init_gcrypt() {
   git config --add annex.sshcaching false
 }
 
-#~ # Init annex special
-#~ annex_init_special() {
-  #~ local PREFIX="$1"
-  #~ local CMDLINE="$2"
-  #~ local REMOTE="${3:-noname}"
-  #~ local ENCRYPTION="${4:-none}"
-  #~ local REMOTEPATH="${5:-$(git_repo)}"
-  #~ shift 5
-  #~ local CMDARGS="$(printf "$CMDLINE" "$REMOTE" "$ENCRYPTION" "$REMOTEPATH" "$@")"
-  #~ vcsh_run "${PREFIX:+$PREFIX }git annex enableremote $CMDARGS 2>/dev/null || ${PREFIX:+$PREFIX }git annex initremote $CMDARGS"
-  #~ #echo $CMDARGS
-#~ }
-
-#~ # Init hubic annex
-#~ annex_init_hubic() {
-  #~ local NAME="${1:-hubic}"; shift
-  #~ annex_init_special "" "%s encryption=%s type=external externaltype=hubic hubic_container=annex hubic_path='%s' embedcreds=no" "$NAME" "$@"
-#~ }
-
-#~ # Init gdrive annex
-#~ annex_init_gdrive() {
-  #~ local NAME="${1:-gdrive}"; shift
-  #~ annex_init_special "" "%s encryption=%s type=external externaltype=googledrive folder='%s'" "$NAME" "$@"
-  #~ local KEY; read -p "Enter the OAUTH key: " KEY
-  #~ annex_init_special "OAUTH='$KEY'" "%s encryption=%s type=external externaltype=googledrive folder='%s'" "$NAME" "$@"
-#~ }
-
-#~ # Init bup annex
-#~ annex_init_bup() {
-  #~ local NAME="${1:-bup}"; shift
-  #~ annex_init_special "" "%s encryption=%s type=bup buprepo='%s'" "$NAME" "$@"
-#~ }
-
-#~ # Init rsync annex
-#~ annex_init_rsync() {
-  #~ local NAME="${1:-rsync}"; shift
-  #~ annex_init_special "" "%s encryption=%s type=rsync rsyncurl='%s' keyid='%s'" "$NAME" "$@"
-  #~ git config --add annex.sshcaching false
-#~ }
-
-#~ # Init gcrypt annex
-#~ annex_init_gcrypt() {
-  #~ local NAME="${1:-gcrypt}"; shift
-  #~ annex_init_special "" "%s encryption=%s type=gcrypt gitrepo='%s' keyid='%s'" "$NAME" "$@"
-#~ }
-
 # Annex sync
 annex_sync() {
   vcsh_run 'git annex sync "$@"'
@@ -324,6 +278,11 @@ annex_rename_special() {
 	git remote rename "$1" "$2"
 	git config --unset remote.$2.fetch
 	git annex initremote "$1" name="$2"
+}
+
+# Revert changes in all modes (indirect/direct)
+annex_revert() {
+  git annex proxy -- git revert "${1:-HEAD}"
 }
 
 ########################################
