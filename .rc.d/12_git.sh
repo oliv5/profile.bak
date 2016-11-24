@@ -7,13 +7,6 @@ export GIT_PAGER="${PAGER:-less}"
 ########################################
 # Dependencies
 
-# Wrapper: vcsh run
-# Overwritten by vcsh main script
-command -v "vcsh_run" >/dev/null 2>&1 ||
-vcsh_run() {
-  eval "$@"
-}
-
 # Wrapper: git annex direct mode
 # Overwritten by annex main script
 command -v "annex_direct" >/dev/null 2>&1 ||
@@ -38,13 +31,20 @@ ask_question() {
 ########################################
 # git wrapper
 git() {
-  if [ "$1" = "annex" -a ! -z "$(command git config --get vcsh.vcsh)" ]; then
+  # Forbid git annex in direct mode with VCSH
+  if [ "$1" = "annex" -a -n "$(command git config --get vcsh.vcsh)" ]; then
     if [ "$(command git config --get annex.direct)" = "true" -o "$2" = "direct" ]; then
       echo "git annex in direct mode is not compatible with VCSH repositories..." >&2
       return 1
     fi
   fi
-  command git "$@"
+  # VCSH repository not loaded yet
+  if [ -z "$GIT_WRAPPER" ] && [ -z "$VCSH_REPO_NAME" ] && command git config --get vcsh.vcsh >/dev/null 2>&1; then
+    local GIT_WRAPPER=1
+    vcsh "$(git_repo)" "$@"
+  else
+    command git "$@"
+  fi
 }
 
 ########################################
@@ -272,18 +272,16 @@ git_pull_branches() {
     # are not compatible with vcsh
     git annex sync
   else
-    vcsh_run "
-      CURRENT=\"$(git rev-parse --abbrev-ref HEAD)\"
-      for BRANCH in $BRANCHES; do
-        # Is there a remote with this branch ?
-        if command git for-each-ref --shell refs/remotes | grep \"refs/remotes/.*/\$BRANCH'\" >/dev/null; then
-          git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
-          git pull --rebase --autostash || exit \$?
-          echo \"-----\"
-        fi
-      done
-      git checkout -fq \"\$CURRENT\"
-    "
+    CURRENT="$(git rev-parse --abbrev-ref HEAD)"
+    for BRANCH in $BRANCHES; do
+      # Is there a remote with this branch ?
+      if command git for-each-ref --shell refs/remotes | grep "refs/remotes/.*/$BRANCH'" >/dev/null; then
+        git checkout $FORCE "$BRANCH" >/dev/null || continue
+        git pull --rebase --autostash || exit $?
+        echo "-----"
+      fi
+    done
+    git checkout -fq "$CURRENT"
   fi
 }
 else
@@ -296,35 +294,34 @@ git_pull_branches() {
     # are not compatible with vcsh
     git annex sync
   else
-    vcsh_run "
-      end() {
-        trap - INT TERM
-        git checkout -fq \"\$CURRENT\"
-        if [ -n \"\$STASH\" ]; then
-          git stash apply -q --index \"\$STASH\"
-        fi
-      }
-      set +e
-      STASH=\"\$(git stash create 2>/dev/null)\"
-      trap end INT TERM
-      if [ -n \"\$STASH\" ]; then
-        git reset --hard HEAD -q --
+    end() {
+      trap - INT TERM
+      unset -f end
+      git checkout -fq "$CURRENT"
+      if [ -n "$STASH" ]; then
+        git stash apply -q --index "$STASH"
       fi
-      CURRENT=\"$(git rev-parse --abbrev-ref HEAD)\"
-      for BRANCH in $BRANCHES; do
-        # Is there a remote with this branch ?
-        if command git for-each-ref --shell refs/remotes | grep \"refs/remotes/.*/\$BRANCH'\" >/dev/null; then
-          git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
-          if [ -x \"\$(git --exec-path)/git-pull\" ]; then
-            git pull --rebase || exit \$?
-          else
-            git merge --ff-only \"$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)\" || exit \$?
-          fi
-          echo \"-----\"
+    }
+    set +e
+    STASH="$(git stash create 2>/dev/null)"
+    trap end INT TERM
+    if [ -n "$STASH" ]; then
+      git reset --hard HEAD -q --
+    fi
+    CURRENT="$(git rev-parse --abbrev-ref HEAD)"
+    for BRANCH in $BRANCHES; do
+      # Is there a remote with this branch ?
+      if command git for-each-ref --shell refs/remotes | grep "refs/remotes/.*/$BRANCH'" >/dev/null; then
+        git checkout $FORCE "$BRANCH" >/dev/null || continue
+        if [ -x "$(git --exec-path)/git-pull" ]; then
+          git pull --rebase || exit $?
+        else
+          git merge --ff-only "$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)" || exit $?
         fi
-      done
-      end
-    "
+        echo "-----"
+      fi
+    done
+    end
   fi
 }
 fi
@@ -341,24 +338,22 @@ git_pull_remotes() {
     # are not compatible with vcsh
     git annex sync
   else
-    vcsh_run "
-      CURRENT=\"$(git rev-parse --abbrev-ref HEAD)\"
-      git fetch --all 2>/dev/null
-      for BRANCH in $BRANCHES; do
-        # Is there a remote with this branch ?
-        if command git for-each-ref --shell refs/remotes | grep \"refs/remotes/.*/\$BRANCH'\" >/dev/null; then
-          git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
-          for REMOTE in $REMOTES; do
-            # Does this remote have this branch ?
-            if command git show-ref \"refs/remotes/\$REMOTE/\$BRANCH\" >/dev/null; then
-              git pull --rebase --autostash \"\$REMOTE\" \"\$BRANCH\" || exit \$?
-              echo \"-----\"
-            fi
-          done
-        fi
-      done
-      git checkout -fq \"\$CURRENT\"
-    "
+    CURRENT="$(git rev-parse --abbrev-ref HEAD)"
+    git fetch --all 2>/dev/null
+    for BRANCH in $BRANCHES; do
+      # Is there a remote with this branch ?
+      if command git for-each-ref --shell refs/remotes | grep "refs/remotes/.*/$BRANCH'" >/dev/null; then
+        git checkout $FORCE "$BRANCH" >/dev/null || continue
+        for REMOTE in $REMOTES; do
+          # Does this remote have this branch ?
+          if command git show-ref "refs/remotes/$REMOTE/$BRANCH" >/dev/null; then
+            git pull --rebase --autostash "$REMOTE" "$BRANCH" || exit $?
+            echo "-----"
+          fi
+        done
+      fi
+    done
+    git checkout -fq "$CURRENT"
   fi
 }
 else
@@ -372,41 +367,40 @@ git_pull_remotes() {
     # are not compatible with vcsh
     git annex sync
   else
-    vcsh_run "
-      end() {
-        trap - INT TERM
-        git checkout -fq \"\$CURRENT\"
-        if [ -n \"\$STASH\" ]; then
-          git stash apply -q --index \"\$STASH\"
-        fi
-      }
-      set +e
-      STASH=\"\$(git stash create 2>/dev/null)\"
-      trap end INT TERM
-      if [ -n \"\$STASH\" ]; then
-        git reset --hard HEAD -q --
+    end() {
+      trap - INT TERM
+      unset -f end
+      git checkout -fq "$CURRENT"
+      if [ -n "$STASH" ]; then
+        git stash apply -q --index "$STASH"
       fi
-      CURRENT=\"$(git rev-parse --abbrev-ref HEAD)\"
-      git fetch --all 2>/dev/null
-      for BRANCH in $BRANCHES; do
-        # Is there a remote with this branch ?
-        if command git for-each-ref --shell refs/remotes | grep \"refs/remotes/.*/\$BRANCH'\" >/dev/null; then
-          git checkout $FORCE \"\$BRANCH\" >/dev/null || continue
-          for REMOTE in $REMOTES; do
-            # Does this remote have this branch ?
-            if command git show-ref \"refs/remotes/\$REMOTE/\$BRANCH\" >/dev/null; then
-              if [ -x \"\$(git --exec-path)/git-pull\" ]; then
-                git pull --rebase \"\$REMOTE\" \"\$BRANCH\" || exit \$?
-              else
-                git merge --ff-only \"\$REMOTE/\$BRANCH\" || exit \$?
-              fi
-              echo \"-----\"
+    }
+    set +e
+    STASH="$(git stash create 2>/dev/null)"
+    trap end INT TERM
+    if [ -n "$STASH" ]; then
+      git reset --hard HEAD -q --
+    fi
+    CURRENT="$(git rev-parse --abbrev-ref HEAD)"
+    git fetch --all 2>/dev/null
+    for BRANCH in $BRANCHES; do
+      # Is there a remote with this branch ?
+      if command git for-each-ref --shell refs/remotes | grep "refs/remotes/.*/$BRANCH'" >/dev/null; then
+        git checkout $FORCE "$BRANCH" >/dev/null || continue
+        for REMOTE in $REMOTES; do
+          # Does this remote have this branch ?
+          if command git show-ref "refs/remotes/$REMOTE/$BRANCH" >/dev/null; then
+            if [ -x "$(git --exec-path)/git-pull" ]; then
+              git pull --rebase "$REMOTE" "$BRANCH" || exit $?
+            else
+              git merge --ff-only "$REMOTE/$BRANCH" || exit $?
             fi
-          done
-        fi
-      done
-      end
-    "
+            echo "-----"
+          fi
+        done
+      fi
+    done
+    end
   fi
 }
 fi
@@ -476,7 +470,7 @@ git_upkeep() {
   local FLAG OPTIND OPTARG
   while getopts "vasdum" FLAG; do
     case "$FLAG" in
-      v) vcsh_run git status;;
+      v) git status;;
       a) ADD=1;;
       s) DL=1; UL=1;;
       d) DL=1;;
@@ -486,14 +480,14 @@ git_upkeep() {
   done
   # Run
   if [ -n "$ADD" ]; then
-    vcsh_run git add -v -u :/
-    vcsh_run git commit -m "$MSG"
+    git add -v -u :/
+    git commit -m "$MSG"
   fi
   if [ -n "$DL" ]; then
     git_pull
   fi
   if [ -n "$UL" ]; then
-    vcsh_run git push
+    git push
   fi
 }
 

@@ -24,13 +24,6 @@ alias gandd='git annex forget --drop-dead'
 alias gani='git annex info'
 alias gannex='git annex'
 
-# Wrapper: vcsh run
-# Overwritten by vcsh main script
-command -v "vcsh_run" >/dev/null 2>&1 ||
-vcsh_run() {
-  eval "$@"
-}
-
 # Check annex exists
 annex_exists() {
   git ${1:+--git-dir="$1"} config --get annex.version >/dev/null 2>&1
@@ -53,17 +46,17 @@ annex_bare() {
 
 # Init annex
 annex_init() {
-  vcsh_run 'git annex init "$(uname -n)"'
+  git annex init "$(uname -n)"
 }
 
 # Uninit annex
 annex_uninit() {
-  vcsh_run 'git annex uninit && git config --replace-all core.bare false'
+  git annex uninit && git config --replace-all core.bare false
 }
 
 # Init annex in direct mode
 annex_init_direct() {
-  vcsh_run 'annex_init && git annex direct'
+  annex_init && git annex direct
 }
 
 # Init hubic annex
@@ -120,7 +113,7 @@ annex_init_gcrypt() {
 
 # Annex sync
 annex_sync() {
-  vcsh_run 'git annex sync "$@"'
+  git annex sync "$@"
 }
 
 # Annex sync content
@@ -130,18 +123,18 @@ alias annex_sync_content_fast='annex_sync --content --fast'
 # Annex status
 annex_status() {
   echo "annex status:"
-  vcsh_run 'git annex status'
+  git annex status
 }
 
 # Git status for scripts
 annex_st() {
-  vcsh_run 'git annex status' | awk '/^[\? ]?'$1'[\? ]?/ {print "\""$2"\""}'
+  git annex status | awk '/^[\? ]?'$1'[\? ]?/ {print "\""$2"\""}'
 }
 
 # Annex diff
 annex_diff() {
   if ! annex_direct; then
-    vcsh_run 'git diff' "$@"
+    git diff "$@"
   fi
 }
 
@@ -158,7 +151,7 @@ annex_bundle() {
       if annex_bare; then
         tar zcf "${BUNDLE}" -h ./annex
       else
-        vcsh_run "git annex find" | 
+        git annex find | 
           awk '{print "\""$0"\""}' |
           xargs tar zcf "${BUNDLE}" -h --exclude-vcs --
       fi
@@ -178,11 +171,10 @@ annex_bundle() {
 }
 
 # Annex get
-alias annex_get_auto='annex_get --auto'
-alias annex_get_fast='annex_get --fast'
-alias annex_get_fast_auto='annex_get --fast --auto'
+alias annex_get_auto='git annex get --auto'
+alias annex_get_fast='git annex get --fast'
+alias annex_get_fast_auto='git annex get --fast --auto'
 alias annex_get_missing='annex_missing | xargs annex_get'
-alias annex_get='vcsh_run git annex get'
 
 # Annex copy
 alias annex_copy_all='annex_copy --all'
@@ -194,10 +186,10 @@ annex_copy() {
   for LAST; do true; done
   if [ "$LAST" = "--from" ] || [ "$LAST" = "--to" ]; then
     for REMOTE in $(git_remotes); do
-      vcsh_run git annex copy "$@" "$REMOTE"
+      git annex copy "$@" "$REMOTE"
     done
   else
-    vcsh_run git annex copy "$@"
+    git annex copy "$@"
   fi
 }
 
@@ -227,7 +219,7 @@ annex_upkeep() {
   local FLAG OPTIND OPTARG
   while getopts "vasdum" FLAG; do
     case "$FLAG" in
-      v) vcsh_run git annex status;;
+      v) git annex status;;
       a) ADD=1; annex_direct && SYNC=1;;
       s) SYNC=1;;
       d) DL=1;;
@@ -237,16 +229,16 @@ annex_upkeep() {
   done
   # Run
   if [ -n "$ADD" ]; then
-    vcsh_run git annex add . --fast
+    git annex add . --fast
     if ! annex_direct; then
-      vcsh_run git commit -m "$MSG"
+      git commit -m "$MSG"
     fi
   fi
   if [ -n "$SYNC" ]; then
-    vcsh_run git annex sync
+    git annex sync
   fi
   if [ -n "$DL" ]; then
-    vcsh_run git annex get
+    git annex get
   fi
   if [ -n "$UL" ]; then
     annex_upload_fast
