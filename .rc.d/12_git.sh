@@ -1031,7 +1031,8 @@ alias git_amend='git commit --amend'
 alias grb='git rebase'
 alias grbi='git rebase -i'
 # Fetch/pull/push aliases
-alias gpu='git_push'
+alias gpu='git push'
+alias gpua='git_push_all'
 if [ $(git_version) -gt $(git_version 2.9) ]; then
   alias gup='git pull --rebase --autostash'
 else
