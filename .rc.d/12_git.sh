@@ -961,6 +961,7 @@ alias glh='git log -p'
 alias glo='git log --name-only'
 alias gla='git log --name-status'
 alias gls='git log --stat'
+alias gll='git log --pretty=oneline --abbrev-commit'
 alias glog='git log'
 alias git_history='git log -p'
 # Tag aliases
