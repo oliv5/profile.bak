@@ -492,7 +492,7 @@ git_upkeep() {
       u) PUSH=1;;
       r) REMOTES="$OPTARG";;
       z) set -vx; DBG="true";;
-      *) echo >&2 "Usage: git_upkeep [-a] [-n] [-d] [-c] [-p 'refs'] [-u 'refs'] [-r 'remotes'] [-m 'msg'] [-z]"
+      *) echo >&2 "Usage: git_upkeep [-a] [-n] [-d] [-c] [-p] [-u] [-r 'remotes'] [-m 'msg'] [-z]"
          echo >&2 "-a stage (a)ll files"
          echo >&2 "-n stage (n)ew files"
          echo >&2 "-d stage (d)eleted files"
@@ -527,7 +527,7 @@ git_upkeep() {
   # Pull
   if [ -n "$PULL" ]; then
     for REMOTE in ${REMOTES:-""}; do
-      $DBG git pull $REMOTE || return $?
+      $DBG git pull --rebase $REMOTE || return $?
     done
   fi
   # Push
