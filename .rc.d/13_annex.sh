@@ -209,40 +209,87 @@ alias annex_upload_fast_auto='annex_copy_fast_auto --to'
 
 # Annex upkeep
 annex_upkeep() {
-  annex_exists || return 1
-  # Get args
+  local DBG=""
+  # Add options
   local ADD=""
+  local DEL=""
+  # Sync options
+  local MSG="annex_upkeep() at $(date)"
   local SYNC=""
-  local DL=""
-  local UL=""
-  local MSG="[upkeep] auto-commit"
-  local FLAG OPTIND OPTARG
-  while getopts "vasdum" FLAG; do
-    case "$FLAG" in
-      v) git annex status;;
-      a) ADD=1; annex_direct && SYNC=1;;
-      s) SYNC=1;;
-      d) DL=1;;
-      u) UL=1;;
+  local SYNC_OPT="--no-commit --no-pull --no-push"
+  # Copy options
+  local GET=""
+  local GET_OPT=""
+  local SEND=""
+  local SEND_OPT="--all"
+  local REMOTES=""
+  # Get arguments
+  echo "[annex_upkeep] called with args: $@"
+  while getopts "adscpum:ger:fzh" OPTFLAG; do
+    case "$OPTFLAG" in
+      # Add
+      a) ADD=1;;
+      d) DEL=1;;
+      # Sync
+      s) SYNC=1; SYNC_OPT="--commit --pull --push";;
+      c) SYNC=1; SYNC_OPT="${SYNC_OPT%--no-commit*} ${SYNC_OPT#*--no-commit} --commit";;
+      p) SYNC=1; SYNC_OPT="${SYNC_OPT%--no-pull*} ${SYNC_OPT#*--no-pull} --pull";;
+      u) SYNC=1; SYNC_OPT="${SYNC_OPT%--no-push*} ${SYNC_OPT#*--no-push} --push";;
       m) MSG="$OPTARG";;
+      # UL/DL
+      g) GET=1;;
+      e) SEND=1;;
+      r) REMOTES="${OPTARG}";;
+      f) GET_OPT="--fast"; SEND_OPT="--fast";;
+      # Misc
+      z) set -vx; DBG="true";;
+      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-s] [-c] [-m 'msg'] [-p] [-u] [-g] [-e] [-r 'remote1 remote2 ..'] [-f] [-z]"
+         echo >&2 "-a (a)dd new files"
+         echo >&2 "-d add (d)eleted files"
+         echo >&2 "-s (s)ync"
+         echo >&2 "-c (c)ommit"
+         echo >&2 "-p (p)ull"
+         echo >&2 "-u p(u)sh"
+         echo >&2 "-m (m)essage"
+         echo >&2 "-g (g)et"
+         echo >&2 "-e s(e)nd to remotes"
+         echo >&2 "-f (f)ast get/send"
+         echo >&2 "-z (s)imulate operations"
+         return 1
+         ;;
     esac
   done
-  # Run
+  shift "$((OPTIND-1))"
+  unset OPTFLAG OPTARG
+  OPTIND=1
+  [ $# -ne 0 ] && echo "Bad parameters: $@" && return 1
+  # Main
+  annex_exists || return 1
+  echo "[annex_upkeep] start at $(date)"
+  # Add
   if [ -n "$ADD" ]; then
-    git annex add . --fast
-    if ! annex_direct; then
-      git commit -m "$MSG"
-    fi
+    $DBG git annex add . || return $?
   fi
+  # Revert deleted files
+  if [ -z "$DEL" ]; then
+    gstx D | xargs -0 $DBG command git checkout || return $?
+  fi
+  # Sync
   if [ -n "$SYNC" ]; then
-    git annex sync
+    $DBG git annex sync --message="$MSG" $SYNC_OPT || return $?
   fi
-  if [ -n "$DL" ]; then
-    git annex get
+  # Get
+  if [ -n "$GET" ]; then
+      $DBG git annex get $GET_OPT || return $?
   fi
-  if [ -n "$UL" ]; then
-    annex_upload_fast
+  # Upload
+  if [ -n "$SEND" ]; then
+    [ -z "$REMOTES" ] && echo "No remotes to send to..." && return 1
+    for REMOTE in ${REMOTES}; do
+      $DBG git annex copy --to "$REMOTE" $SEND_OPT || return $?
+    done
   fi
+  echo "[annex_upkeep] end at $(date)"
 }
 
 # Find aliases

@@ -471,61 +471,72 @@ git_bundle() {
 
 # Git upkeep
 git_upkeep() {
-    local DBG=""
-    local NEW=""
-    local DEL=""
-    local COMMIT=""
-    local MSG="git_upkeep() at $(date)"
-    local PULL=""
-    local PUSH=""
-    # Get arguments
-    echo "[git_upkeep] called with args: $@"
-    while getopts "andcp:u:m:s" OPTFLAG; do
-      case "$OPTFLAG" in
-        a) NEW=1; DEL=1;;
-        n) NEW=1;;
-        d) DEL=1;;
-        c) COMMIT=1;;
-        m) MSG="$OPTARG";;
-        p) PULL="$OPTARG";;
-        u) PUSH="$OPTARG";;
-        s) set -vx; DBG="false";;
-        *) echo >&2 "Usage: git_upkeep [-a] [-n] [-d] [-c] [-p 'refs'] [-u 'refs'] [-m 'msg'] [-s]"
-           echo >&2 "-a  stage (a)ll files"
-           echo >&2 "-n  stage (n)ew files"
-           echo >&2 "-d  stage (d)eleted files"
-           echo >&2 "-c  (c)ommit files"
-           echo >&2 "-p  (p)ull"
-           echo >&2 "-u  p(u)sh"
-           echo >&2 "-m  commit (m)essage"
-           echo >&2 "-s  (s)imulate operations"
-           exit 1
-           ;;
-      esac
+  local DBG=""
+  local NEW=""
+  local DEL=""
+  local COMMIT=""
+  local MSG="git_upkeep() at $(date)"
+  local PULL=""
+  local PUSH=""
+  local REMOTES=""
+  # Get arguments
+  echo "[git_upkeep] called with args: $@"
+  while getopts "andcpur:m:zh" OPTFLAG; do
+    case "$OPTFLAG" in
+      a) NEW=1; DEL=1;;
+      n) NEW=1;;
+      d) DEL=1;;
+      c) COMMIT=1;;
+      m) MSG="$OPTARG";;
+      p) PULL=1;;
+      u) PUSH=1;;
+      r) REMOTES="$OPTARG";;
+      z) set -vx; DBG="true";;
+      *) echo >&2 "Usage: git_upkeep [-a] [-n] [-d] [-c] [-p 'refs'] [-u 'refs'] [-r 'remotes'] [-m 'msg'] [-z]"
+         echo >&2 "-a stage (a)ll files"
+         echo >&2 "-n stage (n)ew files"
+         echo >&2 "-d stage (d)eleted files"
+         echo >&2 "-c (c)ommit files"
+         echo >&2 "-p (p)ull"
+         echo >&2 "-u p(u)sh"
+         echo >&2 "-r (r)remotes to pull/push"
+         echo >&2 "-m commit (m)essage"
+         echo >&2 "-z (s)imulate operations"
+         return 1
+         ;;
+    esac
+  done
+  shift "$((OPTIND-1))"
+  unset OPTFLAG OPTARG
+  OPTIND=1
+  [ $# -ne 0 ] && echo "Bad parameters: $@" && return 1
+  # Main
+  git_exists || return 1
+  echo "[git_upkeep] start at $(date)"
+  # Add
+  if [ -n "$DEL" ]; then
+      gstx D | xargs -0 $DBG git add || return $?
+  fi
+  if [ -n "$NEW" ]; then
+      $DBG git add -u || return $?
+  fi
+  # Commit
+  if [ -n "$COMMIT" ]; then
+      $DBG git commit -m "$MSG" || return $?
+  fi
+  # Pull
+  if [ -n "$PULL" ]; then
+    for REMOTE in ${REMOTES:-""}; do
+      $DBG git pull $REMOTE || return $?
     done
-    unset OPTFLAG OPTARG
-    OPTIND=1
-    # Main
-    git_exists || return 1
-    echo "[git_upkeep] start at $(date)"
-    # Add
-    if [ -n "$DEL" ]; then
-        $DBG gstx D | xargs -0 git add
-    elif [ -n "$NEW" ]; then
-        $DBG git add -u
-    fi
-    # Commit
-    if [ -n "$COMMIT" ]; then
-        $DBG git commit -n "$MSG"
-    fi
-    # Pull
-    if [ -n "$PULL" ]; then
-        $DBG git push $PULL
-    fi
-    # Push
-    if [ -n "$PUSH" ]; then
-        $DBG git push $PUSH
-    fi
+  fi
+  # Push
+  if [ -n "$PUSH" ]; then
+    for REMOTE in ${REMOTES:-""}; do
+      $DBG git push $REMOTE || return $?
+    done
+  fi
+  echo "[git_upkeep] end at $(date)"
 }
 
 ########################################
