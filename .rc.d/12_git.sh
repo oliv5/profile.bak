@@ -130,12 +130,22 @@ git_branch_exists() {
 
 # Delete local untracked branch (safely)
 git_branch_delete() {
-  local BRANCHES="${1:-$(git_branch "$2")}"
-  for BRANCH in $BRANCHES; do
-    if ask_question 2 "Delete local branch $BRANCH ? (y/n) " y Y >/dev/null; then
-      git ${2:+--git-dir="$2"} tag "delete_$BRANCH_$(date +%Y%m%d-%H%M%S)" &&
-      git ${2:+--git-dir="$2"} branch -d "$BRANCH"
-    fi
+  for BRANCH; do
+    echo "Delete local branch '$BRANCH'"
+    git tag "deleted.${BRANCH}_$(date +%Y%m%d-%H%M%S)" "refs/head/$BRANCH" &&
+      git branch -d "$BRANCH"
+  done
+}
+
+# Delete remote untracked branch
+git_branch_delete_remote() {
+  for BRANCH; do
+    local REMOTE="${BRANCH%%/*}"
+    local NAME="${BRANCH##*/}"
+    echo "Delete remote branch '$BRANCH'"
+    git tag "deleted.${REMOTE}.${NAME}.$(date +%Y%m%d-%H%M%S)" "remotes/$BRANCH" && { 
+      git push "$REMOTE" ":$NAME" || git branch -rd "$BRANCH"
+    }
   done
 }
 
