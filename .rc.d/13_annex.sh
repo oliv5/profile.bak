@@ -222,9 +222,9 @@ annex_upkeep() {
   local GET_OPT=""
   local SEND=""
   local SEND_OPT="--all"
-  local REMOTES=""
+  local REMOTES="$(git remote)"
   # Get arguments
-  echo "[annex_upkeep] called with args: $@"
+  #echo "[annex_upkeep] arguments: $@"
   while getopts "adscpum:ger:fzh" OPTFLAG; do
     case "$OPTFLAG" in
       # Add
@@ -265,14 +265,15 @@ annex_upkeep() {
   [ $# -ne 0 ] && echo "Bad parameters: $@" && return 1
   # Main
   annex_exists || return 1
-  echo "[annex_upkeep] start at $(date)"
+  #echo "[annex_upkeep] start at $(date)"
   # Add
   if [ -n "$ADD" ]; then
     $DBG git annex add . || return $?
   fi
   # Revert deleted files
-  if [ -z "$DEL" ]; then
-    gstx D | xargs -0 $DBG command git checkout || return $?
+  if [ -z "$DEL" ] && ! annex_direct; then
+    gstx D | xargs -0 $DBG git checkout || return $?
+    #annex_st D | xargs $DBG git checkout || return $?
   fi
   # Sync
   if [ -n "$SYNC" ]; then
@@ -289,7 +290,7 @@ annex_upkeep() {
       $DBG git annex copy --to "$REMOTE" $SEND_OPT || return $?
     done
   fi
-  echo "[annex_upkeep] end at $(date)"
+  #echo "[annex_upkeep] end at $(date)"
 }
 
 # Find aliases

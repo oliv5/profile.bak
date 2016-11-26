@@ -480,7 +480,7 @@ git_upkeep() {
   local PUSH=""
   local REMOTES=""
   # Get arguments
-  echo "[git_upkeep] called with args: $@"
+  #echo "[git_upkeep] arguments: $@"
   while getopts "andcpur:m:zh" OPTFLAG; do
     case "$OPTFLAG" in
       a) NEW=1; DEL=1;;
@@ -512,7 +512,7 @@ git_upkeep() {
   [ $# -ne 0 ] && echo "Bad parameters: $@" && return 1
   # Main
   git_exists || return 1
-  echo "[git_upkeep] start at $(date)"
+  #echo "[git_upkeep] start at $(date)"
   # Add
   if [ -n "$DEL" ]; then
       gstx D | xargs -0 $DBG git add || return $?
@@ -536,7 +536,7 @@ git_upkeep() {
       $DBG git push $REMOTE || return $?
     done
   fi
-  echo "[git_upkeep] end at $(date)"
+  #echo "[git_upkeep] end at $(date)"
 }
 
 ########################################
