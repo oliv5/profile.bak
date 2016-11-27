@@ -539,6 +539,19 @@ git_upkeep() {
   #echo "[git_upkeep] end at $(date)"
 }
 
+# Use .git directory and configure it as bare repo
+git_tobare() {
+  local SRC="${1:-$PWD}"
+  local DST="${SRC}.git"
+  cd "$SRC" &&
+  git_exists &&
+  [ -d ".git" ] &&
+  mv .git "$DST" &&
+  cd "$DST" &&
+  git config --bool core.bare true &&
+  rmdir "$SRC"
+}
+
 ########################################
 # Git diff all files
 git_diff_all() {

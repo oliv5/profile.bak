@@ -1,10 +1,5 @@
 #!/bin/sh
 
-# Select bup repository
-bup_select() {
-  export BUP_DIR="$1"
-}
-
 # Check bup repository
 bup_exists(){
   local BUP_DIR="${1:-${BUP_DIR:-.}}"
@@ -13,6 +8,7 @@ bup_exists(){
 
 # Init bup directory
 bup_init() {
+  local BUP_DIR="${BUP_DIR:-.}"
   bup_exists && { echo "Skip existing repo..." && return 1; }
   local SERVER=${1:+-r "$1"}
   shift
@@ -21,6 +17,7 @@ bup_init() {
 
 # Add file or directory
 bup_add() {
+  local BUP_DIR="${BUP_DIR:-.}"
   bup_exists || { echo "Not a bup directory..."; return 1; }
   local BRANCH="${1:?No backup branch...}"
   local SRC="${2:?Nothing to backup...}"
@@ -32,6 +29,7 @@ bup_add() {
 
 # Restore a backup
 bup_restore() {
+  local BUP_DIR="${BUP_DIR:-.}"
   bup_exists || { echo "Not a bup directory..."; return 1; }
   local BRANCH="${1:?No backup branch...}"
   local SRC="${2:?Nothing to restore...}"
@@ -43,6 +41,7 @@ bup_restore() {
 
 # Make a tar backup
 bup_tar() {
+  local BUP_DIR="${BUP_DIR:-.}"
   bup_exists || { echo "Not a bup directory..."; return 1; }
   local BRANCH="${1:?No backup branch specified...}"
   local SRC="${2:?Nothing to backup...}"
@@ -53,6 +52,7 @@ bup_tar() {
 
 # Restore from tar backup
 bup_untar() {
+  local BUP_DIR="${BUP_DIR:-.}"
   bup_exists || { echo "Not a bup directory..."; return 1; }
   local BRANCH="${1:?No backup branch specified...}"
   local DST="${2:?No output directory...}"
@@ -64,22 +64,17 @@ bup_untar() {
 alias bup_ls='bup ls'
 
 # Show git log
-bup_log() {
-  bup_exists || { echo "Not a bup directory..."; return 1; }
-  git --git-dir="$BUP_DIR" log "$@"
-}
+alias bup_log='git --git-dir="$BUP_DIR" log'
 
 # Get repo size
-bup_size() {
-  bup_exists || { echo "Not a bup directory..."; return 1; }
-  du -s "$BUP_DIR"
-}
+alias bup_size='du -s "$BUP_DIR"'
 
 # Protect with PAR2
 alias bup_protect='bup fsck -g'
 
 # Encrypt a bup repo
 bup_encrypt() {
+  local BUP_DIR="${BUP_DIR:-.}"
   bup_exists || { echo "Not a bup directory..."; return 1; }
   local ARCHIVE="${1:?No output archive specified...}"
   local KEY="${2:?No encryption key specified...}"
@@ -88,6 +83,7 @@ bup_encrypt() {
 
 # gpg > tar deflate
 bup_decrypt(){
+  local BUP_DIR="${BUP_DIR:-.}"
   local ARCHIVE="${1:?No input archive specified...}"
   local DIR="${2:-${BUP_DIR:-.}}"
   gpg --decrypt "$ARCHIVE" | tar -xvf - -C "$DIR"

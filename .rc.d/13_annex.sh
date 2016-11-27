@@ -325,6 +325,35 @@ annex_revert() {
   git annex proxy -- git revert "${1:-HEAD}"
 }
 
+# Clean log by rebuilding branch git-annex & master
+annex_clean() {
+  # Stop on error
+  ( set -e
+    annex_exists || return 1
+    if [ $(git_st | wc -l) -ne 0 ]; then
+      echo "Some changes are pending. Abort ..."
+      return 2
+    fi
+    # Rebuild master branch
+    git branch -m old-master
+    git checkout --orphan master
+    git add .
+    git commit -m 'first commit'
+    # Rebuild git-annex branch
+    git branch -m git-annex old-git-annex
+    git checkout old-git-annex
+    git checkout --orphan git-annex
+    git add .
+    git commit -m 'first commit'
+    git checkout master
+    # Cleanup
+    git branch -D old-master old-git-annex
+    git reflog expire --expire=now --all
+    git prune
+    git gc
+  )
+}
+
 ########################################
 ########################################
 # Last commands in file
