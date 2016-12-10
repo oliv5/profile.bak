@@ -1,0 +1,43 @@
+[DEFAULT]
+#skip = mr_skip
+skip = [ ! -z "$VCSH_REPO_NAME" ] && echo "WARNING: Mr is run from a VCSH repo !!!!"
+
+# Mr actions
+#lib = 
+	# Check whether to skip this action or not
+	#mr_skip() {
+	#	{
+	#		[ ! -z "$VCSH_REPO_NAME" ] && echo "WARNING: Mr is run from a VCSH repo !!!!"
+	#	}
+	#	||
+	#	{
+	#		[ -r "$HOME/.mrskip" ] && {
+	#			local MR_NAME="$(basename "${MR_REPO}" .git)"
+	#			local HOSTNAME="$(uname -n)"
+	#			grep -iE "^($HOSTNAME|):($MR_REPO|):($MR_NAME|):($MR_ACTION|)$" "$HOME/.mrskip" >/dev/null 2>&1; 
+	#		}
+	#	}
+	#}
+	# Ask user something
+	#mr_ask() {
+	#	local TEXT="$1"
+	#	local REPLY=""
+	#	shift
+	#	read -p "${TEXT}${@:+ ($@)}: " REPLY
+	#	if [ -z "$REPLY" ]; then
+	#		REPLY="$@"
+	#	fi
+	#	echo "$REPLY"
+	#}
+
+# Load git library
+lib = . "$RC_DIR/.rc.d/12_git.sh"
+	  . "$RC_DIR/.rc.d/13_vcsh.sh"
+	  . "$RC_DIR/.rc.d/13_annex.sh"
+	  . "$RC_DIR/.rc.d/13_repo.sh"
+
+# Include our repositories
+include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/lib.d/null" 2>/dev/null || true
+include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/hosts.d/$(uname -n | tr 'A-Z' 'a-z')" 2>/dev/null || true
+include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/"* || true
+include = cat .mrconfig.local 2>/dev/null || true
