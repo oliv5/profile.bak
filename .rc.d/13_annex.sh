@@ -46,7 +46,12 @@ annex_bare() {
 
 # Init annex
 annex_init() {
-  git annex init "$(uname -n)"
+  git init "$1" && git annex init "${2:-$(uname -n)}"
+}
+
+# Init annex bare repo
+annex_init_bare() {
+  git init --bare "$1" && git annex init "${2:-$(uname -n)}"
 }
 
 # Uninit annex
