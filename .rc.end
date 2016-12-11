@@ -25,7 +25,7 @@ fi
 ################################
 # Setup path
 path_prepend "$HOME/bin" "$HOME/.local/bin" "$HOME/pbin" "$HOME/pbin/wrappers"
-path_append /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin
+path_append /usr/local/bin /usr/local/sbin /usr/bin /usr/sbin /bin /sbin
 path_append "$HOME/pbin/externals"
 path_cleanup
 
