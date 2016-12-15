@@ -149,6 +149,11 @@ git_branch_delete_remote() {
   done
 }
 
+# Set an existing branch to a given SHA1
+git_branch_jump() {
+  git fetch . "${2:?No destination specified...}" "${1:?No source specified...}"
+}
+
 # Get current branch tracking
 git_tracking() {
   git ${1:+--git-dir="$1"} rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null
