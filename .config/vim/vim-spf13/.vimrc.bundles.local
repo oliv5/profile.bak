@@ -47,6 +47,7 @@
 	"Bundle 'vim-scripts/highlight.vim'
 	Bundle 'mtth/scratch.vim'
 	Bundle 'airblade/vim-gitgutter'
+	Bundle 'vim-latex/vim-latex'
 " }
 
 " Disable unwanted bundles {
