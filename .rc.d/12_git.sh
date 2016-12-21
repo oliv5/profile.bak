@@ -106,6 +106,8 @@ git_root() {
   git_bare "$@" && git_dir "$@" || git_worktree "$@"
 }
 
+########################################
+
 # Get current branch name
 # Hide errors when ref is unknown
 git_branch() {
@@ -160,6 +162,22 @@ git_tracking() {
   #git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD) 2>/dev/null
 }
 
+# Get local branches names
+git_branches() {
+  git ${2:+--git-dir="$2"} for-each-ref --format='%(refname:short)' refs/heads/ | xargs echo
+}
+git_branches_info() {
+  for branch in $(git branch -r $@ | grep -v HEAD); do
+    echo -e $(git show --format="%ci %cr %an" $branch | head -n 1) \\t$branch
+  done | sort -r
+}
+
+# Get merged branches
+git_branch_merged() {
+  git branch --${2:+no-}merged ${1}
+}
+
+########################################
 # Get remote url
 git_url() {
   git ${2:+--git-dir="$2"} config --get remote.${1}.url
@@ -176,16 +194,6 @@ git_st() {
 }
 git_stx() {
   git status -z | awk 'BEGIN{RS="\0"; ORS="\0"}/'"^[\? ]?$1"'/{print substr($0,4)}'
-}
-
-# Get local branches names
-git_branches() {
-  git ${2:+--git-dir="$2"} for-each-ref --format='%(refname:short)' refs/heads/ | xargs echo
-}
-git_branches_info() {
-  for branch in $(git branch -r $@ | grep -v HEAD); do 
-    echo -e $(git show --format="%ci %cr %an" $branch | head -n 1) \\t$branch
-  done | sort -r
 }
 
 # Get remote names
@@ -918,6 +926,20 @@ git_find() {
 # Create a tag
 git_tag_create() {
   git tag "tag_$(date +%Y%m%d-%H%M%S).$(git_branch)${1:+_$1}"
+}
+
+########################################
+# Easy amend of previous commit
+git_amend_squash() {
+  local COMMIT="${1:-HEAD}"
+  git add -u &&
+  git commit --squash="$COMMIT" -m "" &&
+  git rebase --interactive --autosquash "${COMMIT}~2"
+}
+git_amend_fixup() {
+  git add -u &&
+  git commit --fixup="$COMMIT" -m "" &&
+  git rebase --interactive --autosquash "${COMMIT}~2"
 }
 
 ########################################
