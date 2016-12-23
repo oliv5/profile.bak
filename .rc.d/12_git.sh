@@ -930,16 +930,17 @@ git_tag_create() {
 
 ########################################
 # Easy amend of previous commit
-git_amend_squash() {
+git_squash() {
   local COMMIT="${1:-HEAD}"
-  git add -u &&
+  local AHEAD="${2:-2}"
   git commit --squash="$COMMIT" -m "" &&
-  git rebase --interactive --autosquash "${COMMIT}~2"
+  git rebase --interactive --autosquash "${COMMIT}~${AHEAD}"
 }
-git_amend_fixup() {
-  git add -u &&
-  git commit --fixup="$COMMIT" -m "" &&
-  git rebase --interactive --autosquash "${COMMIT}~2"
+git_fixup() {
+  local COMMIT="${1:-HEAD}"
+  local AHEAD="${2:-2}"
+  git commit --fixup="$COMMIT" &&
+  git rebase --interactive --autosquash "${COMMIT}~${AHEAD}"
 }
 
 ########################################
