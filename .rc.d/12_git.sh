@@ -1085,6 +1085,8 @@ alias gco='git checkout'
 alias gre='git reset'
 alias greh='git reset --hard'
 alias grh='git reset HEAD'
+alias grh1='git reset HEAD~'
+alias grh2='git reset HEAD~2'
 alias grhh='git reset HEAD --hard'
 alias git_rollback='git reset'
 # Amend last commit
