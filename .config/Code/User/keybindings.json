@@ -27,15 +27,12 @@
 { "key": "ctrl+alt+b",            "command": "workbench.action.toggleSidebarVisibility" },
 { "key": "ctrl+alt+h",            "command": "workbench.action.output.toggleOutput" },
 
-// Close panels
-{ "key": "escape",                "command": "workbench.action.toggleSidebarVisibility", "when": "searchViewletVisible" },
-
 // Panels quick bindings
 { "key": "f12",                   "command": "workbench.action.toggleFullScreen" },
 { "key": "shift+f12",             "command": "workbench.action.togglePanel" },
 { "key": "ctrl+f12",              "command": "workbench.action.toggleSidebarVisibility" },
-{ "key": "ctrl+shift+f12",        "command":"workbench.action.toggleSidebarPosition" },
-{ "key": "ctrl+b",                "command": "workbench.view.toggleSidebarVisibility" },
+{ "key": "ctrl+shift+f12",        "command": "workbench.action.toggleSidebarPosition" },
+{ "key": "ctrl+b",                "command": "workbench.action.toggleSidebarVisibility" },
 { "key": "ctrl+e",                "command": "workbench.view.explorer" },
 
 // Editors management
@@ -103,6 +100,4 @@
 { "key": "ctrl+q",                "command": "editor.action.commentLine", "when": "editorTextFocus" },
 { "key": "ctrl+shift+q",          "command": "editor.action.blockComment", "when": "editorTextFocus" },
 
-// END
-{ "key": "",                      "command": "" }
 ]
