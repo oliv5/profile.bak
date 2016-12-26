@@ -175,6 +175,11 @@ annex_bundle() {
   fi
 }
 
+# Annex sync
+alias annex_ci='git annex sync --no-push --no-pull'
+alias annex_push='git annex sync --no-commit --no-pull'
+alias annex_pull='git annex sync --no-commit --no-push'
+
 # Annex get
 alias annex_get_auto='git annex get --auto'
 alias annex_get_fast='git annex get --fast'
