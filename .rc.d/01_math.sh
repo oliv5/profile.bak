@@ -6,6 +6,7 @@ min() { echo $(($1<$2?$1:$2)); }
 max() { echo $(($1>$2?$1:$2)); }
 lim() { max $(min $1 $3) $2; }
 isint() { expr 2 "*" "$1" + 1 >/dev/null 2>&1; }
+alias avg="awk '{a+=\$1} END{print a/NR}'"
 
 # Conversion to integer using printf
 _int() {
