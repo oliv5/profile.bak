@@ -31,24 +31,26 @@ OPTS="-v -r -z -s -i --size-only"
     }
 
     # Get args
-    while getopts "bsdtlvc:hf:mp" FLAG
+    while getopts "bsdtilvc:hf:mp" FLAG
     do
       case "$FLAG" in
         b) OPTS="${OPTS} ${OPT_BACKUP}";;
         s) OPTS="${OPTS} ${OPT_DRYRUN}";;
         d) OPTS="${OPTS} ${OPT_DELETE}";;
         t) OPTS="${OPTS} -T $(mktemp -d)";;
+        i) OPTS="${OPTS} --inplace";;
         l) LOGGER="logger"; VERBOSE="";;
         v) VERBOSE="";;
         c) CHECKMOUNT="${OPTARG}";;
         f) ;; # for compatibility with old script
         m) ;; # for compatibility with old script
         p) DIFF="1"; OPTS="${OPTS} ${OPT_DRYRUN} ${OPT_DELETE}";;
-        h) echo >&2 "Usage: `basename $0` [-s] [-d] [-l] [-v] [-c dir] [-p] -- src dst ..."
+        h) echo >&2 "Usage: `basename $0` [-s] [-d] [-t] [-i] [-l] [-v] [-c dir] [-p] -- src dst ..."
            echo >&2 "-s   show only (dry run)"
            echo >&2 "-p   make a diff only"
            echo >&2 "-d   delete unknown destination files"
            echo >&2 "-t   use /tmp as temporary storage"
+           echo >&2 "-i   copy in place (not temp file)"
            echo >&2 "-l   use system logger instead of stdout"
            echo >&2 "-v   be verbose"
            echo >&2 "-c   mountpoint to check in both src/dst"
