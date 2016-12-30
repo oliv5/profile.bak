@@ -37,27 +37,41 @@ _path_remove() {
 }
 
 # Remove given fs from path
-_path_removefs() {
+_path_remove_fs() {
   local VAR="${1:-PATH}"
   local FS="${2:-cifs|fusefs|nfs}"
   export $VAR="$(
-  eval echo "\$$VAR:" | 
+  eval echo "\$$VAR" |
     while read -d: D; do
-      if [ -z "$(stat -f -c %T "$D" | grep "$FS")" ]; then
+      if ! stat -f -c %T "$D" 2>/dev/null | grep -Eq "$FS"; then
         printf "$D:"
       fi
     done
   )"
 }
 
-# Cleanup path
+# Remove absent path
+_path_remove_abs() {
+  local VAR="${1:-PATH}"
+  export $VAR="$(
+  eval echo "\$$VAR" |
+    while read -d: D; do
+      SIZE="$(stat -c %s "$D" 2>/dev/null)"
+      if [ -n "$SIZE" -a "$SIZE" != "0" ]; then
+        printf "$D:"
+      fi
+    done
+  )"
+}
+
+# Cleanup path (remove duplicated entries)
 _path_cleanup() {
   local VAR="${1:-PATH}"
   shift
   #eval export $VAR="$(echo "\$$VAR" | awk 'NF && !x[$0]++' RS='[:|\n]' ORS=':' | sed -r 's|~|'"${HOME}"'|g; s|\:\.||g; s|(^:\|:$)||')"
   export $VAR="$(
-    str_uniq : : "$(eval echo "\$$VAR")" | 
-    awk 'NF && !x[$0]++' RS='[:|\n]' ORS=':' | 
+    str_uniq : : "$(eval echo "\$$VAR")" |
+    awk 'NF && !x[$0]++' RS='[:|\n]' ORS=':' |
     sed -r 's|~|'"${HOME}"'|g; s|\:\.||g; s|(^:\|:$)||')"
 }
 
@@ -65,7 +79,8 @@ _path_cleanup() {
 alias path_prepend='_path_prepend PATH'
 alias path_append='_path_append PATH'
 alias path_remove='_path_remove PATH'
-alias path_removefs='_path_removefs PATH'
+alias path_remove_fs='_path_remove_fs PATH'
+alias path_remove_abs='_path_remove_abs PATH'
 alias path_cleanup='_path_cleanup PATH'
 alias path_abs='readlink -f --'
 
@@ -75,5 +90,6 @@ alias path_abs='readlink -f --'
 alias ldlibpath_prepend='_path_prepend LD_LIBRARY_PATH'
 alias ldlibpath_append='_path_append LD_LIBRARY_PATH'
 alias ldlibpath_remove='_path_remove LD_LIBRARY_PATH'
-alias ldlibpath_removefs='_path_removefs LD_LIBRARY_PATH'
+alias ldlibpath_remove_fs='_path_remove_fs LD_LIBRARY_PATH'
+alias ldlibpath_remove_abs='_path_remove_abs LD_LIBRARY_PATH'
 alias ldlibpath_cleanup='_path_cleanup LD_LIBRARY_PATH'
