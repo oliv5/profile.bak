@@ -70,7 +70,8 @@ git_version() {
 # Check repo exists
 git_exists() {
   #git ${1:+--work-tree="$1"} rev-parse --verify "HEAD" >/dev/null 2>&1
-  git ${1:+--git-dir="$1"} rev-parse --verify HEAD >/dev/null 2>&1
+  #git ${1:+--git-dir="$1"} rev-parse --verify HEAD >/dev/null 2>&1
+  git ${1:+--git-dir="$1"} rev-parse >/dev/null 2>&1
 }
 
 # Check bare repo attribute
