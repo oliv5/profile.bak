@@ -902,7 +902,9 @@ git_search() {
 
 ########################################
 # Git gc all
-alias git_gc='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; git gc"'
+alias git_gc='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; pwd; git gc"'
+alias git_repack='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack"'
+alias git_pack='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; pwd; git gc; git repack"'
 
 # Find git directory
 ff_git() {
@@ -920,6 +922,12 @@ git_find() {
 	ff_git0 "${1:-.}" |
 		while read -d $'\0' DIR; do
 			git_exists "$DIR" && printf "'%s'\n" "$DIR"
+		done 
+}
+git_find0() {
+	ff_git0 "${1:-.}" |
+		while read -d $'\0' DIR; do
+			git_exists "$DIR" && printf "%s\0" "$DIR"
 		done 
 }
 
