@@ -564,7 +564,7 @@ if !exists('loaded_commentary')
 	autocmd FileType c,cpp set commentstring=//%s
 	autocmd FileType py,sh set commentstring=#%s
 	" Key mapping
-	FnMap <c-q>		:normal gcc<CR>
+	FnNoremap <c-q>		:normal gcc<CR>
 	snoremap <c-q>		<c-o>:normal gcc<CR>
 endif
 

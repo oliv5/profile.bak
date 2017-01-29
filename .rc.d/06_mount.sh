@@ -90,6 +90,7 @@ umount_nfs() {
   local TMPFS="${4:-nfstmp}"
   #local TMPFS="${4:-fakenfs}"
   sudo sh -c "
+    sh -c 'echo 0 > /proc/sys/kernel/hung_task_timeout_secs'
     ifconfig $ITF:$TMPFS $IP netmask 255.255.255.255
     umount -f -l \"$MOUNTPOINT\"
     ifconfig $ITF:$TMPFS down
