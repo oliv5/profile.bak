@@ -47,3 +47,20 @@ ask_passwd() {
   stty echo; trap - INT
   echo $PASSWD
 }
+
+################################
+# Move files based on extensions
+movefiles() {
+  local SRC="${1?No source specified...}"
+  local DST="${2?No destination specified...}"
+  local MNT="${3?No mountpoint specified...}"
+  local EXCLUDE=""
+  shift 3
+  for EXT; do EXCLUDE="${EXCLUDE:+$EXCLUDE }--exclude=$EXT"; done
+  [ -n "$MNT" ] && sudo mount "$MNT"
+  while [ -z "$MNT" ] || mountpoint "$MNT" >/dev/null; do
+    rsync -av --progress --remove-source-files $EXCLUDE "$SRC" "$DST" 2>/dev/null
+    echo "Waiting for file ..."
+    sleep 10s
+  done
+}
