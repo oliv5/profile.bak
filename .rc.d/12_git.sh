@@ -466,6 +466,7 @@ git_set_tracking() {
 git_bundle() {
   git_exists || return 1
   local DIR="${1:-$(git_dir)/bundle}"
+  mkdir -p "$DIR"
   if [ -d "$DIR" ]; then
     local BUNDLE="$DIR/${2:-$(git_name "bundle").git}"
     local GPG_RECIPIENT="$3"

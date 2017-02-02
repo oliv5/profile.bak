@@ -148,6 +148,7 @@ annex_bundle() {
   git_exists || return 1
   if annex_exists; then
     local DIR="${1:-$(git_dir)/bundle}"
+    mkdir -p "$DIR"
     if [ -d "$DIR" ]; then
       local BUNDLE="$DIR/${2:-$(git_name "annex").tgz}"
       local GPG_RECIPIENT="$3"
