@@ -25,6 +25,8 @@ xrandr_setres() {
   xrandr -s "${ARG1:-0}" "$@"
 }
 alias xrandr_refresh='xrandr_setres 0'
+alias xrandr_1600='xrandr_setres 1600x1200'
+alias xrandr_1360='xrandr_setres 1360x768'
 alias xrandr_1280='xrandr_setres 1280x1024'
 alias xrandr_1024='xrandr_setres 1024x768'
 alias xrandr_800='xrandr_setres 800x600'
