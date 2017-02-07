@@ -537,7 +537,7 @@ git_upkeep() {
   fi
   # Commit
   if [ -n "$COMMIT" ]; then
-      $DBG git commit -m "$MSG" || return $?
+      $DBG git commit -m "$MSG" || return 0 # return 0 when nothing to be committed
   fi
   # Pull
   if [ -n "$PULL" ]; then
@@ -1116,12 +1116,11 @@ alias gupa='git_pull_all'
 alias gfe='git fetch'
 alias gfa='git fetch --all'
 # Config aliases
-alias gcl='git config -l'
 alias gcg='git config --get'
 alias gcs='git config --set'
-alias gcfg='git config'
-alias gcfgl='git config -l'
-alias gcfgg='git config -g'
+alias gcl='git config -l'
+alias gcf='git config -l'
+alias gcfg='git config -g'
 alias gconfig='git config'
 # Git ignore changes
 alias git_ignore_changes='git update-index --assume-unchanged'
