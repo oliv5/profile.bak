@@ -12,10 +12,11 @@ ExitHandler() {
   # Release mutex & exit
   rm "$PIDFILE" 2>/dev/null
   # Kill running binaries
-  kill ${2:--TERM} -- -$$ 2>/dev/null
+  kill -s ${2:-TERM} -- -$$ 2>/dev/null
   # The end
-  #exit $1
-  kill ${2:--TERM} $$
+  killall -q -s ${2:-TERM} ripme ripme.sh
+  kill -s ${2:-TERM} $$
+  exit $1
 }
 
 # Check output filename to prevent overwrites
@@ -51,6 +52,7 @@ SPEED="2"
 RENAME=""
 OVERWRITE=""
 INSTALL=""
+DELTMP=""
 METHOD="mplayer"
 PKGINSTALL="apt-get install"
 PKGREPO="add-apt-repository"
@@ -60,7 +62,7 @@ SPEED_DVD=(1 2 4 8 12 16)
 SPEED_CD=(1 2 4 8 12 24)
 
 # Get command line options
-while getopts :t:d:e:m:o:u:f:c:s:a:rwnik OPTNAME
+while getopts :t:d:e:m:o:u:f:c:s:a:rwnizk OPTNAME
 do case "$OPTNAME" in
   t)  TYPE="$OPTARG";;
   d)  DEVICE="$OPTARG";;
@@ -76,6 +78,7 @@ do case "$OPTNAME" in
   w)  OVERWRITE="1"; RENAME="";;
   n)  DRYRUN="echo";;
   i)  INSTALL=1;;
+  z)  DELTMP="true";;
   k)  ExitHandler 0 KILL;;
   [?]) echo >&2 "Ripme $VERSION - rips dvd, audio cd, extracts subtitles"
        echo >&2 "Usage: $(basename $0) [options]"
@@ -93,6 +96,7 @@ do case "$OPTNAME" in
        echo >&2 "-w         Allow output file overwrite (disabled). Exclusive with -r"
        echo >&2 "-n         No dump, simulate only"
        echo >&2 "-i         Install necessary software"
+       echo >&2 "-z         Keep temporary files"
        echo >&2 "-k         Kill all ripme processes"
        exit 1;;
   esac
@@ -252,7 +256,7 @@ if [ "$TYPE" = "dvd" ]; then
         TMP="/tmp/tmp_$(basename ${0%.*})"
         $DRYRUN mencoder dvd://${TRACK} ${DEVICE:+-dvd-device "$DEVICE"} -endpos 0 -nosound -ovc frameno -sid 0x20 -vobsubout "$TMP" -o /dev/null >/dev/null 2>&1
         PALETTE="$(grep palette \"$TMP.idx\" 2>/dev/null)"
-        $DRYRUN rm "$TMP.idx" "$TMP.sub"
+        $DRYRUN $DELTMP rm "$TMP.idx" "$TMP.sub"
       fi
 
       # Prepare subtitles extraction
@@ -362,7 +366,7 @@ elif [ "$TYPE" = "cdda" ]; then
     #$DRYRUN mplayer cdda://${TRACK} ${DEVICE:+-cdrom-device "$DEVICE"} -nocache -dumpstream -dumpfile "$TMPFILE"
     $DRYRUN cdparanoia ${TRACK} -d "${DEVICE}" "${TMPFILE}"
     #$DRYRUN sh -c "oggenc -q 7 \"${TMPFILE}\" -o \"${DUMPFILE}\" ; rm \"${TMPFILE}\"" &
-    $DRYRUN sh -c "oggenc -q 7 \"${TMPFILE}\" -o \"${DUMPFILE}\"" &
+    $DRYRUN sh -c "oggenc -q 7 \"${TMPFILE}\" -o \"${DUMPFILE}\" && ${DELTMP} rm -v \"${TMPFILE}\"" &
   done
 
   # Wait for children
