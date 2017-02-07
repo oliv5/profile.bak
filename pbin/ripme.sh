@@ -51,6 +51,7 @@ ALANGS="en"
 SPEED="2"
 RENAME=""
 OVERWRITE=""
+USERNAME=""
 DELTMP=""
 METHOD="mplayer"
 DEVINFO="/tmp/$(basename $0).$(date +%s).tmp"
@@ -58,7 +59,7 @@ SPEED_DVD=(1 2 4 8 12 16)
 SPEED_CD=(1 2 4 8 12 24)
 
 # Get command line options
-while getopts :t:d:e:m:o:i:f:c:s:a:rwnzk OPTNAME
+while getopts :t:d:e:m:o:i:u:f:c:s:a:rwnzk OPTNAME
 do case "$OPTNAME" in
   t)  TYPE="$OPTARG";;
   d)  DEVICE="$OPTARG";;
@@ -66,6 +67,7 @@ do case "$OPTNAME" in
   m)  METHOD="$OPTARG";;
   o)  ODIR="$OPTARG";;
   i)  ADIR="$OPTARG";;
+  u)  USERNAME="$OPTARG";;
   f)  TITLE="$OPTARG";;
   c)  TRACKS="$OPTARG";;
   s)  SLANGS="$OPTARG";;
@@ -108,11 +110,14 @@ echo $$ 1>&200
 # Log preamble
 echo >&2 "[ripme] Start at $(date)"
 echo >&2 "[ripme] Command-line: ripme.sh $ARGS"
-echo >&2 "[ripme] User: $USER"
+echo >&2 "[ripme] Video output directory: ${ODIR}"
+echo >&2 "[ripme] Audio output directory: ${ADIR}"
+echo >&2 "[ripme] By user: $USER"
+echo >&2 "[ripme] For user: ${USERNAME:-$USER}"
 touch "$DEVINFO"
 
 # List used software
-echo >&2 "Using the following packages:"
+echo >&2 "[ripme] Using the following packages:"
 echo >&2 "  vlc mplayer cdparanoia"
 echo >&2 "  transcode subtitleripper"
 echo >&2 "  ppa:ruediger-c-plusplus/vobsub2srt libavutil-dev libtiff4-dev"
@@ -296,7 +301,7 @@ if [ "$TYPE" = "dvd" ]; then
 
     # Set output files/directory ownership
     if [ ! -z "$DUMPFILE" ]; then
-      $DRYRUN chown --reference="${ODIR}" "$ODIR" "$DUMPFILE"
+      [ -n "$USERNAME" ] && $DRYRUN chown -R "$USERNAME" "$ODIR" "$DUMPFILE"
     fi
 
   done
@@ -363,7 +368,7 @@ elif [ "$TYPE" = "cdda" ]; then
   wait
 
   # Set output files/directory ownership
-  $DRYRUN chown -R --reference="${ODIR}" "$ODIR"
+  [ -n "$USERNAME" ] && $DRYRUN chown -R "$USERNAME" "$ODIR"
 
 elif [ "$TYPE" = "auto" ]; then
 
