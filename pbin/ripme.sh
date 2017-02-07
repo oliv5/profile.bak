@@ -51,18 +51,14 @@ ALANGS="en"
 SPEED="2"
 RENAME=""
 OVERWRITE=""
-INSTALL=""
 DELTMP=""
 METHOD="mplayer"
-PKGINSTALL="apt-get install"
-PKGREPO="add-apt-repository"
-PKGUPDATE="apt-get update"
 DEVINFO="/tmp/$(basename $0).$(date +%s).tmp"
 SPEED_DVD=(1 2 4 8 12 16)
 SPEED_CD=(1 2 4 8 12 24)
 
 # Get command line options
-while getopts :t:d:e:m:o:u:f:c:s:a:rwnizk OPTNAME
+while getopts :t:d:e:m:o:u:f:c:s:a:rwnzk OPTNAME
 do case "$OPTNAME" in
   t)  TYPE="$OPTARG";;
   d)  DEVICE="$OPTARG";;
@@ -77,7 +73,6 @@ do case "$OPTNAME" in
   r)  RENAME="1"; OVERWRITE="";;
   w)  OVERWRITE="1"; RENAME="";;
   n)  DRYRUN="echo";;
-  i)  INSTALL=1;;
   z)  DELTMP="true";;
   k)  ExitHandler 0 KILL;;
   [?]) echo >&2 "Ripme $VERSION - rips dvd, audio cd, extracts subtitles"
@@ -95,7 +90,6 @@ do case "$OPTNAME" in
        echo >&2 "-r         Rename existing output file (disabled). Exclusive with -w"
        echo >&2 "-w         Allow output file overwrite (disabled). Exclusive with -r"
        echo >&2 "-n         No dump, simulate only"
-       echo >&2 "-i         Install necessary software"
        echo >&2 "-z         Keep temporary files"
        echo >&2 "-k         Kill all ripme processes"
        exit 1;;
@@ -117,17 +111,13 @@ echo >&2 "[ripme] Command-line: ripme.sh $ARGS"
 echo >&2 "[ripme] User: $USER"
 touch "$DEVINFO"
 
-# Install necessary software
-if [ ! -z "$INSTALL" ]; then
-  $DRYRUN sudo $PKGINSTALL ppa:ruediger-c-plusplus/vobsub2srt
-  $DRYRUN sudo $PKGUPDATE
-  $DRYRUN sudo $PACKAGEMANAGER vlc
-  $DRYRUN sudo $PACKAGEMANAGER mplayer
-  $DRYRUN sudo $PACKAGEMANAGER hdparm
-  $DRYRUN sudo $PACKAGEMANAGER transcode subtitleripper
-  $DRYRUN sudo $PACKAGEMANAGER vobsub2srt libavutil-dev libtiff4-dev libtesseract-dev tesseract-ocr-eng tesseract-ocr-fra
-  $DRYRUN sudo $PACKAGEMANAGER qpxtool hdparm
-fi
+# List used software
+echo >&2 "Using the following packages:"
+echo >&2 "  vlc mplayer cdparanoia"
+echo >&2 "  transcode subtitleripper"
+echo >&2 "  ppa:ruediger-c-plusplus/vobsub2srt libavutil-dev libtiff4-dev"
+echo >&2 "  libtesseract-dev tesseract-ocr-eng tesseract-ocr-fra"
+echo >&2 "  qpxtool cdvdcontrol hdparm eject "
 
 # Read DVD information
 if [ "$TYPE" = "auto" -o "$TYPE" = "dvd" ]; then
