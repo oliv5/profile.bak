@@ -58,14 +58,14 @@ SPEED_DVD=(1 2 4 8 12 16)
 SPEED_CD=(1 2 4 8 12 24)
 
 # Get command line options
-while getopts :t:d:e:m:o:u:f:c:s:a:rwnzk OPTNAME
+while getopts :t:d:e:m:o:i:f:c:s:a:rwnzk OPTNAME
 do case "$OPTNAME" in
   t)  TYPE="$OPTARG";;
   d)  DEVICE="$OPTARG";;
   e)  SPEED="$(($OPTARG - 1))";;
   m)  METHOD="$OPTARG";;
   o)  ODIR="$OPTARG";;
-  u)  ADIR="$OPTARG";;
+  i)  ADIR="$OPTARG";;
   f)  TITLE="$OPTARG";;
   c)  TRACKS="$OPTARG";;
   s)  SLANGS="$OPTARG";;
@@ -82,7 +82,7 @@ do case "$OPTNAME" in
        echo >&2 "-e speed   Device read speed : 1,2,... (2)"
        echo >&2 "-m method  Ripping method: tccat, mplayer, vlc (mplayer)"
        echo >&2 "-o dir     Output directory (current)"
-       echo >&2 "-u dir     Audio output directory override (none)"
+       echo >&2 "-i dir     Audio output directory override (none)"
        echo >&2 "-f file    Output filename (media title)"
        echo >&2 "-c tracks  Track numbers: all,disc,longest,0,1,2,... (longest)"
        echo >&2 "-s langs   DVD subtitles languages: en,fr,es,... (none)"
