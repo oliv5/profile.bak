@@ -53,13 +53,14 @@ RENAME=""
 OVERWRITE=""
 USERNAME=""
 DELTMP=""
-METHOD="mplayer"
+METHOD=""
+CODEC=""
 DEVINFO="/tmp/$(basename $0).$(date +%s).tmp"
 SPEED_DVD=(1 2 4 8 12 16)
 SPEED_CD=(1 2 4 8 12 24)
 
 # Get command line options
-while getopts :t:d:e:m:o:i:u:f:c:s:a:rwnzk OPTNAME
+while getopts :t:d:e:m:o:i:u:f:x:c:s:a:rwnzk OPTNAME
 do case "$OPTNAME" in
   t)  TYPE="$OPTARG";;
   d)  DEVICE="$OPTARG";;
@@ -69,7 +70,8 @@ do case "$OPTNAME" in
   i)  ADIR="$OPTARG";;
   u)  USERNAME="$OPTARG";;
   f)  TITLE="$OPTARG";;
-  c)  TRACKS="$OPTARG";;
+  x)  TRACKS="$OPTARG";;
+  c)  CODEC="$OPTARG";;
   s)  SLANGS="$OPTARG";;
   a)  ALANGS="$OPTARG";;
   r)  RENAME="1"; OVERWRITE="";;
@@ -82,11 +84,12 @@ do case "$OPTNAME" in
        echo >&2 "-t type    Media type: auto, dvd, cdda (auto)"
        echo >&2 "-d device  Device name in /dev (/dev/dvd)"
        echo >&2 "-e speed   Device read speed : 1,2,... (2)"
-       echo >&2 "-m method  Ripping method: tccat, mplayer, vlc (mplayer)"
+       echo >&2 "-m method  Ripping method: tccat, mplayer, vlc (mplayer), cdparanoia"
        echo >&2 "-o dir     Output directory (current)"
        echo >&2 "-i dir     Audio output directory override (none)"
        echo >&2 "-f file    Output filename (media title)"
-       echo >&2 "-c tracks  Track numbers: all,disc,longest,0,1,2,... (longest)"
+       echo >&2 "-x tracks  Track numbers: all,disc,longest,0,1,2,... (longest)"
+       echo >&2 "-c codec   Audio codec: mp3, flac, aac, mpc, ogg; Video codec: not used"
        echo >&2 "-s langs   DVD subtitles languages: en,fr,es,... (none)"
        echo >&2 "-a langs   DVD audio languages: en,fr,es,... (en) - only with vlc"
        echo >&2 "-r         Rename existing output file (disabled). Exclusive with -w"
@@ -119,10 +122,11 @@ touch "$DEVINFO"
 # List used software
 echo >&2 "[ripme] Using the following packages:"
 echo >&2 "  vlc mplayer cdparanoia"
+echo >&2 "  oggenc lame flac mpc ffmpeg"
 echo >&2 "  transcode subtitleripper"
 echo >&2 "  ppa:ruediger-c-plusplus/vobsub2srt libavutil-dev libtiff4-dev"
 echo >&2 "  libtesseract-dev tesseract-ocr-eng tesseract-ocr-fra"
-echo >&2 "  qpxtool cdvdcontrol hdparm eject "
+echo >&2 "  qpxtool cdvdcontrol hdparm eject"
 
 # Read DVD information
 if [ "$TYPE" = "auto" -o "$TYPE" = "dvd" ]; then
@@ -134,6 +138,10 @@ if [ "$TYPE" = "auto" -o "$TYPE" = "dvd" ]; then
   elif [ "$TYPE" = "dvd" ]; then
     echo >&2 "[ripme] Error: cannot read DVD information from device '$DEVICE'..."
     ExitHandler 1
+  fi
+  # Set default ripping method
+  if [ -z "$METHOD" ]; then
+    METHOD="mplayer"
   fi
 fi
 
@@ -151,6 +159,13 @@ if [ "$TYPE" = "auto" -o "$TYPE" = "cdda" ]; then
   # Get audio output directory
   if [ ! -z "$ADIR" ]; then
     ODIR="$ADIR"
+  fi
+  # Set default ripping method & codec
+  if [ -z "$METHOD" ]; then
+    METHOD="cdparanoia"
+  fi
+  if [ -z "$CODEC" ]; then
+    CODEC="ogg"
   fi
 fi
 
@@ -357,11 +372,25 @@ elif [ "$TYPE" = "cdda" ]; then
       continue
     fi
 
-    # Ripnow
-    #$DRYRUN mplayer cdda://${TRACK} ${DEVICE:+-cdrom-device "$DEVICE"} -nocache -dumpstream -dumpfile "$TMPFILE"
-    $DRYRUN cdparanoia ${TRACK} -d "${DEVICE}" "${TMPFILE}"
-    #$DRYRUN sh -c "oggenc -q 7 \"${TMPFILE}\" -o \"${DUMPFILE}\" ; rm \"${TMPFILE}\"" &
-    $DRYRUN sh -c "oggenc -q 7 \"${TMPFILE}\" -o \"${DUMPFILE}\" && ${DELTMP} rm -v \"${TMPFILE}\"" &
+    # Rip CD to wav
+    if [ "$METHOD" = "cdparanoia" ]; then
+      $DRYRUN cdparanoia ${TRACK} -d "${DEVICE}" "${TMPFILE}"
+    else
+      $DRYRUN mplayer cdda://${TRACK} ${DEVICE:+-cdrom-device "$DEVICE"} -nocache -dumpstream -dumpfile "$TMPFILE"
+    fi
+    
+    # Encode from wav
+    if [ "$CODEC" = "mp3" ]; then
+      $DRYRUN sh -c "lame --replaygain-accurate -q 0 --vbr-new -V 3 \"${TMPFILE}\" \"${DUMPFILE}\" && ${DELTMP} rm -v \"${TMPFILE}\"" &
+    elif [ "$CODEC" = "aac" ]; then
+      $DRYRUN sh -c "ffmpeg -acodec libfaac -i \"${TMPFILE}\" \"${DUMPFILE}\" && ${DELTMP} rm -v \"${TMPFILE}\"" &
+    elif [ "$CODEC" = "mpc" ]; then
+      $DRYRUN sh -c "mpcenc --quality 9 \"${TMPFILE}\" \"${DUMPFILE}\" && ${DELTMP} rm -v \"${TMPFILE}\"" &
+    elif [ "$CODEC" = "flac" ]; then
+      $DRYRUN sh -c "flac -8 \"${TMPFILE}\" \"${DUMPFILE}\" && ${DELTMP} rm -v \"${TMPFILE}\"" &
+    else
+      $DRYRUN sh -c "oggenc -q 7 \"${TMPFILE}\" -o \"${DUMPFILE}\" && ${DELTMP} rm -v \"${TMPFILE}\"" &
+    fi
   done
 
   # Wait for children
