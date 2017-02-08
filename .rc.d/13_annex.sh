@@ -133,7 +133,7 @@ annex_status() {
 
 # Git status for scripts
 annex_st() {
-  git annex status | awk '/^[\? ]?'$1'[\? ]?/ {print "\""$2"\""}'
+  git annex status | awk -F'#;#.' '/^[\? ]?'$1'[\? ]?/ {sub(/ /,"#;#.");print $2}'
 }
 
 # Annex diff
