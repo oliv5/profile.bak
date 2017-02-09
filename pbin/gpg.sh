@@ -151,9 +151,7 @@ encrypt() {
 
   if [ -z "$RECIPIENT" ]; then
     # List the available keys
-    #KEYS=$(gpg --list-keys | egrep '^uid' | awk '{$1=$1;print}' | cut -d '(' -f1 | cut -d '<' -f1 | sed -e 's/uid //g;s/^[ \t]*//;s/[ \t]*$//;s/ /_/g')
-    #KEYS=$(gpg --list-keys | grep uid | grep -oE '<[^>]*>')
-    KEYS=$(gpg --list-keys | awk '/^uid/{$1="";print $0}')
+    KEYS=$(gpg --list-keys --with-colons | awk -F: '/pub/ {print $10}')
 
     # Select the key
     ###RECIPIENT=$(echo $KEYS | xargs zenity --title "Encryption Keys" --text "Select the key to be used for encryption" --list --radiolist --column "" --column "Available keys on your keyring:")
