@@ -278,11 +278,11 @@ git_clone() {
 
 # Batch pull the selected branches from their remote tracking
 git_pull() {
-	git_pull_branches "$(git_branch)" "$@"
+  git_pull_branches "$(git_branch)" "$@"
 }
 
 git_pull_all() {
-	git_pull_branches "" "$@"
+  git_pull_branches "" "$@"
 }
 
 # Batch pull existing branches from their remote tracking
@@ -431,7 +431,7 @@ fi
 
 # Batch push the current branch to all remotes
 git_push() {
-	git_push_all "${@:-}" "$(git_branch)"
+  git_push_all "${@:-}" "$(git_branch)"
 }
 
 # Batch push existing remote/branches
@@ -909,27 +909,44 @@ alias git_pack='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; pwd; git gc; git r
 
 # Find git directory
 ff_git() {
-	for DIR in "${@:-.}"; do
-		find ${DIR:-.} -type d -name '*.git' -prune
-	done
+  for DIR in "${@:-.}"; do
+    find ${DIR:-.} -type d -name '*.git' -prune
+  done
 }
 ff_git0() {
-	for DIR in "${@:-.}"; do
-		find ${DIR:-.} -type d -name '*.git' -prune -print0
-	done
+  for DIR in "${@:-.}"; do
+    find ${DIR:-.} -type d -name '*.git' -prune -print0
+  done
 }
+
 # Find git repo
 git_find() {
-	ff_git0 "${1:-.}" |
-		while read -d $'\0' DIR; do
-			git_exists "$DIR" && printf "'%s'\n" "$DIR"
-		done 
+  ## Bash only (read -d)
+  #ff_git0 "${1:-.}" |
+  #  while IFS= read -r -d $'\0' DIR; do
+  #   git_exists "$DIR" && printf "'%s'\n" "$DIR"
+  # done
+  for DIR in "${@:-.}"; do
+    find ${DIR:-.} -type d -name '*.git' -prune -exec sh -c '
+      for DIR; do
+        git --git-dir="$DIR" rev-parse >/dev/null 2>&1 && printf "'%s'\\n" "$DIR"
+      done
+    ' _ {} +
+  done
 }
 git_find0() {
-	ff_git0 "${1:-.}" |
-		while read -d $'\0' DIR; do
-			git_exists "$DIR" && printf "%s\0" "$DIR"
-		done 
+  ## Bash only (read -d)
+  #ff_git0 "${1:-.}" |
+  # while IFS= read -r -d $'\0' DIR; do
+  #   git_exists "$DIR" && printf "%s\0" "$DIR"
+  # done
+  for DIR in "${@:-.}"; do
+    find ${DIR:-.} -type d -name '*.git' -prune -exec sh -c '
+      for DIR; do
+        git --git-dir="$DIR" rev-parse >/dev/null 2>&1 && printf "%s\0" "$DIR"
+      done
+    ' _ {} +
+  done
 }
 
 ########################################
