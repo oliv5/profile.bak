@@ -120,3 +120,17 @@ check_nfs() {
 alias umount_sshfs='fusermount -u'
 alias mount_sshfs='sshfs -o cache=yes -o kernel_cache -o compression=no -o large_read'
 alias mount_sshfs_fast='sshfs -o cache=yes -o kernel_cache -o compression=no -o large_read -o Ciphers=arcfour'
+
+# Mount & exec command
+mount_exec() {
+	local MOUNT="${1:?No mount specified...}"; shift
+	sudo mount "$MOUNT" >/dev/null 2>&1
+	trap "sudo umount -l '$MOUNT'" INT
+	if mountpoint "$MOUNT" >/dev/null 2>&1; then
+		eval "$@"
+		sudo umount -l "$MOUNT"
+	else
+		echo "Path '$MOUNT' not mounted, skip it..."
+	fi
+	trap INT
+}
