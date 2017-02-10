@@ -336,8 +336,31 @@ annex_revert() {
   git annex proxy -- git revert "${1:-HEAD}"
 }
 
+# Clean unused files
+annex_clean_unused() {
+  annex_exists || return 1
+  local IFS=$' \n'
+  local REPLY; read -r -p "Delete unused files? (a/y/n) " REPLY
+  if [ "$REPLY" = "a" -o "$REPLY" = "A" ]; then
+    local LAST="$(git annex unused | awk '/SHA256E/ {a=$1} END{print a}')"
+    git annex dropunused 1-$LAST
+  elif [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
+    local LIST=""
+    git annex unused | grep -F 'SHA256E' | 
+      while read -r NUM KEY; do 
+        echo "---------------"
+        git log --oneline -S "$KEY"
+        read -r -p "Delete file $NUM ($KEY)? (y/n) " REPLY < /dev/tty
+        if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
+          LIST="$LIST $NUM"
+        fi
+      done
+    git annex dropunused $LIST
+  fi
+}
+
 # Clean log by rebuilding branch git-annex & master
-annex_clean() {
+annex_clean_log() {
   # Stop on error
   ( set -e
     annex_exists || return 1
