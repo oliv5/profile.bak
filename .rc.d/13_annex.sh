@@ -305,14 +305,15 @@ annex_upkeep() {
 }
 
 # Find aliases
-alias annex_wantget='git annex find --want-get --not --in'
-alias annex_wantdrop='git annex find --want-drop --in'
+alias annex_find='git annex find'
 alias annex_present='git annex find'
 alias annex_absent='git annex find --not --in=here'
 alias annex_missing='git annex list | grep "^_+ "'
+alias annex_wantget='git annex find --want-get --not --in'
+alias annex_wantdrop='git annex find --want-drop --in'
 
 # Find annex repositories
-annex_find() {
+annex_find_repo() {
 	ff_git0 "${1:-.}" |
 		while read -d $'\0' DIR; do
 			annex_exists "$DIR" && printf "'%s'\n" "$DIR"
@@ -320,8 +321,8 @@ annex_find() {
 }
 
 # Fsck/check all
-alias annex_fsck='annex_find | xargs -I {} -n 1 sh -c "cd \"{}/..\"; pwd; git annex fsck"'
-alias annex_check='annex_find | xargs -I {} -n 1 sh -c "cd \"{}/..\"; pwd; git annex list | grep \"^_\""'
+alias annex_fsck='annex_find_repo | xargs -I {} -n 1 sh -c "cd \"{}/..\"; pwd; git annex fsck"'
+alias annex_check='annex_find_repo | xargs -I {} -n 1 sh -c "cd \"{}/..\"; pwd; git annex list | grep \"^_\""'
 
 # Rename special remotes
 annex_rename_special() {
