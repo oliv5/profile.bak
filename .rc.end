@@ -13,13 +13,15 @@ if command -v "locale" >/dev/null 2>&1; then
   unset LC_MONETARY LC_ADDRESS LC_TELEPHONE
   unset LC_MEASUREMENT LC_IDENTIFICATION 
   unset LC_NUMERIC LC_PAPER LC_COLLATE LC_MESSAGES
-  for LOCALE in fr_FR.UTF-8 fr_FR.utf8 $(locale -a | head -n 1); do
-    if locale -a | grep "$LOCALE" >/dev/null; then
-      # Set the default only
-      [ -z "$LANG" ] && export LANG="$LOCALE"
-    fi
-  done
-  unset LOCALE
+  # Set the default only: $LANG
+  if [ -z "$LANG" ]; then
+    for LANG in fr_FR.UTF-8 $(locale -a | head -n 1); do
+        if locale -a | grep "$LANG" >/dev/null; then
+            export LANG
+            break
+        fi
+    done
+  fi
 fi
 
 ################################

@@ -33,16 +33,17 @@ alias xrandr_800='xrandr_setres 800x600'
 alias xrandr_640='xrandr_setres 640x480'
 
 # Enable display
+alias xrandr_auto='xrandr_en'
 xrandr_en() {
   #See options like --dryrun, --mode 1024x768
   local ARG1="$1"; shift $(min 1 $#)
-  xrandr --output "${ARG1:?No display specified}" --auto "$@"
+  xrandr --output "${ARG1:-$(xrandr_connected | head -n 1)}" --auto "$@"
 }
 
 # Disable display
 xrandr_dis() {
   local ARG1="$1"; shift $(min 1 $#)
-  xrandr --output "${ARG1:?No display specified}" --off "$@"
+  xrandr --output "${ARG1:-$(xrandr_connected | head -n 1)}" --off "$@"
 }
 
 # Set backlight

@@ -8,3 +8,7 @@ find_media() {
 alias find_video='find_media video'
 alias find_music='find_media audio'
 alias find_photos='find_media image'
+
+##################################
+# Idendity codec
+alias lscodec='mplayer -vo null -ao null -frames 0 -identify'
