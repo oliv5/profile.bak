@@ -19,7 +19,16 @@ alias tty_next='sudo fgconsole'
 
 # Find display
 show_display() {
-  ps a | awk '/[X]org/ {print $6}'
+  ps a | grep -E '[X]org' | sed -e 's/^.*\(:[0-9]\+\).*$/\1/g'
+}
+show_display_local() {
+  for x in /tmp/.X11-unix/X*; do echo ":${x##*X}"; done
+}
+show_display_remote() {
+  netstat -lnt | awk '
+    sub(/.*:/,"",$4) && $4 >= 6000 && $4 < 6100 {
+      print ($1 == "tcp6" ? "ip6-localhost:" : "localhost:") ($4 - 6000)
+    }'
 }
 
 ################################
