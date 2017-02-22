@@ -32,8 +32,24 @@ wifi_disable() {
 }
 
 ############################
-# Ip client
-alias ip_renew='sudo dhclient -r; sudo dhclient -1'
+# IP tables flush: must be done by a script at once
+iptables_flush() {
+  # Set policies to ACCEPT
+  sudo iptables -t filter -P INPUT ACCEPT
+  sudo iptables -t filter -P FORWARD ACCEPT
+  sudo iptables -t filter -P OUTPUT ACCEPT
+  # Remove all existing rules
+  sudo iptables -t filter -F	# All rules
+  sudo iptables -t filter -X	# Delete all user defined-chains (ex: ssh established session)
+  sudo iptables -t nat -F
+  sudo iptables -t nat -X
+  sudo iptables -t mangle -F
+  sudo iptables -t mangle -X
+}
+
+############################
+# DHCP client
+alias dhcp_renew='sudo dhclient -r; sudo dhclient -1'
 
 ############################
 # quvi alias
