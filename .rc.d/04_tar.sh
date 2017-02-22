@@ -45,6 +45,16 @@ tgzd() {
   done
 }
 
+# tgz integrity test
+tgzt() {
+  local RES=0
+  local SRC
+  for SRC; do
+    tar -tzf "$SRC" >/dev/null || RES=$?
+  done
+  return $RES
+}
+
 ########################
 # quick tar > bz compress/deflate
 tbz() {
