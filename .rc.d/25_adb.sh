@@ -108,19 +108,26 @@ adb_backup_system() {
 
 # Nandroid backup from asb
 # http://forum.xda-developers.com/showthread.php?t=1818321
+# Whole memory: /dev/block/mmcblk0
+# Sub-partitions: /dev/block/platform/msm_sdcc.1/by-name/ ... (boot;recovery;system;userdata;...)
 nandroid_backup() {
     local DEV="${1:-/dev/block/mmcblk0}"
-    local DST="${2:-./nandroid_backup_$(basename "$DEV")}"
+    local DST="${2:-./nandroid_backup_$(date '+%Y%m%d_%H%M%S')_$(basename "$DEV")}"
     local PORT="${3:-5555}"
+    # Check prerequisites
+    type adb >/dev/null
     # First shell
     (
-        adb forward tcp:$PORT tcp:$PORT
-        adb shell su "/system/xbin/busybox nc -l -p $PORT -e /system/xbin/busybox dd if='$DEV'"
+        adb forward tcp:$PORT tcp:$PORT &&
+        adb shell su root -- "/system/xbin/busybox nc -l -p $PORT -e /system/xbin/busybox dd if='$DEV'"
     ) &
+    # Let the UE start nc
+    sleep 2s
     # Second shell
-    adb forward tcp:$PORT tcp:$PORT
-    nc 127.0.0.1 $PORT | pv -i 0.5 > "${DST}.raw"
-    command 7z >/dev/null 2>&1 && 
-        7z x "${DST}.7z" "${DST}.raw" &&
+    (   set -e
+        adb forward tcp:$PORT tcp:$PORT &&
+        nc 127.0.0.1 $PORT | pv -i 0.5 > "${DST}.raw" &&
+        7z a "${DST}.raw.7z" "${DST}.raw" 2>/dev/null &&
         rm "${DST}.raw"
+    )
 }
