@@ -88,7 +88,7 @@ find_duplicates() {
   local TMP1="$(tempfile)"
   local TMP2="$(tempfile)"
   for DIR in "${@:-.}"; do
-    find "${DIR:-.}" -type f -exec md5sum {} \; >> "$TMP1"
+    find "${DIR:-.}" -not -type d -exec md5sum {} \; >> "$TMP1"
   done
   awk '{print $1}' "$TMP1" | sort | uniq -d > "$TMP2"
   while read SUM; do
@@ -97,7 +97,7 @@ find_duplicates() {
   rm "$TMP1" "$TMP2" 2>/dev/null
 }
 
-# Find empty directories
+# Find empty directories/files
 alias fd_empty='find . -type d -empty'
 alias ff_empty='find . -type f -empty'
 
