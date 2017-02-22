@@ -155,7 +155,7 @@ annex_bundle() {
       local GPG_TRUST="${4:+--trust-model always}"
       echo "Tar annex into $BUNDLE"
       if annex_bare; then
-        tar zcf "${BUNDLE}" -h ./annex
+        tar zcf "${BUNDLE}" --exclude='*/creds/*' -h ./annex
       else
         git annex find | 
           awk '{print "\""$0"\""}' |
