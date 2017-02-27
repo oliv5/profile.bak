@@ -41,6 +41,14 @@ bin2hex32() {
   hexdump $@ -ve '1/4 "0x%.8x\n"'
 }
 
+# Hexwrite byte
+# $1: file
+# $2: offset
+# $3: dec value
+hexwrite() {
+  printf '\\x%s' "$3" | dd of="$1" bs=1 seek="$2" count=1 conv=notrunc &> /dev/null
+}
+
 ################################
 # Floating point operations
 # See http://unix.stackexchange.com/questions/40786/how-to-do-integer-float-calculations-in-bash-or-other-languages-frameworks

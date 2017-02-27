@@ -490,7 +490,7 @@ git_upkeep() {
   local NEW=""
   local DEL=""
   local COMMIT=""
-  local MSG="git_upkeep() at $(date)"
+  local MSG="git_upkeep() at $(date +%Y%m%d-%H%M%S)"
   local PULL=""
   local PUSH=""
   local REMOTES=""
@@ -530,7 +530,7 @@ git_upkeep() {
   #echo "[git_upkeep] start at $(date)"
   # Add
   if [ -n "$DEL" ]; then
-      gstx D | xargs -0 $DBG git add || return $?
+      git_stx "^D[ M]|^ D" | xargs -0 $DBG git add || return $?
   fi
   if [ -n "$NEW" ]; then
       $DBG git add -u || return $?
