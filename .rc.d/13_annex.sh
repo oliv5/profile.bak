@@ -185,7 +185,7 @@ alias annex_pull='git annex sync --no-commit --no-push'
 alias annex_get_auto='git annex get --auto'
 alias annex_get_fast='git annex get --fast'
 alias annex_get_fast_auto='git annex get --fast --auto'
-alias annex_get_missing='annex_missing | xargs annex_get'
+alias annex_get_missing='annex find --not --in . --print0 | xargs -O git annex get'
 
 # Annex copy
 alias annex_copy_all='annex_copy --all'
@@ -217,6 +217,31 @@ alias annex_upload_fast='annex_copy_fast --to'
 alias annex_upload_all='annex_copy_all --to'
 alias annex_upload_auto='annex_copy_auto --to'
 alias annex_upload_fast_auto='annex_copy_fast_auto --to'
+
+# Annex transfer the given files
+annex_transfer() {
+  local FROM="${1}"
+  local TO="${2:?No destination repository...}"
+  local DBG=""
+  shift 2
+  for F; do
+    if [ -z "$(git annex find --in . "$F")" ]; then
+      $DBG git annex get "$F" "${FROM:+--from $FROM}"
+      $DBG git annex move "$F" --to "$TO"
+    else
+      $DBG git annex copy "$F" --to "$TO"
+    fi
+  done
+}
+# Annex transfer all files
+annex_transfer_all() {
+  local IFS="$(printf '\n')"
+  for REPO; do
+    git annex find --not --in "$REPO" | while read -r F; do
+      annex_transfer "" "$REPO" "$F"
+    done
+  done
+}
 
 # Annex upkeep
 annex_upkeep() {
@@ -305,12 +330,18 @@ annex_upkeep() {
 }
 
 # Find aliases
-alias annex_find='git annex find'
-alias annex_present='git annex find'
-alias annex_absent='git annex find --not --in=here'
-alias annex_missing='git annex list | grep "^_+ "'
+alias annex_existing='git annex find --in'
+alias annex_missing='git annex find --not --in'
 alias annex_wantget='git annex find --want-get --not --in'
 alias annex_wantdrop='git annex find --want-drop --in'
+alias annex_nowhere='git annex list | grep -E "^_+ "'
+
+# Is file in annex ?
+annex_isin() {
+  local REPO="${1:-.}"
+  shift
+  [ -n "$(git annex find --in "$REPO" "$@")" ]
+}
 
 # Find annex repositories
 annex_find_repo() {
@@ -344,7 +375,7 @@ annex_clean_unused() {
   local REPLY; read -r -p "Delete unused files? (a/y/n) " REPLY
   if [ "$REPLY" = "a" -o "$REPLY" = "A" ]; then
     local LAST="$(git annex unused | awk '/SHA256E/ {a=$1} END{print a}')"
-    git annex dropunused 1-$LAST
+    git annex dropunused "$@" 1-$LAST
   elif [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
     local LIST=""
     git annex unused | grep -F 'SHA256E' | 
@@ -356,7 +387,7 @@ annex_clean_unused() {
           LIST="$LIST $NUM"
         fi
       done
-    git annex dropunused $LIST
+    git annex dropunused "$@" $LIST
   fi
 }
 
