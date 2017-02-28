@@ -530,7 +530,7 @@ git_upkeep() {
   #echo "[git_upkeep] start at $(date)"
   # Add
   if [ -n "$DEL" ]; then
-      git_stx "^D[ M]|^ D" | xargs -0 $DBG git add || return $?
+      git_stx "^D[ M]|^ D" | xargs -r0 $DBG git add || return $?
   fi
   if [ -n "$NEW" ]; then
       $DBG git add -u || return $?
