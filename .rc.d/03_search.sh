@@ -1,5 +1,6 @@
 #!/bin/sh
 
+###########################################
 # Find files implementations
 _ffind1() {
   local FCASE="${FCASE:--}name"
@@ -80,6 +81,7 @@ alias   iffl2='FCASE=-i FTYPE=l FXTYPE=  FARGS="-maxdepth 2" _ffind'
 alias  iffll2='FCASE=-i FTYPE=l FXTYPE=f FARGS="-maxdepth 2" _ffind'
 alias  ifflb2='FCASE=-i FTYPE=l FXTYPE=l FARGS="-maxdepth 2" _ffind'
 
+###########################################
 # Backward find
 _bfind1() {
   local ABSPATH="$(readlink -f "${1:-$PWD}")"
@@ -104,6 +106,7 @@ alias  bf='BTYPE=   _bfind'
 alias bff='BTYPE=-f _bfind'
 alias bfd='BTYPE=-d _bfind'
 
+###########################################
 # Find breadth-first (width-first)
 #_wfind1() { _ffind "${@:-*}" -prune -printf '%d\t%p\n' | sort -nk1 | cut -f2-; }
 _wfind1() { _ffind "${@:-*}" -depth; }
@@ -115,6 +118,7 @@ alias  wfl='FCASE= FTYPE=l FXTYPE=  FARGS= _wfind'
 alias wfll='FCASE= FTYPE=l FXTYPE=f FARGS= _wfind'
 alias wflb='FCASE= FTYPE=l FXTYPE=l FARGS= _wfind'
 
+###########################################
 # File grep implementations
 _fgrep1() {
   if [ $# -gt 1 ]; then
@@ -147,6 +151,7 @@ alias iggls='iggl 2>/dev/null'
 #ggl() {  gg "$@" | cut -d : -f 1 | uniq; }
 #iggl(){ igg "$@" | cut -d : -f 1 | uniq; }
 
+###########################################
 # Search & replace
 _fsed1() {
   # Get arguments
@@ -170,3 +175,50 @@ _fsed1() {
 alias _fsed='_fsed1'
 alias  hh='FCASE=   FTYPE=  FXTYPE= FARGS= SEXCLUDE= _fsed'
 alias ihh='FCASE=-i FTYPE=  FXTYPE= FARGS= SEXCLUDE= _fsed'
+
+###########################################
+# Find duplicate files in directory
+alias ff_dup='find_duplicates'
+find_duplicates() {
+  local TMP1="$(tempfile)"
+  local TMP2="$(tempfile)"
+  for DIR in "${@:-.}"; do
+    find "${DIR:-.}" -not -type d -exec md5sum {} \; >> "$TMP1"
+  done
+  awk '{print $1}' "$TMP1" | sort | uniq -d > "$TMP2"
+  while read SUM; do
+    grep "$SUM" "$TMP1" | cut -d ' ' -f 2- | xargs
+  done < "$TMP2"
+  rm "$TMP1" "$TMP2" 2>/dev/null
+}
+
+# Find empty directories/files
+alias fd_empty='find . -type d -empty'
+alias ff_empty='find . -type f -empty'
+
+# Find duplicate links of all links (good/bad)
+ffl_dup() {
+  for D in "${@:-.}"; do
+    find "$D" -type l -exec sh -c '
+	    find "$2" -lname "*$(basename "$(readlink -q "$1")")" -print0 | sort -z | xargs -r0 -- sh -c "[ \$# -ge 1 ] && echo \$0 \$@"
+    ' _ {} "$D" \; | sort -u
+  done
+}
+# Find duplicate links (raw list)
+ffl_dupr() {
+  for D in "${@:-.}"; do
+    find "$D" -type l -exec sh -c '
+	    find "$2" -lname "*$(basename "$(readlink -q "$1")")" -print0 | sort -z | xargs -r0 -- sh -c "[ \$# -ge 1 ] && echo \$0 && for F; do echo "\$F"; done"
+    ' _ {} "$D" \; | sort -u
+  done
+}
+
+# Find duplicate links of good links
+ffl_dupg() {
+  for D in "${@:-.}"; do
+    find "$D" -type f -exec sh -c '
+	    #find -L "$2" -samefile "$1" -xtype l -print0 | xargs -r0 -- echo
+      find "$2" -lname "$(basename "$1")" -print0 | xargs -r0 -- echo
+    ' _ {} "$D" \;
+  done
+}

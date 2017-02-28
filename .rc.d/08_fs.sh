@@ -81,26 +81,6 @@ lsof_close(){
   ls -l | grep '(deleted)' | awk '{ print $9 }' | while read FILE; do :> /proc/$PID/fd/$FILE; done
 }
 
-##############################
-# Find duplicate files
-alias ff_dup='find_duplicates'
-find_duplicates() {
-  local TMP1="$(tempfile)"
-  local TMP2="$(tempfile)"
-  for DIR in "${@:-.}"; do
-    find "${DIR:-.}" -not -type d -exec md5sum {} \; >> "$TMP1"
-  done
-  awk '{print $1}' "$TMP1" | sort | uniq -d > "$TMP2"
-  while read SUM; do
-    grep "$SUM" "$TMP1" | cut -d ' ' -f 2- | xargs
-  done < "$TMP2"
-  rm "$TMP1" "$TMP2" 2>/dev/null
-}
-
-# Find empty directories/files
-alias fd_empty='find . -type d -empty'
-alias ff_empty='find . -type f -empty'
-
 ################################
 # http://unix.stackexchange.com/questions/59112/preserve-directory-structure-when-moving-files-using-find
 # Move by replicating directory structure
