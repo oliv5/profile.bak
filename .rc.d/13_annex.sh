@@ -227,7 +227,7 @@ annex_transfer() {
   for F; do
     if [ -z "$(git annex find --in "$TO" "$F")" ]; then
       if [ -z "$(git annex find --in . "$F")" ]; then
-        $DBG git annex get "$F" "${FROM:+--from $FROM}"
+        $DBG git annex get "$F" ${FROM:+--from "$FROM"}
         $DBG git annex move "$F" --to "$TO"
       else
         $DBG git annex copy "$F" --to "$TO"
