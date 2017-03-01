@@ -14,7 +14,7 @@ rc_source() {
   local RC_DRYRUN=""
 
   # Global aliases
-  alias rc='RC_VERBOSE=true rc_source'
+  alias rc='rc_source'
 
   ##############
   # Log function
