@@ -371,7 +371,7 @@ annex_revert() {
 }
 
 # Clean unused files
-annex_clean_unused() {
+annex_clean() {
   annex_exists || return 1
   local IFS=$' \n'
   local REPLY; read -r -p "Delete unused files? (a/y/n) " REPLY
@@ -394,7 +394,7 @@ annex_clean_unused() {
 }
 
 # Clean log by rebuilding branch git-annex & master
-annex_clean_log() {
+annex_log_clean() {
   # Stop on error
   ( set -e
     annex_exists || return 1
@@ -402,6 +402,9 @@ annex_clean_log() {
       echo "Some changes are pending. Abort ..."
       return 2
     fi
+    # Confirmation
+    read -r -p "Delete file $NUM ($KEY)? (y/n) " REPLY < /dev/tty
+    [ "$REPLY" != "y" -a "$REPLY" != "Y" ] && return 3
     # Rebuild master branch
     git branch -m old-master
     git checkout --orphan master
