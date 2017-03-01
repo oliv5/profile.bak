@@ -201,7 +201,9 @@ for SRC in "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS:-"${@:-.}"}"; do
   IFS="$(printf '\n\t')"
   #CTRLCHARS="$(printf '*[\001-\037\177]*')"
   #for FILE in $(find "$SRC" ! -type d ! -name "$CTRLCHARS")
-  for FILE in $(find "$SRC" ! -type d); do
+  #for FILE in $(find "$SRC" ! -type d); do
+  for FILE in "$SRC" $([ -d "$SRC" ] && find "$SRC" ! -type d); do
+    [ ! -f "$FILE" ] && continue
     if [ -n "$EN_AUTODETECT" ]; then
       if echo "$FILE" | grep -E "\.(gpg|pgp)$" >/dev/null; then
         if [ -n "$EN_DECRYPT" ]; then
