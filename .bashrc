@@ -123,7 +123,7 @@ fi
 ######################################
 
 # Set load flag
-export ENV_BASHRC=$((ENV_CNT=ENV_CNT+1))
+export ENV_BASHRC=$((ENV_BASHRC+1))
 
 # Bootstrap user profile
 if [ -r "$HOME/.rc" ]; then

@@ -44,7 +44,7 @@ fi
 ######################################
 
 # Set load flag
-export ENV_DASHRC=$((ENV_CNT=ENV_CNT+1))
+export ENV_DASHRC=$((ENV_DASHRC+1))
 
 # Bootstrap user profile
 if [ -r "$HOME/.rc" ]; then

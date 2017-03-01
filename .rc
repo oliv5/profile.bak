@@ -2,117 +2,98 @@
 # Main user profile script
 # It should be compatible with all shells (dash, bash,...)
 
-################################
-# Define global variables
-export RC_PERMISSIONS="${RC_PERMISSIONS:--x}"
-export RC_DIR="${RC_DIR:-$HOME}"
-export RC_DIR_LOCAL="${RC_DIR_LOCAL:-$HOME}"
-# Define local variables
-RC_VERBOSE="false"
-RC_DRYRUN=""
+# Main source function
+rc_source() {
+  # Global variables
+  export RC_DIR="${RC_DIR:-$HOME}"
+  export RC_DIR_LOCAL="${RC_DIR_LOCAL:-$HOME}"
 
-################################
-# Arguments
-while getopts 'vdrx' FLAGS; do
-  case "$FLAGS" in
-    v) RC_VERBOSE="true";;
-    d) RC_DRYRUN="true";;
-    r) RC_PERMISSIONS="-r";;
-    x) RC_PERMISSIONS="-x";;
-    *) echo >&2 "Usage: .rc [-v] [-d] [-r] [-x]"
-       echo >&2 "-v   verbose mode"
-       echo >&2 "-d   dry-run"
-       echo >&2 "-r   load all readable scripts"
-       echo >&2 "-x   load all executable scripts (default)"
-       kill -INT $$
-       ;;
-  esac
-done
-shift $(expr $OPTIND - 1)
-# The following fails in dash 0.5.7-3
-#unset OPTIND; OPTIND=""
-unset FLAGS OPTARG OPTERR
+  # Local variables
+  local FLAGS OPTIND OPTARG OPTERR
+  local RC_VERBOSE="${RC_VERBOSE:-false}"
+  local RC_DRYRUN=""
 
-################################
-# Log function
-rc_log() {
-  ${RC_VERBOSE:-false} && echo "$@"
-}
+  # Global aliases
+  alias rc='RC_VERBOSE=true rc_source'
 
-################################
-# Load profile scripts
-alias rc='RC_VERBOSE=true rc_source'
-alias rc_sourcemods='rc_source'
-alias load='rc'
+  ##############
+  # Log function
+  rc_log() {
+    ${RC_VERBOSE:-false} && echo "$@"
+  }
 
-# Source files by name and perms
-rc_sourcefiles() {
-  local PERMISSION="${1:-${RC_PERMISSIONS:--x}}"
-  local PERMISSION_REGEX="^[-rwx]*$PERMISSION[-rwx]* *"
-  shift
-  # Source all files
-  for FILE; do
-    if test ${PERMISSION} "$FILE" || 
-      grep -e "${PERMISSION_REGEX}${FILE##${RC_DIR}/.rc.d/}" "${RC_DIR}/.rc.d/.permissions" >/dev/null 2>&1 ||
-      grep -e "${PERMISSION_REGEX}${FILE##${RC_DIR_LOCAL}/.rc.local.d/}" "${RC_DIR_LOCAL}/.rc.local.d/.permissions" >/dev/null 2>&1; then
+  # Source file 
+  rc_sourcefile() {
+    for FILE; do
+      if [ -r "$FILE" ]; then
         rc_log "Source '$FILE'"
-        set --
-        [ -n "$FILE" ] && ${RC_DRYRUN} . "$FILE"
+        set --; ${RC_DRYRUN} . "$FILE"
+      fi
+    done
+  }
+
+  # Source module when executable or listed in rc.list 
+  rc_sourcemod() {
+    for FILE; do
+      if test -x "$FILE" || grep -e "${FILE##*/}" "${FILE%/*}/rc.list" >/dev/null 2>&1; then
+        rc_sourcefile "$FILE"
+      fi
+    done
+  }
+
+  ##############
+  # Process arguments
+  while getopts 'vdrx' FLAGS; do
+    case "$FLAGS" in
+      v) RC_VERBOSE="true";;
+      d) RC_DRYRUN="true";;
+      *) echo >&2 "Usage: .rc [-v] [-d] [-r] [-x]"
+         echo >&2 "-v   verbose mode"
+         echo >&2 "-d   dry-run"
+         kill -INT $$
+         ;;
+    esac
+  done
+  shift $(expr $OPTIND - 1)
+
+  ##############
+  # Startup scripts
+  if [ $# -eq 0 ]; then
+    export ENV_RC=$((ENV_RC+1))
+    rc_log "Source $RC_DIR/.rc"
+    if [ -z "$ENV_PROFILE" ]; then # when not already done
+      rc_sourcefile "$RC_DIR/.profile"
+    fi
+    rc_sourcefile "$RC_DIR_LOCAL/.rc.local"
+  fi
+
+  ##############
+  # Main scripts
+  for PATTERN in "${@:-*}"; do
+    rc_sourcemod "$RC_DIR/.rc.d/"*$PATTERN*.sh
+    if [ -n "$BASH_VERSION" ]; then
+      rc_sourcemod "$RC_DIR/.rc.d/bash/"*$PATTERN*.sh
+    fi
+    if [ -n "$ANDROID_ROOT" ]; then
+      rc_sourcemod "$RC_DIR/.rc.d/android/"*$PATTERN*.sh
+    fi
+    rc_sourcemod "$RC_DIR_LOCAL/.rc.local.d/"*$PATTERN*.sh
+    if [ -n "$BASH_VERSION" ]; then
+      rc_sourcemod "$RC_DIR_LOCAL/.rc.local.d/bash/"*$PATTERN*.sh
     fi
   done
-}
 
-# Source files by partial name
-rc_source() {
-  local RC_PERMISSIONS="${RC_PERMISSIONS:--x}"
-  local RC_DIR="${RC_DIR:-$HOME}"
-  local RC_DIR_LOCAL="${RC_DIR_LOCAL:-$HOME}"
+  ##############
+  # End scripts
   if [ $# -eq 0 ]; then
-    . "${RC_DIR:-.}/.rc"
-  else
-    for PATTERN; do
-      rc_sourcefiles "-r" "$RC_DIR/.rc.d/"*$PATTERN*.sh
-      if [ -n "$BASH_VERSION" ]; then
-        rc_sourcefiles "$RC_PERMISSIONS" "$RC_DIR/.rc.d/bash/"*$PATTERN*.sh
-      fi
-      if [ -n "$ANDROID_ROOT" ]; then
-        rc_sourcefiles "$RC_PERMISSIONS" "$RC_DIR/.rc.d/android/"*$PATTERN*.sh
-      fi
-      rc_sourcefiles "-r" "$RC_DIR_LOCAL/.rc.local.d/"*$PATTERN*.sh
-    done
+    rc_sourcefile "$RC_DIR/.rc.end"
+    rc_sourcefile "$RC_DIR_LOCAL/.rc.local.end"
   fi
+
+  ##############
+  return 0
 }
 
 ################################
-# Source all scripts
-rc_log "Source $RC_DIR/.rc"
-export ENV_RC=$((ENV_CNT=ENV_CNT+1))
-# .profile when not already done
-if [ -z "$ENV_PROFILE" ]; then
-  rc_sourcefiles "-r" "$RC_DIR/.profile"
-fi
-# Start scripts
-rc_sourcefiles "-r" "$RC_DIR_LOCAL/.rc.local"
-# Main scripts
-rc_sourcefiles "$RC_PERMISSIONS" "$RC_DIR/.rc.d/"*.sh
-if [ -n "$BASH_VERSION" ]; then
-  rc_sourcefiles "$RC_PERMISSIONS" "$RC_DIR/.rc.d/bash/"*.sh
-fi
-if [ -n "$ANDROID_ROOT" ]; then
-  rc_sourcefiles "$RC_PERMISSIONS" "$RC_DIR/.rc.d/android/"*.sh
-fi
-rc_sourcefiles "$RC_PERMISSIONS" "$RC_DIR_LOCAL/.rc.local.d/"*.sh
-if [ -n "$BASH_VERSION" ]; then
-  rc_sourcefiles "$RC_PERMISSIONS" "$RC_DIR_LOCAL/.rc.local.d/bash/"*.sh
-fi
-# End scripts
-rc_sourcefiles "-r" "$RC_DIR/.rc.end"
-rc_sourcefiles "-r" "$RC_DIR_LOCAL/.rc.local.end"
-export ENV_RC_END=$ENV_CNT
-
-################################
-#Clean local variables
-unset RC_VERBOSE
-unset RC_DRYRUN
-# make sure this is the last line
-# to ensure a good return code
+# Source rc files
+rc_source "$@"
