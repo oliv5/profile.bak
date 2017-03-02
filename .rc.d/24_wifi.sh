@@ -17,6 +17,14 @@ wifi_disable() {
     sudo rfkill block wifi
 }
 
+# Wifi status test
+wifi_enabled() {
+  ip addr show dev ${1:-wlan0} 2>/dev/null | grep UP >/dev/null
+}
+wifi_enabled2() {
+  iw ${1:-wlan0} link 2>/dev/null | grep -v -i not >/dev/null
+}
+
 # List networks
 wifi_scan() {
     sudo iwlist "${1:-wlan0}" scan
