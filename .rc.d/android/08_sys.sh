@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Sudo
+alias sudo='su root --'
+
 # Processes
 ps -x >/dev/null 2>&1 &&
   alias psg='ps -x | grep -i' ||
