@@ -224,7 +224,7 @@ annex_transfer() {
   local TO="${2:?No destination repository...}"
   local DBG=""
   shift 2
-  for F; do
+  for F in "${@:-*}"; do
     if [ -z "$(git annex find --in "$TO" "$F")" ]; then
       if [ -z "$(git annex find --in . "$F")" ]; then
         $DBG git annex get "$F" ${FROM:+--from "$FROM"}
@@ -237,8 +237,9 @@ annex_transfer() {
 }
 # Annex transfer all files to the given repos
 annex_transfer_repo() {
-  local IFS="$(printf '\n')"
-  for REPO; do
+  local REPOS="${@:-$(git_remotes)}"
+  for REPO in $REPOS; do
+    local IFS="$(printf '\n')"
     git annex find --not --in "$REPO" | while read -r F; do
       annex_transfer "" "$REPO" "$F"
     done

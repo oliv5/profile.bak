@@ -289,6 +289,7 @@ git_pull_all() {
 if [ $(git_version) -gt $(git_version 2.9) ]; then
 git_pull_branches() {
   git_exists || return 1
+  local IFS="$(printf ' \n')"
   local BRANCHES="${1:-$(git_branches)}"
   local FORCE="$([ "$2" = "-f" ] && echo "-f")"
   if annex_direct; then
@@ -311,6 +312,7 @@ git_pull_branches() {
 else
 git_pull_branches() {
   git_exists || return 1
+  local IFS="$(printf ' \n')"
   local BRANCHES="${1:-$(git_branches)}"
   local FORCE="$([ "$2" = "-f" ] && echo "-f")"
   if annex_direct; then
@@ -354,6 +356,7 @@ fi
 if [ $(git_version) -gt $(git_version 2.9) ]; then
 git_pull_remotes() {
   git_exists || return 1
+  local IFS="$(printf ' \n')"
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   local FORCE="$([ "$3" = "-f" ] && echo "-f")"
@@ -383,6 +386,7 @@ git_pull_remotes() {
 else
 git_pull_remotes() {
   git_exists || return 1
+  local IFS="$(printf ' \n')"
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   local FORCE="$([ "$3" = "-f" ] && echo "-f")"
@@ -437,6 +441,7 @@ git_push() {
 # Batch push existing remote/branches
 git_push_all() {
   git_exists || return 1
+  local IFS="$(printf ' \n')"
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   for REMOTE in $REMOTES; do
@@ -452,6 +457,7 @@ git_push_all() {
 # Set default upstream on all branches
 git_set_tracking() {
   git_exists || return 1
+  local IFS="$(printf ' \n')"
   local REMOTE="${1:?No remote specified. Possible remotes are: $(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   git fetch --all 2>/dev/null
