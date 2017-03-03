@@ -192,7 +192,17 @@ encrypt() {
   # Delete original file if new one is present
   if [ ! -z "$DELETE" -a -f "$OUTPUT" ]; then
     $VERBOSE echo "Wipe input file '$INPUT'"
-    [ $(stat -c %s "$INPUT") -lt 25000000 ] && $SIMULATE wipe -D -q -f "$INPUT" >"$STDOUT" 2>&1 || $SIMULATE rm "$(readlink -f "$INPUT")" >"$STDOUT" 2>&1
+    if [ -L "$INPUT" ]; then
+      # Symlink
+      $SIMULATE rm -v "$INPUT" >"$STDOUT" 2>&1
+    else
+      # Regular file
+      if [ $(stat -c %s "$INPUT") -lt 25000000 ]; then
+        $SIMULATE wipe -D -q -f "$INPUT" >"$STDOUT" 2>&1
+      else
+        $SIMULATE rm -v "$(readlink -f "$INPUT")" >"$STDOUT" 2>&1
+      fi
+    fi
   fi
 }
 
