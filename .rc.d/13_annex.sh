@@ -22,7 +22,7 @@ alias gancff='git annex copy --fast --from'
 alias gand='git annex drop'
 alias gandd='git annex forget --drop-dead'
 alias gani='git annex info'
-alias gannex='git annex'
+alias gan='git annex'
 
 # Check annex exists
 annex_exists() {
@@ -235,8 +235,8 @@ annex_transfer() {
     fi
   done
 }
-# Annex transfer all files
-annex_transfer_all() {
+# Annex transfer all files to the given repos
+annex_transfer_repo() {
   local IFS="$(printf '\n')"
   for REPO; do
     git annex find --not --in "$REPO" | while read -r F; do
@@ -424,6 +424,9 @@ annex_log_clean() {
     git gc
   )
 }
+
+# Annex info
+alias annex_du='git annex info --fast'
 
 ########################################
 ########################################
