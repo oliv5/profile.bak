@@ -218,31 +218,45 @@ alias annex_upload_all='annex_copy_all --to'
 alias annex_upload_auto='annex_copy_auto --to'
 alias annex_upload_fast_auto='annex_copy_fast_auto --to'
 
-# Annex transfer the given files
+# Annex transfer the given files to the given repos
+# $FROM can be defined to selected the origin repo
 annex_transfer() {
-  local FROM="${1}"
-  local TO="${2:?No destination repository...}"
+  local REPOS="${1:-$(git_remotes)}"
   local DBG=""
-  shift 2
-  for F in "${@:-*}"; do
-    if [ -z "$(git annex find --in "$TO" "$F")" ]; then
+  [ $# -gt 0 ] && shift
+  for REPO in $REPOS; do
+    local IFS=$'\n'
+    git annex find --not --in "$REPO" "$@" | while read -r F; do
       if [ -z "$(git annex find --in . "$F")" ]; then
         $DBG git annex get "$F" ${FROM:+--from "$FROM"}
-        $DBG git annex move "$F" --to "$TO"
+        $DBG git annex move "$F" --to "$REPO"
       else
-        $DBG git annex copy "$F" --to "$TO"
+        $DBG git annex copy "$F" --to "$REPO"
       fi
-    fi
+    done
   done
 }
+
 # Annex transfer all files to the given repos
+# Smarter than annex_transfer() because it merges
+# the file lists of all the repos
+# $FROM can be defined to selected the origin repo
 annex_transfer_repo() {
   local REPOS="${@:-$(git_remotes)}"
+  local DBG=""
+  local FIND="git annex find"
   for REPO in $REPOS; do
-    local IFS="$(printf '\n')"
-    git annex find --not --in "$REPO" | while read -r F; do
-      annex_transfer "" "$REPO" "$F"
+    FIND="$FIND --or --not --in $REPO"
+  done
+  local IFS=$'\n'
+  eval "$FIND" | while read -r F; do
+    [ -n "$(git annex find --in . "$F")" ] && DROP="" || DROP=1
+    $DBG git annex get "$F" ${FROM:+--from "$FROM"}
+    local IFS=$' \n'
+    for REPO in $REPOS; do
+      $DBG git annex copy "$F" --to "$REPO"
     done
+    [ -n "$DROP" ] && $DBG git annex drop "$F"
   done
 }
 
