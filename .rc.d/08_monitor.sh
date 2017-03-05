@@ -33,18 +33,16 @@ show_display_remote() {
 
 ################################
 # Processes
-alias psf='ps -faux'
 alias pse='ps -ef'
-alias psg='ps -ef | grep -i'
+alias psf='ps -faux'
+alias psg='ps -aux | grep -i'
+alias psu='ps -fu'
 alias pg='pgrep -fl'
 alias lsg='ls | grep -i'
 alias llg='ll | grep -i'
 alias lsofg='lsof | grep -i'
 
 # User processes
-psu() {
-  ps -fu "${1:-$USER}"
-}
 pgu() {
   pgrep -flu "$(id -u ${1:-$USER})"
 }
