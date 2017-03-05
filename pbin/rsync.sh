@@ -11,7 +11,11 @@ DIFF=""
 OPT_BACKUP="-b"
 OPT_DELETE="--delete --ignore-errors"
 OPT_DRYRUN="-n --progress"
-OPTS="-v -r -z -s -i --size-only"
+OPT_CHECK=""
+OPT_CHECK_1="--ignore-times"
+OPT_CHECK_2="--no-perms --no-owner --no-group"
+OPT_CHECK_3="--size-only"
+OPTS="-v -r -z -s -i"
 
 # Subshell
 (
@@ -31,8 +35,7 @@ OPTS="-v -r -z -s -i --size-only"
     }
 
     # Get args
-    while getopts "bsdtilvc:hf:mp" FLAG
-    do
+    while getopts "bsdtilvc:hf:mpxyz" FLAG; do
       case "$FLAG" in
         b) OPTS="${OPTS} ${OPT_BACKUP}";;
         s) OPTS="${OPTS} ${OPT_DRYRUN}";;
@@ -45,7 +48,10 @@ OPTS="-v -r -z -s -i --size-only"
         f) ;; # for compatibility with old script
         m) ;; # for compatibility with old script
         p) DIFF="1"; OPTS="${OPTS} ${OPT_DRYRUN} ${OPT_DELETE}";;
-        h) echo >&2 "Usage: `basename $0` [-s] [-d] [-t] [-i] [-l] [-v] [-c dir] [-p] -- src dst ..."
+        x) OPT_CHECK="$OPT_CHECK_1";;
+        y) OPT_CHECK="$OPT_CHECK_2";;
+        z) OPT_CHECK="$OPT_CHECK_3";;
+        h) echo >&2 "Usage: `basename $0` [-s] [-d] [-t] [-i] [-l] [-v] [-c dir] [-p] [-x] [-y] [-z] -- src dst ..."
            echo >&2 "-s   show only (dry run)"
            echo >&2 "-p   make a diff only"
            echo >&2 "-d   delete unknown destination files"
@@ -54,6 +60,9 @@ OPTS="-v -r -z -s -i --size-only"
            echo >&2 "-l   use system logger instead of stdout"
            echo >&2 "-v   be verbose"
            echo >&2 "-c   mountpoint to check in both src/dst"
+           echo >&2 "-x   do not check times"
+           echo >&2 "-y   do not check permissions/owner"
+           echo >&2 "-z   check size only"
            echo >&2 "...  additional rsync options"
            end 1
            ;;
@@ -62,9 +71,8 @@ OPTS="-v -r -z -s -i --size-only"
     shift $(($OPTIND-1))
     SRC="${1:?Please specify the source directory}"
     DST="${2:?Please specify the target directory}"
-    SRC="${SRC%/}";DST="${DST%/}"
-    shift 2
-    OPTS="${OPTS} $@"
+    SRC="${SRC%/}";DST="${DST%/}";shift 2
+    OPTS="${OPTS} ${OPT_CHECK:-$OPT_CHECK_3} $@"
 
     # Beginning
     log "Backup - begins at $(date)"
