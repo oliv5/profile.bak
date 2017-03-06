@@ -53,14 +53,14 @@ diffh() {
 
 # Diff using rsync
 diffr() {
-  rsync -avsn "$@"
+  rsync -avsn --size-only "$@"
 }
 diffrd() {
-  rsync -avsn --delete "$@" | grep "^delet"
+  rsync -avsn --size-only --delete "$@" | grep "^delet"
 }
 diffru() {
-  rsync -avsn --existing "$@"
+  rsync -avsn --size-only --existing "$@"
 }
 diffrn() {
-  rsync -avsn --ignore-existing "$@"
+  rsync -avsn --size-only --ignore-existing "$@"
 }
