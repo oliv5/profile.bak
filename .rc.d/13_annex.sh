@@ -218,45 +218,44 @@ alias annex_upload_all='annex_copy_all --to'
 alias annex_upload_auto='annex_copy_auto --to'
 alias annex_upload_fast_auto='annex_copy_fast_auto --to'
 
-# Annex transfer the given files to the given repos
+# Annex transfer files to the specified repos
 # $FROM can be defined to selected the origin repo
+# $DBG is used to debug (set it to "echo")
+# $ECHO is used to print info (set it to "echo")
+alias annex_transfer_show='DBG=true ECHO=echo annex_transfer'
 annex_transfer() {
   local REPOS="${1:-$(git_remotes)}"
-  local DBG=""
+  local DBG="$DBG"
   [ $# -gt 0 ] && shift
+  # Build the find command
+  local FIND=""
   for REPO in $REPOS; do
-    local IFS=$'\n'
-    git annex find --not --in "$REPO" "$@" | while read -r F; do
-      if [ -z "$(git annex find --in . "$F")" ]; then
-        $DBG git annex get "$F" ${FROM:+--from "$FROM"}
-        $DBG git annex move "$F" --to "$REPO"
-      else
-        $DBG git annex copy "$F" --to "$REPO"
+    FIND="${FIND:+$FIND --or }--not --in $REPO"
+  done
+  FIND="git annex find $FIND "$@""
+  # Look for all missing files which are in our local host
+  local IFS=$'\n'
+  eval "${REPOS:+$FIND --and --in .}" | while read -r F; do
+    local IFS=$' \n'
+    for REPO in $REPOS; do
+      if [ -n "$ECHO" ] && [ -n "$(git annex find --not --in "$REPO" "$F")" ]; then
+        echo "[$REPO] '$F'"
       fi
+      $DBG git annex copy "$F" --to "$REPO" --fast
     done
   done
-}
-
-# Annex transfer all files to the given repos
-# Smarter than annex_transfer() because it merges
-# the file lists of all the repos
-# $FROM can be defined to selected the origin repo
-annex_transfer_repo() {
-  local REPOS="${@:-$(git_remotes)}"
-  local DBG=""
-  local FIND="git annex find"
-  for REPO in $REPOS; do
-    FIND="$FIND --or --not --in $REPO"
-  done
+  # Look for all missing files which are NOT in our local host
   local IFS=$'\n'
-  eval "$FIND" | while read -r F; do
-    [ -n "$(git annex find --in . "$F")" ] && DROP="" || DROP=1
+  eval "${REPOS:+$FIND --and --not --in .}" | while read -r F; do
     $DBG git annex get "$F" ${FROM:+--from "$FROM"}
     local IFS=$' \n'
     for REPO in $REPOS; do
-      $DBG git annex copy "$F" --to "$REPO"
+      if [ -n "$ECHO" ] && [ -n "$(git annex find --not --in "$REPO" "$F")" ]; then
+        echo "[$REPO] '$F'"
+      fi
+      $DBG git annex copy "$F" --to "$REPO" --fast
     done
-    [ -n "$DROP" ] && $DBG git annex drop "$F"
+    $DBG git annex drop "$F"
   done
 }
 
