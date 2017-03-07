@@ -255,7 +255,7 @@ annex_transfer() {
 
 # Drop local files which are in the specified remote repos
 # $DBG is used to debug (set it to "echo")
-alias annex_drop_show='DBG=echo annex_transfer'
+alias annex_drop_show='DBG=echo annex_drop'
 annex_drop() {
   local REPOS="${1:-$(git_remotes)}"
   local DBG="$DBG"
