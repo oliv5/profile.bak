@@ -910,8 +910,8 @@ git_search() {
 ########################################
 # Git gc all
 alias git_gc='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; pwd; git gc"'
-alias git_repack='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack"'
-alias git_pack='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; pwd; git gc; git repack"'
+alias git_repack='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack -d"'
+alias git_pack='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack -d; git prune; git gc"'
 
 # Find git directory
 ff_git() {
@@ -1083,6 +1083,7 @@ alias glh='git log -p'
 alias glo='git log --name-only'
 alias gla='git log --name-status'
 alias gls='git log --stat'
+alias glS='git log -S'
 alias gll='git log --pretty=oneline --abbrev-commit'
 alias glog='git log'
 alias git_history='git log -p'

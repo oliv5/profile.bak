@@ -129,6 +129,10 @@ alias spk9='sudo pkill -9'
 alias ska='sudo killall'
 alias ska9='sudo killall -9'
 alias xk='xkill'
+kg()  { psg $1 | xargs kill; }
+kg9() { psg $1 | xargs kill -9; }
+skg() { psg $1 | xargs sudo kill; }
+skg9(){ psg $1 | xargs sudo kill -9; }
 
 # du
 alias duh='du -h'

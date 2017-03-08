@@ -42,6 +42,11 @@ alias lsg='ls | grep -i'
 alias llg='ll | grep -i'
 alias lsofg='lsof | grep -i'
 
+# Grep process IDs
+psgp(){
+  ps -aux | awk "/$1/ "'{print $2}'
+}
+
 # User processes
 pgu() {
   pgrep -flu "$(id -u ${1:-$USER})"
