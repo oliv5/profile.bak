@@ -218,62 +218,39 @@ alias annex_upload_all='annex_copy_all --to'
 alias annex_upload_auto='annex_copy_auto --to'
 alias annex_upload_fast_auto='annex_copy_fast_auto --to'
 
-# Transfer files to the specified repos
+# Move files to the specified repos, one by one
 # $FROM can be defined to selected the origin repo
 # $DBG is used to debug (set it to "echo")
-alias annex_transfer_show='DBG=echo annex_transfer'
-annex_transfer() {
+alias annex_move_show='DBG=echo annex_move'
+annex_move() {
   local REPOS="${1:-$(git_remotes)}"
   local DBG="$DBG"
+  local IFS=$' \n'
   [ $# -gt 0 ] && shift
   [ -z "$REPOS" ] && return 0
-  # Build the find command
-  local FIND=""
+  # Copy local files to remote repos
   for REPO in $REPOS; do
-    FIND="${FIND:+$FIND --or }--not --in $REPO"
-  done
-  FIND="git annex find $FIND "$@""
-  # Look for all missing files which are in our local host
-  local IFS=$'\n'
-  eval "$FIND --and --in ." | while read -r F; do
-    local IFS=$' \n'
-    for REPO in $REPOS; do
-      if [ -n "$(git annex find "$F" --not --in "$REPO")" ]; then
-        $DBG git annex copy "$F" --to "$REPO"
-      fi
-    done
+    $DBG git annex copy --not --in "$REPO" --to "$REPO" "$@"
   done
   # Look for all missing files which are NOT in our local host
-  local IFS=$'\n'
-  eval "$FIND --and --not --in ." | while read -r F; do
-    $DBG git annex get "$F" ${FROM:+--from "$FROM"}
-    local IFS=$' \n'
+  local LOCATION="$(echo "$REPOS" | sed -e 's/ / --or --not --in /g')"
+  local CMD="git annex find --not --in . --and -\( --not --in $LOCATION -\)"
+  IFS= eval "$CMD" "$@" | while IFS= read -r F; do
+    $DBG git annex get ${FROM:+--from "$FROM"} "$F"
     for REPO in $REPOS; do
-      if [ -n "$(git annex find "$F" --not --in "$REPO")" ]; then
-        $DBG git annex copy "$F" --to "$REPO"
-      fi
+      $DBG git annex copy --not --in "$REPO" --to "$REPO" "$F"
     done
-    $DBG git annex drop "$F"
+    # Alternative "git annex drop", since it killed the "while read" loop
+    $DBG git annex move "$F" --to "$REPO" --fast
   done
 }
 
 # Drop local files which are in the specified remote repos
-# $DBG is used to debug (set it to "echo")
-alias annex_drop_show='DBG=echo annex_drop'
-alias annex_dropn='git annex drop -N $(git_remotes | wc -w)'
+alias annex_dropq='git annex drop -N $(git_remotes | wc -w)'
 annex_drop() {
-  local REPOS="${1:-$(git_remotes)}"
-  local DBG="$DBG"
+  local LOCATION="$(echo ${1:-$(git_remotes)} | sed -e 's/ / --and --in /g')"
   [ $# -gt 0 ] && shift
-  [ -z "$REPOS" ] && return 0
-  # Build the find command
-  local FIND=""
-  for REPO in $REPOS; do
-    FIND="$FIND --and --in $REPO"
-  done
-  # Drop files
-  git annex find --in . $FIND --print0 "$@" |
-    xargs -0 $DBG git annex drop
+  eval "echo git annex drop --in $LOCATION "$@""
 }
 
 # Annex upkeep
@@ -402,13 +379,15 @@ annex_revert() {
 }
 
 # Clean unused files
-annex_clean() {
+annex_unused() {
   annex_exists || return 1
   local IFS=$' \n'
-  local REPLY; read -r -p "Delete unused files? (a/y/n) " REPLY
+  local REPLY; read -r -p "Delete unused files? (a/y/n/s) " REPLY
   if [ "$REPLY" = "a" -o "$REPLY" = "A" ]; then
     local LAST="$(git annex unused | awk '/SHA256E/ {a=$1} END{print a}')"
     git annex dropunused "$@" 1-$LAST
+  elif [ "$REPLY" = "s" -o "$REPLY" = "S" ]; then
+    git annex unused
   elif [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
     local LIST=""
     git annex unused | grep -F 'SHA256E' | 
@@ -425,7 +404,8 @@ annex_clean() {
 }
 
 # Clean log by rebuilding branch git-annex & master
-annex_log_clean() {
+# Similar to "git annex forget"
+annex_forget() {
   # Stop on error
   ( set -e
     annex_exists || return 1
