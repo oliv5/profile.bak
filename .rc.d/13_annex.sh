@@ -238,7 +238,9 @@ annex_transfer() {
   eval "$FIND --and --in ." | while read -r F; do
     local IFS=$' \n'
     for REPO in $REPOS; do
-      $DBG git annex copy "$F" --to "$REPO" --fast
+      if [ -n "$(git annex find "$F" --not --in "$REPO")" ]; then
+        $DBG git annex copy "$F" --to "$REPO"
+      fi
     done
   done
   # Look for all missing files which are NOT in our local host
@@ -247,7 +249,9 @@ annex_transfer() {
     $DBG git annex get "$F" ${FROM:+--from "$FROM"}
     local IFS=$' \n'
     for REPO in $REPOS; do
-      $DBG git annex copy "$F" --to "$REPO" --fast
+      if [ -n "$(git annex find "$F" --not --in "$REPO")" ]; then
+        $DBG git annex copy "$F" --to "$REPO"
+      fi
     done
     $DBG git annex drop "$F"
   done
@@ -256,6 +260,7 @@ annex_transfer() {
 # Drop local files which are in the specified remote repos
 # $DBG is used to debug (set it to "echo")
 alias annex_drop_show='DBG=echo annex_drop'
+alias annex_dropn='git annex drop -N $(git_remotes | wc -w)'
 annex_drop() {
   local REPOS="${1:-$(git_remotes)}"
   local DBG="$DBG"
