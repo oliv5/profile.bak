@@ -230,19 +230,18 @@ annex_move() {
   [ -z "$REPOS" ] && return 0
   # Copy local files to remote repos
   for REPO in $REPOS; do
-    $DBG git annex copy --not --in "$REPO" --to "$REPO" "$@"
+    $DBG git annex copy --not --in "$REPO" --to "$REPO" -J2 "$@"
   done
   # Look for all missing files which are NOT in our local host
   local LOCATION="$(echo "$REPOS" | sed -e 's/ / --or --not --in /g')"
-  local CMD="git annex find --not --in . --and -\( --not --in $LOCATION -\)"
-  IFS= eval "$CMD" "$@" | while IFS= read -r F; do
+  git annex find --not --in . --and -\( --not --in $LOCATION -\) --print0 "$@" | xargs -0 -n1 sh -c '
+    DBG="$1";FROM="$2";REPOS="$3";F="$4"
     $DBG git annex get ${FROM:+--from "$FROM"} "$F"
     for REPO in $REPOS; do
       $DBG git annex copy --not --in "$REPO" --to "$REPO" "$F"
     done
-    # Alternative "git annex drop", since it killed the "while read" loop
-    $DBG git annex move "$F" --to "$REPO" --fast
-  done
+    $DBG git annex drop "$F"
+  ' _ "$DBG" "$FROM" "$REPOS"
 }
 
 # Drop local files which are in the specified remote repos
@@ -250,7 +249,7 @@ alias annex_dropq='git annex drop -N $(git_remotes | wc -w)'
 annex_drop() {
   local LOCATION="$(echo ${1:-$(git_remotes)} | sed -e 's/ / --and --in /g')"
   [ $# -gt 0 ] && shift
-  eval "echo git annex drop --in $LOCATION "$@""
+  git annex drop --in $LOCATION "$@"
 }
 
 # Annex upkeep
