@@ -22,3 +22,23 @@ alias toUpper='str_upper'
 str_upper() {
   echo "${@}" | tr "[:lower:]" "[:upper:]"
 }
+
+# Check if string have the given prefix
+str_prefix() {
+  local PATTERN="$1"
+  shift
+  for FILE; do
+    [ "$FILE" == "${FILE#$PATTERN}" ] && return 1
+  done
+  return 0
+}
+
+# Check if string have the given suffix
+str_suffix() {
+  local PATTERN="$1"
+  shift
+  for FILE; do
+    [ "$FILE" == "${FILE%$PATTERN}" ] && return 1
+  done
+  return 0
+}
