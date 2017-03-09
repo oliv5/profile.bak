@@ -9,7 +9,7 @@ ta() {
       tad "." "$SRC"
     else
       #tar -cvf "${SRC}.tar" "$SRC"
-      taa "${SRC}.tar" "$SRC"
+      taa "${SRC%%/*}.tar" "$SRC"
     fi
   done
 }
@@ -40,7 +40,7 @@ tgz() {
       tgzd "." "$SRC"
     else
       #tar -cvzf "${SRC}.tgz" "$SRC"
-      tgza "${SRC}.tgz" "$SRC"
+      tgza "${SRC%%/*}.tgz" "$SRC"
     fi
   done
 }
@@ -81,7 +81,7 @@ tbz() {
       tbzd "." "$SRC"
     else
       #tar -cvjf "${SRC}.tbz" "$SRC"
-      tbza "${SRC}.tbz" "$SRC"
+      tbza "${SRC%%/*}.tbz" "$SRC"
     fi
   done
 }
@@ -112,7 +112,7 @@ txz() {
       txzd "." "$SRC"
     else
       #tar -cvJf "${SRC}.txz" "$SRC"
-      txza "${SRC}.txz" "$SRC"
+      txza "${SRC%%/*}.txz" "$SRC"
     fi
   done
 }
@@ -143,7 +143,7 @@ tgg() {
     if [ "${SRC%.tar.gpg}" != "$SRC" ]; then
       tggd "." "$SRC"
     else
-      tgga "$KEY" "${SRC}.tar.gpg" "$SRC" 
+      tgga "$KEY" "${SRC%%/*}.tar.gpg" "$SRC" 
     fi
   done
 }

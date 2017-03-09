@@ -1,25 +1,25 @@
 #!/bin/sh
 
 # Quick zip compress/deflate
-zipq() {
+zp() {
   for SRC; do
     if [ "${SRC##*.}" = "zip" ]; then
-      zipd "." "$SRC"
+      zpd "." "$SRC"
     else
-      zipa "${SRC}.zip" "$SRC"
+      zpa "${SRC%%/*}.zip" "$SRC"
     fi
   done
 }
 
 # Zip compress
-zipa() {
+zpa() {
   local ARCHIVE="${1:?No archive to create...}"
   shift 1
   zip -r9 "$ARCHIVE" "$@"
 }
 
 # Zip deflate (in place when output dir is "")
-zipd() {
+zpd() {
   local DST="${1:?No output directory specified...}"
   local SRC
   shift
@@ -29,7 +29,7 @@ zipd() {
 }
 
 # Zip test archive
-zipt() {
+zpt() {
   local RES=0
   local SRC
   for SRC; do
@@ -40,20 +40,20 @@ zipt() {
 
 ###############################
 # Quick tar > zip > gpg compress/deflate
-zipg() {
+zpg() {
   local KEY="${1:?No encryption key specified...}"
   shift
   for SRC; do
-    if [ "${SRC%.tar.xz.gpg}" != "$SRC" ]; then
-      zipgd "." "$SRC"
+    if [ "${SRC%.tar.zip.gpg}" != "$SRC" ]; then
+      zpgd "." "$SRC"
     else
-      zipga "$KEY" "${SRC}.tar.xz.gpg" "$SRC"
+      zpga "$KEY" "${SRC%%/*}.tar.zip.gpg" "$SRC"
     fi
   done
 }
 
 # tar > zip > gpg compress
-zipga(){
+zpga(){
   local KEY="${1:?No encryption key specified...}"
   local ARCHIVE="${2:?No archive to create...}"
   shift 2
@@ -61,7 +61,7 @@ zipga(){
 }
 
 # gpg > zip > tar deflate
-zipgd(){
+zpgd(){
   local DST="${1:?No output directory specified...}"
   local SRC
   shift 1
@@ -79,7 +79,7 @@ zipgd(){
   #~ F2="F2"
   #~ echo "This is OK." > $F1
   #~ [ $# -gt 0 ] && local IFS=$'\n' || local IFS=$' \n'
-  #~ for FCT in ${@:-zipq 'zipg 0x95C1629C87884760'}; do
+  #~ for FCT in ${@:-zp 'zpg 0x95C1629C87884760'}; do
     #~ echo "***********************"
     #~ echo "Testing $FCT..."
     #~ rm ${F2}* 2>/dev/null
@@ -98,3 +98,4 @@ zipgd(){
     #~ echo
   #~ done
 #~ }
+#~ _unittest

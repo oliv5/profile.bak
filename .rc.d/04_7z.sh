@@ -27,7 +27,7 @@ _7zq() {
     if [ "${SRC##*.}" = "7z" ]; then
       _7zd "." "$SRC"
     else
-      _7za "${SRC}.7z" "$SRC"
+      _7za "${SRC%%/*}.7z" "$SRC"
     fi
   done
 }
@@ -57,7 +57,7 @@ _7zt() {
     if [ "${SRC%.tar.7z}" != "$SRC" ]; then
       _7ztd "." "$SRC"
     else
-      _7zta "${SRC}.tar.7z" "$SRC"
+      _7zta "${SRC%%/*}.tar.7z" "$SRC"
     fi
   done
 }
@@ -90,7 +90,7 @@ _7zg() {
     if [ "${SRC%.7z.gpg}" != "$SRC" ]; then
       _7zgd "." "$SRC"
     else
-      _7zga "$KEY" "${SRC}.7z.gpg" "$SRC"
+      _7zga "$KEY" "${SRC%%/*}.7z.gpg" "$SRC"
     fi
   done
 }
@@ -133,7 +133,7 @@ _7ztg() {
     if [ "${SRC%.tar.7z.gpg}" != "$SRC" ]; then
       _7ztgd "." "$SRC"
     else
-      _7ztga "$KEY" "${SRC}.tar.7z.gpg" "$SRC"
+      _7ztga "$KEY" "${SRC%%/*}.tar.7z.gpg" "$SRC"
     fi
   done
 }

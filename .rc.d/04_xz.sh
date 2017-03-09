@@ -6,9 +6,9 @@
 xzt() {
   for SRC; do
     if [ "${SRC%.tar.xz}" != "$SRC" ]; then
-      xztd "." "$SRC"
+      echo xztd "." "$SRC"
     else
-      xzta "${SRC}.tar.xz" "$SRC"
+      xzta "${SRC%%/*}.tar.xz" "$SRC"
     fi
   done
 }
@@ -40,7 +40,7 @@ xzg() {
     if [ "${SRC%.tar.xz.gpg}" != "$SRC" ]; then
       xzgd "." "$SRC"
     else
-      xzga "$KEY" "${SRC}.tar.xz.gpg" "$SRC"
+      xzga "$KEY" "${SRC%%/*}.tar.xz.gpg" "$SRC"
     fi
   done
 }
