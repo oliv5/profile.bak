@@ -2,92 +2,72 @@
 # Note: diff using "xzdiff"
 
 ###############################
-# Quick tar > xz compress/deflate
-xzt() {
+# Quick xz compress/deflate
+xzq() {
   for SRC; do
-    if [ "${SRC%.tar.xz}" != "$SRC" ]; then
-      echo xztd "." "$SRC"
+    if [ "${SRC%.xz}" != "$SRC" ]; then
+      xzd "." "$SRC"
     else
-      xzta "${SRC%%/*}.tar.xz" "$SRC"
+      xza "${SRC%%/*}.xz" "$SRC"
     fi
   done
 }
 
-# tar > xz compress
-xzta() {
+# xz compress
+xza() {
   local ARCHIVE="${1:?No archive to create...}"
   shift 1
-  tar -cvf - "$@" | xz -c -9 - > "$ARCHIVE"
+  xz -c -9 "$@" > "$ARCHIVE"
 }
 
-# xz > tar deflate
-xztd() {
+# xz deflate
+xzd() {
   local DST="${1:?No output directory specified...}"
   local SRC
   shift 1
   mkdir -p "$DST"
+  command cd "$DST"
   for SRC; do
-    xz -d --stdout "$SRC" | tar -xvf - -C "$DST"
+    xz -dk "$SRC"
   done
+  command cd "$OLDPWD"
 }
 
 ###############################
-# Quick tar > xz > gpg compress/deflate
+# Quick xz > gpg compress/deflate
 xzg() {
   local KEY="${1:?No encryption key specified...}"
   shift
   for SRC; do
-    if [ "${SRC%.tar.xz.gpg}" != "$SRC" ]; then
+    if [ "${SRC%.txz.gpg}" != "$SRC" ]; then
       xzgd "." "$SRC"
     else
-      xzga "$KEY" "${SRC%%/*}.tar.xz.gpg" "$SRC"
+      xzga "$KEY" "${SRC%%/*}.txz.gpg" "$SRC"
     fi
   done
 }
 
-# tar > xz > gpg compress
+# xz > gpg compress
 xzga(){
   local KEY="${1:?No encryption key specified...}"
   local ARCHIVE="${2:?No archive to create...}"
   shift 2
-  tar -cvf - "$@" | xz -c -9 - | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
+  xz -ck -9 "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
 }
 
-# gpg > xz > tar deflate
+# gpg > xz deflate
 xzgd(){
   local DST="${1:?No output directory specified...}"
   local SRC
   shift 1
   mkdir -p "$DST"
+  command cd "$DST"
   for SRC; do
-    gpg --decrypt --batch "$SRC" | xz -d --stdout - | tar -xvf - -C "$DST"
+    gpg --decrypt --batch "$SRC" | xz -d > "${SRC%.txz.gpg}"
   done
+  command cd "$OLDPWD"
 }
 
 ###############################
 #~ # Unit test
-#~ _unittest() {
-  #~ cd /tmp
-  #~ F1="F1"
-  #~ F2="F2"
-  #~ echo "This is OK." > $F1
-  #~ [ $# -gt 0 ] && local IFS=$'\n' || local IFS=$' \n'
-  #~ for FCT in ${@:-xzt 'xzg 0x95C1629C87884760'}; do
-    #~ echo "***********************"
-    #~ echo "Testing $FCT..."
-    #~ rm ${F2}* 2>/dev/null
-    #~ cp $F1 $F2
-    #~ (set -vx; eval $FCT $F2)
-    #~ diff -s $F1 $F2
-    #~ ls ${F2}*
-    #~ rm $F2
-    #~ (set -vx; eval $FCT ${F2}.*)
-    #~ diff -s $F1 $F2 &&
-      #~ echo ">>>>> $FCT test success !!! <<<<<" ||
-      #~ echo ">>>>> $FCT test FAILED !!! <<<<<" 
-    #~ read
-    #~ ls ${F2}*
-    #~ rm ${F2}* 2>/dev/null
-    #~ echo
-  #~ done
-#~ }
+#~ _unittest xzq 'xzg 0x95C1629C87884760'

@@ -38,25 +38,25 @@ gzt() {
 }
 
 ###############################
-# Quick tar > gzip > gpg compress/deflate
+# Quick gzip > gpg compress/deflate
 gzg() {
   local KEY="${1:?No encryption key specified...}"
   shift
   for SRC; do
-    if [ "${SRC%.tar.gz.gpg}" != "$SRC" ]; then
+    if [ "${SRC%.gz.gpg}" != "$SRC" ]; then
       gzgd "." "$SRC"
     else
-      gzga "$KEY" "${SRC%%/*}.tar.gz.gpg" "$SRC"
+      gzga "$KEY" "${SRC%%/*}.gz.gpg" "$SRC"
     fi
   done
 }
 
-# tar > gzip > gpg compress
+# gzip > gpg compress
 gzga(){
   local KEY="${1:?No encryption key specified...}"
   local ARCHIVE="${2:?No archive to create...}"
   shift 2
-  tar -cvf - "$@" | zip -r9 - - | gpg --encrypt --recipient "$KEY" > "$ARCHIVE"
+  zip -r9 - "$@" | gpg --encrypt --recipient "$KEY" > "$ARCHIVE"
 }
 
 # gpg > gzip > tar deflate
@@ -66,35 +66,10 @@ gzgd(){
   shift 1
   mkdir -p "$DST"
   for SRC; do
-    gpg --decrypt --batch "$SRC" | funzip 2>/dev/null | tar -xvf - -C "$DST"
+    gpg --decrypt --batch "$SRC" | funzip > "$DST/$(basename "${SRC%.gz.gpg}")"
   done
 }
 
 ###############################
 # Unit test
-#~ _unittest() {
-  #~ cd /tmp
-  #~ F1="F1"
-  #~ F2="F2"
-  #~ echo "This is OK." > $F1
-  #~ [ $# -gt 0 ] && local IFS=$'\n' || local IFS=$' \n'
-  #~ for FCT in ${@:-gz 'gzg 0x95C1629C87884760'}; do
-    #~ echo "***********************"
-    #~ echo "Testing $FCT..."
-    #~ rm ${F2}* 2>/dev/null
-    #~ cp $F1 $F2
-    #~ (set -vx; eval $FCT $F2)
-    #~ diff -s $F1 $F2
-    #~ ls ${F2}*
-    #~ rm $F2
-    #~ (set -vx; eval $FCT ${F2}.*)
-    #~ diff -s $F1 $F2 &&
-      #~ echo ">>>>> $FCT test success !!! <<<<<" ||
-      #~ echo ">>>>> $FCT test FAILED !!! <<<<<" 
-    #~ read
-    #~ ls ${F2}*
-    #~ rm ${F2}* 2>/dev/null
-    #~ echo
-  #~ done
-#~ }
-#~ _unittest
+#~ _unittest gz 'gzg 0x95C1629C87884760'

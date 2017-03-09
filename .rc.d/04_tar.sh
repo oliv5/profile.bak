@@ -27,7 +27,40 @@ tad() {
   local SRC
   shift
   for SRC; do
-    tar -xvf "$SRC" ${DST:+-C "$DST"}
+    tar -xvf "$SRC" -C "$DST"
+  done
+}
+
+###############################
+# quick tar > gpg compress/deflate
+tag() {
+  local KEY="${1:?No encryption key specified...}"
+  shift
+  for SRC; do
+    if [ "${SRC%.tar.gpg}" != "$SRC" ]; then
+      tagd "." "$SRC"
+    else
+      taga "$KEY" "${SRC%%/*}.tar.gpg" "$SRC" 
+    fi
+  done
+}
+
+# tar > gpg compress
+taga(){
+  local KEY="${1:?No encryption key specified...}"
+  local ARCHIVE="${2:?No archive to create...}"
+  shift 2
+  tar -cf - "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
+}
+
+# gpg > tar deflate
+tagd(){
+  local DST="${1:?No output directory specified...}"
+  local SRC
+  shift 1
+  mkdir -p "$DST"
+  for SRC; do
+    gpg --decrypt --batch "$SRC" | tar -xvf - -C "$DST"
   done
 }
 
@@ -58,7 +91,7 @@ tgzd() {
   local SRC
   shift
   for SRC; do
-    tar -xvzf "$SRC" ${DST:+-C "$DST"}
+    tar -xvzf "$SRC" -C "$DST"
   done
 }
 
@@ -70,6 +103,39 @@ tgzt() {
     tar -tzf "$SRC" >/dev/null || RES=$?
   done
   return $RES
+}
+
+###############################
+# quick tar > gz > gpg compress/deflate
+tgzg() {
+  local KEY="${1:?No encryption key specified...}"
+  shift
+  for SRC; do
+    if [ "${SRC%.tgz.gpg}" != "$SRC" ]; then
+      tgzgd "." "$SRC"
+    else
+      tgzga "$KEY" "${SRC%%/*}.tgz.gpg" "$SRC" 
+    fi
+  done
+}
+
+# tar > gz > gpg compress
+tgzga(){
+  local KEY="${1:?No encryption key specified...}"
+  local ARCHIVE="${2:?No archive to create...}"
+  shift 2
+  tar -czf - "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
+}
+
+# gpg > gz > tar deflate
+tgzgd(){
+  local DST="${1:?No output directory specified...}"
+  local SRC
+  shift 1
+  mkdir -p "$DST"
+  for SRC; do
+    gpg --decrypt --batch "$SRC" | tar -xvzf - -C "$DST"
+  done
 }
 
 ########################
@@ -99,7 +165,40 @@ tbzd() {
   local SRC
   shift
   for SRC; do
-    tar -xvjf "$SRC" ${DST:+-C "$DST"}
+    tar -xvjf "$SRC" -C "$DST"
+  done
+}
+
+###############################
+# quick tar > bz > gpg compress/deflate
+tbzg() {
+  local KEY="${1:?No encryption key specified...}"
+  shift
+  for SRC; do
+    if [ "${SRC%.tbz.gpg}" != "$SRC" ]; then
+      tbzgd "." "$SRC"
+    else
+      tbzga "$KEY" "${SRC%%/*}.tbz.gpg" "$SRC" 
+    fi
+  done
+}
+
+# tar > bz > gpg compress
+tbzga(){
+  local KEY="${1:?No encryption key specified...}"
+  local ARCHIVE="${2:?No archive to create...}"
+  shift 2
+  tar -cjf - "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
+}
+
+# gpg > bz > tar deflate
+tbzgd(){
+  local DST="${1:?No output directory specified...}"
+  local SRC
+  shift 1
+  mkdir -p "$DST"
+  for SRC; do
+    gpg --decrypt --batch "$SRC" | tar -xvjf - -C "$DST"
   done
 }
 
@@ -121,6 +220,7 @@ txz() {
 txza() {
   local ARCHIVE="${1:?No archive to create...}"
   shift
+  #tar -cvf - "$@" | xz -c -9 - > "$ARCHIVE"
   tar -cvJf "$ARCHIVE" "$@"
 }
 
@@ -130,52 +230,125 @@ txzd() {
   local SRC
   shift
   for SRC; do
-    tar -xvJf "$SRC" ${DST:+-C "$DST"}
+    #xz -d --stdout "$SRC" | tar -xvf - -C "$DST"
+    tar -xvJf "$SRC" -C "$DST"
   done
 }
 
-########################
-# quick tar > gpg compress/deflate
-tgg() {
+###############################
+# Quick tar > xz > gpg compress/deflate
+txzg() {
   local KEY="${1:?No encryption key specified...}"
   shift
   for SRC; do
-    if [ "${SRC%.tar.gpg}" != "$SRC" ]; then
-      tggd "." "$SRC"
+    if [ "${SRC%.txz.gpg}" != "$SRC" ]; then
+      txzgd "." "$SRC"
     else
-      tgga "$KEY" "${SRC%%/*}.tar.gpg" "$SRC" 
+      txzga "$KEY" "${SRC%%/*}.txz.gpg" "$SRC"
     fi
   done
 }
 
-# tar > gpg compress
-tgga(){
+# tar > xz > gpg compress
+txzga(){
   local KEY="${1:?No encryption key specified...}"
   local ARCHIVE="${2:?No archive to create...}"
   shift 2
-  tar -cf - "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
+  #tar -cvf - "$@" | xz -c -9 - | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
+  tar -cvJf - "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
 }
 
-# gpg > tar deflate
-tggd(){
+# gpg > xz > tar deflate
+txzgd(){
   local DST="${1:?No output directory specified...}"
   local SRC
   shift 1
   mkdir -p "$DST"
   for SRC; do
-    gpg --decrypt --batch "$SRC" | tar -xvf - ${DST:+-C "$DST"}
+    #gpg --decrypt --batch "$SRC" | xz -d --stdout - | tar -xvf - -C "$DST"
+    gpg --decrypt --batch "$SRC" | tar -xvJf - -C "$DST"
   done
 }
 
-#~ ###############################
-#~ # Unit test
+###############################
+# quick tar > 7z compress
+t7z() {
+  for SRC; do
+    if [ "${SRC%.tar.7z}" != "$SRC" ]; then
+      t7zd "." "$SRC"
+    else
+      t7za "${SRC%%/*}.tar.7z" "$SRC"
+    fi
+  done
+}
+
+# tar > 7z compress
+t7za() {
+  local ARCHIVE="${1:?No archive to create...}"
+  shift 1
+  tar -cf - "$@" | 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off -si "$ARCHIVE"
+}
+
+# 7z > tar deflate
+t7zd() {
+  local DST="${1:?No output directory specified...}"
+  local SRC
+  shift 1
+  mkdir -p "$DST"
+  for SRC; do
+    7z x -so "$SRC" | tar -xf - -C "$DST"
+  done
+}
+
+###############################
+# quick tar > 7z > gpg compress
+t7zg() {
+  local KEY="${1:?No encryption key specified...}"
+  shift
+  for SRC; do
+    if [ "${SRC%.tar.7z.gpg}" != "$SRC" ]; then
+      t7zgd "." "$SRC"
+    else
+      t7zga "$KEY" "${SRC%%/*}.tar.7z.gpg" "$SRC"
+    fi
+  done
+}
+
+# tar > 7z > gpg compress
+t7zga(){
+  local KEY="${1:?No encryption key specified...}"
+  local ARCHIVE="${2:?No archive to create...}"
+  shift 2
+  # 7z does not support "7z a -so" with 7z compression
+  #tar -cf - "$@" | 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off -si -an -so "$@" | gpg --encrypt  --batch --recipient "$KEY" -o "$ARCHIVE"
+  local TMP="$(mktemp --suffix=.7z -u)"
+  tar -cf - "$@" | eval 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=off -si "$TMP"
+  gpg --encrypt --batch --recipient "$KEY" -o "$ARCHIVE" "$TMP"
+  rm "$TMP"
+}
+
+# gpg > 7z > tar deflate
+t7zgd(){
+  local DST="${1:?No output directory specified...}"
+  local SRC
+  shift 1
+  for SRC; do
+    local TMP="$(mktemp --suffix=.7z -u)"
+    gpg --decrypt --batch -o "$TMP" "$SRC"
+    7z x -so "$TMP" | tar -xf - -C "$DST"
+    rm "$TMP"
+  done
+}
+
+###############################
+# Unit test
 #~ _unittest() {
   #~ cd /tmp
   #~ F1="F1"
   #~ F2="F2"
   #~ echo "This is OK." > $F1
   #~ [ $# -gt 0 ] && local IFS=$'\n' || local IFS=$' \n'
-  #~ for FCT in ${@:-ta tgz tbz txz}; do
+  #~ for FCT in "$@"; do
     #~ echo "***********************"
     #~ echo "Testing $FCT..."
     #~ rm ${F2}* 2>/dev/null
@@ -194,3 +367,6 @@ tggd(){
     #~ echo
   #~ done
 #~ }
+#~ _unittest ta 'tag 0x95C1629C87884760' tgz 'tgzg 0x95C1629C87884760' 
+#~ _unittest tbz 'tbzg 0x95C1629C87884760' txz 'txzg 0x95C1629C87884760'
+#~ _unittest t7z 't7zg 0x95C1629C87884760'

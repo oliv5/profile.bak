@@ -39,63 +39,38 @@ zpt() {
 }
 
 ###############################
-# Quick tar > zip > gpg compress/deflate
+# Quick zip > gpg compress/deflate
 zpg() {
   local KEY="${1:?No encryption key specified...}"
   shift
   for SRC; do
-    if [ "${SRC%.tar.zip.gpg}" != "$SRC" ]; then
+    if [ "${SRC%.zip.gpg}" != "$SRC" ]; then
       zpgd "." "$SRC"
     else
-      zpga "$KEY" "${SRC%%/*}.tar.zip.gpg" "$SRC"
+      zpga "$KEY" "${SRC%%/*}.zip.gpg" "$SRC"
     fi
   done
 }
 
-# tar > zip > gpg compress
+# zip > gpg compress
 zpga(){
   local KEY="${1:?No encryption key specified...}"
   local ARCHIVE="${2:?No archive to create...}"
   shift 2
-  tar -cvf - "$@" | zip -r9 - - | gpg --encrypt --recipient "$KEY" > "$ARCHIVE"
+  zip -r9 - "$@" | gpg --encrypt --recipient "$KEY" > "$ARCHIVE"
 }
 
-# gpg > zip > tar deflate
+# gpg > zip deflate
 zpgd(){
   local DST="${1:?No output directory specified...}"
   local SRC
   shift 1
   mkdir -p "$DST"
   for SRC; do
-    gpg --decrypt --batch "$SRC" | funzip 2>/dev/null | tar -xvf - -C "$DST"
+    gpg --decrypt --batch "$SRC" | funzip > "$DST/$(basename "${SRC%.zip.gpg}")"
   done
 }
 
 ###############################
 # Unit test
-#~ _unittest() {
-  #~ cd /tmp
-  #~ F1="F1"
-  #~ F2="F2"
-  #~ echo "This is OK." > $F1
-  #~ [ $# -gt 0 ] && local IFS=$'\n' || local IFS=$' \n'
-  #~ for FCT in ${@:-zp 'zpg 0x95C1629C87884760'}; do
-    #~ echo "***********************"
-    #~ echo "Testing $FCT..."
-    #~ rm ${F2}* 2>/dev/null
-    #~ cp $F1 $F2
-    #~ (set -vx; eval $FCT $F2)
-    #~ diff -s $F1 $F2
-    #~ ls ${F2}*
-    #~ rm $F2
-    #~ (set -vx; eval $FCT ${F2}.*)
-    #~ diff -s $F1 $F2 &&
-      #~ echo ">>>>> $FCT test success !!! <<<<<" ||
-      #~ echo ">>>>> $FCT test FAILED !!! <<<<<" 
-    #~ read
-    #~ ls ${F2}*
-    #~ rm ${F2}* 2>/dev/null
-    #~ echo
-  #~ done
-#~ }
-#~ _unittest
+#~ _unittest zp 'zpg 0x95C1629C87884760'
