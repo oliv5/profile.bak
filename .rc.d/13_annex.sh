@@ -245,11 +245,13 @@ annex_move() {
 }
 
 # Drop local files which are in the specified remote repos
-alias annex_dropq='git annex drop -N $(git_remotes | wc -w)'
-annex_drop() {
-  local LOCATION="$(echo ${1:-$(git_remotes)} | sed -e 's/ / --and --in /g')"
+alias annex_drop='git annex drop -N $(git_remotes | wc -w)'
+annex_drop_fast() {
+  local REPOS="${1:-$(git_remotes)}"
+  local COPIES="$(echo "$REPOS" | wc -w)"
+  local LOCATION="$(echo "$REPOS" | sed -e 's/ / --and --in /g')"
   [ $# -gt 0 ] && shift
-  git annex drop --in $LOCATION "$@"
+  git annex drop --in $LOCATION -N "$COPIES" "$@"
 }
 
 # Annex upkeep
