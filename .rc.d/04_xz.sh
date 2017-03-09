@@ -5,7 +5,7 @@
 # Quick xz compress/deflate
 xzq() {
   for SRC; do
-    if [ "${SRC%.xz}" != "$SRC" ]; then
+    if [ "$SRC" != "${SRC%.xz}" ]; then
       xzd "." "$SRC"
     else
       xza "${SRC%%/*}.xz" "$SRC"
@@ -39,10 +39,10 @@ xzg() {
   local KEY="${1:?No encryption key specified...}"
   shift
   for SRC; do
-    if [ "${SRC%.txz.gpg}" != "$SRC" ]; then
+    if [ "$SRC" != "${SRC%.xz.gpg}" ]; then
       xzgd "." "$SRC"
     else
-      xzga "$KEY" "${SRC%%/*}.txz.gpg" "$SRC"
+      xzga "$KEY" "${SRC%%/*}.xz.gpg" "$SRC"
     fi
   done
 }
@@ -63,11 +63,11 @@ xzgd(){
   mkdir -p "$DST"
   command cd "$DST"
   for SRC; do
-    gpg --decrypt --batch "$SRC" | xz -d > "${SRC%.txz.gpg}"
+    gpg --decrypt --batch "$SRC" | xz -d > "${SRC%.xz.gpg}"
   done
   command cd "$OLDPWD"
 }
 
 ###############################
-#~ # Unit test
+# Unit test
 #~ _unittest xzq 'xzg 0x95C1629C87884760'

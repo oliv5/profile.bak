@@ -4,7 +4,7 @@
 # quick tar compress/deflate
 ta() {
   for SRC; do
-    if [ "${SRC##*.}" = "tar" ]; then
+    if [ "$SRC" != "${SRC%.tar}" ]; then
       #tar -xvf "$SRC" -C "${SRC%/*}"
       tad "." "$SRC"
     else
@@ -37,7 +37,7 @@ tag() {
   local KEY="${1:?No encryption key specified...}"
   shift
   for SRC; do
-    if [ "${SRC%.tar.gpg}" != "$SRC" ]; then
+    if [ "$SRC" != "${SRC%.tar.gpg}" ]; then
       tagd "." "$SRC"
     else
       taga "$KEY" "${SRC%%/*}.tar.gpg" "$SRC" 
@@ -68,7 +68,7 @@ tagd(){
 # quick tar > gz compress/deflate
 tgz() {
   for SRC; do
-    if [ "${SRC##*.}" = "tgz" ] || [ "${SRC%.tar.gz}" != "$SRC" ]; then
+    if [ "$SRC" != "${SRC%.tgz}" ] || [ "$SRC" != "${SRC%.tar.gz}" ]; then
       #tar -xvzf "$SRC" -C "${SRC%/*}"
       tgzd "." "$SRC"
     else
@@ -111,7 +111,7 @@ tgzg() {
   local KEY="${1:?No encryption key specified...}"
   shift
   for SRC; do
-    if [ "${SRC%.tgz.gpg}" != "$SRC" ]; then
+    if [ "$SRC" != "${SRC%.tgz.gpg}" ] || [ "$SRC" != "${SRC%.tar.gz.gpg}" ]; then
       tgzgd "." "$SRC"
     else
       tgzga "$KEY" "${SRC%%/*}.tgz.gpg" "$SRC" 
@@ -142,7 +142,7 @@ tgzgd(){
 # quick tar > bz compress/deflate
 tbz() {
   for SRC; do
-    if [ "${SRC##*.}" = "tbz" ] || [ "${SRC##*.}" = "tbz2" ] || [ "${SRC%.tar.bz}" != "$SRC" ] || [ "${SRC%.tar.bz2}" != "$SRC" ]; then
+    if [ "$SRC" != "${SRC%.tbz}" ] || [ "$SRC" != "${SRC%.tbz2}" ]|| [ "$SRC" != "${SRC%.tar.bz}" ] || [ "$SRC" != "${SRC%.tar.bz2}" ]; then
       #tar -xvjf "$SRC" -C "${SRC%/*}"
       tbzd "." "$SRC"
     else
@@ -175,7 +175,7 @@ tbzg() {
   local KEY="${1:?No encryption key specified...}"
   shift
   for SRC; do
-    if [ "${SRC%.tbz.gpg}" != "$SRC" ]; then
+    if [ "$SRC" != "${SRC%.tbz.gpg}" ] || [ "$SRC" != "${SRC%.tar.bz.gpg}" ]; then
       tbzgd "." "$SRC"
     else
       tbzga "$KEY" "${SRC%%/*}.tbz.gpg" "$SRC" 
@@ -206,7 +206,7 @@ tbzgd(){
 # quick tar > xz (Lzma) compress/deflate
 txz() {
   for SRC; do
-    if [ "${SRC##*.}" = "txz" ] || [ "${SRC%.tar.xz}" != "$SRC" ]; then
+    if [ "$SRC" != "${SRC%.txz}" ] || [ "$SRC" != "${SRC%.tar.xz}" ]; then
       #tar -xvJf "$SRC" -C "${SRC%/*}"
       txzd "." "$SRC"
     else
@@ -241,7 +241,7 @@ txzg() {
   local KEY="${1:?No encryption key specified...}"
   shift
   for SRC; do
-    if [ "${SRC%.txz.gpg}" != "$SRC" ]; then
+    if [ "$SRC" != "${SRC%.txz.gpg}" ]; then
       txzgd "." "$SRC"
     else
       txzga "$KEY" "${SRC%%/*}.txz.gpg" "$SRC"
@@ -274,7 +274,7 @@ txzgd(){
 # quick tar > 7z compress
 t7z() {
   for SRC; do
-    if [ "${SRC%.tar.7z}" != "$SRC" ]; then
+    if [ "$SRC" != "${SRC%.tar.7z}" ]; then
       t7zd "." "$SRC"
     else
       t7za "${SRC%%/*}.tar.7z" "$SRC"
@@ -306,7 +306,7 @@ t7zg() {
   local KEY="${1:?No encryption key specified...}"
   shift
   for SRC; do
-    if [ "${SRC%.tar.7z.gpg}" != "$SRC" ]; then
+    if [ "$SRC" != "${SRC%.tar.7z.gpg}" ]; then
       t7zgd "." "$SRC"
     else
       t7zga "$KEY" "${SRC%%/*}.tar.7z.gpg" "$SRC"

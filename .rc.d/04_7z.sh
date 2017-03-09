@@ -17,7 +17,7 @@ alias 7zdiffm='_7zdiffm'
 # quick 7z compress
 _7zq() {
   for SRC; do
-    if [ "${SRC##*.}" = "7z" ]; then
+    if [ "$SRC" != "${SRC%.7z}" ]; then
       _7zd "." "$SRC"
     else
       _7za "${SRC%%/*}.7z" "$SRC"
@@ -48,7 +48,7 @@ _7zg() {
   local KEY="${1:?No encryption key specified...}"
   shift
   for SRC; do
-    if [ "${SRC%.7z.gpg}" != "$SRC" ]; then
+    if [ "$SRC" != "${SRC%.7z.gpg}" ]; then
       _7zgd "." "$SRC"
     else
       _7zga "$KEY" "${SRC%%/*}.7z.gpg" "$SRC"

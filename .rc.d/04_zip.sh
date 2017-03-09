@@ -3,7 +3,7 @@
 # Quick zip compress/deflate
 zp() {
   for SRC; do
-    if [ "${SRC##*.}" = "zip" ]; then
+    if [ "$SRC" != "${SRC%.zip}" ]; then
       zpd "." "$SRC"
     else
       zpa "${SRC%%/*}.zip" "$SRC"
@@ -44,7 +44,7 @@ zpg() {
   local KEY="${1:?No encryption key specified...}"
   shift
   for SRC; do
-    if [ "${SRC%.zip.gpg}" != "$SRC" ]; then
+    if [ "$SRC" != "${SRC%.zip.gpg}" ]; then
       zpgd "." "$SRC"
     else
       zpga "$KEY" "${SRC%%/*}.zip.gpg" "$SRC"

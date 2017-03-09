@@ -3,7 +3,7 @@
 # Quick gzip compress/deflate
 gz() {
   for SRC; do
-    if [ "${SRC##*.}" = "gz" ]; then
+    if [ "$SRC" != "${SRC%.gz}" ]; then
       gzd "." "$SRC"
     else
       gza "${SRC%%/*}.gz" "$SRC"
@@ -43,7 +43,7 @@ gzg() {
   local KEY="${1:?No encryption key specified...}"
   shift
   for SRC; do
-    if [ "${SRC%.gz.gpg}" != "$SRC" ]; then
+    if [ "$SRC" != "${SRC%.gz.gpg}" ]; then
       gzgd "." "$SRC"
     else
       gzga "$KEY" "${SRC%%/*}.gz.gpg" "$SRC"
