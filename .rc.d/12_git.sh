@@ -560,17 +560,25 @@ git_upkeep() {
   #echo "[git_upkeep] end at $(date)"
 }
 
-# Use .git directory and configure it as bare repo
+# Normal to bare repo
 git_tobare() {
-  local SRC="${1:-$PWD}"
+  local SRC="${1:-.}"
   local DST="${SRC}.git"
-  cd "$SRC" &&
-  git_exists &&
-  [ -d ".git" ] &&
-  mv .git "$DST" &&
-  cd "$DST" &&
-  git config --bool core.bare true &&
-  rmdir "$SRC"
+  git_exists "$SRC/.git" &&
+  mv "$SRC/.git" "$DST" &&
+  git --git-dir="$DST" config --bool core.bare true &&
+  rm -r "$SRC"
+}
+
+# Bare to normal repo
+git_frombare() {
+  local SRC="${1:-.}"
+  local DST="${SRC%%.git}"
+  git_exists "$SRC" &&
+  mkdir "${SRC%%.git}" &&
+  mv "$SRC" "$DST/.git" &&
+  git --git-dir="$DST/.git" config --bool core.bare false &&
+  git --git-dir="$DST/.git" --work-tree="$DST" reset HEAD --hard
 }
 
 ########################################
