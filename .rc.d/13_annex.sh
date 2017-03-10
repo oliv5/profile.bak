@@ -159,7 +159,7 @@ annex_bundle() {
       else
         git annex find | 
           awk '{print "\""$0"\""}' |
-          xargs tar zcf "${BUNDLE}" -h --exclude-vcs --
+          xargs -r tar zcf "${BUNDLE}" -h --exclude-vcs --
       fi
       if [ ! -z "$GPG_RECIPIENT" ]; then
         gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${BUNDLE}" &&
@@ -185,7 +185,7 @@ alias annex_pull='git annex sync --no-commit --no-push'
 alias annex_get_auto='git annex get --auto'
 alias annex_get_fast='git annex get --fast'
 alias annex_get_fast_auto='git annex get --fast --auto'
-alias annex_get_missing='annex find --not --in . --print0 | xargs -O git annex get'
+alias annex_get_missing='annex find --not --in . --print0 | xargs -rO git annex get'
 
 # Annex copy
 alias annex_copy_all='annex_copy --all'
@@ -230,11 +230,11 @@ annex_move() {
   [ -z "$REPOS" ] && return 0
   # Copy local files to remote repos
   for REPO in $REPOS; do
-    $DBG git annex copy --not --in "$REPO" --to "$REPO" -J2 "$@"
+    $DBG git annex copy --not --in "$REPO" --to "$REPO" "$@"
   done
   # Look for all missing files which are NOT in our local host
   local LOCATION="$(echo "$REPOS" | sed -e 's/ / --or --not --in /g')"
-  git annex find --not --in . --and -\( --not --in $LOCATION -\) --print0 "$@" | xargs -0 -n1 sh -c '
+  git annex find --not --in . --and -\( --not --in $LOCATION -\) --print0 "$@" | xargs -r0 -n1 sh -c '
     DBG="$1";FROM="$2";REPOS="$3";F="$4"
     $DBG git annex get ${FROM:+--from "$FROM"} "$F"
     for REPO in $REPOS; do
@@ -319,8 +319,8 @@ annex_upkeep() {
   fi
   # Revert deleted files
   if [ -z "$DEL" ] && ! annex_direct; then
-    gstx D | xargs -0 $DBG git checkout || return $?
-    #annex_st D | xargs $DBG git checkout || return $?
+    gstx D | xargs -r0 $DBG git checkout || return $?
+    #annex_st D | xargs -r $DBG git checkout || return $?
   fi
   # Sync
   if [ -n "$SYNC" ]; then
@@ -363,8 +363,8 @@ annex_find_repo() {
 }
 
 # Fsck/check all
-alias annex_fsck='annex_find_repo | xargs -I {} -n 1 sh -c "cd \"{}/..\"; pwd; git annex fsck"'
-alias annex_check='annex_find_repo | xargs -I {} -n 1 sh -c "cd \"{}/..\"; pwd; git annex list | grep \"^_\""'
+alias annex_fsck='annex_find_repo | xargs -r -I {} -n 1 sh -c "cd \"{}/..\"; pwd; git annex fsck"'
+alias annex_check='annex_find_repo | xargs -r -I {} -n 1 sh -c "cd \"{}/..\"; pwd; git annex list | grep \"^_\""'
 
 # Rename special remotes
 annex_rename_special() {
