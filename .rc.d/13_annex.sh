@@ -225,14 +225,14 @@ alias annex_move_show='DBG=echo annex_move'
 annex_move() {
   local REPOS="${1:-$(git_remotes)}"
   local DBG="$DBG"
-  local IFS=$' \n'
   [ $# -gt 0 ] && shift
   [ -z "$REPOS" ] && return 0
   # Copy local files to remote repos
+  local IFS=$' \n'
   for REPO in $REPOS; do
     $DBG git annex copy --not --in "$REPO" --to "$REPO" "$@"
   done
-  # Look for all missing files which are NOT in our local host
+  # Get/copy/drop all missing local files
   local LOCATION="$(echo "$REPOS" | sed -e 's/ / --or --not --in /g')"
   git annex find --not --in . --and -\( --not --in $LOCATION -\) --print0 "$@" | xargs -r0 -n1 sh -c '
     DBG="$1";FROM="$2";REPOS="$3";F="$4"
@@ -242,6 +242,30 @@ annex_move() {
     done
     $DBG git annex drop "$F"
   ' _ "$DBG" "$FROM" "$REPOS"
+}
+
+# Rsync files to the specified location, one by one
+# $FROM can be defined to selected the origin repo
+# $DBG is used to debug (set it to "echo")
+alias annex_rsync_show='DBG=echo annex_rsync'
+annex_rsync() {
+  local DST="${1:?No destination specified...}"
+  local DBG="$DBG"
+  local ROOT="$(git_root)"
+  [ $# -gt 0 ] && shift
+  # Copy local files
+  for F in "${@:-}"; do
+    $DBG rsync -v -r -z -s -i --inplace --size-only --progress -P -K -L --cvs-exclude "$ROOT/$F" "$DST/$F"
+  done
+  # Get/copy/drop all missing local files
+  git annex find --not --in . --print0 "$@" | xargs -r0 -n1 sh -c '
+    DBG="$1";FROM="$2";DST="$3/$4";SRC="$4"
+    if [ -n "$(rsync -n --ignore-existing /dev/null "$DST")" ]; then
+      $DBG git annex get ${FROM:+--from "$FROM"} "$SRC"
+      $DBG rsync -v -r -z -s -i --size-only --progress -P -K -L --cvs-exclude "$SRC" "$DST"
+      $DBG git annex drop "$SRC"
+    fi
+  ' _ "$DBG" "$FROM" "$DST"
 }
 
 # Drop local files which are in the specified remote repos
