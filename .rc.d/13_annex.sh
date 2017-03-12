@@ -10,6 +10,11 @@ alias ganlc='git annex find | wc -l'
 alias ganf='git annex find'
 alias ganfc='git annex find | wc -l'
 alias gans='git annex sync'
+alias gansn='git annex sync --no-commit'
+alias gansp='git annex sync --no-commit --no-push'
+alias gansu='git annex sync --no-commit --no-pull'
+alias gansc='git annex sync --content'
+alias ganscf='git annex sync --content --fast'
 alias gang='git annex get'
 alias ganc='git annex copy'
 alias ganca='git annex copy --all'
@@ -117,15 +122,6 @@ annex_init_gcrypt() {
   git config --add annex.sshcaching false
 }
 
-# Annex sync
-annex_sync() {
-  git annex sync "$@"
-}
-
-# Annex sync content
-alias annex_sync_content='annex_sync --content'
-alias annex_sync_content_fast='annex_sync --content --fast'
-
 # Annex status
 annex_status() {
   echo "annex status:"
@@ -177,17 +173,6 @@ annex_bundle() {
   fi
 }
 
-# Annex sync
-alias annex_ci='git annex sync --no-push --no-pull'
-alias annex_push='git annex sync --no-commit --no-pull'
-alias annex_pull='git annex sync --no-commit --no-push'
-
-# Annex get
-alias annex_get_auto='git annex get --auto'
-alias annex_get_fast='git annex get --fast'
-alias annex_get_fast_auto='git annex get --fast --auto'
-alias annex_get_missing='annex find --not --in . --print0 | xargs -rO git annex get'
-
 # Annex copy
 alias annex_copy_all='annex_copy --all'
 alias annex_copy_auto='annex_copy --auto'
@@ -219,61 +204,70 @@ alias annex_upload_all='annex_copy_all --to'
 alias annex_upload_auto='annex_copy_auto --to'
 alias annex_upload_fast_auto='annex_copy_fast_auto --to'
 
-# Move files to the specified repos, one by one
-# $FROM can be defined to selected the origin repo
-# $DBG is used to debug (set it to "echo")
-alias annex_move_show='DBG=echo annex_move'
-annex_move() {
+# Transfer files to the specified repos, one by one
+# $FROM is used to selected the origin repo
+# $DROP is used to drop the newly retrieved files
+# $DBG is used to print the command on stderr
+alias annex_copyto='DBG= DROP= annex_transfer'
+alias annex_moveto='DBG= DROP=1 annex_transfer'
+annex_transfer() {
+  annex_exists || return 1
   local REPOS="${1:-$(git_remotes)}"
-  local DBG="$DBG"
+  local DBG="${DBG:+echo >&2}"
   [ $# -gt 0 ] && shift
   [ -z "$REPOS" ] && return 0
   # Copy local files to remote repos
   local IFS=$' '
   for REPO in $REPOS; do
-    $DBG git annex copy --not --in "$REPO" --to "$REPO" "$@"
+    eval $DBG git annex copy --not --in "$REPO" --to "$REPO" "$@"
   done
   # Get/copy/drop all missing local files
   local LOCATION="$(echo "$REPOS" | sed -e 's/ / --or --not --in /g')"
   git annex find --not --in . --and -\( --not --in $LOCATION -\) --print0 "$@" | xargs -r0 -n1 sh -c '
-    DBG="$1";FROM="$2";REPOS="$3";F="$4"
-    $DBG git annex get ${FROM:+--from "$FROM"} "$F"
+    REPOS="$1";F="$2"
+    eval $DBG git annex get ${FROM:+--from "$FROM"} "$F" || exit $?
     for REPO in $REPOS; do
-      $DBG git annex copy --not --in "$REPO" --to "$REPO" "$F"
+      eval $DBG git annex copy --not --in "$REPO" --to "$REPO" "$F"
     done
-    $DBG git annex drop "$F"
-  ' _ "$DBG" "$FROM" "$REPOS"
-  # Drop local files
-  #$DBG git annex drop "$@"
+    [ -n "$DROP" ] && eval $DBG git annex drop "$F"
+  ' _ "$REPOS"
 }
 
 # Rsync files to the specified location, one by one
-# $FROM can be defined to selected the origin repo
-# $DBG is used to debug (set it to "echo")
-alias annex_rsync_show='DBG=echo annex_rsync'
-annex_rsync() {
+# $FROM is used to selected the origin repo
+# $DROP is used to drop the newly retrieved files
+# $DBG is used to print the command on stderr
+# $DELETE is used to delete the missing existing files
+alias annex_rsync='DBG= DELETE= _annex_rsync'
+alias annex_rsyncd='DBG= DELETE=1 _annex_rsync'
+_annex_rsync() {
+  annex_exists || return 1
   local DST="${1:?No destination specified...}"
-  local DBG="$DBG"
+  local DBG="${DBG:+echo >&2}"
+  local DROP="${DROP:-1}"
   local ROOT="$(git_root)"
+  local RSYNC_OPTS="${DELETE:+--delete}"
+  RSYNC_OPTS="${RSYNC_OPTS:--K -L}"
   [ $# -gt 0 ] && shift
   # Copy local files
   for F in "${@:-}"; do
-    $DBG rsync -v -r -z -s -i --inplace --size-only --progress -P -K -L --cvs-exclude "$ROOT/$F" "$DST/$F"
+    eval $DBG rsync -v -r -z -s -i --inplace --size-only --progress -P $RSYNC_OPTS --cvs-exclude "$ROOT/$F" "$DST/$F"
   done
   # Get/copy/drop all missing local files
   git annex find --not --in . --print0 "$@" | xargs -r0 -n1 sh -c '
-    DBG="$1";FROM="$2";DST="$3/$4";SRC="$4"
+    RSYNC_OPTS="$1";DST="$2/$3";SRC="$3"
     if [ -n "$(rsync -n --ignore-existing /dev/null "$DST")" ]; then
-      $DBG git annex get ${FROM:+--from "$FROM"} "$SRC"
-      $DBG rsync -v -r -z -s -i --size-only --progress -P -K -L --cvs-exclude "$SRC" "$DST"
-      $DBG git annex drop "$SRC"
+      eval $DBG git annex get ${FROM:+--from "$FROM"} "$SRC" || exit $?
+      eval $DBG rsync -v -r -z -s -i --size-only --progress -P $RSYNC_OPTS --cvs-exclude "$SRC" "$DST"
+      [ -n "$DROP" ] && eval $DBG git annex drop "$SRC"
     fi
-  ' _ "$DBG" "$FROM" "$DST"
+  ' _ "$RSYNC_OPTS" "$DST"
 }
 
 # Drop local files which are in the specified remote repos
 alias annex_drop='git annex drop -N $(git_remotes | wc -w)'
 annex_drop_fast() {
+  annex_exists || return 1
   local REPOS="${1:-$(git_remotes)}"
   local COPIES="$(echo "$REPOS" | wc -w)"
   local LOCATION="$(echo "$REPOS" | sed -e 's/ / --and --in /g')"
@@ -404,6 +398,14 @@ annex_rename_special() {
 # Revert changes in all modes (indirect/direct)
 annex_revert() {
   git annex proxy -- git revert "${1:-HEAD}"
+}
+
+# Annex find file from key
+annex_fromkey() {
+  annex_exists || return 1
+  for KEY; do
+    git log -S "$KEY" --format=%h | tail -n 1 | xargs -r -n1 git show | grep -A 2 -e "^\+.*$KEY" | tail -n 1
+  done
 }
 
 # Clean unused files
