@@ -5,6 +5,7 @@ alias gana='git annex add'
 alias gant='git annex status'
 alias ganst='git annex status'
 alias ganl='git annex list'
+alias ganls='git annex list'
 alias ganlc='git annex find | wc -l'
 alias ganf='git annex find'
 alias ganfc='git annex find | wc -l'
@@ -228,7 +229,7 @@ annex_move() {
   [ $# -gt 0 ] && shift
   [ -z "$REPOS" ] && return 0
   # Copy local files to remote repos
-  local IFS=$' \n'
+  local IFS=$' '
   for REPO in $REPOS; do
     $DBG git annex copy --not --in "$REPO" --to "$REPO" "$@"
   done
@@ -242,6 +243,8 @@ annex_move() {
     done
     $DBG git annex drop "$F"
   ' _ "$DBG" "$FROM" "$REPOS"
+  # Drop local files
+  #$DBG git annex drop "$@"
 }
 
 # Rsync files to the specified location, one by one
@@ -369,7 +372,7 @@ alias annex_existing='git annex find --in'
 alias annex_missing='git annex find --not --in'
 alias annex_wantget='git annex find --want-get --not --in'
 alias annex_wantdrop='git annex find --want-drop --in'
-alias annex_nowhere='git annex list | grep -E "^_+ "'
+annex_lost() { git annex list "$@" | grep -E "^_+ "; }
 
 # Is file in annex ?
 annex_isin() {
@@ -405,8 +408,8 @@ annex_revert() {
 
 # Clean unused files
 annex_unused() {
-  annex_exists || return 1
-  local IFS=$' \n'
+  !annex_bare || return 1
+  local IFS=$' \t\n'
   local REPLY; read -r -p "Delete unused files? (a/y/n/s) " REPLY
   if [ "$REPLY" = "a" -o "$REPLY" = "A" ]; then
     local LAST="$(git annex unused | awk '/SHA256E/ {a=$1} END{print a}')"

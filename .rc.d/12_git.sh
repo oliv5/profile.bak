@@ -289,7 +289,7 @@ git_pull_all() {
 if [ $(git_version) -gt $(git_version 2.9) ]; then
 git_pull_branches() {
   git_exists || return 1
-  local IFS="$(printf ' \n')"
+  local IFS=$' \t\n'
   local BRANCHES="${1:-$(git_branches)}"
   local FORCE="$([ "$2" = "-f" ] && echo "-f")"
   if annex_direct; then
@@ -312,7 +312,7 @@ git_pull_branches() {
 else
 git_pull_branches() {
   git_exists || return 1
-  local IFS="$(printf ' \n')"
+  local IFS=$' \t\n'
   local BRANCHES="${1:-$(git_branches)}"
   local FORCE="$([ "$2" = "-f" ] && echo "-f")"
   if annex_direct; then
@@ -356,7 +356,7 @@ fi
 if [ $(git_version) -gt $(git_version 2.9) ]; then
 git_pull_remotes() {
   git_exists || return 1
-  local IFS="$(printf ' \n')"
+  local IFS=$' \t\n'
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   local FORCE="$([ "$3" = "-f" ] && echo "-f")"
@@ -386,7 +386,7 @@ git_pull_remotes() {
 else
 git_pull_remotes() {
   git_exists || return 1
-  local IFS="$(printf ' \n')"
+  local IFS=$' \t\n'
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   local FORCE="$([ "$3" = "-f" ] && echo "-f")"
@@ -441,7 +441,7 @@ git_push() {
 # Batch push existing remote/branches
 git_push_all() {
   git_exists || return 1
-  local IFS="$(printf ' \n')"
+  local IFS=$' \t\n'
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   for REMOTE in $REMOTES; do
@@ -457,7 +457,7 @@ git_push_all() {
 # Set default upstream on all branches
 git_set_tracking() {
   git_exists || return 1
-  local IFS="$(printf ' \n')"
+  local IFS=$' \t\n'
   local REMOTE="${1:?No remote specified. Possible remotes are: $(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   git fetch --all 2>/dev/null
@@ -694,20 +694,20 @@ git_stash_flush() {
 git_stash_backup() {
   git_exists || return 1
   local DST="$(git_dir)/backup"
+  local IFS=$'\n'
+  local DESCR
   mkdir -p "$DST"
-  ( IFS=$'\n'
-    #for DESCR in $(git stash list --pretty=format:"%h %gd %ci"); do
-    #  local NAME="$(echo $DESCR | awk '{gsub(/-/,"",$3); gsub(/:/,"",$4); print "stash{" $3 "-" $4 "}_" $1}')"
-    for DESCR in $(git stash list --oneline); do
-      local NAME="$(echo $DESCR | sed 's/^.*: // ; s/[^0-9a-zA-Z._:]/_/g')"
-      local HASH="$(echo $DESCR | awk '{print $1}')"
-      local FILE="$DST/stash_${HASH}_${NAME}.gz"
-      if [ ! -e "$FILE" ]; then
-        echo "Backup $HASH in $FILE"
-        git stash show -p "$HASH" "$@" | gzip --best > "$FILE"
-      fi
-    done
-  )
+  #for DESCR in $(git stash list --pretty=format:"%h %gd %ci"); do
+  #  local NAME="$(echo $DESCR | awk '{gsub(/-/,"",$3); gsub(/:/,"",$4); print "stash{" $3 "-" $4 "}_" $1}')"
+  for DESCR in $(git stash list --oneline); do
+    local NAME="$(echo $DESCR | sed 's/^.*: // ; s/[^0-9a-zA-Z._:]/_/g')"
+    local HASH="$(echo $DESCR | awk '{print $1}')"
+    local FILE="$DST/stash_${HASH}_${NAME}.gz"
+    if [ ! -e "$FILE" ]; then
+      echo "Backup $HASH in $FILE"
+      git stash show -p "$HASH" "$@" | gzip --best > "$FILE"
+    fi
+  done
 }
 
 ########################################
