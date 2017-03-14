@@ -208,9 +208,10 @@ alias annex_upload_fast_auto='annex_copy_fast_auto --to'
 # $FROM is used to selected the origin repo
 # $DROP is used to drop the newly retrieved files
 # $DBG is used to print the command on stderr
-alias annex_copyto='DBG= DROP= annex_transfer'
-alias annex_moveto='DBG= DROP=1 annex_transfer'
-annex_transfer() {
+alias annex_copyto='DBG= DROP= _annex_transfer'
+alias annex_transferto='DBG= DROP=1 _annex_transfer'
+alias annex_moveto='DBG= DROP=2 _annex_transfer'
+_annex_transfer() {
   annex_exists || return 1
   local REPOS="${1:-$(git_remotes)}"
   local DBG="${DBG:+echo >&2}"
@@ -219,17 +220,18 @@ annex_transfer() {
   # Copy local files to remote repos
   local IFS=$' '
   for REPO in $REPOS; do
-    eval $DBG git annex copy --not --in "$REPO" --to "$REPO" "$@"
+    eval $DBG git annex copy --not --in \"\$REPO\" --to \"\$REPO\" \"\$@\"
   done
+  [ "$DROP" = "2" ] && eval $DBG git annex drop --in . \"\$@\"
   # Get/copy/drop all missing local files
   local LOCATION="$(echo "$REPOS" | sed -e 's/ / --or --not --in /g')"
   git annex find --not --in . --and -\( --not --in $LOCATION -\) --print0 "$@" | xargs -r0 -n1 sh -c '
     REPOS="$1";F="$2"
-    eval $DBG git annex get ${FROM:+--from "$FROM"} "$F" || exit $?
+    eval $DBG git annex get \${FROM:+--from \"\$FROM\"} \"\$F\" || exit $?
     for REPO in $REPOS; do
-      eval $DBG git annex copy --not --in "$REPO" --to "$REPO" "$F"
+      eval $DBG git annex copy --not --in \"\$REPO\" --to \"\$REPO\" \"\$F\"
     done
-    [ -n "$DROP" ] && eval $DBG git annex drop "$F"
+    [ -n "$DROP" ] && eval $DBG git annex drop \"\$F\"
   ' _ "$REPOS"
 }
 
@@ -251,15 +253,15 @@ _annex_rsync() {
   [ $# -gt 0 ] && shift
   # Copy local files
   for F in "${@:-}"; do
-    eval $DBG rsync -v -r -z -s -i --inplace --size-only --progress -P $RSYNC_OPTS --cvs-exclude "$ROOT/$F" "$DST/$F"
+    eval $DBG rsync -v -r -z -s -i --inplace --size-only --progress -P $RSYNC_OPTS --cvs-exclude \"\$ROOT/\$F\" \"\$DST/\$F\"
   done
   # Get/copy/drop all missing local files
   git annex find --not --in . --print0 "$@" | xargs -r0 -n1 sh -c '
     RSYNC_OPTS="$1";DST="$2/$3";SRC="$3"
     if [ -n "$(rsync -n --ignore-existing /dev/null "$DST")" ]; then
-      eval $DBG git annex get ${FROM:+--from "$FROM"} "$SRC" || exit $?
-      eval $DBG rsync -v -r -z -s -i --size-only --progress -P $RSYNC_OPTS --cvs-exclude "$SRC" "$DST"
-      [ -n "$DROP" ] && eval $DBG git annex drop "$SRC"
+      eval $DBG git annex get \${FROM:+--from \"\$FROM\"} \"\$SRC\" || exit $?
+      eval $DBG rsync -v -r -z -s -i --size-only --progress -P $RSYNC_OPTS --cvs-exclude \"\$SRC\" \"\$DST\"
+      [ -n "$DROP" ] && eval $DBG git annex drop \"\$SRC\"
     fi
   ' _ "$RSYNC_OPTS" "$DST"
 }
