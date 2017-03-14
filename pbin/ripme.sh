@@ -242,7 +242,7 @@ if [ "$TYPE" = "dvd" ]; then
     if [ "$METHOD" = "mplayer" ]; then
 
       # Proceed with the dump
-      $DRYRUN mplayer dvd://${TRACK} ${DEVICE:+-dvd-device "$DEVICE"} -dumpstream -dumpfile "$DUMPFILE" ${SPEED}
+      $DRYRUN mplayer -nolirc dvd://${TRACK} ${DEVICE:+-dvd-device "$DEVICE"} -dumpstream -dumpfile "$DUMPFILE" ${SPEED}
 
     elif [ "$METHOD" = "vlc" ]; then
 
@@ -376,7 +376,7 @@ elif [ "$TYPE" = "cdda" ]; then
     if [ "$METHOD" = "cdparanoia" ]; then
       $DRYRUN cdparanoia ${TRACK} -d "${DEVICE}" "${TMPFILE}"
     else
-      $DRYRUN mplayer cdda://${TRACK} ${DEVICE:+-cdrom-device "$DEVICE"} -nocache -dumpstream -dumpfile "$TMPFILE"
+      $DRYRUN mplayer -nolirc cdda://${TRACK} ${DEVICE:+-cdrom-device "$DEVICE"} -nocache -vo null -vc null -ao pcm:file="$TMPFILE"
     fi
     
     # Encode from wav
