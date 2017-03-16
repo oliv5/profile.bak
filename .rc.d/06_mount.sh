@@ -43,13 +43,13 @@ mount_private() {
   local SIG="${3:-$HOME/.ecryptfs/private.sig}"
   local KEY="$(cat "$SIG" 2>/dev/null)"
   mkdir -p "$DST"
-	mount_ecryptfs "$SRC" "$DST" "$KEY"
+        mount_ecryptfs "$SRC" "$DST" "$KEY"
 }
 umount_private() {
   local DST="$HOME/private"
-	if mountpoint "$DST" 2>&1 >/dev/null; then
-		sudo umount "$DST"
-	fi
+        if mountpoint "$DST" 2>&1 >/dev/null; then
+                sudo umount "$DST"
+        fi
 }
 
 # Mount encfs
@@ -109,11 +109,11 @@ autofs_toggle() {
 
 # Check logged on users have a local home
 check_nfs() {
-	for LOGGED_USERS in $(who | awk '{print $1}' | sort | uniq); do
-		if ! grep $LOGGED_USERS /etc/exports >/dev/null; then
-			echo "WARNING: user $LOGGED_USERS is logged in using a remote home..."
-		fi
-	done
+  for LOGGED_USERS in $(who | awk '{print $1}' | sort | uniq); do
+    if ! grep $LOGGED_USERS /etc/exports >/dev/null; then
+      echo "WARNING: user $LOGGED_USERS is logged in using a remote home..."
+    fi
+  done
 }
 
 # Mount sshfs
@@ -123,14 +123,17 @@ alias mount_sshfs_fast='sshfs -o cache=yes -o kernel_cache -o compression=no -o 
 
 # Mount & exec command
 mount_exec() {
-	local MOUNT="${1:?No mount specified...}"; shift
-	sudo mount "$MOUNT" >/dev/null 2>&1
-	trap "sudo umount -l '$MOUNT'" INT
-	if mountpoint "$MOUNT" >/dev/null 2>&1; then
-		eval "$@"
-		sudo umount -l "$MOUNT"
-	else
-		echo "Path '$MOUNT' not mounted, skip it..."
-	fi
-	trap INT
+  local MOUNT="${1:?No mount specified...}"
+  shift
+  if ! mountpoint -q "$MOUNT"; then
+    sudo mount "$MOUNT"
+    trap "sudo umount -l '$MOUNT'" INT
+  fi
+  if mountpoint -q "$MOUNT"; then
+    eval "$@"
+    sudo umount -l "$MOUNT"
+  else
+    echo "Path '$MOUNT' not mounted, skip it..."
+  fi
+  trap INT
 }
