@@ -241,29 +241,38 @@ _annex_transfer() {
 # $DBG is used to print the command on stderr
 # $DELETE is used to delete the missing existing files
 alias annex_rsync='DBG= DELETE= _annex_rsync'
-alias annex_rsyncd='DBG= DELETE=1 _annex_rsync'
+alias annex_rsyncd='DBG= DELETE=2 _annex_rsync'
+alias annex_rsyncds='DBG= DELETE=1 _annex_rsync'
 _annex_rsync() {
   annex_exists || return 1
   local DST="${1:?No destination specified...}"
+  local SRC="${PWD}"
   local DBG="${DBG:+echo >&2}"
   local DROP="${DROP:-1}"
-  local ROOT="$(git_root)"
-  local RSYNC_OPTS="${DELETE:+--delete}"
-  RSYNC_OPTS="${RSYNC_OPTS:--K -L}"
   [ $# -gt 0 ] && shift
   # Copy local files
   for F in "${@:-}"; do
-    eval $DBG rsync -v -r -z -s -i --inplace --size-only --progress -P $RSYNC_OPTS --cvs-exclude \"\$ROOT/\$F\" \"\$DST/\$F\"
+    if [ -d "$SRC/$F" ]; then
+      eval $DBG rsync -v -r -z -s -i --inplace --size-only --progress -K -L -P --cvs-exclude \"\$SRC/\$F/\" \"\$DST/\$F/\"
+    else
+      eval $DBG rsync -v -r -z -s -i --inplace --size-only --progress -K -L -P --cvs-exclude \"\$SRC/\$F\" \"\$\(dirname \"\$DST/\$F\"\)/\"
+    fi
   done
   # Get/copy/drop all missing local files
   git annex find --not --in . --print0 "$@" | xargs -r0 -n1 sh -c '
     RSYNC_OPTS="$1";DST="$2/$3";SRC="$3"
     if [ -n "$(rsync -n --ignore-existing /dev/null "$DST")" ]; then
       eval $DBG git annex get \${FROM:+--from \"\$FROM\"} \"\$SRC\" || exit $?
-      eval $DBG rsync -v -r -z -s -i --size-only --progress -P $RSYNC_OPTS --cvs-exclude \"\$SRC\" \"\$DST\"
+      eval $DBG rsync -v -r -z -s -i --size-only --progress -P -K -L --cvs-exclude \"\$SRC\" \"\$\(dirname \"\$DST\"\)/\"
       [ -n "$DROP" ] && eval $DBG git annex drop \"\$SRC\"
     fi
   ' _ "$RSYNC_OPTS" "$DST"
+  # Delete missing destination files
+  if [ "$DELETE" = 1 ]; then
+    eval $DBG rsync -rni --delete --cvs-exclude --ignore-existing --ignore-non-existing \"\$SRC\" \"\$DST\"
+  elif [ "$DELETE" = 2 ]; then
+    eval $DBG rsync -ri --delete --cvs-exclude --ignore-existing --ignore-non-existing \"\$SRC\" \"\$DST\"
+  fi
 }
 
 # Drop local files which are in the specified remote repos
