@@ -214,24 +214,24 @@ alias annex_moveto='DBG= DROP=2 _annex_transfer'
 _annex_transfer() {
   annex_exists || return 1
   local REPOS="${1:-$(git_remotes)}"
-  local DBG="${DBG:+echo >&2}"
+  local DBG="${DBG:+echo}"
   [ $# -gt 0 ] && shift
   [ -z "$REPOS" ] && return 0
   # Copy local files to remote repos
   local IFS=$' '
   for REPO in $REPOS; do
-    eval $DBG git annex copy --not --in \"\$REPO\" --to \"\$REPO\" \"\$@\"
+    $DBG git annex copy --not --in "$REPO" --to "$REPO" "$@"
   done
-  [ "$DROP" = "2" ] && eval $DBG git annex drop --in . \"\$@\"
+  [ "$DROP" = "2" ] && $DBG git annex drop --in . "$@"
   # Get/copy/drop all missing local files
   local LOCATION="$(echo "$REPOS" | sed -e 's/ / --or --not --in /g')"
   git annex find --not --in . --and -\( --not --in $LOCATION -\) --print0 "$@" | xargs -r0 -n1 sh -c '
     REPOS="$1";F="$2"
-    eval $DBG git annex get \${FROM:+--from \"\$FROM\"} \"\$F\" || exit $?
+    $DBG git annex get ${FROM:+--from "$FROM"} "$F" || exit $?
     for REPO in $REPOS; do
-      eval $DBG git annex copy --not --in \"\$REPO\" --to \"\$REPO\" \"\$F\"
+      $DBG git annex copy --not --in "$REPO" --to "$REPO" "$F"
     done
-    [ -n "$DROP" ] && eval $DBG git annex drop \"\$F\"
+    [ -n "$DROP" ] && $DBG git annex drop "$F"
   ' _ "$REPOS"
 }
 
@@ -240,38 +240,41 @@ _annex_transfer() {
 # $DROP is used to drop the newly retrieved files
 # $DBG is used to print the command on stderr
 # $DELETE is used to delete the missing existing files
-alias annex_rsync='DBG= DELETE= _annex_rsync'
-alias annex_rsyncd='DBG= DELETE=2 _annex_rsync'
-alias annex_rsyncds='DBG= DELETE=1 _annex_rsync'
+alias annex_rsync='DBG= DELETE= DROP=1 _annex_rsync'
+alias annex_rsyncd='DBG= DELETE=2 DROP=1 _annex_rsync'
+alias annex_rsyncds='DBG= DELETE=1 DROP=1 _annex_rsync'
 _annex_rsync() {
   annex_exists || return 1
   local DST="${1:?No destination specified...}"
   local SRC="${PWD}"
-  local DBG="${DBG:+echo >&2}"
-  local DROP="${DROP:-1}"
+  local DBG="${DBG:+echo}"
+  local RSYNC_OPT="-v -r -z -s -i --inplace --size-only --progress -K -L -P --exclude=.git/"
   [ $# -gt 0 ] && shift
+  [ "${SRC%/}" = "${DST%/}" ] && return 2
   # Copy local files
   for F in "${@:-}"; do
     if [ -d "$SRC/$F" ]; then
-      eval $DBG rsync -v -r -z -s -i --inplace --size-only --progress -K -L -P --cvs-exclude \"\$SRC/\$F/\" \"\$DST/\$F/\"
+      $DBG rsync $RSYNC_OPT "$SRC/${F:+$F/}" "$DST/${F:+$F/}"
     else
-      eval $DBG rsync -v -r -z -s -i --inplace --size-only --progress -K -L -P --cvs-exclude \"\$SRC/\$F\" \"\$\(dirname \"\$DST/\$F\"\)/\"
+      $DBG rsync $RSYNC_OPT "$SRC/$F" "$(dirname "$DST/$F")/"
     fi
   done
+  [ "$DROP" = "2" ] && $DBG git annex drop --in . "$@"
   # Get/copy/drop all missing local files
+  local TMPFILE="$(tempfile)"
   git annex find --not --in . --print0 "$@" | xargs -r0 -n1 sh -c '
-    RSYNC_OPTS="$1";DST="$2/$3";SRC="$3"
-    if [ -n "$(rsync -n --ignore-existing /dev/null "$DST")" ]; then
-      eval $DBG git annex get \${FROM:+--from \"\$FROM\"} \"\$SRC\" || exit $?
-      eval $DBG rsync -v -r -z -s -i --size-only --progress -P -K -L --cvs-exclude \"\$SRC\" \"\$\(dirname \"\$DST\"\)/\"
-      [ -n "$DROP" ] && eval $DBG git annex drop \"\$SRC\"
+    DBG="$1²";RSYNC_OPT="$2";TMPFILE="$3";DST="$4/$5";SRC="$5"
+    if [ -n "$(rsync -ni --ignore-existing "$TMPFILE" "$DST")" ]; then
+      $DBG git annex get ${FROM:+--from "$FROM"} "$SRC" || exit $?
+      $DBG rsync $RSYNC_OPT "$SRC" "$(dirname "$DST")/"
+      [ -n "$DROP" ] && $DBG git annex drop "$SRC"
     fi
-  ' _ "$RSYNC_OPTS" "$DST"
+  ' _ "$DBG" "$RSYNC_OPT" "$TMPFILE" "$DST"
   # Delete missing destination files
   if [ "$DELETE" = 1 ]; then
-    eval $DBG rsync -rni --delete --cvs-exclude --ignore-existing --ignore-non-existing \"\$SRC\" \"\$DST\"
+    $DBG rsync -rni --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC" "$DST"
   elif [ "$DELETE" = 2 ]; then
-    eval $DBG rsync -ri --delete --cvs-exclude --ignore-existing --ignore-non-existing \"\$SRC\" \"\$DST\"
+    $DBG rsync -ri --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC" "$DST"
   fi
 }
 
