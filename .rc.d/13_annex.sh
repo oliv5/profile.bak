@@ -425,7 +425,7 @@ annex_fromkey() {
 # Clean unused files
 annex_unused() {
   !annex_bare || return 1
-  local IFS=$' \t\n'
+  local IFS="$(printf ' \t\n')"
   local REPLY; read -r -p "Delete unused files? (a/y/n/s) " REPLY
   if [ "$REPLY" = "a" -o "$REPLY" = "A" ]; then
     local LAST="$(git annex unused | awk '/SHA256E/ {a=$1} END{print a}')"

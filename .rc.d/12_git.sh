@@ -276,87 +276,86 @@ git_clone() {
   done
 }
 
+#~ # Batch pull the selected branches from their remote tracking
+#~ alias git_pull='git_pull_branches "$(git_branch)"'
+#~ alias git_pull_all='git_pull_branches'
+
+#~ # Batch pull existing branches from their remote tracking
+#~ if [ $(git_version) -gt $(git_version 2.9) ]; then
+#~ git_pull_branches() {
+  #~ git_exists || return 1
+  #~ local IFS="$(printf ' \t\n')"
+  #~ local BRANCHES="${1:-$(git_branches)}"
+  #~ local FORCE="$([ "$2" = "-f" ] && echo "-f")"
+  #~ if annex_direct; then
+    #~ # Note: git annex repos in direct mode
+    #~ # are not compatible with vcsh
+    #~ git annex sync
+  #~ else
+    #~ CURRENT="$(git rev-parse --abbrev-ref HEAD)"
+    #~ for BRANCH in $BRANCHES; do
+      #~ # Is there a remote with this branch ?
+      #~ if command git for-each-ref --shell refs/remotes | grep "refs/remotes/.*/$BRANCH'" >/dev/null; then
+        #~ git checkout $FORCE "$BRANCH" >/dev/null || continue
+        #~ git pull --rebase --autostash || exit $?
+        #~ echo "-----"
+      #~ fi
+    #~ done
+    #~ git checkout -fq "$CURRENT"
+  #~ fi
+#~ }
+#~ else
+#~ git_pull_branches() {
+  #~ git_exists || return 1
+  #~ local IFS="$(printf ' \t\n')"
+  #~ local BRANCHES="${1:-$(git_branches)}"
+  #~ local FORCE="$([ "$2" = "-f" ] && echo "-f")"
+  #~ if annex_direct; then
+    #~ # Note: git annex repos in direct mode
+    #~ # are not compatible with vcsh
+    #~ git annex sync
+  #~ else
+    #~ end() {
+      #~ trap - INT TERM
+      #~ unset -f end
+      #~ git checkout -fq "$CURRENT"
+      #~ if [ -n "$STASH" ]; then
+        #~ git stash apply -q --index "$STASH"
+      #~ fi
+    #~ }
+    #~ set +e
+    #~ STASH="$(git stash create 2>/dev/null)"
+    #~ trap end INT TERM
+    #~ if [ -n "$STASH" ]; then
+      #~ git reset --hard HEAD -q --
+    #~ fi
+    #~ CURRENT="$(git rev-parse --abbrev-ref HEAD)"
+    #~ for BRANCH in $BRANCHES; do
+      #~ # Is there a remote with this branch ?
+      #~ if command git for-each-ref --shell refs/remotes | grep "refs/remotes/.*/$BRANCH'" >/dev/null; then
+        #~ git checkout $FORCE "$BRANCH" >/dev/null || continue
+        #~ if [ -x "$(git --exec-path)/git-pull" ]; then
+          #~ git pull --rebase || exit $?
+        #~ else
+          #~ git merge --ff-only "$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)" || exit $?
+        #~ fi
+        #~ echo "-----"
+      #~ fi
+    #~ done
+    #~ end
+  #~ fi
+#~ }
+#~ fi
+
 # Batch pull the selected branches from their remote tracking
-git_pull() {
-  git_pull_branches "$(git_branch)" "$@"
-}
-
-git_pull_all() {
-  git_pull_branches "" "$@"
-}
-
-# Batch pull existing branches from their remote tracking
-if [ $(git_version) -gt $(git_version 2.9) ]; then
-git_pull_branches() {
-  git_exists || return 1
-  local IFS=$' \t\n'
-  local BRANCHES="${1:-$(git_branches)}"
-  local FORCE="$([ "$2" = "-f" ] && echo "-f")"
-  if annex_direct; then
-    # Note: git annex repos in direct mode
-    # are not compatible with vcsh
-    git annex sync
-  else
-    CURRENT="$(git rev-parse --abbrev-ref HEAD)"
-    for BRANCH in $BRANCHES; do
-      # Is there a remote with this branch ?
-      if command git for-each-ref --shell refs/remotes | grep "refs/remotes/.*/$BRANCH'" >/dev/null; then
-        git checkout $FORCE "$BRANCH" >/dev/null || continue
-        git pull --rebase --autostash || exit $?
-        echo "-----"
-      fi
-    done
-    git checkout -fq "$CURRENT"
-  fi
-}
-else
-git_pull_branches() {
-  git_exists || return 1
-  local IFS=$' \t\n'
-  local BRANCHES="${1:-$(git_branches)}"
-  local FORCE="$([ "$2" = "-f" ] && echo "-f")"
-  if annex_direct; then
-    # Note: git annex repos in direct mode
-    # are not compatible with vcsh
-    git annex sync
-  else
-    end() {
-      trap - INT TERM
-      unset -f end
-      git checkout -fq "$CURRENT"
-      if [ -n "$STASH" ]; then
-        git stash apply -q --index "$STASH"
-      fi
-    }
-    set +e
-    STASH="$(git stash create 2>/dev/null)"
-    trap end INT TERM
-    if [ -n "$STASH" ]; then
-      git reset --hard HEAD -q --
-    fi
-    CURRENT="$(git rev-parse --abbrev-ref HEAD)"
-    for BRANCH in $BRANCHES; do
-      # Is there a remote with this branch ?
-      if command git for-each-ref --shell refs/remotes | grep "refs/remotes/.*/$BRANCH'" >/dev/null; then
-        git checkout $FORCE "$BRANCH" >/dev/null || continue
-        if [ -x "$(git --exec-path)/git-pull" ]; then
-          git pull --rebase || exit $?
-        else
-          git merge --ff-only "$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)" || exit $?
-        fi
-        echo "-----"
-      fi
-    done
-    end
-  fi
-}
-fi
+alias git_pull='git_pull_remotes ""'
+alias git_pull_all='git_pull_remotes'
 
 # Batch pull existing remote branches
 if [ $(git_version) -gt $(git_version 2.9) ]; then
 git_pull_remotes() {
   git_exists || return 1
-  local IFS=$' \t\n'
+  local IFS="$(printf ' \t\n')"
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   local FORCE="$([ "$3" = "-f" ] && echo "-f")"
@@ -386,7 +385,7 @@ git_pull_remotes() {
 else
 git_pull_remotes() {
   git_exists || return 1
-  local IFS=$' \t\n'
+  local IFS="$(printf ' \t\n')"
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   local FORCE="$([ "$3" = "-f" ] && echo "-f")"
@@ -433,15 +432,11 @@ git_pull_remotes() {
 }
 fi
 
-# Batch push the current branch to all remotes
-git_push() {
-  git_push_all "${@:-}" "$(git_branch)"
-}
-
-# Batch push existing remote/branches
+# Batch push to all existing remote/branches
+alias git_push='git_push_all "" "$(git_branch)"'
 git_push_all() {
   git_exists || return 1
-  local IFS=$' \t\n'
+  local IFS="$(printf ' \t\n')"
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   for REMOTE in $REMOTES; do
@@ -454,10 +449,11 @@ git_push_all() {
   done
 }
 
-# Set default upstream on all branches
-git_set_tracking() {
+# Set default upstream on the specified branches
+alias git_set_tracking='git_set_all_tracking "" "$(git_branch)"'
+git_set_all_tracking() {
   git_exists || return 1
-  local IFS=$' \t\n'
+  local IFS="$(printf ' \t\n')"
   local REMOTE="${1:?No remote specified. Possible remotes are: $(git_remotes)}"
   local BRANCHES="${2:-$(git_branches)}"
   git fetch --all 2>/dev/null
@@ -465,6 +461,19 @@ git_set_tracking() {
     if git for-each-ref "refs/remotes/$REMOTE" | grep -- "refs/remotes/$REMOTE/$BRANCH\$" >/dev/null; then
       git branch -u "$REMOTE/$BRANCH" "$BRANCH"
     fi
+  done
+}
+
+# Get default upstream on the specified branches
+alias git_get_tracking='git_get_all_tracking "$(git_branch)"'
+alias git_get_tracking_remote='git_get_all_tracking "$(git_branch)" | sed -s "s;/.*;;"'
+alias git_get_tracking_branch='git_get_all_tracking "$(git_branch)" | sed -s "s;.*/;;"'
+git_get_all_tracking() {
+  git_exists || return 1
+  local IFS="$(printf ' \t\n')"
+  local BRANCHES="${1:-$(git_branches)}"
+  for BRANCH in $BRANCHES; do
+    git rev-parse --abbrev-ref "$BRANCH@{upstream}"
   done
 }
 
@@ -694,7 +703,7 @@ git_stash_flush() {
 git_stash_backup() {
   git_exists || return 1
   local DST="$(git_dir)/backup"
-  local IFS=$'\n'
+  local IFS="$(printf '\n')"
   local DESCR
   mkdir -p "$DST"
   #for DESCR in $(git stash list --pretty=format:"%h %gd %ci"); do
