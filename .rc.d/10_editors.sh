@@ -44,6 +44,6 @@ fi
 
 #########################
 # Source insight
-alias si='PREFIX="$HOME/.wine-sourceinsight" si.sh'
-alias si2='PREFIX="$HOME/.wine-sourceinsight2" si.sh'
-alias si3='PREFIX="$HOME/.wine-sourceinsight3" si.sh'
+alias si='PREFIX="$HOME/.wineprefix/sourceinsight" si.sh'
+alias si2='PREFIX="$HOME/.wineprefix/sourceinsight2" si.sh'
+alias si3='PREFIX="$HOME/.wineprefix/sourceinsight3" si.sh'
