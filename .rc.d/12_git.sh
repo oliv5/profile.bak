@@ -569,9 +569,10 @@ git_upkeep() {
   #echo "[git_upkeep] end at $(date)"
 }
 
+########################################
 # Normal to bare repo
 git_tobare() {
-  local SRC="${1:-.}"
+  local SRC="${1:-$PWD}"
   local DST="${SRC}.git"
   git_exists "$SRC/.git" &&
   mv "$SRC/.git" "$DST" &&
@@ -581,13 +582,13 @@ git_tobare() {
 
 # Bare to normal repo
 git_frombare() {
-  local SRC="${1:-.}"
+  local SRC="${1:-$PWD}"
   local DST="${SRC%%.git}"
   git_exists "$SRC" &&
   mkdir "${SRC%%.git}" &&
   mv "$SRC" "$DST/.git" &&
   git --git-dir="$DST/.git" config --bool core.bare false &&
-  git --git-dir="$DST/.git" --work-tree="$DST" reset HEAD --hard
+  git --git-dir="$DST/.git" --work-tree="$DST" reset --hard HEAD --
 }
 
 ########################################
