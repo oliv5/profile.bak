@@ -37,18 +37,33 @@ alias dhcp_renew='sudo dhclient -r; sudo dhclient -1'
 alias flashdl='quvi'
 
 # Wget mirror website
-#alias wget_mirror='wget -mkEpnp'
 alias wget_mirror='wget --mirror --convert-links --adjust-extension --page-requisites --no-parent'
-wget_mirror_legacy() {
-  local SITE=${1:?Please specify the URL}
-  local DOMAIN=$(echo "$SITE" | sed -E 's;^https?://([^/]*)/.*$;\1;')
-  shift $(min 1 $#)
-  wget "$@" --recursive -l${LEVEL:-9999} --no-parent --no-directories --no-clobber --domains ${DOMAIN:?Found no domain} --convert-links --html-extension --page-requisites -e robots=off -U mozilla --limit-rate=${LIMITRATE:-200k} --random-wait "$SITE"
-}
 
 # Wget download specific extension
 wget_ext() {
-  wget ${3:+--domains="$3"} ${4:+--http-user "$4"} ${5:+--http-passwd "$5"} -r -l1 -H -t1 -nd -N -np --follow-ftp -A${2:?No extension specified...} -erobots=off "${1:?No url specified...}"
+  local URL="${1:?No url specified...}"
+  local EXT="${2:?No extension specified...}"
+  shift 2
+  wget -r -l1 -H -t1 -nd -N -np --follow-ftp -erobots=off -A$EXT "$URL" "$@"
+}
+
+# Wget list urls
+wget_ls() {
+  wget --spider --force-html --no-directories --no-parent -r -l2 "${@:?No url specified...}" 2>&1 | 
+    awk '/^--/{print $3}' | uniq | grep -ve '\.\(css\|js\|png\|gif\|jpg\)$'
+}
+
+# HTML to pdf
+alias html_topdf='wkhtmltopdf --margin-bottom 20mm --margin-top 20mm --minimum-font-size 16'
+wget_pdf() {
+  local NAME
+  wget_ls "$@" | while IFS= read -r URL; do
+    NAME="${URL%/index.html}"
+    NAME="${NAME%/}"
+    NAME="${NAME##*/}"
+    echo "Processing $URL"
+    wkhtmltopdf --margin-bottom 20mm --margin-top 20mm --minimum-font-size 16 "$URL" "${NAME:-index}.pdf"
+  done
 }
 
 ############################

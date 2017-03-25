@@ -47,3 +47,18 @@ wol_send() {
         fi
     fi
 }
+
+# enable wol persistently
+wol_persistent() {
+    sudo sh -c 'cat > /etc/init/wol <<EOF
+start on started network
+
+script
+    for interface in \$(cut -d: -f1 /proc/net/dev | tail -n +3); do
+        logger -t "wakeonlan init script" enabling wake on lan for \$interface
+        ethtool -s \$interface wol g
+    done
+end script
+EOF
+'
+}

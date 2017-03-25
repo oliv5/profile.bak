@@ -220,7 +220,7 @@ _annex_transfer() {
   # Copy local files to remote repos
   local IFS=$' '
   for REPO in $REPOS; do
-    $DBG git annex copy --not --in "$REPO" --to "$REPO" "$@"
+    while ! $DBG git annex copy --not --in "$REPO" --to "$REPO" "$@"; do true; done
   done
   [ "$DROP" = "2" ] && $DBG git annex drop --in . "$@"
   # Get/copy/drop all missing local files
@@ -229,9 +229,10 @@ _annex_transfer() {
     REPOS="$1";F="$2"
     $DBG git annex get ${FROM:+--from "$FROM"} "$F" || exit $?
     for REPO in $REPOS; do
-      $DBG git annex copy --not --in "$REPO" --to "$REPO" "$F"
+      while ! $DBG git annex copy --not --in "$REPO" --to "$REPO" "$F"; do true; done
     done
     [ -n "$DROP" ] && $DBG git annex drop "$F"
+    exit 0
   ' _ "$REPOS"
 }
 
@@ -254,9 +255,9 @@ _annex_rsync() {
   # Copy local files
   for F in "${@:-}"; do
     if [ -d "$SRC/$F" ]; then
-      $DBG rsync $RSYNC_OPT "$SRC/${F:+$F/}" "$DST/${F:+$F/}"
+      while ! $DBG rsync $RSYNC_OPT "$SRC/${F:+$F/}" "$DST/${F:+$F/}"; do true; done
     else
-      $DBG rsync $RSYNC_OPT "$SRC/$F" "$(dirname "$DST/$F")/"
+      while ! $DBG rsync $RSYNC_OPT "$SRC/$F" "$(dirname "$DST/$F")/"; do true; done
     fi
   done
   [ "$DROP" = "2" ] && $DBG git annex drop --in . "$@"
@@ -266,15 +267,16 @@ _annex_rsync() {
     DBG="$1²";RSYNC_OPT="$2";TMPFILE="$3";DST="$4/$5";SRC="$5"
     if [ -n "$(rsync -ni --ignore-existing "$TMPFILE" "$DST")" ]; then
       $DBG git annex get ${FROM:+--from "$FROM"} "$SRC" || exit $?
-      $DBG rsync $RSYNC_OPT "$SRC" "$(dirname "$DST")/"
+      while ! $DBG rsync $RSYNC_OPT "$SRC" "$(dirname "$DST")/"; do true; done
       [ -n "$DROP" ] && $DBG git annex drop "$SRC"
+      exit 0
     fi
   ' _ "$DBG" "$RSYNC_OPT" "$TMPFILE" "$DST"
   # Delete missing destination files
   if [ "$DELETE" = 1 ]; then
-    $DBG rsync -rni --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC" "$DST"
+    while ! $DBG rsync -rni --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC" "$DST"; do true; done
   elif [ "$DELETE" = 2 ]; then
-    $DBG rsync -ri --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC" "$DST"
+    while ! $DBG rsync -ri --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC" "$DST"; do true; done
   fi
 }
 
@@ -423,8 +425,8 @@ annex_fromkey() {
 }
 
 # Clean unused files
-annex_unused() {
-  !annex_bare || return 1
+annex_dropunused() {
+  ! annex_bare || return 1
   local IFS="$(printf ' \t\n')"
   local REPLY; read -r -p "Delete unused files? (a/y/n/s) " REPLY
   if [ "$REPLY" = "a" -o "$REPLY" = "A" ]; then
@@ -433,17 +435,20 @@ annex_unused() {
   elif [ "$REPLY" = "s" -o "$REPLY" = "S" ]; then
     git annex unused
   elif [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
-    local LIST=""
+    local LAST="$(git annex unused | awk '/SHA256E/ {a=$1} END{print a}')"
     git annex unused | grep -F 'SHA256E' | 
       while read -r NUM KEY; do 
         echo "---------------"
         git log --oneline -S "$KEY"
-        read -r -p "Delete file $NUM ($KEY)? (y/n) " REPLY < /dev/tty
+        read -r -p "Delete file $NUM/$LAST ($KEY)? (y/f/n) " REPLY < /dev/tty
         if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
-          LIST="$LIST $NUM"
+          sh -c "git annex dropunused ""$@"" $NUM" &
+          wait
+        elif [ "$REPLY" = "f" -o "$REPLY" = "F" ]; then
+          sh -c "git annex dropunused --force ""$@"" $NUM" &
+          wait
         fi
       done
-    git annex dropunused "$@" $LIST
   fi
 }
 

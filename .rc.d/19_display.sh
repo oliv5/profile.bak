@@ -1,6 +1,9 @@
 #!/bin/sh
 
 # List devices
+xrandr_ls() {
+  xrandr -q | awk '/connected/ {print $1}'
+}
 xrandr_connected() {
   xrandr -q | awk '/ connected/{print $1}'
 }
@@ -14,23 +17,33 @@ xrandr_off() {
   xrandr -q | awk '/ connected/{name=$1} /*/{name=""} END{print name}'
 }
 
-# Get screen resolution
-xrandr_getres() {
-  xrandr --current | grep \* | cut -d' ' -f4
+# Get current device
+xrandr_device() {
+  xrandr -q | awk '/connected/{d=$1}/*/{print d}'
+}
+xrandr_current() {
+  xrandr -q | awk '/connected/{d=$1}/*/{print d "\t" $1}'
 }
 
-# Set screen resolution
-xrandr_setres() {
-  local ARG1="$1"; shift $(min 1 $#)
-  xrandr -s "${ARG1:-0}" "$@"
+# Screen resolution
+xrandr_size() {
+  if [ $# -ge 0 ]; then
+    xrandr -q | awk '/*/{print $1}'
+  else
+    xrandr -s "$@"
+  fi
 }
-alias xrandr_refresh='xrandr_setres 0'
-alias xrandr_1600='xrandr_setres 1600x1200'
-alias xrandr_1360='xrandr_setres 1360x768'
-alias xrandr_1280='xrandr_setres 1280x1024'
-alias xrandr_1024='xrandr_setres 1024x768'
-alias xrandr_800='xrandr_setres 800x600'
-alias xrandr_640='xrandr_setres 640x480'
+alias xrandr_getres='xrandr_size;'
+alias xrandr_getsize='xrandr_size;'
+alias xrandr_setres='xrandr_size'
+alias xrandr_setsize='xrandr_size'
+alias xrandr_refresh='xrandr_size 0'
+alias xrandr_1600='xrandr_size 1600x1200'
+alias xrandr_1360='xrandr_size 1360x768'
+alias xrandr_1280='xrandr_size 1280x1024'
+alias xrandr_1024='xrandr_size 1024x768'
+alias xrandr_800='xrandr_size 800x600'
+alias xrandr_640='xrandr_size 640x480'
 
 # Enable display
 alias xrandr_auto='xrandr_en'

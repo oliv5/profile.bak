@@ -46,3 +46,16 @@ fct_collision() {
     echo "$ALIAS"
   done
 }
+
+# Wrap script fcts in aliases
+# Useful ?
+fct_wrap() {
+  for SCRIPT; do
+    SCRIPT="$(readlink -f "$SCRIPT")"
+    while IFS= read -r FCT; do 
+      alias $FCT="(unalias -a; . $SCRIPT; eval $FCT)"
+    done <<EOF
+$(awk -F '(' '/^.*_.*\s*\(\)\s*\{?$/ {print $1}' "$SCRIPT")
+EOF
+  done
+}
