@@ -74,3 +74,9 @@ zpgd(){
 ###############################
 # Unit test
 #~ _unittest zp 'zpg 0x95C1629C87884760'
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ "${1#zp}" != "$1" ] && "$@" || true

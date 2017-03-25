@@ -34,3 +34,9 @@ fi
 
 # Flag
 export TMUX_LOADED=1
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ "${1#tmux}" != "$1" ] && "$@" || true

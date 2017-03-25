@@ -62,3 +62,9 @@ end script
 EOF
 '
 }
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ "${1#wol}" != "$1" ] && "$@" || true

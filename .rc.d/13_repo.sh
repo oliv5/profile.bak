@@ -11,4 +11,4 @@ repo_bundle() {
 ########################################
 # Last commands in file
 # Execute function from command line
-[ $# -gt 0 -a ! -z "$1" ] && "$@" || true
+[ "${1#repo}" != "$1" ] && "$@" || true

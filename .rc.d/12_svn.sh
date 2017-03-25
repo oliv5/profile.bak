@@ -452,3 +452,9 @@ alias svn_diffzip='__svn_diffzip _7zdiff'
 alias svn_diffzipc='__svn_diffzip _7zdiffd 2>/dev/null | wc -l'
 alias svn_diffzipm='__svn_diffzip _7zdiffm'
 alias svn_diffzipd='__svn_diffzip _7zdiffd'
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ "${1#svn}" != "$1" ] && "$@" || true

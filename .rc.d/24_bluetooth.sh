@@ -29,3 +29,9 @@ bt_getconfig() {
     sudo hcitool dev
     sudo hcitool scan
 }
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ "${1#bt}" != "$1" ] && "$@" || true

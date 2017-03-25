@@ -88,3 +88,9 @@ bup_decrypt(){
   local DIR="${2:-${BUP_DIR:-.}}"
   gpg --decrypt "$ARCHIVE" | tar -xvf - -C "$DIR"
 }
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ "${1#bup}" != "$1" ] && "$@" || true

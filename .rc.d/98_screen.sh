@@ -64,3 +64,9 @@ fi
 
 # Flag
 export SCREEN_LOADED=1
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ "${1#screen}" != "$1" ] && "$@" || true

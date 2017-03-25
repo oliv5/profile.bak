@@ -1176,4 +1176,5 @@ alias gk='gitk'
 ########################################
 # Last commands in file
 # Execute function from command line
-[ $# -gt 0 -a ! -z "$1" ] && "$@" || true
+[ "${1#git}" != "$1" ] && "$@" || true
+

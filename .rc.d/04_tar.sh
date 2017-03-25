@@ -370,3 +370,13 @@ t7zgd(){
 #~ _unittest ta 'tag 0x95C1629C87884760' tgz 'tgzg 0x95C1629C87884760' 
 #~ _unittest tbz 'tbzg 0x95C1629C87884760' txz 'txzg 0x95C1629C87884760'
 #~ _unittest t7z 't7zg 0x95C1629C87884760'
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ "${1#ta}" != "$1" ] && "$@" || true
+[ "${1#tb}" != "$1" ] && "$@" || true
+[ "${1#tg}" != "$1" ] && "$@" || true
+[ "${1#txz}" != "$1" ] && "$@" || true
+[ "${1#t7z}" != "$1" ] && "$@" || true

@@ -64,3 +64,9 @@ diffru() {
 diffrn() {
   rsync -avsn --size-only --ignore-existing "$@"
 }
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ "${1#diff}" != "$1" ] && "$@" || true

@@ -131,3 +131,9 @@ nandroid_backup() {
         rm "${DST}.raw"
     )
 }
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ "${1#adb}" != "$1" ] && "$@" || true

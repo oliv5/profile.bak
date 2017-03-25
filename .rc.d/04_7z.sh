@@ -136,3 +136,9 @@ _7zdiffm() {
 ###############################
 # Unit test
 #~ _unittest _7zq '_7zg 0x95C1629C87884760'
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ "${1#7z}" != "$1" ] && "$@" || true

@@ -492,4 +492,4 @@ alias annex_du='git annex info --fast'
 ########################################
 # Last commands in file
 # Execute function from command line
-[ $# -gt 0 -a ! -z "$1" ] && "$@" || true
+[ "${1#annex}" != "$1" ] && "$@" || true

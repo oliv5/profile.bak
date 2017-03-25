@@ -71,3 +71,9 @@ xzgd(){
 ###############################
 # Unit test
 #~ _unittest xzq 'xzg 0x95C1629C87884760'
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ "${1#xz}" != "$1" ] && "$@" || true

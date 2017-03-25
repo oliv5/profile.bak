@@ -73,3 +73,9 @@ gzgd(){
 ###############################
 # Unit test
 #~ _unittest gz 'gzg 0x95C1629C87884760'
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ "${1#gz}" != "$1" ] && "$@" || true

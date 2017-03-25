@@ -35,3 +35,9 @@ wifi_connect() {
     sudo iwconfig "${1:-wlan0}" essid "${2:?No ESSID specified...}" ${3:+key "$3"}
     sudo dhclient "${1:-wlan0}"
 }
+
+########################################
+########################################
+# Last commands in file
+# Execute function from command line
+[ "${1#wifi}" != "$1" ] && "$@" || true
