@@ -96,14 +96,15 @@ adb_logcat() {
 }
 
 # Android backup (files only, Android4.0+)
+alias adb_backup_userapp='adb_backup -all -apk -oob -no-system'
+alias adb_backup_systemapp='adb_backup -all -apk -oob -system'
+alias adb_backup_shared='adb_backup -shared'
+alias adb_backup_all='adb_backup -apk -oob -all -system -shared'
 adb_backup() {
     local DST="${1:-./adb_backup.$(date +%Y%m%d-%H%M).dat}"
     eval "${1:+shift}"
-    adb backup -all -apk -shared "$@" -f "$DST"
+    adb backup "$@" -f "$DST"
     7z a "${DST}.7z" "$DST" && rm "$DST"
-}
-adb_backup_system() {
-    adb_backup -system
 }
 
 # Nandroid backup from asb

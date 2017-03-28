@@ -58,6 +58,8 @@ alias rsync_cptree='rsync -a'
 alias rsync_cp='rsync -R'
 # Rsync move file (with tree)
 alias rsync_mv='rsync -R --remove-source-files'
+# Rsync update timestamp only
+alias rsync_timestamp='rsync -vrt --size-only --existing'
 
 ##############################
 # Duplicate file or directory with incremental num
