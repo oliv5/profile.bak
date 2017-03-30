@@ -48,13 +48,13 @@ TITLE=""
 DRYRUN=""
 SLANGS=""
 ALANGS="en"
-SPEED="2"
+SPEED=""
 RENAME=""
 OVERWRITE=""
 USERNAME=""
 DELTMP=""
-METHOD=""
-CODEC=""
+METHOD="mplayer"
+CODEC="ogg"
 DEVINFO="/tmp/$(basename $0).$(date +%s).tmp"
 SPEED_DVD=(1 2 4 8 12 16)
 SPEED_CD=(1 2 4 8 12 24)
@@ -81,17 +81,17 @@ do case "$OPTNAME" in
   k)  ExitHandler 0 KILL;;
   [?]) echo >&2 "Ripme $VERSION - rips dvd, audio cd, extracts subtitles"
        echo >&2 "Usage: $(basename $0) [options]"
-       echo >&2 "-t type    Media type: auto, dvd, cdda (auto)"
+       echo >&2 "-t type    Media type: (auto), dvd, cdda"
        echo >&2 "-d device  Device name in /dev (/dev/dvd)"
-       echo >&2 "-e speed   Device read speed : 1,2,... (2)"
-       echo >&2 "-m method  Ripping method: tccat, mplayer, vlc (mplayer), cdparanoia"
+       echo >&2 "-e speed   Device read speed : 1, (2), ..."
+       echo >&2 "-m method  Ripping method: tccat, (mplayer), vlc, cdparanoia"
        echo >&2 "-o dir     Output directory (current)"
        echo >&2 "-i dir     Audio output directory override (none)"
        echo >&2 "-f file    Output filename (media title)"
-       echo >&2 "-x tracks  Track numbers: all,disc,longest,0,1,2,... (longest)"
-       echo >&2 "-c codec   Audio codec: mp3, flac, aac, mpc, ogg; Video codec: not used"
-       echo >&2 "-s langs   DVD subtitles languages: en,fr,es,... (none)"
-       echo >&2 "-a langs   DVD audio languages: en,fr,es,... (en) - only with vlc"
+       echo >&2 "-x tracks  Track numbers: all, disc, (longest), 0, 1, 2,..."
+       echo >&2 "-c codec   Audio codec: mp3, flac, aac, mpc, (ogg); Video codec: not used"
+       echo >&2 "-s langs   DVD subtitles languages: en, fr, es, ... (none)"
+       echo >&2 "-a langs   DVD audio languages: (en),fr,es,... - only with vlc"
        echo >&2 "-r         Rename existing output file (disabled). Exclusive with -w"
        echo >&2 "-w         Allow output file overwrite (disabled). Exclusive with -r"
        echo >&2 "-n         No dump, simulate only"
@@ -139,10 +139,6 @@ if [ "$TYPE" = "auto" -o "$TYPE" = "dvd" ]; then
     echo >&2 "[ripme] Error: cannot read DVD information from device '$DEVICE'..."
     ExitHandler 1
   fi
-  # Set default ripping method
-  if [ -z "$METHOD" ]; then
-    METHOD="mplayer"
-  fi
 fi
 
 # Read audio CD information
@@ -160,13 +156,6 @@ if [ "$TYPE" = "auto" -o "$TYPE" = "cdda" ]; then
   if [ ! -z "$ADIR" ]; then
     ODIR="$ADIR"
   fi
-  # Set default ripping method & codec
-  if [ -z "$METHOD" ]; then
-    METHOD="cdparanoia"
-  fi
-  if [ -z "$CODEC" ]; then
-    CODEC="ogg"
-  fi
 fi
 
 # Check device presence. Failure if not detected
@@ -183,22 +172,25 @@ if [ ! -d "$ODIR" ]; then
   ExitHandler 1
 fi
 
+# Mplayer needs a home (!!)
+if [ "$METHOD" = "mplayer" ]; then
+  export MPLAYER_HOME="$(mktemp -d)"
+fi
+
+# Set device speed
+if [ -n "$SPEED" ]; then
+  # see http://hektor.umcs.lublin.pl/~mikosmul/computing/tips/cd-rom-speed.html
+  # see http://manpages.ubuntu.com/manpages/precise/man1/cdvdcontrol.1.html
+  SPEED=${SPEED_DVD[$SPEED]}
+  if [ "$METHOD" != "mplayer" ]; then
+    sudo cdvdcontrol -d "$DEVICE" -s --silent on --sm-dvd-rd $SPEED --sm-cd-rd $SPEED --sm-nosave || \
+    sudo hdparm -E $SPEED "$DEVICE" || \
+    sudo eject -x $SPEED "$DEVICE"
+  fi
+fi
+
 # Main processing
 if [ "$TYPE" = "dvd" ]; then
-
-  # Set device speed
-  if [ ! -z "$SPEED" ]; then
-    # see http://hektor.umcs.lublin.pl/~mikosmul/computing/tips/cd-rom-speed.html
-    # see http://manpages.ubuntu.com/manpages/precise/man1/cdvdcontrol.1.html
-    SPEED=${SPEED_DVD[$SPEED]}
-    if [ "$METHOD" = "mplayer" ]; then
-      SPEED="-dvd-speed $SPEED"
-    else
-      sudo cdvdcontrol -d "$DEVICE" -s --silent on --sm-dvd-rd $SPEED --sm-nosave || \
-      sudo hdparm -E $SPEED "$DEVICE" || \
-      sudo eject -x $SPEED "$DEVICE"
-    fi
-  fi
 
   # Extract DVD title
   if [ -z "$TITLE" ]; then
@@ -242,7 +234,7 @@ if [ "$TYPE" = "dvd" ]; then
     if [ "$METHOD" = "mplayer" ]; then
 
       # Proceed with the dump
-      $DRYRUN mplayer -nolirc dvd://${TRACK} ${DEVICE:+-dvd-device "$DEVICE"} -dumpstream -dumpfile "$DUMPFILE" ${SPEED}
+      $DRYRUN mplayer -quiet -input nodefault-bindings -noconsolecontrols -nolirc ${SPEED:+-dvd-speed $SPEED} dvd://${TRACK} ${DEVICE:+-dvd-device "$DEVICE"} -dumpstream -dumpfile "$DUMPFILE"
 
     elif [ "$METHOD" = "vlc" ]; then
 
@@ -323,16 +315,6 @@ if [ "$TYPE" = "dvd" ]; then
 
 elif [ "$TYPE" = "cdda" ]; then
 
-  # Set device speed
-  if [ ! -z "$SPEED" ]; then
-    # see http://hektor.umcs.lublin.pl/~mikosmul/computing/tips/cd-rom-speed.html
-    # see http://manpages.ubuntu.com/manpages/precise/man1/cdvdcontrol.1.html
-    SPEED=${SPEED_CD[$SPEED]}
-    sudo cdvdcontrol -d "$DEVICE" -s --silent on --sm-cd-rd $SPEED --sm-nosave || \
-    sudo hdparm -E $SPEED "$DEVICE" || \
-    sudo eject -x $SPEED "$DEVICE"
-  fi
-
   # Extract audio CD tracks
   FIRST=$(awk '/first:/ {print $2}' "$DEVINFO")
   LAST=$(awk '/last/ {print $4}' "$DEVINFO")
@@ -375,8 +357,13 @@ elif [ "$TYPE" = "cdda" ]; then
     # Rip CD to wav
     if [ "$METHOD" = "cdparanoia" ]; then
       $DRYRUN cdparanoia ${TRACK} -d "${DEVICE}" "${TMPFILE}"
+    elif [ "$METHOD" = "vlc" ]; then
+      # https://wiki.videolan.org/VLC_HowTo/Extract_audio/#The_VLC_command_invocation
+      $DRYRUN cvlc -I dummy --no-sout-video --sout-audio --no-sout-rtp-sap --no-sout-standard-sap --ttl=1 --sout-keep \
+        --sout "#transcode{acodec=s16l,channels=2}:std{access=file,mux=wav,dst='${TMPFILE}'}" \
+        cdda://${DEVICE} --cdda-track=${TRACK} vlc://quit
     else
-      $DRYRUN mplayer -nolirc cdda://${TRACK} ${DEVICE:+-cdrom-device "$DEVICE"} -nocache -vo null -vc null -ao pcm:file="$TMPFILE"
+      $DRYRUN mplayer -quiet -input nodefault-bindings -noconsolecontrols -nolirc ${SPEED:+-cdda speed=$SPEED:paranoia=2} cdda://${TRACK} ${DEVICE:+-cdrom-device "$DEVICE"} -benchmark -vc null -vo null -ao pcm:fast:waveheader:file="$TMPFILE"
     fi
     
     # Encode from wav
