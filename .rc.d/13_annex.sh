@@ -248,9 +248,8 @@ alias annex_upload_fast_auto='annex_copy_fast_auto --to'
 # $FROM is used to selected the origin repo
 # $DROP is used to drop the newly retrieved files
 # $DBG is used to print the command on stderr
-alias annex_copyto='DBG= DROP= _annex_transfer'
-alias annex_transferto='DBG= DROP=1 _annex_transfer'
-alias annex_moveto='DBG= DROP=2 _annex_transfer'
+alias annex_transfer='DBG= DROP=1 _annex_transfer'
+alias annex_move='DBG= DROP=2 _annex_transfer'
 _annex_transfer() {
   annex_exists || return 1
   local REPOS="${1:-$(git_remotes)}"
