@@ -58,6 +58,7 @@ rc_source() {
 
   ##############
   # Startup scripts
+  local RC_CNT=$(($RC_CNT+1))
   if [ $# -eq 0 ]; then
     export ENV_RC=$((ENV_RC+1))
     rc_log "Source $RC_DIR/.rc"
@@ -88,10 +89,14 @@ rc_source() {
   if [ $# -eq 0 ]; then
     rc_sourcefile "$RC_DIR/.rc.end"
     rc_sourcefile "$RC_DIR_LOCAL/.rc.local.end"
+    export ENV_RC_END=$((ENV_RC_END+1))
   fi
 
   ##############
-  unset -f rc_log rc_sourcemod rc_sourcefile
+  # Cleanup at the last nested call
+  if [ $RC_CNT -eq 1 ]; then
+    unset -f rc_log rc_sourcemod rc_sourcefile
+  fi
   return 0
 }
 

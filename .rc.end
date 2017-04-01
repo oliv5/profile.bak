@@ -1,7 +1,6 @@
 #!/bin/sh
 # Main user profile end script
 # It should be compatible with all shells (dash, bash,...)
-export ENV_RC_END=$((ENV_RC_END+1))
 
 ################################
 # Setup locales (https://www.gnu.org/software/gettext/manual/html_node/Locale-Environment-Variables.html#Locale-Environment-Variables)
