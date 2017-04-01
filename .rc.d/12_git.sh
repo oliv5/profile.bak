@@ -199,7 +199,7 @@ git_stx() {
 
 # Get remote names
 git_remotes() {
-  git ${2:+--git-dir="$2"} remote | xargs echo
+  git ${1:+--git-dir="$1"} remote | xargs
 }
 
 # Get git backup name

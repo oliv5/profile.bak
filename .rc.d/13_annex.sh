@@ -145,6 +145,19 @@ annex_diff() {
   fi
 }
 
+# Get remote(s) uuid
+annex_uuid() {
+  for REMOTE in "${@:-.*}"; do
+    git config --get-regexp remote\.${REMOTE}\.annex-uuid
+  done
+}
+
+# List annexed remotes
+annex_remotes() {
+  git config --get-regexp "remote\..*\.annex-uuid" |
+    awk -F. '{print $2}' | xargs
+}
+
 # Annex bundle
 annex_bundle() {
   ( set +e; # Need to go on
@@ -222,7 +235,7 @@ annex_copy() {
   annex_exists || return 1
   for LAST; do true; done
   if [ "$LAST" = "--from" ] || [ "$LAST" = "--to" ]; then
-    for REMOTE in $(git_remotes); do
+    for REMOTE in $(annex_remotes); do
       git annex copy "$@" "$REMOTE"
     done
   else
@@ -252,7 +265,7 @@ alias annex_transfer='DBG= DROP=1 _annex_transfer'
 alias annex_move='DBG= DROP=2 _annex_transfer'
 _annex_transfer() {
   annex_exists || return 1
-  local REPOS="${1:-$(git_remotes)}"
+  local REPOS="${1:-$(annex_remotes)}"
   local DBG="${DBG:+echo}"
   [ $# -gt 0 ] && shift
   [ -z "$REPOS" ] && return 0
@@ -320,10 +333,10 @@ _annex_rsync() {
 }
 
 # Drop local files which are in the specified remote repos
-alias annex_drop='git annex drop -N $(git_remotes | wc -w)'
+alias annex_drop='git annex drop -N $(annex_remotes | wc -w)'
 annex_drop_fast() {
   annex_exists || return 1
-  local REPOS="${1:-$(git_remotes)}"
+  local REPOS="${1:-$(annex_remotes)}"
   local COPIES="$(echo "$REPOS" | wc -w)"
   local LOCATION="$(echo "$REPOS" | sed -e 's/ / --and --in /g')"
   [ $# -gt 0 ] && shift
@@ -425,6 +438,7 @@ annex_lost() { git annex list "$@" | grep -E "^_+ "; }
 
 # Is file in annex ?
 annex_isin() {
+  annex_exists || return 1
   local REPO="${1:-.}"
   shift
   [ -n "$(git annex find --in "$REPO" "$@")" ]
