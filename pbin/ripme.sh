@@ -183,9 +183,9 @@ if [ -n "$SPEED" ]; then
   # see http://manpages.ubuntu.com/manpages/precise/man1/cdvdcontrol.1.html
   SPEED=${SPEED_DVD[$SPEED]}
   if [ "$METHOD" != "mplayer" ]; then
-    sudo cdvdcontrol -d "$DEVICE" -s --silent on --sm-dvd-rd $SPEED --sm-cd-rd $SPEED --sm-nosave || \
     sudo hdparm -E $SPEED "$DEVICE" || \
-    sudo eject -x $SPEED "$DEVICE"
+    sudo eject -x $SPEED "$DEVICE" || \
+    sudo cdvdcontrol -d "$DEVICE" -s --silent on --sm-dvd-rd $SPEED --sm-cd-rd $SPEED --sm-nosave
   fi
 fi
 
@@ -345,8 +345,8 @@ elif [ "$TYPE" = "cdda" ]; then
   # Rip it
   for TRACK in $(seq $FIRST $LAST); do
     # Build track filename
-    DUMPFILE="${ODIR}/track${TRACK}.ogg"
-    TMPFILE="/tmp/track${TRACK}.ogg.wav"
+    DUMPFILE="${ODIR}/track${TRACK}.${CODEC}"
+    TMPFILE="/tmp/track${TRACK}.${CODEC}.wav"
 
     # Check the output file name
     if ! CheckOutputFilename "DUMPFILE"; then
