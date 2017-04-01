@@ -47,7 +47,12 @@ annex_direct() {
 
 # Test annex bare
 annex_bare() {
-  annex_exists && ! annex_direct && git_bare
+  annex_exists "$@" && ! annex_direct "$@" && git_bare "$@"
+}
+
+# Test annex standard (indirect, not bare)
+annex_std() {
+  annex_exists "$@" && ! annex_direct "$@" && ! git_bare "$@"
 }
 
 # Init annex
@@ -142,6 +147,7 @@ annex_diff() {
 
 # Annex bundle
 annex_bundle() {
+  ( set +e; # Need to go on
   git_exists || return 1
   if annex_exists; then
     local DIR="${1:-$(git_dir)/bundle}"
@@ -164,13 +170,47 @@ annex_bundle() {
       fi
       ls -l "${BUNDLE}"*
     else
-      echo "Target directory '$DIR' does not exists."
+      echo "Output directory '$DIR' cannot be created."
       echo "Skip bundle creation..."
     fi
   else
     echo "Repository '$(git_dir)' is not git-annex ready."
     echo "Skip bundle creation..."
   fi
+  )
+}
+
+# Annex enumeration
+annex_enum() {
+  ( set +e; # Need to go on
+  git_exists || return 1
+  if annex_std; then
+    local DIR="${1:-$(git_dir)/list}"
+    mkdir -p "$DIR"
+    if [ -d "$DIR" ]; then
+      local LIST="$DIR/${2:-$(git_name "annex").txt.gz}"
+      local GPG_RECIPIENT="$3"
+      local GPG_TRUST="${4:+--trust-model always}"
+      echo "List annex into $LIST"
+      git ls-files --no-empty-directory -z | xargs -r0 -n1 sh -c '
+        LIST="$1"; FILE="$2"
+        printf "\"%s\" <- \"%s\"\n" "$(readlink -- "$FILE")" "$FILE" | grep -F ".git/annex" >> "${LIST%.*}"
+      ' _ "$LIST"
+      gzip -S .gz -9 "${LIST%.*}"
+      if [ ! -z "$GPG_RECIPIENT" ]; then
+        gpg -v --output "${LIST}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${LIST}" &&
+          (shred -fu "${LIST}" || wipe -f -- "${LIST}" || rm -- "${LIST}")
+      fi
+      ls -l "${LIST}"*
+    else
+      echo "Output directory '$DIR' cannot be created."
+      echo "Skip list creation..."
+    fi
+  else
+    echo "Repository '$(git_dir)' cannot be enumerated."
+    echo "Skip list creation..."
+  fi
+  )
 }
 
 # Annex copy

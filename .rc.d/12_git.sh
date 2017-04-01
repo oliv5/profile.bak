@@ -472,6 +472,7 @@ git_get_all_tracking() {
 
 # Create a bundle
 git_bundle() {
+  ( set +e; # Need to go on
   git_exists || return 1
   local DIR="${1:-$(git_dir)/bundle}"
   mkdir -p "$DIR"
@@ -490,6 +491,7 @@ git_bundle() {
     echo "Target directory '$DIR' does not exists."
     echo "Skip bundle creation..."
   fi
+  )
 }
 
 # Git upkeep
@@ -737,12 +739,14 @@ git_clean() {
 ########################################
 # List local files
 git_ls() {
-  git ls-tree -r ${1:-$(git_branch)} --name-only ${2:+| grep -F "$2"}
+  #git ${3:+--git-dir="$3"} ls-tree -r ${1:-$(git_branch "" "$3")} --name-only ${2:+| grep -F "$2"}
+  git ls-files "$@"
 }
 
 # List files in commit
-git_list() {
+git_ls_commit() {
   #git show --pretty="format:" --name-only "${@:-HEAD}"
+  #git ${2:+--git-dir="$2"} diff-tree --no-commit-id --name-only -r "${1:-HEAD}"
   git diff-tree --no-commit-id --name-only -r "${@:-HEAD}"
 }
 
