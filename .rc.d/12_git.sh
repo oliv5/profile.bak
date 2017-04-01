@@ -247,32 +247,25 @@ git_allshorthash() {
 }
 
 ########################################
-# Repo init
-git_init() {
-  local DIR="$1"
-  shift 2>/dev/null
+# Clone one branch only
+git_clone_branch() {
+  local URL="${1:?No URL specified}"
+  local BRANCH="${2:-master}"
+  local DIR="${3:-$(basename "$URL" .git)}"
   mkdir -p "$DIR"
   cd "$DIR" || return 1
-  [ ! -d ".git" ] && git init
-  for ARGS; do
-    set -- $ARGS
-    git remote add "$@"
-  done
+  git init
+  git remote add origin -t "$BRANCH" "$URL"
+  git fetch
+  git checkout "$BRANCH"
 }
 
-# Repo clone
-git_clone() {
-  local URL="${1:?No URL specified}"
-  local REMOTE="${2:-origin}"
-  local BRANCH="${3:-master}"
-  local DIR="${4:-$(basename "$URL" .git)}"
-  shift 3 2>/dev/null
-  git clone "$URL" "$DIR" || break
-  git --git-dir="$DIR/.git" remote rename origin "$REMOTE"
-  git --git-dir="$DIR/.git" checkout "$BRANCH"
-  for ARGS; do
-    set -- $ARGS
-    git remote add "$@"
+# Add batch of remotes
+git_add_remotes() {
+  git_exists || return 1
+  while [ $# -ge 3 ]; do
+    git remote add "$1" "$2" ${3:+-t "$3"}
+    shift 3
   done
 }
 
