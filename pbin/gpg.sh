@@ -8,7 +8,7 @@
 # Author: Oliv5 <oliv5@caramail.com>
 
 # Variables
-VERSION=0.98
+VERSION=0.99
 PASSPHRASE=""
 RECIPIENT=""
 NB_ENCRYPT=0
@@ -84,7 +84,7 @@ DisplayQuestion() {
   if [ -z "$ZENITY" ]; then
     IFS="$(printf '\n')"
     #read -s -t 30 -p "$2 " ANSWER
-    read -p "$2 " ANSWER
+    read -p "$2 " ANSWER </dev/tty
     echo $ANSWER
   else
     echo $(zenity --title "$1" --entry --hide-text --text="$2" --timeout 30 | sed 's/^[ \t]*//;s/[ \t]*$//')
@@ -98,7 +98,7 @@ DisplayList() {
     echo "$1" >/dev/stderr
     echo "$5" >/dev/stderr
     #read -t 30 -p "$2 " ANSWER
-    read -p "$2 " ANSWER
+    read -p "$2 " ANSWER </dev/tty
     echo $ANSWER
   else
     zenity --list --radiolist --title "$1" --text "$2" --column "$3" --column "$4" --timeout 30 $(printf "TRUE\n$5\n")
@@ -206,13 +206,15 @@ encrypt() {
   fi
 }
 
-# Loop through nautilus files or command line filess
-for SRC in "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS:-"${@:-.}"}"; do
-  IFS="$(printf '\n\t')"
+# Loop through nautilus files or command line files
+#printf %s "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS:-"${@:-.}"}" | while read -r SRC; do
+IFS="$(printf '\n')"
+LIST="$(printf %s "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS:-"${@:-.}"}" | sed -e 's/\n$//')"
+for SRC in "$LIST"; do
   #CTRLCHARS="$(printf '*[\001-\037\177]*')"
   #for FILE in $(find "$SRC" ! -type d ! -name "$CTRLCHARS")
-  #for FILE in $(find "$SRC" ! -type d); do
-  for FILE in "$SRC" $([ -d "$SRC" ] && find "$SRC" ! -type d); do
+  #for FILE in "$SRC" $([ -d "$SRC" ] && find "$SRC" ! -type d); do
+  for FILE in $(find "$SRC" ! -type d); do
     [ ! -f "$FILE" ] && continue
     if [ -n "$EN_AUTODETECT" ]; then
       if echo "$FILE" | grep -E "\.(gpg|pgp)$" >/dev/null; then
