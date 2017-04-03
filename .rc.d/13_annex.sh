@@ -127,12 +127,6 @@ annex_init_gcrypt() {
   git config --add annex.sshcaching false
 }
 
-# Annex status
-annex_status() {
-  echo "annex status:"
-  git annex status
-}
-
 # Git status for scripts
 annex_st() {
   git annex status | awk -F'#;#.' '/^[\? ]?'$1'[\? ]?/ {sub(/ /,"#;#.");print $2}'
@@ -540,6 +534,22 @@ annex_forget() {
 
 # Annex info
 alias annex_du='git annex info --fast'
+
+# Delete all versions of a file
+# https://git-annex.branchable.com/tips/deleting_unwanted_files/
+annex_delete() {
+  annex_exists || return 1
+  local IFS="$(printf ' \t\n')"
+  for F; do
+    git annex drop --force "$F"
+    git annex whereis "$F"
+    for R in $(annex_remotes); do
+      git annex drop --force "$F" --from "$R"
+    done
+    rm "$F" 2>/dev/null
+  done
+  git annex sync
+}
 
 ########################################
 ########################################
