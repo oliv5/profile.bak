@@ -247,6 +247,14 @@ git_allshorthash() {
 }
 
 ########################################
+# Clone & rename remote
+git_clone() {
+  git clone "$1" ${3:+"$3"} || return 1
+  if [ -n "$2" ]; then
+    git --git-dir="${3:-$(basename "$1" .git)}" remote rename origin "$2"
+  fi
+}
+
 # Clone one branch only
 git_clone_branch() {
   local URL="${1:?No URL specified}"
@@ -268,6 +276,8 @@ git_add_remotes() {
     shift 3
   done
 }
+
+########################################
 
 #~ # Batch pull the selected branches from their remote tracking
 #~ alias git_pull='git_pull_branches "$(git_branch)"'
@@ -989,6 +999,33 @@ git_fixup() {
   local AHEAD="${2:-2}"
   git commit --fixup="$COMMIT" &&
   git rebase --interactive --autosquash "${COMMIT}~${AHEAD}"
+}
+
+########################################
+# Git clone gcrypt repo
+git_clone_gcrypt() {
+  local URL="${1:?No URL specified...}"
+  local KEY="${2:?No key specified...}"
+  local DIR="${3:-$(basename "$URL" .git)}"
+  local REMOTE="${4:-origin}"
+  local BRANCH="${4:-master}"
+  ! git_exists "$DIR/.git" || return 1
+  mkdir -p "$DIR"
+  git --git-dir="$DIR/.git" init
+  git --git-dir="$DIR/.git" remote add "$REMOTE" "gcrypt::${URL}"
+  git --git-dir="$DIR/.git" config "remote.${REMOTE}.gcrypt-participants" "$KEY"
+  (cd "$DIR"; git pull "$REMOTE" "$BRANCH")
+}
+
+# Git add gcrypt remote
+git_add_gcrypt_remote() {
+  local NAME="${1:?No remote name specified...}"
+  local URL="${2:?No URL specified...}"
+  local KEY="${3:?No key specified...}"
+  local DIR="${4:-.}"
+  git_exists "$DIR/.git" || return 1
+  git --git-dir="$DIR/.git" remote add "$NAME" "gcrypt::${URL}"
+  git --git-dir="$DIR/.git" config remote.${NAME}.gcrypt-participants "$KEY"
 }
 
 ########################################
