@@ -207,13 +207,14 @@ encrypt() {
   fi
 }
 
+# Main
+true ${@:?No file/directory specified...}
 # Loop through nautilus files or command line files
 #printf %s "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS:-"${@:-.}"}" | while read -r SRC; do
 IFS="$(printf '\n')"
-LIST="$(printf %s "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS:-"${@:-.}"}" | sed -e 's/\n$//')"
+LIST="$(printf %s "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS:-"$@"}" | sed -e 's/\n$//')"
 for SRC in "$LIST"; do
   for FILE in $(find "$SRC" ! -type d); do
-    [ ! -f "$FILE" ] && continue
     if [ -n "$EN_AUTODETECT" ]; then
       if echo "$FILE" | grep -E "\.(gpg|pgp)$" >/dev/null; then
         if [ -n "$EN_DECRYPT" ]; then
@@ -234,5 +235,6 @@ for SRC in "$LIST"; do
   done
 done
 
-# End status
+# Exit status
 $VERBOSE DisplayInfo "Job complete!" "Encrypted files: $NB_ENCRYPT\nDecrypted files: $NB_DECRYPT"
+exit 0
