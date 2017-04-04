@@ -114,6 +114,17 @@ getRecipient() {
     DisplayList "Encryption Keys" "Select the encryption key:" "*" "Available keys:" "$@"
 }
 
+deleteFiles() {
+  for FILES; do
+    $VERBOSE echo "Delete input file '$FILE'"
+    if command -v wipe >/dev/null && [ ! -L "$FILE" ] && [ $(stat -c %s "$FILE") -lt 25000000 ]; then
+      $SIMULATE wipe -D -q -f "$FILE"
+    else
+      $SIMULATE rm -v "$FILE"
+    fi
+  done
+}
+
 # Decrypt file
 decrypt(){
   local INPUT="$1"
@@ -143,10 +154,7 @@ decrypt(){
 
   # Delete original file if new one is present
   if [ ! -z "$DELETE" -a -f "$OUTPUT" ]; then
-    #$VERBOSE echo "Wipe input file '$INPUT'"
-    #[ $(stat -c %s "$INPUT") -lt 25000000 ] && $SIMULATE wipe -q -f "$INPUT" >"$STDOUT" 2>&1 || $SIMULATE rm "$INPUT" >"$STDOUT" 2>&1
-    $VERBOSE echo "Delete input file '$INPUT'"
-    $SIMULATE rm "$INPUT" >"$STDOUT" 2>&1
+    deleteFiles "$INPUT" >"$STDOUT" 2>&1
   fi
 }
 
@@ -195,18 +203,7 @@ encrypt() {
 
   # Delete original file if new one is present
   if [ ! -z "$DELETE" -a -f "$OUTPUT" ]; then
-    $VERBOSE echo "Wipe input file '$INPUT'"
-    if [ -L "$INPUT" ]; then
-      # Symlink
-      $SIMULATE rm -v "$INPUT" >"$STDOUT" 2>&1
-    else
-      # Regular file
-      if [ $(stat -c %s "$INPUT") -lt 25000000 ]; then
-        $SIMULATE wipe -D -q -f "$INPUT" >"$STDOUT" 2>&1
-      else
-        $SIMULATE rm -v "$(readlink -f "$INPUT")" >"$STDOUT" 2>&1
-      fi
-    fi
+    deleteFiles "$INPUT" >"$STDOUT" 2>&1
   fi
 }
 
