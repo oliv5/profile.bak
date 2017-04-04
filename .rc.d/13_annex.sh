@@ -537,7 +537,7 @@ alias annex_du='git annex info --fast'
 
 # Delete all versions of a file
 # https://git-annex.branchable.com/tips/deleting_unwanted_files/
-annex_delete() {
+annex_rm() {
   annex_exists || return 1
   local IFS="$(printf ' \t\n')"
   for F; do
