@@ -93,16 +93,26 @@ DisplayQuestion() {
 
 # Display a list of choices, get selection
 DisplayList() {
+  local TITLE="$1"
+  local DESCR="$2"
+  local HEADER1="$3"
+  local HEADER2="$4"
+  shift 4
   if [ -z "$ZENITY" ]; then
-    IFS="$(printf '\n')"
-    echo "$1" >/dev/stderr
-    echo "$5" >/dev/stderr
-    #read -t 30 -p "$2 " ANSWER
-    read -p "$2 " ANSWER </dev/tty
+    echo "$TITLE" >/dev/stderr
+    echo "$@" >/dev/stderr
+    #read -t 30 -p "$DESCR " ANSWER
+    read -p "$DESCR " ANSWER </dev/tty
     echo $ANSWER
   else
-    zenity --list --radiolist --title "$1" --text "$2" --column "$3" --column "$4" --timeout 30 $(printf "TRUE\n$5\n")
+    zenity --list --radiolist --timeout 30 --title "$TITLE" --text "$DESCR" --column "$HEADER1" --column "$HEADER2" "$@"
   fi
+}
+
+getRecipient() {
+    local IFS=":"
+    set -- $(gpg --list-keys --with-colons | awk -F: 'BEGIN{num=0} /pub/{num++;printf "%s:%s:",(num==1)?"TRUE":"",$10}')
+    DisplayList "Encryption Keys" "Select the encryption key:" "*" "Available keys:" "$@"
 }
 
 # Decrypt file
@@ -117,7 +127,7 @@ decrypt(){
   # Collect GnuPG passphrase
   if [ -z "$PASSPHRASE" ]; then
     ###PASSPHRASE=$(zenity --title "GnuPG Decryption" --entry --hide-text --text="Enter your GnuPG passphrase" | sed 's/^[ \t]*//;s/[ \t]*$//')
-    PASSPHRASE=$(DisplayQuestion "Decryption" "Enter your key GnuPG passphrase:")
+    PASSPHRASE="$(DisplayQuestion "Decryption" "Enter your key GnuPG passphrase:")"
     if [ -z "$PASSPHRASE" ]; then
       ###$VERBOSE zenity --warning --title "No passphrase" --text "Decryption is disabled!"
       $VERBOSE DisplayWarning "No passphrase" "Decryption is disabled!"
@@ -151,11 +161,10 @@ encrypt() {
 
   if [ -z "$RECIPIENT" ]; then
     # List the available keys
-    KEYS=$(gpg --list-keys --with-colons | awk -F: '/pub/ {print $10}')
+    KEYS="$(gpg --list-keys --with-colons | awk -F: '/pub/ {print $10}')"
 
     # Select the key
-    ###RECIPIENT=$(echo $KEYS | xargs zenity --title "Encryption Keys" --text "Select the key to be used for encryption" --list --radiolist --column "" --column "Available keys on your keyring:")
-    RECIPIENT=$(DisplayList "Encryption Keys" "Select the encryption key:" "**" "Available keys:" "$KEYS")
+    RECIPIENT="$(getRecipient)"
     if [ -z "$RECIPIENT" ]; then
       ###$VERBOSE zenity --warning --title "No key" --text "Encryption is disabled!"
       $VERBOSE DisplayWarning "No key" "Encryption is disabled!"
@@ -167,7 +176,7 @@ encrypt() {
 
   if [ -z "$PASSPHRASE" ]; then
     if [ ! -z "$EN_SIGN" ]; then
-      PASSPHRASE=$(DisplayQuestion "Signature" "Enter your key GnuPG passphrase:")
+      PASSPHRASE="$(DisplayQuestion "Signature" "Enter your key GnuPG passphrase:")"
       if [ -z "$PASSPHRASE" ]; then
         $VERBOSE DisplayWarning "No passphrase" "Signing is disabled!"
         unset EN_SIGN
