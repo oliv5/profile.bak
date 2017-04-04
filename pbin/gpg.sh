@@ -24,7 +24,6 @@ SIMULATE=""
 OVERWRITE=""
 VERBOSE="false"
 STDOUT="/dev/null"
-#STDOUT="/dev/stdout"
 
 # Autodetect zenity & display
 ZENITY=""
@@ -126,10 +125,8 @@ decrypt(){
 
   # Collect GnuPG passphrase
   if [ -z "$PASSPHRASE" ]; then
-    ###PASSPHRASE=$(zenity --title "GnuPG Decryption" --entry --hide-text --text="Enter your GnuPG passphrase" | sed 's/^[ \t]*//;s/[ \t]*$//')
     PASSPHRASE="$(DisplayQuestion "Decryption" "Enter your key GnuPG passphrase:")"
     if [ -z "$PASSPHRASE" ]; then
-      ###$VERBOSE zenity --warning --title "No passphrase" --text "Decryption is disabled!"
       $VERBOSE DisplayWarning "No passphrase" "Decryption is disabled!"
       unset EN_DECRYPT
       continue
@@ -166,12 +163,10 @@ encrypt() {
     # Select the key
     RECIPIENT="$(getRecipient)"
     if [ -z "$RECIPIENT" ]; then
-      ###$VERBOSE zenity --warning --title "No key" --text "Encryption is disabled!"
       $VERBOSE DisplayWarning "No key" "Encryption is disabled!"
       unset EN_ENCRYPT
       continue
     fi
-    #RECIPIENT=$(echo "$RECIPIENT" | sed -e 's/_/ /g' | sed 's/^[ \t]*//;s/[ \t]*$//')
   fi
 
   if [ -z "$PASSPHRASE" ]; then
@@ -220,9 +215,6 @@ encrypt() {
 IFS="$(printf '\n')"
 LIST="$(printf %s "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS:-"${@:-.}"}" | sed -e 's/\n$//')"
 for SRC in "$LIST"; do
-  #CTRLCHARS="$(printf '*[\001-\037\177]*')"
-  #for FILE in $(find "$SRC" ! -type d ! -name "$CTRLCHARS")
-  #for FILE in "$SRC" $([ -d "$SRC" ] && find "$SRC" ! -type d); do
   for FILE in $(find "$SRC" ! -type d); do
     [ ! -f "$FILE" ] && continue
     if [ -n "$EN_AUTODETECT" ]; then
@@ -245,5 +237,5 @@ for SRC in "$LIST"; do
   done
 done
 
-###$VERBOSE zenity --info --title "Job complete" --text "Encrypted files: $NB_ENCRYPT\nDecrypted files: $NB_DECRYPT"
+# End status
 $VERBOSE DisplayInfo "Job complete!" "Encrypted files: $NB_ENCRYPT\nDecrypted files: $NB_DECRYPT"
