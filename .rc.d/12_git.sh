@@ -63,7 +63,7 @@ git_setup() {
 ########################################
 # Get git version
 git_version() {
-  local VERSION="${1:-$(git --version | cut -d' ' -f 3)}"
+  local VERSION="${1:-$(git --version 2>/dev/null | cut -d' ' -f 3)}"
   expr $(echo $VERSION | awk -F'.' '{printf "%.d%.2d%.2d%.2d",$1,$2,$3,$4}')
 }
 
