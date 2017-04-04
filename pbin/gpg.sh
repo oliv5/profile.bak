@@ -132,7 +132,7 @@ decrypt(){
   if [ "$OUTPUT" = "$INPUT" ]; then
     OUTPUT="${OUTPUT}.out"
   fi
-  echo "Decrypting file '$INPUT' into '$OUTPUT'" >"$STDOUT" 2>&1
+  echo "Decrypting file '$INPUT' into '$OUTPUT'"
 
   # Collect GnuPG passphrase
   if [ -z "$PASSPHRASE" ]; then
@@ -145,7 +145,7 @@ decrypt(){
   fi
 
   # Decrypt
-  echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE --passphrase-fd 0 -o "$OUTPUT" -d "$INPUT" >"$STDOUT" 2>&1
+  echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE --passphrase-fd 0 -o "$OUTPUT" -d "$INPUT"
 
   # One more file!
   if [ -f "$OUTPUT" ]; then
@@ -154,7 +154,7 @@ decrypt(){
 
   # Delete original file if new one is present
   if [ ! -z "$DELETE" -a -f "$OUTPUT" ]; then
-    deleteFiles "$INPUT" >"$STDOUT" 2>&1
+    deleteFiles "$INPUT"
   fi
 }
 
@@ -162,7 +162,7 @@ decrypt(){
 encrypt() {
   local INPUT="$1"
   local OUTPUT="${INPUT}.gpg"
-  echo "Encrypting file '$INPUT' into '$OUTPUT'" >"$STDOUT" 2>&1
+  echo "Encrypting file '$INPUT' into '$OUTPUT'"
 
   if [ -z "$RECIPIENT" ]; then
     # List the available keys
@@ -191,9 +191,9 @@ encrypt() {
 
   # Encrypt
   if [ ! -z "$EN_SIGN" ]; then
-    echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE --no-default-recipient --recipient "$RECIPIENT" --trust-model always --encrypt --sign -o "$OUTPUT" "$INPUT" >"$STDOUT" 2>&1
+    echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE --no-default-recipient --recipient "$RECIPIENT" --trust-model always --encrypt --sign -o "$OUTPUT" "$INPUT"
   else
-    $SIMULATE gpg -v --batch $OVERWRITE --no-default-recipient --recipient "$RECIPIENT" --trust-model always --encrypt -o "$OUTPUT" "$INPUT" >"$STDOUT" 2>&1
+    $SIMULATE gpg -v --batch $OVERWRITE --no-default-recipient --recipient "$RECIPIENT" --trust-model always --encrypt -o "$OUTPUT" "$INPUT"
   fi
 
   # One more file!
@@ -203,7 +203,7 @@ encrypt() {
 
   # Delete original file if new one is present
   if [ ! -z "$DELETE" -a -f "$OUTPUT" ]; then
-    deleteFiles "$INPUT" >"$STDOUT" 2>&1
+    deleteFiles "$INPUT"
   fi
 }
 
@@ -217,18 +217,18 @@ for SRC in "$LIST"; do
     if [ -n "$EN_AUTODETECT" ]; then
       if echo "$FILE" | grep -E "\.(gpg|pgp)$" >/dev/null; then
         if [ -n "$EN_DECRYPT" ]; then
-          decrypt "$FILE"
+          decrypt "$FILE" >"$STDOUT" 2>&1
         fi
       else
         if [ -n "$EN_ENCRYPT" ]; then
-          encrypt "$FILE"
+          encrypt "$FILE" >"$STDOUT" 2>&1
         fi
       fi
     else
       if [ -n "$EN_DECRYPT" ]; then
-        decrypt "$FILE"
+        decrypt "$FILE" >"$STDOUT" 2>&1
       elif [ -n "$EN_ENCRYPT" ]; then
-        encrypt "$FILE"
+        encrypt "$FILE" >"$STDOUT" 2>&1
       fi
     fi
   done
