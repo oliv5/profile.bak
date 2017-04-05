@@ -67,6 +67,24 @@ mount_iso() {
   sudo mount -o loop -t iso9660 "$@"
 }
 
+# bin/cue to iso
+conv_bin2iso() {
+  local BIN="${1:?Missing BIN file...}"
+  local CUE="${2:-${BIN%.*}.cue}"
+  local ISO="${3:-${BIN%.*}.iso}"
+  shift $(($#>=3?3:$#))
+  if [ ! -e "$CUE" ]; then
+    # MODE1 is the track mode when it is a computer CD
+    # MODE2 if it is a PlayStation CD.
+    cat > "$CUE" <<EOF
+FILE \"$BIN\" BINARY
+TRACK 01 MODE1/2352
+INDEX 01 00:00:00
+EOF
+  fi
+  bchunk "$@" "$BIN" "$CUE" "$ISO"
+}
+
 # Mount dd img
 mount_img() {
   local SRC="${1:?No image specified...}"
