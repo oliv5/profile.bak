@@ -1,11 +1,11 @@
 " General {
 	set updatetime=1000  " Swap file write / CursorHold  evt delay (in ms)
-	set shell=/bin/bash\ --rcfile\ ~/.bashrc\ -i    " Set shell, load user profile
+	"set shell=/bin/bash\ --rcfile\ ~/.bashrc\ -i    " Set shell, load user profile
 	set secure      " Security mode
 	set noexrc      " don't read .vimrc in current directory
 
 	" backupdir/viewdir/directory/undodir directories are set by spf13 directly
-  " viminfo is not set by spf13
+	" viminfo is not set by spf13
 	" Save/restore part of edit session
 	"  /10  :  search items
 	"  '10  :  marks in 10 previously edited files
