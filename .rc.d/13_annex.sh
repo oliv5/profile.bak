@@ -463,16 +463,60 @@ annex_revert() {
   git annex proxy -- git revert "${1:-HEAD}"
 }
 
-# Annex find file from key
+# Annex info
+alias annex_du='git annex info --fast'
+
+########################################
+# Find files from key
+# Note key = file content, so there can be
+# multiple files mapped to a single key
 annex_fromkey() {
-  annex_exists || return 1
   for KEY; do
-    git log -S "$KEY" --format=%h | tail -n 1 | xargs -r -n1 git show | grep -A 2 -e "^\+.*$KEY" | tail -n 1
+    #git show -999999 -p --no-color --word-diff=porcelain -S "$KEY" | 
+    git log -p --no-color --word-diff=porcelain -S "$KEY" | 
+      awk '/^(---|\+\+\+) (a|b)/{line=$0} /'$KEY'/{printf "%s\0",substr(line,5); exit 0}' |
+      # Remove leading/trailing double quotes, leading "a/", trailing spaces.
+      # Escape '%'
+      sed -z -e 's/\s*$//' -e 's/^"//' -e 's/"$//' -e 's/^..//' -e 's/%/\%/g' |
+      # printf does evaluate octal charaters from UTF8
+      xargs -r0 -n1 -I {} -- printf "{}\0"
+      # Sanity extension check between key and file
+      #xargs -r0 -n1 sh -c '
+        #[ "${1##*.}" != "${2##*.}" ] && printf "Warning: key extension ${2##*.} mismatch %s\n" "${1##*/}" >&2
+        #printf "$2\0"
+      #' _ "$KEY"
   done
 }
 
-# Clean unused files
+# List unused files matching pattern
+annex_unused() {
+  ! annex_bare || return 1
+  local PATTERNS=""
+  for ARG; do PATTERNS="${PATTERNS:+$PATTERNS }-e '$ARG'"; done
+  eval annex_fromkey $(git annex unused ${FROM:+--from $FROM} | awk "/^\s+[0-9]+\s/{print \$2}") ${PATTERNS:+| grep -zF $PATTERNS} | xargs -r0 -n1
+}
+
+# Drop unused files matching pattern
 annex_dropunused() {
+  ! annex_bare || return 1
+  local IFS="$(printf ' \t\n')"
+  local PATTERNS=""
+  for ARG; do PATTERNS="${PATTERNS:+$PATTERNS }-e '$ARG'"; done
+  git annex unused ${FROM:+--from $FROM} | grep -E '^\s+[0-9]+\s' | 
+    while IFS=' ' read -r NUM KEY; do
+      eval annex_fromkey "$KEY" ${PATTERNS:+| grep -zF $PATTERNS} | xargs -r0 sh -c '
+        NUM="$1";KEY="$2"; shift 2
+        for FILE; do
+          printf "Drop unused file %s\n%s\n%s\n" "$NUM" "$FILE" "$KEY"
+        done
+        git annex dropunused "$NUM" ${FROM:+--from $FROM} ${FORCE:+--force}
+        echo "~"
+      ' _ "$NUM" "$KEY"
+    done
+}
+
+# Drop all unused files interactively
+annex_dropunused_interactive() {
   ! annex_bare || return 1
   local IFS="$(printf ' \t\n')"
   local REPLY; read -r -p "Delete unused files? (a/y/n/s) " REPLY
@@ -480,14 +524,14 @@ annex_dropunused() {
     local LAST="$(git annex unused | awk '/SHA256E/ {a=$1} END{print a}')"
     git annex dropunused "$@" 1-$LAST
   elif [ "$REPLY" = "s" -o "$REPLY" = "S" ]; then
-    git annex unused
+    annex_show_unused_key
   elif [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
     local LAST="$(git annex unused | awk '/SHA256E/ {a=$1} END{print a}')"
     git annex unused | grep -F 'SHA256E' | 
-      while read -r NUM KEY; do 
-        echo "---------------"
-        git log --oneline -S "$KEY"
-        read -r -p "Delete file $NUM/$LAST ($KEY)? (y/f/n) " REPLY < /dev/tty
+      while read -r NUM KEY; do
+        echo "$KEY"
+        annex_fromkey "$KEY"
+        read -r -p "Delete file $NUM/$LAST? (y/f/n) " REPLY < /dev/tty
         if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
           sh -c "git annex dropunused ""$@"" $NUM" &
           wait
@@ -495,6 +539,7 @@ annex_dropunused() {
           sh -c "git annex dropunused --force ""$@"" $NUM" &
           wait
         fi
+        echo "~"
       done
   fi
 }
@@ -532,17 +577,17 @@ annex_forget() {
   )
 }
 
-# Annex info
-alias annex_du='git annex info --fast'
-
 # Delete all versions of a file
 # https://git-annex.branchable.com/tips/deleting_unwanted_files/
-annex_rm() {
+annex_purge() {
   annex_exists || return 1
   local IFS="$(printf ' \t\n')"
   for F; do
-    git annex drop --force "$F"
+    echo "Delete file '$F' ? (y/n)"
+    read REPLY </dev/tty
+    [ "$REPLY" = "y" -o "$REPLY" = "Y" ] || continue
     git annex whereis "$F"
+    git annex drop --force "$F"
     for R in $(annex_remotes); do
       git annex drop --force "$F" --from "$R"
     done
