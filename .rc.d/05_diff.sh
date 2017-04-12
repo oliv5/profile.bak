@@ -30,26 +30,53 @@ diffbc() {
   diff -U 0 "$1" "$2" | grep '^@' | wc -l
 }
 
-# Show part of files differences
-__diffp() {
-  true ${1:?No diff program specified} ${2:?No file 1 specified} ${3:?No file 2 specified}
-  #eval $1 <(cut -b ${4:-1-} "$2")  <(cut -b ${4:-1-} "$3")
-  PIPE1="$(mktemp -u)"
-  PIPE2="$(mktemp -u)"
-  mkfifo "$PIPE1" "$PIPE2"
-  eval "$1" "$PIPE1" "$PIPE2" &
-  cut -b ${4:-1-} "$2" > "$PIPE1"
-  cut -b ${4:-1-} "$3" > "$PIPE2"
-  rm "$PIPE1" "$PIPE2"
+# Util fct to pipe 2 commands into one
+_diff_pipe() {
+  local R="${1:?Reader command not specified...}"
+  local W1="${2:?Writer command 1 not specified...}"
+  local W2="${3:?Writer command 2 not specified...}"
+  if command -v bash >/dev/null; then
+    # Use process substitution
+    bash -c "$R <($W1) <($W2)"
+  else
+    # Manual process substitution
+    local P1="$(mktemp -u)"
+    mkfifo -m 600 "$P1"
+    local P2="$(mktemp -u)"
+    mkfifo -m 600 "$P2"
+    eval "$W1" > "$P1" &
+    eval "$W2" > "$P2" &
+    eval "$R" "$P1" "$P2" 
+    rm "$P1" "$P2"
+  fi
 }
-alias diffp='__diffp diff'
-alias diffpm='__diffp meld'
 
-# Compare files and display diffs in hexa format
-diffh() {
-  true ${1:?No file 1 specified} ${2:?No file 2 specified}
-  cmp -l "$1" "$2" | gawk '{printf "%08X %02X %02X\n", $1-'${3:-0}', strtonum(0$2), strtonum(0$3)}'
+# Diff/meld byte-limited portions of the input files with cut -b
+diffp() {
+  _diff_pipe "diff" "cut -b ${3:-1-} \"$1\"" "cut -b ${3:-1-} \"$2\""
 }
+diffpm() {
+  _diff_pipe "meld" "cut -b ${3:-1-} \"$1\"" "cut -b ${3:-1-} \"$2\""
+}
+
+# Diff/meld line-limited portions of the input files with awk
+diffl() {
+  _diff_pipe "diff" "awk \"NR>=${3:-1}${4:+ && NR<=$4}\" \"$1\"" "awk \"NR>=${3:-1} ${4:+&& NR<=$4}\" \"$2\""
+}
+difflm() {
+  _diff_pipe "meld" "awk \"NR>=${3:-1}${4:+ && NR<=$4}\" \"$1\"" "awk \"NR>=${3:-1} ${4:+&& NR<=$4}\" \"$2\""
+}
+
+# Hex-diff 2 input files
+diffh() {
+  cmp -l "$1" "$2" | gawk '{printf "%08X %02X %02X\n", $1-'${3:-0}', strtonum(0$2), strtonum(0$3)}'
+  #_diff_pipe "diff" "hexdump -C \"$1\"" "hexdump -C \"$2\""
+}
+diffhm() {
+  _diff_pipe "meld" "hexdump -C \"$1\"" "hexdump -C \"$2\""
+}
+
+#######################
 
 # Diff using rsync
 diffr() {

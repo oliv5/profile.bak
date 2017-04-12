@@ -94,6 +94,60 @@ die() {
 }
 
 ################################
+# Create an unamed pipe
+mkpipe() {
+  for P; do
+    # Create a temporary named pipe
+    PIPE="$(mktemp -u)"
+    mkfifo -m 600 "$PIPE"
+    # Attach to file descriptor in rw mode "<>"
+    eval "exec $P<>\"$PIPE\""
+    # Unlink the named pipe
+    rm "$PIPE"
+  done
+}
+
+# Close an unamed pipe
+rmpipe() {
+  for P; do
+    eval "exec $P>&-"
+  done
+}
+
+# Pipe multiple writers into a single reader
+# Same as bash process substitution
+# "reader <(writer1) <(writer2)"
+pipe_reader() {
+  local READER="${1:?Reader command not specified...}"
+  shift
+  local DIR="$(mktemp -d)"
+  for W in $(seq $#); do
+    mkfifo -m 600 "$DIR/$W"
+  done
+  for W in $(seq $#); do
+    eval "$1" > "$DIR/$W" &
+    shift
+  done
+  eval "$READER" "$DIR"/*
+  rm -r "$DIR"
+}
+# Pipe a single writer into multiple readers
+pipe_writer() {
+  local WRITER="${1:?Writer command not specified...}"
+  shift
+  local DIR="$(mktemp -d)"
+  for R in $(seq $#); do
+    mkfifo -m 600 "$DIR/$R"
+  done
+  for R in $(seq $#); do
+    eval "$R" < "$DIR/$R" &
+    shift
+  done
+  eval "$WRITER" | tee "$DIR"/* >/dev/null
+  rm -r "$DIR"
+}
+
+################################
 # Cmd exist test
 cmd_exists() {
   for CMD; do
