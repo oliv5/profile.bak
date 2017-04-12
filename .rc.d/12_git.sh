@@ -860,6 +860,21 @@ git_purge_gc() {
   git gc --prune=now
 }
 
+# Git cleanup
+# https://gist.github.com/Zoramite/2039636
+git_cleanup() {
+  # Verifies the connectivity and validity of the objects in the database
+  git fsck —unreachable
+  # Manage reflog information
+  git reflog expire —expire=0 —all
+  # Pack unpacked objects in a repository
+  git repack -a -d -l
+  # Prune all unreachable objects from the object database
+  git prune
+  # Cleanup unnecessary files and optimize the local repository
+  git gc —aggressive
+}
+
 # Truncate history from a given commit
 # Warning: it rewrites everything
 git_truncate() {
