@@ -179,10 +179,12 @@ annex_bundle() {
     else
       echo "Output directory '$DIR' cannot be created."
       echo "Skip bundle creation..."
+      exit 1
     fi
   else
     echo "Repository '$(git_dir)' is not git-annex ready."
     echo "Skip bundle creation..."
+    exit 1
   fi
   )
 }
@@ -195,27 +197,35 @@ annex_enum() {
     local DIR="${1:-$(git_dir)/list}"
     mkdir -p "$DIR"
     if [ -d "$DIR" ]; then
-      local LIST="$DIR/${2:-$(git_name "annex").txt.gz}"
+      local LIST="$DIR/${2:-$(git_name "annex.enum").txt.gz}"
       local GPG_RECIPIENT="$3"
       local GPG_TRUST="${4:+--trust-model always}"
       echo "List annex into $LIST"
-      git ls-files --no-empty-directory -z | xargs -r0 -n1 sh -c '
+      git annex find "$(git_root)" --print0 | xargs -r0 -n1 sh -c '
         LIST="$1"; FILE="$2"
         printf "\"%s\" <- \"%s\"\n" "$(readlink -- "$FILE")" "$FILE" | grep -F ".git/annex" >> "${LIST%.*}"
       ' _ "$LIST"
-      gzip -S .gz -9 "${LIST%.*}"
-      if [ ! -z "$GPG_RECIPIENT" ]; then
-        gpg -v --output "${LIST}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${LIST}" &&
-          (shred -fu "${LIST}" || wipe -f -- "${LIST}" || rm -- "${LIST}")
+      if [ -r "${LIST%.*}" ]; then
+        gzip -S .gz -9 "${LIST%.*}"
+        if [ ! -z "$GPG_RECIPIENT" ]; then
+          gpg -v --output "${LIST}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${LIST}" &&
+            (shred -fu "${LIST}" || wipe -f -- "${LIST}" || rm -- "${LIST}")
+        fi
+        ls -l "${LIST}"*
+      else
+        echo "Listing could not be made."
+        echo "Skip list creation..."
+        exit 1
       fi
-      ls -l "${LIST}"*
     else
       echo "Output directory '$DIR' cannot be created."
       echo "Skip list creation..."
+      exit 1
     fi
   else
     echo "Repository '$(git_dir)' cannot be enumerated."
     echo "Skip list creation..."
+    exit 1
   fi
   )
 }

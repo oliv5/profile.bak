@@ -191,7 +191,8 @@ git_modified() {
 
 # Git status for scripts
 git_st() {
-  git status -s | awk '/^[\? ]?'$1'[\? ]?/ {print "\""$2"\""}'
+  #git status -s | awk '/^[\? ]?'$1'[\? ]?/ {print "\""$2"\""}'
+  git status -s | awk '/'"^[\? ]?$1"'/{print substr($0,4)}'
 }
 git_stx() {
   git status -z | awk 'BEGIN{RS="\0"; ORS="\0"}/'"^[\? ]?$1"'/{print substr($0,4)}'
@@ -251,7 +252,7 @@ git_allshorthash() {
 git_clone() {
   git clone "$1" ${3:+"$3"} || return 1
   if [ -n "$2" ]; then
-    git --git-dir="${3:-$(basename "$1" .git)}" remote rename origin "$2"
+    git --git-dir="${3:-$(basename "$1" .git)}/.git" remote rename origin "$2"
   fi
 }
 
@@ -500,6 +501,7 @@ git_bundle() {
   else
     echo "Target directory '$DIR' does not exists."
     echo "Skip bundle creation..."
+    exit 1
   fi
   )
 }
@@ -550,7 +552,7 @@ git_upkeep() {
   #echo "[git_upkeep] start at $(date)"
   # Add
   if [ -n "$DEL" ]; then
-      git_stx "^D[ M]|^ D" | xargs -r0 $DBG git add || return $?
+      git_stx "^D[ M]|^ D" | xargs -r0 $DBG git add --all --ignore-error --
   fi
   if [ -n "$NEW" ]; then
       $DBG git add -u || return $?
