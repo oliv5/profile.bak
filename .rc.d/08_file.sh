@@ -27,7 +27,8 @@ lsof_deleted() {
 }
 
 lsof_close(){
-  # For all open but deleted files associated with process 2746, trunctate the file to 0 bytes
+  # For all opened but deleted files associated to process $PID,
+  # trunctate the file to 0 bytes
   local PID="${1:?No PID specified...}"
   cd /proc/$PID/fd 
   ls -l | grep '(deleted)' | awk '{ print $9 }' | while read FILE; do :> /proc/$PID/fd/$FILE; done
@@ -77,6 +78,7 @@ bak_date() {
   done
 }
 
+##############################
 # Unlink - overwrites the unlink legacy tool
 unlink() {
   for FILE; do
@@ -94,3 +96,6 @@ swap() {
   mv -fT "$FILE1" "$FILE2"
   mv -fT "$TMP" "$FILE1"
 }
+
+# Get file size
+alias fsize='stat -L -c %s'

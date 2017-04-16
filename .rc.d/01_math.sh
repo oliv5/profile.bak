@@ -49,6 +49,28 @@ hexwrite() {
   printf '\\x%s' "$3" | dd of="$1" bs=1 seek="$2" count=1 conv=notrunc &> /dev/null
 }
 
+# Sum pipe input
+alias sum="awk 'BEGIN{a=0}{a=a+\$0}END{print a}'"
+
+# Make a sum of all inputs
+add() {
+  local RES=0
+  for I; do
+    RES=$(($RES+$I))
+  done
+  echo $RES
+}
+
+# Substract ($2+$3+...$n) to $1
+sub() {
+  local RES=${1:-0}
+  shift $(($#>0?1:0))
+  for I; do
+    RES=$(($RES-$I))
+  done
+  echo $RES
+}
+
 ################################
 # Floating point operations
 # See http://unix.stackexchange.com/questions/40786/how-to-do-integer-float-calculations-in-bash-or-other-languages-frameworks
