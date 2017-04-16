@@ -211,9 +211,11 @@ encrypt() {
 true ${@:?No file/directory specified...}
 # Loop through nautilus files or command line files
 #printf %s "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS:-"${@:-.}"}" | while read -r SRC; do
-IFS="$(printf '\n')"
+IFS='
+'
 LIST="$(printf %s "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS:-"$@"}" | sed -e 's/\n$//')"
 for SRC in "$LIST"; do
+  find "$SRC" ! -type d
   for FILE in $(find "$SRC" ! -type d); do
     if [ -n "$EN_AUTODETECT" ]; then
       if echo "$FILE" | grep -E "\.(gpg|pgp)$" >/dev/null; then
