@@ -27,7 +27,7 @@ rc_source() {
       if [ -r "$FILE" ]; then
         rc_log "Source '$FILE'"
         for FCT in $(awk -F'(' '/\w\s*\(\)/ {print $1}' "$FILE"); do
-          unalias "$FCT" 2>/dev/null
+          ${RC_DRYRUN} unalias "$FCT" 2>/dev/null
         done
         set --; ${RC_DRYRUN} . "$FILE"
       fi
@@ -75,6 +75,7 @@ rc_source() {
   ##############
   # Main scripts
   for PATTERN in "${@:-*}"; do
+    set +f
     # Load scripts by pattern search
     rc_sourcemod "$RC_DIR/.rc.d/"*$PATTERN*.sh
     if [ -n "$BASH_VERSION" ]; then
