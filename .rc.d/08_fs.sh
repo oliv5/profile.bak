@@ -150,7 +150,7 @@ dd_status() {
 ################################
 # Make iso from block device
 mk_iso() {
-  dd if="${1:-/dev/cdrom}" of="${2:-./myimage.iso}" conv=noerror
+  dd if="${1:-/dev/cdrom}" of="${2:-./myimage.iso}" conv=noerror,notrunc
 }
 
 # Make iso from filesystem
@@ -191,5 +191,21 @@ check_alliso() {
     else
       echo "FAILURE."
     fi
+  done
+}
+
+################################
+# Cue to iso
+cue2iso() {
+  for F; do
+    bchunk "${F%%.cue}.bin" "$F" "${F%%.cue}.iso"
+  done
+}
+# CD burner toc to iso
+toc2iso() {
+  for F; do
+    toc2cue "$F" "${F%%.toc}.cue" &&
+    bchunk "${F}.bin" "${F%%.toc}.cue" "${F%%.toc}.iso" &&
+    rm "${F%%.toc}.cue"
   done
 }

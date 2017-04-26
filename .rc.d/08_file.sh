@@ -63,6 +63,21 @@ alias rsync_mv='rsync -R --remove-source-files'
 alias rsync_timestamp='rsync -vrt --size-only --existing'
 
 ##############################
+# Copy files & preserve permissions
+cp_tar() {
+  tar cvfp - "${1:?No source specified...}" | ( cd "${2:?No destination specified...}/" ; tar xvfp - )
+}
+cp_cpio() {
+  find "${1:?No source directory specified...}/" -print -depth | cpio -pdm "${2:?No destination directory specified...}/"
+}
+ssh_cpout() {
+  find "${1:?No local source directory specified...}/" -depth -print | cpio -oaV | ssh "${2:?No remote destination user@host:port/directory specified...}/" 'cpio -imVd'
+}
+ssh_cpin() {
+  ssh "${1:?No remote source user@host:port/directory specified...}/" "find \"${2:?No local destination directory specified...}/\" -depth -print | cpio -oaV" | cpio -imVd
+}
+
+##############################
 # Duplicate file or directory with incremental num
 bak() {
   for FILE; do

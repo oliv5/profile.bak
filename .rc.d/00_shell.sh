@@ -162,6 +162,22 @@ cmd_unset() {
   unset -f $* 2>/dev/null
 }
 
+# Unalias a script commands
+cmd_unalias() {
+  for FILE; do
+    for FCT in $(awk -F'(' '/\w\s*\(\)/ {print $1}' "$FILE"); do
+      unalias "$CMD" 2>/dev/null
+    done
+  done
+}
+
+# Unalias all existing commands
+cmd_unalias_all() {
+  for CMD in $(set | grep " () $" | cut -d" " -f1); do
+    unalias "$CMD" 2>/dev/null
+  done
+}
+
 ################################
 # Run a command silently
 alias noerror='2>/dev/null'
@@ -214,23 +230,25 @@ eintr() {
 ## export NC='\033[0m' # No Color
 ## echo -e "I ${RED}love${NC} Stack Overflow"
 ## printf "I ${RED}love${NC} Stack Overflow\n"
-export NC='\033[0m' # No Color
-export BLACK='\033[0;30m'
-export BLUE='\033[0;34m'
-export GREEN='\033[0;32m'
-export CYAN='\033[0;36m'
-export RED='\033[0;31m'
-export PURPLE='\033[0;35m'
-export ORANGE='\033[0;33m'
-export LGRAY='\033[0;37m'
-export DGRAY='\033[1;30m'
-export LBLUE='\033[1;34m'
-export LGREEN='\033[1;32m'
-export LCYAN='\033[1;36m'
-export LRED='\033[1;31m'
-export LPURPLE='\033[1;35m'
-export YELLOW='\033[1;33m'
-export WHITE='\033[1;37m'
+ansi_colors() {
+  export NC='\033[0m' # No Color
+  export BLACK='\033[0;30m'
+  export BLUE='\033[0;34m'
+  export GREEN='\033[0;32m'
+  export CYAN='\033[0;36m'
+  export RED='\033[0;31m'
+  export PURPLE='\033[0;35m'
+  export ORANGE='\033[0;33m'
+  export LGRAY='\033[0;37m'
+  export DGRAY='\033[1;30m'
+  export LBLUE='\033[1;34m'
+  export LGREEN='\033[1;32m'
+  export LCYAN='\033[1;36m'
+  export LRED='\033[1;31m'
+  export LPURPLE='\033[1;35m'
+  export YELLOW='\033[1;33m'
+  export WHITE='\033[1;37m'
+}
 
 # Strip ANSI codes
-alias rm-ansi='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'
+alias ansi_strip='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'

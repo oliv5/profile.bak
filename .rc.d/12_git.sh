@@ -454,12 +454,11 @@ git_push_all() {
 }
 
 # Set default upstream on the specified branches
-alias git_set_tracking='git_set_all_tracking "" "$(git_branch)"'
-git_set_all_tracking() {
+git_set_tracking() {
   git_exists || return 1
   local IFS="$(printf ' \t\n')"
   local REMOTE="${1:?No remote specified. Possible remotes are: $(git_remotes)}"
-  local BRANCHES="${2:-$(git_branches)}"
+  local BRANCHES="${2:-$(git_branch)}"
   git fetch --all 2>/dev/null
   for BRANCH in $BRANCHES; do
     if git for-each-ref "refs/remotes/$REMOTE" | grep -- "refs/remotes/$REMOTE/$BRANCH\$" >/dev/null; then

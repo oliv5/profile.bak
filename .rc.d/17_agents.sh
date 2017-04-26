@@ -24,7 +24,7 @@ gpg_agent() {
 	export GPG_TTY=$(tty)
 	if test -f "$GPG_AGENT_FILE" && \
 		kill -0 $(cut -d: -f 2 "$GPG_AGENT_FILE") 2>/dev/null; then
-			export GPG_AGENT_INFO=$(cat "$GPG_AGENT_FILE")
+		export GPG_AGENT_INFO=$(cat "$GPG_AGENT_FILE")
 	else
 		eval $(gpg-agent --daemon "$@") >/dev/null
 		echo "$GPG_AGENT_INFO" > "$GPG_AGENT_FILE"
