@@ -155,7 +155,7 @@ mk_iso() {
 
 # Make iso from filesystem
 mk_isofs() {
-  mkisofs -o "${2:-./myimage.iso}" "${1:?No input directory specified...}"
+  mkisofs -r -l -o "${2:-./myimage.iso}" "${1:?No input directory specified...}"
 }
 
 # Diff iso versus source
