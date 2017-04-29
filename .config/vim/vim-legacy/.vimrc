@@ -145,12 +145,13 @@ endif
 if has('syntax')
 	syntax on     " Syntax highlight
 	" Color scheme
-	"if (&term=="builtin_gui" || has("gui_running") || &t_Co>2)
-	if (has("gui_running") && (&term=="builtin_gui" || &t_Co>2))
-		colorscheme torte
-	else
-		colorscheme default
-	endif
+	try | colorscheme torte | catch | colorscheme default | endtry
+	"if (has("gui_running") || &term=="builtin_gui" || &t_Co>2)
+	"if (has("gui_running") && (&term=="builtin_gui" || &t_Co>2))
+	"	colorscheme torte
+	"else
+	"	colorscheme default
+	"endif
 	" Completion menu
 	highlight Pmenu gui=bold guifg=black guibg=brown ctermfg=0 ctermbg=238
 	highlight PmenuSel gui=bold guifg=black guibg=grey ctermfg=0 ctermbg=238
