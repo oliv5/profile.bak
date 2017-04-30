@@ -75,21 +75,27 @@ diffh() {
 diffhm() {
   _diff_pipe "meld" "hexdump -C \"$1\"" "hexdump -C \"$2\""
 }
+diffhr() {
+  find "$1" -type f -exec sh -c '
+    set -vx
+    cmp "$1" "$(echo $1 | sed -e "s;$2;$3;")"
+  ' _ "{}" "$1" "$2" \;
+}
 
 #######################
 
 # Diff using rsync
 diffr() {
-  rsync -avsn --size-only "$@"
+  rsync -avsn "$@"
 }
 diffrd() {
-  rsync -avsn --size-only --delete "$@" | grep "^delet"
+  rsync -avsn --delete "$@" | grep "^delet"
 }
 diffru() {
-  rsync -avsn --size-only --existing "$@"
+  rsync -avsn --existing "$@"
 }
 diffrn() {
-  rsync -avsn --size-only --ignore-existing "$@"
+  rsync -avsn --ignore-existing "$@"
 }
 
 ########################################
