@@ -77,7 +77,6 @@ diffhm() {
 }
 diffhr() {
   find "$1" -type f -exec sh -c '
-    set -vx
     cmp "$1" "$(echo $1 | sed -e "s;$2;$3;")"
   ' _ "{}" "$1" "$2" \;
 }
