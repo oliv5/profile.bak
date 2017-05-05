@@ -31,9 +31,13 @@ mount_ecryptfs() {
     return 1
   fi
   chmod 500 "$SRC"
-  sudo ecryptfs-add-passphrase --fnek
+  ecryptfs-add-passphrase --fnek
   sudo mount -i -t ecryptfs -o "$OPT" "$SRC" "$DST"
   chmod 700 "$DST"
+}
+umount_ecryptfs() {
+  sudo mount "${1:?Missing mounted directory...}"
+  keyctl clear @u
 }
 
 # Mount/umount ecryptfs private directory
@@ -43,13 +47,10 @@ mount_private() {
   local SIG="${3:-$HOME/.ecryptfs/private.sig}"
   local KEY="$(cat "$SIG" 2>/dev/null)"
   mkdir -p "$DST"
-        mount_ecryptfs "$SRC" "$DST" "$KEY"
+  mount_ecryptfs "$SRC" "$DST" "$KEY"
 }
 umount_private() {
-  local DST="$HOME/private"
-        if mountpoint "$DST" 2>&1 >/dev/null; then
-                sudo umount "$DST"
-        fi
+  umount_ecryptfs "${1:-$HOME/private}"
 }
 
 # Mount encfs
