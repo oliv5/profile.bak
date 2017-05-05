@@ -149,13 +149,26 @@ dd_status() {
 
 ################################
 # Make iso from block device
-mk_iso() {
+mk_rawiso() {
   dd if="${1:-/dev/cdrom}" of="${2:-./myimage.iso}" conv=noerror,notrunc
 }
 
 # Make iso from filesystem
 mk_isofs() {
-  mkisofs -r -l -V "$(basename "${1%%/}")" -o "${2:-./myimage.iso}" "${1:?No input directory specified...}"
+  mkisofs -r -l -V "${3:-$(basename "${1%%/}")}" -o "${2:-./myimage.iso}" "${1:?No input directory specified...}"
+}
+
+# Make iso from ddrescue
+mk_iso() {
+  local SRC="${1:?No device specified...}"
+  local DST="${2:-./image.iso}"
+  local TEMP="${DST%%.iso}.tmp.iso"
+  ddrescue -d -r${3:-3} "$SRC" "$TEMP" "${TEMP%%.iso}.map" && {
+    sudo mount -t iso9660 "$TEMP" /mnt
+    mk_isofs /mnt "$DST" "$(basename "${DST%%.iso}")"
+    # && rm "$TEMP" "${TEMP%%.iso}.map"
+    sudo umount /mnt
+  }
 }
 
 # Diff iso versus source
