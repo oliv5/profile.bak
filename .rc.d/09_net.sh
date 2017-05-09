@@ -14,16 +14,10 @@
 
 ############################
 # Speed limiters
-alias speed_help='echo ethtool -s eth0 speed 100, trickle -d 20 -u 20, eval X | pv -L 100kb'
-itf_speed() {
-  sudo ethtool -s ${1:-eth0} speed ${2:-1000}
-}
-pg_speed() {
-  local DL="${1:-1000}"
-  local UL="${2:-$1}"
-  shift 2 2>/dev/null
-  trickle -d "$DL" -u "$UL" "$@"
-}
+bwctrl0='sudo ethtool'      # sudo ethtool -s eth0 speed 100 #kpbs
+bwctrl1='sudo wondershaper' # sudo wondershaper eth0 256 128 #kpbs
+bwctrl2='trickle'           # trickle -d 20 -u 20
+bwctrl3='pv -L'             # eval ... | pv -L 256kb
 
 ############################
 # IP tables flush: must be done by a script at once

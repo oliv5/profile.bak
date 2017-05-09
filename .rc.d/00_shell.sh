@@ -70,6 +70,12 @@ alias shift9='command shift 9 2>/dev/null || set --'
 # Alias to get script path
 alias shell_script='[ -n "$BASH_VERSION" ] && (builtin cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd) || readlink -f "$(dirname "$0")"'
 
+# Open shell with no ASLR. Set ADDR_NO_RANDOMIZE personality (man sys/personality.h) to all children.
+# Same as echo 0 | tee /proc/sys/kernel/randomize_va_space (0=no ASLR, 1=only shared lib, 2=global)
+shell_noaslr() {
+  setarch "$(uname -m)" -R "$SHELL"
+}
+
 ################################
 # Success display function
 msg_success() {
