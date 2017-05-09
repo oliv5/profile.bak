@@ -36,3 +36,20 @@ gpg_agent() {
 gpg_agent_ssh() {
 	gpg_agent --enable-ssh-support
 }
+
+# Start gnome keyring daemon
+gnome_keyring_agent() {
+	command -v gnome-keyring-daemon >/dev/null 2>&1 || return 1
+	if ! pgrep -f gnome-keyring-daemon >/dev/null; then
+		rm -r "/run/user/$(id -u)/keyring/"
+		gnome-keyring-daemon -r -d
+	fi
+	eval $(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh,gpg 2>/dev/null)
+	export SSH_AUTH_SOCK
+	return 0
+}
+
+# Start agents with hardcoded order of priority: gnome keyring > gpg-agent > ssh-agent
+start_agent() {
+	gnome_keyring_agent || gpg_agent_ssh || ssh_agent || true
+}

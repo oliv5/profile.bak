@@ -46,9 +46,8 @@ if [ -r "${HOME}/.anacron/anacrontab" ]; then
   anacron -s -t "${HOME}/.anacron/anacrontab" -S "${HOME}/.anacron/spool"
 fi
 
-# GPG/SSH agents
-command -v ssh_agent >/dev/null && ssh_agent
-command -v gpg_agent >/dev/null && gpg_agent
+# Gnome keyring/GPG/SSH agents
+command -v start_agent >/dev/null 2>&1 && start_agent
 
 # Disable console beep
 #command -v xset >/dev/null 2>&1 && pidof X >/dev/null && xset b off 2>/dev/null # From X11 window system
