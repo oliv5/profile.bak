@@ -191,18 +191,8 @@
 		\ 'file': '\.exe$\|\.so$\|\.dll$\|\.pyc$\|\.tmp$\|\.svn' }
 " }
 
-" Use legacy after config if available {
-	if filereadable(expand("$XDG_CONFIG_HOME/vim/vim-legacy/.vimrc.after"))
-		source $XDG_CONFIG_HOME/vim/vim-legacy/.vimrc.after
-	endif
-" }
-
 " Use custom local config if available {
 	if filereadable(expand("~/.vimrc.local.custom"))
 		source ~/.vimrc.local.custom
 	endif
-" }
-
-" User profile end {
-	let g:loaded_vimrc = 1
 " }

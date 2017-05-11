@@ -8,9 +8,9 @@ finalize_setup() {
 	mkdir -p ${XDG_CACHE_HOME:-~/.cache}/vim/vimview
 	mkdir -p ${XDG_CACHE_HOME:-~/.cache}/vim/vimswap
 	mkdir -p ${XDG_CACHE_HOME:-~/.cache}/vim/vimundo
-	mkdir -p ~/.vim/ftdetect ~/.vim/syntax
-	[ -d ~/.vimftdetect ] && ln -fsv ~/.vimftdetect/* ~/.vim/ftdetect/
-	[ -d ~/.vimsyntax ] && ln -fsv ~/.vimsyntax/* ~/.vim/syntax/
+	rm ~/.vim/ftdetect ~/.vim/syntax 2>/dev/null
+	[ -d ~/.vimftdetect ] && ln -fsv ~/.vimftdetect ~/.vim/ftdetect
+	[ -d ~/.vimsyntax ] && ln -fsv ~/.vimsyntax ~/.vim/syntax
 }
 
 # SPF13 setup
@@ -21,10 +21,9 @@ spf13_setup() {
 	fi
 	ln -fsv "$spf13_dir/spf13-vim/.vim"* ~/
 	ln -fsv "$spf13_dir/.vimrc"* ~/
-	mkdir -p ~/.vim/plugin
-	for plugin in "$legacy_dir/.vim/plugin/"*; do
-		ln -fsv "$plugin" ~/.vim/plugin/
-	done
+	rm ~/.vim/plugin ~/.vim/after 2>/dev/null
+	ln -sv "$legacy_dir/.vim/plugin" ~/.vim/plugin
+	ln -sv "$legacy_dir/.vim/after" ~/.vim/after
 	rm ~/.gvimrc 2>/dev/null
 	finalize_setup
 }
