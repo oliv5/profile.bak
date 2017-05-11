@@ -306,26 +306,5 @@ filetype plugin indent on   " enable detection, plugins and indenting in one ste
 
 
 " *******************************************************
-" } After scripts {
-" *******************************************************
-
-" Use after config
-if filereadable(expand("~/.vimrc.after"))
-	source ~/.vimrc.after
-endif
-if filereadable(expand("~/.vimrc.after.local"))
-	source ~/.vimrc.after.local
-endif
-
-
-" *******************************************************
-" } Environment conclusion {
-" *******************************************************
-
-" Load flag
-let g:loaded_vimrc = 1
-
-
-" *******************************************************
 " } The end
 " *******************************************************
