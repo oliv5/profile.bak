@@ -112,14 +112,30 @@ git_root() {
 # Get current branch name
 # Hide errors when ref is unknown
 git_branch() {
-  git ${2:+--git-dir="$2"} rev-parse --abbrev-ref "${1:-HEAD}" 2>/dev/null
+  #git ${2:+--git-dir="$2"} rev-parse --abbrev-ref "${1:-HEAD}" 2>/dev/null
   #git branch -a | grep -E '^\*' | cut -c 3-
+  #git for-each-ref --format='%(objectname) %(refname:short)' refs/heads | awk "/^$(git rev-parse HEAD)/ {print \$2}"
+  # The following works for detached heads too
+  git ${2:+--git-dir="$2"} describe --contains --all "${1:-HEAD}" 2>/dev/null
+}
+
+# Get current branch tracking
+git_tracking() {
+  git ${1:+--git-dir="$1"} rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null
+  #git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD) 2>/dev/null
 }
 
 # Get all local branches
 git_branches() {
-  #git ${1:+--git-dir="$1"} for-each-ref --shell refs/heads/ --format='%(refname:short)'
-  git ${1:+--git-dir="$1"} for-each-ref --shell refs/heads/ --format='%(refname:short)' | sed -e 's;heads/;;' | xargs echo 
+  #git ${1:+--git-dir="$1"} for-each-ref --shell refs/heads/ --format='%(refname:short)' | sed -e 's;heads/;;' | xargs echo 
+  git ${1:+--git-dir="$1"} for-each-ref --format='%(refname:short)' refs/heads/ | xargs echo
+}
+
+# List all branches info
+git_branches_info() {
+  for branch in $(git branch -r $@ | grep -v HEAD); do
+    echo -e $(git show --format="%ci %cr %an" $branch | head -n 1) \\t$branch
+  done | sort -r
 }
 
 # Check a branch exists
@@ -129,6 +145,11 @@ git_branch_exists() {
   echo "$1" | grep -- '/' >/dev/null && BRANCH="remotes/$1" || BRANCH="heads/$1"
   #[ -n "$(git ${2:+--git-dir="$2"} for-each-ref --shell refs/${BRANCH})" ]
   git ${2:+--git-dir="$2"} show-ref "refs/${BRANCH}" >/dev/null
+}
+
+# Get merged branches
+git_branch_merged() {
+  git ${3:+--git-dir="$3"} branch --${2:+no-}merged ${1}
 }
 
 # Delete local untracked branch (safely)
@@ -157,27 +178,6 @@ git_branch_jump() {
   git fetch . "${2:?No destination specified...}" "${1:?No source specified...}"
 }
 
-# Get current branch tracking
-git_tracking() {
-  git ${1:+--git-dir="$1"} rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null
-  #git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD) 2>/dev/null
-}
-
-# Get local branches names
-git_branches() {
-  git ${2:+--git-dir="$2"} for-each-ref --format='%(refname:short)' refs/heads/ | xargs echo
-}
-git_branches_info() {
-  for branch in $(git branch -r $@ | grep -v HEAD); do
-    echo -e $(git show --format="%ci %cr %an" $branch | head -n 1) \\t$branch
-  done | sort -r
-}
-
-# Get merged branches
-git_branch_merged() {
-  git branch --${2:+no-}merged ${1}
-}
-
 ########################################
 # Get remote url
 git_url() {
@@ -191,11 +191,11 @@ git_modified() {
 
 # Git status for scripts
 git_st() {
-  #git status -s | awk '/^[\? ]?'$1'[\? ]?/ {print "\""$2"\""}'
-  git status -s | awk '/'"^[\? ]?$1"'/{print substr($0,4)}'
+  #git ${2:+--git-dir="$2"} status -s | awk '/^[\? ]?'$1'[\? ]?/ {print "\""$2"\""}'
+  git ${2:+--git-dir="$2"} status -s | awk '/'"^[\? ]?$1"'/{print substr($0,4)}'
 }
 git_stx() {
-  git status -z | awk 'BEGIN{RS="\0"; ORS="\0"}/'"^[\? ]?$1"'/{print substr($0,4)}'
+  git ${2:+--git-dir="$2"} status -z | awk 'BEGIN{RS="\0"; ORS="\0"}/'"^[\? ]?$1"'/{print substr($0,4)}'
 }
 
 # Get remote names
@@ -209,7 +209,7 @@ git_name() {
 }
 
 # Check a set of commands exist
-git_cmd() {
+git_cmd_exists() {
   local EXECPATH="$(git_exp)"
   for CMD; do
     [ -x "${EXECPATH}/git-${CMD}" ] || return 1
@@ -219,13 +219,18 @@ git_cmd() {
 
 # Check a remote repo exists
 git_ping() {
-  git ls-remote "${1:-$(git_dir)}" &> /dev/null
+  git ${2:+--git-dir="$2"} ls-remote "${1:-$(git_dir)}" &> /dev/null
 }
 
 # Get number of commits
 alias git_count_all='git_count --all'
 git_count() {
-  git rev-list ${1:-HEAD} --count
+  git ${2:+--git-dir="$2"} rev-list ${1:-HEAD} --count
+}
+
+# Check if we are in a detached head
+git_detached() {
+  [ -z "$(git ${1:+--git-dir="$1"} symbolic-ref --short -q HEAD)" ]
 }
 
 ########################################
