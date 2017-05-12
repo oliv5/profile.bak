@@ -39,10 +39,11 @@ _path_remove() {
 # Remove given fs from path
 _path_remove_fs() {
   local VAR="${1:-PATH}"
+  local VAL="$(eval echo "\$$VAR")"
   local FS="${2:-cifs|fusefs|nfs}"
   export $VAR="$(
-  eval echo "\$$VAR" |
-    while read -d: D; do
+    IFS=':'
+    for D in $VAL; do
       if ! stat -f -c %T "$D" 2>/dev/null | grep -Eq "$FS"; then
         printf "$D:"
       fi
@@ -53,13 +54,11 @@ _path_remove_fs() {
 # Remove absent path
 _path_remove_abs() {
   local VAR="${1:-PATH}"
+  local VAL="$(eval echo "\$$VAR")"
   export $VAR="$(
-  eval echo "\$$VAR" |
-    while read -d: D; do
-      SIZE="$(stat -c %s "$D" 2>/dev/null)"
-      if [ -n "$SIZE" -a "$SIZE" != "0" ]; then
-        printf "$D:"
-      fi
+    IFS=':'
+    for D in $VAR; do
+      [ -d "$D" ] && printf "$D:"
     done
   )"
 }

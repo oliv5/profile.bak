@@ -76,6 +76,13 @@ shell_noaslr() {
   setarch "$(uname -m)" -R "$SHELL"
 }
 
+# Swap IFS temporarily
+shell_ifs() {
+  local IFS="${1:?No IFS specified...}"
+  shift
+  $@ # execute in current environment. No quotes, or IFS is not applied.
+}
+
 ################################
 # Success display function
 msg_success() {
