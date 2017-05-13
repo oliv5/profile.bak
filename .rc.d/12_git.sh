@@ -1050,6 +1050,30 @@ git_add_gcrypt_remote() {
 }
 
 ########################################
+# https://gist.github.com/smileyborg/913fe3221edfad996f06
+# Check if commit is an evil merge
+git_evil_merge() {
+  local SHA1="${1:?No commit specified...}"
+  local GIT="${2:-$PWD}"
+  local TMP="$(mktemp)"
+  # Get current HEAD rev
+  local HEAD="$(git -C "$GIT" symbolic-ref --short -q HEAD)" ||
+  HEAD="$(git -C "$GIT" rev-parse HEAD)" # detached HEAD, get the SHA1
+  # Stash changes
+  local STASH="$(git -C "$GIT" stash 2>/dev/null)"
+  # Perform the merge without resolving conflicts. Then diff the result with the actual merge commit we're inspecting.
+  git -C "$GIT" checkout "${SHA1}~" &>/dev/null
+  git -C "$GIT" -c merge.conflictstyle=diff3 merge --no-ff "${SHA1}^2" --no-commit &>/dev/null
+  git -C "$GIT" add $(git -C "$GIT" status -s | cut -c 3-) &>/dev/null
+  git -C "$GIT" commit --no-edit &>/dev/null
+  git -C "$GIT" diff "HEAD..$SHA1" > "$TMP"
+  # Restore repository
+  git -C "$GIT" checkout "$HEAD" &>/dev/null
+  # Restore stash
+  [ -n "$STASH" ] && git -C "$GIT" stash pop
+}
+
+########################################
 # Status aliases
 alias gt='git status -uno'
 alias gtu='gstu'

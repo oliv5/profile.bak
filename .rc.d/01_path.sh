@@ -41,29 +41,29 @@ _path_remove_fs() {
   local VAR="${1:-PATH}"
   local VAL="$(eval echo "\$$VAR")"
   local FS="${2:-cifs|fusefs|nfs}"
-  export $VAR="$(
-    IFS=':'
-    for D in $VAL; do
-      if ! stat -f -c %T "$D" 2>/dev/null | grep -Eq "$FS"; then
-        printf "$D:"
-      fi
-    done
-  )"
+  local IFS=":"
+  local RES
+  for D in $VAL; do
+    if ! stat -f -c %T "$D" 2>/dev/null | grep -Eq "$FS"; then
+      RES="${RES:+$RES:}$D"
+    fi
+  done
+  export $VAR="$RES"
 }
 
 # Remove absent path
-_path_remove_abs() {
+_path_remove_absent() {
   local VAR="${1:-PATH}"
   local VAL="$(eval echo "\$$VAR")"
-  export $VAR="$(
-    IFS=':'
-    for D in $VAR; do
-      [ -d "$D" ] && printf "$D:"
-    done
-  )"
+  local IFS=":"
+  local RES
+  for D in $VAL; do
+    [ -d "$D" ] && RES="${RES:+$RES:}$D"
+  done
+  export $VAR="$RES"
 }
 
-# Cleanup path (remove duplicated entries)
+# Cleanup path: remove duplicated or empty entries, expand $HOME
 _path_cleanup() {
   local VAR="${1:-PATH}"
   shift
@@ -74,21 +74,21 @@ _path_cleanup() {
     sed -r 's|~|'"${HOME}"'|g; s|\:\.||g; s|(^:\|:$)||')"
 }
 
-# Add to PATH
+# PATH aliases
 alias path_prepend='_path_prepend PATH'
 alias path_append='_path_append PATH'
 alias path_remove='_path_remove PATH'
 alias path_remove_fs='_path_remove_fs PATH'
-alias path_remove_abs='_path_remove_abs PATH'
+alias path_remove_absent='_path_remove_absent PATH'
 alias path_cleanup='_path_cleanup PATH'
 alias path_abs='readlink -f --'
 
-# Add to LD_LIBRARY_PATH
+# LD_LIBRARY_PATH aliases
 # Warning: should not use it
 # see ftp://linuxmafia.com/faq/Admin/ld-lib-path.html
 alias ldlibpath_prepend='_path_prepend LD_LIBRARY_PATH'
 alias ldlibpath_append='_path_append LD_LIBRARY_PATH'
 alias ldlibpath_remove='_path_remove LD_LIBRARY_PATH'
 alias ldlibpath_remove_fs='_path_remove_fs LD_LIBRARY_PATH'
-alias ldlibpath_remove_abs='_path_remove_abs LD_LIBRARY_PATH'
+alias ldlibpath_remove_absent='_path_remove_absent LD_LIBRARY_PATH'
 alias ldlibpath_cleanup='_path_cleanup LD_LIBRARY_PATH'
