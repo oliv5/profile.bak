@@ -36,7 +36,7 @@ mount_ecryptfs() {
   chmod 700 "$DST"
 }
 umount_ecryptfs() {
-  sudo mount "${1:?Missing mounted directory...}"
+  sudo mount -f "${1:?Missing mounted directory...}"
   keyctl clear @u
 }
 
