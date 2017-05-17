@@ -923,11 +923,13 @@ endfunction
 " Search next
 function! s:Wnext(prefix)
 	try | silent execute a:prefix . "next" | catch | silent! execute a:prefix . "first" | endtry
+	silent execute a:prefix . a:prefix
 endfunction
 
 " Search prev
 function! s:Wprev(prefix)
 	try | silent execute a:prefix . "prev" | catch | silent! execute a:prefix . "last" | endtry
+	silent execute a:prefix . a:prefix
 endfunction
 
 " Execute system commands in quickfix or location window
