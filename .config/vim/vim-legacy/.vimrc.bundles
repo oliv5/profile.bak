@@ -288,7 +288,7 @@ if !exists('g:loaded_minibufexplorer')
 	let g:miniBufExplSplitToEdge = 1
 	let g:miniBufExplTabWrap = 1
 	let g:miniBufExplMinSize = 1
-	let g:miniBufExplMaxSize = 2
+	let g:miniBufExplMaxSize = 5
 	let g:miniBufExplSortBy = 'number' "'mru'
 	let g:miniBufExplBRSplit = 0
 
