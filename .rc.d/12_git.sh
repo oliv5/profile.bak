@@ -1222,6 +1222,9 @@ alias grhh='git reset HEAD --hard'
 alias git_rollback='git reset'
 # Amend last commit
 alias git_amend='git commit --amend'
+alias gam='git commit --amend'
+# Cherry-pick
+alias gcp='git cherry-pick'
 # Rebase aliases
 alias grb='git rebase'
 alias grbi='git rebase -i'
