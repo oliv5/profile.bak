@@ -958,6 +958,16 @@ noremap <silent><C-SPACE>       :Wtoggle<CR>
 nnoremap <silent><SPACE>        :Wnext<CR>
 nnoremap <silent><S-SPACE>      :Wprev<CR>
 
+" Autocommands (note: ltag is not concerned...)
+if has('quickfix')
+  augroup quickfix
+"    au! QuickFixCmdPost [^l]* nested Ccopy
+"    au! QuickFixCmdPost l* nested Lcopy
+    au! QuickFixCmdPost * nested pclose
+    au! BufReadPost quickfix nnoremap <buffer> <CR> <CR><C-W>p
+  augroup END
+endif
+
 
 " *******************************************************
 " } Quickfix window management {
@@ -1012,15 +1022,6 @@ command! -nargs=0 -bar Lclear   call setloclist(0,[])
 nnoremap <localleader>l   :Ltoggle<CR>
 nnoremap <silent>l        :Lnext<CR>
 nnoremap <silent>L        :Lprev<CR>
-
-" Autocommands (note: ltag is not concerned...)
-if has('quickfix')
-  augroup quickfix
-"    au! QuickFixCmdPost [^l]* nested Ccopy
-"    au! QuickFixCmdPost l* nested Lcopy
-    au! QuickFixCmdPost * nested pclose
-  augroup END
-endif
 
 
 " *******************************************************
