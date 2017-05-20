@@ -1173,13 +1173,14 @@ alias grm='git rm'
 alias grmu='git clean -fn'
 alias gmv='git mv'
 # Logs/history aliases
+alias glg='git log'
 alias gln='git log -n'
 alias gl1='git log -n 1'
 alias gl2='git log -n 2'
 alias glh='git log -p'
 alias glo='git log --name-only'
 alias gla='git log --name-status'
-alias gls='git log --stat'
+alias glf='git log --stat'
 alias glS='git log -S'
 alias gll='git log --pretty=oneline --abbrev-commit'
 alias glog='git log'
@@ -1194,7 +1195,6 @@ alias gtls='git log --tags --simplify-by-decoration --pretty="format:%ai %d"'
 alias gtda='git tag -l | xargs git tag -d'
 alias gtdl='git tag -l | xargs git tag -d; git fetch'
 alias gtg='git tag'
-alias gtag='git tag'
 # Add aliases
 alias ga='git add'
 alias gan='git add $(git ls-files -o --exclude-standard)'
@@ -1221,8 +1221,8 @@ alias grh2='git reset HEAD~2'
 alias grhh='git reset HEAD --hard'
 alias git_rollback='git reset'
 # Amend last commit
-alias git_amend='git commit --amend'
 alias gam='git commit --amend'
+alias git_amend='git commit --amend'
 # Cherry-pick
 alias gcp='git cherry-pick'
 # Rebase aliases
@@ -1245,7 +1245,6 @@ alias gcs='git config --set'
 alias gcl='git config -l'
 alias gcf='git config -l'
 alias gcfg='git config -g'
-alias gconfig='git config'
 # Git ignore changes
 alias git_ignore_changes='git update-index --assume-unchanged'
 alias git_noignore_changes='git update-index --no-assume-unchanged'
@@ -1253,6 +1252,10 @@ alias git_noignore_changes='git update-index --no-assume-unchanged'
 alias gr='cd "$(git_root)"'
 # gitk aliases
 alias gk='gitk'
+# ls aliases
+alias gls='git_ls'
+alias glsc='git_ls_commit'
+
 
 ########################################
 ########################################
