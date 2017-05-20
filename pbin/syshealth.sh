@@ -48,12 +48,20 @@ PID %MEM RSS COMMAND
 Disk Usage
 *********************************************************************
 $(df -Pkh | grep -v 'Filesystem')
+$(if cmd_exists iostat; then iostat; else echo "Not available..."; fi)
 
 
 *********************************************************************
 Memory
 *********************************************************************
-$(free -m)
+$(if cmd_exists free; then free -m; else echo "Not available..."; fi)
+$(if cmd_exists vmstat; then vmstat; else echo "Not available..."; fi)
+
+
+*********************************************************************
+Network
+*********************************************************************
+$(if cmd_exists netstat; then sudo netstat -antup; else echo "Not available..."; fi)
 
 
 *********************************************************************
