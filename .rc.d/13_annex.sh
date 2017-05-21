@@ -201,7 +201,7 @@ annex_enum() {
       local GPG_RECIPIENT="$3"
       local GPG_TRUST="${4:+--trust-model always}"
       echo "List annex into $LIST"
-      git annex find "$(git_root)" --print0 | xargs -r0 -n1 sh -c '
+      git annex find "$(git_root)" --in . --or --not --in . --print0 | xargs -r0 -n1 sh -c '
         LIST="$1"; FILE="$2"
         printf "\"%s\" <- \"%s\"\n" "$(readlink -- "$FILE")" "$FILE" | grep -F ".git/annex" >> "${LIST%.*}"
       ' _ "$LIST"
@@ -213,7 +213,7 @@ annex_enum() {
         fi
         ls -l "${LIST}"*
       else
-        echo "Listing could not be made."
+        echo "Listing is missing or empty."
         echo "Skip list creation..."
         exit 1
       fi
