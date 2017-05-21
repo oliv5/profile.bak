@@ -583,23 +583,24 @@ git_upkeep() {
 ########################################
 # Normal to bare repo
 git_tobare() {
-  local SRC="${1:-$PWD}"
-  local DST="${SRC}.git"
-  git_exists "$SRC/.git" &&
-  mv "$SRC/.git" "$DST" &&
-  git --git-dir="$DST" config --bool core.bare true &&
-  rm -r "$SRC"
+  local DIR="${1:-$PWD}"
+  local TMP="${DIR}.git"
+  git_exists "$DIR/.git" &&
+  mv "$DIR/.git" "$TMP" &&
+  rm -r "$DIR" &&
+  mv "$TMP" "$DIR" &&
+  command cd . &&
+  git --git-dir="$DIR" config --bool core.bare true
 }
 
 # Bare to normal repo
 git_frombare() {
-  local SRC="${1:-$PWD}"
-  local DST="${SRC%%.git}"
-  git_exists "$SRC" &&
-  mkdir "${SRC%%.git}" &&
-  mv "$SRC" "$DST/.git" &&
-  git --git-dir="$DST/.git" config --bool core.bare false &&
-  git --git-dir="$DST/.git" --work-tree="$DST" reset --hard HEAD --
+  local DIR="${1:-$PWD}"
+  git_exists "$DIR" &&
+  mkdir -p "$DIR/.git" &&
+  mv "$DIR"/* "$DIR/.git" &&
+  git --git-dir="$DIR/.git" config --bool core.bare false &&
+  git --git-dir="$DIR/.git" --work-tree="$DIR" reset --hard HEAD --
 }
 
 ########################################
