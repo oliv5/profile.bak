@@ -104,6 +104,9 @@ alias fs='stat -c "%s"'
 # Move
 alias mv="mv -i"
 
+# rm
+alias trash='gvfs-trash'
+
 # mk/rm dir
 alias mkd='mkdir'
 alias rmd='rmdir'
