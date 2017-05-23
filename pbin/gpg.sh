@@ -213,7 +213,7 @@ true ${@:?No file/directory specified...}
 #printf %s "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS:-"${@:-.}"}" | while read -r SRC; do
 IFS='
 '
-LIST="$(printf %s "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS:-"$@"}" | sed -e 's/\n$//')"
+LIST="$(printf %s "${@:-$NAUTILUS_SCRIPT_SELECTED_FILE_PATHS}" | sed -e 's/\n$//')"
 for SRC in "$LIST"; do
   find "$SRC" ! -type d
   for FILE in $(find "$SRC" ! -type d); do
