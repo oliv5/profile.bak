@@ -70,6 +70,7 @@ alias lls='ls -laFS'
 alias lln='ls -laF | awk "\$5==0 {print \$0}"'
 alias llN='ls -laF | awk "\$5!=0 {print \$0}"'
 alias lsg='ls | grep'
+alias llg='ll | grep'
 
 # Alias cd/back
 alias b='cdb'
@@ -137,12 +138,18 @@ alias spk9='sudo pkill -9'
 alias ska='sudo killall'
 alias ska9='sudo killall -9'
 alias xk='xkill'
-kg()  { psg $1 | xargs kill; }
-kg9() { psg $1 | xargs kill -9; }
-skg() { psg $1 | xargs sudo kill; }
-skg9(){ psg $1 | xargs sudo kill -9; }
 
-# du
+# Ps
+alias pse='ps -ef'
+alias psf='ps faux'
+alias psg='ps aux | grep -i'
+alias psu='ps fu'
+alias pg='pgrep -fl'
+
+# Lsof
+alias lsofg='lsof | grep -i'
+
+# Du
 alias duh='du -h'
 alias duh0='du -h -d0'
 alias duh1='du -h -d1'

@@ -33,18 +33,10 @@ show_display_remote() {
 
 ################################
 # Processes
-alias pse='ps -ef'
-alias psf='ps -faux'
-alias psg='ps -aux | grep -i'
-alias psu='ps -fu'
-alias pg='pgrep -fl'
-alias lsg='ls | grep -i'
-alias llg='ll | grep -i'
-alias lsofg='lsof | grep -i'
 
 # Grep process IDs
 psgp(){
-  ps -aux | awk "/$1/ "'{print $2}'
+  ps aux | awk "/$1/ "'{print $2}'
 }
 
 # User processes
