@@ -1,6 +1,8 @@
 " General {
 	set updatetime=1000  " Swap file write / CursorHold  evt delay (in ms)
-	set shell=/bin/bash\ --rcfile\ ~/.bashrc\ -i    " Set shell, load user profile
+	if has('gui_running')
+		set shell=/bin/bash\ --rcfile\ ~/.rc\ -i " Set shell, load user profile
+	endif
 	set secure      " Security mode
 	set noexrc      " don't read .vimrc in current directory
 
