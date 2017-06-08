@@ -186,7 +186,11 @@ alias nsug='sudo netstat -anup | grep'
 alias nh='sudo nethogs'
 alias it='iftop'
 
-# Misc
+# History
 alias hi='history'
+alias hg='history | grep'
+alias hgi='history | grep -i'
+
+# Misc
 alias mo='mimeopen'
 alias s='silent'
