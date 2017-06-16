@@ -50,8 +50,8 @@ fi
 command -v start_agent >/dev/null 2>&1 && start_agent
 
 # Disable console beep
-#command -v xset >/dev/null 2>&1 && pidof X >/dev/null && xset b off 2>/dev/null # From X11 window system
-command -v xset >/dev/null 2>&1 && xset b off 2>/dev/null # From X11 window system
+#command -v xset >/dev/null 2>&1 && pidof X >/dev/null && timeout 2s xset b off 2>/dev/null # From X11 window system
+command -v xset >/dev/null 2>&1 && timeout 2s xset b off 2>/dev/null # From X11 window system
 command -v setterm >/dev/null 2>&1 && setterm -blength 0 2>/dev/null # From the system console
 
 # Protect private directories
