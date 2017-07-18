@@ -31,13 +31,13 @@ mount_ecryptfs() {
     return 1
   fi
   chmod 500 "$SRC"
-  ecryptfs-add-passphrase --fnek
+  sudo ecryptfs-add-passphrase --fnek
   sudo mount -i -t ecryptfs -o "$OPT" "$SRC" "$DST"
   chmod 700 "$DST"
 }
 umount_ecryptfs() {
   sudo mount -f "${1:?Missing mounted directory...}"
-  keyctl clear @u
+  sudo keyctl clear @u
 }
 
 # Mount/umount ecryptfs private directory
