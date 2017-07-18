@@ -365,7 +365,7 @@ annex_upkeep() {
   local REMOTES="$(git remote)"
   # Get arguments
   #echo "[annex_upkeep] arguments: $@"
-  while getopts "adscpum:ger:fzh" OPTFLAG; do
+  while getopts "adscpum:ger:ftzh" OPTFLAG; do
     case "$OPTFLAG" in
       # Add
       a) ADD=1;;
@@ -375,7 +375,8 @@ annex_upkeep() {
       c) SYNC=1; SYNC_OPT="${SYNC_OPT%--no-commit*} ${SYNC_OPT#*--no-commit} --commit";;
       p) SYNC=1; SYNC_OPT="${SYNC_OPT%--no-pull*} ${SYNC_OPT#*--no-pull} --pull";;
       u) SYNC=1; SYNC_OPT="${SYNC_OPT%--no-push*} ${SYNC_OPT#*--no-push} --push";;
-      m) MSG="$OPTARG";;
+      t) SYNC=1; SYNC_OPT="${SYNC_OPT} --content";;
+      m) MSG="${OPTARG}";;
       # UL/DL
       g) GET=1;;
       e) SEND=1;;
@@ -394,6 +395,7 @@ annex_upkeep() {
          echo >&2 "-g (g)et"
          echo >&2 "-e s(e)nd to remotes"
          echo >&2 "-f (f)ast get/send"
+         echo >&2 "-t sync conten(t)"
          echo >&2 "-z (s)imulate operations"
          return 1
          ;;
