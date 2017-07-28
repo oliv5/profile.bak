@@ -58,7 +58,7 @@ svn_bckname() {
 
 # Retrieve svn version
 svn_version() {
-  IFS=$'.' svn --version | awk '{print $3; exit}' | cut -d. -f "${1:-1-}"
+  IFS=$'.' svn --version 2>/dev/null | awk '{print $3; exit}' | cut -d. -f "${1:-1-}"
 }
 
 # Retrieve date
