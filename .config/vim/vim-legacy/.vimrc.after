@@ -236,8 +236,8 @@ nnoremap <S-Tab>    <LT><LT>
 vnoremap <S-Tab>    <LT>
 
 " Identation insert mode
-"inoremap <Tab>   <C-T>
-"inoremap <S-Tab> <C-D>
+"inoremap <Tab>      <C-T>
+"inoremap <S-Tab>    <C-D>
 
 " Y behave like C and D (not like cc, dd, yy)
 noremap Y y$
@@ -246,9 +246,24 @@ noremap Y y$
 nnoremap <silent> <leader>" viw<esc>a"<esc>hbi"<esc>lel
 
 " Upper (U)/lower (u)/switch (~) case
-FnNoremap <C-u>		<C-c>g~iw
+FnNoremap <C-u>	    <C-c>g~iw
 snoremap <C-u>      <C-g>~
 vnoremap <C-u>      ~
+
+
+" *******************************************************
+" } Fold {
+" *******************************************************
+" Options
+if has("folding")
+	set foldlevel=99  " default is unfold
+endif
+
+" Key mapping
+FnNoremap <F6>       zo  " Open
+FnNoremap <S-F6>     zc  " Close
+FnNoremap <C-F6>     zO  " Open all
+FnNoremap <M-F6>     zC  " Close all
 
 
 " *******************************************************
