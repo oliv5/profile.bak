@@ -1013,13 +1013,13 @@ git_tag_create() {
 git_squash() {
   local COMMIT="${1:-HEAD}"
   local AHEAD="${2:-2}"
-  git commit --squash="$COMMIT" -m ""
+  git_modified && git commit --squash="$COMMIT" -m ""
   git rebase --interactive --autosquash "${COMMIT}~${AHEAD}"
 }
 git_fixup() {
   local COMMIT="${1:-HEAD}"
   local AHEAD="${2:-2}"
-  git commit --fixup="$COMMIT" -m ""
+  git_modified && git commit --fixup="$COMMIT" -m ""
   git rebase --interactive --autosquash "${COMMIT}~${AHEAD}"
 }
 
