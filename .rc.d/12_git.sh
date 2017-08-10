@@ -178,6 +178,18 @@ git_branch_jump() {
   git fetch . "${2:?No destination specified...}" "${1:?No source specified...}"
 }
 
+# Rename remote branch
+git_branch_rename_remote() {
+  local OLD="${1:?No old branch name specified...}"
+  local NEW="${2:?No new branch name specified...}"
+  local REMOTE="${3:-origin}"
+  git checkout "$OLD" &&
+  git pull --ff-only &&
+  git branch -m "$OLD" "$NEW" &&
+  git push "$REMOTE" --delete "refs/heads/$OLD" &&
+  git push "$REMOTE" "$NEW"
+}
+
 ########################################
 # Get remote url
 git_url() {
@@ -1174,7 +1186,7 @@ alias grm='git rm'
 alias grmu='git clean -fn'
 alias gmv='git mv'
 # Logs/history aliases
-alias glg='git log'
+alias glg='git log | grep'
 alias gln='git log -n'
 alias gl1='git log -n 1'
 alias gl2='git log -n 2'
@@ -1184,6 +1196,7 @@ alias gla='git log --name-status'
 alias glf='git log --stat'
 alias glS='git log -S'
 alias gll='git log --pretty=oneline --abbrev-commit'
+alias gla='git shortlog -s -n'
 alias glog='git log'
 alias git_history='git log -p'
 # Tag aliases
