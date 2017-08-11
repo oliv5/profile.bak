@@ -191,6 +191,9 @@ alias hi='history'
 alias hg='history | grep'
 alias hgi='history | grep -i'
 
+# Mount
+alias mg='mount | grep'
+
 # Misc
 alias mo='mimeopen'
 alias s='silent'
