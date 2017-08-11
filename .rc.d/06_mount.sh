@@ -39,9 +39,7 @@ umount_ecryptfs() {
   sudo mount -f "${1:?Missing mounted directory...}"
   sudo keyctl clear @u
 }
-
-# Mount/umount ecryptfs private directory
-mount_private() {
+mount_private_ecryptfs() {
   local SRC="${1:-$HOME/.private}"
   local DST="${2:-$HOME/private}"
   local SIG="${3:-$HOME/.ecryptfs/private.sig}"
@@ -49,7 +47,7 @@ mount_private() {
   mkdir -p "$DST"
   mount_ecryptfs "$SRC" "$DST" "$KEY"
 }
-umount_private() {
+umount_private_ecryptfs() {
   umount_ecryptfs "${1:-$HOME/private}"
 }
 
@@ -61,6 +59,18 @@ mount_encfs() {
   local PASSFILE="${4}"
   shift $(min 4 $#)
   ENCFS6_CONFIG="$(readlink -f "$KEY")" sudo -E encfs -o nonempty ${PASSFILE:+--extpass='cat "$PASSFILE"'} "$@" "$SRC" "$DST"
+}
+umount_encfs() {
+  fusermount -u "${1:?Missing mounted directory...}"
+}
+mount_private_encfs() {
+  local SRC="${1:-$HOME/.private}"
+  local DST="${2:-$HOME/private}"
+  mkdir -p "$DST"
+  mount_encfs "$SRC" "$DST" "$KEY"
+}
+umount_private_encfs() {
+  umount_encfs "${1:-$HOME/private}"
 }
 
 # Mount iso
