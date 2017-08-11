@@ -169,8 +169,14 @@ alias dpkgl='dpkg -l'
 alias dpkgg='dpkg -l | grep -i'
 
 # Head/tail
-alias h='head'
+alias he='head'
+alias h1='head -n 1'
+alias h2='head -n 2'
+alias h5='head -n 5'
 alias t='tail'
+alias t1='tail -n 1'
+alias t2='tail -n 2'
+alias t5='tail -n 5'
 
 # More/less
 alias m='more'
