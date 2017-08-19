@@ -38,5 +38,6 @@
 	"theme_asphalt_show_input_dropdowon": true,
 	"theme_asphalt_show_panel_close": false,
 	"theme_asphalt_status_bar_brighter": false,
-	"theme_asphalt_tabs_small": true
+	"theme_asphalt_tabs_small": true,
+	"update_check": false
 }
