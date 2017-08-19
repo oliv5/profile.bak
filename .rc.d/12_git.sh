@@ -1024,15 +1024,13 @@ git_tag_create() {
 # Easy amend of previous commit
 git_squash() {
   local COMMIT="${1:-HEAD}"
-  local AHEAD="${2:-2}"
-  git_modified && git commit --squash="$COMMIT" -m ""
-  git rebase --interactive --autosquash "${COMMIT}~${AHEAD}"
+  git_modified && git commit --squash="$COMMIT"
+  git rebase --interactive --autosquash
 }
 git_fixup() {
   local COMMIT="${1:-HEAD}"
-  local AHEAD="${2:-2}"
-  git_modified && git commit --fixup="$COMMIT" -m ""
-  git rebase --interactive --autosquash "${COMMIT}~${AHEAD}"
+  git_modified && git commit --fixup="$COMMIT"
+  git rebase --interactive --autosquash
 }
 
 ########################################
@@ -1202,6 +1200,7 @@ alias git_history='git log -p'
 # Tag aliases
 alias gta='git tag -a'
 alias gtl='git tag -l'
+alias gtlg='git tag -l | grep'
 alias gtd='git tag -d'
 alias gtc='git_tag_create'
 alias gtf='git tag --contains'
