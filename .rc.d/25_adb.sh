@@ -90,6 +90,16 @@ adb_data_off() {
     adb shell svc data disable
 }
 
+# Mobile Data eco off (root only)
+adb_data_eco_off() {
+    adb shell cmd netpolicy set restrict-background false
+}
+
+# Mobile Data echo on (root only)
+adb_data_eco_off() {
+    adb shell cmd netpolicy set restrict-background true
+}
+
 # Get logcat (root only)
 adb_logcat() {
     adb shell logcat
