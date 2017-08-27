@@ -19,6 +19,7 @@ EN_ENCRYPT=1
 EN_DECRYPT=1
 EN_AUTODETECT=1
 EN_SIGN=""
+PUB_KEYS=""
 DELETE=1
 SIMULATE=""
 OVERWRITE=""
@@ -32,22 +33,24 @@ xhost +si:localuser:$(whoami) >/dev/null 2>&1 && {
 }
 
 # Get command line options
-while getopts egdk:fsovz OPTNAME
+while getopts egdk:pfsovz OPTNAME
 do case "$OPTNAME" in
   e)  EN_DECRYPT="";EN_AUTODETECT="";;
   d)  EN_ENCRYPT="";EN_AUTODETECT="";;
   g)  EN_SIGN=1;;
   k)  RECIPIENT="$OPTARG";;
+  p)  PUB_KEYS=1;;
   f)  DELETE=""; echo "Keeping input files." >"$STDOUT";;
   s)  SIMULATE="true"; echo "Performing a dry-run with no file changed." >"$STDOUT";;
   o)  OVERWRITE="--yes";;
   v)  VERBOSE=""; STDOUT="/dev/stdout";;
   z)  ZENITY="";;
-  [?]) echo >&2 "Usage: $(basename $0) v$VERSION [-e] [-g] [-d] [-k key] [-f] [-s] [-v] [-z]  ... directories/files"
+  [?]) echo >&2 "Usage: $(basename $0) v$VERSION [-e] [-g] [-d] [-k key] [-p] [-f] [-s] [-v] [-z]  ... directories/files"
        echo >&2 "-e    encrypt only"
        echo >&2 "-g    sign (with -e only)"
        echo >&2 "-d    decrypt only"
        echo >&2 "-k    select recipent key"
+       echo >&2 "-p    list public keys instead of secret keys"
        echo >&2 "-f    do not delete input files"
        echo >&2 "-s    simulate"
        echo >&2 "-o    overwrite output file"
@@ -108,13 +111,18 @@ DisplayList() {
   fi
 }
 
-getRecipient() {
+GetRecipient() {
     local IFS=":"
-    set -- $(gpg --list-keys --with-colons | awk -F: 'BEGIN{num=0} /pub/{num++;printf "%s:%s:",(num==1)?"TRUE":"",$10}')
+    # List the available keys
+    if [ -n "$PUB_KEYS" ]; then
+      set -- $(gpg --list-keys --with-colons | awk -F: 'BEGIN{num=0} /pub/{num++;printf "%s:%s:",(num==1)?"TRUE":"",$10}')
+    else
+      set -- $(gpg --list-secret-keys --with-colons | awk -F: 'BEGIN{num=0} /sec/{num++;printf "%s:%s:",(num==1)?"TRUE":"",$10}')
+    fi
     DisplayList "Encryption Keys" "Select the encryption key:" "*" "Available keys:" "$@"
 }
 
-deleteFiles() {
+DeleteFiles() {
   for FILES; do
     $VERBOSE echo "Delete input file '$FILE'"
     if command -v wipe >/dev/null && [ ! -L "$FILE" ] && [ $(stat -c %s "$FILE") -lt 25000000 ]; then
@@ -126,7 +134,7 @@ deleteFiles() {
 }
 
 # Decrypt file
-decrypt(){
+Decrypt(){
   local INPUT="$1"
   local OUTPUT="${INPUT%.*}"
   if [ "$OUTPUT" = "$INPUT" ]; then
@@ -154,22 +162,19 @@ decrypt(){
 
   # Delete original file if new one is present
   if [ ! -z "$DELETE" -a -f "$OUTPUT" ]; then
-    deleteFiles "$INPUT"
+    DeleteFiles "$INPUT"
   fi
 }
 
 #Encrypt file
-encrypt() {
+Encrypt() {
   local INPUT="$1"
   local OUTPUT="${INPUT}.gpg"
   echo "Encrypting file '$INPUT' into '$OUTPUT'"
 
   if [ -z "$RECIPIENT" ]; then
-    # List the available keys
-    KEYS="$(gpg --list-keys --with-colons | awk -F: '/pub/ {print $10}')"
-
     # Select the key
-    RECIPIENT="$(getRecipient)"
+    RECIPIENT="$(GetRecipient)"
     if [ -z "$RECIPIENT" ]; then
       $VERBOSE DisplayWarning "No key" "Encryption is disabled!"
       unset EN_ENCRYPT
@@ -203,7 +208,7 @@ encrypt() {
 
   # Delete original file if new one is present
   if [ ! -z "$DELETE" -a -f "$OUTPUT" ]; then
-    deleteFiles "$INPUT"
+    DeleteFiles "$INPUT"
   fi
 }
 
@@ -215,23 +220,22 @@ IFS='
 '
 LIST="$(printf %s "${@:-$NAUTILUS_SCRIPT_SELECTED_FILE_PATHS}" | sed -e 's/\n$//')"
 for SRC in "$LIST"; do
-  find "$SRC" ! -type d
   for FILE in $(find "$SRC" ! -type d); do
     if [ -n "$EN_AUTODETECT" ]; then
-      if echo "$FILE" | grep -E "\.(gpg|pgp)$" >/dev/null; then
+      if echo "$FILE" | grep -E "\.(gpg|pgp)$" >/dev/null 2>&1; then
         if [ -n "$EN_DECRYPT" ]; then
-          decrypt "$FILE" >"$STDOUT" 2>&1
+          Decrypt "$FILE" >"$STDOUT" 2>&1
         fi
       else
         if [ -n "$EN_ENCRYPT" ]; then
-          encrypt "$FILE" >"$STDOUT" 2>&1
+          Encrypt "$FILE" >"$STDOUT" 2>&1
         fi
       fi
     else
       if [ -n "$EN_DECRYPT" ]; then
-        decrypt "$FILE" >"$STDOUT" 2>&1
+        Decrypt "$FILE" >"$STDOUT" 2>&1
       elif [ -n "$EN_ENCRYPT" ]; then
-        encrypt "$FILE" >"$STDOUT" 2>&1
+        Encrypt "$FILE" >"$STDOUT" 2>&1
       fi
     fi
   done
