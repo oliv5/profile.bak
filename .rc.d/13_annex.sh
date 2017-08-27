@@ -152,6 +152,14 @@ annex_remotes() {
     awk -F. '{print $2}' | xargs
 }
 
+# List annexed enabled remotes
+annex_enabled() {
+  local EXCLUDE="$(git config --get-regexp "remote\..*\.annex-ignore" true | awk -F. '{printf $2"|"}' | sed -e "s/|$//")"
+  git config --get-regexp "remote\..*\.annex-uuid" |
+    grep -vE "${EXCLUDE:-$^}" | 
+    awk -F. '{print $2}' | xargs
+}
+
 # Annex bundle
 annex_bundle() {
   ( set +e; # Need to go on
@@ -239,7 +247,7 @@ annex_copy() {
   annex_exists || return 1
   for LAST; do true; done
   if [ "$LAST" = "--from" ] || [ "$LAST" = "--to" ]; then
-    for REMOTE in $(annex_remotes); do
+    for REMOTE in $(annex_enabled); do
       git annex copy "$@" "$REMOTE"
     done
   else
@@ -269,7 +277,7 @@ alias annex_transfer='DBG= DROP=1 _annex_transfer'
 alias annex_move='DBG= DROP=2 _annex_transfer'
 _annex_transfer() {
   annex_exists || return 1
-  local REPOS="${1:-$(annex_remotes)}"
+  local REPOS="${1:-$(annex_enabled)}"
   local DBG="${DBG:+echo}"
   [ $# -gt 0 ] && shift
   [ -z "$REPOS" ] && return 0
@@ -337,10 +345,10 @@ _annex_rsync() {
 }
 
 # Drop local files which are in the specified remote repos
-alias annex_drop='git annex drop -N $(annex_remotes | wc -w)'
+alias annex_drop='git annex drop -N $(annex_enabled | wc -w)'
 annex_drop_fast() {
   annex_exists || return 1
-  local REPOS="${1:-$(annex_remotes)}"
+  local REPOS="${1:-$(annex_enabled)}"
   local COPIES="$(echo "$REPOS" | wc -w)"
   local LOCATION="$(echo "$REPOS" | sed -e 's/ / --and --in /g')"
   [ $# -gt 0 ] && shift
@@ -362,7 +370,7 @@ annex_upkeep() {
   local GET_OPT=""
   local SEND=""
   local SEND_OPT="--all"
-  local REMOTES="$(git remote)"
+  local REMOTES="$(annex_enabled)"
   # Get arguments
   #echo "[annex_upkeep] arguments: $@"
   while getopts "adscpum:ger:ftzh" OPTFLAG; do
@@ -396,7 +404,7 @@ annex_upkeep() {
          echo >&2 "-e s(e)nd to remotes"
          echo >&2 "-f (f)ast get/send"
          echo >&2 "-t sync conten(t)"
-         echo >&2 "-z (s)imulate operations"
+         echo >&2 "-z simulate operations"
          return 1
          ;;
     esac
@@ -600,7 +608,7 @@ annex_purge() {
     [ "$REPLY" = "y" -o "$REPLY" = "Y" ] || continue
     git annex whereis "$F"
     git annex drop --force "$F"
-    for R in $(annex_remotes); do
+    for R in $(annex_enabled); do
       git annex drop --force "$F" --from "$R"
     done
     rm "$F" 2>/dev/null

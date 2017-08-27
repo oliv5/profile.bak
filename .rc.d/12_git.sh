@@ -554,7 +554,7 @@ git_upkeep() {
          echo >&2 "-u p(u)sh"
          echo >&2 "-r (r)remotes to pull/push"
          echo >&2 "-m commit (m)essage"
-         echo >&2 "-z (s)imulate operations"
+         echo >&2 "-z simulate operations"
          return 1
          ;;
     esac
