@@ -38,7 +38,7 @@ _fsed() {
   # Sed in place with display
   #_ffind "${!#}" -type f $SED_EXCLUDE -execdir sed -i $SEDOPT -e "/$IN/{w /dev/stderr" -e "}" -e "s/$IN/$OUT/g" {} \;
   # Sed in place with backup
-  _ffind "${!#}" -type f $SED_EXCLUDE -execdir sed -i _$(date +%Y%m%d-%H%M%S).bak $SEDOPT "s/$IN/$OUT/g" {} \;
+  _ffind "${!#}" -type f $SED_EXCLUDE -execdir sed -i_$(date +%Y%m%d-%H%M%S).bak $SEDOPT "s/$IN/$OUT/g" {} \;
   # Sed with confirmation about all files
   #_ffind "${!#}" -type f $SED_EXCLUDE -exec echo "Processing file {} ?" \; -exec bash -c read \; -execdir sed -i $SEDOPT "s/$IN/$OUT/g" {} \;
 }
