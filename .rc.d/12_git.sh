@@ -107,6 +107,11 @@ git_root() {
   git_bare "$@" && git_dir "$@" || git_worktree "$@"
 }
 
+# Check if we are at the top level directory
+git_top() {
+  [ "$(git_root 2>/dev/null)" = "$PWD" ]
+}
+
 ########################################
 
 # Get current branch name
@@ -1018,6 +1023,18 @@ git_find0() {
 # Create a tag
 git_tag_create() {
   git tag "tag_$(date +%Y%m%d-%H%M%S).$(git_branch)${1:+_$1}"
+}
+
+# Delete a tag totally (local & remotes)
+git_tag_delete() {
+  local REMOTES="$(git_remotes)"
+  git tag -l "$@" | xargs -rn 1 -I{} sh -c '
+    TAG="$1"; shift
+    for REMOTE; do
+      git push "$REMOTE" :refs/tags/${TAG} || exit 1
+    done
+    git tag -d "$TAG"
+  ' _ {} $REMOTES
 }
 
 ########################################
