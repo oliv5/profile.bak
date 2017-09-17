@@ -5,7 +5,7 @@ set -e
 ###################
 # Check prerequisites
 if ! command -v git 2>&1 >/dev/null; then 
-	echo "Git missing, cannot go on..."
+	echo "Git is missing, cannot go on..."
 	exit 1
 fi
 
@@ -17,7 +17,7 @@ export PATH="$PATH:$HOME/bin/externals:$HOME/bin/git-repo"
 ###################
 # Ask for private directory
 read -p "Enter private data directory in \$HOME: " PRIVATE
-export PRIVATE="$HOME/$PRIVATE"
+export PRIVATE="$HOME/${PRIVATE:-private}"
 mkdir -p "$PRIVATE"
 
 ###################
@@ -58,7 +58,7 @@ if ! command -v mr >/dev/null 2>&1; then
 fi
 
 ###################
- Download and install google repo if not already there
+# Download and install google repo if not already there
 if ! command -v repo >/dev/null 2>&1; then
 	mkdir -p bin/externals
 	curl https://storage.googleapis.com/git-repo-downloads/repo > "$HOME/bin/externals/repo" && 
@@ -66,20 +66,3 @@ if ! command -v repo >/dev/null 2>&1; then
 	git clone https://gerrit.googlesource.com/git-repo "$HOME/bin/git-repo" && 
 		chmod a+x "$HOME/bin/git-repo/repo"
 fi
-
-# Setup bin repos
-#read -p "Setup bin repos ? (y/n) " REPLY
-#if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
-#	mkdir -p "$HOME/bin"
-#	cd "$HOME/bin"
-#	repo init -u https://github.com/oliv5/manifests.git -m bin.xml
-#	repo sync -c
-#fi
-
-# Setup dev repos
-#read -p "Setup dev repos ? (y/n) " REPLY
-#if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
-#	mkdir -p "${PRIVATE:-$HOME}/dev"
-#	cd "${PRIVATE:-$HOME}/dev"
-#	repo init -u https://github.com/oliv5/manifests.git -m dev.xml
-#fi
