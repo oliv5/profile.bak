@@ -1,1 +1,9 @@
-rc.light.list
+# rc file list
+00_shell.sh
+01_fct.sh
+01_math.sh
+01_path.sh
+01_str.sh
+02_cd.sh
+03_search.sh
+05_diff.sh
