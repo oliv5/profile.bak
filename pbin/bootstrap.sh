@@ -33,7 +33,7 @@ fi
 cd "$HOME"
 read -p "Clone profile ? (y/n) " REPLY
 if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
-	vcsh clone https://github.com/oliv5/profile.git || 
+	vcsh clone https://github.com/oliv5/profile.git profile ||
 		{ vcsh profile pull; vcsh profile reset --hard; } || 
 		exit 0
 fi
@@ -60,9 +60,17 @@ fi
 ###################
 # Download and install google repo if not already there
 if ! command -v repo >/dev/null 2>&1; then
-	mkdir -p bin/externals
+	mkdir -p "$HOME/bin/externals"
 	curl https://storage.googleapis.com/git-repo-downloads/repo > "$HOME/bin/externals/repo" && 
 		chmod a+x "$HOME/bin/externals/repo"
 	git clone https://gerrit.googlesource.com/git-repo "$HOME/bin/git-repo" && 
 		chmod a+x "$HOME/bin/git-repo/repo"
+fi
+
+###################
+# Setup bin repo
+if [ -r "$HOME/pbin/bin.xml" ]; then
+    command -v repo >/dev/null || { echo "Error: cannot find repo..."; exit 1; }
+    mkdir -p "$HOME/bin"
+    repo sync -u "$HOME/pbin/bin.xml"
 fi
