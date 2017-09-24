@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+  <remote  name="github" 
+           fetch="https://github.com" />
+  <remote  name="gist" 
+           fetch="https://gist.github.com" />
+  <remote  name="googlesource" 
+           fetch="https://gerrit.googlesource.com" />
+  <remote  name="apbteam" 
+           fetch="git://apbteam.org" />
+
+  <default revision="refs/heads/master"
+           remote="github"
+           sync-c="true"
+           sync-j="4" />
+
+  <!-- External binaries repos -->
+  <project remote="googlesource" name="git-repo"                          path="bin/externals/repo" />
+  <project remote="github"       name="joeyh/myrepos"                     path="bin/externals/mr" />
+  <project remote="github"       name="RichiH/vcsh"                       path="bin/externals/vcsh" />
+  <project remote="github"       name="rupa/z"                            path="bin/externals/z" />
+
+</manifest>
+
