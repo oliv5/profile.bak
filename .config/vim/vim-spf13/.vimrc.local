@@ -23,6 +23,9 @@
 	
 	" Autoreload changed files
 	set noautoread
+	
+	" Clipboard
+	set clipboard=autoselect,exclude:cons\|linux
 " }
 
 " UI settings, theme & color scheme {

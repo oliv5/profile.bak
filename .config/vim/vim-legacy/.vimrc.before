@@ -61,6 +61,49 @@ command! -nargs=+ AltMap     call <SID>AltMap(<f-args>)
 command! -nargs=+ CondRemap  call <SID>CondRemap(<f-args>)
 command! -nargs=+ IMapFix  	 call <SID>IMapFix(<f-args>)
 
+
+" *******************************************************
+" } Stash pop vim parameters {
+" *******************************************************
+
+" @params
+function! PosStash(...)
+	let s:stashCursor = [getpos(".")] + s:stashCursor
+endf
+
+" @params
+function! PosPop(...)
+	call setpos('.', s:stashCursor[0])
+	let s:stashCursor = s:stashCursor[1:]
+endf
+
+" @params [regname]
+function! RegStash(...)
+	let l:regname = a:0 > 1 ? a:1 : v:register
+	let s:stashReg = [getreg(l:regname), getregtype(l:regname)] + s:stashReg
+endf
+
+" @params [regname]
+function! RegPop(...)
+	let l:regname = a:0 > 1 ? a:1 : v:register
+	call setreg(l:regname, s:stashReg[0], s:stashReg[1])
+	let s:stashReg = s:stashReg[2:]
+endf
+
+" @params [markname]
+function! MarkStash(...)
+	let l:markname = a:0 > 1 ? a:1 : 'm'
+	let s:stashMark = getpos("'" . l:markname) + s:stashMark
+endf
+
+" @params [markname]
+function! MarkPop(...)
+	let l:markname = a:0 > 1 ? a:1 : 'm'
+	call setpos("'" . l:markname, s:stashMark)
+	let s:stashMark = s:stashMark[1:]
+endf
+
+
 " *******************************************************
 " } The end
 " *******************************************************
