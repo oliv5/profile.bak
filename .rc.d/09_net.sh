@@ -188,3 +188,11 @@ opened_port_in() {
 ssh_copy_id() {
   ssh ${1:?No host specified} -p ${2:?No port specified...} -- sh -c "cat 'command=\"${3:?No command specified...},no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ${SSH_ORIGINAL_COMMAND#* }\" ${4:?No ssh key specified...}' >> '$HOME/.ssh/authorized_keys'"
 }
+
+# Get server remove pubkey
+# https://unix.stackexchange.com/questions/126908/get-ssh-server-key-fingerprint
+ssh_get_server_pubkey() {
+  local FILE="$(mktemp)"
+  ssh-keyscan host > "$FILE" 2>/dev/null
+  ssh-keygen -l -f "$FILE"
+}
