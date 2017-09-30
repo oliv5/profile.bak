@@ -1219,6 +1219,7 @@ alias glf='git log --stat'
 alias glS='git log -S'
 alias gll='git log --pretty=oneline --abbrev-commit'
 alias gla='git shortlog -s -n'
+alias glt='git log --graph'
 alias glog='git log'
 alias git_history='git log -p'
 # Tag aliases
