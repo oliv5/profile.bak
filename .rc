@@ -11,6 +11,7 @@ rc_source() {
   # Local variables
   local RC_VERBOSE="${RC_VERBOSE:-false}"
   local RC_DRYRUN=""
+  local RC_ALL=""
 
   # Global aliases
   alias rc='rc_source'
@@ -37,7 +38,7 @@ rc_source() {
   # Source module when executable or listed in rc.list 
   rc_sourcemod() {
     for FILE; do
-      if test -x "$FILE" || grep -e "${FILE##*/}" "${FILE%/*}/rc.list" >/dev/null 2>&1; then
+      if [ -n "$RC_ALL" ] || test -x "$FILE" || grep -e "${FILE##*/}" "${FILE%/*}/rc.list" >/dev/null 2>&1; then
         rc_sourcefile "$FILE"
       fi
     done
@@ -46,11 +47,13 @@ rc_source() {
   ##############
   # Process arguments
   local FLAGS OPTIND OPTARG OPTERR=0
-  while getopts 'vd' FLAGS; do
+  while getopts 'avd' FLAGS; do
     case "$FLAGS" in
+      a) RC_ALL="true";;
       v) RC_VERBOSE="true";;
       d) RC_DRYRUN="true";;
-      *) echo >&2 "Usage: .rc [-v] [-d]"
+      *) echo >&2 "Usage: .rc [-a] [-v] [-d]"
+         echo >&2 "-a   load all scripts"
          echo >&2 "-v   verbose mode"
          echo >&2 "-d   dry-run"
          kill -INT $$
