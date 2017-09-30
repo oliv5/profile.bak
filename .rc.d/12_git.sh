@@ -259,6 +259,10 @@ git_hash() {
 git_allhash() {
   git rev-list "${@:-HEAD}"
 }
+git_roothash() {
+  git rev-list --max-parents=0 HEAD 2>/dev/null ||
+  git rev-list --parents HEAD | egrep "^[a-f0-9]{40}$"
+}
 
 # Get short hash
 alias git_ssha1='git_shorthash'
@@ -267,6 +271,9 @@ git_shorthash() {
 }
 git_allshorthash() {
   git_allhash "$@" | cut -c 1-8
+}
+git_rootshorthash() {
+  git_roothash "$@" | cut -c 1-8
 }
 
 ########################################
