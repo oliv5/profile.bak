@@ -1049,12 +1049,12 @@ git_tag_delete() {
 git_squash() {
   local COMMIT="${1:-HEAD}"
   git_modified && git commit --squash="$COMMIT"
-  git rebase --interactive --autosquash
+  git rebase --interactive --autosquash "${COMMIT}~2"
 }
 git_fixup() {
   local COMMIT="${1:-HEAD}"
   git_modified && git commit --fixup="$COMMIT"
-  git rebase --interactive --autosquash
+  git rebase --interactive --autosquash "${COMMIT}~2"
 }
 
 ########################################
