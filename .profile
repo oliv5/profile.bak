@@ -7,7 +7,7 @@
 
 # Misc variables
 [ -z "$USER" ] && export USER="$(id -un)"
-[ -z "$HOME" ] && export HOME="$(grep "$USER" /etc/passwd | cut -d: -f6)"
+[ -z "$HOME" ] && export HOME="$(grep "$USER" /etc/passwd 2>/dev/null || echo ":::::$PWD/$USER" | cut -d: -f6)"
 [ -z "$LOGNAME" ] && export LOGNAME="$USER"
 [ -z "$HOSTNAME" ] && export HOSTNAME="$(hostname 2>/dev/null || uname -n)"
 [ -z "$DOMAIN" ] && export DOMAIN="$(hostname -d 2>/dev/null)"
