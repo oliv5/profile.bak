@@ -1,38 +1,8 @@
 #!/bin/sh
 
-# Find garbage files
-ff_garbage() {
-  ( set -vx
-    printf "Home garbage\n"
-    find "$HOME" -type f -name "*~" -print
-    ls "${HOME}"/.macromedia/* "${HOME}"/.adobe/*
-    printf "\nSystem coredumps\n"
-    sudo find /var -type f -name "core" -print
-    printf "\nTemporary files\n"
-    sudo ls /tmp
-    sudo ls /var/tmp
-    printf "\nLogs\n"
-    sudo du -a -b /var/log | sort -n -r | head -n 10
-    sudo ls /var/log/*.gz
-    printf "\nOpened but deleted\n"
-    sudo lsof -nP | grep '(deleted)'
-    sudo lsof -nP | awk '/deleted/ { sum+=$8 } END { print sum }'
-    sudo lsof -nP | grep '(deleted)' | awk '{ print $2 }' | sort | uniq
-  )
-}
-
 ################################
-lsof_deleted() {
-    sudo lsof -nP | grep '(deleted)'
-}
-
-lsof_close(){
-  # For all opened but deleted files associated to process $PID,
-  # trunctate the file to 0 bytes
-  local PID="${1:?No PID specified...}"
-  cd /proc/$PID/fd 
-  ls -l | grep '(deleted)' | awk '{ print $9 }' | while read FILE; do :> /proc/$PID/fd/$FILE; done
-}
+# File size
+alias fsize='stat -L -c %s'
 
 ################################
 # http://unix.stackexchange.com/questions/59112/preserve-directory-structure-when-moving-files-using-find
@@ -101,6 +71,7 @@ unlink() {
   done
 }
 
+##############################
 # Swap files or directories
 swap() {
   local FILE1="${1:?Nothing to swap...}"
@@ -112,5 +83,47 @@ swap() {
   mv -fT "$TMP" "$FILE1"
 }
 
-# Get file size
-alias fsize='stat -L -c %s'
+
+################################
+# http://unix.stackexchange.com/questions/59112/preserve-directory-structure-when-moving-files-using-find
+# Move by replicating directory structure
+mkdir_mv() {
+  local SRC="$1"
+  local DST="$(path_abs "${2:-.}")"
+  shift 2
+  local BASENAME="$(basename "$SRC")"
+  find "$(dirname "$SRC")" -name "${BASENAME:-*}" $@ -exec sh -c '
+      for x; do
+        mkdir -p "$0/${x%/*}" &&
+        mv "$x" "$0/$x"
+      done
+    ' "$DST" {} +
+}
+
+################################
+# Rsync replicate tree (without files)
+alias rsync_mktree='rsync -a -f"+ */" -f"- *"'
+# Rsync copy tree (with files)
+alias rsync_cptree='rsync -a'
+# Rsync copy file (with tree)
+alias rsync_cp='rsync -R'
+# Rsync move file (with tree)
+alias rsync_mv='rsync -R --remove-source-files'
+
+################################
+# Move files from multiple sources while filtering extensions
+# ex: EXCLUDE="temp *.bak" movefiles $DST/ $SRC1/ $SRC2/
+movefiles() {
+  local DST="${1?No destination specified...}"; shift
+  local OPT=""; for EXT in $EXCLUDE; do OPT="${OPT:+$OPT }--exclude=$EXT"; done
+  for SRC; do
+    rsync -av --progress --remove-source-files --prune-empty-dirs $OPT "$SRC/" "$DST" 2>/dev/null
+  done
+}
+
+# Move files from mounted drives
+movefiles_mnt() {
+  local MNT="${1?No mountpoint specified...}"; shift
+  sudo mount "$MNT" && 
+    movefiles "$@"
+}

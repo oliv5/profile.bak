@@ -49,19 +49,12 @@ ask_passwd() {
 }
 
 ################################
-# Move files from multiple sources while filtering extensions
-# ex: EXCLUDE="temp *.bak" movefiles $DST/ $SRC1/ $SRC2/
-movefiles() {
-  local DST="${1?No destination specified...}"; shift
-  local OPT=""; for EXT in $EXCLUDE; do OPT="${OPT:+$OPT }--exclude=$EXT"; done
-  for SRC; do
-    rsync -av --progress --remove-source-files --prune-empty-dirs $OPT "$SRC/" "$DST" 2>/dev/null
-  done
-}
+# Retry
+alias retry='retry.sh'
 
-# Move files from mounted drives
-movefiles_mnt() {
-  local MNT="${1?No mountpoint specified...}"; shift
-  sudo mount "$MNT" && 
-    movefiles "$@"
+# Repeat
+repeat() {
+  local NUM="${1:?No repeat count specified...}"
+  shift
+  for NUM in $(seq $NUM); do "$@"; done
 }

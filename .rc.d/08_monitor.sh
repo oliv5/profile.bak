@@ -234,3 +234,37 @@ ipc_semstatn() {
   #awk '$5~/[0-9]+/ {print $5}' /proc/sysvipc/sem | sort | uniq -c | sort -r | awk '{system("getent passwd " $2 " | cut -d: -f 1"); print $1}'
   awk '$5~/[0-9]+/ {print $5}' /proc/sysvipc/sem | sort | uniq -c | sort -r | awk '{printf $1; "getent passwd " $2 " | cut -d: -f 1" | getline; print " "$1}'
 }
+
+################################
+lsof_deleted() {
+    sudo lsof -nP | grep '(deleted)'
+}
+
+lsof_close(){
+  # For all open but deleted files associated with process 2746, trunctate the file to 0 bytes
+  local PID="${1:?No PID specified...}"
+  cd /proc/$PID/fd 
+  ls -l | grep '(deleted)' | awk '{ print $9 }' | while read FILE; do :> /proc/$PID/fd/$FILE; done
+}
+
+################################
+# Find garbage files
+ff_garbage() {
+  ( set -vx
+    printf "Home garbage\n"
+    find "$HOME" -type f -name "*~" -print
+    ls "${HOME}"/.macromedia/* "${HOME}"/.adobe/*
+    printf "\nSystem coredumps\n"
+    sudo find /var -type f -name "core" -print
+    printf "\nTemporary files\n"
+    sudo ls /tmp
+    sudo ls /var/tmp
+    printf "\nLogs\n"
+    sudo du -a -b /var/log | sort -n -r | head -n 10
+    sudo ls /var/log/*.gz
+    printf "\nOpened but deleted\n"
+    sudo lsof -nP | grep '(deleted)'
+    sudo lsof -nP | awk '/deleted/ { sum+=$8 } END { print sum }'
+    sudo lsof -nP | grep '(deleted)' | awk '{ print $2 }' | sort | uniq
+  )
+}

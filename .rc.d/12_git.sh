@@ -743,12 +743,8 @@ git_stash_backup() {
   local IFS="$(printf '\n')"
   local DESCR
   mkdir -p "$DST"
-  #for DESCR in $(git stash list --pretty=format:"%h %gd %ci"); do
-  #  local NAME="$(echo $DESCR | awk '{gsub(/-/,"",$3); gsub(/:/,"",$4); print "stash{" $3 "-" $4 "}_" $1}')"
-  for DESCR in $(git stash list --oneline); do
-    local NAME="$(echo $DESCR | sed 's/^.*: // ; s/[^0-9a-zA-Z._:]/_/g')"
-    local HASH="$(echo $DESCR | awk '{print $1}')"
-    local FILE="$DST/stash_${HASH}_${NAME}.gz"
+  git stash list --format="%H %h %gd" | while IFS=" " read -r HASH SHORT NAME; do
+    local FILE="$DST/stash_${NAME}_${SHORT}.gz"
     if [ ! -e "$FILE" ]; then
       echo "Backup $HASH in $FILE"
       git stash show -p "$HASH" "$@" | gzip --best > "$FILE"
@@ -1167,6 +1163,15 @@ alias gbav='git branch -va' # verbose list all
 alias gbm='git branch --merged'    # list merged branches
 alias gbM='git branch --no-merged' # list unmerged branches
 alias gbr='git branch -r'   # list remote
+alias gbag='git branch -a | grep'   # list all
+alias gblg='git branch -l | grep'   # list local
+alias gbvg='git branch -v | grep'   # verbose list local
+alias gbvvg='git branch -v | grep'  # double-verbose list local
+alias gbvag='git branch -va | grep' # verbose list all
+alias gbavg='git branch -va | grep' # verbose list all
+alias gbmg='git branch --merged | grep'    # list merged branches
+alias gbMg='git branch --no-merged | grep' # list unmerged branches
+alias gbrg='git branch -r | grep'   # list remote
 alias gbd='git branch -d'   # delete branch (merged only)
 alias gbD='git branch -D'   # delete branch (any)
 alias gbdr='git branch -rd' # remove remote branch (merged only)
