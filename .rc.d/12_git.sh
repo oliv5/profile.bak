@@ -380,13 +380,12 @@ git_add_remotes() {
 #~ }
 #~ fi
 
-# Batch pull the selected branches from their remote tracking
-alias git_pull='git_pull_remotes ""'
-alias git_pull_all='git_pull_remotes'
+# Batch pull the current branch from all remotes
+git_pull() { git_pull_all "" "$(git_branch)"; }
 
 # Batch pull existing remote branches
 if [ $(git_version) -gt $(git_version 2.9) ]; then
-git_pull_remotes() {
+git_pull_all() {
   git_exists || return 1
   local IFS="$(printf ' \t\n')"
   local REMOTES="${1:-$(git_remotes)}"
@@ -416,7 +415,7 @@ git_pull_remotes() {
   fi
 }
 else
-git_pull_remotes() {
+git_pull_all() {
   git_exists || return 1
   local IFS="$(printf ' \t\n')"
   local REMOTES="${1:-$(git_remotes)}"
@@ -465,8 +464,10 @@ git_pull_remotes() {
 }
 fi
 
+# Push the current branch to all remotes
+git_push() { git_push_all "" "$(git_branch)"; }
+
 # Batch push to all existing remote/branches
-alias git_push='git_push_all "" "$(git_branch)"'
 git_push_all() {
   git_exists || return 1
   local IFS="$(printf ' \t\n')"
