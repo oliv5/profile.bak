@@ -161,19 +161,24 @@ git_branch_merged() {
 git_branch_delete() {
   for BRANCH; do
     echo "Delete local branch '$BRANCH'"
-    git tag "deleted.${BRANCH}_$(date +%Y%m%d-%H%M%S)" "refs/head/$BRANCH" &&
+    git tag "$(git_name deleted)" "refs/head/$BRANCH" &&
       git branch -d "$BRANCH"
   done
 }
 
+# List remote branches
+git_branches_remote() {
+  git ls-remote --heads | awk '{print substr($2,12)}'
+}
+
 # Delete remote untracked branch
 git_branch_delete_remote() {
-  for BRANCH; do
-    local REMOTE="${BRANCH%%/*}"
-    local NAME="${BRANCH##*/}"
-    echo "Delete remote branch '$BRANCH'"
-    git tag "deleted.${REMOTE}.${NAME}.$(date +%Y%m%d-%H%M%S)" "remotes/$BRANCH" && { 
-      git push "$REMOTE" ":$NAME" || git branch -rd "$BRANCH"
+  for REFS; do
+    local REMOTE="${REFS%%/*}"
+    local BRANCH="${REFS#*/}"
+    echo "Delete remote branch '$REFS'"
+    git tag "$(git_name deleted)" "remotes/$REFS" && {
+      git push "$REMOTE" ":$BRANCH" || git branch -rd "$REFS"
     }
   done
 }
@@ -222,7 +227,7 @@ git_remotes() {
 
 # Get git backup name
 git_name() {
-  echo "$(git_repo).${1:+$1.}$(uname -n).$(git_branch | tr '/' '_').$(date +%Y%m%d-%H%M%S).$(git_shorthash)"
+  echo "$(git_repo).${1:+$1.}$(uname -n).$(git_branch | tr '/' '_').$(date +%Y%m%d-%H%M%S).$(git_shorthash)${2:+.$2}"
 }
 
 # Check a set of commands exist
@@ -274,6 +279,15 @@ git_allshorthash() {
 }
 git_rootshorthash() {
   git_roothash "$@" | cut -c 1-8
+}
+
+########################################
+# Get git author
+git_author() {
+  local REF
+  for REF; do
+    git log --format='%ae' "${REF}^!"
+  done
 }
 
 ########################################
