@@ -549,8 +549,9 @@ annex_dropunused_interactive() {
     local LAST="$(git annex unused | awk '/SHA256E/ {a=$1} END{print a}')"
     git annex unused | grep -F 'SHA256E' | 
       while read -r NUM KEY; do
-        echo "$KEY"
+        printf "Key: $KEY\nFile: "
         annex_fromkey "$KEY"
+        echo
         read -r -p "Delete file $NUM/$LAST? (y/f/n) " REPLY < /dev/tty
         if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
           sh -c "git annex dropunused ""$@"" $NUM" &
