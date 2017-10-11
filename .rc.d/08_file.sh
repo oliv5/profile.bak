@@ -67,7 +67,8 @@ bak_date() {
 # Unlink - overwrites the unlink legacy tool
 unlink() {
   for FILE; do
-    cp --remove-destination "$(readlink "$FILE")" "$FILE"
+    LINK="$(readlink "$FILE")"
+    [ -n "$LINK" ] && cp --remove-destination "$LINK" "$FILE"
   done
 }
 
