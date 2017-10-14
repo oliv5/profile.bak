@@ -527,10 +527,10 @@ annex_dropunused() {
       eval annex_fromkey "$KEY" ${PATTERNS:+| grep -zF $PATTERNS} | xargs -r0 sh -c '
         NUM="$1";KEY="$2"; shift 2
         for FILE; do
-          printf "Drop unused file %s\n%s\n%s\n" "$NUM" "$FILE" "$KEY"
+          printf "Drop unused file %s\nFile: %s\nKey: %s\n" "$NUM" "$FILE" "$KEY"
         done
         git annex dropunused "$NUM" ${FROM:+--from $FROM} ${FORCE:+--force}
-        echo "~"
+        echo ""
       ' _ "$NUM" "$KEY"
     done
 }
