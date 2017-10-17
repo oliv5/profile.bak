@@ -30,6 +30,7 @@ alias gandd='git annex forget --drop-dead'
 alias gani='git annex info'
 alias gan='git annex'
 
+########################################
 # Check annex exists
 annex_exists() {
   git ${1:+--git-dir="$1"} config --get annex.version >/dev/null 2>&1
@@ -75,6 +76,7 @@ annex_init_direct() {
   annex_init && git annex direct
 }
 
+########################################
 # Init hubic annex
 annex_init_hubic() {
   local NAME="${1:-hubic}"
@@ -127,6 +129,7 @@ annex_init_gcrypt() {
   git config --add annex.sshcaching false
 }
 
+########################################
 # Git status for scripts
 annex_st() {
   git annex status | awk -F'#;#.' '/^[\? ]?'$1'[\? ]?/ {sub(/ /,"#;#.");print $2}'
@@ -160,6 +163,7 @@ annex_enabled() {
     awk -F. '{print $2}' | xargs
 }
 
+########################################
 # Annex bundle
 annex_bundle() {
   ( set +e; # Need to go on
@@ -238,6 +242,7 @@ annex_enum() {
   )
 }
 
+########################################
 # Annex copy
 alias annex_copy_all='annex_copy --all'
 alias annex_copy_auto='annex_copy --auto'
@@ -269,7 +274,10 @@ alias annex_upload_all='annex_copy_all --to'
 alias annex_upload_auto='annex_copy_auto --to'
 alias annex_upload_fast_auto='annex_copy_fast_auto --to'
 
+########################################
+# Similar to "git annex move"
 # Transfer files to the specified repos, one by one
+# without downloading the whole repo locally
 # $FROM is used to selected the origin repo
 # $DROP is used to drop the newly retrieved files
 # $DBG is used to print the command on stderr
@@ -300,7 +308,9 @@ _annex_transfer() {
   ' _ "$REPOS"
 }
 
+# Similar to "git annex move"
 # Rsync files to the specified location, one by one
+# without downloading the whole repo locally
 # $FROM is used to selected the origin repo
 # $DROP is used to drop the newly retrieved files
 # $DBG is used to print the command on stderr
@@ -344,6 +354,7 @@ _annex_rsync() {
   fi
 }
 
+########################################
 # Drop local files which are in the specified remote repos
 alias annex_drop='git annex drop -N $(annex_enabled | wc -w)'
 annex_drop_fast() {
@@ -355,6 +366,7 @@ annex_drop_fast() {
   git annex drop --in $LOCATION -N "$COPIES" "$@"
 }
 
+########################################
 # Annex upkeep
 annex_upkeep() {
   local DBG=""
@@ -443,6 +455,7 @@ annex_upkeep() {
   #echo "[annex_upkeep] end at $(date)"
 }
 
+########################################
 # Find aliases
 alias annex_existing='git annex find --in'
 alias annex_missing='git annex find --not --in'
@@ -466,10 +479,12 @@ annex_find_repo() {
 		done 
 }
 
+########################################
 # Fsck/check all
 alias annex_fsck='annex_find_repo | xargs -r -I {} -n 1 sh -c "cd \"{}/..\"; pwd; git annex fsck"'
 alias annex_check='annex_find_repo | xargs -r -I {} -n 1 sh -c "cd \"{}/..\"; pwd; git annex list | grep \"^_\""'
 
+########################################
 # Rename special remotes
 annex_rename_special() {
 	git config remote.$1.fetch dummy
@@ -565,6 +580,7 @@ annex_dropunused_interactive() {
   fi
 }
 
+########################################
 # Clean log by rebuilding branch git-annex & master
 # Similar to "git annex forget"
 annex_forget() {
@@ -598,6 +614,7 @@ annex_forget() {
   )
 }
 
+########################################
 # Delete all versions of a file
 # https://git-annex.branchable.com/tips/deleting_unwanted_files/
 annex_purge() {
