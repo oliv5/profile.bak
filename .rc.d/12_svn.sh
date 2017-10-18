@@ -120,22 +120,10 @@ svn_stx() {
 # Get svn revision numbers
 __svn_rev1() { local REV="${1%%:*}"; [ ! -z "${REV}" ] && echo "${REV}"; }
 __svn_rev2() { local REV="${1##*:}"; [ ! -z "${REV}" ] && echo "${REV}"; }
-__svn_revsingle() {
-  local REV="$(echo $1 | sed -r 's/-/:/g')"
-  if [ "${REV##*:}" = "$REV" ]; then
-    echo "${REV:+${2:--}c$REV}"
-  fi
-}
-__svn_revrange() {
-  local REV="$(echo $1 | sed -r 's/-/:/g')"
-  if [ "${REV##*:}" != "$REV" ]; then
-    echo "${2:--}r${REV}" | sed -r 's/r:/r1:/; s/:$/:HEAD/; s/:/'"${3:-:}"'/'
-  fi
-}
 __svn_revarg() {
   local REV="$(echo $1 | sed -r 's/-/:/g')"
   if [ "${REV##*:}" = "$REV" ]; then
-    echo "${REV:+${2:--}c$REV}"
+    echo "${REV:+${2:--}c${3}$REV}"
   else 
     echo "${2:--}r${REV}" | sed -r 's/r:/r1:/; s/:$/:HEAD/; s/:/'"${3:-:}"'/'
   fi
@@ -244,7 +232,7 @@ svn_rollback() {
   # Backup
   svn_export "$REV" "$(svn_bckdir)/$(svn_bckname rollback "" "$REV").7z"
   # Rollback (svn merge back from first to second)
-  svn merge $(__svn_revarg "$REV") .
+  svn merge $(__svn_revarg "$REV" "-" "-") .
 }
 
 # Backup current changes
