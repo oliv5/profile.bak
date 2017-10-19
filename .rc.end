@@ -34,6 +34,9 @@ path_cleanup
 # Remove some aliases/fct shortcuts
 cmd_unset which find grep awk sed xargs cut
 
+# Renew shell hashes
+hash -r
+
 ################################
 # Default prompt
 if [ ${#PS1} -lt 5 ]; then
