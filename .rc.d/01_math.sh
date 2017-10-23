@@ -8,12 +8,11 @@ lim() { max $(min $1 $3) $2; }
 isint() { expr 2 "*" "$1" + 1 >/dev/null 2>&1; }
 alias avg="awk '{a+=\$1} END{print a/NR}'"
 
-# Conversion to integer using printf
+# Conversion to (unsigned) integer using printf
 _int() {
   local MAX="${1:?No maximum value specified...}"
   shift
-  for NUM; do
-    local RES=$(printf "%d" "$NUM")
+  for RES; do
     [ $RES -ge $MAX ] && RES=$((RES-2*MAX))
     echo $RES
   done
@@ -23,18 +22,11 @@ alias int8='_int $((1<<7))'
 alias int16='_int $((1<<15))'
 alias int32='_int $((1<<31))'
 alias int64='_int $((1<<63))'
-
-# Conversion to unsigned integer using printf
-_uint() {
-  for NUM; do
-    printf "%d\n" "$NUM"
-  done
-}
-alias uint='_uint'
-alias uint8='_uint'
-alias uint16='_uint'
-alias uint32='_uint'
-alias uint64='_uint'
+alias uint='uint32'
+alias uint8='_int $((1<<8))'
+alias uint16='_int $((1<<16))'
+alias uint32='_int $((1<<32))'
+alias uint64='_int $((1<<64))'
 
 # Hexdump to txt 32 bits
 bin2hex32() {
