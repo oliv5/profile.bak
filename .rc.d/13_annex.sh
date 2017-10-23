@@ -404,10 +404,12 @@ annex_upkeep() {
       f) GET_OPT="--fast"; SEND_OPT="--fast";;
       # Misc
       z) set -vx; DBG="true";;
-      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-s] [-c] [-m 'msg'] [-p] [-u] [-g] [-e] [-r 'remote1 remote2 ..'] [-f] [-z]"
+      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-r 'rem1 rem2 ...'] [-s] [-t] [-c] [-p] [-u] [-m 'msg'] [-g] [-e] [-f] [-i] [-v] [-w] [-z]"
          echo >&2 "-a (a)dd new files"
          echo >&2 "-d add (d)eleted files"
-         echo >&2 "-s (s)ync"
+         echo >&2 "-r (r)emotes to work on"
+         echo >&2 "-s (s)ync, similar to -cpu"
+         echo >&2 "-t sync conten(t)"
          echo >&2 "-c (c)ommit"
          echo >&2 "-p (p)ull"
          echo >&2 "-u p(u)sh"
@@ -415,10 +417,11 @@ annex_upkeep() {
          echo >&2 "-g (g)et"
          echo >&2 "-e s(e)nd to remotes"
          echo >&2 "-f (f)ast get/send"
-         echo >&2 "-t sync conten(t)"
+         echo >&2 "-i check network (i)nterface connection"
+         echo >&2 "-v check charging le(v)el"
+         echo >&2 "-w check charging status"
          echo >&2 "-z simulate operations"
-         return 1
-         ;;
+         return 1;;
     esac
   done
   shift "$((OPTIND-1))"
@@ -439,7 +442,7 @@ annex_upkeep() {
   fi
   # Sync
   if [ -n "$SYNC" ]; then
-    $DBG git annex sync --message="$MSG" $SYNC_OPT || return $?
+    $DBG git annex sync "${MSG:+--message="$MSG"}" $SYNC_OPT || return $?
   fi
   # Get
   if [ -n "$GET" ]; then
@@ -453,6 +456,7 @@ annex_upkeep() {
     done
   fi
   #echo "[annex_upkeep] end at $(date)"
+  return 0
 }
 
 ########################################
