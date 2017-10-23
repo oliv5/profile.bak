@@ -417,8 +417,8 @@ annex_upkeep() {
          echo >&2 "-e s(e)nd to remotes"
          echo >&2 "-f (f)ast get/send"
          echo >&2 "-i check network (i)nterface connection"
-         echo >&2 "-v check charging le(v)el"
-         echo >&2 "-w check charging status"
+         echo >&2 "-v check device charging le(v)el"
+         echo >&2 "-w check device charging status"
          echo >&2 "-z simulate operations"
          return 1;;
     esac
@@ -427,8 +427,22 @@ annex_upkeep() {
   REMOTES="${@:-$REMOTES}"
   unset OPTFLAG OPTARG
   OPTIND=1
-  # Main
+  # Main checks
   annex_exists || return 1
+  if [ -n "$INCHARGE" ]; then
+    local CHARGE_STATUS="$(cat ${INCHARGE:-/sys/class/power_supply/battery/status 2>/dev/null | tr '[:upper:]' '[:lower:]'})"
+    #local CHARGE_LEVEL="$(dumpsys battery | awk '/level:/ {print $2}')"
+    if [ "$CHARGE_STATUS" != "charging" -a "$CHARGE_STATUS" != "full" ]; then
+      echo "[warning] device is not in charge. Abort..."
+      return 2
+    fi
+  fi
+  if [ -n "$NET_DEVICE" ] && ! ip addr show dev "$NET_DEVICE" 2>/dev/null | grep "state UP" >/dev/null; then
+    echo "[warning] wifi device '$NET_DEVICE' is not connected. Disable file content transfer..."
+    SYNC_OPT="${SYNC_OPT%--content*} ${SYNC_OPT#*--content}"
+    unset GET
+    unset SEND
+  fi
   # Add
   if [ -n "$ADD" ]; then
     $DBG git annex add . || return $?
