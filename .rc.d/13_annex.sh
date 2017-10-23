@@ -383,6 +383,10 @@ annex_upkeep() {
   local SEND=""
   local SEND_OPT="--all"
   local REMOTES="$(annex_enabled)"
+  # Misc options
+  local NETWORK_DEV="";
+  local CHARGE_LEVEL="";
+  local CHARGE_STATUS="";
   # Get arguments
   while getopts "adscpum:gefti:v:w:zh" OPTFLAG; do
     case "$OPTFLAG" in
@@ -402,8 +406,11 @@ annex_upkeep() {
       r) REMOTES="${OPTARG}";;
       f) GET_OPT="--fast"; SEND_OPT="--fast";;
       # Misc
+      i) NETWORK_DEV="${OPTARG}";;
+      v) CHARGE_LEVEL="${OPTARG}";;
+      w) CHARGE_STATUS="${OPTARG}";;
       z) set -vx; DBG="true";;
-      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-s] [-t] [-c] [-p] [-u] [-m 'msg'] [-g] [-e] [-f] [-i itf] [-v lvl] [-w var] [-z] [remote1 remote2 ...] "
+      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-s] [-t] [-c] [-p] [-u] [-m 'msg'] [-g] [-e] [-f] [-i itf] [-v 'var lvl'] [-w 'var status1 status2 ...'] [-z] [remote1 remote2 ...] "
          echo >&2 "-a (a)dd new files"
          echo >&2 "-d add (d)eleted files"
          echo >&2 "-r (r)emotes to work on"
@@ -427,21 +434,41 @@ annex_upkeep() {
   REMOTES="${@:-$REMOTES}"
   unset OPTFLAG OPTARG
   OPTIND=1
-  # Main checks
+  # Base check
   annex_exists || return 1
-  if [ -n "$INCHARGE" ]; then
-    local CHARGE_STATUS="$(cat ${INCHARGE:-/sys/class/power_supply/battery/status 2>/dev/null | tr '[:upper:]' '[:lower:]'})"
-    #local CHARGE_LEVEL="$(dumpsys battery | awk '/level:/ {print $2}')"
-    if [ "$CHARGE_STATUS" != "charging" -a "$CHARGE_STATUS" != "full" ]; then
-      echo "[warning] device is not in charge. Abort..."
-      return 2
-    fi
-  fi
-  if [ -n "$NET_DEVICE" ] && ! ip addr show dev "$NET_DEVICE" 2>/dev/null | grep "state UP" >/dev/null; then
-    echo "[warning] wifi device '$NET_DEVICE' is not connected. Disable file content transfer..."
+  # Connected network device
+  if [ -n "$NETWORK_DEV" ] && ! ip addr show dev "$NETWORK_DEV" 2>/dev/null | grep "state UP" >/dev/null; then
+    echo "[warning] wifi device '$NETWORK_DEV' is not connected. Disable file content transfer..."
     SYNC_OPT="${SYNC_OPT%--content*} ${SYNC_OPT#*--content}"
     unset GET
     unset SEND
+  fi
+  # Charging status
+  if [ -n "$CHARGE_STATUS" ]; then
+    set -- $CHARGE_STATUS
+    local DEVICE="$1"; shift
+    local CURRENT_STATUS="$(cat "$DEVICE" 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+    local FOUND=""
+    for EXPECTED_STATUS; do
+      if [ "$CURRENT_STATUS" = "$EXPECTED_STATUS" ]; then 
+        FOUND=1
+        break
+      fi
+    done
+    if [ -z "$FOUND" ]; then
+      echo "[warning] device is not in charge. Abort..."
+      return 3
+    fi
+  fi
+  # Charging level
+  if [ -n "$CHARGE_LEVEL" ]; then
+    local DEVICE="$(set -- $CHARGE_LEVEL; echo $1)"
+    local EXPECTED_LEVEL="$(set -- $CHARGE_LEVEL; echo $2)"
+    local MEASURED_LEVEL="$(cat "$DEVICE" 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+    if ! isint "$EXPECTED_LEVEL" || ! isint "$MEASURED_LEVEL" || [ $MEASURED_LEVEL -lt $EXPECTED_LEVEL ]; then
+      echo "[warning] device charge level ($MEASURED_LEVEL) is lower than threshold ($EXPECTED_LEVEL). Abort..."
+      return 2
+    fi
   fi
   # Add
   if [ -n "$ADD" ]; then
