@@ -384,8 +384,7 @@ annex_upkeep() {
   local SEND_OPT="--all"
   local REMOTES="$(annex_enabled)"
   # Get arguments
-  #echo "[annex_upkeep] arguments: $@"
-  while getopts "adscpum:ger:ftzh" OPTFLAG; do
+  while getopts "adscpum:gefti:v:w:zh" OPTFLAG; do
     case "$OPTFLAG" in
       # Add
       a) ADD=1;;
@@ -404,7 +403,7 @@ annex_upkeep() {
       f) GET_OPT="--fast"; SEND_OPT="--fast";;
       # Misc
       z) set -vx; DBG="true";;
-      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-r 'rem1 rem2 ...'] [-s] [-t] [-c] [-p] [-u] [-m 'msg'] [-g] [-e] [-f] [-i] [-v] [-w] [-z]"
+      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-s] [-t] [-c] [-p] [-u] [-m 'msg'] [-g] [-e] [-f] [-i itf] [-v lvl] [-w var] [-z] [remote1 remote2 ...] "
          echo >&2 "-a (a)dd new files"
          echo >&2 "-d add (d)eleted files"
          echo >&2 "-r (r)emotes to work on"
@@ -425,12 +424,11 @@ annex_upkeep() {
     esac
   done
   shift "$((OPTIND-1))"
+  REMOTES="${@:-$REMOTES}"
   unset OPTFLAG OPTARG
   OPTIND=1
-  [ $# -ne 0 ] && echo "Bad parameters: $@" && return 1
   # Main
   annex_exists || return 1
-  #echo "[annex_upkeep] start at $(date)"
   # Add
   if [ -n "$ADD" ]; then
     $DBG git annex add . || return $?
@@ -442,7 +440,7 @@ annex_upkeep() {
   fi
   # Sync
   if [ -n "$SYNC" ]; then
-    $DBG git annex sync "${MSG:+--message="$MSG"}" $SYNC_OPT || return $?
+    $DBG git annex sync "${MSG:+--message="$MSG"}" $SYNC_OPT $REMOTES || return $?
   fi
   # Get
   if [ -n "$GET" ]; then
@@ -450,12 +448,10 @@ annex_upkeep() {
   fi
   # Upload
   if [ -n "$SEND" ]; then
-    [ -z "$REMOTES" ] && echo "No remotes to send to..." && return 1
     for REMOTE in ${REMOTES}; do
       $DBG git annex copy --to "$REMOTE" $SEND_OPT || return $?
     done
   fi
-  #echo "[annex_upkeep] end at $(date)"
   return 0
 }
 
