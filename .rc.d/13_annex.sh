@@ -376,12 +376,14 @@ annex_upkeep() {
   # Sync options
   local MSG="annex_upkeep() at $(date)"
   local SYNC=""
-  local SYNC_OPT="--no-commit --no-pull --no-push"
+  local NO_COMMIT=""
+  local NO_PULL=""
+  local NO_PUSH=""
+  local CONTENT=""
   # Copy options
   local GET=""
-  local GET_OPT=""
   local SEND=""
-  local SEND_OPT="--all"
+  local FAST="--all"
   local REMOTES="$(annex_enabled)"
   # Misc options
   local NETWORK_DEV="";
@@ -394,17 +396,17 @@ annex_upkeep() {
       a) ADD=1;;
       d) DEL=1;;
       # Sync
-      s) SYNC=1; SYNC_OPT="--commit --pull --push";;
-      c) SYNC=1; SYNC_OPT="${SYNC_OPT%--no-commit*} ${SYNC_OPT#*--no-commit} --commit";;
-      p) SYNC=1; SYNC_OPT="${SYNC_OPT%--no-pull*} ${SYNC_OPT#*--no-pull} --pull";;
-      u) SYNC=1; SYNC_OPT="${SYNC_OPT%--no-push*} ${SYNC_OPT#*--no-push} --push";;
-      t) SYNC=1; SYNC_OPT="${SYNC_OPT} --content";;
+      s) SYNC=1;;
+      c) SYNC=1; NO_COMMIT="--no-commit";;
+      p) SYNC=1; NO_PULL="--no-pull";;
+      u) SYNC=1; NO_PUSH="--no-push";;
+      t) SYNC=1; CONTENT="--content";;
       m) MSG="${OPTARG}";;
       # UL/DL
       g) GET=1;;
       e) SEND=1;;
       r) REMOTES="${OPTARG}";;
-      f) GET_OPT="--fast"; SEND_OPT="--fast";;
+      f) FAST="--fast";;
       # Misc
       i) NETWORK_DEV="${OPTARG}";;
       v) CHARGE_LEVEL="${OPTARG}";;
@@ -439,7 +441,7 @@ annex_upkeep() {
   # Connected network device
   if [ -n "$NETWORK_DEV" ] && ! ip addr show dev "$NETWORK_DEV" 2>/dev/null | grep "state UP" >/dev/null; then
     echo "[warning] wifi device '$NETWORK_DEV' is not connected. Disable file content transfer..."
-    SYNC_OPT="${SYNC_OPT%--content*} ${SYNC_OPT#*--content}"
+    unset CONTENT
     unset GET
     unset SEND
   fi
@@ -481,16 +483,16 @@ annex_upkeep() {
   fi
   # Sync
   if [ -n "$SYNC" ]; then
-    $DBG git annex sync "${MSG:+--message="$MSG"}" $SYNC_OPT $REMOTES || return $?
+    $DBG git annex sync ${NO_COMMIT} ${NO_PULL} ${NO_PUSH} ${CONTENT} "${MSG:+--message="$MSG"}" $REMOTES || return $?
   fi
   # Get
   if [ -n "$GET" ]; then
-      $DBG git annex get $GET_OPT || return $?
+      $DBG git annex get ${FAST} || return $?
   fi
   # Upload
   if [ -n "$SEND" ]; then
     for REMOTE in ${REMOTES}; do
-      $DBG git annex copy --to "$REMOTE" $SEND_OPT || return $?
+      $DBG git annex copy --to "$REMOTE" ${FAST} || return $?
     done
   fi
   return 0
