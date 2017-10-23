@@ -467,7 +467,7 @@ annex_upkeep() {
     local DEVICE="$(set -- $CHARGE_LEVEL; echo $1)"
     local EXPECTED_LEVEL="$(set -- $CHARGE_LEVEL; echo $2)"
     local MEASURED_LEVEL="$(cat "$DEVICE" 2>/dev/null | tr '[:upper:]' '[:lower:]')"
-    if ! isint "$EXPECTED_LEVEL" || ! isint "$MEASURED_LEVEL" || [ $MEASURED_LEVEL -lt $EXPECTED_LEVEL ]; then
+    if [ "$MEASURED_LEVEL" -lt "$EXPECTED_LEVEL" 2>/dev/null ]; then
       echo "[warning] device charge level ($MEASURED_LEVEL) is lower than threshold ($EXPECTED_LEVEL). Abort..."
       return 2
     fi
