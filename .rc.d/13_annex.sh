@@ -386,7 +386,7 @@ annex_upkeep() {
   local FAST="--all"
   local REMOTES="$(annex_enabled)"
   # Misc options
-  local NETWORK_DEV="";
+  local NETWORK_DEVICE="";
   local CHARGE_LEVEL="";
   local CHARGE_STATUS="";
   # Get arguments
@@ -408,7 +408,7 @@ annex_upkeep() {
       r) REMOTES="${OPTARG}";;
       f) FAST="--fast";;
       # Misc
-      i) NETWORK_DEV="${OPTARG}";;
+      i) NETWORK_DEVICE="${OPTARG}";;
       v) CHARGE_LEVEL="${OPTARG}";;
       w) CHARGE_STATUS="${OPTARG}";;
       z) set -vx; DBG="true";;
@@ -439,8 +439,8 @@ annex_upkeep() {
   # Base check
   annex_exists || return 1
   # Connected network device
-  if [ -n "$NETWORK_DEV" ] && ! ip addr show dev "$NETWORK_DEV" 2>/dev/null | grep "state UP" >/dev/null; then
-    echo "[warning] wifi device '$NETWORK_DEV' is not connected. Disable file content transfer..."
+  if [ -n "$NETWORK_DEVICE" ] && ! ip addr show dev "$NETWORK_DEVICE" 2>/dev/null | grep "state UP" >/dev/null; then
+    echo "[warning] wifi device '$NETWORK_DEVICE' is not connected. Disable file content transfer..."
     unset CONTENT
     unset GET
     unset SEND
@@ -448,8 +448,8 @@ annex_upkeep() {
   # Charging status
   if [ -n "$CHARGE_STATUS" ]; then
     set -- $CHARGE_STATUS
-    local DEVICE="$1"; shift
-    local CURRENT_STATUS="$(cat "$DEVICE" 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+    local CURRENT_STATUS="$(cat "$1" 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+    shift
     local FOUND=""
     for EXPECTED_STATUS; do
       if [ "$CURRENT_STATUS" = "$EXPECTED_STATUS" ]; then 
@@ -464,11 +464,11 @@ annex_upkeep() {
   fi
   # Charging level
   if [ -n "$CHARGE_LEVEL" ]; then
-    local DEVICE="$(set -- $CHARGE_LEVEL; echo $1)"
-    local EXPECTED_LEVEL="$(set -- $CHARGE_LEVEL; echo $2)"
-    local MEASURED_LEVEL="$(cat "$DEVICE" 2>/dev/null | tr '[:upper:]' '[:lower:]')"
-    if [ "$MEASURED_LEVEL" -lt "$EXPECTED_LEVEL" 2>/dev/null ]; then
-      echo "[warning] device charge level ($MEASURED_LEVEL) is lower than threshold ($EXPECTED_LEVEL). Abort..."
+    set -- $CHARGE_LEVEL
+    local CURRENT_LEVEL="$(cat "$1" 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+    local EXPECTED_LEVEL="$2"
+    if [ "$CURRENT_LEVEL" -lt "$EXPECTED_LEVEL" 2>/dev/null ]; then
+      echo "[warning] device charge level ($CURRENT_LEVEL) is lower than threshold ($EXPECTED_LEVEL). Abort..."
       return 2
     fi
   fi
