@@ -30,22 +30,22 @@ ask_question() {
 
 ########################################
 # git wrapper
-git() {
-  # Forbid git annex in direct mode with VCSH
-  if [ "$1" = "annex" -a -n "$(command git config --get vcsh.vcsh)" ]; then
-    if [ "$(command git config --get annex.direct)" = "true" -o "$2" = "direct" ]; then
-      echo "git annex in direct mode is not compatible with VCSH repositories..." >&2
-      return 1
-    fi
-  fi
-  # VCSH repository not loaded yet
-  if [ -z "$GIT_WRAPPER" ] && [ -z "$VCSH_REPO_NAME" ] && command git config --get vcsh.vcsh >/dev/null 2>&1; then
-    local GIT_WRAPPER=1
-    vcsh "$(git_repo)" "$@"
-  else
-    command git "$@"
-  fi
-}
+#git() {
+#  # Forbid git annex in direct mode with VCSH
+#  if [ "$1" = "annex" -a -n "$(command git config --get vcsh.vcsh)" ]; then
+#    if [ "$(command git config --get annex.direct)" = "true" -o "$2" = "direct" ]; then
+#      echo "git annex in direct mode is not compatible with VCSH repositories..." >&2
+#      return 1
+#    fi
+#  fi
+#  # VCSH repository not loaded yet
+#  if [ -z "$GIT_WRAPPER" ] && [ -z "$VCSH_REPO_NAME" ] && command git config --get vcsh.vcsh >/dev/null 2>&1; then
+#    local GIT_WRAPPER=1
+#    vcsh "$(git_repo)" "$@"
+#  else
+#    command git "$@"
+#  fi
+#}
 
 ########################################
 # Env setup
