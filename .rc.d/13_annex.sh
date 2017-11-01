@@ -373,6 +373,7 @@ annex_upkeep() {
   # Add options
   local ADD=""
   local DEL=""
+  local FORCE=""
   # Sync options
   local MSG="annex_upkeep() at $(date)"
   local SYNC=""
@@ -390,11 +391,13 @@ annex_upkeep() {
   local CHARGE_LEVEL="";
   local CHARGE_STATUS="";
   # Get arguments
-  while getopts "adscpum:gefti:v:w:zh" OPTFLAG; do
+  OPTIND=1
+  while getopts "adoscpum:gefti:v:w:zh" OPTFLAG; do
     case "$OPTFLAG" in
       # Add
       a) ADD=1;;
       d) DEL=1;;
+      o) FORCE=1;;
       # Sync
       s) SYNC=1;;
       c) SYNC=1; NO_COMMIT="--no-commit";;
@@ -412,9 +415,10 @@ annex_upkeep() {
       v) CHARGE_LEVEL="${OPTARG}";;
       w) CHARGE_STATUS="${OPTARG}";;
       z) set -vx; DBG="true";;
-      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-s] [-t] [-c] [-p] [-u] [-m 'msg'] [-g] [-e] [-f] [-i itf] [-v 'var lvl'] [-w 'var status1 status2 ...'] [-z] [remote1 remote2 ...] "
+      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-o] [-s] [-t] [-c] [-p] [-u] [-m 'msg'] [-g] [-e] [-f] [-i itf] [-v 'var lvl'] [-w 'var status1 status2 ...'] [-z] [remote1 remote2 ...] "
          echo >&2 "-a (a)dd new files"
          echo >&2 "-d add (d)eleted files"
+         echo >&2 "-o f(o)rce add/delete files"
          echo >&2 "-r (r)emotes to work on"
          echo >&2 "-s (s)ync, similar to -cpu"
          echo >&2 "-t sync conten(t)"
@@ -433,9 +437,8 @@ annex_upkeep() {
     esac
   done
   shift "$((OPTIND-1))"
+  unset OPTFLAG OPTARG OPTIND
   REMOTES="${@:-$REMOTES}"
-  unset OPTFLAG OPTARG
-  OPTIND=1
   # Base check
   annex_exists || return 1
   # Connected network device
@@ -474,7 +477,7 @@ annex_upkeep() {
   fi
   # Add
   if [ -n "$ADD" ]; then
-    $DBG git annex add . || return $?
+    $DBG git annex add . ${FORCE:+--force} || return $?
   fi
   # Revert deleted files
   if [ -z "$DEL" ] && ! annex_direct; then
