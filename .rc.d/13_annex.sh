@@ -441,13 +441,6 @@ annex_upkeep() {
   REMOTES="${@:-$REMOTES}"
   # Base check
   annex_exists || return 1
-  # Connected network device
-  if [ -n "$NETWORK_DEVICE" ] && ! ip addr show dev "$NETWORK_DEVICE" 2>/dev/null | grep "state UP" >/dev/null; then
-    echo "[warning] wifi device '$NETWORK_DEVICE' is not connected. Disable file content transfer..."
-    unset CONTENT
-    unset GET
-    unset SEND
-  fi
   # Charging status
   if [ -n "$CHARGE_STATUS" ]; then
     set -- $CHARGE_STATUS
@@ -474,6 +467,13 @@ annex_upkeep() {
       echo "[warning] device charge level ($CURRENT_LEVEL) is lower than threshold ($EXPECTED_LEVEL). Abort..."
       return 2
     fi
+  fi
+  # Connected network device
+  if [ -n "$NETWORK_DEVICE" ] && ! ip addr show dev "$NETWORK_DEVICE" 2>/dev/null | grep "state UP" >/dev/null; then
+    echo "[warning] network interface '$NETWORK_DEVICE' is not connected. Disable file content transfer..."
+    unset CONTENT
+    unset GET
+    unset SEND
   fi
   # Add
   if [ -n "$ADD" ]; then
