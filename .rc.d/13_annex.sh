@@ -377,9 +377,9 @@ annex_upkeep() {
   # Sync options
   local MSG="annex_upkeep() at $(date)"
   local SYNC=""
-  local NO_COMMIT=""
-  local NO_PULL=""
-  local NO_PUSH=""
+  local NO_COMMIT="--no-commit"
+  local NO_PULL="--no-pull"
+  local NO_PUSH="--no-push"
   local CONTENT=""
   # Copy options
   local GET=""
@@ -399,10 +399,10 @@ annex_upkeep() {
       d) DEL=1;;
       o) FORCE=1;;
       # Sync
-      s) SYNC=1;;
-      c) SYNC=1; NO_COMMIT="--no-commit";;
-      p) SYNC=1; NO_PULL="--no-pull";;
-      u) SYNC=1; NO_PUSH="--no-push";;
+      s) SYNC=1; NO_COMMIT=""; NO_PULL=""; NO_PUSH="";;
+      c) SYNC=1; NO_COMMIT="";;
+      p) SYNC=1; NO_PULL="";;
+      u) SYNC=1; NO_PUSH="";;
       t) SYNC=1; CONTENT="--content";;
       m) MSG="${OPTARG}";;
       # UL/DL
