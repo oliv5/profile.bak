@@ -243,36 +243,27 @@ annex_enum() {
 }
 
 ########################################
-# Annex copy
-alias annex_copy_all='annex_copy --all'
-alias annex_copy_auto='annex_copy --auto'
-alias annex_copy_fast='annex_copy --fast'
-alias annex_copy_fast_auto='annex_copy --fast --auto'
-annex_copy() {
-  annex_exists || return 1
-  for LAST; do true; done
-  if [ "$LAST" = "--from" ] || [ "$LAST" = "--to" ]; then
-    for REMOTE in $(annex_enabled); do
-      git annex copy "$@" "$REMOTE"
-    done
-  else
-    git annex copy "$@"
-  fi
+# Annex download/upload
+alias annex_download='git annex get'
+alias annex_dl='git annex get'
+alias annex_ul='annex_upload'
+alias annex_send='annex_upload'
+annex_upload() {
+  local ARGS=""
+  local PREV=""
+  local TO=""
+  for ARG; do
+     if [ "$PREV" = "--to" ]; then
+      TO="${TO:+$TO }'$ARG'"
+     elif [ "$ARG" != "--to" ]; then
+      ARGS="${ARGS:+$ARGS }'$ARG'"
+     fi
+     PREV="$ARG"
+  done
+  for REMOTE in ${TO:-$(annex_enabled)}; do
+    eval git annex copy ${ARGS:-.} --to "$REMOTE"
+  done
 }
-
-# Annex download
-alias annex_download='annex_copy --from'
-alias annex_download_fast='annex_copy_fast --from'
-alias annex_download_all='annex_copy_all --from'
-alias annex_download_auto='annex_copy_auto --from'
-alias annex_download_fast_auto='annex_copy_fast_auto --from'
-
-# Annex upload
-alias annex_upload='annex_copy --to'
-alias annex_upload_fast='annex_copy_fast --to'
-alias annex_upload_all='annex_copy_all --to'
-alias annex_upload_auto='annex_copy_auto --to'
-alias annex_upload_fast_auto='annex_copy_fast_auto --to'
 
 ########################################
 # Similar to "git annex move"
