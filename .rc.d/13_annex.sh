@@ -410,7 +410,6 @@ annex_upkeep() {
          echo >&2 "-a (a)dd new files"
          echo >&2 "-d add (d)eleted files"
          echo >&2 "-o f(o)rce add/delete files"
-         echo >&2 "-r (r)emotes to work on"
          echo >&2 "-s (s)ync, similar to -cpu"
          echo >&2 "-t sync conten(t)"
          echo >&2 "-c (c)ommit"
