@@ -428,7 +428,8 @@ annex_upkeep() {
     esac
   done
   shift "$((OPTIND-1))"
-  unset OPTFLAG OPTARG OPTIND
+  unset OPTFLAG OPTARG
+  OPTIND=1
   REMOTES="${@:-$REMOTES}"
   # Base check
   annex_exists || return 1
