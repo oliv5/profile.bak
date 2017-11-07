@@ -3,7 +3,7 @@
 # SSH-agent
 ssh_agent() {
 	command -v ssh-agent >/dev/null 2>&1 || return 1
-	SSH_AGENT_FILE="$HOME/.ssh-agent-info"
+	local SSH_AGENT_FILE="$HOME/.ssh-agent-info"
 	ssh-add -l >/dev/null 2>&1
 	if [ $? -eq 2 ]; then
 		test -r "$SSH_AGENT_FILE" && \
@@ -20,14 +20,16 @@ ssh_agent() {
 # GPG agent (basic)
 gpg_agent() {
 	command -v gpg-agent >/dev/null 2>&1 || return 1
-	GPG_AGENT_FILE="$HOME/.gpg-agent-info"
-	export GPG_TTY=$(tty)
-	if test -f "$GPG_AGENT_FILE" && \
-		kill -0 $(cut -d: -f 2 "$GPG_AGENT_FILE") 2>/dev/null; then
-		export GPG_AGENT_INFO=$(cat "$GPG_AGENT_FILE")
+	local GPG_AGENT_FILE="$HOME/.gpg-agent-info"
+	local GPG_AGENT_PID="$(test -f "$GPG_AGENT_FILE" && cut -d: -f 2 "$GPG_AGENT_FILE")"
+	export GPG_TTY="$(tty)"
+	if [ -n "$GPG_AGENT_PID" ] && [ "$GPG_AGENT_PID" -gt 0 ] && \
+		kill -0 "$GPG_AGENT_PID" 2>/dev/null; then
+		export GPG_AGENT_INFO="$(cat "$GPG_AGENT_FILE")"
 	else
-		eval $(gpg-agent --daemon "$@") >/dev/null
-		echo "$GPG_AGENT_INFO" > "$GPG_AGENT_FILE"
+		eval $(gpg-agent -q -s --daemon "$@") &&
+			{ echo "$GPG_AGENT_INFO" > "$GPG_AGENT_FILE"; } ||
+			{ rm "$GPG_AGENT_FILE"; }
 	fi
 	return 0
 }
