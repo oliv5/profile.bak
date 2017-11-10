@@ -38,7 +38,6 @@ show_display_remote() {
 psgp(){
   ps aux | awk "/$1/ "'{print $2}'
 }
-
 # User processes
 pgu() {
   pgrep -flu "$(id -u ${1:-$USER})"
@@ -48,7 +47,6 @@ psgu() {
   shift
   psu "$USER" | grep -i "$@"
 }
-
 # List of PIDs
 pid() {
   # Use xargs to trim leading spaces
@@ -68,6 +66,12 @@ ppid() {
 pppid() {
   # Use xargs to trim leading spaces
   [ $# -gt 0 ] && ps -p "$@" -o ppid= | xargs
+}
+# List of zombies
+#http://www.noah.org/wiki/Kill_-9_does_not_work
+psz() {
+  ps aux | awk '"[ZzDd]" ~ $8 { print $2; }'
+  #ps Haxwwo stat,pid,ppid,user,wchan:25,command | grep -e "^STAT" -e "^D" -e "^Z"
 }
 
 ################################
@@ -188,14 +192,15 @@ mem_top() {
 }
 
 ################################
-# Zombies processes management
-# List zombies
-zombie_ls() {
-  ps aux | awk '"[Zz]" ~ $8 { print $2; }'
+# Kill zombie by killing rpciod too
+# http://www.noah.org/wiki/Kill_-9_does_not_work
+killz(){
+  kill -9 "$@"
+  ps Haxwwo pid,command | awk '/rpciod/ && !/grep/ {print $1}' | xargs -r kill
 }
 
-# Try to kill zombies by detaching them from their parent
-zombie_kill() {
+# Kill all zombies by detaching them from their parent
+killz_detach() {
   local _PID _PPID
   ps -e -o pid,ppid,state,comm |
     awk '"[Zz]" ~ $3 { printf("%d %d %s\n", $1, $2, $4); }' |
