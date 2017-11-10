@@ -81,3 +81,10 @@ bash_checkbashisms() {
   command -v checkbashisms >/dev/null 2>&1 || die "checkbashisms not found..."
   find "${1:-.}" -name "${2:-*.sh}" -exec sh -c 'checkbashisms {} 2>/dev/null || ([ $? -ne 2 ] && echo "checkbashisms {}")' \;
 }
+
+################################
+# Setup command completion
+bash_completion() {
+  complete -o bashdefault -o default -o nospace -F "$2" "$1" 2>/dev/null \
+  || complete -o default -o nospace -F "$2" "$1"
+}
