@@ -27,7 +27,7 @@ gpg_agent() {
 		kill -0 "$GPG_AGENT_PID" 2>/dev/null; then
 		export GPG_AGENT_INFO="$(cat "$GPG_AGENT_FILE")"
 	else
-		eval $(gpg-agent -q -s --daemon "$@") &&
+		eval "$(gpg-agent -q -s --daemon "$@")" &&
 			{ echo "$GPG_AGENT_INFO" > "$GPG_AGENT_FILE"; } ||
 			{ rm "$GPG_AGENT_FILE"; }
 	fi
@@ -44,10 +44,10 @@ gnome_keyring_agent() {
 	command -v gnome-keyring-daemon >/dev/null 2>&1 || return 1
 	if ! pgrep -f gnome-keyring-daemon >/dev/null; then
 		rm -r "/run/user/$(id -u)/keyring/" 2>/dev/null
-		eval $(gnome-keyring-daemon -r -d 2>/dev/null)
+		eval "$(gnome-keyring-daemon -r -d 2>/dev/null)"
 	fi
-	eval $(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh,gpg 2>/dev/null)
-	export SSH_AUTH_SOCK
+	eval "$(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh,gpg 2>/dev/null)"
+	export SSH_AUTH_SOCK GNOME_KEYRING_CONTROL
 	return 0
 }
 
