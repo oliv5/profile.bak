@@ -36,6 +36,8 @@ alias sci='svn ci'
 alias scid='svn ci -m "Development commit $(svn_date)"'
 # jump aliases
 alias sr='cd "$(svn_root)"'
+# merge aliases
+smm='svn_merge'
 
 # Ask user
 svn_askuser() {
@@ -233,6 +235,12 @@ svn_rollback() {
   svn_export "$REV" "$(svn_bckdir)/$(svn_bckname rollback "" "$REV").7z"
   # Rollback (svn merge back from first to second)
   svn merge $(__svn_revarg "$REV" "-" "-") .
+}
+
+# Cherry-pick
+svn_cherrypick() {
+  local REV="${1:?No revision specified...}"; shift $(min 1 $#)
+  svn merge $(__svn_revarg "$REV") "$@"
 }
 
 # Backup current changes

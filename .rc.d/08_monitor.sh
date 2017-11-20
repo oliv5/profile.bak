@@ -70,7 +70,7 @@ pppid() {
 # List of zombies
 #http://www.noah.org/wiki/Kill_-9_does_not_work
 psz() {
-  ps aux | awk '"[ZzDd]" ~ $8 { print $2; }'
+  ps aux | awk '"[ZzDd]" ~ $8'
   #ps Haxwwo stat,pid,ppid,user,wchan:25,command | grep -e "^STAT" -e "^D" -e "^Z"
 }
 
