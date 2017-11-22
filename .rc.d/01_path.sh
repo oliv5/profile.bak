@@ -74,6 +74,14 @@ _path_cleanup() {
     sed -r 's|~|'"${HOME}"'|g; s|\:\.||g; s|(^:\|:$)||')"
 }
 
+# Find and append path
+_path_find() {
+  local VAR="${1:-PATH}"
+  local DIR="${2:-.}"
+  local NAME="${3}"
+  export $VAR="$(eval echo "\$$VAR")$(find "$DIR" ${NAME:+-name "$NAME"} -type d -print0 | xargs -0 printf ':%s')"
+}
+
 # PATH aliases
 path_prepend() { _path_prepend PATH "$@"; }
 path_append() { _path_append PATH "$@"; }
@@ -81,6 +89,7 @@ path_remove() { _path_remove PATH "$@"; }
 path_remove_fs() { _path_remove_fs PATH "$@"; }
 path_remove_absent() { _path_remove_absent PATH "$@"; }
 path_cleanup() { _path_cleanup PATH "$@"; }
+path_find() { _path_find PATH "$@"; }
 alias path_abs='readlink -f --'
 
 # LD_LIBRARY_PATH aliases
@@ -92,3 +101,4 @@ ldlibpath_remove() { _path_remove LD_LIBRARY_PATH "$@"; }
 ldlibpath_remove_fs() { _path_remove_fs LD_LIBRARY_PATH "$@"; }
 ldlibpath_remove_absent() { _path_remove_absent LD_LIBRARY_PATH "$@"; }
 ldlibpath_cleanup() { _path_cleanup LD_LIBRARY_PATH "$@"; }
+ldlibpath_find() { _path_find LD_LIBRARY_PATH "$@"; }
