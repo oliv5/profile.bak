@@ -65,7 +65,7 @@ mk_isofs() {
   mkisofs -r -l -V "${3:-$(basename "${1%%/}")}" -o "${2:-./myimage.iso}" "${1:?No input directory specified...}"
 }
 
-# Make iso from ddrescue
+# Make iso from ddrescue & mkisofs
 mk_iso() {
   local SRC="${1:?No device specified...}"
   local DST="${2:-./image.iso}"

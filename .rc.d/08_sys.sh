@@ -28,6 +28,16 @@ alias keyb_set='setxkbmap -layout'
 alias keyb_setfr='setxkbmap -layout fr'
 
 ################################
+# Get XWindow ID
+xwmid() {
+  xwininfo | awk '/xwininfo: Window id:/ {print $4}'
+}
+# Get XWindow PID
+xwmpid() {
+  xprop -id "${1:-$(xwmid)}" | awk '/WM_PID/ {print $3}'
+}
+
+################################
 # Chroot
 mkchroot(){
   local SRC="/dev/${1:?Please specify the root device}"
