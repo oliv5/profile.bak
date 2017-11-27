@@ -40,11 +40,10 @@ iptables_flush() {
 alias dhcp_renew='sudo dhclient -r; sudo dhclient -1'
 
 ############################
-# quvi alias
-alias flashdl='quvi'
-
 # Wget mirror website
 alias wget_mirror='wget --mirror --convert-links --adjust-extension --page-requisites --no-parent'
+alias wget_flat='wget_mirror -nd'
+alias wget_flatflat='wget_mirror -nd -nH'
 
 # Wget download specific extension
 wget_ext() {
