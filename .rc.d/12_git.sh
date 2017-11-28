@@ -1124,6 +1124,7 @@ git_evil_merge() {
 alias gt='git status -uno'
 alias gtu='gstu'
 alias gst='git_st'
+alias gstv='git_stx | xargs -0 $GEDITOR'
 alias gstm='git status --porcelain -b | awk "NR==1 || /^(M.|.M)/"'    # modified
 alias gsta='git status --porcelain -b | awk "NR==1 || /^A[ MD]/"'     # added
 alias gstd='git status --porcelain -b | awk "NR==1 || /^D[ M]|^ D/"'  # deleted
