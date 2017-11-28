@@ -79,7 +79,8 @@ _path_find() {
   local VAR="${1:-PATH}"
   local DIR="${2:-.}"
   local NAME="${3}"
-  export $VAR="$(eval echo "\$$VAR")$(find "$DIR" ${NAME:+-name "$NAME"} -type d -print0 | xargs -0 printf ':%s')"
+  local RES="$(find "$DIR" ${NAME:+-name "$NAME"} -type d -print0 | xargs -r0 printf '%s')"
+  export $VAR="$(eval echo "\$$VAR")${RES:+:$RES}"
 }
 
 # PATH aliases
