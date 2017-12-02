@@ -12,7 +12,7 @@ skip = [ ! -z "$VCSH_REPO_NAME" ] && echo "WARNING: Mr is run from a VCSH repo !
 	#	||
 	#	{
 	#		[ -r "$HOME/.mrskip" ] && {
-	#			local MR_NAME="$(basename "${MR_REPO}" .git)"
+	#			local MR_NAME="$(basename "$MR_REPO" .git)"
 	#			local HOSTNAME="$(uname -n)"
 	#			grep -iE "^($HOSTNAME|):($MR_REPO|):($MR_NAME|):($MR_ACTION|)$" "$HOME/.mrskip" >/dev/null 2>&1; 
 	#		}
@@ -31,13 +31,16 @@ skip = [ ! -z "$VCSH_REPO_NAME" ] && echo "WARNING: Mr is run from a VCSH repo !
 	#}
 
 # Load git library
-lib = . "$RC_DIR/.rc.d/12_git.sh"
+lib = export PATH="$HOME/pbin:$PATH"
+	  . "$RC_DIR/.rc.d/06_mount.sh"
+	  . "$RC_DIR/.rc.d/12_git.sh"
 	  . "$RC_DIR/.rc.d/13_vcsh.sh"
 	  . "$RC_DIR/.rc.d/13_annex.sh"
 	  . "$RC_DIR/.rc.d/13_repo.sh"
 
 # Include our repositories
-include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/lib.d/null" 2>/dev/null || true
-include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/hosts.d/$(uname -n | tr 'A-Z' 'a-z')" 2>/dev/null || true
-include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/"* || true
-include = cat .mrconfig.local 2>/dev/null || true
+include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/lib.d/null"
+include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/.start" 2>/dev/null || true
+include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/"*
+include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/.end" 2>/dev/null || true
+include = cat "$HOME/.mrconfig.local" 2>/dev/null || true
