@@ -125,8 +125,10 @@ git_branch() {
 }
 
 # Get current branch tracking
+alias git_tracking_remote='git_tracking | sed -s "s;/.*;;"'
+alias git_tracking_branch='git_tracking | sed -s "s;.*/;;"'
 git_tracking() {
-  git ${1:+--git-dir="$1"} rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null
+  git ${2:+--git-dir="$2"} rev-parse --abbrev-ref --symbolic-full-name "$1@{upstream}" 2>/dev/null | grep -v '@{upstream}'
   #git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD) 2>/dev/null
 }
 
@@ -508,19 +510,6 @@ git_set_tracking() {
     if git for-each-ref "refs/remotes/$REMOTE" | grep -- "refs/remotes/$REMOTE/$BRANCH\$" >/dev/null; then
       git branch -u "$REMOTE/$BRANCH" "$BRANCH"
     fi
-  done
-}
-
-# Get default upstream on the specified branches
-alias git_get_tracking='git_get_all_tracking "$(git_branch)"'
-alias git_get_tracking_remote='git_get_all_tracking "$(git_branch)" | sed -s "s;/.*;;"'
-alias git_get_tracking_branch='git_get_all_tracking "$(git_branch)" | sed -s "s;.*/;;"'
-git_get_all_tracking() {
-  git_exists || return 1
-  local IFS="$(printf ' \t\n')"
-  local BRANCHES="${1:-$(git_branches)}"
-  for BRANCH in $BRANCHES; do
-    git rev-parse --abbrev-ref "$BRANCH@{upstream}"
   done
 }
 
@@ -1147,13 +1136,12 @@ alias gstxi='git_stx "^\!\!"'       # ignored
 alias gstxz='git_stx "^[MARC] "'    # in index
 alias gstxs='git_stx "^[^\?\?]"'    # not untracked# List aliases
 # List files
-alias gll='git ls-files'
 alias gls='git ls-files'
-alias glm='git ls-files -m'
-alias glu='git ls-files -u' # unmerged = in conflict
-alias gld='git ls-files -d'
-alias gln='git ls-files -o --exclude-standard'
-alias gli='git ls-files -o -i --exclude-standard'
+alias glsm='git ls-files -m'
+alias glsu='git ls-files -u' # unmerged = in conflict
+alias glsd='git ls-files -d'
+alias glsn='git ls-files -o --exclude-standard'
+alias glsi='git ls-files -o -i --exclude-standard'
 # Diff aliases
 alias gd='git diff'
 alias gdd='git diff'
@@ -1272,13 +1260,12 @@ alias ggrep='git grep'
 # Checkout aliases
 alias gco='git checkout'
 # Reset aliases
-alias gre='git reset'
-alias greh='git reset --hard'
 alias grh='git reset HEAD'
 alias grh1='git reset HEAD~'
 alias grh2='git reset HEAD~2'
 alias grhh='git reset HEAD --hard'
-alias git_rollback='git reset'
+alias gro='git reset $(git_tracking)'
+alias grt='git reset $(git_tracking)'
 # Amend last commit
 alias gam='git commit --amend'
 alias git_amend='git commit --amend'
