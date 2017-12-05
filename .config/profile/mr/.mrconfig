@@ -1,3 +1,6 @@
+[ALIAS]
+include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/lib.d/alias"
+
 [DEFAULT]
 #skip = mr_skip
 skip = [ ! -z "$VCSH_REPO_NAME" ] && echo "WARNING: Mr is run from a VCSH repo !!!!"
