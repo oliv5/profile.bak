@@ -1,5 +1,5 @@
 [ALIAS]
-include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/lib.d/alias"
+include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/lib.d/alias" 2>/dev/null || true
 
 [DEFAULT]
 #skip = mr_skip
