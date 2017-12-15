@@ -1274,6 +1274,11 @@ alias gcp='git cherry-pick'
 # Rebase aliases
 alias grb='git rebase'
 alias grbi='git rebase -i'
+alias grbi1='git rebase -i HEAD~1'
+alias grbi2='git rebase -i HEAD~2'
+alias grbi3='git rebase -i HEAD~3'
+alias grbi4='git rebase -i HEAD~4'
+alias grbi5='git rebase -i HEAD~5'
 # Fetch/pull/push aliases
 alias gpu='git push'
 alias gpua='git_push_all'
