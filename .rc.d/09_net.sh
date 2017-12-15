@@ -195,3 +195,9 @@ ssh_get_server_pubkey() {
   ssh-keyscan host > "$FILE" 2>/dev/null
   ssh-keygen -l -f "$FILE"
 }
+
+############################
+# quvi download
+quvi_get() {
+  quvi "$@" --exec 'wget %u -O %t.%e'
+}
