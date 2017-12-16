@@ -89,7 +89,8 @@ DisplayQuestion() {
     read -p "$2 " ANSWER </dev/tty
     echo $ANSWER
   else
-    echo $(zenity --title "$1" --entry --hide-text --text="$2" --timeout 30 | sed 's/^[ \t]*//;s/[ \t]*$//')
+    #echo $(zenity --title "$1" --entry --hide-text --text="$2" --timeout 30 | sed 's/^[ \t]*//;s/[ \t]*$//')
+    echo $(zenity --title "$1" --entry --hide-text --text="$2" | sed 's/^[ \t]*//;s/[ \t]*$//')
   fi
 }
 
@@ -107,7 +108,8 @@ DisplayList() {
     read -p "$DESCR " ANSWER </dev/tty
     echo $ANSWER
   else
-    zenity --list --radiolist --timeout 30 --title "$TITLE" --text "$DESCR" --column "$HEADER1" --column "$HEADER2" "$@"
+    #zenity --list --radiolist --timeout 30 --title "$TITLE" --text "$DESCR" --column "$HEADER1" --column "$HEADER2" "$@"
+    zenity --list --radiolist --title "$TITLE" --text "$DESCR" --column "$HEADER1" --column "$HEADER2" "$@"
   fi
 }
 
