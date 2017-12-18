@@ -35,7 +35,7 @@ mkctags() {
   ln -fs "${CTAGS_DB}" "${DST}/tags"
 }
 
-# Scan directory for cscope files
+# Scan directory and build cscope file list incrementally
 scancsdir() {
   # Get directories, remove ~/
   local SRC="$(eval echo ${1:-$PWD})"
@@ -43,11 +43,11 @@ scancsdir() {
   # Get options
   local CSCOPE_FILES="$DST/${_CSCOPE_FILES}"
   # Scan directory
-  ( set -f; find -L "$SRC" $_CSCOPE_EXCLUDE -regextype posix-egrep -regex "$_CSCOPE_REGEX" -type f -execdir readlink -f "{}" \; > "$CSCOPE_FILES" )
+  ( set -f; find -L "$SRC" $_CSCOPE_EXCLUDE -regextype posix-egrep -regex "$_CSCOPE_REGEX" -type f -execdir readlink -f "{}" \; >> "$CSCOPE_FILES" )
 }
 
 # Make cscope db from source list file
-mkcscope_1() {
+mkcscope() {
   command -v >/dev/null cscope || return
   # Get directories, remove ~/
   local SRC="$(eval echo ${1:-$PWD})"
@@ -65,7 +65,7 @@ mkcscope_1() {
 # Scan and make cscope db
 # Warning: this is not incremental
 # It erases the old database and rebuild it
-mkcscope_2() {
+mkcscope_clean() {
   command -v >/dev/null cscope || return
   # Get directories, remove ~/
   local SRC="$(eval echo ${1:-$PWD})"
@@ -74,14 +74,8 @@ mkcscope_2() {
   local CSCOPE_OPTIONS="$_CSCOPE_OPTS $3"
   local CSCOPE_DB="$DST/${_CSCOPE_OUT}"
   # Build tag file
-  #find -L "$SRC" $_CSCOPE_EXCLUDE -regextype posix-egrep -regex "$_CSCOPE_REGEX" -type f -printf '"%p"\n'
   ( set -f; find -L "$SRC" $_CSCOPE_EXCLUDE -regextype posix-egrep -regex "$_CSCOPE_REGEX" -type f -execdir readlink -f "{}" \; |\
     command cscope $CSCOPE_OPTIONS -i '-' -f "$CSCOPE_DB" )
-}
-
-# Cscope alias - use a fct because aliases are not exported to other fct
-mkcscope() {
-  mkcscope_1 "$@"
 }
 
 # Make id-utils db
