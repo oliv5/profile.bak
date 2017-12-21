@@ -1,4 +1,5 @@
 #!/bin/sh
+# https://www.bootc.net/archives/2013/06/09/my-perfect-gnupg-ssh-agent-setup/
 
 # SSH-agent
 ssh_agent() {
@@ -42,9 +43,8 @@ gpg_agent_ssh() {
 # Start gnome keyring daemon
 gnome_keyring_agent() {
 	command -v gnome-keyring-daemon >/dev/null 2>&1 || return 1
-	if ! pgrep -f gnome-keyring-daemon >/dev/null; then
-		rm -r "/run/user/$(id -u)/keyring/" 2>/dev/null
-		eval "$(gnome-keyring-daemon -r -d 2>/dev/null)"
+	if pgrep -f '^gnome-keyring-daemon' >/dev/null; then
+		GNOME_KEYRING_CONTROL="/run/user/$(id -u)/keyring"
 	fi
 	eval "$(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh,gpg 2>/dev/null)"
 	export SSH_AUTH_SOCK GNOME_KEYRING_CONTROL
