@@ -216,3 +216,5 @@ alias c='cat'
 # Misc
 alias mo='mimeopen'
 alias s='silent'
+alias ag='alias | grep'
+alias agi='alias | grep -i'

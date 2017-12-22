@@ -1226,6 +1226,7 @@ alias grm='git rm'
 alias grmu='git clean -fn'
 alias gmv='git mv'
 # Logs/history aliases
+alias gl='git log --oneline'
 alias glg='git log --oneline | grep'
 alias glgi='git log --oneline | grep -i'
 alias gln='git log --oneline -n'
@@ -1273,6 +1274,7 @@ alias grh2='git reset HEAD~2'
 alias grhh='git reset HEAD --hard'
 alias gro='git reset $(git_tracking)'
 alias grt='git reset $(git_tracking)'
+grev() { git reset "$@"; git checkout -- "$@"; }
 # Amend last commit
 alias gam='git commit --amend'
 alias git_amend='git commit --amend'
