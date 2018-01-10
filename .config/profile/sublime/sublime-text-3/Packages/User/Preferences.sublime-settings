@@ -1,0 +1,44 @@
+{
+	"color_scheme": "Packages/User/SublimeLinter/Made of Code (SL).tmTheme",
+	"file_exclude_patterns":
+	[
+		"*.pyc",
+		"*.pyo",
+		"*.exe",
+		"*.dll",
+		"*.obj",
+		"*.o",
+		"*.a",
+		"*.lib",
+		"*.so",
+		"*.dylib",
+		"*.ncb",
+		"*.sdf",
+		"*.suo",
+		"*.pdb",
+		"*.idb",
+		"*.class",
+		"*.psd",
+		"*.db",
+		"*.sublime-workspace",
+		"*.sublime-project",
+		"tags",
+		".tags*",
+		".id",
+		".cscope.*",
+		".pycscope.*",
+		".git*",
+		".svn"
+	],
+	"ignored_packages":
+	[
+		"Package Control",
+		"Vintage"
+	],
+	"theme": "Aristocat.sublime-theme",
+	"theme_asphalt_show_input_dropdowon": true,
+	"theme_asphalt_show_panel_close": false,
+	"theme_asphalt_status_bar_brighter": false,
+	"theme_asphalt_tabs_small": true,
+	"update_check": false
+}
