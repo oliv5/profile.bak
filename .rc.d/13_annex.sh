@@ -213,7 +213,7 @@ annex_enum() {
       local GPG_RECIPIENT="$3"
       local GPG_TRUST="${4:+--trust-model always}"
       echo "List annex into $LIST"
-      git annex find "$(git_root)" --in . --or --not --in . --print0 | xargs -r0 -n1 sh -c '
+      git --git-dir="$(git_dir)" annex find "$(git_root)" --in . --or --not --in . --print0 | xargs -r0 -n1 sh -c '
         LIST="$1"; FILE="$2"
         printf "\"%s\" <- \"%s\"\n" "$(readlink -- "$FILE")" "$FILE" | grep -F ".git/annex" >> "${LIST%.*}"
       ' _ "$LIST"
