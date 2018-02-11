@@ -21,16 +21,13 @@ mkdir_mv() {
 }
 
 ################################
-# Rsync replicate tree (without files)
-alias rsync_mktree='rsync -a -f"+ */" -f"- *"'
-# Rsync copy tree (with files)
-alias rsync_cptree='rsync -a'
-# Rsync copy file (with tree)
-alias rsync_cp='rsync -R'
-# Rsync move file (with tree)
-alias rsync_mv='rsync -R --remove-source-files'
-# Rsync update timestamp only
-alias rsync_timestamp='rsync -vrt --size-only --existing'
+# Rsync
+alias rsync_cp='rsync -a' # Recursive copy
+alias rsync_mv='rsync -a --remove-source-files' # Recursive move
+alias rsync_mktree='rsync -a -f"+ */" -f"- *"'  # Replicate tree
+alias rsync_cptree='rsync -R' # Copy & keep relative tree
+alias rsync_mvtree='rsync -R --remove-source-files' # Move & keep relative tree
+alias rsync_timestamp='rsync -rt --size-only --existing' # Update timestamps only
 
 ##############################
 # Copy files & preserve permissions
