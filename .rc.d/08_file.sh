@@ -7,6 +7,7 @@ alias fsize='stat -L -c %s'
 ################################
 # http://unix.stackexchange.com/questions/59112/preserve-directory-structure-when-moving-files-using-find
 # Move by replicating directory structure
+# See also rsync_mktree
 mkdir_mv() {
   local SRC="$1"
   local DST="$(path_abs "${2:-.}")"
@@ -97,16 +98,6 @@ mkdir_mv() {
       done
     ' "$DST" {} +
 }
-
-################################
-# Rsync replicate tree (without files)
-alias rsync_mktree='rsync -a -f"+ */" -f"- *"'
-# Rsync copy tree (with files)
-alias rsync_cptree='rsync -a'
-# Rsync copy file (with tree)
-alias rsync_cp='rsync -R'
-# Rsync move file (with tree)
-alias rsync_mv='rsync -R --remove-source-files'
 
 ################################
 # Move files from multiple sources while filtering extensions

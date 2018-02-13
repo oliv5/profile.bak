@@ -213,6 +213,14 @@ alias mg='mount | grep'
 # Cat
 alias c='cat'
 
+# Rsync
+alias rcp='rsync_cp'
+alias rmv='rsync_mv'
+alias rmktree='rsync_mktree'
+alias rcptree='rsync_cptree'
+alias rmvtree='rsync_mvtree'
+alias rts='rsync_timestamp'
+
 # Misc
 alias mo='mimeopen'
 alias s='silent'
