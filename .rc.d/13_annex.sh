@@ -29,6 +29,7 @@ alias gand='git annex drop'
 alias gandd='git annex forget --drop-dead'
 alias gani='git annex info'
 alias gan='git annex'
+alias annex='git annex'
 
 ########################################
 # Check annex exists
