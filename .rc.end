@@ -197,9 +197,13 @@ alias it='iftop'
 alias sns='sudo netstat -an'
 alias snst='sudo netstat -antp'
 alias snsu='sudo netstat -anup'
+alias snstp='sudo netstat -antp'
+alias snsup='sudo netstat -anup'
 alias snsg='sudo netstat -an | grep'
 alias snstg='sudo netstat -antp | grep'
 alias snsug='sudo netstat -anup | grep'
+alias snstpg='sudo netstat -antp | grep'
+alias snsupg='sudo netstat -anup | grep'
 alias snh='sudo nethogs'
 
 # History
