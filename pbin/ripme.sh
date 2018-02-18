@@ -54,6 +54,8 @@ OVERWRITE=""
 USERNAME=""
 DELTMP=""
 METHOD="mplayer"
+MPLAYER_LIB="dvdnav"
+MPLAYER_OPT=""
 CODEC="ogg"
 DEVINFO="/tmp/$(basename $0).$(date +%s).tmp"
 SPEED_DVD=(1 2 4 8 12 16)
@@ -84,7 +86,7 @@ do case "$OPTNAME" in
        echo >&2 "-t type    Media type: (auto), dvd, cdda"
        echo >&2 "-d device  Device name in /dev (/dev/dvd)"
        echo >&2 "-e speed   Device read speed : 1, (2), ..."
-       echo >&2 "-m method  Ripping method: tccat, (mplayer), vlc, cdparanoia"
+       echo >&2 "-m method  Ripping method: tccat, (mplayer), mplayer_dvdnav, mplayer_dvdread, vlc, cdparanoia"
        echo >&2 "-o dir     Output directory (current)"
        echo >&2 "-i dir     Audio output directory override (none)"
        echo >&2 "-f file    Output filename (media title)"
@@ -172,9 +174,19 @@ if [ ! -d "$ODIR" ]; then
   ExitHandler 1
 fi
 
-# Mplayer needs a home (!!)
-if [ "$METHOD" = "mplayer" ]; then
+# Mplayer specific options
+if [ "${METHOD%%_*}" = "mplayer" ]; then
+  # DVD processing lib: libdvdnav (dvdnav) or libdvdread (dvd)
+  MPLAYER_LIB="${METHOD##*_}"
+  if [ "${METHOD##*_}" = "dvdread" ]; then
+    MPLAYER_LIB="dvd"
+  else
+    MPLAYER_LIB="dvdnav"
+    MPLAYER_OPT="-nocache"
+  fi
+  # Mplayer needs a home (!!)
   export MPLAYER_HOME="$(mktemp -d)"
+  METHOD="mplayer"
 fi
 
 # Set device speed
@@ -234,7 +246,7 @@ if [ "$TYPE" = "dvd" ]; then
     if [ "$METHOD" = "mplayer" ]; then
 
       # Proceed with the dump
-      $DRYRUN mplayer -quiet -input nodefault-bindings -noconsolecontrols -nolirc ${SPEED:+-dvd-speed $SPEED} dvd://${TRACK} ${DEVICE:+-dvd-device "$DEVICE"} -dumpstream -dumpfile "$DUMPFILE"
+      $DRYRUN mplayer -quiet -input nodefault-bindings -noconsolecontrols -nolirc ${SPEED:+-dvd-speed $SPEED} ${MPLAYER_LIB}://${TRACK} ${DEVICE:+-dvd-device "$DEVICE"} ${MPLAYER_OPT} -dumpstream -dumpfile "$DUMPFILE"
 
     elif [ "$METHOD" = "vlc" ]; then
 
