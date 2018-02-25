@@ -55,8 +55,8 @@ if ! command -v repo >/dev/null 2>&1; then
 	mkdir -p "$HOME/bin/externals"
 	curl https://storage.googleapis.com/git-repo-downloads/repo > "$HOME/bin/externals/repo" && 
 		chmod a+x "$HOME/bin/externals/repo"
-	git clone https://gerrit.googlesource.com/git-repo "$HOME/bin/git-repo" && 
-		chmod a+x "$HOME/bin/git-repo/repo"
+	#git clone https://gerrit.googlesource.com/git-repo "$HOME/bin/git-repo" && 
+	#	chmod a+x "$HOME/bin/git-repo/repo"
 fi
 
 ###################
