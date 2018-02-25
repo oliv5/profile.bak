@@ -15,10 +15,12 @@ export PATH="$PATH:$HOME/bin:$HOME/bin/vcsh:$HOME/bin/mr"
 export PATH="$PATH:$HOME/bin/externals:$HOME/bin/git-repo"
 
 ###################
-# Ask for private directory
-read -p "Enter private data directory in \$HOME: " PRIVATE
-export PRIVATE="$HOME/${PRIVATE:-private}"
-mkdir -p "$PRIVATE"
+# Setup private data folder
+if [ ! -d "$PRIVATE" ]; then
+	read -p "Private data directory in \$HOME (default is '\$HOME/private'): " PRIVATE
+	export PRIVATE="$HOME/${PRIVATE:-private}"
+	mkdir -p "$PRIVATE"
+fi
 
 ###################
 # Download and install vcsh if not already there
@@ -30,23 +32,13 @@ if ! command -v vcsh >/dev/null 2>&1; then
 fi
 
 # Clone profile repository
-cd "$HOME"
 read -p "Clone profile ? (y/n) " REPLY
 if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
+	cd "$HOME"
 	vcsh clone https://github.com/oliv5/profile.git profile ||
 		{ vcsh profile pull; vcsh profile reset --hard; } || 
 		exit 0
 fi
-#{
-#	TMPDIR="$(mktemp -d)"
-#	echo "Move existing files into backup directory: $TMPDIR"
-#	vcsh profile ls-files --with-tree=origin/master -c | 
-#		while IFS='\0' read F; do
-#			[ -e "$F" ] && mv "$F" "$TMPDIR/"
-#		done
-#	vcsh profile pull
-#	vcsh profile reset --hard
-#}
 
 ###################
 # Download and install mr if not already there
@@ -68,9 +60,16 @@ if ! command -v repo >/dev/null 2>&1; then
 fi
 
 ###################
-# Setup bin repo
-if [ -r "$HOME/pbin/bin.xml" ]; then
-    command -v repo >/dev/null || { echo "Error: cannot find repo..."; exit 1; }
-    mkdir -p "$HOME/bin"
-    repo sync -u "$HOME/pbin/bin.xml"
+# Clone home repository
+read -p "Home repository URL (enpty to skip): " REPLY
+if [ -n "$REPLY" ]; then
+	cd "$HOME"
+	vcsh clone "$REPLY"
+fi
+
+###################
+# Checkout remaining repositories
+read -p "Clone remaining repositories ? (y/n) " REPLY
+if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
+	mr checkout
 fi
