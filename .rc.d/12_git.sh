@@ -745,10 +745,9 @@ git_stash_backup() {
   git_exists || return 1
   local DST="$(git_dir)/backup"
   local IFS="$(printf '\n')"
-  local DESCR
   mkdir -p "$DST"
   git stash list --format="%H %h %gd" | while IFS=" " read -r HASH SHORT NAME; do
-    local FILE="$DST/stash_${NAME}_${SHORT}.gz"
+    local FILE="$DST/stash_${SHORT}.gz"
     if [ ! -e "$FILE" ]; then
       echo "Backup $HASH in $FILE"
       git stash show -p "$HASH" "$@" | gzip --best > "$FILE"
