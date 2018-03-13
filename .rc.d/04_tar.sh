@@ -26,6 +26,7 @@ tad() {
   local DST="${1:?No output directory specified...}"
   local SRC
   shift
+  mkdir -p "$DST"
   for SRC; do
     tar -xvf "$SRC" -C "$DST"
   done
@@ -90,6 +91,7 @@ tgzd() {
   local DST="${1:?No output directory specified...}"
   local SRC
   shift
+  mkdir -p "$DST"
   for SRC; do
     tar -xvzf "$SRC" -C "$DST"
   done
@@ -164,6 +166,7 @@ tbzd() {
   local DST="${1:?No output directory specified...}"
   local SRC
   shift
+  mkdir -p "$DST"
   for SRC; do
     tar -xvjf "$SRC" -C "$DST"
   done
@@ -229,6 +232,7 @@ txzd() {
   local DST="${1:?No output directory specified...}"
   local SRC
   shift
+  mkdir -p "$DST"
   for SRC; do
     #xz -d --stdout "$SRC" | tar -xvf - -C "$DST"
     tar -xvJf "$SRC" -C "$DST"
@@ -332,6 +336,7 @@ t7zgd(){
   local DST="${1:?No output directory specified...}"
   local SRC
   shift 1
+  mkdir -p "$DST"
   for SRC; do
     local TMP="$(mktemp --suffix=.7z -u)"
     gpg --decrypt --batch -o "$TMP" "$SRC"
