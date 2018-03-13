@@ -213,6 +213,7 @@ alias hgi='history | grep -i'
 
 # Mount
 alias mg='mount | grep'
+alias mount_private='mount_private_ecryptfs'
 
 # Cat
 alias c='cat'

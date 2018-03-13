@@ -56,7 +56,7 @@ wget_ext() {
 # Wget list urls
 wget_ls() {
   wget --spider --force-html --no-directories --no-parent -r -l2 "${@:?No url specified...}" 2>&1 | 
-    awk '/^--/{print $3}' | uniq | grep -ve '\.\(css\|js\|png\|gif\|jpg\)$'
+    awk '/^--/{print $3}'
 }
 
 # HTML to pdf

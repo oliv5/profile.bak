@@ -1155,7 +1155,8 @@ alias gdl='git diff --name-only'
 alias gdll='git diff --name-status'
 alias gds='git diff stash'
 # Merge aliases
-alias gmm='git mergetool -y'
+#alias gmm='git mergetool -y'
+alias gmm='gstx UU | xargs -0 git mergetool -y'
 # Branch aliases
 alias gba='git branch -a'   # list all
 alias gbl='git branch -l'   # list local
