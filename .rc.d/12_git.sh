@@ -121,7 +121,7 @@ git_branch() {
   #git branch -a | grep -E '^\*' | cut -c 3-
   #git for-each-ref --format='%(objectname) %(refname:short)' refs/heads | awk "/^$(git rev-parse HEAD)/ {print \$2}"
   # The following works for detached heads too
-  git ${2:+--git-dir="$2"} describe --contains --all "${1:-HEAD}" 2>/dev/null
+  { git ${2:+--git-dir="$2"} symbolic-ref "${1:-HEAD}" 2>/dev/null || echo "(detached head)"; } | sed 's;refs/heads/;;'
 }
 
 # Get current branch tracking
@@ -863,6 +863,24 @@ git_amend_names() {
   # Execute the script
   git filter-branch -f --env-filter "$SCRIPT" $REV
 )
+}
+
+# Amend commit log (with git filter-branch).
+git_amend_log() {
+  ( set -e
+    local FROM="$(git_hash ${1:?No SHA1_1 specified...})"
+    local NEWLOG="${2:?No new log specified...}"
+    local TO="${3:-$(git_branch)}"
+    local BRANCH="${4:-$(git_branch)}"
+    git_modified && return 1
+    git_tag_create "git_amend_log"
+    git branch _tmp_git_amend_log "${TO}"
+    local SCRIPT="if [ \"\$GIT_COMMIT\" = \"$FROM\" ]; then echo \"$NEWLOG\"; else cat; fi"
+    git filter-branch -f --msg-filter "$SCRIPT" -- ${FROM}^.._tmp_git_amend_log || true
+    echo "Previous head was: $(git_hash)"
+    git update-ref refs/heads/"$BRANCH" refs/heads/_tmp_git_amend_log
+    git branch -d _tmp_git_amend_log
+  )
 }
 
 ########################################
