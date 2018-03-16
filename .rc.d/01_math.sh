@@ -29,17 +29,22 @@ alias uint16='_int $((1<<16))'
 alias uint32='_int $((1<<32))'
 alias uint64='_int $((1<<64))'
 
-# Int to hex
-int2hex() {
-  ( echo "obase=16" ; echo "$@" ) | bc
-}
-hex2int() {
-  ( echo "obase=10" ; echo "$@" ) | bc
+# Computations using bc
+alias calc2='calc "obase=2;"'
+alias calc8='calc "obase=8;"'
+alias calc10='calc "obase=10;"'
+alias calc16='calc "obase=16;"'
+alias int2hex='calc16'
+alias hex2int='calc10'
+calc() {
+  echo "$@" | bc
 }
 
-# Int to hex file conversion
-fint2hex() {
-  ( echo "obase=16" ; cat "$@" ) | bc
+# File conversion using bc
+alias fint2hex='fcalc 16'
+alias fhex2int='fcalc 10'
+fcalc() {
+  ( echo "obase=$1"; shift; cat "$@" ) | bc
 }
 
 # Hexdump to txt
