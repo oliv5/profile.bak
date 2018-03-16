@@ -209,8 +209,15 @@ git_url() {
 }
 
 # Check if a repo has been modified
+# https://stackoverflow.com/questions/5139290/how-to-check-if-theres-nothing-to-be-committed-in-the-current-branch
 git_modified() {
-  ! git ${1:+--git-dir="$1"} diff-index --quiet HEAD --
+  #! git ${1:+--git-dir="$1"} diff-files --quiet --ignore-submodules || ! git ${1:+--git-dir="$1"} diff-index --cached --quiet --ignore-submodules HEAD --
+  ! git ${1:+--git-dir="$1"} diff --quiet || ! git ${1:+--git-dir="$1"} diff --cached --quiet
+}
+
+# Check if repo has untracked files
+git_untracked() {
+  [ "$(git ${1:+--git-dir="$1"} ls-files --other --exclude-standard --directory)" != "" ]
 }
 
 # Git status for scripts
@@ -681,10 +688,16 @@ git_stash_create() {
 git_stash_pop() {
   git stash pop "stash@{${1:-0}}"
 }
+git_stash_pop_forced() {
+  git stash show -p "stash@{${1:-0}}" | git apply && git stash drop "stash@{${1:-0}}"
+}
 
 # Apply change from stash
 git_stash_apply() {
   git stash apply "stash@{${1:-0}}"
+}
+git_stash_apply_forced() {
+  git stash show -p "stash@{${1:-0}}" | git apply
 }
 git_stash_apply_branch() {
   git stash branch "$(git_stash_name "${1:-0}")" "stash@{${1:-0}}"
@@ -873,7 +886,7 @@ git_amend_log() {
     local TO="${3:-$(git_branch)}"
     local BRANCH="${4:-$(git_branch)}"
     git_modified && return 1
-    git_tag_create "git_amend_log"
+    #git_tag_create "git_amend_log"
     git branch _tmp_git_amend_log "${TO}"
     local SCRIPT="if [ \"\$GIT_COMMIT\" = \"$FROM\" ]; then echo \"$NEWLOG\"; else cat; fi"
     git filter-branch -f --msg-filter "$SCRIPT" -- ${FROM}^.._tmp_git_amend_log || true
@@ -883,9 +896,26 @@ git_amend_log() {
   )
 }
 
-########################################
-# Purge a given file from history
-git_purge_file() {
+# Amend commit file (with git filter-branch).
+git_amend_file() {
+  ( set -e
+    local FROM="$(git_hash ${1:?No SHA1_1 specified...})"
+    local TO="${2:-$(git_branch)}"
+    local BRANCH="${3:-$(git_branch)}"
+    ! git_modified && return 1
+    git stash
+    git branch _tmp_git_amend_log "${TO}"
+    local SCRIPT="git stash show -p | git apply"
+    git filter-branch -f --tree-filter "$SCRIPT" -- ${FROM}.._tmp_git_amend_log || true
+    echo "Previous head was: $(git_hash)"
+    git update-ref refs/heads/"$BRANCH" refs/heads/_tmp_git_amend_log
+    git branch -d _tmp_git_amend_log
+    git stash pop
+  )
+}
+
+# Prune a given file from history
+git_prune_file() {
   local FILE="${1:?No path specified...}"
   git filter-branch --force --index-filter \
     "git rm --cached --ignore-unmatch '$FILE'" \
@@ -893,7 +923,7 @@ git_purge_file() {
 }
 
 # Purge commits from a given author
-git_purge_author() {
+git_prune_author() {
   local NAME="${1:?No name specified...}"
   local REV="${2:-HEAD}"
   git filter-branch --commit-filter \
@@ -901,6 +931,7 @@ git_purge_author() {
     $REV
 }
 
+########################################
 # Forced garbage-collector (use after purge_file) 
 git_purge_gc() {
   git for-each-ref --format='delete %(refname)' refs/original | git update-ref --stdin
@@ -1330,8 +1361,6 @@ alias gcfg='git config -g'
 # Git ignore changes
 alias git_ignore_changes='git update-index --assume-unchanged'
 alias git_noignore_changes='git update-index --no-assume-unchanged'
-# cd aliases
-alias gr='cd "$(git_root)"'
 # gitk aliases
 alias gk='gitk'
 # ls aliases
