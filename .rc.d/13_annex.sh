@@ -330,7 +330,7 @@ _annex_rsync() {
   # Get/copy/drop all missing local files
   local TMPFILE="$(tempfile)"
   git annex find --not --in . --print0 "$@" | xargs -r0 -n1 sh -c '
-    DBG="$1²";RSYNC_OPT="$2";TMPFILE="$3";DST="$4/$5";SRC="$5"
+    DBG="$1";RSYNC_OPT="$2";TMPFILE="$3";DST="$4/$5";SRC="$5"
     if [ -n "$(rsync -ni --ignore-existing "$TMPFILE" "$DST")" ]; then
       $DBG git annex get ${FROM:+--from "$FROM"} "$SRC" || exit $?
       while ! $DBG rsync $RSYNC_OPT "$SRC" "$(dirname "$DST")/"; do true; done
@@ -670,6 +670,34 @@ annex_purge() {
     rm "$F" 2>/dev/null
   done
   git annex sync
+}
+
+########################################
+# Populate a special remote directory with files from the input source
+# The current repository is used to find out keys & file names,
+# but is not used directly to copy/move the files from
+# WHERE selects which files & repo to look for
+# MOVE=1 moves files instead of copying them
+alias annex_populate='MOVE= _annex_populate'
+alias annex_populated='MOVE=1 _annex_populate'
+_annex_populate() {
+  local DST="${1:?No dst directory specified...}"
+  local SRC="${2:-$PWD}"
+  local WHERE="${3:-${WHERE:---include '*'}}"
+  eval git annex find "$WHERE" --format='\${file}\\000\${hashdirlower}\${key}/\${key}\\000' | xargs -r0 -n2 sh -c '
+    MOVE="$1"; SRC="$2/$4"; DST="$3/$5"
+    echo "$SRC -> $DST"
+    if [ -r "$SRC" ]; then
+      mkdir -p "$(dirname "$DST")"
+      if [ -n "$MOVE" -a ! -h "$SRC" ]; then
+        mv -f -T "$SRC" "$DST"
+      else
+        rsync -K -L --protect-args "$SRC" "$DST"
+      fi
+    else
+      echo "Skip unreadable source file"
+    fi
+  ' _ "$MOVE" "$SRC" "$DST"
 }
 
 ########################################
