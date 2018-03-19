@@ -679,23 +679,21 @@ annex_purge() {
 # WHERE selects which files & repo to look for
 # MOVE=1 moves files instead of copying them
 alias annex_populate='MOVE= _annex_populate'
-alias annex_populated='MOVE=1 _annex_populate'
+alias annex_populatem='MOVE=1 _annex_populate'
 _annex_populate() {
   local DST="${1:?No dst directory specified...}"
   local SRC="${2:-$PWD}"
   local WHERE="${3:-${WHERE:---include '*'}}"
   eval git annex find "$WHERE" --format='\${file}\\000\${hashdirlower}\${key}/\${key}\\000' | xargs -r0 -n2 sh -c '
     MOVE="$1"; SRC="$2/$4"; DST="$3/$5"
-    echo "$SRC -> $DST"
     if [ -r "$SRC" ]; then
+      echo "$SRC -> $DST"
       mkdir -p "$(dirname "$DST")"
       if [ -n "$MOVE" -a ! -h "$SRC" ]; then
         mv -f -T "$SRC" "$DST"
       else
         rsync -K -L --protect-args "$SRC" "$DST"
       fi
-    else
-      echo "Skip unreadable source file"
     fi
   ' _ "$MOVE" "$SRC" "$DST"
 }
