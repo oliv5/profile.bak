@@ -84,8 +84,8 @@ annex_init_hubic() {
   local ENCRYPTION="${2:-none}"
   local REMOTEPATH="${3:-$(git_repo)}"
   local KEYID="$4"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no keyid+="$KEYID" ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no keyid="$KEYID" 
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no ${KEYID:+keyid="$KEYID"} ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no ${KEYID:+keyid="$KEYID"}
 }
 
 # Init gdrive annex
@@ -94,8 +94,8 @@ annex_init_gdrive() {
   local ENCRYPTION="${2:-none}"
   local REMOTEPATH="${3:-$(git_repo)}"
   local KEYID="$4"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" keyid+="$KEYID" ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" keyid="$KEYID" 
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" ${KEYID:+keyid="$KEYID"} ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" ${KEYID:+keyid="$KEYID"}
 }
 
 # Init bup annex
@@ -104,8 +104,8 @@ annex_init_bup() {
   local ENCRYPTION="${2:-none}"
   local REMOTEPATH="${3:-$(git_repo)}"
   local KEYID="$4"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" keyid+="$KEYID" ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" keyid="$KEYID" 
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" ${KEYID:+keyid="$KEYID"} ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" ${KEYID:+keyid="$KEYID"}
 }
 
 # Init rsync annex
@@ -114,8 +114,8 @@ annex_init_rsync() {
   local ENCRYPTION="${2:-none}"
   local REMOTEPATH="${3:-$(git_repo)}"
   local KEYID="$4"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" keyid+="$KEYID" ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" keyid="$KEYID"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" ${KEYID:+keyid="$KEYID"} ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" ${KEYID:+keyid="$KEYID"}
   git config --add annex.sshcaching false
 }
 
@@ -125,8 +125,8 @@ annex_init_gcrypt() {
   local ENCRYPTION="${2:-none}"
   local REMOTEPATH="${3:-$(git_repo)}"
   local KEYID="$4"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" keyid+="$KEYID" ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" keyid="$KEYID"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" ${KEYID:+keyid="$KEYID"} ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" ${KEYID:+keyid="$KEYID"}
   git config --add annex.sshcaching false
 }
 
