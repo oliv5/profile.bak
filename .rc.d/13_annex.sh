@@ -306,43 +306,47 @@ _annex_transfer() {
 # $FROM is used to selected the origin repo
 # $DROP is used to drop the newly retrieved files
 # $DBG is used to print the command on stderr
-# $DELETE is used to delete the missing existing files
-alias annex_rsync='DBG= DELETE= DROP=1 _annex_rsync'
-alias annex_rsyncd='DBG= DELETE=2 DROP=1 _annex_rsync'
-alias annex_rsyncds='DBG= DELETE=1 DROP=1 _annex_rsync'
+# $DELETE is used to delete the missing existing files (1=dry-run, 2=do-it)
+# $RSYNC_OPT gives rsync options
+alias annex_rsync='DBG= DELETE= DROP=1 RSYNC_OPT= _annex_rsync'
+alias annex_rsyncd='DBG= DELETE=2 DROP=1 RSYNC_OPT= _annex_rsync'
+alias annex_rsyncds='DBG= DELETE=1 DROP=1 RSYNC_OPT= _annex_rsync'
 _annex_rsync() {
   annex_exists || return 1
   local DST="${1:?No destination specified...}"
   local SRC="${PWD}"
   local DBG="${DBG:+echo}"
-  local RSYNC_OPT="-v -r -z -s -i --inplace --size-only --progress -K -L -P --exclude=.git/"
+  local RSYNC_OPT="${RSYNC_OPT:--v -r -z -s -i --inplace --size-only --progress -K -L -P}"
   [ $# -gt 0 ] && shift
   [ "${SRC%/}" = "${DST%/}" ] && return 2
-  # Copy local files
-  for F in "${@:-}"; do
-    if [ -d "$SRC/$F" ]; then
-      while ! $DBG rsync $RSYNC_OPT "$SRC/${F:+$F/}" "$DST/${F:+$F/}"; do true; done
-    else
-      while ! $DBG rsync $RSYNC_OPT "$SRC/$F" "$(dirname "$DST/$F")/"; do true; done
-    fi
-  done
-  [ "$DROP" = "2" ] && $DBG git annex drop --in . "$@"
-  # Get/copy/drop all missing local files
-  local TMPFILE="$(tempfile)"
-  git annex find --not --in . --print0 "$@" | xargs -r0 -n1 sh -c '
-    DBG="$1";RSYNC_OPT="$2";TMPFILE="$3";DST="$4/$5";SRC="$5"
-    if [ -n "$(rsync -ni --ignore-existing "$TMPFILE" "$DST")" ]; then
-      $DBG git annex get ${FROM:+--from "$FROM"} "$SRC" || exit $?
-      while ! $DBG rsync $RSYNC_OPT "$SRC" "$(dirname "$DST")/"; do true; done
+  if git_bare; then
+    echo "NOT TESTED YET. Press enter to go on..." && read NOP
+    # Bare repositories do not have "git annex find"
+    find annex/objects -type f | while read SRCNAME; do
+      annex_fromkey "$SRCNAME" | xargs -0 -rn1 echo | while read DSTNAME; do
+        while ! $DBG rsync $RSYNC_OPT "${SRC}/${SRCNAME}" "${DST}/${DSTNAME}"; do sleep 1; done
+      done
+    done
+  else
+    # Plain git repositories
+    # Get & copy local files one by one
+    git annex find --include='*' --print0 "$@" | xargs -0 -rn1 sh -c '
+      DBG="$1";RSYNC_OPT="$2";DST="$3/$4";SRC="$4"
+      if [ -L "$SRC" -a ! -e "$SRC" ]; then
+        $DBG git annex get ${FROM:+--from "$FROM"} "$SRC" || exit $?
+      else
+        unset DROP
+      fi
+      while ! $DBG rsync $RSYNC_OPT "$SRC" "$DST"; do sleep 1; done
       [ -n "$DROP" ] && $DBG git annex drop "$SRC"
       exit 0
+    ' _ "$DBG" "$RSYNC_OPT" "$DST"
+    # Delete missing destination files
+    if [ "$DELETE" = 1 ]; then
+      while ! $DBG rsync -rni --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC/" "$DST/"; do sleep 1; done
+    elif [ "$DELETE" = 2 ]; then
+      while ! $DBG rsync -ri --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC/" "$DST/"; do sleep 1; done
     fi
-  ' _ "$DBG" "$RSYNC_OPT" "$TMPFILE" "$DST"
-  # Delete missing destination files
-  if [ "$DELETE" = 1 ]; then
-    while ! $DBG rsync -rni --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC" "$DST"; do true; done
-  elif [ "$DELETE" = 2 ]; then
-    while ! $DBG rsync -ri --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC" "$DST"; do true; done
   fi
 }
 
@@ -545,8 +549,9 @@ alias annex_du='git annex info --fast'
 # multiple files mapped to a single key
 annex_fromkey() {
   for KEY; do
+    KEY="$(basename "$KEY")"
     #git show -999999 -p --no-color --word-diff=porcelain -S "$KEY" | 
-    git log -p --no-color --word-diff=porcelain -S "$KEY" | 
+    git log -n 1 -p --no-color --word-diff=porcelain -S "$KEY" |
       awk '/^(---|\+\+\+) (a|b)/{line=$0} /'$KEY'/{printf "%s\0",substr(line,5); exit 0}' |
       # Remove leading/trailing double quotes, leading "a/", trailing spaces.
       # Escape '%'
@@ -561,6 +566,24 @@ annex_fromkey() {
   done
 }
 
+# Get key from file name
+annex_getkey() {
+  git annex find --include='*' "${@}" --format='${key}\000'
+}
+annex_gethashdir() {
+  git annex find --include='*' "${@}" --format='${hashdirlower}\000'
+}
+annex_gethashdirmixed() {
+  git annex find --include='*' "${@}" --format='${hashdirmixed}\000'
+}
+annex_gethashpath() {
+  git annex find --include='*' "${@}" --format='${hashdirlower}${key}/${key}\000'
+}
+annex_gethashpathmixed() {
+  git annex find --include='*' "${@}" --format='${hashdirmixed}${key}/${key}\000'
+}
+
+########################################
 # List unused files matching pattern
 annex_unused() {
   ! annex_bare || return 1
