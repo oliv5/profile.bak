@@ -1205,7 +1205,7 @@ alias gdll='git diff --name-status'
 alias gds='git diff stash'
 # Merge aliases
 #alias gmm='git mergetool -y'
-alias gmm='gstx UU | xargs -0 git mergetool -y'
+alias gmm='gstx UU | xargs -r0 -n1 git mergetool -y'
 # Branch aliases
 alias gba='git branch -a'   # list all
 alias gbl='git branch -l'   # list local
@@ -1290,6 +1290,13 @@ alias gla='git shortlog -s -n'
 alias glt='git log --graph'
 alias glh='git log -p'
 alias git_history='git log -p'
+# Reflog
+alias grl='git reflog'
+alias grl1='git reflog -n 1'
+alias grl2='git reflog -n 2'
+alias grl3='git reflog -n 3'
+alias grl5='git reflog -n 5'
+alias grl10='git reflog -n 10'
 # Tag aliases
 alias gta='git tag -a'
 alias gtl='git tag -l'
