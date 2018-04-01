@@ -1289,6 +1289,7 @@ alias glS='git log -S'
 alias gla='git shortlog -s -n'
 alias glt='git log --graph'
 alias glh='git log -p'
+alias glha='git log --pretty=format: --name-only --diff-filter=A | sort -u'
 alias git_history='git log -p'
 # Reflog
 alias grl='git reflog'
