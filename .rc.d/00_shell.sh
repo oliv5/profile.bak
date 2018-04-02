@@ -107,6 +107,12 @@ die() {
 }
 
 ################################
+# Directory management
+dir_empty() {
+  test -z "$(find "$1" -mindepth 1 -printf X -quit)"
+}
+
+################################
 # Create an unamed pipe
 mkpipe() {
   for P; do
