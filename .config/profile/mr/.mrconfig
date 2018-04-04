@@ -6,11 +6,11 @@ skip = [ ! -z "$VCSH_REPO_NAME" ] && echo "WARNING: Mr is run from a VCSH repo !
 
 # Load git library
 lib = export PATH="$HOME/pbin:$PATH"
-	  . "$RC_DIR/.rc.d/06_mount.sh"
-	  . "$RC_DIR/.rc.d/12_git.sh"
-	  . "$RC_DIR/.rc.d/13_vcsh.sh"
-	  . "$RC_DIR/.rc.d/13_annex.sh"
-	  . "$RC_DIR/.rc.d/13_repo.sh"
+	  . "${RC_DIR:-$HOME}/.rc.d/06_mount.sh"
+	  . "${RC_DIR:-$HOME}/.rc.d/12_git.sh"
+	  . "${RC_DIR:-$HOME}/.rc.d/13_vcsh.sh"
+	  . "${RC_DIR:-$HOME}/.rc.d/13_annex.sh"
+	  . "${RC_DIR:-$HOME}/.rc.d/13_repo.sh"
 
 # Include our repositories
 include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/lib.d/null"
