@@ -530,11 +530,14 @@ git_bundle() {
     local BUNDLE="$DIR/${2:-$(git_name "bundle").git}"
     local GPG_RECIPIENT="$3"
     local GPG_TRUST="${4:+--trust-model always}"
+    local OWNER="${5:-$USER}"
     echo "Git bundle into $BUNDLE"
     git bundle create "$BUNDLE" --all
+    chown "$OWNER" "$BUNDLE"
     if [ ! -z "$GPG_RECIPIENT" ]; then
       gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${BUNDLE}" &&
         (shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
+      chown "$OWNER" "${BUNDLE}.gpg"
     fi
     ls -l "${BUNDLE}"*
   else

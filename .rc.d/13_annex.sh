@@ -176,6 +176,7 @@ annex_bundle() {
       local BUNDLE="$DIR/${2:-$(git_name "annex").tgz}"
       local GPG_RECIPIENT="$3"
       local GPG_TRUST="${4:+--trust-model always}"
+      local OWNER="${5:-$USER}"
       echo "Tar annex into $BUNDLE"
       if annex_bare; then
         tar zcf "${BUNDLE}" --exclude='*/creds/*' -h ./annex
@@ -184,9 +185,11 @@ annex_bundle() {
           awk '{print "\""$0"\""}' |
           xargs -r tar zcf "${BUNDLE}" -h --exclude-vcs --
       fi
+      chown "$OWNER" "$BUNDLE"
       if [ ! -z "$GPG_RECIPIENT" ]; then
         gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${BUNDLE}" &&
           (shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
+        chown "$OWNER" "${BUNDLE}.gpg"
       fi
       ls -l "${BUNDLE}"*
     else
