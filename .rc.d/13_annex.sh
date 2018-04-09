@@ -30,11 +30,6 @@ alias gandd='git annex forget --drop-dead'
 alias gani='git annex info'
 alias gan='git annex'
 alias annex='git annex'
-# Assistant
-alias ganweb='git annex webapp'
-alias ganass='git annex assistant'
-alias annex_webapp='git annex webapp'
-alias annex_assistant='git annex assistant'
 
 ########################################
 # Check annex exists
@@ -168,6 +163,12 @@ annex_enabled() {
     grep -vE "${EXCLUDE:-$^}" | 
     awk -F. '{print $2}' | xargs
 }
+
+########################################
+# Assistant
+alias annex_webapp='git annex webapp'
+alias annex_assistant='git annex assistant --autostart'
+alias annex_assistant_all='git annex assistant --autostart'
 
 ########################################
 # Annex bundle
