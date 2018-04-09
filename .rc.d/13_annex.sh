@@ -167,8 +167,9 @@ annex_enabled() {
 ########################################
 # Assistant
 alias annex_webapp='git annex webapp'
-alias annex_assistant='git annex assistant --autostart'
-alias annex_assistant_all='git annex assistant --autostart'
+alias annex_assistant='git annex assistant'
+alias annex_assistant_auto='git annex assistant --autostart'
+alias annex_assistant_stop='git annex assistant --stop; git annex assistant --autostop'
 
 ########################################
 # Annex bundle
