@@ -3,7 +3,6 @@
 # This function prints each argument wrapped in single quotes
 # (separated by spaces).  Any single quotes embedded in the
 # arguments are escaped.
-#
 arg_quote() {
   local SEP=''
   for ARG; do
@@ -11,6 +10,9 @@ arg_quote() {
     printf '%s' "${SEP}'${SQESC}'"
     SEP=' '
   done
+}
+quote() {
+  printf '"%s" ' "$@"
 }
 
 # Right trim shell parameters. Adds quotes
