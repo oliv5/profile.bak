@@ -32,7 +32,7 @@ _path_remove() {
   shift
   local DIR
   for DIR; do
-    eval export $VAR="$(eval echo "\$$VAR" | sed -e "s;${DIR}:\?;;g")"
+    eval export $VAR="$(eval echo "\$$VAR" | sed -r "s;${DIR}:?;;g")"
   done
 }
 
