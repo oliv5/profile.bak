@@ -96,6 +96,9 @@ diffru() {
 diffrn() {
   rsync -avsn --ignore-existing "$@"
 }
+diffrs() {
+  rsync -rvn --size-only "$@"
+}
 
 ########################################
 ########################################
