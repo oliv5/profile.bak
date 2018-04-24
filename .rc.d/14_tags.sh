@@ -2,13 +2,12 @@
 # Note: this file must be independant, it can be sourced by external scripts
 
 # Ctags settings
-_CTAGS_OPTS='-R --c++-kinds=+p --fields=+iaS --extra=+qf'
+_CTAGS_OPTS='--fields=+iaS --extra=+qf --c++-kinds=+p --python-kinds=-i'
 _CTAGS_OUT='.tags'
 
 # Cscope settings
-#_CSCOPE_OPTS='-qb'
 _CSCOPE_OPTS='-qbk'
-_CSCOPE_REGEX='.*\.(h|c|cc|cpp|hpp|inc|S)$'
+_CSCOPE_REGEX='.*\.(h|c|cc|cpp|hpp|inc|py|S)$'
 _CSCOPE_EXCLUDE='-not -path "*.svn*" -and -not -path "*.git" -and -not -path "/tmp/*"'
 _CSCOPE_OUT='.cscope.out'
 _CSCOPE_FILES='.cscope.files'
@@ -25,8 +24,9 @@ mkctags() {
   # Get directories, remove ~/
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
+  shift $(($#<=2?$#:2))
   # Get options
-  local CTAGS_OPTIONS="$_CTAGS_OPTS $3"
+  local CTAGS_OPTIONS="$_CTAGS_OPTS -R $@"
   local CTAGS_DB="${DST}/${_CTAGS_OUT}"
   # Build tag file
   #$(which ctags) $CTAGS_OPTIONS "${CTAGS_DB}" "${SRC}" 2>&1 >/dev/null | \
@@ -40,6 +40,7 @@ scancsdir() {
   # Get directories, remove ~/
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
+  shift $(($#<=2?$#:2))
   # Get options
   local CSCOPE_FILES="$DST/${_CSCOPE_FILES}"
   # Scan directory
@@ -52,8 +53,9 @@ mkcscope() {
   # Get directories, remove ~/
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
+  shift $(($#<=2?$#:2))
   # Get options
-  local CSCOPE_OPTIONS="$_CSCOPE_OPTS $3"
+  local CSCOPE_OPTIONS="$_CSCOPE_OPTS $@"
   local CSCOPE_FILES="$DST/${_CSCOPE_FILES}"
   local CSCOPE_DB="$DST/${_CSCOPE_OUT}"
   # Build file list
@@ -70,8 +72,9 @@ mkcscope_clean() {
   # Get directories, remove ~/
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
+  shift $(($#<=2?$#:2))
   # Get options
-  local CSCOPE_OPTIONS="$_CSCOPE_OPTS $3"
+  local CSCOPE_OPTIONS="$_CSCOPE_OPTS $@"
   local CSCOPE_DB="$DST/${_CSCOPE_OUT}"
   # Build tag file
   ( set -f; find -L "$SRC" $_CSCOPE_EXCLUDE -regextype posix-egrep -regex "$_CSCOPE_REGEX" -type f -execdir readlink -f "{}" \; |\
@@ -84,6 +87,7 @@ mkids() {
   # Get directories, remove ~/
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
+  shift $(($#<=2?$#:2))
   # build db
   ( cd "$SRC"
     command mkid -o "$DST/${_ID_OUT}"
@@ -96,6 +100,7 @@ mkpycscope() {
   # Get directories, remove ~/
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
+  shift $(($#<=2?$#:2))
   # Build tag file
   command pycscope -R -f "$DST/${_PYCSCOPE_OUT}" "$SRC"
 }
@@ -106,6 +111,7 @@ mkgtags() {
   # Get directories, remove ~/
   local SRC="$(eval echo ${1:-$PWD})"
   local DST="$(eval echo ${2:-$PWD})"
+  shift $(($#<=2?$#:2))
   # Build tag file
   if [ -z "$1" ]; then
     gtags "$DST"
