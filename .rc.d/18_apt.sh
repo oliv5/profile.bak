@@ -41,7 +41,7 @@ dpkg_unlock() {
 }
 alias apt_lock='sudo apt-mark hold'
 alias apt_unlock='sudo apt-mark unhold'
-alias apt_lslock='sudo apt-mark showhold'
+alias apt_ls_lock='sudo apt-mark showhold'
 alias aptitude_lock='sudo aptitude hold'
 alias aptitude_unlock='sudo aptitude unhold'
 
@@ -55,3 +55,24 @@ kernel_current() {
 kernel_others() {
   dpkg -l 'linux-*' | sed '/^ii/!d;/'"$(uname -r | sed "s/\(.*\)-\([^0-9]\+\)/\1/")"'/d;s/^[^ ]* [^ ]* \([^ ]*\).*/\1/;/[0-9]/!d'
 }
+
+# Script to get all the PPA installed on a system
+# https://askubuntu.com/questions/148932/how-can-i-get-a-list-of-all-repositories-and-ppas-from-the-command-line-into-an
+apt_ls_ppa() {
+  for APT in `find /etc/apt/ -name \*.list`; do
+      grep -Po "(?<=^deb\s).*?(?=#|$)" $APT | while read ENTRY ; do
+          HOST=`echo $ENTRY | cut -d/ -f3`
+          USER=`echo $ENTRY | cut -d/ -f4`
+          PPA=`echo $ENTRY | cut -d/ -f5`
+          #echo sudo apt-add-repository ppa:$USER/$PPA
+          if [ "ppa.launchpad.net" = "$HOST" ]; then
+              echo ppa:$USER/$PPA
+          else
+              echo \'${ENTRY}\'
+          fi
+      done
+  done
+}
+
+# Remove ppa
+alias apt_rm_ppa='sudo add-apt-repository --remove'

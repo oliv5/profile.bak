@@ -660,6 +660,11 @@ git_stash_name() {
   git stash list | awk "NR==$((${1:-0}+1)){print \$2}"
 }
 
+# Get stash count
+git_stash_count() {
+  git stash list | wc -l
+}
+
 # Push changes onto stash, revert changes
 git_stash_save() {
   local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
@@ -680,6 +685,7 @@ git_stash_save_lazy() {
 
 # Push changes onto stash, does not revert anything
 git_stash_create() {
+  [ $(git_stash_count) -gt 0 ] || { echo "ERROR: no initial stash..."; return 1; }
   local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
   local REF="$(git stash create)"
   true "${REF:?Nothing to stash...}"
