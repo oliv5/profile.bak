@@ -1,4 +1,7 @@
 *
+!/.bash_completion
+!/.bash_completion.d
+!/.bash_completion.d/git
 !/.bash_login
 !/.bash_logout
 !/.bash_profile
@@ -29,6 +32,8 @@
 !/.config/profile/desktop/si.png
 !/.config/profile/desktop/xkill.desktop
 !/.config/profile/desktop/xkill.png
+!/.config/profile/manifest
+!/.config/profile/manifest/bin.xml
 !/.config/profile/mr
 !/.config/profile/mr/.mrconfig
 !/.config/profile/sourceinsight
@@ -71,41 +76,56 @@
 !/.config/profile/sourceinsight/macros/snippet.em
 !/.config/profile/sourceinsight/Si3572Setup.exe.7z
 !/.config/profile/sourceinsight/Si3581Setup.exe.7z
+!/.config/profile/sourceinsight/Si3583Setup.exe
 !/.config/profile/sourceinsight/UserManual.pdf
 !/.config/profile/sublime
-!/.config/profile/sublime/packagelist.txt
+!/.config/profile/sublime/doc
+!/.config/profile/sublime/doc/Sublime-Text-3-Full-Documentation.7z
 !/.config/profile/sublime/packages
-!/.config/profile/sublime/packages/Installed Packages
-!/.config/profile/sublime/packages/Installed Packages/0_package_control_loader.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/Alignment.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/BracketHighlighter.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/C++ Snippets.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/CTags.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/DocBlockr.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/FileDiffs.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/File History.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/GitGutter.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/GotoDocumentation.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/Move By Symbols.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/Package Control.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/PackageResourceViewer.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/SideBarEnhancements.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/SublimeLinter-cppcheck.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/Theme - Aristocat.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/Theme - Asphalt.sublime-package
-!/.config/profile/sublime/packages/Installed Packages/Trimmer.sublime-package
-!/.config/profile/sublime/packages/Packages
-!/.config/profile/sublime/packages/Packages/Anaconda.7z
-!/.config/profile/sublime/packages/Packages/bz2.7z
-!/.config/profile/sublime/packages/Packages/ssl-linux.7z
-!/.config/profile/sublime/packages/Packages/SublimeLinter.7z
-!/.config/profile/sublime/packages/Packages/SublimeREPL.7z
-!/.config/profile/sublime/packages/Packages/Terminal.7z
-!/.config/profile/sublime/packages/Packages/Theme - Spacegray.7z
+!/.config/profile/sublime/packages/Anaconda.7z
+!/.config/profile/sublime/packages/bz2.7z
+!/.config/profile/sublime/packages/packagelist.txt
+!/.config/profile/sublime/packages/ssl-linux.7z
+!/.config/profile/sublime/packages/SublimeLinter.7z
+!/.config/profile/sublime/packages/SublimeREPL.7z
+!/.config/profile/sublime/packages/Terminal.7z
+!/.config/profile/sublime/packages/Theme - Spacegray.7z
+!/.config/profile/sublime/setup
 !/.config/profile/sublime/setup.sh
-!/.config/profile/sublime/sublime_text_3_build_3083_x64.tar.bz2
-!/.config/profile/sublime/sublime_text_3_build_3103_x64.tar.bz2
-!/.config/profile/sublime/Sublime-Text-3-Full-Documentation.7z
+!/.config/profile/sublime/setup/sublime_text_3_build_3083_x64.tar.bz2
+!/.config/profile/sublime/setup/sublime_text_3_build_3103_x64.tar.bz2
+!/.config/profile/sublime/setup/sublime_text_3_build_3143_x64.tar.bz2
+!/.config/profile/sublime/sublime-text-3
+!/.config/profile/sublime/sublime-text-3/Installed Packages
+!/.config/profile/sublime/sublime-text-3/Installed Packages/0_package_control_loader.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/Alignment.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/BracketHighlighter.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/C++ Snippets.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/CTags.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/DocBlockr.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/FileDiffs.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/File History.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/GitGutter.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/GotoDocumentation.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/Move By Symbols.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/Package Control.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/PackageResourceViewer.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/SideBarEnhancements.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/SublimeLinter-cppcheck.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/Theme - Aristocat.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/Theme - Asphalt.sublime-package
+!/.config/profile/sublime/sublime-text-3/Installed Packages/Trimmer.sublime-package
+!/.config/profile/sublime/sublime-text-3/Packages
+!/.config/profile/sublime/sublime-text-3/Packages/colorschemes
+!/.config/profile/sublime/sublime-text-3/Packages/colorschemes/Harper.tmTheme
+!/.config/profile/sublime/sublime-text-3/Packages/colorschemes/Made of Code.tmTheme
+!/.config/profile/sublime/sublime-text-3/Packages/User
+!/.config/profile/sublime/sublime-text-3/Packages/User/CTags.sublime-settings
+!/.config/profile/sublime/sublime-text-3/Packages/User/Default (Linux).sublime-keymap
+!/.config/profile/sublime/sublime-text-3/Packages/User/Default (Linux).sublime-mousemap
+!/.config/profile/sublime/sublime-text-3/Packages/User/Preferences.sublime-settings
+!/.config/profile/sublime/sublime-text-3/Packages/User/SublimeLinter
+!/.config/profile/sublime/sublime-text-3/Packages/User/SublimeLinter/Made of Code (SL).tmTheme
 !/.config/profile/vscode
 !/.config/profile/vscode/global-6.5.4.tar.gz
 !/.config/profile/vscode/ms-vscode.cpptools-0.5.0.7z
@@ -134,6 +154,9 @@
 !/.config/vim/vim-legacy/samples/syntax
 !/.config/vim/vim-legacy/samples/syntax/zsplog.vim
 !/.config/vim/vim-legacy/.vim
+!/.config/vim/vim-legacy/.vim/after
+!/.config/vim/vim-legacy/.vim/after/plugin
+!/.config/vim/vim-legacy/.vim/after/plugin/after.vim
 !/.config/vim/vim-legacy/.vim/bundle
 !/.config/vim/vim-legacy/.vim/bundle/bufline
 !/.config/vim/vim-legacy/.vim/bundle/bufline/doc
@@ -693,6 +716,160 @@
 !/.config/vim/vim-legacy/.vim/bundle/vim-ide~/vim-support/templates/regex.templates
 !/.config/vim/vim-legacy/.vim/bundle/vim-ide~/vim-support/templates/statements.templates
 !/.config/vim/vim-legacy/.vim/bundle/vim-ide~/vim-support/templates/Templates
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/compiler
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/compiler/tex.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/catalog.xml
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/db2vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/db2vim/db2vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/db2vim/domutils.py
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/db2vim/textutils.py
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/imaps.txt
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/latexhelp.txt
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/latex-suite-chunk.xsl
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/latex-suite-common.xsl
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/latex-suite.css
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/latex-suite-quickstart.css
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/latex-suite-quickstart.txt
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/latex-suite-quickstart.xml
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/latex-suite.txt
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/latex-suite.xml
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/latex-suite.xsl
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/Makefile
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/Makefile.in
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/README
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/doc/README.new
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/bib_latexSuite.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/bibtex.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/bibtools.py
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/brackets.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/compiler.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/custommacros.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/diacritics.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/dictionaries
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/dictionaries/dictionary
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/dictionaries/SIunits
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/elementmacros.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/envmacros.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/folding.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/macros
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/macros/example
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/main.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/mathmacros-utf.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/mathmacros.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/multicompile.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/outline.py
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/accents
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/acromake
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/afterpage
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/alltt
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/amsmath
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/amsthm
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/amsxtra
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/arabic
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/array
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/babel
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/bar
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/biblatex
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/bm
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/bophook
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/boxedminipage
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/caption2
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/cases
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/ccaption
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/changebar
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/chapterbib
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/cite
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/color
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/comma
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/csquotes
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/deleq
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/drftcite
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/dropping
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/enumerate
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/eqlist
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/eqparbox
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/everyshi
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/exmpl
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/fixme
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/flafter
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/float
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/floatflt
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/fn2end
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/footmisc
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/geometry
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/german
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/graphicx
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/graphpap
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/harpoon
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/hhline
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/histogram
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/hyperref
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/ifthen
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/inputenc
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/letterspace
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/lineno
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/longtable
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/lscape
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/manyfoot
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/moreverb
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/multibox
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/multicol
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/newalg
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/ngerman
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/numprint
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/oldstyle
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/outliner
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/overcite
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/pagenote
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/parallel
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/plain
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/plates
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/polski
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/psgo
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/schedule
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/SIunits
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/textfit
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/times
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/tipa
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/ulem
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/url
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/verbatim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages/version
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/packages.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/projecttemplate.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/pytools.py
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/smartspace.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/templates
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/templates/article.tex
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/templates/IEEEtran.tex
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/templates/report.tex
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/templates/report_two_column.tex
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/templates.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/texmenuconf.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/texproject.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/texrc
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/texviewer.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/version.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/latex-suite/wizardfuncs.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ftplugin/tex_latexSuite.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/.gitignore
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/indent
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/indent/tex.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/latextags
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/ltags
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/Makefile
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/Makefile.in
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/plugin
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/plugin/filebrowser.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/plugin/imaps.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/plugin/remoteOpen.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/plugin/SyntaxFolds.vim
+!/.config/vim/vim-legacy/.vim/bundle/vim-latex~/vim-latex.metainfo.xml
 !/.config/vim/vim-legacy/.vim/bundle/vim-misc~
 !/.config/vim/vim-legacy/.vim/bundle/vim-misc~/addon-info.json
 !/.config/vim/vim-legacy/.vim/bundle/vim-misc~/autoload
@@ -760,6 +937,7 @@
 !/.config/vim/vim-spf13/setup.sh
 !/.config/vim/vim-spf13/uninstall.sh
 !/.config/vim/vim-spf13/update.sh
+!/.config/vim/vim-spf13/.vimrc.after.local
 !/.config/vim/vim-spf13/.vimrc.before.local
 !/.config/vim/vim-spf13/.vimrc.bundles.local
 !/.config/vim/vim-spf13/.vimrc.local
@@ -770,8 +948,10 @@
 !/.gitignore.d/profile
 !/.inputrc
 !/.mkshrc
+!/.mrconfig
 !/pbin
 !/pbin/audio.sh
+!/pbin/bin.xml
 !/pbin/bootstrap.sh
 !/pbin/checkbashisms.sh
 !/pbin/crontab-setup.sh
@@ -791,6 +971,7 @@
 !/pbin/externals/mr/url.txt
 !/pbin/externals/mr/webcheckout
 !/pbin/externals/repo
+!/pbin/externals/setup-externals.sh
 !/pbin/externals/svnmerge.py
 !/pbin/externals/vcsh
 !/pbin/externals/vcsh/README.md
@@ -798,12 +979,17 @@
 !/pbin/externals/vcsh/vcsh
 !/pbin/externals/vcsh/_vcsh
 !/pbin/game.sh
+!/pbin/git-annex-decrypt.sh
+!/pbin/gnomeshell-extension-manage
+!/pbin/gpg-export.sh
 !/pbin/gpg.sh
 !/pbin/gps.sh
 !/pbin/gshell
 !/pbin/hwctrl.sh
 !/pbin/locations.sh
 !/pbin/move.sh
+!/pbin/openssl.sh
+!/pbin/pdfdiff.sh
 !/pbin/resources
 !/pbin/resources/cron.backup.template.sh
 !/pbin/resources/cron.bundle.template.sh
@@ -821,6 +1007,7 @@
 !/pbin/rsync.sh
 !/pbin/schedule.sh
 !/pbin/si.sh
+!/pbin/syshealth.sh
 !/pbin/unity
 !/pbin/upload.sh
 !/pbin/woof
@@ -833,15 +1020,18 @@
 !/.rc.d/01_fct.sh
 !/.rc.d/01_math.sh
 !/.rc.d/01_path.sh
+!/.rc.d/01_str.sh
 !/.rc.d/02_cd.sh
 !/.rc.d/03_search.sh
 !/.rc.d/04_7z.sh
+!/.rc.d/04_gz.sh
 !/.rc.d/04_tar.sh
 !/.rc.d/04_xz.sh
 !/.rc.d/04_zip.sh
 !/.rc.d/05_diff.sh
 !/.rc.d/06_mount.sh
 !/.rc.d/08_convert.sh
+!/.rc.d/08_file.sh
 !/.rc.d/08_fs.sh
 !/.rc.d/08_monitor.sh
 !/.rc.d/08_pwr.sh
@@ -862,6 +1052,7 @@
 !/.rc.d/19_display.sh
 !/.rc.d/20_media.sh
 !/.rc.d/20_printer.sh
+!/.rc.d/20_wine.sh
 !/.rc.d/24_bluetooth.sh
 !/.rc.d/24_wifi.sh
 !/.rc.d/25_adb.sh
@@ -869,21 +1060,23 @@
 !/.rc.d/98_screen.sh
 !/.rc.d/98_tmux.sh
 !/.rc.d/android
-!/.rc.d/android/01_shell.sh
 !/.rc.d/android/03_search.sh
 !/.rc.d/android/08_sys.sh
+!/.rc.d/android/rc.list
 !/.rc.d/bash
 !/.rc.d/bash/01_stack.sh
 !/.rc.d/bash/01_trap.sh
 !/.rc.d/bash/02_cd.sh
-!/.rc.d/bash/03_basic_search.sh
-!/.rc.d/bash/03_search.sh
 !/.rc.d/bash/08_sys.sh
 !/.rc.d/bash/10_misc.sh
-!/.rc.d/bash/11_dev.sh
-!/.rc.d/.permissions
+!/.rc.d/bash/disabled
+!/.rc.d/bash/disabled/03_basic_search.sh
+!/.rc.d/bash/disabled/03_search.sh
+!/.rc.d/bash/disabled/11_dev.sh
+!/.rc.d/rc.list
 !/.rc.d/test
 !/.rc.d/test/00_shell.sh
+!/.rc.d/test/annex_populate.sh
 !/.rc.d/test/io_test.sh
 !/.rc.d/test/trap_test.sh
 !/.rc.end
