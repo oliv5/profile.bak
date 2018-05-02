@@ -13,6 +13,8 @@ PASSPHRASE=""
 RECIPIENT=""
 NB_ENCRYPT=0
 NB_DECRYPT=0
+GPG_VERSION=$(gpg --version | cut -f3 -d' ' | awk -F'.' '{printf "%.d%.2d%.2d",$1,$2,$3; exit}')
+GPG_VERSION_2_2_4=20204
 
 # Options
 EN_ENCRYPT=1
@@ -116,10 +118,18 @@ DisplayList() {
 GetRecipient() {
     local IFS=":"
     # List the available keys
-    if [ -n "$PUB_KEYS" ]; then
-      set -- $(gpg --list-keys --with-colons | awk -F: 'BEGIN{num=0} /pub/{num++;printf "%s:%s:",(num==1)?"TRUE":"",$10}')
+    if [ $GPG_VERSION -ge $GPG_VERSION_2_2_4 ]; then
+      if [ -n "$PUB_KEYS" ]; then
+        set -- $(gpg --list-keys --with-colons | awk -F: 'BEGIN{num=0} /uid/{num++;printf "%s:%s:",(num==1)?"TRUE":"",$10}')
+      else
+        set -- $(gpg --list-secret-keys --with-colons | awk -F: 'BEGIN{num=0} /uid/{num++;printf "%s:%s:",(num==1)?"TRUE":"",$10}')
+      fi
     else
-      set -- $(gpg --list-secret-keys --with-colons | awk -F: 'BEGIN{num=0} /sec/{num++;printf "%s:%s:",(num==1)?"TRUE":"",$10}')
+      if [ -n "$PUB_KEYS" ]; then
+        set -- $(gpg --list-keys --with-colons | awk -F: 'BEGIN{num=0} /pub/{num++;printf "%s:%s:",(num==1)?"TRUE":"",$10}')
+      else
+        set -- $(gpg --list-secret-keys --with-colons | awk -F: 'BEGIN{num=0} /sec/{num++;printf "%s:%s:",(num==1)?"TRUE":"",$10}')
+      fi
     fi
     DisplayList "Encryption Keys" "Select the encryption key:" "*" "Available keys:" "$@"
 }
