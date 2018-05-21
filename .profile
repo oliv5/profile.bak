@@ -6,7 +6,7 @@
 #umask 022
 
 # Misc variables
-[ -z "$USER" ] && export USER="$(id -un)"
+[ -z "$USER" ] && export USER="$(id -un 2>/dev/null || id -u)"
 [ -z "$HOME" ] && export HOME="$(grep "$USER" /etc/passwd 2>/dev/null || echo ":::::$PWD/$USER" | cut -d: -f6)"
 [ -z "$LOGNAME" ] && export LOGNAME="$USER"
 [ -z "$HOSTNAME" ] && export HOSTNAME="$(hostname 2>/dev/null || uname -n)"
