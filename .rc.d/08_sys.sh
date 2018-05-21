@@ -104,3 +104,13 @@ user_rename() {
     return 0
   fi
 }
+
+################################
+# List kernel modules
+alias kernel_lsmod='find /lib/modules/$(uname -r) -type f -name "*.ko*"'
+alias kernel_lsmodg='find /lib/modules/$(uname -r) -type f -name "*.ko*" | grep'
+kernel_lsmodk() {
+  for MOD; do
+    grep "$MOD" /lib/modules/$(uname -r)/modules.dep
+  done
+}
