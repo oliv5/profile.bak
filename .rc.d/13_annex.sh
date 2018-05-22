@@ -481,7 +481,8 @@ annex_upkeep() {
     fi
   fi
   # Connected network device
-  if [ -n "$NETWORK_DEVICE" ] && ! ip addr show dev "$NETWORK_DEVICE" 2>/dev/null | grep "state UP" >/dev/null; then
+  #if [ -n "$NETWORK_DEVICE" ] && ! ip addr show dev "$NETWORK_DEVICE" 2>/dev/null | grep "state UP" >/dev/null; then
+  if [ -n "$NETWORK_DEVICE" ] && ! ip addr show dev "$NETWORK_DEVICE" 2>/dev/null | head -n 1 | grep "UP" >/dev/null; then
     echo "[warning] network interface '$NETWORK_DEVICE' is not connected. Disable file content transfer..."
     unset CONTENT
     unset GET
