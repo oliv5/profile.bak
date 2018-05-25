@@ -28,7 +28,7 @@ gpg_agent() {
 		kill -0 "$GPG_AGENT_PID" 2>/dev/null; then
 		export GPG_AGENT_INFO="$(cat "$GPG_AGENT_FILE")"
 	else
-		eval "$(gpg-agent -q -s --daemon "$@")" &&
+		eval "$(gpg-agent -q -s --daemon "$@" 2>/dev/null)" &&
 			{ echo "$GPG_AGENT_INFO" > "$GPG_AGENT_FILE"; } ||
 			{ rm "$GPG_AGENT_FILE"; }
 	fi
