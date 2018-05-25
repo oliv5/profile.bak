@@ -335,12 +335,14 @@ _annex_rsync() {
   local RSYNC_OPT="${RSYNC_OPT:--v -r -z -s -i --inplace --size-only --progress -K -L -P}"
   [ $# -gt 0 ] && shift
   [ "${SRC%/}" = "${DST%/}" ] && return 2
+  [ "${DST%%:*}" = "${DST}" ] && DST="localhost:${DST}"
   if git_bare; then
     # Bare repositories do not have "git annex find"
     echo "BARE REPOS NOT TESTED YET. Press enter to go on..." && read NOP
     find annex/objects -type f | while read SRCNAME; do
       annex_fromkey "$SRCNAME" | xargs -0 -rn1 echo | while read DSTNAME; do
-        while ! $DBG rsync $RSYNC_OPT "${SRC}/${SRCNAME}" "${DST}/${DSTNAME}"; do sleep 1; done
+        DSTDIR="$(dirname "${DST##*:}/${DSTNAME}")"
+        while ! $DBG rsync --rsync-path="mkdir -p \"${DSTDIR}\" && rsync" $RSYNC_OPT "${SRC}/${SRCNAME}" "${DST}/${DSTNAME}"; do sleep 1; done
       done
     done
   else
@@ -353,7 +355,8 @@ _annex_rsync() {
       else
         unset DROP
       fi
-      while ! $DBG rsync $RSYNC_OPT "$SRC" "$DST"; do sleep 1; done
+      DSTDIR="$(dirname "${DST##*:}/${DSTNAME}")"
+      while ! $DBG rsync --rsync-path="mkdir -p \"${DSTDIR}\" && rsync" $RSYNC_OPT "$SRC" "$DST"; do sleep 1; done
       [ -n "$DROP" ] && $DBG git annex drop "$SRC"
       exit 0
     ' _ "$DBG" "$RSYNC_OPT" "$DST"
