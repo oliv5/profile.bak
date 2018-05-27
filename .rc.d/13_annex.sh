@@ -180,33 +180,33 @@ annex_bundle() {
     local DIR="${1:-$(git_dir)/bundle}"
     mkdir -p "$DIR"
     if [ -d "$DIR" ]; then
-      local BUNDLE="$DIR/${2:-$(git_name "annex").tgz}"
+      local OUT="$DIR/${2:-$(git_name "annex").tgz}"
       local GPG_RECIPIENT="$3"
       local GPG_TRUST="${4:+--trust-model always}"
       local OWNER="${5:-$USER}"
-      echo "Tar annex into $BUNDLE"
+      echo "Tar annex into $OUT"
       if annex_bare; then
-        tar zcf "${BUNDLE}" --exclude='*/creds/*' -h ./annex
+        tar zcf "${OUT}" --exclude='*/creds/*' -h ./annex
       else
         git annex find | 
           awk '{print "\""$0"\""}' |
-          xargs -r tar zcf "${BUNDLE}" -h --exclude-vcs --
+          xargs -r tar zcf "${OUT}" -h --exclude-vcs --
       fi
-      chown "$OWNER" "$BUNDLE"
+      chown "$OWNER" "$OUT"
       if [ ! -z "$GPG_RECIPIENT" ]; then
-        gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${BUNDLE}" &&
-          (shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
-        chown "$OWNER" "${BUNDLE}.gpg"
+        gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
+          (shred -fu "${OUT}" || wipe -f -- "${OUT}" || rm -- "${OUT}")
+        chown "$OWNER" "${OUT}.gpg"
       fi
-      ls -l "${BUNDLE}"*
+      ls -l "${OUT}"*
     else
       echo "Output directory '$DIR' cannot be created."
-      echo "Skip bundle creation..."
+      echo "Abort..."
       exit 1
     fi
   else
     echo "Repository '$(git_dir)' is not git-annex ready."
-    echo "Skip bundle creation..."
+    echo "Abort..."
     exit 1
   fi
   )
@@ -220,34 +220,81 @@ annex_enum() {
     local DIR="${1:-$(git_dir)/list}"
     mkdir -p "$DIR"
     if [ -d "$DIR" ]; then
-      local LIST="$DIR/${2:-$(git_name "annex.enum").txt.gz}"
+      local OUT="$DIR/${2:-$(git_name "annex.enum").txt.gz}"
       local GPG_RECIPIENT="$3"
       local GPG_TRUST="${4:+--trust-model always}"
-      echo "List annex into $LIST"
+      echo "List annex into $OUT"
       git --git-dir="$(git_dir)" annex find "$(git_root)" --in . --or --not --in . --print0 | xargs -r0 -n1 sh -c '
-        LIST="$1"; FILE="$2"
-        printf "\"%s\" <- \"%s\"\n" "$(readlink -- "$FILE")" "$FILE" | grep -F ".git/annex" >> "${LIST%.*}"
-      ' _ "$LIST"
-      if [ -r "${LIST%.*}" ]; then
-        gzip -S .gz -9 "${LIST%.*}"
+        OUT="$1"; FILE="$2"
+        printf "\"%s\" <- \"%s\"\n" "$(readlink -- "$FILE")" "$FILE" | grep -F ".git/annex" >> "${OUT%.*}"
+      ' _ "$OUT"
+      if [ -r "${OUT%.*}" ]; then
+        gzip -S .gz -9 "${OUT%.*}"
         if [ ! -z "$GPG_RECIPIENT" ]; then
-          gpg -v --output "${LIST}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${LIST}" &&
-            (shred -fu "${LIST}" || wipe -f -- "${LIST}" || rm -- "${LIST}")
+          gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
+            (shred -fu "${OUT}" || wipe -f -- "${OUT}" || rm -- "${OUT}")
         fi
-        ls -l "${LIST}"*
+        ls -l "${OUT}"*
       else
         echo "Listing is missing or empty."
-        echo "Skip list creation..."
+        echo "Abort..."
         exit 1
       fi
     else
       echo "Output directory '$DIR' cannot be created."
-      echo "Skip list creation..."
+      echo "Abort..."
       exit 1
     fi
   else
     echo "Repository '$(git_dir)' cannot be enumerated."
-    echo "Skip list creation..."
+    echo "Abort..."
+    exit 1
+  fi
+  )
+}
+
+# Print annex infos (inc. encryption ciphers)
+annex_getinfo() {
+  git annex info .
+  git show git-annex:remote.log
+  for REMOTE in ${@:-$(git_remotes)}; do
+    git annex info "$REMOTE"
+  done
+}
+
+# Store annex infos
+annex_info(){
+  ( set +e; # Need to go on
+  git_exists || return 1
+  if annex_std; then
+    local DIR="${1:-$(git_dir)/list}"
+    mkdir -p "$DIR"
+    if [ -d "$DIR" ]; then
+      local OUT="$DIR/${2:-$(git_name "annex.info").txt.gz}"
+      local GPG_RECIPIENT="$3"
+      local GPG_TRUST="${4:+--trust-model always}"
+      echo "Get repository info into $OUT"
+      annex_getinfo > "${OUT%.*}"
+      if [ -r "${OUT%.*}" ]; then
+        gzip -S .gz -9 "${OUT%.*}"
+        if [ ! -z "$GPG_RECIPIENT" ]; then
+          gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
+            (shred -fu "${OUT}" || wipe -f -- "${OUT}" || rm -- "${OUT}")
+        fi
+        ls -l "${OUT}"*
+      else
+        echo "Infos are missing or empty."
+        echo "Abort..."
+        exit 1
+      fi
+    else
+      echo "Output directory '$DIR' cannot be created."
+      echo "Abort..."
+      exit 1
+    fi
+  else
+    echo "Repository '$(git_dir)' cannot be enumerated."
+    echo "Abort..."
     exit 1
   fi
   )
