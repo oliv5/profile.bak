@@ -154,15 +154,13 @@ alias mount_sshfs_fast='sshfs -o cache=yes -o kernel_cache -o compression=no -o 
 mount_exec() {
   local MOUNT="${1:?No mount specified...}"
   shift
-  if ! mountpoint -q "$MOUNT"; then
-    sudo mount "$MOUNT"
-    trap "sudo umount -l '$MOUNT'" INT
-  fi
   if mountpoint -q "$MOUNT"; then
     eval "$@"
-    sudo umount -l "$MOUNT"
   else
-    echo "Path '$MOUNT' not mounted, skip it..."
+    trap "sudo umount -l '$MOUNT'" INT
+    sudo mount "$MOUNT" &&
+    eval "$@"
+    sudo umount -l "$MOUNT"
+    trap INT
   fi
-  trap INT
 }
