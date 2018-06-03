@@ -258,6 +258,7 @@ annex_getinfo() {
   git annex info .
   git show git-annex:remote.log
   for REMOTE in ${@:-$(git_remotes)}; do
+    echo '-------------------------'
     git annex info "$REMOTE"
   done
 }
@@ -711,7 +712,7 @@ annex_dropunused_interactive() {
 ########################################
 # Clean log by rebuilding branch git-annex & master
 # Similar to "git annex forget"
-annex_forget() {
+annex_cleanup() {
   # Stop on error
   ( set -e
     annex_exists || return 1
@@ -720,7 +721,7 @@ annex_forget() {
       return 2
     fi
     # Confirmation
-    read -r -p "Delete file $NUM ($KEY)? (y/n) " REPLY < /dev/tty
+    local REPLAY; read -r -p "Cleanup git-annex? (y/n) " REPLY < /dev/tty
     [ "$REPLY" != "y" -a "$REPLY" != "Y" ] && return 3
     # Rebuild master branch
     git branch -m old-master
@@ -740,6 +741,20 @@ annex_forget() {
     git prune
     git gc
   )
+}
+
+# Forget a special remote
+annex_forget_remote() {
+  # Confirmation
+  local REPLAY; read -r -p "Forget remotes (and cleanup git-annex history)? (y/n) " REPLY < /dev/tty
+  [ "$REPLY" != "y" -a "$REPLY" != "Y" ] && return 3
+  local OK=1
+  for REMOTE; do
+    git remote remove "$REMOTE" &&
+    git annex dead "$REMOTE" ||
+    OK=""
+  done
+  [ -n "$OK" ] && git annex forget --drop-dead --force
 }
 
 ########################################
