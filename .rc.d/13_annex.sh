@@ -353,7 +353,7 @@ _annex_transfer() {
       if [ -L "$SRC" -a ! -e "$SRC" ]; then
         $DBG git annex get ${FROM:+--from "$FROM"} "$SRC" || exit $?
       else
-        unset DROP
+        [ "$DROP" != "2" ] && unset DROP
       fi
       for REPO in $REPOS; do
         while ! $DBG git annex copy --to "$REPO" "$SRC"; do true; done
