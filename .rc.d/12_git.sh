@@ -685,12 +685,16 @@ git_stash_save_lazy() {
 
 # Push changes onto stash, does not revert anything
 git_stash_create() {
-  [ $(git_stash_count) -gt 0 ] || { echo "ERROR: no initial stash..."; return 1; }
   local STASH="$(git_name)${1:+.$1}"; shift 2>/dev/null
-  local REF="$(git stash create)"
-  true "${REF:?Nothing to stash...}"
-  git stash store -m "$STASH" "$REF" 2>/dev/null || 
-    git update-ref -m "$STASH" refs/stash "$REF"
+  if [ $(git_stash_count) -eq 0 ]; then
+    git stash save -q "$STASH" &&
+    git stash apply -q
+  else
+    local REF="$(git stash create)"
+    true "${REF:?Nothing to stash...}"
+    git stash store -m "$STASH" "$REF" 2>/dev/null ||
+      git update-ref -m "$STASH" refs/stash "$REF"
+  fi
 }
 
 # Pop change from stash
