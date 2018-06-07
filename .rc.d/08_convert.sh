@@ -19,19 +19,14 @@ toMs(){
 }
 
 ################################
-# Convert to openoffice formats
-conv_openoffice() {
-  local FORMAT="${1:?No output format specified}"
-  shift $(min 1 $#)
-  unoconv -f "$FORMAT" "$@" ||
+# Convert to openoffice/libreoffice formats
+conv_lo() {
+  local FORMAT="${1:-?No output format specified}" && shift
+  command -v unoconv >/dev/null && unoconv -f "$FORMAT" "$@" ||
     soffice --headless --convert-to "$FORMAT" "$@"
 }
-
-# Convert to libreoffice formats
-conv_libreoffice() {
-  local FORMAT="${1:?No output format specified}"
-  shift $(min 1 $#)
-  soffice --headless --convert-to "$FORMAT" "$@"
+conv_lopdf() {
+  conv_lo pdf "$@"
 }
 
 ################################
