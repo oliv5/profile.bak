@@ -44,7 +44,7 @@ scancsdir() {
   # Get options
   local CSCOPE_FILES="$DST/${_CSCOPE_FILES}"
   # Scan directory
-  ( set -f; find -L "$SRC" $_CSCOPE_EXCLUDE -regextype posix-egrep -regex "$_CSCOPE_REGEX" -type f -execdir readlink -f "{}" \; >> "$CSCOPE_FILES" )
+  ( set -f; find -L "$SRC" $_CSCOPE_EXCLUDE -regextype posix-egrep -regex "$_CSCOPE_REGEX" -type f -execdir readlink -e "{}" \; | sed -e 's/\\/\\/g ; s/"/\"/g ; s/^/"/g ; s/$/"/g' >> "$CSCOPE_FILES" )
 }
 
 # Make cscope db from source list file
