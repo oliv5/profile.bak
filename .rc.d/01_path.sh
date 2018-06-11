@@ -96,7 +96,13 @@ command -v sed >/dev/null || _STUB="true"
 command -v awk >/dev/null || _STUB="true"
 command -v find >/dev/null || _STUB="true"
 command -v stat >/dev/null || _STUB="true"
-command -v str_uniq >/dev/null || _STUB="true"
+command -v str_uniq >/dev/null ||
+  str_uniq() {
+    local _IFS="${1:- }"
+    local _OFS="${2}"
+    shift 2
+    printf '%s' "$@" | awk -vRS="$_IFS" -vORS="$_OFS" '!seen[$0]++ {str=str$1ORS} END{sub(ORS"$", "", str); printf "%s\n",str}'
+  }
 
 # PATH aliases
 alias path_prepend="$_STUB _path_prepend PATH"
