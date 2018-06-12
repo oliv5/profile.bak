@@ -507,7 +507,8 @@ annex_upkeep() {
   # Charging status
   if [ -n "$CHARGE_STATUS" ]; then
     set -- $CHARGE_STATUS
-    local CURRENT_STATUS="$(cat "$1" 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+    local DEVICE="${1:-/sys/class/power_supply/battery/status}"
+    local CURRENT_STATUS="$({ cat "$DEVICE" 2>/dev/null || sudo cat "$DEVICE" 2>/dev/null; } | tr '[:upper:]' '[:lower:]')"
     shift
     local FOUND=""
     for EXPECTED_STATUS; do
@@ -516,6 +517,7 @@ annex_upkeep() {
         break
       fi
     done
+    set --
     if [ -z "$FOUND" ]; then
       echo "[warning] device is not in charge. Abort..."
       return 3
@@ -524,8 +526,10 @@ annex_upkeep() {
   # Charging level
   if [ -n "$CHARGE_LEVEL" ]; then
     set -- $CHARGE_LEVEL
-    local CURRENT_LEVEL="$(cat "$1" 2>/dev/null | tr '[:upper:]' '[:lower:]')"
-    local EXPECTED_LEVEL="$2"
+    local DEVICE="${1:-/sys/class/power_supply/battery/capacity}"
+    local CURRENT_LEVEL="$({ cat "$DEVICE" 2>/dev/null || sudo cat "$DEVICE" 2>/dev/null; } | tr '[:upper:]' '[:lower:]')"
+    local EXPECTED_LEVEL="${2:-75}"
+    set --
     if [ "$CURRENT_LEVEL" -lt "$EXPECTED_LEVEL" 2>/dev/null ]; then
       echo "[warning] device charge level ($CURRENT_LEVEL) is lower than threshold ($EXPECTED_LEVEL). Abort..."
       return 2
