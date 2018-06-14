@@ -15,8 +15,8 @@ if command -v "locale" >/dev/null 2>&1; then
   unset LC_NUMERIC LC_PAPER LC_COLLATE LC_MESSAGES
   # Set the default only: $LANG
   if [ -z "$LANG" ]; then
-    for LANG in fr_FR.UTF-8 fr_FR.utf-8 $(locale -a | head -n 1); do
-        if locale -a | grep "$LANG" >/dev/null; then
+    for LANG in fr_FR.UTF8 fr_FR.UTF-8 fr_FR.utf-8 "$(locale -a | grep -i "utf8\|utf-8" | head -n 1)" "$(locale -a | head -n 1)"; do
+        if locale -a | grep -i "$LANG" >/dev/null; then
             export LANG
             break
         fi

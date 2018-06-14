@@ -13,3 +13,6 @@ cdu() { unalias cd cda cdb cdf 2>/dev/null; unset -f cd cda cdb cdf 2>/dev/null;
 
 # Make and cd
 mkcd () { mkdir -p "$@" && cd "$@"; }
+
+# Quick cd
+gcd() { cda *"$1"*"$2"*"$3"*"$4"*"$5"*"$6"*"$7"*"$8"*"$9"*; }
