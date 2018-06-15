@@ -1389,7 +1389,9 @@ alias git_noignore_changes='git update-index --no-assume-unchanged'
 alias gk='gitk'
 # ls aliases
 alias gls='git_ls'
+alias glsg='git_ls | grep'
 alias glsc='git_ls_commit'
+alias glscg='git_ls_commit | grep'
 
 
 ########################################
