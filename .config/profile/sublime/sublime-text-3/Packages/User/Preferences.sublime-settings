@@ -32,7 +32,6 @@
 	],
 	"ignored_packages":
 	[
-		"Package Control",
 		"Vintage"
 	],
 	"theme": "Aristocat.sublime-theme",
