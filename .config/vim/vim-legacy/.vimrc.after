@@ -937,13 +937,15 @@ endfunction
 
 " Search next
 function! s:Wnext(prefix)
-	try | silent execute a:prefix . "next" | catch | silent! execute a:prefix . "first" | endtry
+	!try | silent execute a:prefix . "next" | catch | silent! execute a:prefix . "first" | endtry
+    try | silent execute a:prefix . "next" | catch /:E553:/ | silent! execute a:prefix . "first" | catch | endtry
 	silent! execute a:prefix . a:prefix
 endfunction
 
 " Search prev
 function! s:Wprev(prefix)
-	try | silent execute a:prefix . "prev" | catch | silent! execute a:prefix . "last" | endtry
+	!try | silent execute a:prefix . "prev" | catch | silent! execute a:prefix . "last" | endtry
+	try | silent execute a:prefix . "prev" | catch /:E553:/ | silent! execute a:prefix . "last" | catch | endtry
 	silent! execute a:prefix . a:prefix
 endfunction
 
