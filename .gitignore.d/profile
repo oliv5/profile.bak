@@ -81,23 +81,14 @@
 !/.config/profile/sublime
 !/.config/profile/sublime/doc
 !/.config/profile/sublime/doc/Sublime-Text-3-Full-Documentation.7z
-!/.config/profile/sublime/packages
-!/.config/profile/sublime/packages/Anaconda.7z
-!/.config/profile/sublime/packages/bz2.7z
-!/.config/profile/sublime/packages/packagelist.txt
-!/.config/profile/sublime/packages/ssl-linux.7z
-!/.config/profile/sublime/packages/SublimeLinter.7z
-!/.config/profile/sublime/packages/SublimeREPL.7z
-!/.config/profile/sublime/packages/Terminal.7z
-!/.config/profile/sublime/packages/Theme - Spacegray.7z
 !/.config/profile/sublime/setup
-!/.config/profile/sublime/setup.sh
+!/.config/profile/sublime/setup/packagelist.txt
+!/.config/profile/sublime/setup/setup.sh
 !/.config/profile/sublime/setup/sublime_text_3_build_3083_x64.tar.bz2
 !/.config/profile/sublime/setup/sublime_text_3_build_3103_x64.tar.bz2
 !/.config/profile/sublime/setup/sublime_text_3_build_3143_x64.tar.bz2
 !/.config/profile/sublime/sublime-text-3
 !/.config/profile/sublime/sublime-text-3/Installed Packages
-!/.config/profile/sublime/sublime-text-3/Installed Packages/0_package_control_loader.sublime-package
 !/.config/profile/sublime/sublime-text-3/Installed Packages/Alignment.sublime-package
 !/.config/profile/sublime/sublime-text-3/Installed Packages/BracketHighlighter.sublime-package
 !/.config/profile/sublime/sublime-text-3/Installed Packages/C++ Snippets.sublime-package
@@ -131,17 +122,6 @@
 !/.config/profile/vscode/ms-vscode.cpptools-0.5.0.7z
 !/.config/profile/vscode/vscode-amd64-1.0.deb
 !/.config/profile/vscode/VSCode-linux-x64-stable_2016-04-10.zip
-!/.config/sublime-text-3
-!/.config/sublime-text-3/Packages
-!/.config/sublime-text-3/Packages/colorschemes
-!/.config/sublime-text-3/Packages/colorschemes/Harper.tmTheme
-!/.config/sublime-text-3/Packages/colorschemes/Made of Code.tmTheme
-!/.config/sublime-text-3/Packages/User
-!/.config/sublime-text-3/Packages/User/CTags.sublime-settings
-!/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap
-!/.config/sublime-text-3/Packages/User/Default (Linux).sublime-mousemap
-!/.config/sublime-text-3/Packages/User/Package Control.sublime-settings
-!/.config/sublime-text-3/Packages/User/Preferences.sublime-settings
 !/.config/terminator
 !/.config/terminator/config1
 !/.config/terminator/config2
@@ -1007,6 +987,7 @@
 !/pbin/rsync.sh
 !/pbin/schedule.sh
 !/pbin/si.sh
+!/pbin/speedtest-cli
 !/pbin/syshealth.sh
 !/pbin/unity
 !/pbin/upload.sh
