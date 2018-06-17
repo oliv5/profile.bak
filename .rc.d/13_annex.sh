@@ -372,9 +372,9 @@ _annex_transfer() {
 # $DBG is used to print the command on stderr (when not empty)
 # $DELETE is used to delete the missing existing files (1=dry-run, 2=do-it)
 # $RSYNC_OPT is used to specify rsync options
-alias annex_rsync='DBG= DELETE= DROP=1 RSYNC_OPT= _annex_rsync'
-alias annex_rsyncd='DBG= DELETE=2 DROP=1 RSYNC_OPT= _annex_rsync'
-alias annex_rsyncds='DBG= DELETE=1 DROP=1 RSYNC_OPT= _annex_rsync'
+alias annex_rsync='DBG= DELETE= DROP=1 SKIP=1 RSYNC_OPT= _annex_rsync'
+alias annex_rsyncd='DBG= DELETE=2 DROP=1 SKIP=1 RSYNC_OPT= _annex_rsync'
+alias annex_rsyncds='DBG= DELETE=1 DROP=1 SKIP=1 RSYNC_OPT= _annex_rsync'
 _annex_rsync() {
   annex_exists || return 1
   local DST="${1:?No destination specified...}"
@@ -397,7 +397,11 @@ _annex_rsync() {
     # Plain git repositories
     # Get & copy local files one by one
     git annex find --include='*' --print0 "$@" | xargs -0 -rn1 sh -c '
-      DBG="$1";RSYNC_OPT="$2";DST="$3/$4";SRC="$4"
+      DBG="$1";SKIP="$2";RSYNC_OPT="$3";DST="$4/$5";SRC="$5"
+      if [ -n "$SKIP" ] && { curl -s "file://localhost/${DST}" >/dev/null || curl -s "${DST}" >/dev/null; } then
+        echo "Skip existing dst file ${DST}"
+        exit 1
+      fi
       if [ -L "$SRC" -a ! -e "$SRC" ]; then
         $DBG git annex get ${FROM:+--from "$FROM"} "$SRC" || exit $?
       else
@@ -407,7 +411,7 @@ _annex_rsync() {
       while ! $DBG rsync --rsync-path="mkdir -p \"${DSTDIR}\" && rsync" $RSYNC_OPT "$SRC" "$DST"; do sleep 1; done
       [ -n "$DROP" ] && $DBG git annex drop "$SRC"
       exit 0
-    ' _ "$DBG" "$RSYNC_OPT" "$DST"
+    ' _ "$DBG" "${SKIP:+1}" "$RSYNC_OPT" "$DST"
     # Delete missing destination files
     if [ "$DELETE" = 1 ]; then
       while ! $DBG rsync -rni --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC/" "$DST/"; do sleep 1; done
@@ -785,6 +789,7 @@ annex_purge() {
 # Populate a special remote directory with files from the input source
 # The current repository is used to find out keys & file names,
 # but is not used directly to copy/move the files from
+# Note the same backend than the source is used for the destination file names
 # WHERE selects which files & repo to look for
 # MOVE=1 moves files instead of copying them
 alias annex_populate='MOVE= _annex_populate'
@@ -794,17 +799,37 @@ _annex_populate() {
   local SRC="${2:-$PWD}"
   local WHERE="${3:-${WHERE:---include '*'}}"
   eval git annex find "$WHERE" --format='\${file}\\000\${hashdirlower}\${key}/\${key}\\000' | xargs -r0 -n2 sh -c '
-    MOVE="$1"; SRC="$2/$4"; DST="$3/$5"
-    if [ -r "$SRC" ]; then
-      echo "$SRC -> $DST"
-      mkdir -p "$(dirname "$DST")"
-      if [ -n "$MOVE" -a ! -h "$SRC" ]; then
-        mv -f -T "$SRC" "$DST"
+    DBG="$1"; MOVE="$2"; SRCDIR="$3; DSTDIR="$4"; SRC="$SRCDIR/$5"; DST="$DSTDIR/$6"
+    echo "$SRC -> $DST"
+    if [ -d "$SRCDIR" -o -d "$DSTDIR" ]; then
+      if [ -n "$MOVE" ]; then
+        if [ -r "$SRC" -a ! -h "$SRC" ]; then
+          $DBG mkdir -p "$(dirname "$DST")"
+          $DBG mv -f -T "$SRC" "$DST"
+        else
+          $DBG rsync -K -L --protect-args --remove-source-files "$SRC" "$DST"
+        fi
       else
-        rsync -K -L --protect-args "$SRC" "$DST"
+        $DBG rsync -K -L --protect-args "$SRC" "$DST"
       fi
     fi
-  ' _ "$MOVE" "$SRC" "$DST"
+  ' _ "${DBG:+echo [DBG]}" "$MOVE" "$SRC" "$DST"
+}
+
+########################################
+# Set a remote key presence flag
+# WHERE selects which files & repo to look for
+# DBG enable debug mode
+annex_setpresentkey() {
+  local REMOTE="${1:?No remote specified...}"
+  local WHERE="${2:-${WHERE:---include '*'}}"
+  local PRESENT="${3:-1}"
+  local UUID="$(git config --get remote.${REMOTE}.annex-uuid)"
+  [ -z "$UUID" ] && { echo "Remote $REMOTE unknown...}" && return 1; }
+  eval git annex find "$WHERE" --format='\${key}\\000' | xargs -r0 -n1 sh -c '
+    DBG="$1"; UUID="$2"; PRESENT="$3"; KEY="$4"
+    $DBG git annex setpresentkey "$KEY" "$UUID" $PRESENT
+  ' _ "${DBG:+echo [DBG]}" "$UUID" "$PRESENT"
 }
 
 ########################################
