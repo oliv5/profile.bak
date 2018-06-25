@@ -50,12 +50,18 @@ ask_question() {
 ########################################
 # Env setup
 git_setup() {
+  # Diff
+  git config --global --unset-all diff.tool; git config --unset-all diff.tool
   git config --global diff.tool meld
+  git config --global alias.meld '!$HOME/pbin/git-meld.pl'
+  # Merge
+  git config --global --unset-all merge.tool; git config --unset-all merge.tool
   git config --global merge.tool mymerge
   git config --global merge.conflictstyle diff3
   git config --global mergetool.mymerge.cmd \
     'meld --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --diff "$LOCAL" "$MERGED" "$REMOTE"'
   git config --global mergetool.mymerge.trustExitCode true
+  # Misc
   git config --global rerere.enabled true
   git config --global core.excludesfile '~/.gitignore'
 }
@@ -1170,6 +1176,18 @@ git_evil_merge() {
 }
 
 ########################################
+# Emulate git checkout --theirs/ours
+# http://gitready.com/advanced/2009/02/25/keep-either-file-in-merge-conflicts.html
+git_checkout_theirs() {
+  git reset -- "$@"
+  git checkout MERGE_HEAD -- "$@"
+}
+git_checkout_ours() {
+  git reset -- "$@"
+  git checkout ORIG_HEAD -- "$@"
+}
+
+########################################
 # Status aliases
 alias gt='git status -uno'
 alias gtu='gstu'
@@ -1207,6 +1225,7 @@ alias glsi='git ls-files -o -i --exclude-standard'
 alias gd='git diff'
 alias gdd='git diff'
 alias gdm='git difftool -y'
+alias gdt='git meld'
 alias gda='git_diff_all'
 alias gdda='git_diff_all'
 alias gdma='git_diffm_all'
@@ -1343,6 +1362,10 @@ alias iggg='git grep -ni'
 alias ggrep='git grep'
 # Checkout aliases
 alias gco='git checkout'
+#alias gcot='git checkout --theirs'
+#alias gcoo='git checkout --ours'
+alias gcot='git_checkout_theirs'
+alias gcoo='git_checkout_ours'
 # Reset aliases
 alias gre='git reset'
 alias grh='git reset HEAD'
