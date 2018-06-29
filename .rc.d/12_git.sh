@@ -274,14 +274,14 @@ git_detached() {
 # Get hash
 alias git_sha1='git_hash'
 git_hash() {
-  git rev-parse ${2:+--git-dir="$2"} "${1:-HEAD}"
+  git ${2:+--git-dir="$2"} rev-parse "${1:-HEAD}"
 }
 git_allhash() {
-  git rev-list ${2:+--git-dir="$2"} "${1:-HEAD}"
+  git ${2:+--git-dir="$2"} rev-list "${1:-HEAD}"
 }
 git_roothash() {
-  git rev-list ${2:+--git-dir="$2"} --max-parents=0 "${1:-HEAD}" 2>/dev/null ||
-  git rev-list ${2:+--git-dir="$2"} --parents "${1:-HEAD}" | egrep "^[a-f0-9]{40}$"
+  git ${2:+--git-dir="$2"} rev-list --max-parents=0 "${1:-HEAD}" 2>/dev/null ||
+  git ${2:+--git-dir="$2"} rev-list --parents "${1:-HEAD}" | egrep "^[a-f0-9]{40}$"
 }
 
 # Get short hash
