@@ -9,9 +9,9 @@ rc_source() {
   export RC_DIR_LOCAL="${RC_DIR_LOCAL:-$HOME}"
 
   # Local variables
-  local RC_VERBOSE="${RC_VERBOSE:-false}"
-  local RC_DRYRUN=""
-  local RC_ALL=""
+  local RC_VERBOSE="$RC_VERBOSE"
+  local RC_DRYRUN="$RC_DRYRUN"
+  local RC_ALL="$RC_ALL"
   local RC_ERR=0
 
   # Global aliases
@@ -20,7 +20,7 @@ rc_source() {
   ##############
   # Log function
   rc_log() {
-    ${RC_VERBOSE:-false} && echo "$@"
+    eval "echo $@ ${RC_VERBOSE:->/dev/null}"
   }
 
   # Source file 
@@ -31,7 +31,8 @@ rc_source() {
         for FCT in $(awk -F'(' '/\w\s*\(\)/ {print $1}' "$FILE"); do
           ${RC_DRYRUN} unalias "$FCT" 2>/dev/null
         done
-        set --; ${RC_DRYRUN} . "$FILE" || RC_ERR=$?
+        set --; eval "${RC_DRYRUN} . '$FILE' ${RC_VERBOSE:->/dev/null}" || 
+          { RC_ERR=$?; rc_log "Return status not null"; }
       fi
     done
   }
@@ -48,13 +49,15 @@ rc_source() {
   ##############
   # Process arguments
   local FLAGS OPTIND OPTARG OPTERR=0
-  while getopts 'avd' FLAGS; do
+  while getopts 'asvd' FLAGS; do
     case "$FLAGS" in
       a) RC_ALL="true";;
-      v) RC_VERBOSE="true";;
+      s) RC_VERBOSE=">/dev/null 2>&1";;
+      v) RC_VERBOSE=">&1";;
       d) RC_DRYRUN="true";;
       *) echo >&2 "Usage: .rc [-a] [-v] [-d]"
          echo >&2 "-a   load all scripts"
+         echo >&2 "-s   silent mode"
          echo >&2 "-v   verbose mode"
          echo >&2 "-d   dry-run"
          kill -INT $$
@@ -113,6 +116,7 @@ rc_source() {
   # Cleanup at the last nested call
   if [ $RC_CNT -eq 1 ]; then
     unset -f rc_log rc_sourcemod rc_sourcefile
+    unset RC_VERBOSE RC_DRYRUN RC_ALL
   fi
   return $RC_ERR
 }
