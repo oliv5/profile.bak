@@ -12,6 +12,7 @@ rc_source() {
   local RC_VERBOSE="${RC_VERBOSE:-false}"
   local RC_DRYRUN=""
   local RC_ALL=""
+  local RC_ERR=0
 
   # Global aliases
   alias rc='rc_source'
@@ -30,7 +31,7 @@ rc_source() {
         for FCT in $(awk -F'(' '/\w\s*\(\)/ {print $1}' "$FILE"); do
           ${RC_DRYRUN} unalias "$FCT" 2>/dev/null
         done
-        set --; ${RC_DRYRUN} . "$FILE"
+        set --; ${RC_DRYRUN} . "$FILE" || RC_ERR=$?
       fi
     done
   }
@@ -57,6 +58,7 @@ rc_source() {
          echo >&2 "-v   verbose mode"
          echo >&2 "-d   dry-run"
          kill -INT $$
+         return 1
          ;;
     esac
   done
@@ -112,7 +114,7 @@ rc_source() {
   if [ $RC_CNT -eq 1 ]; then
     unset -f rc_log rc_sourcemod rc_sourcefile
   fi
-  return 0
+  return $RC_ERR
 }
 
 ################################
