@@ -123,9 +123,15 @@ alias me='meld'
 # Grep
 alias g='grep'
 alias gv='grep -v'
+alias gc='grep --color'
 alias ig='grep -i'
 alias igv='grep -iv'
 alias pg='pgrep -l'
+# Colorize pattern
+gcp() {
+  local PATTERN="$1"; shift
+  grep --color -E "$PATTERN|$" "$@"
+}
 
 # Kill
 alias k='kill'
@@ -176,10 +182,12 @@ alias he='head'
 alias h1='head -n 1'
 alias h2='head -n 2'
 alias h5='head -n 5'
+alias h10='head -n 10'
 alias t='tail'
 alias t1='tail -n 1'
 alias t2='tail -n 2'
 alias t5='tail -n 5'
+alias t10='tail -n 10'
 
 # More/less
 alias m='more'
