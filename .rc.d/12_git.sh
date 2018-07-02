@@ -778,8 +778,9 @@ git_stash_backup() {
   local DST="$(git_dir)/backup"
   local IFS="$(printf '\n')"
   mkdir -p "$DST"
-  git stash list --format="%H %h %gd" | while IFS=" " read -r HASH SHORT NAME; do
-    local FILE="$DST/stash_${SHORT}.gz"
+  git stash list --format="%H %h %s" | while IFS=" " read -r HASH SHORT NAME; do
+    NAME="$(echo "$NAME" | awk -F: '{gsub(/^ */,"",$2); gsub(/ /,"_",$2);print $2}' | cut -c -80)"
+    local FILE="$DST/stash_${SHORT}_head_${NAME}.gz"
     if [ ! -e "$FILE" ]; then
       echo "Backup $HASH in $FILE"
       git stash show -p "$HASH" "$@" | gzip --best > "$FILE"
@@ -1186,6 +1187,43 @@ git_checkout_ours() {
   git reset -- "$@"
   git checkout ORIG_HEAD -- "$@"
 }
+
+########################################
+# Prune local branches not in remote anymore
+alias git_prune_branches='git remote prune'
+
+# List local tags not in remote at all
+git_ls_local_tags() {
+  #comm -1 -3 <(git ls-remote --tags origin | cut -d$'\t' -f1 | sort) <(git show-ref --tags | cut -d' ' -f1 | sort)
+  PIPE1="$(mktemp -u)"
+  mkfifo "$PIPE1"
+  PIPE2="$(mktemp -u)"
+  mkfifo "$PIPE2"
+  comm -2 -3 "$PIPE1" "$PIPE2" | uniq &
+  git show-ref --tags | cut -d' ' -f2 | sort -u >"$PIPE1"
+  git ls-remote --tags --refs "$@" | cut -d$'\t' -f2 | sort -u >"$PIPE2"
+  wait
+  rm "$PIPE1" "$PIPE2"
+}
+
+# Prune local tags not in remote at all
+if ! [ $(git_version) -gt $(git_version 1.7.8) ]; then
+  git_prune_local_tags() {
+    # Confirmation
+    git fetch --dry-run --prune "${@:?No remote specified...}" "+refs/tags/*:refs/tags/*"
+    ask_question "Proceed? (y/n) " y Y >/dev/null || return 0
+    # Go !
+    git fetch --prune "$@" "+refs/tags/*:refs/tags/*"
+  }
+else
+  git_prune_local_tags() {
+    # Confirmation
+    git_ls_local_tags "$@"
+    ask_question "Proceed? (y/n) " y Y >/dev/null || return 0
+    # Go !
+    git_ls_local_tags "$@" | xargs -r git tag -d
+  }
+fi
 
 ########################################
 # Status aliases
