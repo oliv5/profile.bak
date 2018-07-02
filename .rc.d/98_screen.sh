@@ -1,6 +1,6 @@
 #!/bin/sh
 # Do not load when not installed
-command -v screen >/dev/null || return 1
+command -v screen >/dev/null || return 0
 
 # SSH autoload
 if [ -z "$STY" -a -n "$SSH_CONNECTION" -a "${SCREEN_AUTOLOAD#*ssh}" != "$SCREEN_AUTOLOAD" ]; then

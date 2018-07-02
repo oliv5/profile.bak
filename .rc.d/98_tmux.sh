@@ -1,6 +1,6 @@
 #!/bin/sh
 # Do not load when not installed
-command -v tmux >/dev/null || return 1
+command -v tmux >/dev/null || return 0
 
 # SSH autoload
 if [ -z "$TMUX" -a -n "$SSH_CONNECTION" -a "${TMUX_AUTOLOAD#*ssh}" != "$TMUX_AUTOLOAD" ]; then
