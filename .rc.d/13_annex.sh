@@ -80,7 +80,7 @@ annex_init_direct() {
 ########################################
 # Init hubic annex
 annex_init_hubic() {
-  local NAME="${1:-hubic}"
+  local NAME="${1:?No remote name specified...}"
   local ENCRYPTION="${2:-none}"
   local REMOTEPATH="${3:-$(git_repo)}"
   local KEYID="$4"
@@ -90,7 +90,7 @@ annex_init_hubic() {
 
 # Init gdrive annex
 annex_init_gdrive() {
-  local NAME="${1:-gdrive}"
+  local NAME="${1:?No remote name specified...}"
   local ENCRYPTION="${2:-none}"
   local REMOTEPATH="${3:-$(git_repo)}"
   local KEYID="$4"
@@ -100,7 +100,7 @@ annex_init_gdrive() {
 
 # Init bup annex
 annex_init_bup() {
-  local NAME="${1:-bup}"
+  local NAME="${1:?No remote name specified...}"
   local ENCRYPTION="${2:-none}"
   local REMOTEPATH="${3:-$(git_repo)}"
   local KEYID="$4"
@@ -110,7 +110,7 @@ annex_init_bup() {
 
 # Init rsync annex
 annex_init_rsync() {
-  local NAME="${1:-rsync}"
+  local NAME="${1:?No remote name specified...}"
   local ENCRYPTION="${2:-none}"
   local REMOTEPATH="${3:-$(git_repo)}"
   local KEYID="$4"
@@ -119,15 +119,40 @@ annex_init_rsync() {
   git config --add annex.sshcaching false
 }
 
+# Init directory annex
+annex_init_directory() {
+  local NAME="${1:?No remote name specified...}"
+  local ENCRYPTION="${2:-none}"
+  local REMOTEPATH="${3:-$(git_repo)}"
+  local KEYID="$4"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${KEYID:+keyid="$KEYID"} ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${KEYID:+keyid="$KEYID"}
+  git config --add annex.sshcaching false
+}
+
 # Init gcrypt annex
 annex_init_gcrypt() {
-  local NAME="${1:-gcrypt}"
+  local NAME="${1:?No remote name specified...}"
   local ENCRYPTION="${2:-none}"
   local REMOTEPATH="${3:-$(git_repo)}"
   local KEYID="$4"
   git annex enableremote "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" ${KEYID:+keyid="$KEYID"} ||
   git annex initremote   "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" ${KEYID:+keyid="$KEYID"}
   git config --add annex.sshcaching false
+}
+
+# Init rclone annex
+annex_init_rclone() {
+  local NAME="${1:?No remote name specified...}"
+  local ENCRYPTION="${2:-none}"
+  local REMOTEPATH="${3:-$(git_repo)}"
+  local KEYID="$4"
+  local CHUNKS="$5"
+  local PROFILE="${6:-$NAME}"
+  local MAC="${7:-HMACSHA512}"
+  local LAYOUT="${8:-lower}"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=rclone target="$PROFILE" prefix="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} mac="${MAC}" rclone_layout="$LAYOUT" ${KEYID:+keyid="$KEYID"} ||
+  git annex initremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=rclone target="$PROFILE" prefix="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} mac="${MAC}" rclone_layout="$LAYOUT" ${KEYID:+keyid="$KEYID"}
 }
 
 ########################################
@@ -839,6 +864,21 @@ annex_setpresentkey() {
     DBG="$1"; UUID="$2"; PRESENT="$3"; KEY="$4"
     $DBG git annex setpresentkey "$KEY" "$UUID" $PRESENT
   ' _ "${DBG:+echo [DBG]}" "$UUID" "$PRESENT"
+}
+
+########################################
+# Find duplicates
+annex_duplicates() {
+  git annex find --include '*' --format='${file} ${escaped_key}\n' | \
+      sort -k2 | uniq --all-repeated=separate -f1 | \
+      sed 's/ [^ ]*$//'
+}
+
+# Remove one duplicate
+annex_rm_duplicates() {
+  git annex find --include '*' --format='${file} ${escaped_key}\n' | \
+      sort -k2 | uniq --repeated -f1 | sed 's/ [^ ]*$//' | \
+      xargs -d '\n' git rm
 }
 
 ########################################
