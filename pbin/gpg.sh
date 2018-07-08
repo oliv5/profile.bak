@@ -21,6 +21,7 @@ EN_ENCRYPT=1
 EN_DECRYPT=1
 EN_AUTODETECT=1
 EN_SIGN=""
+EN_SYMMETRIC=""
 PUB_KEYS=""
 DELETE=1
 SIMULATE=""
@@ -35,11 +36,12 @@ xhost +si:localuser:$(whoami) >/dev/null 2>&1 && {
 }
 
 # Get command line options
-while getopts egdk:pfsovz OPTNAME
+while getopts egdhk:pfsovz OPTNAME
 do case "$OPTNAME" in
-  e)  EN_DECRYPT="";EN_AUTODETECT="";;
-  d)  EN_ENCRYPT="";EN_AUTODETECT="";;
-  g)  EN_SIGN=1;;
+  e)  EN_DECRYPT=""; EN_AUTODETECT="";;
+  d)  EN_ENCRYPT=""; EN_AUTODETECT="";;
+  g)  EN_SIGN=1; EN_SYMMETRIC="";;
+  h)  EN_SYMMETRIC=1; EN_SIGN="";;
   k)  RECIPIENT="$OPTARG";;
   p)  PUB_KEYS=1;;
   f)  DELETE=""; echo "Keeping input files." >"$STDOUT";;
@@ -53,6 +55,7 @@ do case "$OPTNAME" in
        echo >&2 "-d    decrypt only"
        echo >&2 "-k    select recipent key"
        echo >&2 "-p    list public keys instead of secret keys"
+       echo >&2 "-h    symmetric operation (passphrase only)"
        echo >&2 "-f    do not delete input files"
        echo >&2 "-s    simulate"
        echo >&2 "-o    overwrite output file"
@@ -165,7 +168,7 @@ Decrypt(){
   fi
 
   # Decrypt
-  echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE --passphrase-fd 0 -o "$OUTPUT" -d "$INPUT"
+  echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE --passphrase-fd 0 --decrypt -o "$OUTPUT" "$INPUT"
 
   # One more file!
   if [ -f "$OUTPUT" ]; then
@@ -184,7 +187,7 @@ Encrypt() {
   local OUTPUT="${INPUT}.gpg"
   echo "Encrypting file '$INPUT' into '$OUTPUT'"
 
-  if [ -z "$RECIPIENT" ]; then
+  if [ -z "$EN_SYMMETRIC" -a -z "$RECIPIENT" ]; then
     # Select the key
     RECIPIENT="$(GetRecipient)"
     if [ -z "$RECIPIENT" ]; then
@@ -194,7 +197,7 @@ Encrypt() {
     fi
   fi
 
-  if [ -z "$PASSPHRASE" ]; then
+  if [ -z "$EN_SYMMETRIC" -a -z "$PASSPHRASE" ]; then
     if [ ! -z "$EN_SIGN" ]; then
       PASSPHRASE="$(DisplayQuestion "Signature" "Enter your key GnuPG passphrase:")"
       if [ -z "$PASSPHRASE" ]; then
@@ -204,12 +207,14 @@ Encrypt() {
     fi
   fi
 
-  $VERBOSE echo "Recipient $RECIPIENT"
-
   # Encrypt
-  if [ ! -z "$EN_SIGN" ]; then
+  if [ -n "$EN_SYMMETRIC" ]; then
+    echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE --symmetric -o "$OUTPUT" "$INPUT"
+  elif [ ! -z "$EN_SIGN" ]; then
+    $VERBOSE echo "Recipient $RECIPIENT"
     echo "$PASSPHRASE" | $SIMULATE gpg -v --batch $OVERWRITE --no-default-recipient --recipient "$RECIPIENT" --trust-model always --encrypt --sign -o "$OUTPUT" "$INPUT"
   else
+    $VERBOSE echo "Recipient $RECIPIENT"
     $SIMULATE gpg -v --batch $OVERWRITE --no-default-recipient --recipient "$RECIPIENT" --trust-model always --encrypt -o "$OUTPUT" "$INPUT"
   fi
 
