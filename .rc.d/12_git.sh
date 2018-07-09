@@ -1277,8 +1277,8 @@ alias gdmr='git difftool -y $(git_tracking)'
 alias gdcr='git diff --cached $(git_tracking)'
 alias gds='git diff stash'
 # Merge aliases
-#alias gmm='git mergetool -y'
-alias gmm='gstx UU | xargs -r0 -n1 git mergetool -y'
+alias gmm='git mergetool -y'
+#alias gmm='gstx UU | xargs -r0 -n1 git mergetool -y'
 # Branch aliases
 alias gba='git branch -a'   # list all
 alias gbl='git branch -l'   # list local
@@ -1329,9 +1329,12 @@ alias gsf='git_stash_file'
 alias gsfa='git_stash_file_all'
 alias gsfc='git_stash_cat'
 alias gsd='git_stash_diff'
+alias gsd0='git_stash_diff 0'
 alias gsdd='git_stash_diff'
 alias gsdm='git_stash_diffm'
+alias gsdm0='git_stash_diffm 0'
 alias gsdl='git_stash_diffl'
+alias gsdl0='git_stash_diffl 0'
 alias gsb='git_stash_backup'
 alias gsrm='git_stash_drop'
 alias gsm='gsdm'
