@@ -92,6 +92,13 @@ bindkey "^[[1;5D" focus left
 #bindkey -m kP stuff ^b
 #bindkey -m kN stuff ^f
 
+# Focus management
+# http://www.staldal.nu/tech/2009/01/10/how-to-use-ctrl-tab-in-gnu-screen/
+# Ctrl-Tab
+bindkey "^[[27;5;9~" next
+# Ctrl-Shift-Tab
+bindkey "^[[27;6;9~" prev
+
 ##################################
 # Trial bindings
 #bind ' ' windows # space key displays a list of windows
