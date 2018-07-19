@@ -33,8 +33,10 @@ set winfixwidth
 set winfixheight
 
 " Keymapping
-FnNoremap <silent> <C-e>   :Explore<CR>
-FnNoremap <silent> <C-A-e> :Vexplore<CR>
+if empty(maparg('<C-e>', 'n'))
+	FnNoremap <silent> <C-e>   :Explore<CR>
+	FnNoremap <silent> <C-A-e> :Vexplore<CR>
+endif
 
 
 " *******************************************************
@@ -267,9 +269,10 @@ if !exists('g:loaded_nerd_tree')
 	let g:NERDTreeHighlightCursorline = 0 " Not Highlight the cursor line
 
 	" Toggle ON/OFF
-	nmap <localleader>e   :NERDTree<CR>
+	nmap <localleader>e   :NERDTreeToggle<CR>
 	nmap <localleader>ee  :NERDTreeClose<CR>
-	FnNoremap <c-e>       :NERDTreeToggle %:p:h<CR>
+	FnNoremap <C-e>       :NERDTreeToggle <C-R>=expand("%:p:h")<CR><CR>
+	FnNoremap <C-A-e>     :NERDTreeFind<CR>
 endif
 
 
@@ -435,7 +438,8 @@ if !exists('g:loaded_ctrlp')
 	let g:ctrlp_switch_buffer = ''
 	let g:ctrlp_open_new_file = 'r'
 	let g:ctrlp_max_height = 25
-	" Key mapping
+	" Close NERDTree window
+	let g:ctrlp_dont_split = 'NERD'	" Key mapping
 	"FnNoremap <C-p>     :exec 'CtrlP'.g:FindRootDir()<CR>
 	FnNoremap <C-p>     :CtrlP<CR>
 	FnNoremap <C-o>     :CtrlPMRU<CR>
