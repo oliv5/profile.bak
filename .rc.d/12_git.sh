@@ -1112,6 +1112,23 @@ git_tag_delete() {
   ' _ {} $REMOTES
 }
 
+# Get previous tag
+git_tag_prev() {
+  for FROM in "${@:-}"; do
+    git describe --tags --abbrev=0 ${FROM:+${FROM}^}
+  done
+}
+
+# List previous tags from the given branch from the newest one
+git_tag_list_prev() {
+  local FROM="${1:-HEAD}"
+  local TO="$(git tag -l $2)"
+  while [ "$FROM" != "$TO" ]; do
+    FROM="$(git describe --tags --abbrev=0 ${FROM:+${FROM}^} 2>/dev/null)"
+    [ -n "$FROM" ] && echo "$FROM"
+  done
+}
+
 ########################################
 # Easy amend of previous commit
 git_squash() {
@@ -1379,6 +1396,8 @@ alias gta='git tag -a'
 alias gtl='git tag -l'
 alias gtlg='git tag -l | grep'
 alias gtlgi='git tag -l | grep -i'
+alias gtlp='git_tag_list_prev'
+alias gtp='git_tag_prev'
 alias gtd='git tag -d'
 alias gtc='git_tag_create'
 alias gtf='git tag --contains'
