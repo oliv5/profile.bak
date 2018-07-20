@@ -43,6 +43,10 @@ lookup_key() {
         # pubkey cipher includes a trailing newline which was stripped in
         # decrypt_cipher process substitution step above
         IFS= read -rd '' cipher < <( printf "$cipher\n" )
+    elif [ "$encryption" = "sharedpubkey" ] ; then
+        # Full cipher is base64 decoded. Add a trailing \n lost by the shell somewhere
+        cipher="$(echo -n "$cipher" | base64 -d)
+"
     fi
 
     annex_key="$(basename "$(readlink "$symlink")")"

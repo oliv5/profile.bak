@@ -56,6 +56,10 @@ lookup_key() {
         # pubkey cipher includes a trailing newline which was stripped in
         # decrypt_cipher process substitution step above
         IFS= read -rd '' cipher < <( printf "$cipher\n" )
+    elif [ "$encryption" = "sharedpubkey" ] ; then
+        # Full cipher is base64 decoded. Add a trailing \n lost by the shell somewhere
+        cipher="$(echo -n "$cipher" | base64 -d)
+"
     fi
 
     local annex_key="$(basename "$(readlink "$symlink")")"
@@ -75,7 +79,6 @@ lookup_key() {
         if [ "$chunklog_lc" -ge 2 ]; then
             echo "INFO: the remote seems to have multiple sets of chunks" >&2
         fi
-
         while read -r line; do
             chunksize="$(echo -n "${line#*:}" | cut -d ' ' -f 1)"
             numchunks="$(echo -n "${line#*:}" | cut -d ' ' -f 2)"
