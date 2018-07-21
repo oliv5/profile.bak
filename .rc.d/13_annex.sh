@@ -383,7 +383,7 @@ _annex_enum() {
   gzip -S .gz -9 "${OUT%.*}"
 }
 annex_enum() {
-  _annex_archive "enum.local.txt.gz" "$1" "$2" "$3" "$4" "_annex_enum"
+  _annex_archive "enum_local.txt.gz" "$1" "$2" "$3" "$4" "_annex_enum"
 }
 
 # Store annex infos
@@ -396,7 +396,7 @@ annex_info(){
 
 # Enum special remotes
 annex_enum_remotes() {
-  _annex_archive "enum.remotes.txt.gz" "$1" "$2" "$3" "$4" "
+  _annex_archive "enum_remotes.txt.gz" "$1" "$2" "$3" "$4" "
     annex_lookup_remotes > \"\${OUT%.*}\"
     gzip -S .gz -9 \"\${OUT%.*}\"
 "
