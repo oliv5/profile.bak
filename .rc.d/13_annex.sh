@@ -197,87 +197,6 @@ alias annex_assistant_auto='git annex assistant --autostart'
 alias annex_assistant_stop='git annex assistant --stop; git annex assistant --autostop'
 
 ########################################
-# Annex bundle
-annex_bundle() {
-  ( set +e; # Need to go on
-  git_exists || return 1
-  if annex_exists; then
-    local DIR="${1:-$(git_dir)/bundle}"
-    mkdir -p "$DIR"
-    if [ -d "$DIR" ]; then
-      local OUT="$DIR/${2:-$(git_name "annex").tgz}"
-      local GPG_RECIPIENT="$3"
-      local GPG_TRUST="${4:+--trust-model always}"
-      local OWNER="${5:-$USER}"
-      echo "Tar annex into $OUT"
-      if annex_bare; then
-        tar zcf "${OUT}" --exclude='*/creds/*' -h ./annex
-      else
-        git annex find | 
-          awk '{print "\""$0"\""}' |
-          xargs -r tar zcf "${OUT}" -h --exclude-vcs --
-      fi
-      chown "$OWNER" "$OUT"
-      if [ ! -z "$GPG_RECIPIENT" ]; then
-        gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
-          (shred -fu "${OUT}" || wipe -f -- "${OUT}" || rm -- "${OUT}")
-        chown "$OWNER" "${OUT}.gpg"
-      fi
-      ls -l "${OUT}"*
-    else
-      echo "Output directory '$DIR' cannot be created."
-      echo "Abort..."
-      exit 1
-    fi
-  else
-    echo "Repository '$(git_dir)' is not git-annex ready."
-    echo "Abort..."
-    exit 1
-  fi
-  )
-}
-
-# Annex enumeration
-annex_enum() {
-  ( set +e; # Need to go on
-  git_exists || return 1
-  if annex_std; then
-    local DIR="${1:-$(git_dir)/list}"
-    mkdir -p "$DIR"
-    if [ -d "$DIR" ]; then
-      local OUT="$DIR/${2:-$(git_name "annex.enum").txt.gz}"
-      local GPG_RECIPIENT="$3"
-      local GPG_TRUST="${4:+--trust-model always}"
-      echo "List annex into $OUT"
-      git --git-dir="$(git_dir)" annex find "$(git_root)" --in . --or --not --in . --print0 | xargs -r0 -n1 sh -c '
-        OUT="$1"; FILE="$2"
-        printf "\"%s\" <- \"%s\"\n" "$(readlink -- "$FILE")" "$FILE" | grep -F ".git/annex" >> "${OUT%.*}"
-      ' _ "$OUT"
-      if [ -r "${OUT%.*}" ]; then
-        gzip -S .gz -9 "${OUT%.*}"
-        if [ ! -z "$GPG_RECIPIENT" ]; then
-          gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
-            (shred -fu "${OUT}" || wipe -f -- "${OUT}" || rm -- "${OUT}")
-        fi
-        ls -l "${OUT}"*
-      else
-        echo "Listing is missing or empty."
-        echo "Abort..."
-        exit 1
-      fi
-    else
-      echo "Output directory '$DIR' cannot be created."
-      echo "Abort..."
-      exit 1
-    fi
-  else
-    echo "Repository '$(git_dir)' cannot be enumerated."
-    echo "Abort..."
-    exit 1
-  fi
-  )
-}
-
 # Print annex infos (inc. encryption ciphers)
 annex_getinfo() {
   git annex info .
@@ -288,42 +207,199 @@ annex_getinfo() {
   done
 }
 
-# Store annex infos
-annex_info(){
-  ( set +e; # Need to go on
+# Lookup special remote keys
+annex_lookup_remote() {
+  # Preamble
   git_exists || return 1
-  if annex_std; then
-    local DIR="${1:-$(git_dir)/list}"
-    mkdir -p "$DIR"
-    if [ -d "$DIR" ]; then
-      local OUT="$DIR/${2:-$(git_name "annex.info").txt.gz}"
-      local GPG_RECIPIENT="$3"
-      local GPG_TRUST="${4:+--trust-model always}"
-      echo "Get repository info into $OUT"
-      annex_getinfo > "${OUT%.*}"
-      if [ -r "${OUT%.*}" ]; then
-        gzip -S .gz -9 "${OUT%.*}"
-        if [ ! -z "$GPG_RECIPIENT" ]; then
-          gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
-            (shred -fu "${OUT}" || wipe -f -- "${OUT}" || rm -- "${OUT}")
-        fi
-        ls -l "${OUT}"*
-      else
-        echo "Infos are missing or empty."
-        echo "Abort..."
+  annex_std || return 2
+  # Decrypt cipher
+  decrypt_cipher() {
+    cipher="$1"
+    echo "$(echo -n "$cipher" | base64 -d | gpg --decrypt --quiet)"
+  }
+  # Encrypt git-annex key
+  encrypt_key() {
+      local key="$1"
+      local cipher="$2"
+      local mac="$3"
+      local enckey="$key"
+      if [ -n "$cipher" ]; then
+        enckey="GPG$mac--$(echo -n "$key" | openssl dgst -${mac#HMAC} -hmac "$cipher" | sed 's/(stdin)= //')"
+      fi
+      local checksum="$(echo -n $enckey | md5sum)"
+      echo "${checksum:0:3}/${checksum:3:3}/$enckey"
+  }
+  # Find the special remote key from the local key
+  lookup_key() {
+      local encryption="$1"
+      local cipher="$2"
+      local mac="$3"
+      local remote_uuid="$4"
+      local file="$(readlink -m "$5")"
+      # No file
+      if [ -z "$file" ]; then
+        echo >&2 "File '$5' does not exist..."
         exit 1
       fi
-    else
-      echo "Output directory '$DIR' cannot be created."
-      echo "Abort..."
-      exit 1
-    fi
-  else
+      # Analyse keys
+      local annex_key="$(basename "$file")"
+      local checksum="$(echo -n "$annex_key" | md5sum)"
+      local branchdir="${checksum:0:3}/${checksum:3:3}"
+      if [[ "$(git config annex.tune.branchhash1)" = true ]]; then
+          branchdir="${branchdir%%/*}"
+      fi
+      local chunklog="$(git show "git-annex:$branchdir/$annex_key.log.cnk" 2>/dev/null | grep $remote_uuid: | grep -v ' 0$')"
+      local chunklog_lc="$(echo "$chunklog" | wc -l)"
+      local chunksize numchunks chunk_key line n
+      # Decrypt cipher
+      if [ "$encryption" = "hybrid" ] || [ "$encryption" = "pubkey" ]; then
+          cipher="$(decrypt_cipher "$cipher")"
+      fi
+      # Pull out MAC cipher from beginning of cipher
+      if [ "$encryption" = "hybrid" ] ; then
+          cipher="$(echo -n "$cipher" | head  -c 256 )"
+      elif [ "$encryption" = "shared" ] ; then
+          cipher="$(echo -n "$cipher" | base64 -d | tr -d '\n' | head  -c 256 )"
+      elif [ "$encryption" = "pubkey" ] ; then
+          # pubkey cipher includes a trailing newline which was stripped in
+          # decrypt_cipher process substitution step above
+          IFS= read -rd '' cipher < <( printf "$cipher\n" )
+      elif [ "$encryption" = "sharedpubkey" ] ; then
+          # Full cipher is base64 decoded. Add a trailing \n lost by the shell somewhere
+          cipher="$(echo -n "$cipher" | base64 -d)
+"
+      fi
+      if [[ -z $chunklog ]]; then
+          echo "# non-chunked" >&2
+          encrypt_key "$annex_key" "$cipher" "$mac"
+      elif [ "$chunklog_lc" -ge 1 ]; then
+          if [ "$chunklog_lc" -ge 2 ]; then
+              echo "INFO: the remote seems to have multiple sets of chunks" >&2
+          fi
+          while read -r line; do
+              chunksize="$(echo -n "${line#*:}" | cut -d ' ' -f 1)"
+              numchunks="$(echo -n "${line#*:}" | cut -d ' ' -f 2)"
+              echo "# $numchunks chunks of $chunksize bytes" >&2
+              for n in $(seq 1 $numchunks); do
+                  chunk_key="${annex_key/--/-S$chunksize-C$n--}"
+                  encrypt_key "$chunk_key" "$cipher" "$mac"
+              done
+          done <<<"$chunklog"
+      fi
+  }
+  # Main variables
+  local REMOTE="${1:?No remote specified...}"
+  local REMOTE_CONFIG="$(git show git-annex:remote.log | grep 'name='"$REMOTE " | head -n 1)"
+  local ENCRYPTION="$(echo "$REMOTE_CONFIG" | grep -oP 'encryption\=.*? ' | tr -d ' \n' | sed 's/encryption=//')"
+  local CIPHER="$(echo "$REMOTE_CONFIG" | grep -oP 'cipher\=.*? ' | tr -d ' \n' | sed 's/cipher=//')"
+  local UUID="$(echo "$REMOTE_CONFIG" | cut -d ' ' -f 1)"
+  local MAC="$(echo "$REMOTE_CONFIG" | grep -oP 'mac\=.*? ' | tr -d ' \n' | sed 's/mac=//')"
+  [ -z "$REMOTE_CONFIG" ] && { echo >&2 "Remote '$REMOTE' config not found..."; return 3; }
+  [ -z "$ENCRYPTION" ] && { echo >&2 "Remote '$REMOTE' encryption not found..."; return 3; }
+  [ -z "$CIPHER" -a "$ENCRYPTION" != "none" ] && { echo >&2 "Remote '$REMOTE' cipher not found..."; return 3; }
+  [ -z "$UUID" ] && { echo >&2 "Remote '$REMOTE' uuid not found..."; return 3; }
+  [ -z "$MAC" ] && MAC=HMACSHA1
+  shift 1
+  # Main processing
+  git annex find --include '*' "$@" --format='${hashdirmixed}${key}/${key} ${hashdirlower}${key}/${key} ${file}\n' | while IFS=' ' read -r KEY1 KEY2 FILE; do
+    echo "$REMOTE"
+    echo "$FILE"
+    echo "$KEY1"
+    echo "$KEY2"
+    lookup_key "$ENCRYPTION" "$CIPHER" "$MAC" "$UUID" "$FILE"
+    echo
+  done
+}
+
+# Lookup special remotes keys
+annex_lookup_remotes() {
+  local REMOTES="${@:-$(git_remotes)}"
+  for REMOTE in $REMOTES; do
+    annex_lookup_remote "$REMOTE" 2>&1
+  done
+}
+
+########################################
+# List annex content in an archive
+_annex_archive() {
+  ( set +e; # Need to go on on error
+  git_exists || return 1
+  if ! annex_std; then
     echo "Repository '$(git_dir)' cannot be enumerated."
     echo "Abort..."
     exit 1
   fi
+  local NAME="${1:-archive}"
+  local DIR="${2:-$(git_dir)/${NAME%%.*}}"
+  mkdir -p "$DIR"
+  if [ ! -d "$DIR" ]; then
+    echo "Output directory '$DIR' cannot be created."
+    echo "Abort..."
+    exit 1
+  fi
+  local OUT="$DIR/${3:-$(git_name "annex.${NAME%%.*}").${NAME#*.}}"
+  local GPG_RECIPIENT="$4"
+  local GPG_TRUST="${5:+--trust-model always}"
+  shift 5
+  echo "Generate $OUT"
+  eval "$@"
+  if [ ! -r "${OUT}" ]; then
+    echo "Output file is missing or empty."
+    echo "Abort..."
+    exit 1
+  fi
+  if [ ! -z "$GPG_RECIPIENT" ]; then
+    gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
+      (shred -fu "${OUT}" || wipe -f -- "${OUT}" || rm -- "${OUT}")
+  fi
+  ls -l "${OUT}"*
   )
+}
+
+# Annex bundle
+_annex_bundle() {
+  local OUT="$1"
+  local OWNER="${2:-$USER}"
+  echo "Tar annex into $OUT"
+  if annex_bare; then
+    tar zcf "${OUT}" --exclude='*/creds/*' -h ./annex
+  else
+    git annex find | 
+      awk '{print "\""$0"\""}' |
+      xargs -r tar zcf "${OUT}" -h --exclude-vcs --
+  fi
+  [ -f "$OUT" ] && chown "$OWNER" "$OUT"
+}
+annex_bundle() {
+  _annex_archive "bundle.tgz" "$1" "$2" "$3" "$4" "_annex_bundle \"\$OUT\" \"$5\""
+}
+
+# Annex enumeration
+_annex_enum() {
+  git --git-dir="$(git_dir)" annex find "$(git_root)" --include '*' --print0 | xargs -r0 -n1 sh -c '
+    FILE="$1"
+    printf "\"%s\" <- \"%s\"\n" "$(readlink -- "$FILE")" "$FILE" | grep -F ".git/annex"
+  ' _ > "${OUT%.*}"
+  gzip -S .gz -9 "${OUT%.*}"
+}
+annex_enum() {
+  _annex_archive "enum.local.txt.gz" "$1" "$2" "$3" "$4" "_annex_enum"
+}
+
+# Store annex infos
+annex_info(){
+  _annex_archive "info.txt.gz" "$1" "$2" "$3" "$4" "
+    annex_getinfo > \"\${OUT%.*}\"
+    gzip -S .gz -9 \"\${OUT%.*}\"
+"
+}
+
+# Enum special remotes
+annex_enum_remotes() {
+  _annex_archive "enum.remotes.txt.gz" "$1" "$2" "$3" "$4" "
+    annex_lookup_remotes > \"\${OUT%.*}\"
+    gzip -S .gz -9 \"\${OUT%.*}\"
+"
 }
 
 ########################################
