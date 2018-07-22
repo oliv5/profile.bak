@@ -212,80 +212,89 @@ annex_lookup_remote() {
   # Preamble
   git_exists || return 1
   annex_std || return 2
-  # Decrypt cipher
-  decrypt_cipher() {
-    cipher="$1"
-    echo "$(echo -n "$cipher" | base64 -d | gpg --decrypt --quiet)"
-  }
-  # Encrypt git-annex key
-  encrypt_key() {
-      local key="$1"
-      local cipher="$2"
-      local mac="$3"
-      local enckey="$key"
-      if [ -n "$cipher" ]; then
-        enckey="GPG$mac--$(echo -n "$key" | openssl dgst -${mac#HMAC} -hmac "$cipher" | sed 's/(stdin)= //')"
-      fi
-      local checksum="$(echo -n $enckey | md5sum)"
-      echo "${checksum:0:3}/${checksum:3:3}/$enckey"
-  }
-  # Find the special remote key from the local key
-  lookup_key() {
-      local encryption="$1"
-      local cipher="$2"
-      local mac="$3"
-      local remote_uuid="$4"
-      local file="$(readlink -m "$5")"
-      # No file
-      if [ -z "$file" ]; then
-        echo >&2 "File '$5' does not exist..."
-        exit 1
-      fi
-      # Analyse keys
-      local annex_key="$(basename "$file")"
-      local checksum="$(echo -n "$annex_key" | md5sum)"
-      local branchdir="${checksum:0:3}/${checksum:3:3}"
-      if [[ "$(git config annex.tune.branchhash1)" = true ]]; then
-          branchdir="${branchdir%%/*}"
-      fi
-      local chunklog="$(git show "git-annex:$branchdir/$annex_key.log.cnk" 2>/dev/null | grep $remote_uuid: | grep -v ' 0$')"
-      local chunklog_lc="$(echo "$chunklog" | wc -l)"
-      local chunksize numchunks chunk_key line n
+  # Bash lookup_key
+  bash_lookup_key() {
+    bash -c '
       # Decrypt cipher
-      if [ "$encryption" = "hybrid" ] || [ "$encryption" = "pubkey" ]; then
-          cipher="$(decrypt_cipher "$cipher")"
-      fi
-      # Pull out MAC cipher from beginning of cipher
-      if [ "$encryption" = "hybrid" ] ; then
-          cipher="$(echo -n "$cipher" | head  -c 256 )"
-      elif [ "$encryption" = "shared" ] ; then
-          cipher="$(echo -n "$cipher" | base64 -d | tr -d '\n' | head  -c 256 )"
-      elif [ "$encryption" = "pubkey" ] ; then
-          # pubkey cipher includes a trailing newline which was stripped in
-          # decrypt_cipher process substitution step above
-          IFS= read -rd '' cipher < <( printf "$cipher\n" )
-      elif [ "$encryption" = "sharedpubkey" ] ; then
-          # Full cipher is base64 decoded. Add a trailing \n lost by the shell somewhere
-          cipher="$(echo -n "$cipher" | base64 -d)
+      decrypt_cipher() {
+        cipher="$1"
+        echo "$(echo -n "$cipher" | base64 -d | gpg --decrypt --quiet)"
+      }
+      # Encrypt git-annex key
+      encrypt_key() {
+        local key="$1"
+        local cipher="$2"
+        local mac="$3"
+        local enckey="$key"
+        if [ -n "$cipher" ]; then
+          enckey="GPG$mac--$(echo -n "$key" | openssl dgst -${mac#HMAC} -hmac "$cipher" | sed "s/(stdin)= //")"
+        fi
+        local checksum="$(echo -n $enckey | md5sum)"
+        echo "${checksum:0:3}/${checksum:3:3}/$enckey"
+      }
+      # Find the special remote key from the local key
+      lookup_key() {
+        local encryption="$1"
+        local cipher="$2"
+        local mac="$3"
+        local remote_uuid="$4"
+        local file="$(readlink -m "$5")"
+        # No file
+        if [ -z "$file" ]; then
+          echo >&2 "File \"$5\" does not exist..."
+          exit 1
+        fi
+        # Analyse keys
+        local annex_key="$(basename "$file")"
+        local checksum="$(echo -n "$annex_key" | md5sum)"
+        local branchdir="${checksum:0:3}/${checksum:3:3}"
+        if [ "$(git config annex.tune.branchhash1)" = "true" ]; then
+            branchdir="${branchdir%%/*}"
+        fi
+        local chunklog="$(git show "git-annex:$branchdir/$annex_key.log.cnk" 2>/dev/null | grep $remote_uuid: | grep -v " 0$")"
+        local chunklog_lc="$(echo "$chunklog" | wc -l)"
+        local chunksize numchunks chunk_key line n
+        # Decrypt cipher
+        if [ "$encryption" = "hybrid" ] || [ "$encryption" = "pubkey" ]; then
+            cipher="$(decrypt_cipher "$cipher")"
+        fi
+        # Pull out MAC cipher from beginning of cipher
+        if [ "$encryption" = "hybrid" ] ; then
+            cipher="$(echo -n "$cipher" | head  -c 256 )"
+        elif [ "$encryption" = "shared" ] ; then
+            cipher="$(echo -n "$cipher" | base64 -d | tr -d "\n" | head  -c 256 )"
+        elif [ "$encryption" = "pubkey" ] ; then
+            # pubkey cipher includes a trailing newline which was stripped in
+            # decrypt_cipher process substitution step above
+            #IFS= read -rd '' cipher < <( printf "$cipher\n" )
+            cipher="$cipher
 "
-      fi
-      if [[ -z $chunklog ]]; then
-          echo "# non-chunked" >&2
-          encrypt_key "$annex_key" "$cipher" "$mac"
-      elif [ "$chunklog_lc" -ge 1 ]; then
-          if [ "$chunklog_lc" -ge 2 ]; then
-              echo "INFO: the remote seems to have multiple sets of chunks" >&2
-          fi
-          while read -r line; do
-              chunksize="$(echo -n "${line#*:}" | cut -d ' ' -f 1)"
-              numchunks="$(echo -n "${line#*:}" | cut -d ' ' -f 2)"
-              echo "# $numchunks chunks of $chunksize bytes" >&2
-              for n in $(seq 1 $numchunks); do
-                  chunk_key="${annex_key/--/-S$chunksize-C$n--}"
-                  encrypt_key "$chunk_key" "$cipher" "$mac"
-              done
-          done <<<"$chunklog"
-      fi
+        elif [ "$encryption" = "sharedpubkey" ] ; then
+            # Full cipher is base64 decoded. Add a trailing \n lost by the shell somewhere
+            cipher="$(echo -n "$cipher" | base64 -d)
+"
+        fi
+        if [ -z "$chunklog" ]; then
+            echo "# non-chunked" >&2
+            encrypt_key "$annex_key" "$cipher" "$mac"
+        elif [ "$chunklog_lc" -ge 1 ]; then
+            if [ "$chunklog_lc" -ge 2 ]; then
+                echo "INFO: the remote seems to have multiple sets of chunks" >&2
+            fi
+            echo "$chunklog" | while read -r line; do
+                chunksize="$(echo -n "${line#*:}" | cut -d " " -f 1)"
+                numchunks="$(echo -n "${line#*:}" | cut -d " " -f 2)"
+                echo "# $numchunks chunks of $chunksize bytes" >&2
+                for n in $(seq 1 $numchunks); do
+                    chunk_key="${annex_key/--/-S$chunksize-C$n--}"
+                    encrypt_key "$chunk_key" "$cipher" "$mac"
+                done
+            done
+        fi
+      }
+      # Main call
+      lookup_key "$@"
+    ' _ "$@"
   }
   # Main variables
   local REMOTE="${1:?No remote specified...}"
@@ -306,7 +315,7 @@ annex_lookup_remote() {
     echo "$FILE"
     echo "$KEY1"
     echo "$KEY2"
-    lookup_key "$ENCRYPTION" "$CIPHER" "$MAC" "$UUID" "$FILE"
+    bash_lookup_key "$ENCRYPTION" "$CIPHER" "$MAC" "$UUID" "$FILE"
     echo
   done
 }
