@@ -102,12 +102,12 @@ pmake() {
 		local AR="ipcmd semop -s $IPCMD_SEMID -u -1 : ar"
 		local RANLIB="ipcmd semop -s $IPCMD_SEMID -u -1 : ranlib"
 		local PYTHON="ipcmd semop -s $IPCMD_SEMID -u -1 : python"
+		local TRAP="ipcrm -s '$IPCMD_SEMID'; trap INT"
 		ipcmd semctl -s "$IPCMD_SEMID" setall 1
-		trap "ipcrm -s '$IPCMD_SEMID'" INT
+		trap "ipcrm -s '$TRAP'" INT
 		make AR="$AR" RANLIB="$RANLIB" PYTHON="$PYTHON" "$@"
 		local RETCODE=$?
-		ipcrm -s "$IPCMD_SEMID"
-		trap INT
+		eval "$TRAP"
 		return $RETCODE
 	else
 		make "$@"
