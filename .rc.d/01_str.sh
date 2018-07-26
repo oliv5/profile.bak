@@ -12,15 +12,21 @@ str_uniq() {
 }
 
 # To lower
-alias toLower='str_lower'
-str_lower() {
+alias tolower='str_low'
+str_low() {
   echo "${@}" | tr "[:upper:]" "[:lower:]"
+}
+str_lowfirst() {
+  echo "${@}" | sed 's/.*/\l&/'
 }
 
 # To upper
-alias toUpper='str_upper'
-str_upper() {
+alias toupper='str_upper'
+str_up() {
   echo "${@}" | tr "[:lower:]" "[:upper:]"
+}
+str_upfirst() {
+  echo "${@}" | sed 's/.*/\u&/'
 }
 
 # Check if string have the given prefix
