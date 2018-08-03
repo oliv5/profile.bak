@@ -892,6 +892,17 @@ augroup END
 
 
 " *******************************************************
+" } Shell commands {
+" *******************************************************
+" User commands
+command! -nargs=1 -bar Silent execute ':silent !'.<q-args> | execute ':redraw!'
+
+" Mark key maps
+FnNoremap <C-k>      :!
+FnNoremap <C-A-k>    :Silent |
+
+
+" *******************************************************
 " } Marks {
 " *******************************************************
 
