@@ -868,6 +868,7 @@ annex_gethashpathmixed() {
 # List unused files matching pattern
 annex_unused() {
   ! annex_bare || return 1
+  unset IFS
   local PATTERNS=""
   for ARG; do PATTERNS="${PATTERNS:+$PATTERNS }-e '$ARG'"; done
   eval annex_fromkey $(git annex unused ${FROM:+--from $FROM} | awk "/^\s+[0-9]+\s/{print \$2}") ${PATTERNS:+| grep -zF $PATTERNS} | xargs -r0 -n1
@@ -896,12 +897,10 @@ annex_dropunused() {
 annex_dropunused_interactive() {
   ! annex_bare || return 1
   local IFS="$(printf ' \t\n')"
-  local REPLY; read -r -p "Delete unused files? (a/y/n/s) " REPLY
+  local REPLY; read -r -p "Delete unused files? (a/y/n) " REPLY
   if [ "$REPLY" = "a" -o "$REPLY" = "A" ]; then
     local LAST="$(git annex unused | awk '/SHA256E/ {a=$1} END{print a}')"
     git annex dropunused "$@" 1-$LAST
-  elif [ "$REPLY" = "s" -o "$REPLY" = "S" ]; then
-    annex_show_unused_key
   elif [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
     local LAST="$(git annex unused | awk '/SHA256E/ {a=$1} END{print a}')"
     git annex unused | grep -F 'SHA256E' | 
@@ -920,6 +919,11 @@ annex_dropunused_interactive() {
         echo "~"
       done
   fi
+}
+
+# Clean partially transfered files
+annex_dropbad() {
+  git annex unused --fast | awk '/^\s+[0-9]+\s+/ {print $1}' | xargs git annex dropunused
 }
 
 ########################################
