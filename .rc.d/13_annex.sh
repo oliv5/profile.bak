@@ -581,12 +581,14 @@ _annex_rsync() {
         if [ $SIZE -gt $MAXSIZE ]; then
           echo "File \"$FILE\" size ($SIZE) is greater than max size ($MAXSIZE). Skip it..."
         elif [ -n "$SKIP_EXISTING" ]; then
-          DST_FILE="${DST_ROOT}/$FILE"
           # Skip existing files
-          if [ "$DST_SERVER" != "localhost" ] && ssh ${DST_PORT:+-p "$DST_PORT"} "$DST_SERVER" stat -t "$DST_FILE" \>/dev/null 2\>\&1; then
-            echo "Skip existing dst file ${DST_FILE}"
-          elif stat -t "$DST_FILE" >/dev/null 2>&1; then
-            echo "Skip existing dst file ${DST_FILE}"
+          DST_SIZE=0
+          DST_FILE="${DST_ROOT}/$FILE"
+          [ "$DST_SERVER" != "localhost" ] && 
+            DST_SIZE=$(ssh ${DST_PORT:+-p "$DST_PORT"} "$DST_SERVER" stat -c %s "$DST_FILE" 2>&1) ||
+            DST_SIZE=$(stat -c %s "$DST_FILE" 2>&1)
+          if [ "$DST_SIZE" = "$SIZE" ]; then
+            echo "Skip identical existing file ${DST_FILE}"
           else
             # Enqueue the file
             set -- "$@" "$FILE"
