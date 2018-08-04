@@ -530,24 +530,25 @@ annex_transfer() {
   fi
 }
 
-# Rsync files to the specified location, one by one
+# Rsync files to the specified location by chunk of a given size
 # without downloading the whole repo locally at once
 # Options make it similar to "git annex copy" and "git annex move"
 # $FROM is used to selected the origin repo
-# $DROP is used to drop the newly retrieved files (when not empty)
 # $DBG is used to print the command on stderr (when not empty)
+# $SKIP_EXISTING is used to skip existing remote files
 # $DELETE is used to delete the missing existing files (1=dry-run, 2=do-it)
 # $RSYNC_OPT is used to specify rsync options
-alias annex_rsync='DBG= DELETE= DROP=1 SKIP= RSYNC_OPT= _annex_rsync'
-alias annex_rsyncd='DBG= DELETE=2 DROP=1 SKIP= RSYNC_OPT= _annex_rsync'
-alias annex_rsyncds='DBG= DELETE=1 DROP=1 SKIP= RSYNC_OPT= _annex_rsync'
+alias annex_rsync='DBG= DELETE= SKIP_EXISTING= RSYNC_OPT= _annex_rsync'
+alias annex_rsyncd='DBG= DELETE=2 SKIP_EXISTING= RSYNC_OPT= _annex_rsync'
+alias annex_rsyncds='DBG= DELETE=1 SKIP_EXISTING= RSYNC_OPT= _annex_rsync'
 _annex_rsync() {
   annex_exists || return 1
   local DST="${1:?No destination specified...}"
+  local MAXSIZE="${2:-1073741824}"
   local SRC="${PWD}"
-  local DBG="${DBG:+echo}"
+  local DBG="${DBG:+echo [DBG]}"
   local RSYNC_OPT="${RSYNC_OPT:--v -r -z -s -i --inplace --size-only --progress -K -L -P}"
-  [ $# -gt 0 ] && shift
+  [ $# -le 2 ] && shift $# || shift 2
   [ "${SRC%/}" = "${DST%/}" ] && return 2
   [ "${DST%%:*}" = "${DST}" ] && DST="localhost:/${DST}"
   if git_bare; then
@@ -561,35 +562,62 @@ _annex_rsync() {
     done
   else
     # Plain git repositories
-    # Get & copy local files one by one
-    git annex find --include='*' --print0 "$@" | xargs -0 -rn1 sh -c '
-      DBG="$1";SKIP="$2";RSYNC_OPT="$3";DST="$4/$5";SRC="$5"
+    git annex find --include='*' --print0 "$@" | xargs -0 -r sh -c '
+      DBG="$1";MAXSIZE="$2";SKIP_EXISTING="$3";RSYNC_OPT="$4";DST="$5"
+      shift 5
+      TOTALSIZE=0
+      NUMFILES=$#
       DST_PROTO="${DST%%/*}"
-      DST_FILE="/${DST#*/}"
-      DST_DIR="$(dirname "${DST##*:}/${DSTNAME}")"
       DST_SERVER="${DST_PROTO%%:*}"
       DST_PORT="${DST_PROTO##${DST_SERVER}:}"
-      if [ -n "$SKIP" ]; then
-        if [ "$DST_SERVER" != "localhost" ] && ssh ${DST_PORT:+-p "$DST_PORT"} "$DST_SERVER" stat -t "$DST_FILE" \>/dev/null 2\>\&1; then
-          echo "Skip existing dst file ${DST}"
-          exit 1
-        elif stat -t "$DST_FILE" >/dev/null 2>&1; then
-          echo "Skip existing dst file ${DST}"
-          exit 1
+      DST_ROOT="/${DST#*/}"
+      for FILE; do
+        # Init
+        NUMFILES=$(($NUMFILES - 1))
+        [ $TOTALSIZE -eq 0 ] && set --
+        # Get current file size
+        SIZE=$(git annex info --bytes "$FILE" | awk "/size:/{print \$2}")
+        # List the current file
+        if [ $SIZE -gt $MAXSIZE ]; then
+          echo "File \"$FILE\" size ($SIZE) is greater than max size ($MAXSIZE). Skip it..."
+        elif [ -n "$SKIP_EXISTING" ]; then
+          DST_FILE="${DST_ROOT}/$FILE"
+          # Skip existing files
+          if [ "$DST_SERVER" != "localhost" ] && ssh ${DST_PORT:+-p "$DST_PORT"} "$DST_SERVER" stat -t "$DST_FILE" \>/dev/null 2\>\&1; then
+            echo "Skip existing dst file ${DST_FILE}"
+          elif stat -t "$DST_FILE" >/dev/null 2>&1; then
+            echo "Skip existing dst file ${DST_FILE}"
+          else
+            # Enqueue the file
+            set -- "$@" "$FILE"
+            TOTALSIZE=$(($TOTALSIZE + $SIZE))
+          fi
+        else
+          # Enqueue the file
+          set -- "$@" "$FILE"
+          TOTALSIZE=$(($TOTALSIZE + $SIZE))
         fi
-      fi
-      if [ -L "$SRC" -a ! -e "$SRC" ]; then
-        $DBG git annex get ${FROM:+--from "$FROM"} "$SRC" || exit $?
-      else
-        unset DROP
-      fi
-      while ! $DBG rsync --rsync-path="mkdir -p \"${DST_DIR}\" && rsync" $RSYNC_OPT "$SRC" "$DST"; do sleep 1; done
-      [ -n "$DROP" ] && $DBG git annex drop "$SRC"
+        # Check if the transfer limits or last file were reached
+        if [ $TOTALSIZE -ge $MAXSIZE -o $NUMFILES -eq 0 ]; then
+          # Transfer the listed files so far, if any
+          if [ $# -gt 0 ]; then
+            $DBG git annex get ${FROM:+--from "$FROM"} "$@" || exit $?
+            for FILE; do
+              DST_DIR="$(dirname "${DST##*:}/${FILE}")"
+              while ! $DBG rsync --rsync-path="mkdir -p \"$DST_DIR\" && rsync" $RSYNC_OPT "$FILE" "$DST/$FILE"; do sleep 1; done
+            done
+            $DBG git annex drop "$@" || exit $?
+          fi
+          # Empty list
+          set --
+          TOTALSIZE=0
+        fi
+      done
       exit 0
-    ' _ "$DBG" "${SKIP:+1}" "$RSYNC_OPT" "$DST"
+    ' _ "$DBG" "$MAXSIZE" "${SKIP_EXISTING:+1}" "$RSYNC_OPT" "$DST"
     # Delete missing destination files
     if [ "$DELETE" = 1 ]; then
-      while ! $DBG rsync -rni --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC/" "$DST/"; do sleep 1; done
+      while ! $DBG rsync --dry-run -ri --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC/" "$DST/"; do sleep 1; done
     elif [ "$DELETE" = 2 ]; then
       while ! $DBG rsync -ri --delete --cvs-exclude --ignore-existing --ignore-non-existing "$SRC/" "$DST/"; do sleep 1; done
     fi
