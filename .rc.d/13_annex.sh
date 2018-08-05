@@ -874,6 +874,20 @@ annex_unused() {
   eval annex_fromkey $(git annex unused ${FROM:+--from $FROM} | awk "/^\s+[0-9]+\s/{print \$2}") ${PATTERNS:+| grep -zF $PATTERNS} | xargs -r0 -n1
 }
 
+# List unused files matching pattern
+annex_listunused() {
+  ! annex_bare || return 1
+  unset IFS
+  local PATTERNS=""
+  for ARG; do PATTERNS="${PATTERNS:+$PATTERNS }-e '$ARG'"; done
+  git annex unused ${FROM:+--from $FROM} | grep -E '^\s+[0-9]+\s' | 
+    while IFS=' ' read -r NUM KEY; do
+      echo "Key  : $KEY"
+      eval annex_fromkey "$KEY" ${PATTERNS:+| grep -zF $PATTERNS} | 
+        xargs -r0 -n1 echo "File :"
+    done
+}
+
 # Drop unused files matching pattern
 annex_dropunused() {
   ! annex_bare || return 1
@@ -882,14 +896,10 @@ annex_dropunused() {
   for ARG; do PATTERNS="${PATTERNS:+$PATTERNS }-e '$ARG'"; done
   git annex unused ${FROM:+--from $FROM} | grep -E '^\s+[0-9]+\s' | 
     while IFS=' ' read -r NUM KEY; do
-      eval annex_fromkey "$KEY" ${PATTERNS:+| grep -zF $PATTERNS} | xargs -r0 sh -c '
-        NUM="$1";KEY="$2"; shift 2
-        for FILE; do
-          printf "Drop unused file %s\nFile: %s\nKey: %s\n" "$NUM" "$FILE" "$KEY"
-        done
-        git annex dropunused "$NUM" ${FROM:+--from $FROM} ${FORCE:+--force}
-        echo ""
-      ' _ "$NUM" "$KEY"
+      printf "Drop unused key %s\n" "$KEY"
+      git annex dropunused "$NUM" ${FROM:+--from $FROM} ${FORCE:+--force}
+      eval annex_fromkey "$KEY" ${PATTERNS:+| grep -zF $PATTERNS} | xargs -r0 -n1 echo "File: "
+      echo ""
     done
 }
 
@@ -897,13 +907,15 @@ annex_dropunused() {
 annex_dropunused_interactive() {
   ! annex_bare || return 1
   local IFS="$(printf ' \t\n')"
-  local REPLY; read -r -p "Delete unused files? (a/y/n) " REPLY
+  local REPLY; read -r -p "Delete unused files? (a/y/n/s) " REPLY
   if [ "$REPLY" = "a" -o "$REPLY" = "A" ]; then
-    local LAST="$(git annex unused | awk '/SHA256E/ {a=$1} END{print a}')"
+    local LAST="$(git annex unused | awk '/^\s+[0-9]+\s/ {a=$1} END{print a}')"
     git annex dropunused "$@" 1-$LAST
+  elif [ "$REPLY" = "s" -o "$REPLY" = "S" ]; then
+    annex_listunused
   elif [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
-    local LAST="$(git annex unused | awk '/SHA256E/ {a=$1} END{print a}')"
-    git annex unused | grep -F 'SHA256E' | 
+    local LAST="$(git annex unused | awk '/^\s+[0-9]+\s/ {a=$1} END{print a}')"
+    git annex unused | grep -E '^\s+[0-9]+\s' | 
       while read -r NUM KEY; do
         printf "Key: $KEY\nFile: "
         annex_fromkey "$KEY"
