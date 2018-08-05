@@ -484,7 +484,7 @@ annex_transfer() {
   local MAXSIZE="${2:-1073741824}"
   local DBG="${DBG:+echo}"
   local SELECT=""
-  [ $# -ge 2 ] && shift 2
+  [ $# -le 2 ] && shift $# || shift 2
   [ -z "$REPOS" ] && return 0
   [ -z "$ALL" ] && for REPO in $REPOS; do SELECT="${SELECT:+ $SELECT --and }--not --in $REPO"; done
   if git_bare; then
