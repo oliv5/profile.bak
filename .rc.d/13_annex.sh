@@ -803,9 +803,16 @@ annex_find_repo() {
 }
 
 ########################################
-# Fsck/check all
-alias annex_fsck='annex_find_repo | xargs -r -I {} -n 1 sh -c "cd \"{}/..\"; pwd; git annex fsck"'
-alias annex_check='annex_find_repo | xargs -r -I {} -n 1 sh -c "cd \"{}/..\"; pwd; git annex list | grep \"^_\""'
+# Fsck all
+annex_fsck() {
+  local REMOTES="${1:-. $(git_remotes)}"
+  [ $# -ge 1 ] && shift
+  for REMOTE in $REMOTES; do
+    [ "$REMOTE" = "." ] &&
+      git annex fsck "$@" ||
+      git annex fsck --from=${REMOTE} "$@"
+  done
+}
 
 ########################################
 # Rename special remotes
