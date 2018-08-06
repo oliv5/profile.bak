@@ -139,7 +139,7 @@ autofs_toggle() {
 # Check logged on users have a local home
 check_nfs() {
   for LOGGED_USER in $(who | awk '{print $1}' | sort | uniq); do
-    if [ -f /etc/exports ] && ! grep "$LOGGED_USER" /etc/exports >/dev/null; then
+    if [ -f /etc/exports ] && ! command grep -E "^[^#]*$LOGGED_USER" /etc/exports >/dev/null; then
       echo "WARNING: user $LOGGED_USER is logged in using a remote home..."
     fi
   done
