@@ -177,8 +177,12 @@ annex_uuid() {
 
 # List annexed remotes
 annex_remotes() {
-  git config --get-regexp "remote\..*\.annex-uuid" |
-    awk -F. '{print $2}' | xargs
+  git show git-annex:remote.log 2>/dev/null | 
+    perl -n -e'/^'$1'.*name=(\w+)/ && print "$1\n"'
+}
+annex_remotes_uuid() {
+  git show git-annex:remote.log 2>/dev/null | 
+    awk '/'$1'/{print $1}'
 }
 
 # List annexed enabled remotes
@@ -186,7 +190,27 @@ annex_enabled() {
   local EXCLUDE="$(git config --get-regexp "remote\..*\.annex-ignore" true | awk -F. '{printf $2"|"}' | sed -e "s/|$//")"
   git config --get-regexp "remote\..*\.annex-uuid" |
     grep -vE "${EXCLUDE:-$^}" | 
-    awk -F. '{print $2}' | xargs
+    awk -F. '{print $2}' | xargs -n 1
+}
+
+########################################
+annex_hook_commit() {
+  local HOOK="$(git_dir)/hooks/pre-commit"
+  [ -e "$HOOK" ] && { echo "Hook file $HOOK exists already..."; return 1; }
+  cat > "$HOOK" <<EOF
+#!/bin/sh
+# automatically configured by git-annex
+git annex pre-commit .
+
+# Go though added files (--diff-filter=A) and check whether they are symlinks (test -h)
+git diff --cached --name-only --diff-filter=A -z |
+    xargs -r -0 -- sh -c '
+        for F; do
+            test ! -h "\$F" && echo "File \"\$F\" is not a symlink. Abort..." && exit 1
+        done
+    ' _
+EOF
+  chmod +x "$HOOK"
 }
 
 ########################################
@@ -412,11 +436,7 @@ annex_enum_remotes() {
 }
 
 ########################################
-# Annex download/upload
-alias annex_download='git annex get'
-alias annex_dl='git annex get'
-alias annex_ul='annex_upload'
-alias annex_send='annex_upload'
+# Annex upload
 annex_upload() {
   local ARGS=""
   local PREV=""
@@ -627,6 +647,37 @@ _annex_rsync() {
 }
 
 ########################################
+# Populate a special remote directory with files from the input source
+# The current repository is used to find out keys & file names,
+# but is not used directly to copy/move the files from
+# Note the same backend than the source is used for the destination file names
+# WHERE selects which files & repo to look for
+# MOVE=1 moves files instead of copying them
+alias annex_populate='MOVE= _annex_populate'
+alias annex_populatem='MOVE=1 _annex_populate'
+_annex_populate() {
+  local DST="${1:?No dst directory specified...}"
+  local SRC="${2:-$PWD}"
+  local WHERE="${3:-${WHERE:---include '*'}}"
+  eval git annex find "$WHERE" --format='\${file}\\000\${hashdirlower}\${key}/\${key}\\000' | xargs -r0 -n2 sh -c '
+    DBG="$1"; MOVE="$2"; SRCDIR="$3; DSTDIR="$4"; SRC="$SRCDIR/$5"; DST="$DSTDIR/$6"
+    echo "$SRC -> $DST"
+    if [ -d "$SRCDIR" -o -d "$DSTDIR" ]; then
+      if [ -n "$MOVE" ]; then
+        if [ -r "$SRC" -a ! -h "$SRC" ]; then
+          $DBG mkdir -p "$(dirname "$DST")"
+          $DBG mv -f -T "$SRC" "$DST"
+        else
+          $DBG rsync -K -L --protect-args --remove-source-files "$SRC" "$DST"
+        fi
+      else
+        $DBG rsync -K -L --protect-args "$SRC" "$DST"
+      fi
+    fi
+  ' _ "${DBG:+echo [DBG]}" "$MOVE" "$SRC" "$DST"
+}
+
+########################################
 # Drop local files which are in the specified remote repos
 alias annex_drop='git annex drop -N $(annex_enabled | wc -w)'
 annex_drop_fast() {
@@ -817,7 +868,7 @@ annex_fsck() {
 ########################################
 # Rename special remotes
 annex_rename_special() {
-	git config remote.$1.fetch dummy
+	git config remote.$1.fetch "dummy"
 	git remote rename "$1" "$2"
 	git config --unset remote.$2.fetch
 	git annex initremote "$1" name="$2"
@@ -1011,37 +1062,6 @@ annex_purge() {
     rm "$F" 2>/dev/null
   done
   git annex sync
-}
-
-########################################
-# Populate a special remote directory with files from the input source
-# The current repository is used to find out keys & file names,
-# but is not used directly to copy/move the files from
-# Note the same backend than the source is used for the destination file names
-# WHERE selects which files & repo to look for
-# MOVE=1 moves files instead of copying them
-alias annex_populate='MOVE= _annex_populate'
-alias annex_populatem='MOVE=1 _annex_populate'
-_annex_populate() {
-  local DST="${1:?No dst directory specified...}"
-  local SRC="${2:-$PWD}"
-  local WHERE="${3:-${WHERE:---include '*'}}"
-  eval git annex find "$WHERE" --format='\${file}\\000\${hashdirlower}\${key}/\${key}\\000' | xargs -r0 -n2 sh -c '
-    DBG="$1"; MOVE="$2"; SRCDIR="$3; DSTDIR="$4"; SRC="$SRCDIR/$5"; DST="$DSTDIR/$6"
-    echo "$SRC -> $DST"
-    if [ -d "$SRCDIR" -o -d "$DSTDIR" ]; then
-      if [ -n "$MOVE" ]; then
-        if [ -r "$SRC" -a ! -h "$SRC" ]; then
-          $DBG mkdir -p "$(dirname "$DST")"
-          $DBG mv -f -T "$SRC" "$DST"
-        else
-          $DBG rsync -K -L --protect-args --remove-source-files "$SRC" "$DST"
-        fi
-      else
-        $DBG rsync -K -L --protect-args "$SRC" "$DST"
-      fi
-    fi
-  ' _ "${DBG:+echo [DBG]}" "$MOVE" "$SRC" "$DST"
 }
 
 ########################################
