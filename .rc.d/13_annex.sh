@@ -81,71 +81,77 @@ annex_init_direct() {
 # Init hubic annex
 annex_init_hubic() {
   local NAME="${1:?No remote name specified...}"
-  local ENCRYPTION="${2:-none}"
-  local REMOTEPATH="${3:-$(git_repo)}"
+  local REMOTEPATH="${2:-$(git_repo)}"
+  local ENCRYPTION="${3:-none}"
   local KEYID="$4"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no ${KEYID:+keyid="$KEYID"} ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no ${KEYID:+keyid="$KEYID"}
+  local CHUNKS="$5"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=hubic hubic_container=annex hubic_path="$REMOTEPATH" embedcreds=no ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
 }
 
 # Init gdrive annex
 annex_init_gdrive() {
   local NAME="${1:?No remote name specified...}"
-  local ENCRYPTION="${2:-none}"
-  local REMOTEPATH="${3:-$(git_repo)}"
+  local REMOTEPATH="${2:-$(git_repo)}"
+  local ENCRYPTION="${3:-none}"
   local KEYID="$4"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" ${KEYID:+keyid="$KEYID"} ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" ${KEYID:+keyid="$KEYID"}
+  local CHUNKS="$5"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=external externaltype=googledrive folder="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
 }
 
 # Init bup annex
 annex_init_bup() {
   local NAME="${1:?No remote name specified...}"
-  local ENCRYPTION="${2:-none}"
-  local REMOTEPATH="${3:-$(git_repo)}"
+  local REMOTEPATH="${2:-$(git_repo)}"
+  local ENCRYPTION="${3:-none}"
   local KEYID="$4"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" ${KEYID:+keyid="$KEYID"} ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" ${KEYID:+keyid="$KEYID"}
+  local CHUNKS="$5"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=bup buprepo="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
 }
 
 # Init rsync annex
 annex_init_rsync() {
   local NAME="${1:?No remote name specified...}"
-  local ENCRYPTION="${2:-none}"
-  local REMOTEPATH="${3:-$(git_repo)}"
+  local REMOTEPATH="${2:-$(git_repo)}"
+  local ENCRYPTION="${3:-none}"
   local KEYID="$4"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" ${KEYID:+keyid="$KEYID"} ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" ${KEYID:+keyid="$KEYID"}
+  local CHUNKS="$5"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=rsync rsyncurl="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
   git config --add annex.sshcaching false
 }
 
 # Init directory annex
 annex_init_directory() {
   local NAME="${1:?No remote name specified...}"
-  local ENCRYPTION="${2:-none}"
-  local REMOTEPATH="${3:-$(git_repo)}"
+  local REMOTEPATH="${2:-$(git_repo)}"
+  local ENCRYPTION="${3:-none}"
   local KEYID="$4"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${KEYID:+keyid="$KEYID"} ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${KEYID:+keyid="$KEYID"}
+  local CHUNKS="$5"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
   git config --add annex.sshcaching false
 }
 
 # Init gcrypt annex
 annex_init_gcrypt() {
   local NAME="${1:?No remote name specified...}"
-  local ENCRYPTION="${2:-none}"
-  local REMOTEPATH="${3:-$(git_repo)}"
+  local REMOTEPATH="${2:-$(git_repo)}"
+  local ENCRYPTION="${3:-none}"
   local KEYID="$4"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" ${KEYID:+keyid="$KEYID"} ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" ${KEYID:+keyid="$KEYID"}
+  local CHUNKS="$5"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=gcrypt gitrepo="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
   git config --add annex.sshcaching false
 }
 
 # Init rclone annex
 annex_init_rclone() {
   local NAME="${1:?No remote name specified...}"
-  local ENCRYPTION="${2:-none}"
-  local REMOTEPATH="${3:-$(git_repo)}"
+  local REMOTEPATH="${2:-$(git_repo)}"
+  local ENCRYPTION="${3:-none}"
   local KEYID="$4"
   local CHUNKS="$5"
   local PROFILE="${6:-$NAME}"
