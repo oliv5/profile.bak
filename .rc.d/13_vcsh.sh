@@ -10,31 +10,24 @@ vcsh_loaded() {
   [ -n "$VCSH_REPO_NAME" ]
 }
 
-# vcsh init
-vcsh_init() {
+# vcsh run (including profile functions)
+vcsh_run() {
   local REPO="$1"
   shift 2>/dev/null
-  vcsh init "$REPO" || return 1
-  for ARGS; do
-    set -- $ARGS
-    vcsh run "$REPO" command git remote add "$@"
-  done
+  vcsh run "$REPO" sh -c '
+    wrapper() { . $HOME/.rc; }; wrapper
+    eval "$@"
+  ' _ "$@"
 }
 
 # vcsh clone
 vcsh_clone() {
-  local URL="${1:?No URL specified}"
-  local REMOTE="${2:-origin}"
-  local BRANCH="${3:-master}"
-  local REPO="$(basename "$URL" .git)"
-  shift 3 2>/dev/null
-  vcsh clone "$URL" "$REPO" || break
-  vcsh run "$REPO" command git remote rename origin "$REMOTE"
-  vcsh run "$REPO" command git checkout "$BRANCH"
-  for ARGS; do
-    set -- $ARGS
-    vcsh run "$REPO" command git remote add "$@"
-  done
+  local REPO="$(basename "$1" .git)"
+  vcsh clone "$1" "$REPO" || return 1
+  shift
+  if [ -n "$2" ]; then
+    vcsh run "$REPO" git remote rename origin "$2"
+  fi
 }
 
 ########################################
