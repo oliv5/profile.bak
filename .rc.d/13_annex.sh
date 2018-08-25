@@ -57,24 +57,26 @@ annex_std() {
   annex_exists "$@" && ! annex_direct "$@" && ! git_bare "$@"
 }
 
+########################################
 # Init annex
 annex_init() {
-  git init "$1" && git annex init "${2:-$(uname -n)}"
+  git init "${1:-.}" && git --git-dir="${1:-.}/.git" annex init "${2:-$(uname -n)}"
 }
 
 # Init annex bare repo
 annex_init_bare() {
-  git init --bare "$1" && git annex init "${2:-$(uname -n)}"
+  git init --bare "${1:-.}" && git --git-dir="${1:-.}" annex init "${2:-$(uname -n)}"
 }
 
 # Uninit annex
 annex_uninit() {
-  git annex uninit && git config --replace-all core.bare false
+  git --git-dir="${1:-.}" annex uninit && 
+  git --git-dir="${1:-.}" config --replace-all core.bare false
 }
 
 # Init annex in direct mode
 annex_init_direct() {
-  annex_init && git annex direct
+  annex_init "$@" && git --git-dir="${1:-.}" annex direct
 }
 
 ########################################
@@ -368,18 +370,16 @@ _annex_archive() {
     echo "Abort..."
     exit 1
   fi
-  local NAME="${1:-archive}"
-  local DIR="${2:-$(git_dir)/${NAME%%.*}}"
-  mkdir -p "$DIR"
-  if [ ! -d "$DIR" ]; then
-    echo "Output directory '$DIR' cannot be created."
-    echo "Abort..."
+  local OUT="${2:-$(git_dir)/archive/}"
+  [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name "${1%%.*}").${1#*.}"
+  local GPG_RECIPIENT="$3"
+  local GPG_TRUST="${4:+--trust-model always}"
+  shift 4
+  mkdir -p "$(dirname "$OUT")"
+  if [ $? -ne 0 ]; then
+    echo "Cannot create directory \"$(dirname "$OUT")\". Abort..."
     exit 1
   fi
-  local OUT="$DIR/${3:-$(git_name "annex.${NAME%%.*}").${NAME#*.}}"
-  local GPG_RECIPIENT="$4"
-  local GPG_TRUST="${5:+--trust-model always}"
-  shift 5
   echo "Generate $OUT"
   eval "$@"
   if [ ! -r "${OUT}" ]; then
@@ -410,24 +410,28 @@ _annex_bundle() {
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
 annex_bundle() {
-  _annex_archive "bundle.tgz" "$1" "$2" "$3" "$4" "_annex_bundle \"\$OUT\" \"$5\""
+  _annex_archive "bundle.tgz" "$1" "$2" "$3" "_annex_bundle \"\$OUT\" \"$4\""
 }
 
 # Annex enumeration
 _annex_enum() {
   git --git-dir="$(git_dir)" annex find "$(git_root)" --include '*' --print0 | xargs -r0 -n1 sh -c '
     FILE="$1"
-    printf "\"%s\" <- \"%s\"\n" "$(readlink -- "$FILE")" "$FILE" | grep -F ".git/annex"
+    #printf "\"%s\" \"%s\"\n" "$(readlink -- "$FILE")" "$FILE" | grep -F ".git/annex"
+    readlink -- "$FILE" | base64 -w 0
+    echo
+    echo "$FILE" | base64 -w 0
+    echo
   ' _ > "${OUT%.*}"
   gzip -S .gz -9 "${OUT%.*}"
 }
 annex_enum() {
-  _annex_archive "enum_local.txt.gz" "$1" "$2" "$3" "$4" "_annex_enum"
+  _annex_archive "enum_local.txt.gz" "$1" "$2" "$3" "_annex_enum"
 }
 
 # Store annex infos
 annex_info(){
-  _annex_archive "info.txt.gz" "$1" "$2" "$3" "$4" "
+  _annex_archive "info.txt.gz" "$1" "$2" "$3" "
     annex_getinfo > \"\${OUT%.*}\"
     gzip -S .gz -9 \"\${OUT%.*}\"
 "
@@ -435,7 +439,7 @@ annex_info(){
 
 # Enum special remotes
 annex_enum_remotes() {
-  _annex_archive "enum_remotes.txt.gz" "$1" "$2" "$3" "$4" "
+  _annex_archive "enum_remotes.txt.gz" "$1" "$2" "$3" "
     annex_lookup_remotes > \"\${OUT%.*}\"
     gzip -S .gz -9 \"\${OUT%.*}\"
 "

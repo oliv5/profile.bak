@@ -306,25 +306,18 @@ git_author() {
 }
 
 ########################################
-# Clone & rename remote
+# Clone helpers
 git_clone() {
   git clone "$1" ${3:+"$3"} || return 1
   if [ -n "$2" ]; then
     git --git-dir="${3:-$(basename "$1" .git)}/.git" remote rename origin "$2"
   fi
 }
-
-# Clone one branch only
-git_clone_branch() {
-  local URL="${1:?No URL specified}"
-  local BRANCH="${2:-master}"
-  local DIR="${3:-$(basename "$URL" .git)}"
-  mkdir -p "$DIR"
-  cd "$DIR" || return 1
-  git init
-  git remote add origin -t "$BRANCH" "$URL"
-  git fetch
-  git checkout "$BRANCH"
+git_clone_bare() {
+  git clone --bare "$1" ${3:+"$3"} || return 1
+  if [ -n "$2" ]; then
+    git --git-dir="${3:-$(basename "$1" .git)}/.git" remote rename origin "$2"
+  fi
 }
 
 # Add batch of remotes
@@ -530,25 +523,24 @@ git_set_tracking() {
 git_bundle() {
   ( set +e; # Need to go on
   git_exists || return 1
-  local DIR="${1:-$(git_dir)/bundle}"
-  mkdir -p "$DIR"
-  if [ -d "$DIR" ]; then
-    local BUNDLE="$DIR/${2:-$(git_name "bundle").git}"
-    local GPG_RECIPIENT="$3"
-    local GPG_TRUST="${4:+--trust-model always}"
-    local OWNER="${5:-$USER}"
-    echo "Git bundle into $BUNDLE"
-    git bundle create "$BUNDLE" --all
-    chown "$OWNER" "$BUNDLE"
+  local OUT="${1:-$(git_dir)/bundle/$(git_name "bundle").git}"
+  [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name "bundle").git"
+  mkdir -p "$(dirname "$OUT")"
+  if [ $? -eq 0 ]; then
+    local GPG_RECIPIENT="$2"
+    local GPG_TRUST="${3:+--trust-model always}"
+    local OWNER="${4:-$USER}"
+    echo "Git bundle into $OUT"
+    git bundle create "$OUT" --all
+    chown "$OWNER" "$OUT"
     if [ ! -z "$GPG_RECIPIENT" ]; then
-      gpg -v --output "${BUNDLE}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${BUNDLE}" &&
-        (shred -fu "${BUNDLE}" || wipe -f -- "${BUNDLE}" || rm -- "${BUNDLE}")
-      chown "$OWNER" "${BUNDLE}.gpg"
+      gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
+        (shred -fu "${OUT}" || wipe -f -- "${OUT}" || rm -- "${OUT}")
+      chown "$OWNER" "${OUT}.gpg"
     fi
-    ls -l "${BUNDLE}"*
+    ls -l "${OUT}"*
   else
-    echo "Target directory '$DIR' does not exists."
-    echo "Skip bundle creation..."
+    echo "Cannot create directory \"$(dirname "$OUT")\". Abort..."
     exit 1
   fi
   )
@@ -660,7 +652,6 @@ git_diffm_all() {
 }
 
 ########################################
-
 # Get stash name by index
 git_stash_name() {
   git stash list | awk "NR==$((${1:-0}+1)){print \$2}"
