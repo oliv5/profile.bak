@@ -342,6 +342,12 @@ annex_lookup_remote() {
   [ -z "$MAC" ] && MAC=HMACSHA1
   shift 1
   # Main processing
+  echo "## Remote $REMOTE"
+  echo "## Uuid $UUID"
+  echo "## Encryption $ENCRYPTION"
+  echo "## Cipher $CIPHER"
+  echo "## Mac $MAC"
+  echo
   git annex find --include '*' "$@" --format='${hashdirmixed}${key}/${key} ${hashdirlower}${key}/${key} ${file}\n' | while IFS=' ' read -r KEY1 KEY2 FILE; do
     echo "$REMOTE"
     echo "$FILE"
@@ -410,7 +416,7 @@ _annex_bundle() {
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
 annex_bundle() {
-  _annex_archive "bundle.tgz" "$1" "$2" "$3" "_annex_bundle \"\$OUT\" \"$4\""
+  _annex_archive "annex.bundle.tgz" "$1" "$2" "$3" "_annex_bundle \"\$OUT\" \"$4\""
 }
 
 # Annex enumeration
@@ -426,12 +432,12 @@ _annex_enum() {
   gzip -S .gz -9 "${OUT%.*}"
 }
 annex_enum() {
-  _annex_archive "enum_local.txt.gz" "$1" "$2" "$3" "_annex_enum"
+  _annex_archive "annex.enum_local.txt.gz" "$1" "$2" "$3" "_annex_enum"
 }
 
 # Store annex infos
 annex_info(){
-  _annex_archive "info.txt.gz" "$1" "$2" "$3" "
+  _annex_archive "annex.info.txt.gz" "$1" "$2" "$3" "
     annex_getinfo > \"\${OUT%.*}\"
     gzip -S .gz -9 \"\${OUT%.*}\"
 "
@@ -439,7 +445,7 @@ annex_info(){
 
 # Enum special remotes
 annex_enum_remotes() {
-  _annex_archive "enum_remotes.txt.gz" "$1" "$2" "$3" "
+  _annex_archive "annex.enum_remotes.txt.gz" "$1" "$2" "$3" "
     annex_lookup_remotes > \"\${OUT%.*}\"
     gzip -S .gz -9 \"\${OUT%.*}\"
 "
