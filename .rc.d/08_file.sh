@@ -82,7 +82,6 @@ swap() {
   mv -fT "$TMP" "$FILE1"
 }
 
-
 ################################
 # http://unix.stackexchange.com/questions/59112/preserve-directory-structure-when-moving-files-using-find
 # Move by replicating directory structure
@@ -102,16 +101,16 @@ mkdir_mv() {
 ################################
 # Move files from multiple sources while filtering extensions
 # ex: EXCLUDE="temp *.bak" movefiles $DST/ $SRC1/ $SRC2/
-movefiles() {
+move() {
   local DST="${1?No destination specified...}"; shift
   local OPT=""; for EXT in $EXCLUDE; do OPT="${OPT:+$OPT }--exclude=$EXT"; done
   for SRC; do
-    rsync -av --progress --remove-source-files --prune-empty-dirs $OPT "$SRC/" "$DST" 2>/dev/null
+    rsync -av --progress --remove-source-files --prune-empty-dirs $OPT "$SRC/" "$DST/" 2>/dev/null
   done
 }
 
 # Move files from mounted drives
-movefiles_mnt() {
+move_mnt() {
   local MNT="${1?No mountpoint specified...}"; shift
   sudo mount "$MNT" && 
     movefiles "$@"
