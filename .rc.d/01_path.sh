@@ -95,22 +95,22 @@ _path_find() {
 }
 
 # PATH aliases
-alias path_prepend="_path_prepend PATH"
-alias path_append="_path_append PATH"
-alias path_remove="_path_remove PATH"
-alias path_remove_fs="_path_remove_fs PATH"
-alias path_remove_absent="_path_remove_absent PATH"
-alias path_cleanup="_path_cleanup PATH"
-alias path_find="_path_find PATH"
-alias path_abs="readlink -f --"
+path_prepend() { _path_prepend PATH "$@"; }
+path_append() { _path_append PATH "$@"; }
+path_remove() { _path_remove PATH "$@"; }
+path_remove_fs() { _path_remove_fs PATH "$@"; }
+path_remove_absent() { _path_remove_absent PATH "$@"; }
+path_cleanup() { _path_cleanup PATH "$@"; }
+path_find() { _path_find PATH "$@"; }
+path_abs() { readlink -f -- "$@"; }
 
 # LD_LIBRARY_PATH aliases
 # Warning: we should not use LD_LIBRARY_PATH
 # see ftp://linuxmafia.com/faq/Admin/ld-lib-path.html
-alias ldlibpath_prepend="_path_prepend LD_LIBRARY_PATH"
-alias ldlibpath_append="_path_append LD_LIBRARY_PATH"
-alias ldlibpath_remove="_path_remove LD_LIBRARY_PATH"
-alias ldlibpath_remove_fs="_path_remove_fs LD_LIBRARY_PATH"
-alias ldlibpath_remove_absent="_path_remove_absent LD_LIBRARY_PATH"
-alias ldlibpath_cleanup="_path_cleanup LD_LIBRARY_PATH"
-alias ldlibpath_find="_path_find LD_LIBRARY_PATH"
+ldlibpath_prepend() { _path_prepend LD_LIBRARY_PATH "$@"; }
+ldlibpath_append() { _path_append LD_LIBRARY_PATH "$@"; }
+ldlibpath_remove() { _path_remove LD_LIBRARY_PATH "$@"; }
+ldlibpath_remove_fs() { _path_remove_fs LD_LIBRARY_PATH "$@"; }
+ldlibpath_remove_absent() { _path_remove_absent LD_LIBRARY_PATH "$@"; }
+ldlibpath_cleanup() { _path_cleanup LD_LIBRARY_PATH "$@"; }
+ldlibpath_find() { _path_find LD_LIBRARY_PATH "$@"; }
