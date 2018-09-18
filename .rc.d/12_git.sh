@@ -50,6 +50,9 @@ ask_question() {
 ########################################
 # Env setup
 git_setup() {
+  # Push (either simple, upstream or current)
+  git config --global --unset-all push.default
+  git config --global --add push.default current
   # Diff
   git config --global --unset-all diff.tool; git config --unset-all diff.tool
   git config --global diff.tool meld
