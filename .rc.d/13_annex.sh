@@ -28,6 +28,7 @@ alias gancff='git annex copy --fast --from'
 alias gand='git annex drop'
 alias gandd='git annex forget --drop-dead'
 alias gani='git annex info'
+alias ganu='annex_upload'
 alias gan='git annex'
 alias annex='git annex'
 
