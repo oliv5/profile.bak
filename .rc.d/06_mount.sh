@@ -16,6 +16,7 @@ mount_cleaner() {
 }
 
 # Mount ecryptfs
+# https://wiki.archlinux.org/index.php/ECryptfs#Encrypting_a_data_directory
 mount_ecryptfs() {
   local SRC="${1:?Missing source directory...}"
   local DST="${2:?Missing dest directory...}"
@@ -31,12 +32,14 @@ mount_ecryptfs() {
     return 1
   fi
   chmod 500 "$SRC"
+  #( stty -echo; printf "Passphrase: " 1>&2; read PASSWORD; stty echo; echo $PASSWORD; ) | ecryptfs-insert-wrapped-passphrase-into-keyring "$HOME/.ecryptfs/wrapped-passphrase" -
   sudo ecryptfs-add-passphrase --fnek
   sudo mount -i -t ecryptfs -o "$OPT" "$SRC" "$DST"
   chmod 700 "$DST"
 }
 umount_ecryptfs() {
-  sudo mount -f "${1:?Missing mounted directory...}"
+  sudo umount -f "${1:?Missing mounted directory...}" ||
+    sudo umount -l "${1:?Missing mounted directory...}"
   sudo keyctl clear @u
 }
 mount_private_ecryptfs() {
