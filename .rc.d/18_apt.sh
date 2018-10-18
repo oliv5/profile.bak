@@ -14,10 +14,13 @@ alias pkg_rm_forced='sudo pkg --remove --force-remove-reinstreq'
 alias pkg_rm_ppa='sudo add-apt-repository --remove'
 alias pkg_search_old='apt-show-versions | grep "No available version"'
 alias pkg_search_old2='aptitude search "~o"'
+alias pkg_lock='dpkg_lock'
+alias pkg_unlock='dpkg_unlock'
+alias pkg_locked='dpkg_locked'
 
 # Lock/unlock packages
 # https://askubuntu.com/questions/18654/how-to-prevent-updating-of-a-specific-package
-dpkg_status() {
+dpkg_locked() {
   # Install/lock/uninstall
   eval dpkg --get-selections ${1:+| grep "$1"}
 }
@@ -29,7 +32,7 @@ dpkg_unlock() {
 }
 alias apt_lock='sudo apt-mark hold'
 alias apt_unlock='sudo apt-mark unhold'
-alias apt_ls_lock='sudo apt-mark showhold'
+alias apt_locked='sudo apt-mark showhold'
 alias aptitude_lock='sudo aptitude hold'
 alias aptitude_unlock='sudo aptitude unhold'
 
@@ -50,7 +53,7 @@ deb_make() {
 
 # Script to get all the PPA installed on a system
 # https://askubuntu.com/questions/148932/how-can-i-get-a-list-of-all-repositories-and-ppas-from-the-command-line-into-an
-apt_ls_ppa() {
+pkg_ls_ppa() {
   for APT in `find /etc/apt/ -name \*.list`; do
       grep -Po "(?<=^deb\s).*?(?=#|$)" $APT | while read ENTRY ; do
           HOST=`echo $ENTRY | cut -d/ -f3`
