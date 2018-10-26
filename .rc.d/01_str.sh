@@ -48,3 +48,21 @@ str_suffix() {
   done
   return 0
 }
+
+# Trim
+str_trim() {
+  echo "$@" | sed -e 's/\(^\s*\|\s*$\)//g'
+}
+str_triml() {
+  echo "$@" | sed -e 's/^\s*//g'
+}
+str_trimr() {
+  echo "$@" | sed -e 's/\s*$//g'
+}
+
+# Length
+str_len() {
+  for STR; do
+    echo ${#STR}
+  done
+}

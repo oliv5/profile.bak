@@ -12,18 +12,23 @@ fct_exists() {
 
 # Get fct definition
 fct_def() {
-  true ${1:?No fct specified}
-  if fct_exists "$1"; then
-    type $1 | tail -n +2
-  fi
+  for FCT; do
+    if fct_exists "$FCT"; then
+      type $1 | tail -n +2
+    fi
+  done
+}
+fct_def_tiny() {
+  fct_def "$@" | tr '\n' ';' | sed -e 's/()\s*;/()/' -e 's/{\s*;/{ /' -e 's/{\s*/{ /' -e 's/;}/; }/' -e 's/;$//'
 }
 
 # Get fct content
 fct_content() {
-  true ${1:?No fct specified}
-  if fct_exists "$1"; then
-    type $1 | head -n -1 | tail -n +4
-  fi
+  for FCT; do
+    if fct_exists "$FCT"; then
+      type $1 | head -n -1 | tail -n +4
+    fi
+  done
 }
 
 # Append to fct
