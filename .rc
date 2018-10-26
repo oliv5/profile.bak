@@ -46,12 +46,14 @@ rc_source() {
   ##############
   # Process arguments
   local FLAGS OPTIND OPTARG OPTERR=0
-  while getopts 'asvd' FLAGS; do
+  while getopts 'asvdr:l:' FLAGS; do
     case "$FLAGS" in
       a) RC_ALL="true";;
       s) RC_VERBOSE=">/dev/null 2>&1";;
       v) RC_VERBOSE=">&1";;
       d) RC_DRYRUN="true";;
+      r) export RC_DIR="$OPTARG";;
+      l) export RC_DIR_LOCAL="$OPTARG";;
       *) echo >&2 "Usage: .rc [-a] [-v] [-d]"
          echo >&2 "-a   load all scripts"
          echo >&2 "-s   silent mode"
