@@ -942,7 +942,7 @@ git_prune_author() {
   local REV="${2:-HEAD}"
   git filter-branch --commit-filter \
     'if [ "$GIT_AUTHOR_NAME" = "$NAME" ]; then skip_commit "$@"; else git commit-tree "$@"; fi' \
-    $REV
+    "$REV"
 }
 
 ########################################
