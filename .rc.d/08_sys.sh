@@ -67,6 +67,27 @@ cron_sysadd() {
 }
 
 ################################
+# Setup user anacron
+# https://askubuntu.com/questions/235089/how-can-i-run-anacron-in-user-mode
+anacron_usersetup() {
+  local DIR="${1:-$HOME}"
+  mkdir -p "$DIR/.anacron/etc"
+  mkdir -p "$DIR/.anacron/spool"
+  [ ! -e "$DIR/.anacron/etc/anacrontab" ] && cat > "$DIR/.anacron/etc/anacrontab" <<EOF
+# /etc/anacrontab: configuration file for anacron
+
+# See anacron(8) and anacrontab(5) for details.
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# period  delay  job-identifier  command
+#1         10     testjob         test.sh
+EOF
+  cron_useradd "@hourly /usr/sbin/anacron -s -t $HOME/.anacron/etc/anacrontab -S $HOME/.anacron/spool"
+}
+
+################################
 # Rename current logged on user and its group
 user_rename_current_user() {
   local OLDNAME="${1:?Old name not specified...}"
