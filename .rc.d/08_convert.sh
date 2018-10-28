@@ -29,7 +29,6 @@ conv_lopdf() {
   conv_lo pdf "$@"
 }
 
-################################
 # Convert to PDF using wvpdf
 conv_wvpdf() {
   # sudo apt-get install wv texlive-base texlive-latex-base ghostscript
@@ -38,8 +37,9 @@ conv_wvpdf() {
   done
 }
 
+################################
 # Merge PDFs
-merge_pdf() {
+pdf_merge() {
   local INPUT="$(arg_rtrim 1 "$@")"; shift $(($#-1))
   eval command -p gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -sOutputFile="$@" "$INPUT"
 }
@@ -71,8 +71,13 @@ latex2pdf_modified() {
 alias pdf2booklet='pdfbook --short-edge'
 
 # Search into pdf
-pdfsearch() {
+pdf_search() {
   local PATTERN="$1"
   shift
   ff "$@/*.pdf" -exec sh -c 'pdftotext "{}" - | grep --with-filename --label="{}" --color '"$PATTERN" \;
+}
+
+# Shuffle 2 pdf pages
+pdf_shuffle() {
+  pdftk A="${1:?No recto pdf specified...}" B="${2:?No verso pdf specified...}" shuffle A Bend-1 output "${3:-output.pdf}"
 }
