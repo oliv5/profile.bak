@@ -907,10 +907,10 @@ annex_fromkey() {
   for KEY; do
     KEY="$(basename "$KEY")"
     #git show -999999 -p --no-color --word-diff=porcelain -S "$KEY" | 
-    git log -n 1 -p --no-color --word-diff=porcelain -S "$KEY" |
-      awk '/^(---|\+\+\+) (a|b)/{line=$0} /'$KEY'/{printf "%s\0",substr(line,5); exit 0}' |
-      # Remove leading/trailing double quotes, leading "a/", trailing spaces.
-      # Escape '%'
+    #git log -n 1 -p --no-color --word-diff=porcelain -S "$KEY" |
+    git log -p --no-color --word-diff=porcelain -S "$KEY" |
+      awk '/^(---|\+\+\+) (a|b)/{line=$0} /'$KEY'/{printf "%s\0",substr(line,5)}' |
+      # Remove leading/trailing double quotes, leading "a/", trailing spaces. Escape '%'
       sed -z -e 's/\s*$//' -e 's/^"//' -e 's/"$//' -e 's/^..//' -e 's/%/\%/g' |
       # printf does evaluate octal charaters from UTF8
       xargs -r0 -n1 -I {} -- printf "{}\0"
@@ -919,6 +919,22 @@ annex_fromkey() {
         #[ "${1##*.}" != "${2##*.}" ] && printf "Warning: key extension ${2##*.} mismatch %s\n" "${1##*/}" >&2
         #printf "$2\0"
       #' _ "$KEY"
+  done
+}
+
+# Check if key exists in the annex (use the default backend)
+annex_key_exists() {
+  for KEY; do
+    annex_fromkey "$KEY" | xargs -r0 git annex find | grep -m 1 -e "." >/dev/null && echo "$KEY"
+  done
+}
+
+# Check if input file exists in the annex (use the default backend)
+annex_file_exists() {
+  for FILE; do
+    local KEY="$(git annex calckey "$FILE")"
+    # Search without the key file extension
+    annex_key_exists "${KEY%%.*}" >/dev/null && echo "$KEY $FILE"
   done
 }
 
