@@ -371,12 +371,7 @@ annex_lookup_remotes() {
 # List annex content in an archive
 _annex_archive() {
   ( set +e; # Need to go on on error
-  git_exists || return 1
-  if ! annex_std; then
-    echo "Repository '$(git_dir)' cannot be enumerated."
-    echo "Abort..."
-    exit 1
-  fi
+  annex_exists || exit 1
   local OUT="${2:-$(git_dir)/archive/}"
   [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name "${1%%.*}").${1#*.}"
   local GPG_RECIPIENT="$3"
@@ -422,15 +417,21 @@ annex_bundle() {
 
 # Annex enumeration
 _annex_enum() {
-  git --git-dir="$(git_dir)" annex find "$(git_root)" --include '*' --print0 | xargs -r0 -n1 sh -c '
-    FILE="$1"
-    #printf "\"%s\" \"%s\"\n" "$(readlink -- "$FILE")" "$FILE" | grep -F ".git/annex"
-    readlink -- "$FILE" | base64 -w 0
-    echo
-    echo "$FILE" | base64 -w 0
-    echo
-  ' _ > "${OUT%.*}"
-  gzip -S .gz -9 "${OUT%.*}"
+  if annex_bare; then
+    echo "Repository '$(git_dir)' cannot be enumerated."
+    echo "Abort..."
+    exit 1
+  else
+    git --git-dir="$(git_dir)" annex find "$(git_root)" --include '*' --print0 | xargs -r0 -n1 sh -c '
+      FILE="$1"
+      #printf "\"%s\" \"%s\"\n" "$(readlink -- "$FILE")" "$FILE" | grep -F ".git/annex"
+      readlink -- "$FILE" | base64 -w 0
+      echo
+      echo "$FILE" | base64 -w 0
+      echo
+    ' _ > "${OUT%.*}"
+    gzip -S .gz -9 "${OUT%.*}"
+  fi
 }
 annex_enum() {
   _annex_archive "annex.enum_local.txt.gz" "$1" "$2" "$3" "_annex_enum"
@@ -446,10 +447,16 @@ annex_info(){
 
 # Enum special remotes
 annex_enum_remotes() {
-  _annex_archive "annex.enum_remotes.txt.gz" "$1" "$2" "$3" "
-    annex_lookup_remotes > \"\${OUT%.*}\"
-    gzip -S .gz -9 \"\${OUT%.*}\"
-"
+  if annex_bare; then
+    echo "Repository '$(git_dir)' cannot be enumerated."
+    echo "Abort..."
+    exit 1
+  else
+    _annex_archive "annex.enum_remotes.txt.gz" "$1" "$2" "$3" "
+      annex_lookup_remotes > \"\${OUT%.*}\"
+      gzip -S .gz -9 \"\${OUT%.*}\"
+    "
+  fi
 }
 
 ########################################
