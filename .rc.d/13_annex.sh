@@ -790,28 +790,25 @@ annex_upkeep() {
   annex_exists || return 1
   # Charging status
   if [ -n "$CHARGE_STATUS" ]; then
+    command -v sudo >/dev/null || sudo() { su root "$@"; }
     set -- $CHARGE_STATUS
     local DEVICE="${1:-/sys/class/power_supply/battery/status}"
-    local CURRENT_STATUS="$({ cat "$DEVICE" 2>/dev/null || sudo cat "$DEVICE" 2>/dev/null; } | tr '[:upper:]' '[:lower:]')"
     shift
-    local FOUND=""
-    for EXPECTED_STATUS; do
-      if [ "$CURRENT_STATUS" = "$EXPECTED_STATUS" ]; then 
-        FOUND=1
-        break
-      fi
-    done
+    local CURRENT_STATUS="$(sudo cat "$DEVICE" 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+    local EXPECTED_STATUS="$@"
+    local FOUND="${EXPECTED_STATUS%${CURRENT_STATUS}*}"
     set --
-    if [ -z "$FOUND" ]; then
-      echo "[warning] device is not in charge. Abort..."
+    if [ "$FOUND" = "$EXPECTED_STATUS" ]; then
+      echo "[warning] device is not in charge ($CURRENT_STATUS). Abort..."
       return 3
     fi
   fi
   # Charging level
   if [ -n "$CHARGE_LEVEL" ]; then
+    command -v sudo >/dev/null || sudo() { su root "$@"; }
     set -- $CHARGE_LEVEL
     local DEVICE="${1:-/sys/class/power_supply/battery/capacity}"
-    local CURRENT_LEVEL="$({ cat "$DEVICE" 2>/dev/null || sudo cat "$DEVICE" 2>/dev/null; } | tr '[:upper:]' '[:lower:]')"
+    local CURRENT_LEVEL="$(sudo cat "$DEVICE" 2>/dev/null | tr '[:upper:]' '[:lower:]')"
     local EXPECTED_LEVEL="${2:-75}"
     set --
     if [ "$CURRENT_LEVEL" -lt "$EXPECTED_LEVEL" 2>/dev/null ]; then
