@@ -790,7 +790,7 @@ annex_upkeep() {
   annex_exists || return 1
   # Charging status
   if [ -n "$CHARGE_STATUS" ]; then
-    command -v sudo >/dev/null || sudo() { su root "$@"; }
+    command -v sudo >/dev/null || function sudo() { su root "$@"; }
     set -- $CHARGE_STATUS
     local DEVICE="${1:-/sys/class/power_supply/battery/status}"
     shift
@@ -805,7 +805,7 @@ annex_upkeep() {
   fi
   # Charging level
   if [ -n "$CHARGE_LEVEL" ]; then
-    command -v sudo >/dev/null || sudo() { su root "$@"; }
+    command -v sudo >/dev/null || function sudo() { su root "$@"; }
     set -- $CHARGE_LEVEL
     local DEVICE="${1:-/sys/class/power_supply/battery/capacity}"
     local CURRENT_LEVEL="$(sudo cat "$DEVICE" 2>/dev/null | tr '[:upper:]' '[:lower:]')"
