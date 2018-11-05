@@ -17,7 +17,8 @@ function! s:FnMap(prefix, args)
 	execute 'v'.a:prefix.'map' args[1] args[2] '<C-c>'.args[3]
 	execute 's'.a:prefix.'map' args[1] args[2] '<C-c>'.args[3]
 	"execute 'i'.a:prefix.'map' args[1] args[2] '<C-o>'.args[3]
-	execute 'i'.a:prefix.'map <expr>' args[1] args[2] '(pumvisible() ? "\<C-e>" : "")."<C-O>'.args[3].'"'
+	"execute 'i'.a:prefix.'map <expr>' args[1] args[2] '(pumvisible() ? "<C-e>" : "")."<C-c>'.args[3].'a"'
+	call s:IMap(a:prefix, a:args)
 endfunction
 
 " Unmap function keys in normal/visual & insert modes
@@ -44,12 +45,20 @@ function! s:CondRemap(mapfct, key, mode, condition, action)
 	endif
 endfunction
 
+" IMap
+function! s:IMap(prefix, args)
+	let mapping = substitute(a:args[3],'<CR>$\|<cr>$','','')
+	let mapping = substitute(a:args[3],'^<C-O>\|^<C-o>\|^<c-o>','','')
+	execute 'i'.a:prefix.'map <expr>' a:args[1] a:args[2] '(pumvisible() ? "<C-e>" : "")."<C-c>'.mapping.'<CR>a"'
+endfunction
+
 " IMap fix for menucompletions
 function! s:IMapFix(mapfct, key)
 	let mapping = mapcheck(a:key,'i')
 	if mapping!='' && match(mapping,"pumvisible")==-1
-		execute a:mapfct '<expr>' a:key
-			\ '(pumvisible() ? "\<C-e>" : "")."'.substitute(mapping,'<CR>\|','','g').'<CR>"'
+		let mapping = substitute(mapping,'<CR>$\|<cr>$','','')
+		let mapping = substitute(mapping,'^<C-O>\|^<C-o>\|^<c-o>','','')
+		execute a:mapfct '<expr>' a:key '(pumvisible() ? "<C-e>" : "")."<C-c>'.mapping.'<CR>a"'
 	endif
 endfunction
 
