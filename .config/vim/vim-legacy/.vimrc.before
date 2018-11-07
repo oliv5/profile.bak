@@ -17,8 +17,8 @@ function! s:FnMap(prefix, args)
 	execute 'v'.a:prefix.'map' args[1] args[2] '<C-c>'.args[3]
 	execute 's'.a:prefix.'map' args[1] args[2] '<C-c>'.args[3]
 	"execute 'i'.a:prefix.'map' args[1] args[2] '<C-o>'.args[3]
-	"execute 'i'.a:prefix.'map <expr>' args[1] args[2] '(pumvisible() ? "<C-e>" : "")."<C-c>'.args[3].'a"'
-	call s:IMap(a:prefix, a:args)
+	"execute 'i'.a:prefix.'map <expr>' args[1] args[2] '(pumvisible() ? "\<C-e>" : "")."<C-O>'.args[3].'"'
+	call s:IMap(a:prefix, args)
 endfunction
 
 " Unmap function keys in normal/visual & insert modes
@@ -40,25 +40,28 @@ function! s:CondRemap(mapfct, key, mode, condition, action)
 		execute a:mapfct a:key a:action
 	else
 		execute a:mapfct a:key
-					 \ ":if" a:condition "<BAR>" a:action "<BAR> else <BAR>"
-					 \ substitute(mapcheck(a:key,a:mode),'<CR>\|','','g') "<BAR> endif<CR>"
+			 \ ":if" a:condition "<BAR>" a:action "<BAR> else <BAR>"
+			 \ substitute(mapcheck(a:key,a:mode),'<CR>\|','','g') "<BAR> endif<CR>"
 	endif
 endfunction
 
 " IMap
 function! s:IMap(prefix, args)
-	let mapping = substitute(a:args[3],'<CR>$\|<cr>$','','')
-	let mapping = substitute(a:args[3],'^<C-O>\|^<C-o>\|^<c-o>','','')
-	execute 'i'.a:prefix.'map <expr>' a:args[1] a:args[2] '(pumvisible() ? "<C-e>" : "")."<C-c>'.mapping.'<CR>a"'
+	let mapping = a:args[3]
+	if match(mapping,'<\cC\cR>$')!=-1
+		let mapping = substitute(mapping,'^<\cC-\cO>','','')
+		execute 'i'.a:prefix.'map <expr>' a:args[1] a:args[2] '(pumvisible() ? "\<C-e>" : "")."<C-c>'.mapping.'a"'
+	else
+		execute 'i'.a:prefix.'map <expr>' a:args[1] a:args[2] '(pumvisible() ? "\<C-e>" : "")."<C-o>'.a:args[3].'"'
+	endif
 endfunction
 
 " IMap fix for menucompletions
 function! s:IMapFix(mapfct, key)
 	let mapping = mapcheck(a:key,'i')
-	if mapping!='' && match(mapping,"pumvisible")==-1
-		let mapping = substitute(mapping,'<CR>$\|<cr>$','','')
-		let mapping = substitute(mapping,'^<C-O>\|^<C-o>\|^<c-o>','','')
-		execute a:mapfct '<expr>' a:key '(pumvisible() ? "<C-e>" : "")."<C-c>'.mapping.'<CR>a"'
+	if mapping!='' && match(mapping,'pumvisible')==-1
+		let prefix = substitute(a:mapfct,'^i\|map$','','g')
+		call s:IMap(prefix, ['', a:key, '', mapping])
 	endif
 endfunction
 
