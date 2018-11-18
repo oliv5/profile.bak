@@ -1,6 +1,16 @@
 #!/bin/sh
 
 ################################
+# Forced actions
+force_reboot() {
+  # https://stackoverflow.com/questions/31157305/forcing-linux-server-node-to-instantly-crash-and-reboot
+  # To enable it you probably need to put following in sysctl.conf:
+  # kernel.sysrq = 1
+  echo 1 > /proc/sys/kernel/sysrq
+  echo b > /proc/sysrq-trigger
+}
+
+################################
 # Set cpu governor
 alias cpu_powersave='sudo sh -c "echo powersave > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"'
 alias cpu_performence='sudo sh -c "echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"'
