@@ -33,8 +33,8 @@ str_upfirst() {
 str_prefix() {
   local PATTERN="$1"
   shift
-  for FILE; do
-    [ "$FILE" == "${FILE#$PATTERN}" ] && return 1
+  for STR; do
+    [ "$STR" = "${STR#$PATTERN}" ] && return 1
   done
   return 0
 }
@@ -43,10 +43,22 @@ str_prefix() {
 str_suffix() {
   local PATTERN="$1"
   shift
-  for FILE; do
-    [ "$FILE" == "${FILE%$PATTERN}" ] && return 1
+  for STR; do
+    [ "$STR" = "${STR%$PATTERN}" ] && return 1
   done
   return 0
+}
+
+# Check if substring is in string
+str_substring() {
+  local PATTERN="$1"
+  shift
+  for STR; do
+    case "$STR" in 
+      *${PATTERN}*) return 0;;
+    esac
+  done
+  return 1
 }
 
 # Trim
