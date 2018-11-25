@@ -285,3 +285,28 @@ ansi_colors() {
 
 # Strip ANSI codes
 alias ansi_strip='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'
+
+################################
+# Attach terminal to process
+# https://unix.stackexchange.com/questions/31824/how-to-attach-terminal-to-detached-process
+# Alternative: reptyr
+shell_attach() {
+  PID="${1:?No PID specified...}"
+  STDIN="${2}"
+  STDOUT="${3}"
+  GDBINIT="$(mktemp)"
+  rm "$GDBINIT" 2>/dev/null
+  if [ -n "$STDIN" ]; then
+    echo "call close(0)" >> "$GDBINIT"
+    echo "call open(\"$STDIN\", 0600)" >> "$GDBINIT"
+    [ ! -f "$STDIN" ] && mkfifo "$STDIN"
+  fi
+  if [ -n "$STDOUT" ]; then
+    echo "call close(1)" >> "$GDBINIT"
+    echo "call open(\"$STDOUT\", 0400)" >> "$GDBINIT"
+    touch "$STDOUT"
+  fi
+  echo "continue" >> "$GDBINIT"
+  echo "quit" >> "$GDBINIT"
+  sudo sh -c "gdb -p \"$PID\" -nh -nx -x \"$GDBINIT\""
+}
