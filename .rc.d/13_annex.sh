@@ -732,7 +732,7 @@ annex_upkeep() {
   local GET=""
   local SEND=""
   local FAST="--all"
-  local REMOTES="$(annex_enabled)"
+  local REMOTES=""
   # Misc options
   local NETWORK_DEVICE="";
   local CHARGE_LEVEL="";
@@ -785,7 +785,7 @@ annex_upkeep() {
   shift "$((OPTIND-1))"
   unset OPTFLAG OPTARG
   OPTIND=1
-  REMOTES="${@:-$REMOTES}"
+  REMOTES="${@:-$(annex_enabled)}"
   # Base check
   annex_exists || return 1
   # Charging status
@@ -833,7 +833,7 @@ annex_upkeep() {
   fi
   # Sync
   if [ -n "$SYNC" ]; then
-    $DBG git annex sync ${NO_COMMIT} ${NO_PULL} ${NO_PUSH} ${CONTENT} "${MSG:+--message="$MSG"}" $REMOTES || return $?
+    $DBG git annex sync ${NO_COMMIT} ${NO_PULL} ${NO_PUSH} ${CONTENT} ${MSG:+--message="$MSG"} $REMOTES || return $?
   fi
   # Get
   if [ -n "$GET" ]; then

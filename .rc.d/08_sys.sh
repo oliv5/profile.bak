@@ -145,3 +145,15 @@ kernel_lsmodk() {
     grep "$MOD" /lib/modules/$(uname -r)/modules.dep
   done
 }
+
+################################
+# https://www.cyberciti.biz/tips/linux-security.html
+# List accounts with empty passwords
+empty_passwd() {
+  awk -F: '($2 == "") {print}' /etc/shadow
+}
+
+empty_uid() {
+  awk -F: '($3 == "0") {print}' /etc/passwd
+}
+
