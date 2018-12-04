@@ -399,11 +399,11 @@ _annex_archive() {
 
 # Annex bundle
 _annex_bundle() {
-  local OUT="$1"
-  local OWNER="${2:-$USER}"
+  [ -n "$OUT" ] || return 1
+  local OWNER="${1:-$USER}"
   echo "Tar annex into $OUT"
   if annex_bare; then
-    tar zcf "${OUT}" --exclude='*/creds/*' -h ./annex
+    tar zcf "${OUT}" --exclude='*/creds/*' -h "$(git_dir)./annex"
   else
     git annex find | 
       awk '{print "\""$0"\""}' |
@@ -412,17 +412,18 @@ _annex_bundle() {
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
 annex_bundle() {
-  _annex_archive "annex.bundle.tgz" "$1" "$2" "$3" "_annex_bundle \"\$OUT\" \"$4\""
+  _annex_archive "annex.bundle.tgz" "$1" "$2" "$3" "_annex_bundle \"$4\""
 }
 
 # Annex enumeration
 _annex_enum() {
+  [ -n "$OUT" ] || return 1
   if annex_bare; then
     echo "Repository '$(git_dir)' cannot be enumerated."
     echo "Abort..."
-    exit 1
+    return 2
   else
-    git --git-dir="$(git_dir)" annex find "$(git_root)" --include '*' --print0 | xargs -r0 -n1 sh -c '
+    git annex find --include '*' --print0 | xargs -r0 -n1 sh -c '
       FILE="$1"
       #printf "\"%s\" \"%s\"\n" "$(readlink -- "$FILE")" "$FILE" | grep -F ".git/annex"
       readlink -- "$FILE" | base64 -w 0
