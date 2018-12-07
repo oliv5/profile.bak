@@ -133,8 +133,9 @@ annex_init_directory() {
   local ENCRYPTION="${3:-none}"
   local KEYID="$4"
   local CHUNKS="$5"
-  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ||
-  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"}
+  local EXPORTTREE="$6"
+  git annex enableremote "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ${EXPORTTREE:+exporttree=yes} ||
+  git annex initremote   "$NAME" encryption="$ENCRYPTION" type=directory directory="$REMOTEPATH" ${CHUNKS:+chunk=$CHUNKS} ${KEYID:+keyid="$KEYID"} ${EXPORTTREE:+exporttree=yes}
   git config --add annex.sshcaching false
 }
 
@@ -600,7 +601,7 @@ _annex_rsync() {
     # Bare repositories do not have "git annex find"
     echo "BARE REPOS NOT TESTED YET. Press enter to go on..." && read NOP
     find annex/objects -type f | while read SRCNAME; do
-      annex_fromkey "$SRCNAME" | xargs -0 -rn1 echo | while read DSTNAME; do
+      annex_fromkey0 "$SRCNAME" | xargs -0 -rn1 echo | while read DSTNAME; do
         DST_DIR="$(dirname "${DST##*:}/${DSTNAME}")"
         while ! $DBG rsync --rsync-path="mkdir -p \"${DST_DIR}\" && rsync" $RSYNC_OPT "${SRC}/${SRCNAME}" "${DST}/${DSTNAME}"; do sleep 1; done
       done
@@ -906,7 +907,7 @@ alias annex_du='git annex info --fast'
 # Find files from key
 # Note key = file content, so there can be
 # multiple files mapped to a single key
-annex_fromkey() {
+annex_fromkey0() {
   for KEY; do
     KEY="$(basename "$KEY")"
     #git show -999999 -p --no-color --word-diff=porcelain -S "$KEY" | 
@@ -915,6 +916,8 @@ annex_fromkey() {
       awk '/^(---|\+\+\+) (a|b)/{line=$0} /'$KEY'/{printf "%s\0",substr(line,5)}' |
       # Remove leading/trailing double quotes, leading "a/", trailing spaces. Escape '%'
       sed -z -e 's/\s*$//' -e 's/^"//' -e 's/"$//' -e 's/^..//' -e 's/%/\%/g' |
+      # Remove duplicated files
+      uniq -z | 
       # printf does evaluate octal charaters from UTF8
       xargs -r0 -n1 -I {} -- printf "{}\0"
       # Sanity extension check between key and file
@@ -924,11 +927,14 @@ annex_fromkey() {
       #' _ "$KEY"
   done
 }
+annex_fromkey() {
+  annex_fromkey0 "$@" | xargs -r0 -n1
+}
 
 # Check if key exists in the annex (use the default backend)
 annex_key_exists() {
   for KEY; do
-    annex_fromkey "$KEY" | xargs -r0 git annex find | grep -m 1 -e "." >/dev/null && echo "$KEY"
+    annex_fromkey0 "$KEY" | xargs -r0 git annex find | grep -m 1 -e "." >/dev/null && echo "$KEY"
   done
 }
 
@@ -965,7 +971,9 @@ annex_unused() {
   unset IFS
   local PATTERNS=""
   for ARG; do PATTERNS="${PATTERNS:+$PATTERNS }-e '$ARG'"; done
-  eval annex_fromkey $(git annex unused ${FROM:+--from $FROM} | awk "/^\s+[0-9]+\s/{print \$2}") ${PATTERNS:+| grep -zF $PATTERNS} | xargs -r0 -n1
+  annex_fromkey0 $(git annex unused ${FROM:+--from $FROM} | awk "/^\s+[0-9]+\s/{print \$2}") |
+    eval grep -zF "${PATTERNS:-''}" |
+      xargs -r0 -n1
 }
 
 # List unused files matching pattern
@@ -974,27 +982,44 @@ annex_listunused() {
   unset IFS
   local PATTERNS=""
   for ARG; do PATTERNS="${PATTERNS:+$PATTERNS }-e '$ARG'"; done
-  git annex unused ${FROM:+--from $FROM} | grep -E '^\s+[0-9]+\s' | 
+  git annex unused ${FROM:+--from $FROM} | grep -E '^\s+[0-9]+\s' |
     while IFS=' ' read -r NUM KEY; do
       echo "Key  : $KEY"
-      eval annex_fromkey "$KEY" ${PATTERNS:+| grep -zF $PATTERNS} | 
-        xargs -r0 -n1 echo "File :"
+      annex_fromkey0 "$KEY" |
+        eval grep -zF "${PATTERNS:-''}" |
+          xargs -r0 -n1 echo "File :"
     done
+}
+
+# Drop all unused files
+annex_dropunused_all() {
+  local LAST="$(git annex unused ${FROM:+--from $FROM} | awk '/^\s+[0-9]+\s/ {a=$1} END{print a}')"
+  git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force} "$@" 1-$LAST
+}
+
+# Drop partially transfered files
+annex_dropunused_tmp() {
+  git annex unused ${FROM:+--from $FROM} --fast | 
+    awk '/^\s+[0-9]+\s+/ {print $1}' | 
+    xargs git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force}
 }
 
 # Drop unused files matching pattern
 annex_dropunused() {
   ! annex_bare || return 1
+  local TMPFILE="$(mktemp)" || return 2
   local IFS="$(printf ' \t\n')"
   local PATTERNS=""
   for ARG; do PATTERNS="${PATTERNS:+$PATTERNS }-e '$ARG'"; done
   git annex unused ${FROM:+--from $FROM} | grep -E '^\s+[0-9]+\s' | 
     while IFS=' ' read -r NUM KEY; do
-      printf "Drop unused key %s\n" "$KEY"
-      git annex dropunused "$NUM" ${FROM:+--from $FROM} ${FORCE:+--force}
-      eval annex_fromkey "$KEY" ${PATTERNS:+| grep -zF $PATTERNS} | xargs -r0 -n1 echo "File: "
-      echo ""
+      annex_fromkey0 "$KEY" |
+        eval grep -zF "${PATTERNS:-''}" &&
+          echo && 
+          echo -en "$NUM " >> "$TMPFILE"
     done
+  cat "$TMPFILE" | xargs git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force}
+  rm "$TMPFILE"
 }
 
 # Drop all unused files interactively
@@ -1003,33 +1028,27 @@ annex_dropunused_interactive() {
   local IFS="$(printf ' \t\n')"
   local REPLY; read -r -p "Delete unused files? (a/y/n/s) " REPLY
   if [ "$REPLY" = "a" -o "$REPLY" = "A" ]; then
-    local LAST="$(git annex unused | awk '/^\s+[0-9]+\s/ {a=$1} END{print a}')"
-    git annex dropunused "$@" 1-$LAST
+    ${FROM:+FROM="$FROM"} annex_dropunused_all
   elif [ "$REPLY" = "s" -o "$REPLY" = "S" ]; then
-    annex_listunused
+    ${FROM:+FROM="$FROM"} annex_listunused
   elif [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
-    local LAST="$(git annex unused | awk '/^\s+[0-9]+\s/ {a=$1} END{print a}')"
-    git annex unused | grep -E '^\s+[0-9]+\s' | 
+    local LAST="$(git annex unused ${FROM:+--from $FROM} | awk '/^\s+[0-9]+\s/ {a=$1} END{print a}')"
+    git annex unused ${FROM:+--from $FROM} | grep -E '^\s+[0-9]+\s' | 
       while read -r NUM KEY; do
         printf "Key: $KEY\nFile: "
-        annex_fromkey "$KEY"
+        annex_fromkey0 "$KEY"
         echo
         read -r -p "Delete file $NUM/$LAST? (y/f/n) " REPLY < /dev/tty
         if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
-          sh -c "git annex dropunused ""$@"" $NUM" &
+          sh -c "git annex dropunused ${FROM:+--from $FROM} ""$@"" $NUM" &
           wait
         elif [ "$REPLY" = "f" -o "$REPLY" = "F" ]; then
-          sh -c "git annex dropunused --force ""$@"" $NUM" &
+          sh -c "git annex dropunused --force ${FROM:+--from $FROM} ""$@"" $NUM" &
           wait
         fi
         echo "~"
       done
   fi
-}
-
-# Clean partially transfered files
-annex_dropbad() {
-  git annex unused --fast | awk '/^\s+[0-9]+\s+/ {print $1}' | xargs git annex dropunused
 }
 
 ########################################
