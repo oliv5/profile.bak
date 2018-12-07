@@ -413,12 +413,13 @@ _annex_bundle() {
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
 annex_bundle() {
-  _annex_archive "annex.bundle.tar.xz" "$1" "$2" "$3" "_annex_bundle \"$4\""
+  _annex_archive "annex.bundle.tar.xz" "$1" "$2" "$3" "_annex_bundle" "$4"
 }
 
 # Annex enumeration
 _annex_enum() {
   [ -n "$OUT" ] || return 1
+  local OWNER="${1:-$USER}"
   if annex_bare; then
     echo "Repository '$(git_dir)' cannot be enumerated."
     echo "Abort..."
@@ -434,32 +435,39 @@ _annex_enum() {
     ' _ > "${OUT%%.txt.xz}.txt"
     xz -z -9 -S .xz --verbose "${OUT%%.txt.xz}.txt"
   fi
+  [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
 annex_enum() {
-  _annex_archive "annex.enum_local.txt.xz" "$1" "$2" "$3" "_annex_enum"
+  _annex_archive "annex.enum_local.txt.xz" "$1" "$2" "$3" "_annex_enum" "$4"
 }
 
 # Store annex infos
+_annex_info() {
+  [ -n "$OUT" ] || return 1
+  local OWNER="${1:-$USER}"
+  annex_getinfo > "${OUT%%.txt.xz}.txt"
+  xz -z -9 -S .xz --verbose "${OUT%%.txt.xz}.txt"
+  [ -f "$OUT" ] && chown "$OWNER" "$OUT"
+}
 annex_info(){
-  _annex_archive "annex.info.txt.xz" "$1" "$2" "$3" "
-    [ -n \"\$OUT\" ] || return 1
-    annex_getinfo > \"\${OUT%%.txt.xz}.txt\"
-    xz -z -9 -S .xz --verbose \"\${OUT%%.txt.xz}.txt\"
-"
+  _annex_archive "annex.info.txt.xz" "$1" "$2" "$3" "_annex_info" "$4"
 }
 
 # Enum special remotes
+_annex_enum_remotes() {
+  [ -n "$OUT" ] || return 1
+  local OWNER="${1:-$USER}"
+  annex_lookup_remotes > "${OUT%%.txt.xz}.txt"
+  xz -z -9 -S .xz --verbose "${OUT%%.txt.xz}.txt"
+  [ -f "$OUT" ] && chown "$OWNER" "$OUT"
+}
 annex_enum_remotes() {
   if annex_bare; then
     echo "Repository '$(git_dir)' cannot be enumerated."
     echo "Abort..."
-    exit 1
+    return 1
   else
-    _annex_archive "annex.enum_remotes.txt.xz" "$1" "$2" "$3" "
-      [ -n \"\$OUT\" ] || return 1
-      annex_lookup_remotes > \"\${OUT%%.txt.xz}.txt\"
-      xz -z -9 -S .xz --verbose \"\${OUT%%.txt.xz}.txt\"
-    "
+    _annex_archive "annex.enum_remotes.txt.xz" "$1" "$2" "$3" "_annex_enum_remotes" "$4"
   fi
 }
 
