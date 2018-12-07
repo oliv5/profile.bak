@@ -402,18 +402,18 @@ _annex_archive() {
 _annex_bundle() {
   [ -n "$OUT" ] || return 1
   local OWNER="${1:-$USER}"
-  echo "Tar annex into $OUT"
   if annex_bare; then
-    tar zcf "${OUT}" --exclude='*/creds/*' -h "$(git_dir)./annex"
+    tar c -h -O --exclude='*/creds/*' -- "$(git_dir)./annex" |
+      xz -z -9 -c --verbose - > "${OUT}"
   else
-    git annex find | 
-      awk '{print "\""$0"\""}' |
-      xargs -r tar zcf "${OUT}" -h --exclude-vcs --
+    git annex find --print0 | 
+      xargs -r0 tar c -h -O --exclude-vcs -- |
+        xz -z -9 -c --verbose - > "${OUT}"
   fi
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
 annex_bundle() {
-  _annex_archive "annex.bundle.tgz" "$1" "$2" "$3" "_annex_bundle \"$4\""
+  _annex_archive "annex.bundle.tar.xz" "$1" "$2" "$3" "_annex_bundle \"$4\""
 }
 
 # Annex enumeration
@@ -431,19 +431,20 @@ _annex_enum() {
       echo
       echo "$FILE" | base64 -w 0
       echo
-    ' _ > "${OUT%.*}"
-    gzip -S .gz -9 "${OUT%.*}"
+    ' _ > "${OUT%%.txt.xz}.txt"
+    xz -z -9 -S .xz --verbose "${OUT%%.txt.xz}.txt"
   fi
 }
 annex_enum() {
-  _annex_archive "annex.enum_local.txt.gz" "$1" "$2" "$3" "_annex_enum"
+  _annex_archive "annex.enum_local.txt.xz" "$1" "$2" "$3" "_annex_enum"
 }
 
 # Store annex infos
 annex_info(){
-  _annex_archive "annex.info.txt.gz" "$1" "$2" "$3" "
-    annex_getinfo > \"\${OUT%.*}\"
-    gzip -S .gz -9 \"\${OUT%.*}\"
+  _annex_archive "annex.info.txt.xz" "$1" "$2" "$3" "
+    [ -n \"\$OUT\" ] || return 1
+    annex_getinfo > \"\${OUT%%.txt.xz}.txt\"
+    xz -z -9 -S .xz --verbose \"\${OUT%%.txt.xz}.txt\"
 "
 }
 
@@ -454,9 +455,10 @@ annex_enum_remotes() {
     echo "Abort..."
     exit 1
   else
-    _annex_archive "annex.enum_remotes.txt.gz" "$1" "$2" "$3" "
-      annex_lookup_remotes > \"\${OUT%.*}\"
-      gzip -S .gz -9 \"\${OUT%.*}\"
+    _annex_archive "annex.enum_remotes.txt.xz" "$1" "$2" "$3" "
+      [ -n \"\$OUT\" ] || return 1
+      annex_lookup_remotes > \"\${OUT%%.txt.xz}.txt\"
+      xz -z -9 -S .xz --verbose \"\${OUT%%.txt.xz}.txt\"
     "
   fi
 }
