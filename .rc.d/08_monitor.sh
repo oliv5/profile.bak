@@ -203,6 +203,9 @@ killz(){
   kill -9 "$@"
   ps Haxwwo pid,command | awk '/rpciod/ && !/grep/ {print $1}' | xargs -r kill
 }
+killza() {
+  kill -HUP $(ps -A -ostat,ppid | awk '/[zZ]/ && !a[$2]++ {print $2}')
+}
 
 # Kill all zombies by detaching them from their parent
 killz_detach() {
