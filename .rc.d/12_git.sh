@@ -526,24 +526,27 @@ git_set_tracking() {
 git_bundle() {
   ( set +e; # Need to go on
   git_exists || return 1
-  local OUT="${1:-$(git_dir)/bundle/$(git_name "bundle").git}"
-  [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name "bundle").git"
+  local OUT="${1:-$(git_dir)/bundle/$(git_name "bundle")}"
+  [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name "bundle")"
+  OUT="${OUT%%.git.xz}.git.xz"
   mkdir -p "$(dirname "$OUT")"
   if [ $? -eq 0 ]; then
     local GPG_RECIPIENT="$2"
     local GPG_TRUST="${3:+--trust-model always}"
     local OWNER="${4:-$USER}"
     echo "Git bundle into $OUT"
-    git bundle create "$OUT" --all
+    git bundle create "${OUT%%.xz}" --all
+    xz -z -9 -S .xz --verbose "${OUT%%.xz}"
     chown "$OWNER" "$OUT"
     if [ ! -z "$GPG_RECIPIENT" ]; then
+      echo "Encrypting bundle into '${OUT}.gpg'"
       gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
         (shred -fu "${OUT}" || wipe -f -- "${OUT}" || rm -- "${OUT}")
       chown "$OWNER" "${OUT}.gpg"
     fi
     ls -l "${OUT}"*
   else
-    echo "Cannot create directory \"$(dirname "$OUT")\". Abort..."
+    echo "Cannot create directory '$(dirname "$OUT")'. Abort..."
     exit 1
   fi
   )

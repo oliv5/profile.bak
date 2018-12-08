@@ -373,21 +373,20 @@ annex_lookup_remotes() {
 _annex_archive() {
   ( set +e; # Need to go on on error
   annex_exists || exit 1
-  local OUT="${2:-$(git_dir)/archive/}"
+  local OUT="${2:-$(git_dir)/bundle/}"
   [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name "${1%%.*}").${1#*.}"
   local GPG_RECIPIENT="$3"
   local GPG_TRUST="${4:+--trust-model always}"
   shift 4
   mkdir -p "$(dirname "$OUT")"
   if [ $? -ne 0 ]; then
-    echo "Cannot create directory \"$(dirname "$OUT")\". Abort..."
+    echo "Cannot create directory '$(dirname "$OUT")'. Abort..."
     exit 1
   fi
   echo "Generate $OUT"
   eval "$@"
   if [ ! -r "${OUT}" ]; then
-    echo "Output file is missing or empty."
-    echo "Abort..."
+    echo "Output file '${OUT}' is missing or empty. Abort..."
     exit 1
   fi
   if [ ! -z "$GPG_RECIPIENT" ]; then
@@ -421,8 +420,7 @@ _annex_enum() {
   [ -n "$OUT" ] || return 1
   local OWNER="${1:-$USER}"
   if annex_bare; then
-    echo "Repository '$(git_dir)' cannot be enumerated."
-    echo "Abort..."
+    echo "Repository '$(git_dir)' cannot be enumerated. Abort..."
     return 2
   else
     git annex find --include '*' --print0 | xargs -r0 -n1 sh -c '
@@ -463,8 +461,7 @@ _annex_enum_remotes() {
 }
 annex_enum_remotes() {
   if annex_bare; then
-    echo "Repository '$(git_dir)' cannot be enumerated."
-    echo "Abort..."
+    echo "Repository '$(git_dir)' cannot be enumerated. Abort..."
     return 1
   else
     _annex_archive "annex.enum_remotes.txt.xz" "$1" "$2" "$3" "_annex_enum_remotes" "$4"
