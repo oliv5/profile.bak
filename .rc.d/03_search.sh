@@ -183,7 +183,7 @@ find_duplicates() {
   local TMP1="$(tempfile)"
   local TMP2="$(tempfile)"
   for DIR in "${@:-.}"; do
-    find "${DIR:-.}" -type f -exec md5sum {} \; >> "$TMP1"
+    find "${DIR:-.}" -type f -o -type l -exec md5sum {} \; >> "$TMP1"
   done
   #awk '{print $1}' "$TMP1" | sort | uniq -d > "$TMP2"
   sort -k 1 "$TMP1" | cut -d' ' -f 1 | uniq -d > "$TMP2"
