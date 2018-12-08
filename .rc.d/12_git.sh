@@ -243,6 +243,11 @@ git_remotes() {
   git ${1:+--git-dir="$1"} remote | xargs
 }
 
+# Check remote registration
+git_remote_exists() {
+  git ${2:+--git-dir="$2"} remote | grep -E "$1" >/dev/null
+}
+
 # Get git backup name
 git_name() {
   echo "$(git_repo).${1:+$1.}$(uname -n).$(git_branch | tr '/' '_').$(date +%Y%m%d-%H%M%S).$(git_shorthash)${2:+.$2}"
