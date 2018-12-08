@@ -17,7 +17,7 @@ xzq() {
 xza() {
   local ARCHIVE="${1:?No archive to create...}"
   shift 1
-  xz -c -9 "$@" > "$ARCHIVE"
+  xz -zk9c "$@" > "$ARCHIVE"
 }
 
 # xz deflate
@@ -52,7 +52,7 @@ xzga(){
   local KEY="${1:?No encryption key specified...}"
   local ARCHIVE="${2:?No archive to create...}"
   shift 2
-  xz -ck -9 "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
+  xz -zk9c "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
 }
 
 # gpg > xz deflate
