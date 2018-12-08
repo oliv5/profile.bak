@@ -12,3 +12,4 @@ alias find_photos='find_media image'
 ##################################
 # Idendity codec
 alias lscodec='mplayer -vo null -ao null -frames 0 -identify'
+alias lscodec2='mediainfo --fullscan'
