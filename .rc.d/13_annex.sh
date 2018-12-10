@@ -372,7 +372,7 @@ annex_lookup_remotes() {
 # List annex content in an archive
 _annex_archive() {
   ( set +e; # Need to go on on error
-  annex_exists || exit 1
+  annex_exists || return 1
   local OUT="${2:-$(git_dir)/bundle/}"
   [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name "${1%%.*}").${1#*.}"
   local GPG_RECIPIENT="$3"
@@ -381,13 +381,13 @@ _annex_archive() {
   mkdir -p "$(dirname "$OUT")"
   if [ $? -ne 0 ]; then
     echo "Cannot create directory '$(dirname "$OUT")'. Abort..."
-    exit 1
+    return 1
   fi
   echo "Generate $OUT"
   eval "$@"
   if [ ! -r "${OUT}" ]; then
     echo "Output file '${OUT}' is missing or empty. Abort..."
-    exit 1
+    return 1
   fi
   if [ ! -z "$GPG_RECIPIENT" ]; then
     gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
@@ -400,11 +400,20 @@ _annex_archive() {
 # Annex bundle
 _annex_bundle() {
   [ -n "$OUT" ] || return 1
+  OUT="${OUT%%.xz}"; OUT="${OUT%%.tar}.tar.xz"
   local OWNER="${1:-$USER}"
   if annex_bare; then
-    tar c -h -O --exclude='*/creds/*' -- "$(git_dir)./annex" |
+    if [ -d "$(git_dir)/annex" ]; then
+      echo "Skip empty bundle..."
+      return 1
+    fi
+    tar c -h -O --exclude='*/creds/*' -- "$(git_dir)/annex" |
       xz -z -9 -c --verbose - > "${OUT}"
   else
+    if [ $(git annex find 2>/dev/null | wc -l) -eq 0 ]; then
+      echo "Skip empty bundle..."
+      return 1
+    fi
     git annex find --print0 | 
       xargs -r0 tar c -h -O --exclude-vcs -- |
         xz -z -9 -c --verbose - > "${OUT}"
@@ -418,6 +427,7 @@ annex_bundle() {
 # Annex enumeration
 _annex_enum() {
   [ -n "$OUT" ] || return 1
+  OUT="${OUT%%.xz}"; OUT="${OUT%%.txt}.txt.xz"
   local OWNER="${1:-$USER}"
   if annex_bare; then
     echo "Repository '$(git_dir)' cannot be enumerated. Abort..."
@@ -442,9 +452,10 @@ annex_enum() {
 # Store annex infos
 _annex_info() {
   [ -n "$OUT" ] || return 1
+  OUT="${OUT%%.xz}"; OUT="${OUT%%.txt}.txt.xz"
   local OWNER="${1:-$USER}"
-  annex_getinfo > "${OUT%%.txt.xz}.txt"
-  xz -z -9 -S .xz --verbose "${OUT%%.txt.xz}.txt"
+  annex_getinfo > "${OUT%%.xz}"
+  xz -z -9 -S .xz --verbose "${OUT%%.xz}"
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
 annex_info(){
@@ -454,9 +465,10 @@ annex_info(){
 # Enum special remotes
 _annex_enum_remotes() {
   [ -n "$OUT" ] || return 1
+  OUT="${OUT%%.xz}"; OUT="${OUT%%.txt}.txt.xz"
   local OWNER="${1:-$USER}"
-  annex_lookup_remotes > "${OUT%%.txt.xz}.txt"
-  xz -z -9 -S .xz --verbose "${OUT%%.txt.xz}.txt"
+  annex_lookup_remotes > "${OUT%%.xz}"
+  xz -z -9 -S .xz --verbose "${OUT%%.xz}"
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
 annex_enum_remotes() {

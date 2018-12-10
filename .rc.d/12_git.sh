@@ -533,7 +533,7 @@ git_bundle() {
   git_exists || return 1
   local OUT="${1:-$(git_dir)/bundle/$(git_name "bundle")}"
   [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name "bundle")"
-  OUT="${OUT%%.git.xz}.git.xz"
+  OUT="${OUT%%.xz}"; OUT="${OUT%%.git}.git.xz"
   mkdir -p "$(dirname "$OUT")"
   if [ $? -eq 0 ]; then
     local GPG_RECIPIENT="$2"
