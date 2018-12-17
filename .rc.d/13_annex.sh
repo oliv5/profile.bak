@@ -1037,8 +1037,9 @@ annex_dropunused() {
           echo && 
           echo -en "$NUM " >> "$TMPFILE"
     done
-  cat "$TMPFILE" | xargs git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force}
-  rm "$TMPFILE"
+  cat "$TMPFILE" | xargs git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force} &&
+    rm "$TMPFILE" ||
+    echo "Dropunused failed using tmp file $TMPFILE"
 }
 
 # Drop all unused files interactively
