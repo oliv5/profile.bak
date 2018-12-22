@@ -117,8 +117,7 @@ alias rmd='rmdir'
 
 # Diff
 alias d='diff'
-alias di='diff'
-alias me='meld'
+alias m='meld'
 
 # Grep
 alias g='grep'
@@ -237,6 +236,7 @@ alias rts='rsync_timestamp'
 
 # Misc
 alias mo='mimeopen'
+alias xo='xdg-open'
 alias s='silent'
 alias ag='alias | grep'
 alias agi='alias | grep -i'
