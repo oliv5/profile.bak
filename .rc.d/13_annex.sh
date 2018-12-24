@@ -31,6 +31,9 @@ alias gani='git annex info'
 alias ganu='annex_upload'
 alias gan='git annex'
 alias annex='git annex'
+# Assistant
+alias ganas='git annex assistant'
+alias ganw='git annex webapp'
 
 ########################################
 # Check annex exists
@@ -222,13 +225,6 @@ git diff --cached --name-only --diff-filter=A -z |
 EOF
   chmod +x "$HOOK"
 }
-
-########################################
-# Assistant
-alias annex_webapp='git annex webapp'
-alias annex_assistant='git annex assistant'
-alias annex_assistant_auto='git annex assistant --autostart'
-alias annex_assistant_stop='git annex assistant --stop; git annex assistant --autostop'
 
 ########################################
 # Print annex infos (inc. encryption ciphers)
