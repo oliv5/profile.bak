@@ -157,3 +157,11 @@ empty_uid() {
   awk -F: '($3 == "0") {print}' /etc/passwd
 }
 
+################################
+# Bumblebee commands
+# https://github.com/Bumblebee-Project/bbswitch
+alias bb_status='cat /proc/acpi/bbswitch'
+alias bb_on='sudo sh -c "echo ON > /proc/acpi/bbswitch"'
+alias bb_off='sudo sh -c "echo OFF > /proc/acpi/bbswitch"'
+
+

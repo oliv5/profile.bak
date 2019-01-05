@@ -11,6 +11,11 @@ alias disk_info='sudo lshw -class disk -class storage -short'
 alias disk_drive='hwinfo --disk --short'
 alias rpi_fw='/opt/vc/bin/vcgencmd version'
 
+# Drivers
+alias lsmodg='lsmod | grep -i'
+alias modinfog='modinfo | grep -i'
+alias dmesgg='dmesg | grep -i'
+
 ################################
 # TTys
 alias tty_list='ps aux|grep /usr/bin/[X]'
