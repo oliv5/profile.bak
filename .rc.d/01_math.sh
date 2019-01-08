@@ -2,8 +2,8 @@
 
 ################################
 # Computations
-min() { echo $(($1<$2?$1:$2)); }
-max() { echo $(($1>$2?$1:$2)); }
+min() { echo $((${1:-0}<${2:-0}?${1:-0}:${2:-0})); }
+max() { echo $((${1:-0}>${2:-0}?${1:-0}:${2:-0})); }
 lim() { max $(min $1 $3) $2; }
 isint() { expr 2 "*" "$1" + 1 >/dev/null 2>&1; }
 alias avg="awk '{a+=\$1} END{print a/NR}'"
@@ -12,7 +12,7 @@ alias avg="awk '{a+=\$1} END{print a/NR}'"
 _int() {
   local MAX="${1:?No maximum value specified...}"
   shift
-  for RES; do
+  for RES in ${@:-0}; do
     RES="$(echo $RES | bc)"
     [ "$RES" -ge "$MAX" ] && RES="$((RES-2*MAX))"
     echo "$RES"
