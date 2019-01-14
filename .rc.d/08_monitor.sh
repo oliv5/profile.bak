@@ -55,28 +55,50 @@ psgu() {
 # List of PIDs
 pid() {
   # Use xargs to trim leading spaces
-  [ $# -gt 0 ] && ps -C "$@" -o pid= | xargs
+  #[ $# -gt 0 ] && ps -C "$@" -o pid= | xargs
+  for ARG; do
+    { isint "$ARG" && ps -C "$ARG" -o pid= || ps -p "$ARG" -o pid=; } | xargs
+  done
 }
 # List of UIDs
 uid() {
   # Use xargs to trim leading spaces
-  [ $# -gt 0 ] && ps -C "$@" -o user= | xargs
+  #[ $# -gt 0 ] && ps -C "$@" -o user= | xargs
+  for ARG; do
+    { isint "$ARG" && ps -C "$ARG" -o user= || ps -p "$ARG" -o user=; } | xargs
+  done
 }
 # List of PPIDs
 ppid() {
   # Use xargs to trim leading spaces
-  [ $# -gt 0 ] && ps -C "$@" -o ppid= | xargs
+  #[ $# -gt 0 ] && ps -C "$@" -o ppid= | xargs
+  for ARG; do
+    { isint "$ARG" && ps -C "$ARG" -o ppid= || ps -p "$ARG" -o ppid=; } | xargs
+  done
 }
-# List of PPIDs from PIDs
-pppid() {
-  # Use xargs to trim leading spaces
-  [ $# -gt 0 ] && ps -p "$@" -o ppid= | xargs
+ppidn() {
+  local PID="${1}"
+  local ITER="${2:-0}"
+  shift
+  for I in $(seq 1 ${ITER}); do
+    [ -z "$PID" ] && break
+    PID="$(ps -p "$PID" -o ppid=)"
+  done
+  echo "$PID"
 }
 # List of zombies
 #http://www.noah.org/wiki/Kill_-9_does_not_work
 psz() {
   ps aux | awk '"[ZzDd]" ~ $8'
   #ps Haxwwo stat,pid,ppid,user,wchan:25,command | grep -e "^STAT" -e "^D" -e "^Z"
+}
+# Ps process parent
+psp() {
+  for ARG; do
+    for PID in $(ppid $ARG); do
+      ps u -p "$PID"
+    done
+  done
 }
 
 ################################

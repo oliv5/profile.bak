@@ -23,7 +23,7 @@ alias xrandr_getres='xrandr_size;'
 alias xrandr_getsize='xrandr_size;'
 alias xrandr_setres='xrandr_size'
 alias xrandr_setsize='xrandr_size'
-alias xrandr_auto='xrandr_size 0'
+#alias xrandr_auto='xrandr_size 0'
 alias xrandr_refresh='xrandr_size 0'
 alias xrandr_1600='xrandr_size 1600x1200'
 alias xrandr_1360='xrandr_size 1360x768'
@@ -33,8 +33,22 @@ alias xrandr_800='xrandr_size 800x600'
 alias xrandr_640='xrandr_size 640x480'
 
 # Enable/disable display
-alias xrandr_enable='xrandr --auto --output'
-alias xrandr_disable='xrandr --off --output'
+xrandr_auto() {
+  local DISPLAY="${1:?No display specified...}"
+  shift
+  xrandr --output "${DISPLAY}" --auto "$@"
+}
+xrandr_enable() {
+  local DISPLAY="${1:?No display specified...}"
+  local MODE="${2:?No mode specified... ex: 1024x768}"
+  shift 2
+  xrandr --output "${DISPLAY}" --mode "${MODE}" "$@"
+}
+xrandr_disable() {
+  local DISPLAY="${1:?No display specified...}"
+  shift
+  xrandr --output "${DISPLAY}" --off "$@"
+}
 
 # Set backlight
 alias backlight_250='backlight 250'
