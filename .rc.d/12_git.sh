@@ -130,7 +130,7 @@ git_branch() {
   #git branch -a | grep -E '^\*' | cut -c 3-
   #git for-each-ref --format='%(objectname) %(refname:short)' refs/heads | awk "/^$(git rev-parse HEAD)/ {print \$2}"
   # The following works for detached heads too
-  { git ${2:+--git-dir="$2"} symbolic-ref "${1:-HEAD}" 2>/dev/null || echo "(detached head)"; } | sed 's;refs/heads/;;'
+  { git ${2:+--git-dir="$2"} symbolic-ref "${1:-HEAD}" 2>/dev/null || echo "detached_head"; } | sed 's;refs/heads/;;'
 }
 
 # Get current branch tracking
