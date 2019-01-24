@@ -35,7 +35,7 @@ _path_remove() {
   done
 }
 
-# Remove given fs from path
+# Remove given fs from path, as well as absent paths
 _path_remove_fs() {
   command -v grep >/dev/null || return 1
   command -v stat >/dev/null || return 1
@@ -45,8 +45,11 @@ _path_remove_fs() {
   local IFS=":"
   local RES
   for D in $VAL; do
-    if ! stat -f -c %T "$D" 2>/dev/null | grep -Eq "$FS"; then
-      RES="${RES:+$RES:}$D"
+    CURFS="$(timeout --preserve-status 1s stat -f -c %T "$D" 2>/dev/null)"
+    if [ $? -eq 0 ]; then
+      if ! echo "$CURFS" | grep -Eq "$FS"; then
+        RES="${RES:+$RES:}$D"
+      fi
     fi
   done
   export $VAR="$RES"
