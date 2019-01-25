@@ -2,7 +2,7 @@
 
 ########################
 # quick tar compress/deflate
-ta() {
+taz() {
   for SRC; do
     if [ "$SRC" != "${SRC%.tar}" ]; then
       #tar -xvf "$SRC" -C "${SRC%/*}"
