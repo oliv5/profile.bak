@@ -106,6 +106,7 @@ path_remove_absent() { _path_remove_absent PATH "$@"; }
 path_cleanup() { _path_cleanup PATH "$@"; }
 path_find() { _path_find PATH "$@"; }
 path_abs() { readlink -f -- "$@"; }
+path_reset() { export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"; }
 
 # LD_LIBRARY_PATH aliases
 # Warning: we should not use LD_LIBRARY_PATH
@@ -117,3 +118,4 @@ ldlibpath_remove_fs() { _path_remove_fs LD_LIBRARY_PATH "$@"; }
 ldlibpath_remove_absent() { _path_remove_absent LD_LIBRARY_PATH "$@"; }
 ldlibpath_cleanup() { _path_cleanup LD_LIBRARY_PATH "$@"; }
 ldlibpath_find() { _path_find LD_LIBRARY_PATH "$@"; }
+ldlibpath_reset() { export LD_LIBRARY_PATH=""; }
