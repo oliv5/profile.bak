@@ -1462,7 +1462,7 @@ else
 fi
 alias gupa='git_pull_all'
 alias gfe='git fetch'
-alias gfa='git fetch --all'
+alias gfa='git fetch --all --tags'
 # Config aliases
 alias gcg='git config --get'
 alias gcs='git config --set'
