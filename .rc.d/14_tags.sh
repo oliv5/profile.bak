@@ -47,7 +47,7 @@ scancsdir() {
   ( set -f; find -L "$SRC" $_CSCOPE_EXCLUDE -regextype posix-egrep -regex "$_CSCOPE_REGEX" -type f -execdir readlink -e "{}" \; | sed -e 's/\\/\\/g ; s/"/\"/g ; s/^/"/g ; s/$/"/g' >> "$CSCOPE_FILES" )
 }
 
-# Make cscope db from source list file
+# Make cscope db from source list file (incrementally)
 mkcscope() {
   command -v >/dev/null cscope || return
   # Get directories, remove ~/
@@ -58,7 +58,7 @@ mkcscope() {
   local CSCOPE_OPTIONS="$_CSCOPE_OPTS $@"
   local CSCOPE_FILES="$DST/${_CSCOPE_FILES}"
   local CSCOPE_DB="$DST/${_CSCOPE_OUT}"
-  # Build file list
+  # Build file list incrementally
   scancsdir "$SRC" "$DST"
   # Build tag file
   command cscope $CSCOPE_OPTIONS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
@@ -124,7 +124,7 @@ mkgtags() {
 mktags() {
   mkctags "$@"
   mkgtags "$@"
-  mkcscope "$@"
+  rmcscope "$@"; mkcscope "$@"
   mkids "$@"
   mkpycscope "$@"
 }
