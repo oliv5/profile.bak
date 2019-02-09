@@ -1,0 +1,11 @@
+# sample rc file list
+.rc.d/00_shell.sh
+.rc.d/01_fct.sh
+.rc.d/01_math.sh
+.rc.d/01_path.sh
+.rc.d/01_str.sh
+.rc.d/02_cd.sh
+.rc.d/03_search.sh
+.rc.d/05_diff.sh
+.rc.d/android/03_search.sh
+.rc.d/android/08_sys.sh

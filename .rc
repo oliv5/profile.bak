@@ -34,10 +34,11 @@ rc_source() {
     done
   }
 
-  # Source module when executable or listed in rc.list 
+  # Source module when executable or listed in .rc.list 
   rc_sourcemod() {
+    local LIST="$HOME/.rc.list"
     for FILE; do
-      if [ -n "$RC_ALL" ] || test -x "$FILE" || grep -e "${FILE##*/}" "${FILE%/*}/rc.list" >/dev/null 2>&1; then
+      if [ -n "$RC_ALL" ] || test -x "$FILE" || grep -e "^${FILE##$HOME/}" "$LIST" >/dev/null 2>&1; then
         rc_sourcefile "$FILE"
       fi
     done
