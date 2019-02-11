@@ -386,7 +386,7 @@ elif [ "$TYPE" = "cdda" ]; then
     elif [ "$CODEC" = "mpc" ]; then
       $DRYRUN sh -c "mpcenc --quality 9 \"${TMPFILE}\" \"${DUMPFILE}\" && ${DELTMP} rm -v \"${TMPFILE}\"" &
     elif [ "$CODEC" = "flac" ]; then
-      $DRYRUN sh -c "flac -8 \"${TMPFILE}\" \"${DUMPFILE}\" && ${DELTMP} rm -v \"${TMPFILE}\"" &
+      $DRYRUN sh -c "flac -8 \"${TMPFILE}\" -o \"${DUMPFILE}\" && ${DELTMP} rm -v \"${TMPFILE}\"" &
     else
       $DRYRUN sh -c "oggenc -q 7 \"${TMPFILE}\" -o \"${DUMPFILE}\" && ${DELTMP} rm -v \"${TMPFILE}\"" &
     fi
