@@ -43,13 +43,11 @@ _path_remove_fs() {
   local VAL="$(eval echo "\$$VAR")"
   local FS="${2:-cifs|fusefs|nfs}"
   local IFS=":"
-  local RES
+  local RES=""
   for D in $VAL; do
-    CURFS="$(timeout --preserve-status 1s stat -f -c %T "$D" 2>/dev/null)"
-    if [ $? -eq 0 ]; then
-      if ! echo "$CURFS" | grep -Eq "$FS"; then
-        RES="${RES:+$RES:}$D"
-      fi
+    local CURFS="$(timeout 1s stat -f -c %T "$D" 2>/dev/null)"
+    if [ $? -ne 0 ] || ! echo "$CURFS" | grep -Eq "$FS"; then
+      RES="${RES:+$RES:}$D"
     fi
   done
   export $VAR="$RES"
