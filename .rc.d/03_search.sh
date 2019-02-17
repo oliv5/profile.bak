@@ -183,7 +183,7 @@ find_duplicates() {
   local TMP1="$(tempfile)"
   local TMP2="$(tempfile)"
   for DIR in "${@:-.}"; do
-    find "${DIR:-.}" \( -type f -o -type l \) -exec md5sum "{}" \; >> "$TMP1"
+    find "${DIR:-.}" \( -type f -o -type l \) -exec md5sum "{}" \; | sed -e 's/^\\//' >> "$TMP1"
   done
   #awk '{print $1}' "$TMP1" | sort | uniq -d > "$TMP2"
   sort -k 1 "$TMP1" | cut -d' ' -f 1 | uniq -d > "$TMP2"
@@ -192,6 +192,12 @@ find_duplicates() {
     echo
   done < "$TMP2"
   rm "$TMP1" "$TMP2" 2>/dev/null
+}
+
+# Remove duplicated files
+alias rm_dup='rm_duplicates'
+rm_duplicates() {
+  find_duplicates "$@" | sed '1d ; /^$/{N;d}' | xargs -r rm -vi --
 }
 
 # Find empty directories/files
