@@ -121,6 +121,11 @@ git_top() {
   [ "$(git_root 2>/dev/null)" = "$PWD" ]
 }
 
+# Unlock repo
+git_unlock() {
+  rm -v "$(git_dir "$@")/index.lock"
+}
+
 ########################################
 
 # Get current branch name
