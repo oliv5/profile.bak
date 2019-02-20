@@ -1,5 +1,5 @@
 #!/bin/bash
-# Note: need to fix the \" errors around filenames
+# TODO: fix the \" errors around filenames
 
 # Ensure an almost clean exit
 # Enable errors before
@@ -35,6 +35,16 @@ CheckOutputFilename() {
   fi
   eval $1="$FILEPATH" 2>/dev/null
   return 0
+}
+
+# Force CD/DVD drive speed
+# see http://hektor.umcs.lublin.pl/~mikosmul/computing/tips/cd-rom-speed.html
+# see http://manpages.ubuntu.com/manpages/precise/man1/cdvdcontrol.1.html
+SetDeviceSpeed() {
+  local SPEED="${1:?No speed specified...}"
+  sudo hdparm -E "$SPEED" "$DEVICE" ||
+  sudo eject -x "$SPEED" "$DEVICE" ||
+  sudo cdvdcontrol -d "$DEVICE" -s --silent on --sm-dvd-rd "$SPEED" --sm-cd-rd "$SPEED" --sm-nosave
 }
 
 # Init main variables
@@ -166,6 +176,15 @@ if [ ! -z "$DEVICE" -a ! -e "$DEVICE" ]; then
   ExitHandler 1
 fi
 
+# Check we found a device type
+if [ "$TYPE" = "auto" ]; then
+  echo >&2 "[ripme] Error: cannot identify media type..."
+  ExitHandler 1
+elif [ "$TYPE" != "dvd" ] && [ "$TYPE" != "cdda" ]; then
+  echo >&2 "[ripme] Error: device type '$TYPE' is not supported..."
+  ExitHandler 1
+fi
+
 # Create output directory. Failure when not existent
 echo >&1 "Using output directory '$ODIR'"
 mkdir -p "$ODIR"
@@ -191,13 +210,10 @@ fi
 
 # Set device speed
 if [ -n "$SPEED" ]; then
-  # see http://hektor.umcs.lublin.pl/~mikosmul/computing/tips/cd-rom-speed.html
-  # see http://manpages.ubuntu.com/manpages/precise/man1/cdvdcontrol.1.html
-  SPEED=${SPEED_DVD[$SPEED]}
-  if [ "$METHOD" != "mplayer" ]; then
-    sudo hdparm -E $SPEED "$DEVICE" || \
-    sudo eject -x $SPEED "$DEVICE" || \
-    sudo cdvdcontrol -d "$DEVICE" -s --silent on --sm-dvd-rd $SPEED --sm-cd-rd $SPEED --sm-nosave
+  if [ "$TYPE" = "dvd" ]; then
+    SPEED=${SPEED_DVD[$SPEED]}
+  else
+    SPEED=${SPEED_CD[$SPEED]}
   fi
 fi
 
@@ -250,6 +266,9 @@ if [ "$TYPE" = "dvd" ]; then
 
     elif [ "$METHOD" = "vlc" ]; then
 
+      # Set speed
+      SetDeviceSpeed "$SPEED"
+
       # Fix the output filename: vlc settings produces a mpeg file
       DUMPFILE="${DUMPFILE%.*}.mpg"
 
@@ -261,6 +280,9 @@ if [ "$TYPE" = "dvd" ]; then
       fi
 
     else # tccat dump method
+
+      # Set speed
+      SetDeviceSpeed "$SPEED"
 
       # Set the trap signal
       trap "ExitHandler 2" 2
@@ -368,8 +390,10 @@ elif [ "$TYPE" = "cdda" ]; then
 
     # Rip CD to wav
     if [ "$METHOD" = "cdparanoia" ]; then
-      $DRYRUN cdparanoia ${TRACK} -d "${DEVICE}" "${TMPFILE}"
+      $DRYRUN cdparanoia ${TRACK} ${SPEED:+-S "$SPEED"} -d "${DEVICE}" "${TMPFILE}"
     elif [ "$METHOD" = "vlc" ]; then
+      # Set speed
+      SetDeviceSpeed "$SPEED"
       # https://wiki.videolan.org/VLC_HowTo/Extract_audio/#The_VLC_command_invocation
       $DRYRUN cvlc -I dummy --no-sout-video --sout-audio --no-sout-rtp-sap --no-sout-standard-sap --ttl=1 --sout-keep \
         --sout "#transcode{acodec=s16l,channels=2}:std{access=file,mux=wav,dst='${TMPFILE}'}" \
@@ -398,13 +422,6 @@ elif [ "$TYPE" = "cdda" ]; then
   # Set output files/directory ownership
   [ -n "$USERNAME" ] && $DRYRUN chown -R "$USERNAME" "$ODIR"
 
-elif [ "$TYPE" = "auto" ]; then
-
-  echo >&2 "[ripme] Error: cannot identify media type..."
-  ExitHandler 1
-
-else
-  echo >&2 "[ripme] Error: device type '$TYPE' is not supported..."
 fi
 
 # Exit
