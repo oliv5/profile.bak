@@ -628,5 +628,22 @@ endif
 
 
 " *******************************************************
+" } Improved Ansi Escape plugin {
+" https://www.vim.org/scripts/script.php?script_id=4979
+" https://github.com/powerman/vim-plugin-AnsiEsc.git
+" *******************************************************
+if !exists('loaded_ansiesc')
+	let loaded_ansiesc = 1
+	" Options
+	let g:no_plugin_maps = 1
+	let g:no_cecutil_maps = 1
+	let g:no_drchip_menu = 1
+	let g:no_ansiesc_menu = 1
+	" Key mapping
+	FnNoremap <localleader>a	:AnsiEsc<CR>
+endif
+
+
+" *******************************************************
 " } The end
 " *******************************************************
