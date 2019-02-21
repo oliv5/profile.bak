@@ -306,5 +306,18 @@ filetype plugin indent on   " enable detection, plugins and indenting in one ste
 
 
 " *******************************************************
+" } Reload after-scripts (first load is done by plugin after.vim) {
+" *******************************************************
+if exists("g:loaded_vimrc")
+	if filereadable(expand("~/.vimrc.after"))
+		source ~/.vimrc.after
+	endif
+	if filereadable(expand("~/.vimrc.after.local"))
+		source ~/.vimrc.after.local
+	endif
+endif
+
+
+" *******************************************************
 " } The end
 " *******************************************************
