@@ -5,9 +5,9 @@
 
 # Su/sudo
 #su() { (eval /system/bin/su root -- /system/bin/sh -c \""$@"\" & wait $!); }
-sudo() { (eval /system/bin/su root -- /system/bin/sh -c \""$@"\" & wait $!); }
-#! command -v sudo >/dev/null &&
-  #alias sudo='su root --'
+#sudo() { (eval /system/bin/su root -- /system/bin/sh -c \""$@"\" & wait $!); }
+! command -v sudo >/dev/null &&
+  alias sudo='su root --'
 
 # Process monitoring
 alias pg='pgrep -fl'
