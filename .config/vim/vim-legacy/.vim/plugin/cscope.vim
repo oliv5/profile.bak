@@ -114,6 +114,10 @@ if has("cscope")
     vnoremap <C-d><C-i> "+y:Cs find i <C-R>"<CR>
     vnoremap <C-d><C-g> "+y:Cs find g <C-R>"<CR>
 
+    " OLA mappings (because ctrl-c cannot be used in key mappings anymore)
+    nnoremap <C-d>c     :Cs find c <C-R>=expand("<cword>")<CR><CR>
+    vnoremap <C-d>c     "+y:Cs find c <C-R>"<CR>
+
     " Using 'CTRL-spacebar' (intepreted as CTRL-@ by vim) then a search type
     " makes the vim window split horizontally, with search result displayed in
     " the new window.
