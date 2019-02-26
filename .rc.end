@@ -91,6 +91,12 @@ alias e='${GEDITOR:-false}'
 alias sse='ss | cut -c 9- | xargs ${GEDITOR:-false}'
 alias gse='gs | grep modified | cut -d : -f 2 | xargs ${GEDITOR:-false}'
 
+# File manager
+alias n='${FMANAGER:-false}'
+if [ -z "$FMANAGER" ];then
+  export FMANAGER="$(command -v nautilus || command -v konqueror || command -v dolphin || command -v gnome-commander)"
+fi
+
 # Search and process
 ffv()  { ff "${@:-""}" -print0       | xargs -0 gvim; }
 ffv1() { ff "${@:-""}" -print0 -quit | xargs -0 gvim; }
