@@ -100,7 +100,7 @@ mkdir_mv() {
 
 ################################
 # Move files from multiple sources while filtering extensions
-# ex: EXCLUDE="temp *.bak" movefiles $DST/ $SRC1/ $SRC2/
+# ex: EXCLUDE="temp *.bak" move $DST/ $SRC1/ $SRC2/
 move() {
   local DST="${1?No destination specified...}"; shift
   local OPT=""; for EXT in $EXCLUDE; do OPT="${OPT:+$OPT }--exclude=$EXT"; done
@@ -112,6 +112,6 @@ move() {
 # Move files from mounted drives
 move_mnt() {
   local MNT="${1?No mountpoint specified...}"; shift
-  sudo mount "$MNT" && 
-    movefiles "$@"
+  sudo mount "$MNT" &&
+    move "$@"
 }
