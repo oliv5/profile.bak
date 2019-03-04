@@ -105,6 +105,11 @@ adb_logcat() {
     adb shell logcat
 }
 
+# List packages
+adb_ls_packages() {
+    adb shell "pm list packages -f" | cut -f 2 -d "=" | sort
+}
+
 # Android backup (files only, Android4.0+)
 alias adb_backup_userapp='adb_backup -all -apk -oob -no-system'
 alias adb_backup_systemapp='adb_backup -all -apk -oob -system'
