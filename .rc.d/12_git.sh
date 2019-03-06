@@ -546,7 +546,8 @@ git_bundle() {
     local OWNER="${4:-$USER}"
     echo "Git bundle into $OUT"
     git bundle create "${OUT%%.xz}" --all
-    xz -z -9 -S .xz --verbose "${OUT%%.xz}"
+    xz -z -9 -S .xz --verbose "${OUT%%.xz}" &&
+      (shred -fu "${OUT%%.xz}" || wipe -f -- "${OUT%%.xz}" || rm -- "${OUT%%.xz}")
     chown "$OWNER" "$OUT"
     if [ ! -z "$GPG_RECIPIENT" ]; then
       echo "Encrypting bundle into '${OUT}.gpg'"
