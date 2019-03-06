@@ -110,6 +110,17 @@ adb_ls_packages() {
     adb shell "pm list packages -f" | cut -f 2 -d "=" | sort
 }
 
+# Start/stop an app from its package partial name
+adb_start_pkg() {
+    local PACKAGE="${1:?No package name specified...}"
+    local ACTIVITY="${2:-.MainActivity}"
+    adb shell "pm list packages -f" | awk -F= "/${PACKAGE}/ {print \$2}" | xargs -I {} -r -n1 adb shell am start -n "{}/$ACTIVITY"
+}
+adb_stop_pkg() {
+    local PACKAGE="${1:?No package name specified...}"
+    adb shell "pm list packages -f" | awk -F= "/${PACKAGE}/ {print \$2}" | xargs -I {} -r -n1 adb shell am force-stop -n "{}"
+}
+
 # Android backup (files only, Android4.0+)
 alias adb_backup_userapp='adb_backup -all -apk -oob -no-system'
 alias adb_backup_systemapp='adb_backup -all -apk -oob -system'
