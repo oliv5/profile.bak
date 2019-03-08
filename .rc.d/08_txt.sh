@@ -3,7 +3,7 @@
 # Insert text at line(s)
 # sed -i "${MATCH}i${TEXT}" "$FILE"
 txt_insert_at() {
-	local TEXT="${1:?No text specified...}" FILE="${2:?No file specified...}" SED=""
+	local FILE="${1:?No file specified...}" TEXT="${2:?No text specified...}" SED=""
 	shift 2
 	for MATCH; do
 		SED="${SED:+$SED }-e '${MATCH}i${TEXT}'"
@@ -14,7 +14,7 @@ txt_insert_at() {
 # Insert text before matching line(s)
 # sed -i -e "/$MATCH/i"$'\\\n'"$TEXT"$'\n' "$FILE"
 txt_insert_before() {
-	local TEXT="${1:?No text specified...}" FILE="${2:?No file specified...}" SED=""
+	local FILE="${1:?No file specified...}" TEXT="${2:?No text specified...}" SED=""
 	shift 2
 	for MATCH; do
 		SED="${SED:+$SED }-e '/$MATCH/i$TEXT'"
@@ -25,7 +25,7 @@ txt_insert_before() {
 # Insert text after matching line(s)
 # sed -i -e "/$MATCH/a"$'\\\n'"$TEXT"$'\n' "$FILE"
 txt_insert_after() {
-	local TEXT="${1:?No text specified...}" FILE="${2:?No file specified...}" SED=""
+	local FILE="${1:?No file specified...}" TEXT="${2:?No text specified...}" SED=""
 	shift 2
 	for MATCH; do
 		SED="${SED:+$SED }-e '/$MATCH/a$TEXT'"
@@ -47,19 +47,19 @@ txt_cut_at() {
 
 # Cut file before matching line
 txt_cut_before() {
-	local TEXT="${1:?No text specified...}" FILE="${2:?No file specified...}"
+	local FILE="${1:?No file specified...}" TEXT="${2:?No text specified...}"
 	sed ${INPLACE:+-i} "0,/${TEXT}/d" "$FILE"
 }
 
 # Cut file after matching line
 txt_cut_after() {
-	local TEXT="${1:?No text specified...}" FILE="${2:?No file specified...}"
+	local FILE="${1:?No file specified...}" TEXT="${2:?No text specified...}"
 	sed ${INPLACE:+-i} -n "/${TEXT}/q;p" "$FILE"
 	#sed ${INPLACE:+-i} "/${TEXT}/,$d" "$FILE"
 }
 
 # Get matching line numbers
 txt_get_line_num() {
-	local TEXT="${1:?No text specified...}" FILE="${2:?No file specified...}"
+	local FILE="${1:?No file specified...}" TEXT="${2:?No text specified...}"
 	grep -n -e "$TEXT" "$FILE" | cut -f1 -d:
 }
