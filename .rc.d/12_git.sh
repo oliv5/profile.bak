@@ -319,27 +319,13 @@ git_author() {
 }
 
 ########################################
-# Clone helpers
-git_clone() {
-  git clone "$1" ${3:+"$3"} || return 1
-  if [ -n "$2" ]; then
-    git --git-dir="${3:-$(basename "$1" .git)}/.git" remote rename origin "$2"
-  fi
+# Full-import (including all branches/tags)
+git_import_bare() {
+  git clone --mirror "${1:?No source specified...}"
 }
-git_clone_bare() {
-  git clone --bare "$1" ${3:+"$3"} || return 1
-  if [ -n "$2" ]; then
-    git --git-dir="${3:-$(basename "$1" .git)}/.git" remote rename origin "$2"
-  fi
-}
-
-# Add batch of remotes
-git_add_remotes() {
-  git_exists || return 1
-  while [ $# -ge 3 ]; do
-    git remote add "$1" "$2" ${3:+-t "$3"}
-    shift 3
-  done
+git_import() {
+  git_import_bare "$1" &&
+  git_frombare "$1"
 }
 
 ########################################

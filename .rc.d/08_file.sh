@@ -32,6 +32,7 @@ alias rsync_timestamp='rsync -rt --size-only --existing' # Update timestamps onl
 
 ##############################
 # Copy files & preserve permissions
+alias cp_rsync='rsync -a'
 cp_tar() {
   tar cvfp - "${1:?No source specified...}" | ( cd "${2:?No destination specified...}/" ; tar xvfp - )
 }
