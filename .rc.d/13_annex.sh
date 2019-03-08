@@ -368,28 +368,33 @@ annex_lookup_remotes() {
 # List annex content in an archive
 _annex_archive() {
   ( set +e; # Need to go on on error
-  annex_exists || return 1
-  local OUT="${2:-$(git_dir)/bundle/}"
-  [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name "${1%%.*}").${1#*.}"
-  local GPG_RECIPIENT="$3"
-  local GPG_TRUST="${4:+--trust-model always}"
-  shift 4
-  mkdir -p "$(dirname "$OUT")"
-  if [ $? -ne 0 ]; then
-    echo "Cannot create directory '$(dirname "$OUT")'. Abort..."
-    return 1
-  fi
-  echo "Generate $OUT"
-  eval "$@"
-  if [ ! -r "${OUT}" ]; then
-    echo "Output file '${OUT}' is missing or empty. Abort..."
-    return 1
-  fi
-  if [ ! -z "$GPG_RECIPIENT" ]; then
-    gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
-      (shred -fu "${OUT}" || wipe -f -- "${OUT}" || rm -- "${OUT}")
-  fi
-  ls -l "${OUT}"*
+    annex_exists || return 1
+    secure_delete() {
+      { command -v shred >/dev/null && shred -fu "$1"; } || 
+      { command -v wipe >/dev/null && wipe -f -- "$1"; } || 
+      rm -- "$1"
+    }
+    local OUT="${2:-$(git_dir)/bundle/}"
+    [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name "${1%%.*}").${1#*.}"
+    local GPG_RECIPIENT="$3"
+    local GPG_TRUST="${4:+--trust-model always}"
+    shift 4
+    mkdir -p "$(dirname "$OUT")"
+    if [ $? -ne 0 ]; then
+      echo "Cannot create directory '$(dirname "$OUT")'. Abort..."
+      return 1
+    fi
+    echo "Generate $OUT"
+    eval "$@"
+    if [ ! -r "${OUT}" ]; then
+      echo "Output file '${OUT}' is missing or empty. Abort..."
+      return 1
+    fi
+    if [ ! -z "$GPG_RECIPIENT" ]; then
+      gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
+        secure_delete "${OUT}"
+    fi
+    ls -l "${OUT}"*
   )
 }
 
