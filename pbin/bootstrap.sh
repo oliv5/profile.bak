@@ -10,17 +10,19 @@ if ! command -v git 2>&1 >/dev/null; then
 fi
 
 ###################
-# Setup the expected path
-export PATH="$PATH:$HOME/bin:$HOME/bin/vcsh:$HOME/bin/mr"
-export PATH="$PATH:$HOME/bin/externals:$HOME/bin/git-repo"
-
-###################
 # Setup private data folder
-if [ ! -d "$PRIVATE" ]; then
-	read -p "Private data directory in \$HOME (default is '\$HOME/private'): " PRIVATE
-	export PRIVATE="$HOME/${PRIVATE:-private}"
+while [ ! -d "$PRIVATE" ]; then
+	read -p "Private data directory in \$HOME (empty is '\$HOME'): " PRIVATE
+	export PRIVATE="$HOME/${PRIVATE}"
 	mkdir -p "$PRIVATE"
 fi
+if [ "$PRIVATE" != "$HOME" ]; then
+    export HOME="${PRIVATE}/home"
+fi
+
+###################
+# Setup the expected path
+export PATH="$PATH:$HOME/bin:$HOME/bin/vcsh:$HOME/bin/mr:$HOME/bin/external"
 
 ###################
 # Download and install vcsh if not already there
@@ -29,15 +31,6 @@ if ! command -v vcsh >/dev/null 2>&1; then
 	if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
 		git clone --depth 1 https://github.com/RichiH/vcsh.git "$HOME/bin/vcsh"
 	fi
-fi
-
-# Clone profile repository
-read -p "Clone profile ? (y/n) " REPLY
-if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
-	cd "$HOME"
-	vcsh clone https://github.com/oliv5/profile.git profile ||
-		{ vcsh profile pull; vcsh profile reset --hard; } || 
-		exit 0
 fi
 
 ###################
@@ -60,11 +53,29 @@ if ! command -v repo >/dev/null 2>&1; then
 fi
 
 ###################
-# Clone home repository
-read -p "Home repository URL (enpty to skip): " REPLY
-if [ -n "$REPLY" ]; then
+# Clone profile repository
+read -p "Clone profile ? (y/n) " REPLY
+if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
+    URL="https://github.com/oliv5/profile.git"
 	cd "$HOME"
-	vcsh clone "$REPLY"
+	if [ "$PRIVATE" = "$HOME" ]; then
+	    vcsh clone "$URL" profile
+    else
+        git clone "$URL" "$PRIVATE/profile"
+    fi
+fi
+
+###################
+# Clone home repository
+read -p "Home repository URL (empty to skip): " REPLY
+if [ -n "$REPLY" ]; then
+	URL="$REPLY"
+	cd "$HOME"
+	if [ "$PRIVATE" = "$HOME" ]; then
+	    vcsh clone "$URL" home
+	else
+	    git clone "$URL" "$PRIVATE/home"
+	fi
 fi
 
 ###################
