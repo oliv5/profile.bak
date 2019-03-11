@@ -197,7 +197,7 @@ find_duplicates() {
 # Remove duplicated files
 alias rm_dup='rm_duplicates'
 rm_duplicates() {
-  find_duplicates "$@" | sed '1d ; /^$/{N;d}' | xargs -r rm -vi --
+  find_duplicates "$@" | sed '1d ; /^$/{N;d}' | xargs -r -- echo rm --
 }
 
 # Find empty directories/files
