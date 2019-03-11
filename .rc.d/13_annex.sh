@@ -541,10 +541,12 @@ annex_upload() {
 #~ }
 
 # Transfer files to the specified repos by chunk of a given size
+# without downloading the whole repo locally at once
 # $FROM is used to selected the origin repo
 # $DBG is used to print the command on stderr (when not empty)
 # $ALL is used to select all files (when not empty)
-annex_transfer() {
+alias annex_transfer='DBG= FROM= ALL= _annex_transfer'
+_annex_transfer() {
   annex_exists || return 1
   local REPOS="${1:-$(annex_enabled)}"
   local MAXSIZE="${2:-1073741824}"
@@ -559,8 +561,8 @@ annex_transfer() {
   else
     # Plain git repositories
     git annex find --include='*' $SELECT --print0 "$@" | xargs -0 -r sh -c '
-      DBG="$1";REPOS="$2";MAXSIZE="$3"
-      shift 3
+      DBG="$1";REPOS="$2";MAXSIZE="$3";FROM="$4"
+      shift 4
       TOTALSIZE=0
       NUMFILES=$#
       for FILE; do
@@ -592,7 +594,7 @@ annex_transfer() {
         fi
       done
       exit 0
-    ' _ "$DBG" "$REPOS" "$MAXSIZE"
+    ' _ "$DBG" "$REPOS" "$MAXSIZE" "$FROM"
   fi
 }
 
@@ -876,6 +878,7 @@ alias annex_existing='git annex find --in'
 alias annex_missing='git annex find --not --in'
 alias annex_wantget='git annex find --want-get --not --in'
 alias annex_wantdrop='git annex find --want-drop --in'
+alias annex_wanted='annex_wantget'
 annex_lost() { git annex list "$@" | grep -E "^_+ "; }
 
 # Is file in annex ?
