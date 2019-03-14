@@ -375,7 +375,7 @@ _annex_archive() {
       rm -- "$1"
     }
     local OUT="${2:-$(git_dir)/bundle/}"
-    [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name "${1%%.*}").${1#*.}"
+    [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name).${1%%.*}.${1#*.}"
     local GPG_RECIPIENT="$3"
     local GPG_TRUST="${4:+--trust-model always}"
     shift 4

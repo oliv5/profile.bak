@@ -527,7 +527,7 @@ git_bundle() {
       { command -v wipe >/dev/null && wipe -f -- "$1"; } || 
       rm -- "$1"
     }
-    local OUT="${1:-$(git_dir)/bundle/$(git_name "bundle")}"
+    local OUT="${1:-$(git_dir)/bundle/$(git_name).bundle}"
     [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name "bundle")"
     OUT="${OUT%%.xz}"; OUT="${OUT%%.git}.git.xz"
     mkdir -p "$(dirname "$OUT")"
