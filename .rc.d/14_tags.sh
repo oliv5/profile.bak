@@ -175,21 +175,22 @@ rmtags() {
 
 mkalltags() {
   (
-    local SRC
-    for TAGPATH in $(find -L "$(readlink -m "${1:-$PWD}")" -maxdepth ${2:-5} -type f -name ".*.path" 2>/dev/null); do
+    local SRC="$(readlink -m "${1:-$PWD}")"
+    local IFS=$' \n'
+    for TAGPATH in $(find -L "$SRC" -maxdepth ${2:-5} -type f -name ".*.path" 2>/dev/null); do
       echo "** Processing file $TAGPATH"
-      cd "$(dirname $TAGPATH)"
+      command cd "$(dirname $TAGPATH)" || continue
       local TAGNAME="$(basename $TAGPATH)"
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".ctags.path" ]; then
         rmctags
-        for SRC in $(cat $TAGNAME); do
+        for SRC in $(cat "$TAGNAME"); do
           echo "[ctags] add: $SRC"
           mkctags "$SRC" . "-a"
         done
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".cscope.path" ]; then
         rmcscope
-        for SRC in $(cat $TAGNAME); do
+        for SRC in $(cat "$TAGNAME"); do
           echo "[cscope] add: $SRC"
           scancsdir "$SRC" .
         done
@@ -197,14 +198,14 @@ mkalltags() {
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".id.path" ]; then
         rmids
-        for SRC in $(cat $TAGNAME); do
+        for SRC in $(cat "$TAGNAME"); do
           echo "[id] add: $SRC"
           mkids "$SRC" .
         done
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".pycscope.path" ]; then
         rmpycscope
-        for SRC in $(cat $TAGNAME); do
+        for SRC in $(cat "$TAGNAME"); do
           echo "[pycscope] add: $SRC"
           mkpycscope "$SRC" .
         done
