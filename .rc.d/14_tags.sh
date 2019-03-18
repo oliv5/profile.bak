@@ -174,13 +174,13 @@ rmtags() {
 }
 
 mkalltags() {
-  (
-    local SRC="$(readlink -m "${1:-$PWD}")"
-    local IFS=$' \n'
-    for TAGPATH in $(find -L "$SRC" -maxdepth ${2:-5} -type f -name ".*.path" 2>/dev/null); do
+  local SRC="$(readlink -m "${1:-$PWD}")"
+  find -L "$SRC" -maxdepth ${2:-5} -type f -name ".*.path" -print0 2>/dev/null | xargs -r0 sh -c '
+    . "$RC_DIR/.rc.d/14_tags.sh"
+    for TAGPATH; do
       echo "** Processing file $TAGPATH"
       command cd "$(dirname $TAGPATH)" || continue
-      local TAGNAME="$(basename $TAGPATH)"
+      TAGNAME="$(basename $TAGPATH)"
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".ctags.path" ]; then
         rmctags
         for SRC in $(cat "$TAGNAME"); do
@@ -212,5 +212,5 @@ mkalltags() {
       fi
       echo "** Done."
     done
-  )
+  ' _
 }
