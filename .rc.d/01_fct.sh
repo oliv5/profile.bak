@@ -18,6 +18,13 @@ fct_def() {
   done
 }
 
+# Tiny fct definitions on oneline
+fct_tiny() {
+  fct_def "$@" | tr '\n' ';' | 
+    sed -e 's/()\s*;/()/' -e 's/{\s*;/{/g' -e 's/;}/; }/g' -e 's/;;/;/g' -e 's/do\s*;/do/g' -e 's/then\s*;/then/g' -e 's/;$//'
+    #sed -e 's/()\s*;/()/' -e 's/{\s*;/{/g' -e 's/{\s\+/{ /g' -e 's/\s\+}/ }/g' -e 's/;}/; }/g' -e 's/;;/;/g' -e 's/do\s*;/do/g' -e 's/then\s*;/then/g'
+}
+
 # Get fct content
 fct_content() {
   for FCT; do
@@ -26,14 +33,10 @@ fct_content() {
 }
 
 # Define and call fct. Useful with xargs/do-while when functions are not exported in subshells
-fct_tiny() {
-  fct_def "$@" | tr '\n' ';' | 
-    sed -e 's/()\s*;/()/' -e 's/{\s*;/{/g' -e 's/;}/; }/g' -e 's/;;/;/g' -e 's/do\s*;/do/g' -e 's/then\s*;/then/g'
-    #sed -e 's/()\s*;/()/' -e 's/{\s*;/{/g' -e 's/{\s\+/{ /g' -e 's/\s\+}/ }/g' -e 's/;}/; }/g' -e 's/;;/;/g' -e 's/do\s*;/do/g' -e 's/then\s*;/then/g'
-}
-fct_call() {
+# ex: (set -vx; myfile() { for f in "$@"; do echo file="$# $f"; done; }; find . -type f -print0 | xargs -0 sh -c "$(fct_eval myfile \"\$@\")" _)
+fct_eval() {
   local FCT="${1:?No fct specified}"; shift
-  eval "$(fct_tiny "$FCT") $FCT $@"
+  echo "$(fct_tiny "$FCT") ; $FCT" "$@"
 }
 
 # Append to fct
