@@ -5,10 +5,7 @@ alias xrandr_ls="xrandr -q | awk '/connected/ {print \$1}'"
 alias xrandr_connected="xrandr -q | awk '/ connected/{print \$1}'"
 alias xrandr_disconnected="xrandr -q | awk '/disconnected/{print \$1}'"
 alias xrandr_on="xrandr -q | awk '/ connected/{name=\$1} /*/{print name}'"
-alias xrandr_off="xrandr -q | awk '/ connected/{name=\$1} /*/{name=""} END{print name}'"
-
-# Get current device
-alias xrandr_current="xrandr -q | awk '/connected/{d=\$1}/*/{print d}'"
+alias xrandr_off="xrandr -q | awk 'BEGIN{name=\"\"} / connected/{if (length(name)>0) {print name}; name=\$1} /*/{name=\"\"} END{if (length(name)>0) {print name}}'"
 alias xrandr_cfg="xrandr -q | awk '/connected/{d=\$1}/*/{print d \"\t\" \$1}'"
 
 # Screen resolution
@@ -32,22 +29,39 @@ alias xrandr_1024='xrandr_size 1024x768'
 alias xrandr_800='xrandr_size 800x600'
 alias xrandr_640='xrandr_size 640x480'
 
-# Enable/disable display
+# Enable/disable screen
 xrandr_auto() {
-  local DISPLAY="${1:?No display specified...}"
+  local SCREEN="${1:?No screen specified...}"
   shift
-  xrandr --output "${DISPLAY}" --auto "$@"
+  xrandr --output "${SCREEN}" --auto "$@"
 }
 xrandr_enable() {
-  local DISPLAY="${1:?No display specified...}"
+  local SCREEN="${1:?No screen specified...}"
   local MODE="${2:?No mode specified... ex: 1024x768}"
   shift 2
-  xrandr --output "${DISPLAY}" --mode "${MODE}" "$@"
+  xrandr --output "${SCREEN}" --mode "${MODE}" "$@"
 }
 xrandr_disable() {
-  local DISPLAY="${1:?No display specified...}"
+  local SCREEN="${1:?No screen specified...}"
   shift
-  xrandr --output "${DISPLAY}" --off "$@"
+  xrandr --output "${SCREEN}" --off "$@"
+}
+
+# Set scale
+xrandr_scale() {
+  local SCREEN="${1:?No screen specified...}"
+  local SCALE="${2:-1x1}"
+  shift 2
+  xrandr --output "${SCREEN}" --scale "$SCALE" "$@"
+}
+
+# Set position
+xrandr_pos() {
+  local SCREEN1="${1:?No screen specified...}"
+  local POS="${2:?No position specified...}"
+  local SCREEN2="${3:?No screen specified...}"
+  shift 3
+  xrandr --output "${SCREEN2}" --${POS}-of "${SCREEN1}" "$@"
 }
 
 # Set backlight
@@ -64,3 +78,4 @@ backlight_reset() {
 backlight() {
 	sudo sh -c "echo ${1:-500} > /sys/class/backlight/intel_backlight/brightness"
 }
+
