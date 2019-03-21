@@ -518,15 +518,18 @@ git_set_tracking() {
   done
 }
 
+# Secure file deletion
+_git_secure_delete() {
+  echo "Remove file '$1'"
+  { command -v shred >/dev/null && shred -fu "$1"; } ||
+  { command -v wipe >/dev/null && wipe -f -- "$1"; } ||
+  rm -- "$1"
+}
+
 # Create a bundle
 git_bundle() {
   ( set +e; # Need to go on
     git_exists || return 1
-    secure_delete() {
-      { command -v shred >/dev/null && shred -fu "$1"; } || 
-      { command -v wipe >/dev/null && wipe -f -- "$1"; } || 
-      rm -- "$1"
-    }
     local OUT="${1:-$(git_dir)/bundle/$(git_name).bundle}"
     [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name "bundle")"
     OUT="${OUT%%.xz}"; OUT="${OUT%%.git}.git.xz"
@@ -537,13 +540,13 @@ git_bundle() {
       local OWNER="${4:-$USER}"
       echo "Git bundle into $OUT"
       git bundle create "${OUT%%.xz}" --all
-      xz -z -9 -S .xz --verbose "${OUT%%.xz}" &&
-        secure_delete "${OUT%%.xz}"
+      xz -k -z -9 -S .xz --verbose "${OUT%%.xz}" &&
+        _git_secure_delete "${OUT%%.xz}"
       chown "$OWNER" "$OUT"
       if [ ! -z "$GPG_RECIPIENT" ]; then
         echo "Encrypting bundle into '${OUT}.gpg'"
         gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
-          secure_delete "${OUT}"
+          _git_secure_delete "${OUT}"
         chown "$OWNER" "${OUT}.gpg"
       fi
       ls -l "${OUT}"*

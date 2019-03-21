@@ -369,11 +369,6 @@ annex_lookup_remotes() {
 _annex_archive() {
   ( set +e; # Need to go on on error
     annex_exists || return 1
-    secure_delete() {
-      { command -v shred >/dev/null && shred -fu "$1"; } || 
-      { command -v wipe >/dev/null && wipe -f -- "$1"; } || 
-      rm -- "$1"
-    }
     local OUT="${2:-$(git_dir)/bundle/}"
     [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name).${1%%.*}.${1#*.}"
     local GPG_RECIPIENT="$3"
@@ -392,7 +387,7 @@ _annex_archive() {
     fi
     if [ ! -z "$GPG_RECIPIENT" ]; then
       gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
-        secure_delete "${OUT}"
+        _git_secure_delete "${OUT}"
     fi
     ls -l "${OUT}"*
   )
@@ -442,7 +437,8 @@ _annex_enum() {
       echo "$FILE" | base64 -w 0
       echo
     ' _ > "${OUT%%.txt.xz}.txt"
-    xz -z -9 -S .xz --verbose "${OUT%%.txt.xz}.txt"
+    xz -k -z -9 -S .xz --verbose "${OUT%%.txt.xz}.txt" &&
+      _git_secure_delete "${OUT%%.txt.xz}.txt"
   fi
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
@@ -456,7 +452,8 @@ _annex_info() {
   OUT="${OUT%%.xz}"; OUT="${OUT%%.txt}.txt.xz"
   local OWNER="${1:-$USER}"
   annex_getinfo > "${OUT%%.xz}"
-  xz -z -9 -S .xz --verbose "${OUT%%.xz}"
+  xz -k -z -9 -S .xz --verbose "${OUT%%.xz}" &&
+    _git_secure_delete "${OUT%%.xz}"
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
 annex_info(){
@@ -469,7 +466,8 @@ _annex_enum_remotes() {
   OUT="${OUT%%.xz}"; OUT="${OUT%%.txt}.txt.xz"
   local OWNER="${1:-$USER}"
   annex_lookup_remotes > "${OUT%%.xz}"
-  xz -z -9 -S .xz --verbose "${OUT%%.xz}"
+  xz -k -z -9 -S .xz --verbose "${OUT%%.xz}" &&
+    _git_secure_delete "${OUT%%.xz}"
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
 annex_enum_remotes() {
