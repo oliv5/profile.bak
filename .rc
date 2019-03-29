@@ -25,7 +25,8 @@ rc_source() {
     for FILE; do
       if [ -r "$FILE" ]; then
         rc_log "Source '$FILE'"
-        for FCT in $(awk -F'(' '/\w\s*\(\)/ {print $1}' "$FILE"); do
+        # Find all functions and unalias them
+        for FCT in $(awk -F'(' '/^[a-zA-Z_-]*\s\s*\(\)/ {print $1}' "$FILE"); do
           ${RC_DRYRUN} unalias "$FCT" 2>/dev/null
         done
         set --; eval "${RC_DRYRUN} . '$FILE' ${RC_VERBOSE:->/dev/null}" || 
