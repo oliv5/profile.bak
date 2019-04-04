@@ -173,11 +173,17 @@ git_branch_merged() {
   git ${3:+--git-dir="$3"} branch --${2:+no-}merged ${1}
 }
 
+# Set an existing branch to a given SHA1 without checking it out
+git_branch_jump() {
+  git fetch . "${2:?No destination specified...}" "${1:?No source specified...}"
+}
+
 # Delete local untracked branch (safely)
 git_branch_delete() {
-  for BRANCH; do
+  for REFS; do
+    local BRANCH="${REFS#*/}"
     echo "Delete local branch '$BRANCH'"
-    git tag "$(git_name deleted)" "refs/head/$BRANCH" &&
+    git tag "$(git_name deleted.local)" "refs/head/$BRANCH" &&
       git branch -d "$BRANCH"
   done
 }
@@ -193,15 +199,18 @@ git_branch_delete_remote() {
     local REMOTE="${REFS%%/*}"
     local BRANCH="${REFS#*/}"
     echo "Delete remote branch '$REFS'"
-    git tag "$(git_name deleted)" "remotes/$REFS" && {
+    git tag "$(git_name deleted.remote.${REMOTE#*/})" "remotes/$REFS" && {
       git push "$REMOTE" ":$BRANCH" || git branch -rd "$REFS"
     }
   done
 }
 
-# Set an existing branch to a given SHA1
-git_branch_jump() {
-  git fetch . "${2:?No destination specified...}" "${1:?No source specified...}"
+# Delete local and remote branches
+git_branch_delete_both() {
+  for REFS; do
+    git_branch_delete "$REFS"
+    git_branch_delete_remote "$REFS"
+  done
 }
 
 # Rename remote branch
@@ -316,6 +325,15 @@ git_author() {
   for REF; do
     git log --format='%ae' "${REF}^!"
   done
+}
+
+########################################
+# Extract a path from a repo without cloning/checking it out
+git_extract() {
+  local URL="${1:?No url specified...}"
+  local PATH="${2:?No path specified...}"
+  local REF="${3:?No refs specified...}"
+  git archive --format=tar --remote="$URL" "$REF" -- "$PATH" | tar xf -
 }
 
 ########################################
