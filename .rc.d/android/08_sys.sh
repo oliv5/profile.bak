@@ -33,6 +33,7 @@ alias rm_perm='pm revoke'
 
 # Apps management
 start_app(){ am start -n "${1:?No package name specified...}/${2:-.MainActivity}"; }
+restart_app(){ am start -S -n "${1:?No package name specified...}/${2:-.MainActivity}"; }
 stop_app(){ am force-stop "${1:?No package name specified...}"; }
 
 # Start/stop app from package
