@@ -501,45 +501,6 @@ annex_upload() {
 }
 
 ########################################
-#~ # Transfer files to the specified repos, one by one
-#~ # without downloading the whole repo locally at once
-#~ # Options make it similar to "git annex copy" and "git annex move"
-#~ # $FROM is used to selected the origin repo
-#~ # $DROP is used to drop the newly retrieved files (when not empty)
-#~ # $DBG is used to print the command on stderr (when not empty)
-#~ # $ALL is used to select all files (when not empty)
-#~ alias annex_transfer='DBG= DROP=1 _annex_transfer'
-#~ alias annex_move='DBG= DROP=2 _annex_transfer'
-#~ _annex_transfer() {
-  #~ annex_exists || return 1
-  #~ local REPOS="${1:-$(annex_enabled)}"
-  #~ local DBG="${DBG:+echo}"
-  #~ local SELECT=""
-  #~ [ $# -gt 0 ] && shift
-  #~ [ -z "$REPOS" ] && return 0
-  #~ [ -z "$ALL" ] && for REPO in $REPOS; do SELECT="${SELECT:+ $SELECT --and }--not --in $REPO"; done
-  #~ if git_bare; then
-    #~ # Bare repositories do not have "git annex find"
-    #~ echo "BARE REPOS NOT SUPPORTED YET"
-  #~ else
-    #~ # Plain git repositories
-    #~ # Get & copy local files one by one
-    #~ git annex find --include='*' $SELECT --print0 "$@" | xargs -0 -rn1 sh -c '
-      #~ DBG="$1";REPOS="$2";SRC="$3"
-      #~ if [ -L "$SRC" -a ! -e "$SRC" ]; then
-        #~ $DBG git annex get ${FROM:+--from "$FROM"} "$SRC" || exit $?
-      #~ else
-        #~ [ "$DROP" != "2" ] && unset DROP
-      #~ fi
-      #~ for REPO in $REPOS; do
-        #~ while ! $DBG git annex copy --to "$REPO" "$SRC"; do true; done
-      #~ done
-      #~ [ -n "$DROP" ] && $DBG git annex drop "$SRC"
-      #~ exit 0
-    #~ ' _ "$DBG" "$REPOS"
-  #~ fi
-#~ }
-
 # Transfer files to the specified repos by chunk of a given size
 # without downloading the whole repo locally at once
 # $FROM is used to selected the origin repo
