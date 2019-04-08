@@ -847,10 +847,13 @@ annex_upkeep() {
 ########################################
 # Find aliases
 alias annex_existing='git annex find --in'
+alias annex_existing0='git annex find --print0 --in'
 alias annex_missing='git annex find --not --in'
+alias annex_missing0='git annex find --print0 --not --in'
 alias annex_wantget='git annex find --want-get --not --in'
+alias annex_wantget0='git annex find --print0 --want-get --not --in'
 alias annex_wantdrop='git annex find --want-drop --in'
-alias annex_wanted='annex_wantget'
+alias annex_wantdrop0='git annex find --print0 --want-drop --in'
 annex_lost() { git annex list "$@" | grep -E "^_+ "; }
 
 # Is file in annex ?
