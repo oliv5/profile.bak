@@ -521,6 +521,11 @@ _annex_transfer() {
     echo "BARE REPOS NOT SUPPORTED YET"
   else
     # Plain git repositories
+    # 1) copy the local files
+    for REPO in $REPOS; do
+      while ! $DBG git annex copy --to "$REPO" "$@"; do sleep 1; done
+    done
+    # 2) get, copy and drop the remote files
     git annex find --include='*' $SELECT --print0 "$@" | xargs -0 -r sh -c '
       DBG="$1";REPOS="$2";MAXSIZE="$3";FROM="$4"
       shift 4
@@ -591,6 +596,12 @@ _annex_rsync() {
     done
   else
     # Plain git repositories
+    # 1) copy the local files
+    for FILE; do
+      DST_DIR="$(dirname "${DST##*:}/${FILE}")"
+      while ! $DBG rsync --rsync-path="mkdir -p \"$DST_DIR\" && rsync" $RSYNC_OPT "$FILE" "$DST/$FILE"; do sleep 1; done
+    done
+    # 2) get, copy and drop the remote files
     git annex find --include='*' --print0 "$@" | xargs -0 -r sh -c '
       DBG="$1";MAXSIZE="$2";SKIP_EXISTING="$3";RSYNC_OPT="$4";DST="$5"
       shift 5
