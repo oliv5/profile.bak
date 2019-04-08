@@ -582,11 +582,11 @@ _annex_transfer() {
         if [ $TOTALSIZE -ge $MAXSIZE -o $NUMFILES -eq 0 ]; then
           # Transfer the listed files so far, if any
           if [ $# -gt 0 ]; then
-            $DBG git annex get ${FROM:+--from "$FROM"} "$@" || exit $?
+            while ! $DBG git annex get ${FROM:+--from "$FROM"} "$@"; do sleep 1; done
             for REPO in $REPOS; do
-              while ! $DBG git annex copy --to "$REPO" "$@"; do true; done
+              while ! $DBG git annex copy --to "$REPO" "$@"; do sleep 1; done
             done
-            $DBG git annex drop "$@" || exit $?
+            while ! $DBG git annex drop "$@"; do sleep 1; done
           fi
           # Empty list
           set --
@@ -671,12 +671,12 @@ _annex_rsync() {
         if [ $TOTALSIZE -ge $MAXSIZE -o $NUMFILES -eq 0 ]; then
           # Transfer the listed files so far, if any
           if [ $# -gt 0 ]; then
-            $DBG git annex get ${FROM:+--from "$FROM"} "$@" || exit $?
+            while ! $DBG git annex get ${FROM:+--from "$FROM"} "$@"; do sleep 1; done
             for FILE; do
               DST_DIR="$(dirname "${DST##*:}/${FILE}")"
               while ! $DBG rsync --rsync-path="mkdir -p \"$DST_DIR\" && rsync" $RSYNC_OPT "$FILE" "$DST/$FILE"; do sleep 1; done
             done
-            $DBG git annex drop "$@" || exit $?
+            while ! $DBG git annex drop "$@"; do sleep 1; done
           fi
           # Empty list
           set --
@@ -1112,7 +1112,7 @@ annex_cleanup() {
 # Forget a special remote
 annex_forget_remote() {
   # Confirmation
-  local REPLAY; read -r -p "Forget remotes (and cleanup git-annex history)? (y/n) " REPLY < /dev/tty
+  local REPLY; read -r -p "Forget remotes (and cleanup git-annex history)? (y/n) " REPLY < /dev/tty
   [ "$REPLY" != "y" -a "$REPLY" != "Y" ] && return 3
   local OK=1
   for REMOTE; do
