@@ -866,7 +866,7 @@ annex_isin() {
 
 # Find annex repositories
 annex_find_repo() {
-	ff_git0 "${1:-.}" |
+	git_find0 "${1:-.}" |
 		while read -d $'\0' DIR; do
 			annex_exists "$DIR" && printf "'%s'\n" "$DIR"
 		done 

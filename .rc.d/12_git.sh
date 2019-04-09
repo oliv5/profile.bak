@@ -1068,37 +1068,11 @@ git_search() {
 
 ########################################
 # Git gc all
-alias git_gc='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; pwd; git gc"'
-alias git_repack='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack -d"'
-alias git_pack='git_find | xargs -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack -d; git prune; git gc"'
-
-# Find git directory
-ff_git() {
-  for DIR in "${@:-.}"; do
-    find ${DIR:-.} -type d -name '*.git' -prune
-  done
-}
-ff_git0() {
-  for DIR in "${@:-.}"; do
-    find ${DIR:-.} -type d -name '*.git' -prune -print0
-  done
-}
+alias git_gc='git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git gc"'
+alias git_repack='git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack -d"'
+alias git_pack='git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack -d; git prune; git gc"'
 
 # Find git repo
-git_find() {
-  ## Bash only (read -d)
-  #ff_git0 "${1:-.}" |
-  #  while IFS= read -r -d $'\0' DIR; do
-  #   git_exists "$DIR" && printf "'%s'\n" "$DIR"
-  # done
-  for DIR in "${@:-.}"; do
-    find ${DIR:-.} -type d -name '*.git' -prune -exec sh -c '
-      for DIR; do
-        git --git-dir="$DIR" rev-parse >/dev/null 2>&1 && printf "'%s'\\n" "$DIR"
-      done
-    ' _ {} +
-  done
-}
 git_find0() {
   ## Bash only (read -d)
   #ff_git0 "${1:-.}" |
@@ -1112,6 +1086,9 @@ git_find0() {
       done
     ' _ {} +
   done
+}
+git_find() {
+  git_find0 "$@" | xargs
 }
 
 ########################################
