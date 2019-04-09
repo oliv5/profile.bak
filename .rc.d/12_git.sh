@@ -1419,9 +1419,9 @@ alias gpa='git apply'
 alias gsbta='git_subtree_add'
 alias gsbtu='git_subtree_update'
 # Git grep aliases
+alias ggp='git grep'
 alias ggg='git grep -n'
 alias iggg='git grep -ni'
-alias ggrep='git grep'
 # Checkout aliases
 alias gco='git checkout'
 #alias gcot='git checkout --theirs'

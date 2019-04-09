@@ -1,43 +1,5 @@
 #!/bin/sh
 
-# Annex aliases
-alias gana='git annex add'
-alias gant='git annex status'
-alias ganst='git annex status'
-alias ganl='git annex list'
-alias ganls='git annex list'
-alias ganlc='git annex find | wc -l'
-alias ganf='git annex find'
-alias ganfc='git annex find | wc -l'
-alias gans='git annex sync'
-alias gansn='git annex sync --no-commit'
-alias gansp='git annex sync --no-commit --no-push'
-alias gansu='git annex sync --no-commit --no-pull'
-alias gansc='git annex sync --content'
-alias ganscf='git annex sync --content --fast'
-alias gang='git annex get'
-alias ganc='git annex copy'
-alias ganca='git annex copy --all'
-alias gancf='git annex copy --fast'
-alias ganct='git annex copy --to'
-alias gancat='git annex copy --all --to'
-alias gancft='git annex copy --fast --to'
-alias gancf='git annex copy --from'
-alias gancaf='git annex copy --all --from'
-alias gancff='git annex copy --fast --from'
-alias gand='git annex drop'
-alias gandd='git annex forget --drop-dead'
-alias gani='git annex info'
-alias ganu='annex_upload'
-alias ganm='annex_missing'
-alias ganwg='annex_wantget'
-alias ganwd='annex_wantdrop'
-alias gan='git annex'
-# Assistant
-alias ganas='git annex assistant'
-alias ganw='git annex webapp'
-
-########################################
 # Check annex exists
 annex_exists() {
   git ${1:+--git-dir="$1"} config --get annex.version >/dev/null 2>&1
@@ -1148,6 +1110,44 @@ annex_rm_duplicates() {
       sort -k2 | uniq --repeated -f1 | sed 's/ [^ ]*$//' | \
       xargs -d '\n' git rm
 }
+
+########################################
+# Annex aliases
+alias gana='git annex add'
+alias gant='git annex status'
+alias ganst='git annex status'
+alias ganl='git annex list'
+alias ganls='git annex list'
+alias ganlc='git annex find | wc -l'
+alias ganf='git annex find'
+alias ganfc='git annex find | wc -l'
+alias gans='git annex sync'
+alias gansn='git annex sync --no-commit'
+alias gansp='git annex sync --no-commit --no-push'
+alias gansu='git annex sync --no-commit --no-pull'
+alias gansc='git annex sync --content'
+alias ganscf='git annex sync --content --fast'
+alias gang='git annex get'
+alias ganc='git annex copy'
+alias ganca='git annex copy --all'
+alias gancf='git annex copy --fast'
+alias ganct='git annex copy --to'
+alias gancat='git annex copy --all --to'
+alias gancft='git annex copy --fast --to'
+alias gancf='git annex copy --from'
+alias gancaf='git annex copy --all --from'
+alias gancff='git annex copy --fast --from'
+alias gand='git annex drop'
+alias gandd='git annex forget --drop-dead'
+alias gani='git annex info'
+alias ganu='annex_upload'
+alias ganm='annex_missing'
+alias ganwg='annex_wantget'
+alias ganwd='annex_wantdrop'
+alias gan='git annex'
+# Assistant
+alias ganas='git annex assistant'
+alias ganw='git annex webapp'
 
 ########################################
 ########################################
