@@ -483,9 +483,10 @@ _annex_transfer() {
     echo "BARE REPOS NOT SUPPORTED YET"
   else
     # Plain git repositories
+    git annex sync
     # 1) copy the local files
     for REPO in $REPOS; do
-      while ! $DBG git annex copy --to "$REPO" "$@"; do sleep 1; done
+      while ! $DBG git annex copy --to "$REPO" --fast "$@"; do sleep 1; done
     done
     # 2) get, copy and drop the remote files
     git annex find --include='*' $SELECT --print0 "$@" | xargs -0 -r sh -c '
@@ -514,7 +515,7 @@ _annex_transfer() {
             for REPO in $REPOS; do
               while ! $DBG git annex copy --to "$REPO" "$@"; do sleep 1; done
             done
-            while ! $DBG git annex drop "$@"; do sleep 1; done
+            $DBG git annex drop "$@"
           fi
           # Empty list
           set --
@@ -550,6 +551,7 @@ _annex_rsync() {
   if git_bare; then
     # Bare repositories do not have "git annex find"
     echo "BARE REPOS NOT TESTED YET. Press enter to go on..." && read NOP
+    git annex sync
     find annex/objects -type f | while read SRCNAME; do
       annex_fromkey0 "$SRCNAME" | xargs -0 -rn1 echo | while read DSTNAME; do
         DST_DIR="$(dirname "${DST##*:}/${DSTNAME}")"
@@ -558,6 +560,7 @@ _annex_rsync() {
     done
   else
     # Plain git repositories
+    git annex sync
     # 1) copy the local files
     for FILE; do
       DST_DIR="$(dirname "${DST##*:}/${FILE}")"
@@ -610,7 +613,7 @@ _annex_rsync() {
               DST_DIR="$(dirname "${DST##*:}/${FILE}")"
               while ! $DBG rsync --rsync-path="mkdir -p \"$DST_DIR\" && rsync" $RSYNC_OPT "$FILE" "$DST/$FILE"; do sleep 1; done
             done
-            while ! $DBG git annex drop "$@"; do sleep 1; done
+            $DBG git annex drop "$@"
           fi
           # Empty list
           set --
@@ -641,6 +644,7 @@ _annex_populate() {
   local DST="${1:?No dst directory specified...}"
   local SRC="${2:-$PWD}"
   local WHERE="${3:-${WHERE:---include '*'}}"
+  git annex sync
   eval git annex find "$WHERE" --format='\${file}\\000\${hashdirlower}\${key}/\${key}\\000' | xargs -r0 -n2 sh -c '
     DBG="$1"; MOVE="$2"; SRCDIR="$3; DSTDIR="$4"; SRC="$SRCDIR/$5"; DST="$DSTDIR/$6"
     echo "$SRC -> $DST"
@@ -828,7 +832,7 @@ annex_isin() {
 
 # Find annex repositories
 annex_find_repo() {
-	git_find0 "${1:-.}" |
+	git_find0 "$@" |
 		while read -d $'\0' DIR; do
 			annex_exists "$DIR" && printf "'%s'\n" "$DIR"
 		done 
