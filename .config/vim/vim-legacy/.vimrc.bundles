@@ -441,8 +441,8 @@ if !exists('g:loaded_ctrlp')
 	let g:ctrlp_max_height = 25
 	" Close NERDTree window
 	let g:ctrlp_dont_split = 'NERD'	" Key mapping
-	"FnNoremap <C-p>     :exec 'CtrlP'.g:FindRootDir()<CR>
-	FnNoremap <C-p>     :CtrlP<CR>
+	FnNoremap <C-p>     :exec 'CtrlP'.g:FindRootDir()<CR>
+	"FnNoremap <C-p>     :CtrlP<CR>
 	FnNoremap <C-A-p>   :CtrlPMixed<CR>
 	FnNoremap <C-o>     :CtrlPMRU<CR>
 	FnNoremap <C-A-o>   :CtrlPTag<CR>
