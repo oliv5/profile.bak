@@ -301,9 +301,10 @@ git_hash() {
 git_allhash() {
   git ${2:+--git-dir="$2"} rev-list "${1:-HEAD}"
 }
+alias git_firsthash='git_roothash'
 git_roothash() {
   git ${2:+--git-dir="$2"} rev-list --max-parents=0 "${1:-HEAD}" 2>/dev/null ||
-  git ${2:+--git-dir="$2"} rev-list --parents "${1:-HEAD}" | egrep "^[a-f0-9]{40}$"
+  git ${2:+--git-dir="$2"} rev-list --parents "${1:-HEAD}" | egrep --color=never "^[a-f0-9]{40}$"
 }
 
 # Get short hash
@@ -1061,9 +1062,19 @@ git_graph() {
   git log --graph --pretty=format:'%C(blue)%h - %C(bold cyan)%an %C(bold green)(%ar)%C(bold yellow)%d%n''          %C(bold red)%s%C(reset)%n''%w(0,14,14)%b' "$@"
 }
 
-# Search for a string in a commit
+# Search for a string in HEAD a commit
+git_grep() {
+  git grep "$@" ||
+    git log -S "$@" --source --all
+}
+
+# Show history
+alias git_history='git log -p'
+
+# Search in history
 git_search() {
-  git log -S "${1:?nothing to search for...}" --source --all
+  git grep "$@" $(git rev-list --all) ||
+    git log -S "$@" --source --all
 }
 
 ########################################
@@ -1116,7 +1127,7 @@ git_tag_prev() {
   done
 }
 
-# List previous tags from the given branch from the newest one
+# List previous tags in a range of commits
 git_tag_list_prev() {
   local FROM="${1:-HEAD}"
   local TO="$(git tag -l $2)"
@@ -1368,6 +1379,9 @@ alias gcam='git commit -am'
 alias grm='git rm'
 alias grmu='git clean -fn'
 alias gmv='git mv'
+# Hash
+alias gha='git_hash'
+alias ghar='git_roothash'
 # Logs/history aliases
 alias gl='git log --oneline'
 alias glg='git log --oneline | grep'
@@ -1385,7 +1399,6 @@ alias glaa='git shortlog -s -n -a'
 alias glt='git log --graph'
 alias glh='git log -p'
 alias glha='git log --pretty=format: --name-only --diff-filter=A | sort -u'
-alias git_history='git log -p'
 # Reflog
 alias grl='git reflog'
 alias grl1='git reflog -n 1'
@@ -1450,6 +1463,7 @@ alias grbi2='git rebase -i HEAD~2'
 alias grbi3='git rebase -i HEAD~3'
 alias grbi4='git rebase -i HEAD~4'
 alias grbi5='git rebase -i HEAD~5'
+alias grbio='git rebase -i $(git_tracking)'
 # Fetch/pull/push aliases
 alias gpu='git push'
 alias gpua='git_push_all'
