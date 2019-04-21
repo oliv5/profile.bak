@@ -333,8 +333,9 @@ annex_lookup_remotes() {
 _annex_archive() {
   ( set +e; # Need to go on on error
     annex_exists || return 1
-    local OUT="${2:-$(git_dir)/bundle/}"
-    [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name).${1%%.*}.${1#*.}"
+    local OUT="${1:?No output file name specified...}"
+    local DIR="${2:-$(git_dir)/bundle}"
+    OUT="$DIR/$(git_name).${OUT%%.*}.${OUT#*.}"
     local GPG_RECIPIENT="$3"
     local GPG_TRUST="${4:+--trust-model always}"
     shift 4
