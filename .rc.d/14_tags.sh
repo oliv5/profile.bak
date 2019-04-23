@@ -173,9 +173,11 @@ rmtags() {
   rmpycscope "$@"
 }
 
+# Make all tags recursively based on local config files
 mkalltags() {
   local SRC="$(readlink -m "${1:-$PWD}")"
-  find -L "$SRC" -maxdepth ${2:-5} -type f -name ".*.path" -print0 2>/dev/null | xargs -r0 sh -c '
+  export RC_DIR="${RC_DIR:-$HOME}"
+  find -L "$SRC" -maxdepth ${2:-5} -type f -name ".*.path" -print0 2>/dev/null | xargs -r0 -- sh -c '
     . "$RC_DIR/.rc.d/14_tags.sh"
     for TAGPATH; do
       echo "** Processing file $TAGPATH"
@@ -214,3 +216,4 @@ mkalltags() {
     done
   ' _
 }
+
