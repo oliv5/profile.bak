@@ -26,9 +26,10 @@ rc_source() {
       if [ -r "$FILE" ]; then
         rc_log "Source '$FILE'"
         # Find all functions and unalias them
-        for FCT in $(awk -F'(' '/^[a-zA-Z_-]*\s\s*\(\)/ {print $1}' "$FILE"); do
+        for FCT in $(awk -F'(' '/^[a-zA-Z_-]*\s*\(\)/ {print $1}' "$FILE"); do
           ${RC_DRYRUN} unalias "$FCT" 2>/dev/null
         done
+        # Source the file
         set --; eval "${RC_DRYRUN} . '$FILE' ${RC_VERBOSE:->/dev/null}" || 
           { RC_ERR=$?; rc_log "Return status not null"; }
       fi
