@@ -18,6 +18,19 @@ ssh_agent() {
 	return 0
 }
 
+# Disable SSH-agent forwarding for the local user
+# https://developer.github.com/v3/guides/using-ssh-agent-forwarding/
+ssh_agent_no_forward() {
+	local CFG="$HOME/.ssh/ssh_config"
+	if [ ! -e "$CFG" ]; then
+		printf "Host *\n    ForwardAgent no\n" > "$CFG"
+		chmod 600 "$CFG"
+	else
+		grep -E "[^#]\s*ForwardAgent no" "$CFG" >/dev/null 2>&1 ||
+			sed -i '$ a ForwardAgent no' "$CFG"
+	fi
+}
+
 # GPG agent (basic)
 gpg_agent() {
 	command -v gpg-agent >/dev/null 2>&1 || return 1
