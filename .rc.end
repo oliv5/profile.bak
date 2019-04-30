@@ -181,6 +181,8 @@ alias duhl4='du -hL -d4'
 alias envg='env | grep -i'
 alias dpkgl='dpkg -l'
 alias dpkgg='dpkg -l | grep -i'
+dpkgln() { dpkgl "$@" | awk '{print $2}'; }
+dpkggn() { dpkgg "$@" | awk '{print $2}'; }
 
 # Head/tail
 alias he='head'
