@@ -32,19 +32,25 @@ alias ipv6_disable_persistent='sudo sed -i -e "s/disable_ipv6\s*=.*/disable_ipv6
 alias ipv6_enable_persistent='sudo sed -i -e "s/disable_ipv6\s*=.*/disable_ipv6 = 0/" /etc/sysctl.conf'
 
 ############################
-# IP tables flush: must be done by a script at once
+# iptables list all
 iptables_flush() {
-  # Set policies to ACCEPT
+  for TABLE in filter nat mangle raw security; do
+    echo "** Table $TABLE **"
+    sudo iptables -vL -t $TABLE
+  done
+}
+
+# iptables flush all (must be done by a script at once)
+iptables_flush() {
+  # Set table filter policies to ACCEPT
   sudo iptables -t filter -P INPUT ACCEPT
   sudo iptables -t filter -P FORWARD ACCEPT
   sudo iptables -t filter -P OUTPUT ACCEPT
   # Remove all existing rules
-  sudo iptables -t filter -F	# All rules
-  sudo iptables -t filter -X	# Delete all user defined-chains (ex: ssh established session)
-  sudo iptables -t nat -F
-  sudo iptables -t nat -X
-  sudo iptables -t mangle -F
-  sudo iptables -t mangle -X
+  for TABLE in filter nat mangle raw security; do
+    sudo iptables -t $TABLE -F	# All rules
+    sudo iptables -t $TABLE -X	# Delete all user defined-chains (ex: ssh established session)
+  done
 }
 
 ############################
