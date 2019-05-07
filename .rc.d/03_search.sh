@@ -9,7 +9,7 @@ _ffind1() {
   shift 2>/dev/null
   local REGEX='s/;!/" -o -not '${FCASE}' "/g ; s/&!/" -a -not '${FCASE}' "/g ; s/;/" -o '${FCASE}' "/g ; s/&/" -a '${FCASE}' /g'
   ( set -f; FILES="\"$(echo $FILES | sed -e "$REGEX")\""
-    eval find "${DIR:-.}" -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} \\\( ${FILES:+$FCASE "$FILES"} -true \\\) ${FARGS} "$@")
+    eval find -L "${DIR:-.}" -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} \\\( ${FILES:+$FCASE "$FILES"} -true \\\) ${FARGS} "$@")
 }
 _ffind2() {
   local FCASE="${FCASE:--}regex"
@@ -17,68 +17,68 @@ _ffind2() {
   local DIR="${1%"$FILES"}"
   shift 2>/dev/null
   ( set -f; FILES="$(echo $FILES | sed -e 's/;/|/g ; s/\./\\./g ; s/*/.*/g')"
-    find "${DIR:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*/($FILES)"} ${FARGS} "$@")
+    find -L "${DIR:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*/($FILES)"} ${FARGS} "$@")
 }
 alias _ffind='_ffind2'
 alias      ff='FCASE=   FTYPE=  FXTYPE=  FARGS= _ffind'
 alias     fff='FCASE=   FTYPE=f FXTYPE=  FARGS= _ffind'
 alias     ffd='FCASE=   FTYPE=d FXTYPE=  FARGS= _ffind'
 alias     ffl='FCASE=   FTYPE=l FXTYPE=  FARGS= _ffind'
-alias    ffll='FCASE=   FTYPE=l FXTYPE=f FARGS= _ffind'
+alias    fflf='FCASE=   FTYPE=l FXTYPE=f FARGS= _ffind'
 alias    fflb='FCASE=   FTYPE=l FXTYPE=l FARGS= _ffind'
 alias     iff='FCASE=-i FTYPE=  FXTYPE=  FARGS= _ffind'
 alias    ifff='FCASE=-i FTYPE=f FXTYPE=  FARGS= _ffind'
 alias    iffd='FCASE=-i FTYPE=d FXTYPE=  FARGS= _ffind'
 alias    iffl='FCASE=-i FTYPE=l FXTYPE=  FARGS= _ffind'
-alias   iffll='FCASE=-i FTYPE=l FXTYPE=f FARGS= _ffind'
+alias   ifflf='FCASE=-i FTYPE=l FXTYPE=f FARGS= _ffind'
 alias   ifflb='FCASE=-i FTYPE=l FXTYPE=l FARGS= _ffind'
 alias    ffp0='FCASE=   FTYPE=  FXTYPE=  FARGS=-print0 _ffind'
 alias   fffp0='FCASE=   FTYPE=f FXTYPE=  FARGS=-print0 _ffind'
 alias   ffdp0='FCASE=   FTYPE=d FXTYPE=  FARGS=-print0 _ffind'
 alias   fflp0='FCASE=   FTYPE=l FXTYPE=  FARGS=-print0 _ffind'
-alias  ffllp0='FCASE=   FTYPE=l FXTYPE=f FARGS=-print0 _ffind'
+alias  fflfp0='FCASE=   FTYPE=l FXTYPE=f FARGS=-print0 _ffind'
 alias  fflbp0='FCASE=   FTYPE=l FXTYPE=l FARGS=-print0 _ffind'
 alias   iffp0='FCASE=-i FTYPE=  FXTYPE=  FARGS=-print0 _ffind'
 alias  ifffp0='FCASE=-i FTYPE=f FXTYPE=  FARGS=-print0 _ffind'
 alias  iffdp0='FCASE=-i FTYPE=d FXTYPE=  FARGS=-print0 _ffind'
 alias  ifflp0='FCASE=-i FTYPE=l FXTYPE=  FARGS=-print0 _ffind'
-alias iffllp0='FCASE=-i FTYPE=l FXTYPE=f FARGS=-print0 _ffind'
+alias ifflfp0='FCASE=-i FTYPE=l FXTYPE=f FARGS=-print0 _ffind'
 alias ifflbp0='FCASE=-i FTYPE=l FXTYPE=l FARGS=-print0 _ffind'
 alias     ffs='ff    2>/dev/null'
 alias    fffs='fff   2>/dev/null'
 alias    ffds='ffd   2>/dev/null'
 alias    ffls='ffl   2>/dev/null'
-alias   fflls='ffll  2>/dev/null'
+alias   fflfs='fflf  2>/dev/null'
 alias   fflbs='fflb  2>/dev/null'
 alias    iffs='iff   2>/dev/null'
 alias   ifffs='ifff  2>/dev/null'
 alias   iffds='iffd  2>/dev/null'
 alias   iffls='iffl  2>/dev/null'
-alias  ifflls='iffll 2>/dev/null'
+alias  ifflfs='ifflf 2>/dev/null'
 alias  ifflbs='ifflb 2>/dev/null'
 alias     ff1='FCASE=   FTYPE=  FXTYPE=  FARGS="-maxdepth 1" _ffind'
 alias    fff1='FCASE=   FTYPE=f FXTYPE=  FARGS="-maxdepth 1" _ffind'
 alias    ffd1='FCASE=   FTYPE=d FXTYPE=  FARGS="-maxdepth 1" _ffind'
 alias    ffl1='FCASE=   FTYPE=l FXTYPE=  FARGS="-maxdepth 1" _ffind'
-alias   ffll1='FCASE=   FTYPE=l FXTYPE=f FARGS="-maxdepth 1" _ffind'
+alias   fflf1='FCASE=   FTYPE=l FXTYPE=f FARGS="-maxdepth 1" _ffind'
 alias   fflb1='FCASE=   FTYPE=l FXTYPE=l FARGS="-maxdepth 1" _ffind'
 alias    iff1='FCASE=-i FTYPE=  FXTYPE=  FARGS="-maxdepth 1" _ffind'
 alias   ifff1='FCASE=-i FTYPE=f FXTYPE=  FARGS="-maxdepth 1" _ffind'
 alias   iffd1='FCASE=-i FTYPE=d FXTYPE=  FARGS="-maxdepth 1" _ffind'
 alias   iffl1='FCASE=-i FTYPE=l FXTYPE=  FARGS="-maxdepth 1" _ffind'
-alias  iffll1='FCASE=-i FTYPE=l FXTYPE=f FARGS="-maxdepth 1" _ffind'
+alias  ifflf1='FCASE=-i FTYPE=l FXTYPE=f FARGS="-maxdepth 1" _ffind'
 alias  ifflb1='FCASE=-i FTYPE=l FXTYPE=l FARGS="-maxdepth 1" _ffind'
 alias     ff2='FCASE=   FTYPE=  FXTYPE=  FARGS="-maxdepth 2" _ffind'
 alias    fff2='FCASE=   FTYPE=f FXTYPE=  FARGS="-maxdepth 2" _ffind'
 alias    ffd2='FCASE=   FTYPE=d FXTYPE=  FARGS="-maxdepth 2" _ffind'
 alias    ffl2='FCASE=   FTYPE=l FXTYPE=  FARGS="-maxdepth 2" _ffind'
-alias   ffll2='FCASE=   FTYPE=l FXTYPE=f FARGS="-maxdepth 2" _ffind'
+alias   fflf2='FCASE=   FTYPE=l FXTYPE=f FARGS="-maxdepth 2" _ffind'
 alias   fflb2='FCASE=   FTYPE=l FXTYPE=l FARGS="-maxdepth 2" _ffind'
 alias    iff2='FCASE=-i FTYPE=  FXTYPE=  FARGS="-maxdepth 2" _ffind'
 alias   ifff2='FCASE=-i FTYPE=f FXTYPE=  FARGS="-maxdepth 2" _ffind'
 alias   iffd2='FCASE=-i FTYPE=d FXTYPE=  FARGS="-maxdepth 2" _ffind'
 alias   iffl2='FCASE=-i FTYPE=l FXTYPE=  FARGS="-maxdepth 2" _ffind'
-alias  iffll2='FCASE=-i FTYPE=l FXTYPE=f FARGS="-maxdepth 2" _ffind'
+alias  ifflf2='FCASE=-i FTYPE=l FXTYPE=f FARGS="-maxdepth 2" _ffind'
 alias  ifflb2='FCASE=-i FTYPE=l FXTYPE=l FARGS="-maxdepth 2" _ffind'
 
 ###########################################
@@ -115,7 +115,7 @@ alias   wf='FCASE= FTYPE=  FXTYPE=  FARGS= _wfind'
 alias  wff='FCASE= FTYPE=f FXTYPE=  FARGS= _wfind'
 alias  wfd='FCASE= FTYPE=d FXTYPE=  FARGS= _wfind'
 alias  wfl='FCASE= FTYPE=l FXTYPE=  FARGS= _wfind'
-alias wfll='FCASE= FTYPE=l FXTYPE=f FARGS= _wfind'
+alias wflf='FCASE= FTYPE=l FXTYPE=f FARGS= _wfind'
 alias wflb='FCASE= FTYPE=l FXTYPE=l FARGS= _wfind'
 
 ###########################################
