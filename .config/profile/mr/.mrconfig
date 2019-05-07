@@ -8,6 +8,7 @@ skip = [ ! -z "$VCSH_REPO_NAME" ] && echo "WARNING: Mr is run from a VCSH repo !
 lib = export PATH="$HOME/pbin:$PATH"
 	  . "${RC_DIR:-$HOME}/.rc.d/06_mount.sh"
 	  . "${RC_DIR:-$HOME}/.rc.d/12_git.sh"
+	  . "${RC_DIR:-$HOME}/.rc.d/12_svn.sh"
 	  . "${RC_DIR:-$HOME}/.rc.d/13_vcsh.sh"
 	  . "${RC_DIR:-$HOME}/.rc.d/13_annex.sh"
 	  . "${RC_DIR:-$HOME}/.rc.d/13_repo.sh"
