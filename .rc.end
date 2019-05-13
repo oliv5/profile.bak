@@ -9,19 +9,23 @@
 #   locale
 if command -v "locale" >/dev/null 2>&1; then
   ## Order of priority: LANGUAGE LC_ALL LC_xxx LANG
+  # Set the default locale variable LANG
+  LOCALES="$(locale -a 2>/dev/null)"
+  if ! echo "$LOCALES" | grep -w "$LANG"; then
+    for LANG in \
+        "$(echo $LOCALES | xargs -rn1 | grep -ie "fr_fr.*utf-\?8" | head -n 1)" \
+        "$(echo $LOCALES | xargs -rn1 | grep -ie "utf-\?8" | head -n 1)" \
+        "$(echo $LOCALES | xargs -rn1 -l1)"; do
+      export LANG="$LANG"
+      break
+    done
+  fi
+  unset LOCALES
+  # Remove all specific locale variables
   unset LANGUAGE LC_ALL LC_NAME LC_TIME LC_CTYPE
   unset LC_MONETARY LC_ADDRESS LC_TELEPHONE
   unset LC_MEASUREMENT LC_IDENTIFICATION 
   unset LC_NUMERIC LC_PAPER LC_COLLATE LC_MESSAGES
-  # Set the default only: $LANG
-  if [ -z "$LANG" ]; then
-    for LANG in fr_FR.UTF8 fr_FR.UTF-8 fr_FR.utf-8 "$(locale -a | grep -i "utf8\|utf-8" | head -n 1)" "$(locale -a | head -n 1)"; do
-        if locale -a | grep -i "$LANG" >/dev/null; then
-            export LANG
-            break
-        fi
-    done
-  fi
 fi
 
 ################################
