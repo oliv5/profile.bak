@@ -154,20 +154,38 @@ annex_uuid() {
 
 # List annexed remotes
 annex_remotes() {
-  git show git-annex:remote.log 2>/dev/null | 
-    perl -n -e'/^'$1'.*name=(\w+)/ && print "$1\n"'
+  git config --get-regexp "remote\..*\.annex-uuid" |
+    awk -F. '{print $2}' |
+    sort -u |
+    xargs
 }
 annex_remotes_uuid() {
-  git show git-annex:remote.log 2>/dev/null | 
-    awk '/'$1'/{print $1}'
+  git config --get-regexp "remote\..*\.annex-uuid" |
+    awk -F' ' '{print $2}' |
+    sort -u |
+    xargs
 }
-
-# List annexed enabled remotes
 annex_enabled() {
   local EXCLUDE="$(git config --get-regexp "remote\..*\.annex-ignore" true | awk -F. '{printf $2"|"}' | sed -e "s/|$//")"
   git config --get-regexp "remote\..*\.annex-uuid" |
     grep -vE "${EXCLUDE:-$^}" | 
-    awk -F. '{print $2}' | xargs -n 1
+    awk -F. '{print $2}' |
+    sort -u |
+    xargs
+}
+
+# List special remotes
+annex_special_remotes() {
+  git show git-annex:remote.log 2>/dev/null |
+    perl -n -e'/^'$1'.*name=(\w+)/ && print "$1\n"' |
+    sort -u |
+    xargs
+}
+annex_special_remotes_uuid() {
+  git show git-annex:remote.log 2>/dev/null |
+    awk '/'$1'/{print $1}' |
+    sort -u |
+    xargs
 }
 
 ########################################
@@ -195,7 +213,7 @@ EOF
 annex_getinfo() {
   git annex info .
   git show git-annex:remote.log
-  for REMOTE in ${@:-$(git_remotes)}; do
+  for REMOTE in ${@:-$(annex_remotes)}; do
     echo '-------------------------'
     git annex info "$REMOTE"
   done
@@ -322,7 +340,7 @@ annex_lookup_remote() {
 
 # Lookup special remotes keys
 annex_lookup_remotes() {
-  local REMOTES="${@:-$(git_remotes)}"
+  local REMOTES="${@:-$(annex_remotes)}"
   for REMOTE in $REMOTES; do
     annex_lookup_remote "$REMOTE" 2>&1
   done
@@ -821,7 +839,22 @@ alias annex_wantget='git annex find --want-get --not --in'
 alias annex_wantget0='git annex find --print0 --want-get --not --in'
 alias annex_wantdrop='git annex find --want-drop --in'
 alias annex_wantdrop0='git annex find --print0 --want-drop --in'
-annex_lost() { git annex list "$@" | grep -E "^_+ "; }
+annex_existingc() { annex_existing "$@" | wc -l; }
+annex_missingc()  { annex_missing "$REMOTE" | wc -l; }
+annex_wantgetc()  { annex_wantget "$REMOTE" | wc -l; }
+annex_wantdropc() { annex_wantdrop "$REMOTE" | wc -l; }
+annex_lost()  { git annex list "$@" | grep -E "^_+ "; }
+annex_lostc() { git annex list "$@" | grep -E "^_+ " | wc -l; }
+
+# Grouped find aliases
+annex_existingn() { for REMOTE in ${@:-$(annex_remotes) .}; do echo "*** Existing in $REMOTE ***"; annex_existing "$REMOTE"; done; }
+annex_missingn()  { for REMOTE in ${@:-$(annex_remotes) .}; do echo "*** Missing in $REMOTE ***"; annex_missing "$REMOTE"; done; }
+annex_wantgetn()  { for REMOTE in ${@:-$(annex_remotes) .}; do echo "*** Want-get in $REMOTE ***"; annex_wantget "$REMOTE"; done; }
+annex_wantdropn() { for REMOTE in ${@:-$(annex_remotes) .}; do echo "*** Want-drop in $REMOTE ***"; annex_wantdrop "$REMOTE"; done; }
+annex_existingnc() { for REMOTE in ${@:-$(annex_remotes) .}; do echo -n "Num existing in $REMOTE : "; annex_existing "$REMOTE" | wc -l; done; }
+annex_missingnc()  { for REMOTE in ${@:-$(annex_remotes) .}; do echo -n "Num missing in $REMOTE : "; annex_missing "$REMOTE" | wc -l; done; }
+annex_wantgetnc()  { for REMOTE in ${@:-$(annex_remotes) .}; do echo -n "Num want-get in $REMOTE : "; annex_wantget "$REMOTE" | wc -l; done; }
+annex_wantdropnc() { for REMOTE in ${@:-$(annex_remotes) .}; do echo -n "Num want-drop in $REMOTE : "; annex_wantdrop "$REMOTE" | wc -l; done; }
 
 # Is file in annex ?
 annex_isin() {
@@ -842,7 +875,7 @@ annex_find_repo() {
 ########################################
 # Fsck all
 annex_fsck() {
-  local REMOTES="${1:-. $(git_remotes)}"
+  local REMOTES="${1:-. $(annex_remotes)}"
   [ $# -ge 1 ] && shift
   for REMOTE in $REMOTES; do
     [ "$REMOTE" = "." ] &&
@@ -940,6 +973,9 @@ annex_unused() {
     eval grep -zF "${PATTERNS:-''}" |
       xargs -r0 -n1
 }
+annex_unusedc() {
+  annex_unused "$@" | wc -l
+}
 
 # List unused files matching pattern
 annex_listunused() {
@@ -954,6 +990,20 @@ annex_listunused() {
         eval grep -zF "${PATTERNS:-''}" |
           xargs -r0 -n1 echo "File :"
     done
+}
+
+# Group list unused files
+annex_unusedn() {
+  for REMOTE in ${@:-$(annex_remotes) .}; do
+    echo "*** Unused in $REMOTE ***"
+    FROM="$REMOTE" annex_unused
+  done
+}
+annex_unusednc() {
+  for REMOTE in ${@:-$(annex_remotes) .}; do
+    echo -n "Num unused in $REMOTE : "
+    FROM="$REMOTE" annex_unused | wc -l
+  done
 }
 
 # Drop all unused files
