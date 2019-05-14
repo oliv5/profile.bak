@@ -1009,7 +1009,7 @@ annex_unusednc() {
 # Drop all unused files
 annex_dropunused_all() {
   local LAST="$(git annex unused ${FROM:+--from $FROM} | awk '/^\s+[0-9]+\s/ {a=$1} END{print a}')"
-  git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force} "$@" 1-$LAST
+  git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force} "$@" 1-${LAST:?Nothing to drop...}
 }
 
 # Drop partially transfered files
