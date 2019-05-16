@@ -26,11 +26,11 @@ xzd() {
   local SRC
   shift 1
   mkdir -p "$DST"
-  command cd "$DST"
-  for SRC; do
-    xz -dk "$SRC"
-  done
-  command cd "$OLDPWD"
+  ( command cd "$DST"
+    for SRC; do
+      xz -dk "$SRC"
+    done
+  )
 }
 
 ###############################
@@ -61,11 +61,11 @@ xzgd(){
   local SRC
   shift 1
   mkdir -p "$DST"
-  command cd "$DST"
-  for SRC; do
-    gpg --decrypt --batch "$SRC" | xz -d > "${SRC%.xz.gpg}"
-  done
-  command cd "$OLDPWD"
+  ( command cd "$DST"
+    for SRC; do
+      gpg --decrypt --batch "$SRC" | xz -d > "${SRC%.xz.gpg}"
+    done
+  )
 }
 
 ###############################

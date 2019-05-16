@@ -57,14 +57,13 @@ latex2pdf_loop() {
 }
 
 latex2pdf_modified() {
-  local _OLDPWD="$PWD"
   local IFS=$'\n'
   for FILE in $(svn_st "^[^\?\X\P]" 2>/dev/null | grep '.tex\"') $(git_st "M" 2>/dev/null | grep '.tex\"'); do
     eval FILE="$FILE"
-    builtin cd "$_OLDPWD/$(dirname "$FILE")"
-    latex2pdf "$(basename "$FILE")"
+    ( command cd "$(dirname "$FILE")"
+      latex2pdf "$(basename "$FILE")"
+    )
   done
-  builtin cd "$_OLDPWD"
 }
 
 # PDF to booklet
