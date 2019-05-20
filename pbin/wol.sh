@@ -7,7 +7,7 @@ ITF="${4:-eth0}"
 METHOD="$5"
 
 # Convert MAC address '-' into ':'
-MAC="$(echo $MAC | tr '-' ':')"
+MAC="$(echo "$MAC" | tr '-' ':')"
 
 # Returns true when a given method exists and is selected
 _exists() {
@@ -27,13 +27,13 @@ _run() {
 
 # Execute the WOL command
 if _exists wakeonlan "$METHOD"; then
-  _run wakeonlan -i ${IP} -p ${PORT} ${MAC};
+  _run wakeonlan -i "${IP}" -p "${PORT}" "${MAC}";
 elif _exists wol "$METHOD"; then
-  _run wol -i ${IP} -p ${PORT} ${MAC}
+  _run wol -i "${IP}" -p "${PORT}" "${MAC}"
 elif _exists etherwake "$METHOD"; then
-  _run etherwake -i ${ITF} -b ${MAC}
+  _run etherwake -i "${ITF}" -b "${MAC}"
 elif _exists ether-wake "$METHOD"; then
-  _run ether-wake -i ${ITF} -b ${MAC}
+  _run ether-wake -i "${ITF}" -b "${MAC}"
 elif _exists curl "$METHOD"; then
   for URL in $(_urls); do
     _run curl -qs "${URL}" >/dev/null && break
