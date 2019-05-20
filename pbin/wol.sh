@@ -9,8 +9,13 @@ METHOD="$5"
 # Convert MAC address '-' into ':'
 MAC="$(echo $MAC | tr '-' ':')"
 
+# Returns true when a given method exists and is selected
+_exists() {
+  [ -z "$2" ] || [ "$2" = "$1" ] && command -v "$1" >/dev/null 2>&1
+}
+
 # Define usable wol URLs
-wol_urls() {
+_urls() {
   echo "https://www.depicus.com/wake-on-lan/woli?m=${MAC}&i=${IP}&s=255.255.255.255&p=${PORT}"
   echo "http://www.wakeonlan.me/?mobile=0&ip=${IP}:${PORT}&mac=${MAC}&pass=&schedule=&timezone=0"
 }
@@ -21,18 +26,20 @@ _run() {
 }
 
 # Execute the WOL command
-if [ -z "$METHOD" ] || [ "$METHOD" = "wakeonlan" ] && command -v wakeonlan >/dev/null 2>&1; then
+if _exists wakeonlan "$METHOD"; then
   _run wakeonlan -i ${IP} -p ${PORT} ${MAC};
-elif [ -z "$METHOD" ] || [ "$METHOD" = "wol" ] && command -v wol >/dev/null 2>&1; then
+elif _exists wol "$METHOD"; then
   _run wol -i ${IP} -p ${PORT} ${MAC}
-elif [ -z "$METHOD" ] || [ "$METHOD" = "etherwake" ] && command -v etherwake >/dev/null 2>&1; then
+elif _exists etherwake "$METHOD"; then
   _run etherwake -i ${ITF} -b ${MAC}
-elif [ -z "$METHOD" ] || [ "$METHOD" = "curl" ] && command -v curl >/dev/null 2>&1; then
-  for URL in $(wol_urls); do
+elif _exists ether-wake "$METHOD"; then
+  _run ether-wake -i ${ITF} -b ${MAC}
+elif _exists curl "$METHOD"; then
+  for URL in $(_urls); do
     _run curl -qs "${URL}" >/dev/null && break
   done
-elif [ -z "$METHOD" ] || [ "$METHOD" = "wget" ] && command -v wget >/dev/null 2>&1; then
-  for URL in $(wol_urls); do
+elif _exists wget "$METHOD"; then
+  for URL in $(_urls); do
     _run wget "${URL}" -q -O /dev/null && break
   done
 else
