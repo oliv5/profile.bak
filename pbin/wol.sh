@@ -1,10 +1,10 @@
 #!/bin/sh
-set -e
 MAC="${1?Error: please specify a MAC address}"
 IP="${2:-255.255.255.255}"
 PORT="${3:-9}"
 ITF="${4:-eth0}"
 METHOD="$5"
+SSHCRED="$6"
 
 # Convert MAC address '-' into ':'
 MAC="$(echo "$MAC" | tr '-' ':')"
@@ -42,6 +42,17 @@ elif _exists wget "$METHOD"; then
   for URL in $(_urls); do
     _run wget "${URL}" -q -O /dev/null && break
   done
+elif _exists ssh "$METHOD"; then
+  true ${SSHCRED:?No ssh credentials specified...}
+  # Unset parameters 5-6 (especially METHOD to avoid recursion)
+  set -- "$1" "$2" "$3" "$4"
+  # Execute local script in remote
+  ssh "$SSHCRED" <<EOF
+set -- "$1" "$2" "$3" "$4"; $(cat "${PRIVATE:-$HOME}/pbin/wol.sh")
+EOF
+  # Execute remote script
+  #ssh -t "$SSHCRED" -- '${RC_DIR:-$HOME}/pbin/wol.sh' "$@"
 else
   echo >&2 "No appropriate WOL method available..."
+  false
 fi
