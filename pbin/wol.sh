@@ -48,7 +48,7 @@ elif _exists ssh "$METHOD"; then
   set -- "$1" "$2" "$3" "$4"
   # Execute local script in remote
   ssh "$SSHCRED" <<EOF
-set -- "$1" "$2" "$3" "$4"; $(cat "${PRIVATE:-$HOME}/pbin/wol.sh")
+set -- "$1" "$2" "$3" "$4"; $(cat "${RC_DIR:-$HOME}/pbin/wol.sh")
 EOF
   # Execute remote script
   #ssh -t "$SSHCRED" -- '${RC_DIR:-$HOME}/pbin/wol.sh' "$@"
