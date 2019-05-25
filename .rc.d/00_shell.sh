@@ -30,6 +30,15 @@ arg_ltrim() {
   arg_quote "$@"
 }
 
+# Concat parameters separated by a fixed delimiter
+arg_concat() {
+  local DELIM="${1:?No delimiter defined...}"
+  shift
+  for ARG; do
+    printf '%s %s ' "$DELIM" "$ARG"
+  done
+}
+
 # Last shell parameter
 alias arg_last='command shift $(($#-1)) >/dev/null 2>&1'
 
@@ -57,6 +66,7 @@ shell_islogin() {
 # Few shift aliases to prevent fatal error 
 # and eat all arguments when over-shifting
 # Other method: shift $(min $# number)
+# Other method: [ $# -ge number ] && shift number || shift $#
 alias shift1='command shift 1 2>/dev/null'
 alias shift2='command shift 2 2>/dev/null || set --'
 alias shift3='command shift 3 2>/dev/null || set --'
