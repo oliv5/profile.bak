@@ -138,13 +138,6 @@ annex_st() {
   git annex status | awk -F'#;#.' '/^[\? ]?'$1'[\? ]?/ {sub(/ /,"#;#.");print $2}'
 }
 
-# Annex diff
-annex_diff() {
-  if ! annex_direct; then
-    git diff "$@"
-  fi
-}
-
 # Get remote(s) uuid
 annex_uuid() {
   for REMOTE in "${@:-.*}"; do

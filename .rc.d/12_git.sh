@@ -854,6 +854,26 @@ git_cat() {
   done
 }
 
+# List deleted files
+git_deleted() {
+  git diff-tree -r "${@:-HEAD~1..HEAD}" --diff-filter=AD | awk '
+    {
+      gsub("0{40}","")
+      if ($3 in seen){
+        delete deleted[$3]
+      } else if ($4 == "D") {
+        deleted[$3]=$0
+      }
+      seen[$3]=$5
+    }
+    END {
+      for (x in deleted) {
+        print deleted[x]
+      }
+    }
+  '
+}
+
 ########################################
 # Subtrees
 # See https://developer.atlassian.com/blog/2015/05/the-power-of-git-subtree/
@@ -1303,6 +1323,16 @@ alias gddr='git diff $(git_tracking)'
 alias gdmr='git difftool -y $(git_tracking)'
 alias gdcr='git diff --cached $(git_tracking)'
 alias gds='git diff stash'
+# Diff tree
+alias gdta='git diff-tree --diff-filter=A --name-only -r ' #added
+alias gdtc='git diff-tree --diff-filter=C --name-only -r ' #copied
+alias gdtd='git diff-tree --diff-filter=D --name-only -r ' #deleted
+alias gdtm='git diff-tree --diff-filter=M --name-only -r ' #modified
+alias gdtr='git diff-tree --diff-filter=R --name-only -r ' #renamed
+alias gdtt='git diff-tree --diff-filter=T --name-only -r ' #changed
+alias gdtu='git diff-tree --diff-filter=Y --name-only -r ' #unmerged
+alias gdtx='git diff-tree --diff-filter=X --name-only -r ' #unknown
+alias gdtb='git diff-tree --diff-filter=B --name-only -r ' #broken
 # Merge aliases
 alias gmm='git mergetool -y'
 #alias gmm='gstx UU | xargs -r0 -n1 git mergetool -y'
