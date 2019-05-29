@@ -164,4 +164,10 @@ alias bb_status='cat /proc/acpi/bbswitch'
 alias bb_on='sudo sh -c "echo ON > /proc/acpi/bbswitch"'
 alias bb_off='sudo sh -c "echo OFF > /proc/acpi/bbswitch"'
 
-
+################################
+# Get date from webserver
+date_fromweb() {
+  for WEBSERVER; do
+    curl -sD - "$WEBSERVER" | grep '^Date:' | cut -d' ' -f3-6
+  done
+}
