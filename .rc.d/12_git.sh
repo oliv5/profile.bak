@@ -856,15 +856,29 @@ git_cat() {
 
 # List deleted files
 git_deleted() {
-  git diff-tree -r "${@:-HEAD~1..HEAD}" --diff-filter=AD | awk '
+  git diff-tree -r "${@:-HEAD}" --diff-filter=AD --raw | awk '
+    function basename(file) {
+      sub(".*/", "", file)
+      return file
+    }
     {
+      # Remove empty hash
       gsub("0{40}","")
-      if ($3 in seen){
-        delete deleted[$3]
-      } else if ($4 == "D") {
-        deleted[$3]=$0
+      # Get parameters, nullify $1-$4
+      hash=$3
+      action=$4
+      $1=$2=$3=$4=""
+      file=$0
+      sub("    ", "", file)
+      name=basename(file)
+      # Filter added-deleted files
+      if ((hash in seen) || (name in seen)) {
+        delete deleted[hash]
+      } else if (action == "D") {
+        deleted[hash]=file
       }
-      seen[$3]=$5
+      seen[hash]=file
+      seen[name]=file
     }
     END {
       for (x in deleted) {
