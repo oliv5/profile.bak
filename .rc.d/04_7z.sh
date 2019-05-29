@@ -3,7 +3,7 @@
 # Note: could use "xzdiff" for diffs
 
 # Aliases (fct names cannot start with digits)
-alias 7zq='_7zq'
+alias 7zq='_7z'
 alias 7za='_7za'
 alias 7zd='_7zd'
 alias 7zg='_7zg'
@@ -15,7 +15,7 @@ alias 7zdiffm='_7zdiffm'
 
 ###############################
 # quick 7z compress
-_7zq() {
+_7z() {
   for SRC; do
     if [ "$SRC" != "${SRC%.7z}" ]; then
       _7zd "." "$SRC"

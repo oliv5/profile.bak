@@ -29,10 +29,14 @@ alias rsync_mktree='rsync -a -f"+ */" -f"- *"'  # Replicate tree
 alias rsync_cptree='rsync -R' # Copy & keep relative tree
 alias rsync_mvtree='rsync -R --remove-source-files' # Move & keep relative tree
 alias rsync_timestamp='rsync -rt --size-only --existing' # Update timestamps only
+alias rsync_cpn='rsync -a --ignore-existing' # Recursive copy, new files only
+alias rsync_mvn='rsync -a --remove-source-files --ignore-existing' # Recursive move, new files only
+alias rsync_cpu='rsync -a --existing' # Recursive copy, existing files only
+alias rsync_mvu='rsync -a --remove-source-files --existing' # Recursive move, existing files only
 
 ##############################
 # Copy files & preserve permissions
-alias cp_rsync='rsync -a'
+alias cp_rsync='rsync_cp'
 cp_tar() {
   tar cvfp - "${1:?No source specified...}" | ( cd "${2:?No destination specified...}/" ; tar xvfp - )
 }
