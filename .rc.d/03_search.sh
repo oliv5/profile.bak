@@ -152,12 +152,13 @@ alias iggls='iggl 2>/dev/null'
 #iggl(){ igg "$@" | cut -d : -f 1 | uniq; }
 
 ###########################################
-# Search & replace
+# Interactive search & replace
 _fsed1() {
   # Get arguments
-  local SEDOPT="$(arg_rtrim 3 "$@")"; shift $(($#-3))
+  #local SEDOPT="$(arg_rtrim 3 "$@")"; shift $(($#-3))
+  local SEDOPT=""; [ $# -gt 3 ] && local SEDOPT="$1" && shift 1
   local IN="$1"; local OUT="$2"; local FILES="$3"
-  echo "Preparing to replace '$IN' by '$OUT' in files '$FILES' ${SEDOPT:+with options '$SEDOPT'}"
+  echo "Replace '$IN' by '$OUT' in files '$FILES' ${SEDOPT:+with options $SEDOPT}"
   # Ask for options
   local _SHOW; read -p "Show each line changed ? (Y/n) " _SHOW
   local _BACKUP; read -p "Backup each file ? (Y/n) " _BACKUP
@@ -172,9 +173,20 @@ _fsed1() {
     ${_BACKUP:+-execdir sh -c "grep '$IN' '{}' >/dev/null" \;} \
     -execdir sed $SEDOPT --in-place${_BACKUP:+=$_BACKUP} ${_SHOW:+-e "\|$IN|{w /dev/stderr" -e "}"} -e "s|$IN|$OUT|g" "{}" \;
 }
-alias _fsed='_fsed1'
-alias  hh='FCASE=   FTYPE=  FXTYPE= FARGS= SEXCLUDE= _fsed'
-alias ihh='FCASE=-i FTYPE=  FXTYPE= FARGS= SEXCLUDE= _fsed'
+# Bare search & replace
+_fsed2() {
+  # Get arguments
+  #local SEDOPT="$(arg_rtrim 3 "$@")"; shift $(($#-3))
+  local SEDOPT=""; [ $# -gt 3 ] && local SEDOPT="$1" && shift 1
+  local IN="$1"; local OUT="$2"; local FILES="$3"
+  # Call find and sed
+  _ffind "$FILES" $SEXCLUDE -type f \
+    -execdir sed $SEDOPT --in-place -e "s|$IN|$OUT|g" "{}" \;
+}
+alias  hh='FCASE=   FTYPE=  FXTYPE= FARGS= SEXCLUDE= _fsed1'
+alias ihh='FCASE=-i FTYPE=  FXTYPE= FARGS= SEXCLUDE= _fsed1'
+alias  hhf='FCASE=   FTYPE=  FXTYPE= FARGS= SEXCLUDE= _fsed2'
+alias ihhf='FCASE=-i FTYPE=  FXTYPE= FARGS= SEXCLUDE= _fsed2'
 
 ###########################################
 # Find duplicate files in directory
