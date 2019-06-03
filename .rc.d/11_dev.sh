@@ -114,3 +114,38 @@ pmake() {
 		make "$@"
 	fi
 }
+
+# Tab vs spaces
+space2tab() {
+	local FILES="${1:?No files defined...}"
+	local TABSIZE="${2:-4}"
+	local TABNUM="${3:-10}"
+	_ffind "$FILES" -type f -print0 | xargs -r0 -- sh -c '
+		TABSIZE="$1"
+		TABNUM="$2"
+		shift 2
+		for FILE; do
+			for N in $(seq "$TABNUM" -1 1); do
+				sed -r -i -e "s/^(\t*)( {$TABSIZE})/\1\t/" "$FILE"
+			done
+		done
+	' _ "$TABSIZE" "$TABNUM"
+}
+tab2space() {
+	local FILES="${1:?No files defined...}"
+	local TABSIZE="${2:-4}"
+	local TABNUM="${3:-10}"
+	local SPACES=""
+	for N in $(seq $TABSIZE); do SPACES="${SPACES} "; done
+	_ffind "$FILES" -type f -print0 | xargs -r0 -- sh -c '
+		TABSIZE="$1"
+		TABNUM="$2"
+		SPACES="$3"
+		shift 3
+		for FILE; do
+			for N in $(seq "$TABNUM" -1 1); do
+				sed -r -i -e "s/^( *)\t/\1$SPACES/" "$FILE"
+			done
+		done
+	' _ "$TABSIZE" "$TABNUM" "$SPACES"
+}
