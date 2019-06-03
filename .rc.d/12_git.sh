@@ -332,9 +332,9 @@ git_author() {
 # Extract a path from a repo without cloning/checking it out
 git_extract() {
   local URL="${1:?No url specified...}"
-  local PATH="${2:?No path specified...}"
-  local REF="${3:?No refs specified...}"
-  git archive --format=tar --remote="$URL" "$REF" -- "$PATH" | tar xf -
+  local REF="${2:?No refs specified...}"
+  local DIR="${3:?No DIR specified...}"
+  git archive --format=tar --remote="$URL" "$REF" -- "$DIR" | tar xv
 }
 
 ########################################
@@ -526,10 +526,10 @@ git_push_all() {
 # Set default upstream on the specified branches
 git_set_tracking() {
   git_exists || return 1
-  local IFS="$(printf ' \t\n')"
-  local REMOTE="${1:?No remote specified. Possible remotes are: $(git_remotes)}"
-  local BRANCHES="${2:-$(git_branch)}"
   git fetch --all 2>/dev/null
+  local IFS="$(printf ' \t\n')"
+  local REMOTE="${1:-$(git_remotes | cut -d' ' -f 1)}"
+  local BRANCHES="${2:-$(git_branch)}"
   for BRANCH in $BRANCHES; do
     if git for-each-ref "refs/remotes/$REMOTE" | grep -- "refs/remotes/$REMOTE/$BRANCH\$" >/dev/null; then
       git branch -u "$REMOTE/$BRANCH" "$BRANCH"
@@ -1385,6 +1385,7 @@ alias gbDr='git push :'     # remove remote branch (any)
 alias gbdro='git fetch -p'  # remote all old remotes
 alias gbu='git branch --set-upstream-to '  # set branch upstream
 alias gb='git branch'
+alias gst='git_set_tracking'
 # Stash aliases
 alias gsc='git_stash_create'
 alias gss='git_stash_save'
