@@ -54,7 +54,7 @@ ssh_cpin() {
 # Duplicate file or directory with incremental num
 bak() {
   for FILE; do
-    cp -v "$FILE" "${FILE}.$(ls -1 "$FILE".* 2>/dev/null | wc -l)"
+    cp -rv "$FILE" "${FILE}.$(ls -1 "$FILE".* 2>/dev/null | wc -l)"
   done
 }
 
@@ -62,7 +62,7 @@ bak() {
 bak_date() {
   local DATE="$(date +%Y%m%d-%H%M%S)"
   for FILE; do
-    cp -v "$FILE" "${FILE}.${DATE}.bak"
+    cp -rv "$FILE" "${FILE}.${DATE}.bak"
   done
 }
 
