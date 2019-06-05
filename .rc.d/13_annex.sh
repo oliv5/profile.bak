@@ -1,5 +1,14 @@
 #!/bin/sh
 
+# Get annex version
+annex_version() {
+  if [ $# -gt 0 ]; then
+    echo "$@" | awk -F'.' '{printf "%.d%.8d\n",$1,$2$3$4}'
+  else
+    git annex version | awk -F'[ .]' '/git-annex version:/ {printf "%.d%.8d\n",$3,$4}'
+  fi
+}
+
 # Check annex exists
 annex_exists() {
   git ${1:+--git-dir="$1"} config --get annex.version >/dev/null 2>&1
