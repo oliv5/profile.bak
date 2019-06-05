@@ -56,11 +56,8 @@ gpg_agent_ssh() {
 # Start gnome keyring daemon
 gnome_keyring_agent() {
 	command -v gnome-keyring-daemon >/dev/null 2>&1 || return 1
-	if pgrep -f 'gnome-keyring-daemon' >/dev/null; then
-		GNOME_KEYRING_CONTROL="/run/user/$(id -u)/keyring"
-	fi
 	eval "$(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh,gpg 2>/dev/null)"
-	export SSH_AUTH_SOCK GNOME_KEYRING_CONTROL
+	export GNOME_KEYRING_CONTROL SSH_AUTH_SOCK GPG_AGENT_INFO
 	return 0
 }
 
