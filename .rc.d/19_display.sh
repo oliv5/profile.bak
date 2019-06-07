@@ -65,6 +65,8 @@ xrandr_pos() {
 }
 
 # Set backlight
+alias backlight_100='backlight 100'
+alias backlight_150='backlight 150'
 alias backlight_250='backlight 250'
 alias backlight_350='backlight 350'
 alias backlight_500='backlight 500'
@@ -76,6 +78,6 @@ backlight_reset() {
 "
 }
 backlight() {
-	sudo sh -c "echo ${1:-500} > /sys/class/backlight/intel_backlight/brightness"
+	sudo sh -c "echo ${1:-500} > /sys/class/backlight/${2:-intel}_backlight/brightness"
 }
 
