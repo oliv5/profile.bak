@@ -53,13 +53,11 @@ alias scls='screen_ls'
 alias scr='screen_restore'
 alias sck='screen_quit'
 
-# Re-attach session, or print the list
+# Autoload
 if [ -z "$STY" -a -z "$SCREEN_LOADED" ]; then
   if [ "$SCREEN_AUTOLOAD" = "yes" ] && shell_isinteractive && shell_islogin; then
-    screen 2> /dev/null
+    screen_restore 2> /dev/null
   fi
-#else
-#  screen_ls
 fi
 
 # Flag
