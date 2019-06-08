@@ -50,14 +50,13 @@ str_suffix() {
 }
 
 # Check if substring is in string
+alias str_isin='str_substring'
 str_substring() {
-  local PATTERN="$1"
+  local STR="$1"
   shift
-  for STR; do
-    case "$STR" in 
-      *${PATTERN}*) return 0;;
-    esac
-  done
+  case "$*" in
+    *${STR}*) return 0;;
+  esac
   return 1
 }
 
