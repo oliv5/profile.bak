@@ -1,16 +1,5 @@
 #!/bin/sh
 
-# Return a string with uniq words
-alias str_uniqw='str_uniq " " " "'
-str_uniq() {
-  local _IFS="${1:- }"
-  local _OFS="${2}"
-  shift 2
-  #printf -- '%s\n' $@ | sort -u | xargs
-  #printf -- "$@"
-  printf '%s' "$@" | awk -vRS="$_IFS" -vORS="$_OFS" '!seen[$0]++ {str=str$1ORS} END{sub(ORS"$", "", str); printf "%s\n",str}'
-}
-
 # To lower
 alias tolower='str_low'
 str_low() {
@@ -76,4 +65,25 @@ str_len() {
   for STR; do
     echo ${#STR}
   done
+}
+
+# Return a string with uniq words
+alias str_uniqw='str_uniq " " " "'
+str_uniq() {
+  local _IFS="${1:- }"
+  local _OFS="${2}"
+  shift 2
+  printf '%s' "$@" | awk -vRS="$_IFS" -vORS="$_OFS" '!seen[$0]++ {str=str$1ORS} END{sub(ORS"$", "", str); printf "%s\n",str}'
+}
+
+# Keep only uniq strings in list
+str_filter_uniq() {
+  { [ $# -gt 0 ] && echo "$@" || cat /dev/stdin; } | 
+    awk -vRS="${RS:-\n}" '{cnt[$1]++}END{for(s in cnt){if (cnt[s]==1){print s}}}'
+}
+
+# Keep only non-uniq strings in list
+str_filter_duplicate() {
+  { [ $# -gt 0 ] && echo "$@" || cat /dev/stdin; } | 
+    sort | uniq -d
 }
