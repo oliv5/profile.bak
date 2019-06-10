@@ -97,6 +97,9 @@ git_worktree() {
 git_dir() {
   readlink -f "${1:-${GIT_DIR:-$(git rev-parse --git-dir)}}"
 }
+git_user_dir() {
+  echo "$(git_dir "$@")/user"
+}
 
 # Get git exec-path
 git_exp() {
@@ -549,7 +552,7 @@ _git_secure_delete() {
 git_bundle() {
   ( set +e; # Need to go on
     git_exists || return 1
-    local OUT="${1:-$(git_dir)/bundle/$(git_name).bundle}"
+    local OUT="${1:-$(git_user_dir)/bundle/$(git_name).bundle}"
     [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name).bundle"
     OUT="${OUT%%.xz}"; OUT="${OUT%%.git}.git.xz"
     mkdir -p "$(dirname "$OUT")"
@@ -796,7 +799,7 @@ git_stash_flush() {
 #git stash list --pretty=format:"%h %gd %ci" | awk '{gsub(/-/,"",$3); gsub(/:/,"",$4); print "stash{" $3 "-" $4 "}_" $1}'
 git_stash_backup() {
   git_exists || return 1
-  local DST="$(git_dir)/backup"
+  local DST="$(git_user_dir)/stash"
   local IFS="$(printf '\n')"
   mkdir -p "$DST"
   git stash list --format="%H %h %s" | while IFS=" " read -r HASH SHORT NAME; do
@@ -822,7 +825,7 @@ git_clean() {
   shift
   # Backup
   if [ "$2" != "-y" ] && ask_question "Backup? (y/n) " y Y >/dev/null; then
-    local DST="$(git_dir)/clean"
+    local DST="$(git_user_dir)/clean"
     mkdir -p "$DST"
     git_stx '??' | xargs -0 7z a "$DST/clean.$(git_name).7z"
   fi
@@ -1061,7 +1064,7 @@ git_split() {
 # https://stackoverflow.com/questions/4479960/git-checkout-to-a-specific-folder
 # Export the whole repo
 git_backup() {
-  local DST="${1:-$(git_dir)/backup/backup.$(git_name)}"
+  local DST="${1:-$(git_user_dir)/backup/backup.$(git_name)}"
   shift
   # The last '/' is important
   git checkout-index -a -f --prefix="$DST/" "$@"
@@ -1079,7 +1082,7 @@ git_backupdir() {
 # Store repo metadata
 git_meta_store() {
   git-cache-meta --store && 
-    git add "$(git_dir)/git_cache_meta" -f
+    git add "$(git_user_dir)/cache_meta" -f
 }
 
 # Reset file permissions
