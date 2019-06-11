@@ -4,6 +4,24 @@
 # File size
 alias fsize='stat -L -c %s'
 
+# File name/extension
+fext(){
+  for F; do echo "${F##*.}"; done
+}
+fname(){
+  for F; do echo "${F%.*}"; done
+}
+
+################################
+# Recursive permisions/owner
+alias chown_r='chown -R'
+chmod_r() {
+  local DIR="${1:-./}"
+  local PERMS_DIR="${2:-0750}"
+  local PERMS_FILES="${2:-0640}"
+  find "$DIR" -type d -exec chmod "$PERMS_DIR" '{}' + -o -type f -exec chmod "$PERMS_DIR" '{}' +
+}
+
 ################################
 # http://unix.stackexchange.com/questions/59112/preserve-directory-structure-when-moving-files-using-find
 # Move by replicating directory structure
@@ -119,4 +137,21 @@ move_mnt() {
   local MNT="${1?No mountpoint specified...}"; shift
   sudo mount "$MNT" &&
     move "$@"
+}
+
+################################
+alias check_md5='check_hash md5sum'
+alias check_sha1='check_hash sha1sum'
+alias check_sha256='check_hash sha256sum'
+check_hash() {
+  local CMD="${1:?No hash cmd specified}"
+  shift
+  while [ $# -gt 1 ]; do
+    local FILE="$1"
+    local HASH1="$2"
+    eval local HASH2="\$($CMD '$FILE' | cut -d ' ' -f 1)"
+    [ "$HASH1" = "$HASH2" ] || { echo "$FILE"; return 1; }
+    shift 2
+  done
+  return 0
 }

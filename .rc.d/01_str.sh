@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# Replace
+str_replace() {
+  echo "${1//$2/$3}"
+}
+
 # To lower
 alias tolower='str_low'
 str_low() {

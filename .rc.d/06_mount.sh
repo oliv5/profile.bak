@@ -1,5 +1,23 @@
 #!/bin/sh
 
+# Aliases
+alias remount_rw='sudo mount -o remount,rw'
+alias remount_ro='sudo mount -o remount,ro'
+
+# Mount checker
+mounted() {
+  case $(mount) in
+    *" $1 "*) return 0;;  # Mounted
+  esac
+  return 1  # NOT mounted
+}
+mounted_rw() {
+  mount | grep " $1 " | head -n1 | grep -qi -e "[(\s,]rw[\s,)]"
+}
+mounted_ro() {
+  mount | grep " $1 " | head -n1 | grep -qi -e "[(\s,]ro[\s,)]"
+}
+
 # Mount cleaner
 # Keep a number of mounts matching input regex
 mount_cleaner() {
