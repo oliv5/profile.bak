@@ -1,9 +1,15 @@
 #!/bin/sh
 
 # Replace
+if [ -n "$BASH_VERSION" ]; then
 str_replace() {
   echo "${1//$2/$3}"
 }
+else
+str_replace() {
+  echo "$1" | sed -e "s/$2/$3/"
+}
+fi
 
 # To lower
 alias tolower='str_low'
