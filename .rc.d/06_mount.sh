@@ -33,8 +33,11 @@ mount_cleaner() {
   "
 }
 
-# Mount ecryptfs
+#####################################
 # https://wiki.archlinux.org/index.php/ECryptfs#Encrypting_a_data_directory
+# https://wiki.archlinux.org/index.php/ECryptfs#Manual_setup
+
+# Raw mount ecryptfs
 mount_ecryptfs() {
   local SRC="${1:?Missing source directory...}"
   local DST="${2:?Missing dest directory...}"
@@ -50,7 +53,6 @@ mount_ecryptfs() {
     return 1
   fi
   chmod 500 "$SRC"
-  #( stty -echo; printf "Passphrase: " 1>&2; read PASSWORD; stty echo; echo $PASSWORD; ) | ecryptfs-insert-wrapped-passphrase-into-keyring "$HOME/.ecryptfs/wrapped-passphrase" -
   sudo ecryptfs-add-passphrase --fnek
   sudo mount -i -t ecryptfs -o "$OPT" "$SRC" "$DST"
   chmod 700 "$DST"
@@ -60,6 +62,8 @@ umount_ecryptfs() {
     sudo umount -l "${1:?Missing mounted directory...}"
   sudo keyctl clear @u
 }
+
+# Private mount wrappers
 mount_private_ecryptfs() {
   local SRC="${1:-$HOME/.private}"
   local DST="${2:-$HOME/private}"
@@ -72,6 +76,44 @@ umount_private_ecryptfs() {
   umount_ecryptfs "${1:-$HOME/private}"
 }
 
+# Mount helpers
+ecryptfs_wrap_passphrase() {
+  local FILE="${1:-$HOME/.ecryptfs/wrapped-passphrase}"
+  ( stty -echo; printf "Passphrase: " 1>&2; read PASSWORD; stty echo; echo "$PASSWORD"; ) |
+    xargs printf "%s\n%s" $(od -x -N 100 --width=30 /dev/random | head -n 1 | sed "s/^0000000//" | sed "s/\s*//g") |
+    ecryptfs-wrap-passphrase "$FILE"
+}
+ecryptfs_unwrap_passphrase() {
+  local FILE="${1:-$HOME/.ecryptfs/wrapped-passphrase}"
+  ( stty -echo; printf "Passphrase: " 1>&2; read PASSWORD; stty echo; echo "$PASSWORD"; ) |
+    ecryptfs-insert-wrapped-passphrase-into-keyring "$FILE" -
+}
+
+# User mount ecryptfs (no root)
+# WIP: need use of temp file & user_mount_private in .ecryptfs & unmount fcts
+user_mount_ecryptfs() {
+  local SRC="${1:?Missing source directory...}"
+  local DST="${2:?Missing dest directory...}"
+  local KEY1="${3:?Missing content key...}"
+  local KEY2="${4:-$KEY1}"
+  local CONFNAME="${5:-vault}"
+  local CONF="$HOME/.ecryptfs/$CONFNAME.conf"
+  local SIG="$HOME/.ecryptfs/$CONFNAME.sig"
+  chmod 700 "$HOME/.ecryptfs"
+  ecryptfs-add-passphrase --fnek
+  echo "$SRC $DST ecryptfs" > "$CONF"
+  echo "$KEY1" > "$SIG"
+  echo "$KEY2" >> "$SIG"
+  mount.ecryptfs_private "$CONFNAME"
+  chmod -w "$HOME/.ecryptfs"
+}
+user_umount_ecryptfs() {
+  local CONFNAME="${1:-vault}"
+  mount.ecryptfs_private "$CONFNAME"
+  keyctl clear @u
+}
+
+#####################################
 # Mount encfs
 mount_encfs() {
   local SRC="${1:?Missing source directory...}"
@@ -94,6 +136,7 @@ umount_private_encfs() {
   umount_encfs "${1:-$HOME/private}"
 }
 
+#####################################
 # Mount iso
 mount_iso() {
   sudo mount -o loop -t iso9660 "$@"
