@@ -73,7 +73,8 @@ mount_private_ecryptfs() {
   mount_ecryptfs "$SRC" "$DST" "$KEY"
 }
 umount_private_ecryptfs() {
-  umount_ecryptfs "${1:-$HOME/private}"
+  local DST="${1:-$HOME/private}"
+  umount_ecryptfs "$DST"
 }
 
 # Mount helpers
@@ -105,12 +106,27 @@ user_mount_ecryptfs() {
   echo "$KEY1" > "$SIG"
   echo "$KEY2" >> "$SIG"
   mount.ecryptfs_private "$CONFNAME"
-  chmod -w "$HOME/.ecryptfs"
+  chmod 500 "$HOME/.ecryptfs"
 }
 user_umount_ecryptfs() {
   local CONFNAME="${1:-vault}"
   mount.ecryptfs_private "$CONFNAME"
   keyctl clear @u
+}
+
+# Private user mount wrappers
+user_mount_private() {
+  local SRC="${1:-$HOME/.private}"
+  local DST="${2:-$HOME/private}"
+  local SIG="${3:-$HOME/.ecryptfs/private.sig}"
+  local KEY="$(cat "$SIG" 2>/dev/null)"
+  local CONFNAME="${4:-$(basename "$DST")}"
+  mkdir -p "$DST"
+  user_mount_ecryptfs "$SRC" "$DST" "$KEY" "" "$CONFNAME"
+}
+user_umount_private() {
+  local DST="${1:-$HOME/private}"
+  user_umount_ecryptfs "$(basename "$DST")"
 }
 
 #####################################
