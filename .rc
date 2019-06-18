@@ -15,6 +15,11 @@ rc_source() {
   local RC_ERR=0
 
   ##############
+  # Prerequisites
+  command -v grep >/dev/null || { echo "Grep is missing..." ; return 1; }
+  command -v awk >/dev/null || { echo "Awk is missing..." ; return 1; }
+
+  ##############
   # Log function
   rc_log() {
     eval "echo $@ ${RC_VERBOSE:->/dev/null}"
@@ -41,7 +46,9 @@ rc_source() {
     local LIST="$RC_DIR_LOCAL/.rc.list"
     set -- $@
     for FILE; do
-      if [ -n "$RC_ALL" ] || test -x "$FILE" || grep -e "^${FILE##$RC_DIR/}\|^${FILE##$RC_DIR_LOCAL/}" "$LIST" >/dev/null 2>&1; then
+      if [ -n "$RC_ALL" ] ||
+          test -x "$FILE" ||
+          grep -Ee "^${FILE##$RC_DIR/}|^${FILE##$RC_DIR_LOCAL/}" "$LIST" >/dev/null 2>&1; then
         rc_sourcefile "$FILE"
       fi
     done
