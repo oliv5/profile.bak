@@ -152,12 +152,12 @@ alias cpu='cpu_ps'
 
 cpu_ps() {
   # use eval because of the option "|" in $1
-  eval ps aux ${1:+| grep $1} | awk 'BEGIN {sum=0} {sum+=$3}; END {print sum}'
+  eval ps ${2:-aux} ${1:+| grep $1} | awk 'BEGIN {sum=0} {sum+=$3}; END {print sum}'
 }
 
 mem_ps() {
   # use eval because of the option "|" in $1
-  eval ps aux ${1:+| grep $1} | awk 'BEGIN {sum=0} {sum+=$4}; END {print sum}'
+  eval ps ${2:-aux} ${1:+| grep $1} | awk 'BEGIN {sum=0} {sum+=$4}; END {print sum}'
 }
 
 cpu_list() {
