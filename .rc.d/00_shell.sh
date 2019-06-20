@@ -42,6 +42,25 @@ arg_concat() {
 # Last shell parameter
 alias arg_last='command shift $(($#-1)) >/dev/null 2>&1'
 
+# Get last in list
+last() {
+    shift $(($#-1))
+    echo "$1"
+}
+lastn() {
+    shift $(($#-$1-1))
+    echo "$1"
+}
+
+# Is in list?
+is_in() {
+    [ $# -lt 2 ] && return 0
+    local Q="$1"
+    shift
+    for A; do [ "$A" = "$Q" ] && return 0; done
+    return 1
+}
+
 ################################
 # https://stackoverflow.com/questions/18186929/differences-between-login-shell-and-interactive-shell
 # http://www.tldp.org/LDP/abs/html/intandnonint.html
