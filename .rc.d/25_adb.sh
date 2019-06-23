@@ -161,6 +161,11 @@ adb_backup_nandroid() {
         rm "${DST}.raw"
     )
 }
+# Restore ?
+# https://forum.xda-developers.com/showthread.php?p=58350784#post58350784
+# Beware of bootloader / recovery partitions
+# pc: gzip -c mmcblk0.raw | nc -l -p 5555
+# phone: /sbin/busybox nc 127.0.0.1 5555 | gunzip -c | dd bs=4096 of=/dev/block/mmcblk0
 
 ########################################
 ########################################
