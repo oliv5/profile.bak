@@ -101,3 +101,20 @@ alias nfc_disable='su root -- svc nfc disable'
 alias pwr_stayon='su root -- svc power stayon'
 alias pwr_shutdown='su root -- svc power shutdown'
 alias pwr_reboot='su root -- svc power reboot'
+
+# Settings utility wrapper, need seLinux off
+settings_wrapper() {
+  su root -- <<EOF
+  set +e # to go on on errors, run in a subshell
+  setenforce 0
+  settings ${@:?Nothing to do...}
+  setenforce 1
+EOF
+}
+
+# Manage power-save mode (need seLinux off)
+# https://stackoverflow.com/questions/28234502/programmatically-enable-disable-battery-saver-mode
+alias pwr_sav_enable='settings_wrapper put global low_power 1'
+alias pwr_sav_disable='settings_wrapper put global low_power 0'
+alias pwr_sav_get_lvl='settings_wrapper get global low_power_trigger_level'
+alias pwr_sav_set_lvl='settings_wrapper put global low_power_trigger_level'
