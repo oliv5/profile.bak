@@ -84,3 +84,20 @@ alias data_on='su root -- svc data enable'
 alias data_off='su root -- svc data disable'
 alias data_eco_off='su root -- cmd netpolicy set restrict-background false'
 alias data_eco_off='su root -- cmd netpolicy set restrict-background true'
+
+# Manage bluetooth
+alias bt_enable='su root -- svc bluetooth enable'
+alias bt_disable='su root -- svc bluetooth disable'
+
+# Manage usb
+alias usb_get_fct='su root -- svc usb getFunction'
+alias usb_set_fct='su root -- svc usb setFunction'
+
+# Manage nfc
+alias nfc_enable='su root -- svc nfc enable'
+alias nfc_disable='su root -- svc nfc disable'
+
+# Manage power
+alias pwr_stayon='su root -- svc power stayon'
+alias pwr_shutdown='su root -- svc power shutdown'
+alias pwr_reboot='su root -- svc power reboot'
