@@ -11,17 +11,18 @@
 
 # Process monitoring
 alias pg='pgrep -fl'
-alias ps='/system/xbin/ps'
 alias psg='ps -ef | grep -i'
 alias ppid='ps -o pid,ppid | grep'
-alias sps='sudo /system/xbin/ps -ef'
-alias spsg='sudo "/system/xbin/ps -ef | grep"'
-alias sppid='sudo "/system/xbin/ps -o pid,ppid,comm | grep"'
+alias sps='sudo ps -ef'
+alias spsg='sudo "ps -ef | grep"'
+alias sppid='sudo "ps -o pid,ppid,comm | grep"'
 
 # Aliases/functions helpers
 alias lsg='ls | grep -i'
 alias llg='ll | grep -i'
-gpp() { getprop ${@:+| grep $@}; }
+alias sp='setprop'
+alias gp='getprop'
+gppg() { getprop ${@:+| grep $@}; }
 
 # Setup apps
 alias install='pm install -r'
