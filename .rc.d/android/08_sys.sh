@@ -19,7 +19,7 @@ alias sppid='sudo "ps -o pid,ppid,comm | grep"'
 
 # Aliases/functions helpers
 alias lsg='ls | grep -i'
-alias llg='ll | grep -i'
+alias llg='ls -la | grep -i'
 alias sp='setprop'
 alias gp='getprop'
 gppg() { getprop ${@:+| grep $@}; }
@@ -29,25 +29,58 @@ alias install='pm install -r'
 alias uninstall='pm uninstall -k'
 
 # Permissions management
-alias add_perm='pm grant'
-alias rm_perm='pm revoke'
+alias perm_add='pm grant'
+alias perm_rm='pm revoke'
 
 # Apps management
-start_app(){ am start -n "${1:?No package name specified...}/${2:-.MainActivity}"; }
-restart_app(){ am start -S -n "${1:?No package name specified...}/${2:-.MainActivity}"; }
-stop_app(){ am force-stop "${1:?No package name specified...}"; }
+app_start(){ am start -n "${1:?No package name specified...}/${2:-.MainActivity}"; }
+app_restart(){ am start -S -n "${1:?No package name specified...}/${2:-.MainActivity}"; }
+app_stop(){ am force-stop "${1:?No package name specified...}"; }
 
 # Start/stop app from package
-start_pkg() {
+alias pkg_ls='pm list packages -f | cut -f 2 -d "=" | sort'
+pkg_start() {
     local PACKAGE="${1:?No package name specified...}"
     local ACTIVITY="${2:-.MainActivity}"
     pm list packages -f | awk -F= "/${PACKAGE}/ {print \$2}" | xargs -I {} -r -n1 am start -n "{}/$ACTIVITY"
 }
-stop_pkg() {
+pkg_stop() {
     local PACKAGE="${1:?No package name specified...}"
     pm list packages -f | awk -F= "/${PACKAGE}/ {print \$2}" | xargs -I {} -r -n1 am force-stop -n "{}"
 }
 
 # Services management
-start_svc(){ am startservice "${1:?No package name specified...}/${2:?No service name specified...}" ${3:+--user "$3"}; }
-stop_svc(){ am stopservice "${1:?No package name specified...}" ${3:+--user "$3"}; }
+svc_start(){ am startservice "${1:?No package name specified...}/${2:?No service name specified...}" ${3:+--user "$3"}; }
+svc_stop(){ am stopservice "${1:?No package name specified...}" ${3:+--user "$3"}; }
+
+# Unlock screen
+alias screen_unlock='input keyevent 82'
+
+# Lock screen
+alias screen_lock='input keyevent 6; input keyevent 26'
+
+# Open default browser
+alias browser='input keyevent 23'
+
+# Volume
+alias volp='input keyevent 24'
+alias voln='input keyevent 25'
+
+# Go to home screen
+alias home='input keyevent 3'
+
+# Start/stop clock app
+alias clock_start='am start com.google.android.deskclock'
+alias clock_stop='am force-stop com.google.android.deskclock'
+
+# Manage wifi
+alias wifi_mgr='am start -a android.intent.action.MAIN -n com.android.settings/.wifi.WifiSettings'
+alias wifi_status='am start -n com.android.settings/.wifi.WifiStatusTest'
+alias wifi_on='su root -- svc wifi enable'
+alias wifi_off='su root -- svc wifi disable'
+
+# Manage mobile data
+alias data_on='su root -- svc data enable'
+alias data_off='su root -- svc data disable'
+alias data_eco_off='su root -- cmd netpolicy set restrict-background false'
+alias data_eco_off='su root -- cmd netpolicy set restrict-background true'
