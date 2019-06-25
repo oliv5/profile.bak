@@ -78,6 +78,10 @@ alias wifi_mgr='am start -a android.intent.action.MAIN -n com.android.settings/.
 alias wifi_status='am start -n com.android.settings/.wifi.WifiStatusTest'
 alias wifi_on='su root -- svc wifi enable'
 alias wifi_off='su root -- svc wifi disable'
+wifi_state() {
+  ip addr show dev "${1:-wlan0}" 2>/dev/null | grep "state UP" >/dev/null
+  echo $?
+}
 
 # Manage mobile data
 alias data_on='su root -- svc data enable'
@@ -119,3 +123,9 @@ alias pwr_sav_enable='selinux_wrapper settings put global low_power 1'
 alias pwr_sav_disable='selinux_wrapper settings put global low_power 0'
 alias pwr_sav_get_lvl='selinux_wrapper settings get global low_power_trigger_level'
 alias pwr_sav_set_lvl='selinux_wrapper settings put global low_power_trigger_level'
+
+# Manage airplane mode
+# https://stackoverflow.com/questions/10506591/turning-airplane-mode-on-via-adb/40271379
+alias airplane_enable='selinux_wrapper "settings put global airplane_mode_on 1 ; am broadcast -a android.intent.action.AIRPLANE_MODE"'
+alias airplane_disable='selinux_wrapper "settings put global airplane_mode_on 0 ; am broadcast -a android.intent.action.AIRPLANE_MODE"'
+alias airplane_status='selinux_wrapper settings get global airplane_mode_on'
