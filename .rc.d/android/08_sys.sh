@@ -129,3 +129,11 @@ alias pwr_sav_set_lvl='selinux_wrapper settings put global low_power_trigger_lev
 alias airplane_enable='selinux_wrapper "settings put global airplane_mode_on 1 ; am broadcast -a android.intent.action.AIRPLANE_MODE"'
 alias airplane_disable='selinux_wrapper "settings put global airplane_mode_on 0 ; am broadcast -a android.intent.action.AIRPLANE_MODE"'
 alias airplane_status='selinux_wrapper settings get global airplane_mode_on'
+
+# Manage gps
+# https://forum.xda-developers.com/android/help/activate-disable-gps-adb-shell-t3307417
+alias gps_enable_gps='selinux_wrapper settings put secure location_providers_allowed +gps'
+alias gps_enable_network='selinux_wrapper settings put secure location_providers_allowed +network'
+alias gps_enable_full='selinux_wrapper "settings put secure location_providers_allowed +gps ; settings put secure location_providers_allowed +network"'
+alias gps_disable='selinux_wrapper "settings put secure location_providers_allowed -gps ; settings put secure location_providers_allowed -network"'
+alias gps_status='selinux_wrapper settings get secure location_providers_allowed'
