@@ -105,10 +105,11 @@ alias pwr_reboot='su root -- svc power reboot'
 # Execute a cmd with seLinux off
 selinux_wrapper() {
   su root -- <<EOF
-  set +e # to go on on errors, run in a subshell
+  trap 'su root -- setenforce 1; trap INT TERM' INT TERM
   setenforce 0
   ${@:?Nothing to do...}
   setenforce 1
+  trap INT TERM
 EOF
 }
 
