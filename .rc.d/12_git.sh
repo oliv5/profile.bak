@@ -149,6 +149,15 @@ git_tracking() {
   #git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD) 2>/dev/null
 }
 
+# Set default tracking
+git_set_tracking() {
+  local BRANCH="${1:-$(git_branch)}"
+  local REMOTE="${2:-$(git_remotes | cut -d' ' -f 1)}"
+  if git for-each-ref "refs/remotes/$REMOTE" | grep -- "refs/remotes/$REMOTE/$BRANCH\$" >/dev/null; then
+    git ${3:+--git-dir="$3"} branch --set-upstream-to "$REMOTE/$BRANCH" "$BRANCH"
+  fi
+}
+
 # Get all local branches
 git_branches() {
   #git ${1:+--git-dir="$1"} for-each-ref --shell refs/heads/ --format='%(refname:short)' | sed -e 's;heads/;;' | xargs echo 
@@ -523,20 +532,6 @@ git_push_all() {
         git push "$REMOTE" "$BRANCH"
       fi
     done
-  done
-}
-
-# Set default upstream on the specified branches
-git_set_tracking() {
-  git_exists || return 1
-  git fetch --all 2>/dev/null
-  local IFS="$(printf ' \t\n')"
-  local REMOTE="${1:-$(git_remotes | cut -d' ' -f 1)}"
-  local BRANCHES="${2:-$(git_branch)}"
-  for BRANCH in $BRANCHES; do
-    if git for-each-ref "refs/remotes/$REMOTE" | grep -- "refs/remotes/$REMOTE/$BRANCH\$" >/dev/null; then
-      git branch -u "$REMOTE/$BRANCH" "$BRANCH"
-    fi
   done
 }
 
@@ -1325,7 +1320,9 @@ alias glsi='git ls-files -o -i --exclude-standard'
 alias gd='git diff'
 alias gdd='git diff'
 alias gdm='git difftool -y'
-alias gdt='git meld'
+alias gdu='git diff $(git_tracking)'
+alias gddu='git diff $(git_tracking)'
+alias gdmu='git difftool -y $(git_tracking)'
 alias gda='git_diff_all'
 alias gdda='git_diff_all'
 alias gdma='git_diffm_all'
