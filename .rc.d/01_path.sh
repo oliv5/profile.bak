@@ -7,11 +7,11 @@ _path_prepend() {
   local DIR
   for DIR; do
     if [ -d "$DIR" ]; then
-      eval trap "\"export $VAR=\"\${$VAR}\"; trap EXIT\"" EXIT
+      eval trap "\"export $VAR='\${$VAR}'; trap - EXIT\"" EXIT
       eval export $VAR="${DIR}\${$VAR:+:\$$VAR}"
     fi
   done
-  trap EXIT
+  trap - EXIT
 }
 
 # Append to path
@@ -21,11 +21,11 @@ _path_append() {
   local DIR
   for DIR; do
     if [ -d "$DIR" ]; then
-      eval trap "\"export $VAR=\"\${$VAR}\"; trap EXIT\"" EXIT
+      eval trap "\"export $VAR='\${$VAR}'; trap - EXIT\"" EXIT
       eval export $VAR="\${$VAR:+\$$VAR:}${DIR}"
     fi
   done
-  trap EXIT
+  trap - EXIT
 }
 
 # Remove from path
@@ -35,10 +35,10 @@ _path_remove() {
   shift
   local DIR
   for DIR; do
-    eval trap "\"export $VAR=\"\${$VAR}\"; trap EXIT\"" EXIT
+    eval trap "\"export $VAR='\${$VAR}'; trap - EXIT\"" EXIT
     eval export $VAR="$(eval echo "\$$VAR" | sed -r "s;${DIR}:?;;g")"
   done
-  trap EXIT
+  trap - EXIT
 }
 
 # Remove given fs from path, as well as absent paths
@@ -56,9 +56,7 @@ _path_remove_fs() {
       RES="${RES:+$RES:}$D"
     fi
   done
-  eval trap "\"export $VAR=\"\${$VAR}\"; trap EXIT\"" EXIT
   export $VAR="$RES"
-  trap EXIT
 }
 
 # Remove absent path
@@ -70,9 +68,7 @@ _path_remove_absent() {
   for D in $VAL; do
     [ -d "$D" ] && RES="${RES:+$RES:}$D"
   done
-  eval trap "\"export $VAR=\"\${$VAR}\"; trap EXIT\"" EXIT
   export $VAR="$RES"
-  trap EXIT
 }
 
 # Cleanup path: remove duplicated or empty entries, expand $HOME
@@ -89,12 +85,12 @@ _path_cleanup() {
     }
   local VAR="${1:-PATH}"
   shift
-  eval trap "\"export $VAR=\"\${$VAR}\"; trap EXIT\"" EXIT
+  eval trap "\"export $VAR='\${$VAR}'; trap - EXIT\"" EXIT
   export $VAR="$(
     { str_uniq : : "$(eval echo "\$$VAR")" || cat; } |
     { awk 'NF && !x[$0]++' RS='[:|\n]' ORS=':' || cat; } |
     sed -r 's|~|'"${HOME}"'|g; s|\:\.||g; s|(^:\|:$)||')"
-  trap EXIT
+  trap - EXIT
 }
 
 # Find and append path
@@ -104,9 +100,9 @@ _path_find() {
   local DIR="${2:-.}"
   local NAME="${3}"
   local RES="$(find "$DIR" ${NAME:+-name "$NAME"} -type d -print0 | xargs -r0 printf '%s')"
-  eval trap "\"export $VAR=\"\${$VAR}\"; trap EXIT\"" EXIT
+  eval trap "\"export $VAR='\${$VAR}'; trap - EXIT\"" EXIT
   export $VAR="$(eval echo "\$$VAR")${RES:+:$RES}"
-  trap EXIT
+  trap - EXIT
 }
 
 # PATH aliases
