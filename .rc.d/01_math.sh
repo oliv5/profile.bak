@@ -119,3 +119,14 @@ sub() {
 #r -e 'print(sum(1:100))'
 #smjs
 #jspl
+
+
+################################
+# Random number generators
+# https://www.cyberciti.biz/faq/bash-shell-script-generating-random-numbers/
+urandint() {
+  od -vAn -N4 -tu4 < /dev/urandom | tr -d ' '
+}
+randint() {
+  od -An -N2 -i /dev/random | tr -d ' '
+}
