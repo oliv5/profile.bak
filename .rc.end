@@ -11,7 +11,7 @@ if command -v "locale" >/dev/null 2>&1; then
   ## Order of priority: LANGUAGE LC_ALL LC_xxx LANG
   # Set the default locale variable LANG
   LOCALES="$(locale -a 2>/dev/null)"
-  if ! echo "$LOCALES" | grep -w "$LANG"; then
+  if ! echo "$LOCALES" | grep -w "$LANG" >/dev/null; then
     for LANG in \
         "$(echo $LOCALES | xargs -rn1 | grep -ie "fr_fr.*utf-\?8" | head -n 1)" \
         "$(echo $LOCALES | xargs -rn1 | grep -ie "utf-\?8" | head -n 1)" \
