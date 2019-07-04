@@ -1172,7 +1172,8 @@ annex_rm_duplicates() {
 # Annex aliases
 alias gana='git annex add'
 alias gant='git annex status'
-alias ganst='git annex status'
+alias gantn='annex_st \\?'
+alias gantm='annex_st M'
 alias ganl='git annex list'
 alias ganls='git annex list'
 alias ganlc='git annex find | wc -l'
