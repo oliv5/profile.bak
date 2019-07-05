@@ -433,7 +433,7 @@ git_import() {
 #~ fi
 
 # Batch pull the current branch from all remotes
-git_pull() { git_pull_all "" "$(git_branch)"; }
+git_pull() { git_pull_all "$2" "${1:-$(git_branch)}"; }
 
 # Batch pull existing remote branches
 if [ $(git_version) -gt $(git_version 2.9) ]; then
@@ -517,7 +517,7 @@ git_pull_all() {
 fi
 
 # Push the current branch to all remotes
-git_push() { git_push_all "" "$(git_branch)"; }
+git_push() { git_push_all "$2" "${1:-$(git_branch)}"; }
 
 # Batch push to all existing remote/branches
 git_push_all() {
