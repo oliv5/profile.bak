@@ -150,6 +150,7 @@ git_tracking() {
 }
 
 # Set default tracking
+if [ $(git_version) -ge $(git_version 2.0) ]; then
 git_set_tracking() {
   local BRANCH="${1:-$(git_branch)}"
   local REMOTE="${2:-$(git_remotes | cut -d' ' -f 1)}"
@@ -157,6 +158,15 @@ git_set_tracking() {
     git ${3:+--git-dir="$3"} branch --set-upstream-to "$REMOTE/$BRANCH" "$BRANCH"
   fi
 }
+else
+git_set_tracking() {
+  local BRANCH="${1:-$(git_branch)}"
+  local REMOTE="${2:-$(git_remotes | cut -d' ' -f 1)}"
+  if git for-each-ref "refs/remotes/$REMOTE" | grep -- "refs/remotes/$REMOTE/$BRANCH\$" >/dev/null; then
+    git branch --set-upstream "$REMOTE/$BRANCH" "$BRANCH"
+  fi
+}
+fi
 
 # Get all local branches
 git_branches() {
