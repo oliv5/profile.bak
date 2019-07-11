@@ -19,6 +19,15 @@ _ffind2() {
   ( set -f; FILES="$(echo $FILES | sed -e 's/;/|/g ; s/\./\\./g ; s/*/.*/g')"
     find -L "${DIR:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*/($FILES)"} ${FARGS} "$@")
 }
+_ffind3() {
+  local FCASE="${FCASE:--}regex"
+  local ROOT="$(echo "${1%/*}" | sed -re 's;/?[^/]*\*.*$;;g')"
+  local DIR="${1%/*}"; DIR="${DIR%"$ROOT"}"
+  local FILES="$(echo "${1##*/}" | sed -e 's/;/|/g')"
+  local REGEX="$(echo "*$DIR/($FILES)" | sed -e 's/\./\\./g ; s/*/.*/g ; s;//;/;g')"
+  shift 2>/dev/null
+  find -L "${ROOT:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE "$REGEX"} ${FARGS} "$@"
+}
 alias _ffind='_ffind2'
 alias      ff='FCASE=   FTYPE=  FXTYPE=  FARGS= _ffind'
 alias     fff='FCASE=   FTYPE=f FXTYPE=  FARGS= _ffind'
