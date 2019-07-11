@@ -1524,8 +1524,10 @@ alias gpu='git push'
 alias gpua='git_push_all'
 if [ $(git_version) -gt $(git_version 2.9) ]; then
   alias gup='git pull --rebase --autostash'
-else
+elif [ $(git_version) -ge $(git_version 2.0) ]; then
   alias gup='git pull --rebase'
+else
+  alias gup='git_pull'
 fi
 alias gupa='git_pull_all'
 alias gfe='git fetch'
