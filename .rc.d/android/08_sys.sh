@@ -4,10 +4,8 @@
 # http://delphi.org/2013/11/installing-and-running-android-apps-from-command-line/
 
 # Su/sudo
-#su() { (eval /system/bin/su root -- /system/bin/sh -c \""$@"\" & wait $!); }
-#sudo() { (eval /system/bin/su root -- /system/bin/sh -c \""$@"\" & wait $!); }
-! command -v sudo >/dev/null &&
-  alias sudo='su root --'
+unalias sudo 2>/dev/null
+sudo() { su root -- "$@"; stty sane; }
 
 # Process monitoring
 alias pg='pgrep -fl'
