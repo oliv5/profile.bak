@@ -73,7 +73,7 @@ git_setup() {
 # Get git version
 git_version() {
   local VERSION="${1:-$(git --version 2>/dev/null | cut -d' ' -f 3)}"
-  echo "$VERSION" | awk -F'.' '{printf "%.d%.2d%.2d%.2d\n",$1,$2,$3,$4}'
+  echo "$VERSION" | awk -F'.' '{r=sprintf("%.d%.2d%.2d%.2d",$1,$2,$3,$4); sub("^0+","0",r); print r}'
 }
 
 # Check repo exists
