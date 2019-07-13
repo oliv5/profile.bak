@@ -7,13 +7,6 @@ export GIT_PAGER="${PAGER:-less}"
 ########################################
 # Dependencies
 
-# Wrapper: git annex direct mode
-# Overwritten by annex main script
-command -v "annex_direct" >/dev/null 2>&1 ||
-annex_direct() {
-  false
-}
-
 # Ask question
 command -v "ask_question" >/dev/null 2>&1 ||
 ask_question() {
@@ -371,161 +364,6 @@ git_import() {
 
 ########################################
 
-#~ # Batch pull the selected branches from their remote tracking
-#~ alias git_pull='git_pull_branches "$(git_branch)"'
-#~ alias git_pull_all='git_pull_branches'
-
-#~ # Batch pull existing branches from their remote tracking
-#~ if [ $(git_version) -gt $(git_version 2.9) ]; then
-#~ git_pull_branches() {
-  #~ git_exists || return 1
-  #~ local IFS="$(printf ' \t\n')"
-  #~ local BRANCHES="${1:-$(git_branches)}"
-  #~ local FORCE="$([ "$2" = "-f" ] && echo "-f")"
-  #~ if annex_direct; then
-    #~ # Note: git annex repos in direct mode
-    #~ # are not compatible with vcsh
-    #~ git annex sync
-  #~ else
-    #~ CURRENT="$(git rev-parse --abbrev-ref HEAD)"
-    #~ for BRANCH in $BRANCHES; do
-      #~ # Is there a remote with this branch ?
-      #~ if command git for-each-ref --shell refs/remotes | grep "refs/remotes/.*/$BRANCH'" >/dev/null; then
-        #~ git checkout $FORCE "$BRANCH" >/dev/null || continue
-        #~ git pull --rebase --autostash || exit $?
-        #~ echo "-----"
-      #~ fi
-    #~ done
-    #~ git checkout -fq "$CURRENT"
-  #~ fi
-#~ }
-#~ else
-#~ git_pull_branches() {
-  #~ git_exists || return 1
-  #~ local IFS="$(printf ' \t\n')"
-  #~ local BRANCHES="${1:-$(git_branches)}"
-  #~ local FORCE="$([ "$2" = "-f" ] && echo "-f")"
-  #~ if annex_direct; then
-    #~ # Note: git annex repos in direct mode
-    #~ # are not compatible with vcsh
-    #~ git annex sync
-  #~ else
-    #~ end() {
-      #~ trap - INT TERM
-      #~ unset -f end
-      #~ git checkout -fq "$CURRENT"
-      #~ if [ -n "$STASH" ]; then
-        #~ git stash apply -q --index "$STASH"
-      #~ fi
-    #~ }
-    #~ set +e
-    #~ STASH="$(git stash create 2>/dev/null)"
-    #~ trap end INT TERM
-    #~ if [ -n "$STASH" ]; then
-      #~ git reset --hard HEAD -q --
-    #~ fi
-    #~ CURRENT="$(git rev-parse --abbrev-ref HEAD)"
-    #~ for BRANCH in $BRANCHES; do
-      #~ # Is there a remote with this branch ?
-      #~ if command git for-each-ref --shell refs/remotes | grep "refs/remotes/.*/$BRANCH'" >/dev/null; then
-        #~ git checkout $FORCE "$BRANCH" >/dev/null || continue
-        #~ if [ -x "$(git --exec-path)/git-pull" ]; then
-          #~ git pull --rebase || exit $?
-        #~ else
-          #~ git merge --ff-only "$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)" || exit $?
-        #~ fi
-        #~ echo "-----"
-      #~ fi
-    #~ done
-    #~ end
-  #~ fi
-#~ }
-#~ fi
-
-# Batch pull the current branch from all remotes
-git_pull() { git_pull_all "$2" "${1:-$(git_branch)}"; }
-
-# Batch pull existing remote branches
-if [ $(git_version) -gt $(git_version 2.9) ]; then
-git_pull_all() {
-  git_exists || return 1
-  local IFS="$(printf ' \t\n')"
-  local REMOTES="${1:-$(git_remotes)}"
-  local BRANCHES="${2:-$(git_branches)}"
-  local FORCE="$([ "$3" = "-f" ] && echo "-f")"
-  if annex_direct; then
-    # Note: git annex repos in direct mode
-    # are not compatible with vcsh
-    git annex sync
-  else
-    CURRENT="$(git rev-parse --abbrev-ref HEAD)"
-    git fetch --all 2>/dev/null
-    for BRANCH in $BRANCHES; do
-      # Is there a remote with this branch ?
-      if command git for-each-ref --shell refs/remotes | grep "refs/remotes/.*/$BRANCH'" >/dev/null; then
-        git checkout $FORCE "$BRANCH" >/dev/null || continue
-        for REMOTE in $REMOTES; do
-          # Does this remote have this branch ?
-          if command git show-ref "refs/remotes/$REMOTE/$BRANCH" >/dev/null; then
-            git pull --rebase --autostash "$REMOTE" "$BRANCH" || exit $?
-            echo "-----"
-          fi
-        done
-      fi
-    done
-    git checkout -fq "$CURRENT"
-  fi
-}
-else
-git_pull_all() {
-  git_exists || return 1
-  local IFS="$(printf ' \t\n')"
-  local REMOTES="${1:-$(git_remotes)}"
-  local BRANCHES="${2:-$(git_branches)}"
-  local FORCE="$([ "$3" = "-f" ] && echo "-f")"
-  if annex_direct; then
-    # Note: git annex repos in direct mode
-    # are not compatible with vcsh
-    git annex sync
-  else
-    end() {
-      trap - INT TERM
-      unset -f end
-      git checkout -fq "$CURRENT"
-      if [ -n "$STASH" ]; then
-        git stash apply -q --index "$STASH"
-      fi
-    }
-    set +e
-    STASH="$(git stash create 2>/dev/null)"
-    trap end INT TERM
-    if [ -n "$STASH" ]; then
-      git reset --hard HEAD -q --
-    fi
-    CURRENT="$(git rev-parse --abbrev-ref HEAD)"
-    git fetch --all 2>/dev/null
-    for BRANCH in $BRANCHES; do
-      # Is there a remote with this branch ?
-      if command git for-each-ref --shell refs/remotes | grep "refs/remotes/.*/$BRANCH'" >/dev/null; then
-        git checkout $FORCE "$BRANCH" >/dev/null || continue
-        for REMOTE in $REMOTES; do
-          # Does this remote have this branch ?
-          if command git show-ref "refs/remotes/$REMOTE/$BRANCH" >/dev/null; then
-            if [ -x "$(git --exec-path)/git-pull" ]; then
-              git pull --rebase "$REMOTE" "$BRANCH" || exit $?
-            else
-              git merge --ff-only "$REMOTE/$BRANCH" || exit $?
-            fi
-            echo "-----"
-          fi
-        done
-      fi
-    done
-    end
-  fi
-}
-fi
-
 # Push the current branch to all remotes
 git_push() { git_push_all "$2" "${1:-$(git_branch)}"; }
 
@@ -544,6 +382,8 @@ git_push_all() {
     done
   done
 }
+
+########################################
 
 # Secure file deletion
 _git_secure_delete() {
