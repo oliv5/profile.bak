@@ -131,7 +131,8 @@ git_branch() {
   #git branch -a | grep -E '^\*' | cut -c 3-
   #git for-each-ref --format='%(objectname) %(refname:short)' refs/heads | awk "/^$(git rev-parse HEAD)/ {print \$2}"
   # The following works for detached heads too
-  { git ${2:+--git-dir="$2"} symbolic-ref "${1:-HEAD}" 2>/dev/null || echo "detached_head"; } | sed 's;refs/heads/;;'
+  #{ git ${2:+--git-dir="$2"} symbolic-ref "${1:-HEAD}" 2>/dev/null || echo "detached_head"; } | sed 's;refs/heads/;;'
+  git ${2:+--git-dir="$2"} symbolic-ref --short "${1:-HEAD}" 2>/dev/null || echo "detached_head"
 }
 
 # Get current branch tracking
@@ -1017,6 +1018,12 @@ git_tag_list_prev() {
     FROM="$(git describe --tags --abbrev=0 ${FROM:+${FROM}^} 2>/dev/null)"
     [ -n "$FROM" ] && echo "$FROM"
   done
+}
+
+# Test tag existenz
+git_tag_exists() {
+  loca REF="${1:?No ref specified...}"
+  git show-ref --tags -d | grep -qe "$(git rev-parse "$REF")" >/dev/null 2>&1
 }
 
 ########################################
