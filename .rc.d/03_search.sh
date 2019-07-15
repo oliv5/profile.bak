@@ -21,14 +21,28 @@ _ffind2() {
 }
 _ffind3() {
   local FCASE="${FCASE:--}regex"
-  local ROOT="$(echo "${1%/*}" | sed -re 's;/?[^/]*\*.*$;;g')"
-  local DIR="${1%/*}"; DIR="${DIR%"$ROOT"}"
+  local ROOT="$(echo "$1" | sed -r -e 's;[^/]*$;;g' -e 's;[^/]*\*.*$;;g')"
+  local DIR="${1#$ROOT}"; DIR="${DIR%"${1##*/}"}"
   local FILES="$(echo "${1##*/}" | sed -e 's/;/|/g')"
-  local REGEX="$(echo "*$DIR/($FILES)" | sed -e 's/\./\\./g ; s/*/.*/g ; s;//;/;g')"
+  local REGEX="$(echo "$DIR/($FILES)" | sed -e 's/\./\\./g ; s/*/.*/g ; s;//;/;g')"
   shift 2>/dev/null
-  find -L "${ROOT:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE "$REGEX"} ${FARGS} "$@"
+  find -L "${ROOT:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*$REGEX"} ${FARGS} "$@"
 }
-alias _ffind='_ffind2'
+#~ _ffind_test() {
+  #~ mkdir -p a/b/c
+  #~ touch a/b/c/toto.txt a/b/c/toto.txt2
+  #~ echo "Test"; _ffind "toto.txt"
+  #~ echo "Test"; _ffind "./toto.txt"
+  #~ echo "Test"; _ffind "./a*/toto.txt"
+  #~ echo "Test"; _ffind "./a*/*b/toto.txt"
+  #~ echo "Test"; _ffind "toto.*"
+  #~ echo "Test"; _ffind "./toto.*"
+  #~ echo "Test"; _ffind "./a*/toto.*"
+  #~ echo "Test"; _ffind "./a*/*b/toto.*"
+  #~ rm a/b/c/toto.txt a/b/c/toto.txt2
+  #~ rmdir -p a/b/c
+#~ }
+alias _ffind='_ffind3'
 alias      ff='FCASE=   FTYPE=  FXTYPE=  FARGS= _ffind'
 alias     fff='FCASE=   FTYPE=f FXTYPE=  FARGS= _ffind'
 alias     ffd='FCASE=   FTYPE=d FXTYPE=  FARGS= _ffind'
