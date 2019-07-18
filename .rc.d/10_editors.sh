@@ -35,10 +35,14 @@ export COLORTERM="xterm" # backspace bug in vim
 # Start gvim
 if command -v gvim >/dev/null; then
   gvim() {
-    local ARGS="$(echo $@ | awk -F: '{print "+" $2 " " $1}')"
-    ARGS="${1:+--remote-${VIM_USETABS:+tab-}silent} $ARGS"
-    [ "$1" == "-" ] && ARGS="-"
-    command gvim $ARGS
+    local ARGS=""
+    if [ "$1" = "-" ]; then
+      ARGS="-"
+    elif [ -n "$1" ]; then
+      ARGS="$(echo "$@" | awk -F: '{print "+" $2 " \"" $1 "\""}')"
+      ARGS="${1:+--remote-${VIM_USETABS:+tab-}silent} $ARGS"
+    fi
+    eval command gvim $ARGS
   }
 fi
 
