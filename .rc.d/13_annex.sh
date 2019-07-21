@@ -874,6 +874,24 @@ annex_find_repo() {
 		done 
 }
 
+# Set preferred content
+annex_preferred() {
+  annex_exists || return 1
+  local REPO="${1:-.}"
+  local REQUIRED="${2:-$(git_root)/.required}"
+  local WANTED="${3:-$(git_root)/.wanted}"
+  if [ -r "$REQUIRED" ]; then
+    cat "$REQUIRED" | xargs -r git annex required "$REPO"
+  elif [ -n "$REQUIRED" ]; then
+    git annex required "$REPO" "$REQUIRED"
+  fi
+  if [ -r "$WANTED" ]; then
+    cat "$WANTED" | xargs -r git annex wanted "$REPO"
+  elif [ -n "$WANTED" ]; then
+    git annex wanted "$REPO" "$WANTED"
+  fi
+}
+
 ########################################
 # Fsck all
 annex_fsck() {
