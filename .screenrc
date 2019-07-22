@@ -99,6 +99,9 @@ bindkey "^[[27;5;9~" next
 # Ctrl-Shift-Tab
 bindkey "^[[27;6;9~" prev
 
+# UTF-8
+utf8 on
+
 ##################################
 # Trial bindings
 #bind ' ' windows # space key displays a list of windows

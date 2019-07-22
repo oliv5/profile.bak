@@ -28,6 +28,12 @@ if command -v "locale" >/dev/null 2>&1; then
   unset LC_NUMERIC LC_PAPER LC_COLLATE LC_MESSAGES
 fi
 
+# Test locales display
+# https://perlgeek.de/en/article/set-up-a-clean-utf8-environment
+test_locales() {
+  perl -Mcharnames=:full -CS -wle 'print "\N{EURO SIGN}"'
+}
+
 ################################
 # Setup path
 [ -n "${HOME##*/}" ] && path_prepend "$HOME/bin" "$HOME/.local/bin" "$HOME/pbin" "$HOME/pbin/wrappers"
