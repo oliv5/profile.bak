@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# One realpath like implementation
+command -v realpath >/dev/null ||
+realpath() {
+    python -c "import os.path; print os.path.relpath('$1', '${2:-$PWD}')"
+}
+
 # Prepend to path
 _path_prepend() {
   local VAR="${1:-PATH}"
