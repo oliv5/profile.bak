@@ -576,7 +576,7 @@ _annex_rsync() {
     find annex/objects -type f | while read SRCNAME; do
       annex_fromkey0 "$SRCNAME" | xargs -0 -rn1 echo | while read DSTNAME; do
         DST_DIR="$(dirname "${DST##*:}/${DSTNAME}")"
-        while ! $DBG rsync --rsync-path="mkdir -p \"${DST_DIR}\" && rsync" $RSYNC_OPT "${SRC}/${SRCNAME}" "${DST}/${DSTNAME}"; do sleep 1; done
+        while ! $DBG rsync -K -L --rsync-path="mkdir -p \"${DST_DIR}\" && rsync" $RSYNC_OPT "${SRC}/${SRCNAME}" "${DST}/${DSTNAME}"; do sleep 1; done
       done
     done
   else
@@ -585,7 +585,7 @@ _annex_rsync() {
     # 1) copy the local files
     for FILE; do
       DST_DIR="$(dirname "${DST##*:}/${FILE}")"
-      while ! $DBG rsync --rsync-path="mkdir -p \"$DST_DIR\" && rsync" $RSYNC_OPT "$FILE" "$DST/$FILE"; do sleep 1; done
+      while ! $DBG rsync -K -L --rsync-path="mkdir -p \"$DST_DIR\" && rsync" $RSYNC_OPT "$FILE" "$DST/$FILE"; do sleep 1; done
     done
     # 2) get, copy and drop the remote files
     git annex find --include='*' --print0 "$@" | xargs -0 -r sh -c '
@@ -632,9 +632,9 @@ _annex_rsync() {
             while ! $DBG git annex get ${FROM:+--from "$FROM"} "$@"; do sleep 1; done
             for FILE; do
               DST_DIR="$(dirname "${DST##*:}/${FILE}")"
-              while ! $DBG rsync --rsync-path="mkdir -p \"$DST_DIR\" && rsync" $RSYNC_OPT "$FILE" "$DST/$FILE"; do sleep 1; done
+              while ! $DBG rsync -K -L --rsync-path="mkdir -p \"$DST_DIR\" && rsync" $RSYNC_OPT "$FILE" "$DST/$FILE"; do sleep 1; done
             done
-            $DBG git annex drop "$@"
+            while ! $DBG git annex drop "$@"; do sleep 1; done
           fi
           # Empty list
           set --
