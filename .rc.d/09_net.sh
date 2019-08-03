@@ -200,6 +200,46 @@ opened_port_in() {
 }
 
 ##############################
+# SSH shurtcuts (rely on sshh alias)
+alias ssh_shutdown='sshh -t -- shutdown'
+alias ssh_cancel='sshh -t -- shutdown -c'
+alias ssh_poweroff='sshh -t -- sudo poweroff'
+alias ssh_halt='sshh -t -- sudo halt'
+alias ssh_reboot='sshh -t -- sudo reboot'
+alias ssh_hibernate='sshh -t -- sudo hibernate'
+alias ssh_ping='sshh -- ping'
+alias ssh_top='sshh -t -- top'
+alias ssh_netstat='sshh -t -- sudo netstat'
+alias ssh_mount='sshh -t -- sudo mount'
+ssh_aria2() { ssh nas 'sh -c "set -e; cd \"\$1\" && shift; aria2c \"\$@\""' _ "$@"; }
+ssh_youtubedl() { ssh nas 'sh -c "set -e; cd \"\$1\" && shift; youtube-dl \"\$@\""' _ "$@"; }
+
+# Open ssh tunnel
+ssh_open_tunnel() {
+  local SERVER="${1:?No server specified...}"
+  local OPTS=""
+  shift
+  for PORT; do
+    OPTS="${OPTS:+$OPTS }-L $PORT:127.0.0.1:$PORT"
+  done
+  [ -n "$OPTS" ] &&
+    ssh -fnxNT "$SERVER" $OPTS 2>/dev/null
+  ssh_ls_tunnel
+}
+
+# List ssh tunnels
+ssh_ls_tunnel() {
+  ps -ef | grep -E "ssh.* -L .*:.*:" | grep -v grep
+}
+
+# Close ssh tunnel
+ssh_close_tunnel() {
+  for PORT; do
+    pgrep -f "ssh.* -L $PORT:.*:" | xargs -i sh -c "echo Close tunnel with PID {}; kill {} 2>/dev/null"
+  done
+  ssh_ls_tunnel
+}
+
 # Add ssh dedicated command id in ~/.ssh/authorized_keys
 # Use ssh-copy-id for std login shells
 ssh_copy_id() {
