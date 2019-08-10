@@ -85,8 +85,9 @@ bak_date() {
 }
 
 ##############################
-# Unlink - overwrites the unlink legacy tool
-unlink() {
+# Replace symlink by the actual file
+# Not equal to the "unlink" legacy tool
+file_unlink() {
   for FILE; do
     LINK="$(readlink "$FILE")"
     [ -n "$LINK" ] && cp --remove-destination "$LINK" "$FILE"
