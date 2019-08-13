@@ -388,13 +388,14 @@ _annex_bundle() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.xz}"; OUT="${OUT%%.tar}.tar.xz"
   local OWNER="${1:-$USER}"
+  local COMPRESSION="${2:-9}"
   if annex_bare; then
     if [ -d "$(git_dir)/annex" ]; then
       echo "Skip empty bundle..."
       return 1
     fi
     tar c -h -O --exclude='*/creds/*' -- "$(git_dir)/annex" |
-      xz -z -9 -c --verbose - > "${OUT}"
+      xz -z -${COMPRESSION} -c --verbose - > "${OUT}"
   else
     if [ $(git annex find 2>/dev/null | wc -l) -eq 0 ]; then
       echo "Skip empty bundle..."
@@ -402,12 +403,12 @@ _annex_bundle() {
     fi
     git annex find --print0 | 
       xargs -r0 tar c -h -O --exclude-vcs -- |
-        xz -z -9 -c --verbose - > "${OUT}"
+        xz -z -${COMPRESSION} -c --verbose - > "${OUT}"
   fi
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
 annex_bundle() {
-  _annex_archive "annex.bundle.tar.xz" "$1" "$2" "$3" "_annex_bundle" "$4"
+  _annex_archive "annex.bundle.tar.xz" "$1" "$2" "$3" "_annex_bundle" "$4" "$5"
 }
 
 # Annex enumeration
@@ -415,6 +416,7 @@ _annex_enum() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.xz}"; OUT="${OUT%%.txt}.txt.xz"
   local OWNER="${1:-$USER}"
+  local COMPRESSION="${2:-9}"
   if annex_bare; then
     echo "Repository '$(git_dir)' cannot be enumerated. Abort..."
     return 2
@@ -427,13 +429,13 @@ _annex_enum() {
       echo "$FILE" | base64 -w 0
       echo
     ' _ > "${OUT%%.txt.xz}.txt"
-    xz -k -z -9 -S .xz --verbose "${OUT%%.txt.xz}.txt" &&
+    xz -k -z -${COMPRESSION} -S .xz --verbose "${OUT%%.txt.xz}.txt" &&
       _git_secure_delete "${OUT%%.txt.xz}.txt"
   fi
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
 annex_enum() {
-  _annex_archive "annex.enum_local.txt.xz" "$1" "$2" "$3" "_annex_enum" "$4"
+  _annex_archive "annex.enum_local.txt.xz" "$1" "$2" "$3" "_annex_enum" "$4" "$5"
 }
 
 # Store annex infos
@@ -441,13 +443,14 @@ _annex_info() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.xz}"; OUT="${OUT%%.txt}.txt.xz"
   local OWNER="${1:-$USER}"
+  local COMPRESSION="${2:-9}"
   annex_getinfo > "${OUT%%.xz}"
-  xz -k -z -9 -S .xz --verbose "${OUT%%.xz}" &&
+  xz -k -z -${COMPRESSION} -S .xz --verbose "${OUT%%.xz}" &&
     _git_secure_delete "${OUT%%.xz}"
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
 annex_info(){
-  _annex_archive "annex.info.txt.xz" "$1" "$2" "$3" "_annex_info" "$4"
+  _annex_archive "annex.info.txt.xz" "$1" "$2" "$3" "_annex_info" "$4" "$5"
 }
 
 # Enum special remotes
@@ -455,8 +458,9 @@ _annex_enum_remotes() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.xz}"; OUT="${OUT%%.txt}.txt.xz"
   local OWNER="${1:-$USER}"
+  local COMPRESSION="${2:-9}"
   annex_lookup_remotes > "${OUT%%.xz}"
-  xz -k -z -9 -S .xz --verbose "${OUT%%.xz}" &&
+  xz -k -z -${COMPRESSION} -S .xz --verbose "${OUT%%.xz}" &&
     _git_secure_delete "${OUT%%.xz}"
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
@@ -465,7 +469,7 @@ annex_enum_remotes() {
     echo "Repository '$(git_dir)' cannot be enumerated. Abort..."
     return 1
   else
-    _annex_archive "annex.enum_remotes.txt.xz" "$1" "$2" "$3" "_annex_enum_remotes" "$4"
+    _annex_archive "annex.enum_remotes.txt.xz" "$1" "$2" "$3" "_annex_enum_remotes" "$4" "$5"
   fi
 }
 
