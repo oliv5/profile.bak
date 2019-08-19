@@ -814,6 +814,11 @@ annex_upkeep() {
     unset GET
     unset SEND
   fi
+  # Force PULL if a remote is using gcrypt
+  if [ -n "$NO_PULL" ] && git_gcrypt $REMOTES; then
+    echo "Force pull because of gcrypt remote(s)"
+    unset NO_PULL
+  fi
   # Add
   if [ -n "$ADD" ]; then
     $DBG git annex add . ${FORCE:+--force} || return $?

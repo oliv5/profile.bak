@@ -436,7 +436,6 @@ git_upkeep() {
   local PUSH=""
   local REMOTES=""
   # Get arguments
-  #echo "[git_upkeep] arguments: $@"
   while getopts "andcpur:m:zh" OPTFLAG; do
     case "$OPTFLAG" in
       a) NEW=1; DEL=1;;
@@ -468,7 +467,11 @@ git_upkeep() {
   [ $# -ne 0 ] && echo "Bad parameters: $@" && return 1
   # Main
   git_exists || return 1
-  #echo "[git_upkeep] start at $(date)"
+  # Force PULL if a remote is using gcrypt
+  if [ -z "$PULL" ] && [ -n "$PUSH" ] && git_gcrypt $REMOTES; then
+    echo "Force pull because of gcrypt remote(s)"
+    PULL=1
+  fi
   # Add
   if [ -n "$DEL" ]; then
       git_stx "^D[ M]|^ D" | xargs -r0 $DBG git add --all --ignore-error --
@@ -492,7 +495,6 @@ git_upkeep() {
       $DBG git push $REMOTE || return $?
     done
   fi
-  #echo "[git_upkeep] end at $(date)"
 }
 
 ########################################
@@ -1040,6 +1042,14 @@ git_fixup() {
 }
 
 ########################################
+# Test if remote is using gcrypt
+git_gcrypt() {
+  for REMOTE; do
+    git_url "$REMOTE" | grep '^gcrypt::' >/dev/null && return 0
+  done
+  false
+}
+
 # Git clone gcrypt repo
 git_clone_gcrypt() {
   local URL="${1:?No URL specified...}"
