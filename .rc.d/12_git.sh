@@ -384,6 +384,18 @@ git_push_all() {
   done
 }
 
+# Enable/disable push on a given remote(s)
+git_push_disable() {
+  for REMOTE in ${@:-$(git_remotes)}; do
+    git remote set-url --push "$REMOTE" no-push
+  done
+}
+git_push_enable() {
+  for REMOTE in ${@:-$(git_remotes)}; do
+    git config --unset "remote.${REMOTE}.pushurl" no-push
+  done
+}
+
 ########################################
 
 # Secure file deletion
