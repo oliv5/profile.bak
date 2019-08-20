@@ -199,35 +199,43 @@ opened_port_in() {
   fi
 }
 
+
 ##############################
-# SSH command shortcuts (rely on sshh alias)
-#ssh_aria2() { ssh nas 'sh -c "set -e; cd \"\$1\" && shift; aria2c \"\$@\""' _ "$@"; }
-#ssh_youtubedl() { ssh nas 'sh -c "set -e; cd \"\$1\" && shift; youtube-dl \"\$@\""' _ "$@"; }
-#alias ssh_top='sshh -t -- top'
-#alias ssh_reboot='sshh -t -- sudo reboot'
-#alias ssh_shutdown='sshh -t -- shutdown'
-#alias ssh_cancel='sshh -t -- shutdown -c'
-#alias ssh_poweroff='sshh -t -- sudo poweroff'
-#alias ssh_halt='sshh -t -- sudo halt'
-#alias ssh_hibernate='sshh -t -- sudo hibernate'
-#alias ssh_ping='sshh -- ping'
-#alias ssh_netstat='sshh -t -- sudo netstat'
-#alias ssh_mount='sshh -t -- sudo mount'
-
 # SSH command shortcuts
-ssh_aria2() { local SERVER="${1:?No server specified...}"; shift; ssh -t $SERVER -- aria2c "$@"; }
-ssh_youtubedl() { local SERVER="${1:?No server specified...}"; shift; ssh -t $SERVER -- youtubedl "$@"; }
-ssh_top() { local SERVER="${1:?No server specified...}"; shift; ssh -t $SERVER -- top "$@"; }
-ssh_reboot() { local SERVER="${1:?No server specified...}"; shift; ssh -t $SERVER -- sudo reboot "$@"; }
-ssh_shutdown() { local SERVER="${1:?No server specified...}"; shift; ssh -t $SERVER -- sudo shutdown "$@"; }
-ssh_cancel() { local SERVER="${1:?No server specified...}"; shift; ssh -t $SERVER -- sudo shutdown -c "$@"; }
-ssh_poweroff() { local SERVER="${1:?No server specified...}"; shift; ssh -t $SERVER -- sudo poweroff "$@"; }
-ssh_halt() { local SERVER="${1:?No server specified...}"; shift; ssh -t $SERVER -- sudo halt "$@"; }
-ssh_hibernate() { local SERVER="${1:?No server specified...}"; shift; ssh -t $SERVER -- sudo hibernate "$@"; }
-ssh_ping() { local SERVER="${1:?No server specified...}"; shift; ssh -t $SERVER -- ping "$@"; }
-ssh_netstat() { local SERVER="${1:?No server specified...}"; shift; ssh -t $SERVER -- sudo netstat "$@"; }
-ssh_mount() { local SERVER="${1:?No server specified...}"; shift; ssh -t $SERVER -- sudo mount "$@"; }
+ssh_aria2()       { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output specified...}"; shift 2; ssh -t $SSHOPTS -- sh -c "cd \"$DIR\"; aria2c \"$@\""; }
+ssh_youtubedl()   { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output specified...}"; shift 2; ssh -t $SSHOPTS -- sh -c "cd \"$DIR\"; youtubedl \"$@\""; }
+ssh_top()         { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- top "$@"; }
+ssh_reboot()      { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo reboot "$@"; }
+ssh_shutdown()    { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo shutdown "$@"; }
+ssh_cancel()      { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo shutdown -c "$@"; }
+ssh_poweroff()    { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo poweroff "$@"; }
+ssh_halt()        { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo halt "$@"; }
+ssh_hibernate()   { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo hibernate "$@"; }
+ssh_ping()        { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- ping "$@"; }
+ssh_netstat()     { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo netstat "$@"; }
+ssh_mount()       { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo mount "$@"; }
 
+##############################
+# Home ssh aliases examples (to be defined in .rc.local)
+#alias sshh='command ssh -i ~/private/.ssh/id_rsa -F ~/private/.ssh/config'
+#alias scph='command scp -i ~/private/.ssh/id_rsa -F ~/private/.ssh/config'
+#alias rsynch='command rsync -e "ssh -i ~/private/.ssh/id_rsa -F ~/private/.ssh/config"'
+
+# SSH command shortcuts (rely on sshh)
+sshh_aria2()      { ssh(){ sshh "$@"; }; ssh_aria2 "$@"; }
+sshh_youtubedl()  { ssh(){ sshh "$@"; }; ssh_youtubedl "$@"; }
+sshh_top()        { ssh(){ sshh "$@"; }; ssh_top "$@"; }
+sshh_reboot()     { ssh(){ sshh "$@"; }; ssh_reboot "$@"; }
+sshh_shutdown()   { ssh(){ sshh "$@"; }; ssh_shutdown "$@"; }
+sshh_cancel()     { ssh(){ sshh "$@"; }; ssh_cancel "$@"; }
+sshh_halt()       { ssh(){ sshh "$@"; }; ssh_halt "$@"; }
+sshh_hibernate()  { ssh(){ sshh "$@"; }; ssh_hibernate "$@"; }
+sshh_ping()       { ssh(){ sshh "$@"; }; ssh_ping "$@"; }
+sshh_netstat()    { ssh(){ sshh "$@"; }; ssh_netstat "$@"; }
+sshh_mount()      { ssh(){ sshh "$@"; }; ssh_mount "$@"; }
+
+
+##############################
 # Ssh tunnel shortcuts
 ssh_tunnel_open_local() {
   local SERVER="${1:?No server specified...}"
