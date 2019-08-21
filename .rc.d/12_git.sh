@@ -1385,9 +1385,8 @@ if [ $(git_version) -gt $(git_version 2.9) ]; then
 elif [ $(git_version) -ge $(git_version 1.7.10.4) ]; then
   alias gup='git pull --rebase'
 else
-  alias gup='git_pull'
+  alias gup='git pull'
 fi
-alias gupa='git_pull_all'
 alias gfe='git fetch'
 alias gfa='git fetch --all --tags'
 # Config aliases
