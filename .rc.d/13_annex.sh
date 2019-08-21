@@ -892,16 +892,18 @@ annex_find_repo() {
 annex_preferred() {
   annex_exists || return 1
   local REPO="${1:-.}"
-  local REQUIRED="${2:-$(annex_root)/.required}"
-  local WANTED="${3:-$(annex_root)/.wanted}"
+  local REQUIRED_FILE="$(annex_root)/.required"
+  local WANTED_FILE="$(annex_root)/.wanted"
+  local REQUIRED="${2:-$REQUIRED_FILE}"
+  local WANTED="${3:-$WANTED_FILE}"
   if [ -r "$REQUIRED" ]; then
     cat "$REQUIRED" | xargs -ri git annex required "$REPO" "{}"
-  elif [ -n "$REQUIRED" ]; then
+  elif [ "$REQUIRED" != "$REQUIRED_FILE" ]; then
     git annex required "$REPO" "$REQUIRED"
   fi
   if [ -r "$WANTED" ]; then
     cat "$WANTED" | xargs -ri git annex wanted "$REPO" "{}"
-  elif [ -n "$WANTED" ]; then
+  elif [ "$WANTED" != "$WANTED_FILE" ]; then
     git annex wanted "$REPO" "$WANTED"
   fi
 }
@@ -1198,6 +1200,14 @@ annex_rm_duplicates() {
   git annex find --include '*' --format='${file} ${escaped_key}\n' | \
       sort -k2 | uniq --repeated -f1 | sed 's/ [^ ]*$//' | \
       xargs -d '\n' git rm
+}
+
+########################################
+annex_commit_enable() {
+  git config --unset "annex.autocommit" false
+}
+annex_commit_disable() {
+  git config --add "annex.autocommit" false
 }
 
 ########################################

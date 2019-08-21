@@ -60,6 +60,10 @@ git_setup() {
   # Misc
   git config --global rerere.enabled true
   git config --global core.excludesfile '~/.gitignore'
+  # Disable push in gcrypt remotes; enable the one you want manually
+  for REMOTE in $(git_remotes); do
+    git_gcrypt "$REMOTE" && echo "Disable push in remote $REMOTE" && git_push_disable "$REMOTE"
+  done
 }
 
 ########################################
