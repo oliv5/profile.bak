@@ -164,6 +164,7 @@ if !exists('g:loaded_vimrc')
 endif
 
 " Gui options
+set guioptions-=m     " Remove menu bar
 set guioptions-=T     " Remove toolbar
 set guioptions+=aA    " Enable autoselect (autocopy)
 
