@@ -422,9 +422,10 @@ git_bundle() {
       local GPG_RECIPIENT="$2"
       local GPG_TRUST="${3:+--trust-model always}"
       local OWNER="${4:-$USER}"
+      local XZOPTS="$5"
       echo "Git bundle into $OUT"
       git bundle create "${OUT%%.xz}" --all
-      xz -k -z -9 -S .xz --verbose "${OUT%%.xz}" &&
+      xz -k -z -S .xz --verbose $XZOPTS "${OUT%%.xz}" &&
         _git_secure_delete "${OUT%%.xz}"
       chown "$OWNER" "$OUT"
       if [ ! -z "$GPG_RECIPIENT" ]; then

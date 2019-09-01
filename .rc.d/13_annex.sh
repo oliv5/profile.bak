@@ -388,14 +388,14 @@ _annex_bundle() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.xz}"; OUT="${OUT%%.tar}.tar.xz"
   local OWNER="${1:-$USER}"
-  local COMPRESSION="${2:-9}"
+  local XZOPTS="${2:--9}"
   if annex_bare; then
     if [ -d "$(git_dir)/annex" ]; then
       echo "Skip empty bundle..."
       return 1
     fi
     tar c -h -O --exclude='*/creds/*' -- "$(git_dir)/annex" |
-      xz -z -${COMPRESSION} -c --verbose - > "${OUT}"
+      xz -z -c --verbose ${XZOPTS} - > "${OUT}"
   else
     if [ $(git annex find 2>/dev/null | wc -l) -eq 0 ]; then
       echo "Skip empty bundle..."
@@ -403,7 +403,7 @@ _annex_bundle() {
     fi
     git annex find --print0 | 
       xargs -r0 tar c -h -O --exclude-vcs -- |
-        xz -z -${COMPRESSION} -c --verbose - > "${OUT}"
+        xz -z -c --verbose ${XZOPTS} - > "${OUT}"
   fi
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
@@ -416,7 +416,7 @@ _annex_enum() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.xz}"; OUT="${OUT%%.txt}.txt.xz"
   local OWNER="${1:-$USER}"
-  local COMPRESSION="${2:-9}"
+  local XZOPTS="${2:--9}"
   if annex_bare; then
     echo "Repository '$(git_dir)' cannot be enumerated. Abort..."
     return 2
@@ -429,7 +429,7 @@ _annex_enum() {
       echo "$FILE" | base64 -w 0
       echo
     ' _ > "${OUT%%.txt.xz}.txt"
-    xz -k -z -${COMPRESSION} -S .xz --verbose "${OUT%%.txt.xz}.txt" &&
+    xz -k -z -S .xz --verbose ${XZOPTS} "${OUT%%.txt.xz}.txt" &&
       _git_secure_delete "${OUT%%.txt.xz}.txt"
   fi
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
@@ -443,9 +443,9 @@ _annex_info() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.xz}"; OUT="${OUT%%.txt}.txt.xz"
   local OWNER="${1:-$USER}"
-  local COMPRESSION="${2:-9}"
+  local XZOPTS="${2:--9}"
   annex_getinfo > "${OUT%%.xz}"
-  xz -k -z -${COMPRESSION} -S .xz --verbose "${OUT%%.xz}" &&
+  xz -k -z -S .xz --verbose ${XZOPTS} "${OUT%%.xz}" &&
     _git_secure_delete "${OUT%%.xz}"
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
@@ -458,9 +458,9 @@ _annex_enum_remotes() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.xz}"; OUT="${OUT%%.txt}.txt.xz"
   local OWNER="${1:-$USER}"
-  local COMPRESSION="${2:-9}"
+  local XZOPTS="${2:--9}"
   annex_lookup_remotes > "${OUT%%.xz}"
-  xz -k -z -${COMPRESSION} -S .xz --verbose "${OUT%%.xz}" &&
+  xz -k -z -S .xz --verbose ${XZOPTS} "${OUT%%.xz}" &&
     _git_secure_delete "${OUT%%.xz}"
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
