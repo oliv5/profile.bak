@@ -179,7 +179,7 @@ alias iggls='iggl 2>/dev/null'
 _fsed1() {
   # Get arguments
   #local SEDOPT="$(arg_rtrim 3 "$@")"; shift $(($#-3))
-  local SEDOPT=""; [ $# -gt 3 ] && local SEDOPT="$1" && shift 1
+  local SEDOPT="--follow-symlinks"; [ $# -gt 3 ] && SEDOPT="${SEDOPT:+$SEDOPT }$1" && shift 1
   local IN="$1"; local OUT="$2"; local FILES="$3"
   echo "Replace '$IN' by '$OUT' in files '$FILES' ${SEDOPT:+with options $SEDOPT}"
   # Ask for options
@@ -200,7 +200,7 @@ _fsed1() {
 _fsed2() {
   # Get arguments
   #local SEDOPT="$(arg_rtrim 3 "$@")"; shift $(($#-3))
-  local SEDOPT=""; [ $# -gt 3 ] && local SEDOPT="$1" && shift 1
+  local SEDOPT="--follow-symlinks"; [ $# -gt 3 ] && SEDOPT="${SEDOPT:+$SEDOPT }$1" && shift 1
   local IN="$1"; local OUT="$2"; local FILES="$3"
   # Call find and sed
   _ffind "$FILES" $SEXCLUDE -type f \

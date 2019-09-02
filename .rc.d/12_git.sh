@@ -340,13 +340,17 @@ git_rootshorthash() {
 }
 
 ########################################
-# Get git author
+# Get commits author
 git_author() {
   local REF
   for REF; do
-    git log --format='%ae' "${REF}^!"
+    git log --format='%an <%ae>' "${REF}^!"
   done
 }
+
+# Show all authors commits
+alias git_authors='git shortlog -s -n'
+alias git_authors_all='git shortlog -s -n -a'
 
 ########################################
 # Extract a path from a repo without cloning/checking it out
@@ -964,20 +968,20 @@ git_graph() {
   git log --graph --pretty=format:'%C(blue)%h - %C(bold cyan)%an %C(bold green)(%ar)%C(bold yellow)%d%n''          %C(bold red)%s%C(reset)%n''%w(0,14,14)%b' "$@"
 }
 
-# Search for a string in HEAD a commit
+# Search for a string from HEAD
 git_grep() {
   git grep "$@" ||
+    git log -S "$@"
+}
+
+# Search for a string in all the commits
+git_grep_all() {
+  git grep "$@" $(git rev-list --all) ||
     git log -S "$@" --source --all
 }
 
 # Show history
 alias git_history='git log -p'
-
-# Search in history
-git_search() {
-  git grep "$@" $(git rev-list --all) ||
-    git log -S "$@" --source --all
-}
 
 ########################################
 # Git gc all
@@ -1315,6 +1319,9 @@ alias ghar='git_roothash'
 alias gl='git log --oneline'
 alias glg='git log --oneline | grep'
 alias glgi='git log --oneline | grep -i'
+alias gla='git log --all | grep'
+alias glag='git log --all | grep -i'
+alias glagi='git log --all'
 alias gln='git log --oneline -n'
 alias gl1='git log --oneline -n 1'
 alias gl2='git log --oneline -n 2'
@@ -1324,8 +1331,6 @@ alias gl10='git log --oneline -n 10'
 alias glf='git log --follow'
 alias gls='git log --stat'
 alias glS='git log -S'
-alias gla='git shortlog -s -n'
-alias glaa='git shortlog -s -n -a'
 alias glt='git log --graph'
 alias glh='git log -p'
 alias glha='git log --pretty=format: --name-only --diff-filter=A | sort -u'
