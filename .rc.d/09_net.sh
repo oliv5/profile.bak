@@ -233,20 +233,24 @@ sshh_hibernate()  { ssh(){ sshh "$@"; }; ssh_hibernate "$@"; }
 sshh_ping()       { ssh(){ sshh "$@"; }; ssh_ping "$@"; }
 sshh_netstat()    { ssh(){ sshh "$@"; }; ssh_netstat "$@"; }
 sshh_mount()      { ssh(){ sshh "$@"; }; ssh_mount "$@"; }
-
+sshh_tunnel_open_local()  { ssh(){ sshh "$@"; }; ssh_tunnel_open_local "$@"; }
+sshh_tunnel_open_remote() { ssh(){ sshh "$@"; }; sshh_tunnel_open_remote "$@"; }
 
 ##############################
 # Ssh tunnel shortcuts
-ssh_tunnel_open_local() {
-  local SERVER="${1:?No server specified...}"
-  local PORTS="${2:?No ports specified...}"
+_ssh_tunnel_open() {
+  local TYPE="${1:?No tunnel type specified (L/R)...}"
+  local SERVER="${2:?No server specified...}"
+  local PORTS="${3:?No ports specified...}"
   local TUNNEL=""
-  shift 2
+  shift 3
   for PORT in $PORTS; do
-    TUNNEL="${TUNNEL:+$TUNNEL }-L $PORT:127.0.0.1:$PORT"
+    TUNNEL="${TUNNEL:+$TUNNEL }-$TYPE $PORT:127.0.0.1:$PORT"
   done
   ssh -fnxNT "$@" "$SERVER" $TUNNEL
 }
+ssh_tunnel_open_local()  { _ssh_tunnel_open L "$@"; }
+ssh_tunnel_open_remote() { _ssh_tunnel_open R "$@"; }
 ssh_tunnel_close() {
   pgrep -f "ssh.*-L" ${@:+\| grep "$@"} | xargs -r kill
 }
