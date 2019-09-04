@@ -48,10 +48,10 @@ elif _exists ssh "$METHOD"; then
   set -- "$1" "$2" "$3" "$4"
   # Execute local script in remote
   ssh "$SSHCRED" <<EOF
-set -- "$1" "$2" "$3" "$4"; $(cat "${RC_DIR:-$HOME}/pbin/wol.sh")
+set -- "$1" "$2" "$3" "$4"; $(cat "${RC_DIR:-$HOME}/rbin/wol.sh")
 EOF
   # Execute remote script
-  #ssh -t "$SSHCRED" -- '${RC_DIR:-$HOME}/pbin/wol.sh' "$@"
+  #ssh -t "$SSHCRED" -- '${RC_DIR:-$HOME}/rbin/wol.sh' "$@"
 else
   echo >&2 "No appropriate WOL method available..."
   false

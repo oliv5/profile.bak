@@ -5,7 +5,7 @@ include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/lib.d/alias" 2>/dev/null || 
 skip = [ ! -z "$VCSH_REPO_NAME" ] && echo "WARNING: Mr is run from a VCSH repo !!!!"
 
 # Load external libraries
-lib = export PATH="$HOME/pbin:$PATH"
+lib = export PATH="$HOME/rbin:$PATH"
 	  . "${RC_DIR:-$HOME}/.rc.d/06_mount.sh"
 	  . "${RC_DIR:-$HOME}/.rc.d/12_git.sh"
 	  . "${RC_DIR:-$HOME}/.rc.d/12_svn.sh"

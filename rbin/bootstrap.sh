@@ -1,5 +1,5 @@
 #!/bin/sh
-# Run with cmd: (curl https://raw.githubusercontent.com/oliv5/profile/master/pbin/bootstrap.sh -L | sh)
+# Run with cmd: (curl https://raw.githubusercontent.com/oliv5/profile/master/rbin/bootstrap.sh -L | sh)
 set -e
 
 ###################

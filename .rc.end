@@ -36,9 +36,9 @@ test_locales() {
 
 ################################
 # Setup path
-[ -n "${HOME##*/}" ] && path_prepend "$HOME/bin" "$HOME/.local/bin" "$HOME/pbin" "$HOME/pbin/wrappers"
+[ -n "${HOME##*/}" ] && path_prepend "$HOME/bin" "$HOME/.local/bin" "$HOME/rbin" "$HOME/rbin/wrappers"
 path_append /usr/local/bin /usr/local/sbin /usr/bin /usr/sbin /bin /sbin
-[ -n "${HOME##*/}" ] && path_append "$HOME/pbin/externals"
+[ -n "${HOME##*/}" ] && path_append "$HOME/rbin/externals"
 path_cleanup
 
 # Remove some aliases/fct shortcuts
