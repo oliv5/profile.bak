@@ -223,7 +223,7 @@ find_duplicates() {
   #awk '{print $1}' "$TMP1" | sort | uniq -d > "$TMP2"
   sort -k 1 "$TMP1" | cut -d' ' -f 1 | uniq -d > "$TMP2"
   while read SUM; do
-    grep "$SUM" "$TMP1" | cut -d' ' -f 2-
+    grep "$SUM" "$TMP1" | cut -d' ' -f 2- | sort
     echo
   done < "$TMP2"
   rm "$TMP1" "$TMP2" 2>/dev/null
