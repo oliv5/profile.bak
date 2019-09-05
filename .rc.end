@@ -36,7 +36,7 @@ test_locales() {
 
 ################################
 # Setup path
-[ -n "${HOME##*/}" ] && path_prepend "$HOME/bin" "$HOME/.local/bin" "$HOME/rbin" "$HOME/rbin/wrappers"
+[ -n "${HOME##*/}" ] && path_prepend "$HOME/bin" "$HOME/.local/bin" "$HOME/rbin" "$HOME/rbin/wrappers" "$HOME/go/bin"
 path_append /usr/local/bin /usr/local/sbin /usr/bin /usr/sbin /bin /sbin
 [ -n "${HOME##*/}" ] && path_append "$HOME/rbin/externals"
 path_cleanup
