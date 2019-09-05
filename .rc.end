@@ -41,6 +41,7 @@ path_append /usr/local/bin /usr/local/sbin /usr/bin /usr/sbin /bin /sbin
 [ -n "${HOME##*/}" ] && path_append "$HOME/rbin/externals"
 path_cleanup
 
+################################
 # Remove some aliases/fct shortcuts
 cmd_unset which find grep awk sed xargs cut
 
