@@ -252,7 +252,9 @@ _ssh_tunnel_open() {
 ssh_tunnel_open_local()  { _ssh_tunnel_open L "$@"; }
 ssh_tunnel_open_remote() { _ssh_tunnel_open R "$@"; }
 ssh_tunnel_close() {
-  pgrep -f "ssh.*-L" ${@:+\| grep "$@"} | xargs -r kill
+  for PORT; do
+    pgrep -f "ssh.*-L $PORT:" | xargs -r kill
+  done
 }
 ssh_tunnel_ls() {
   ps -ef | grep -E "ssh.* -L .*:.*:" | grep -v grep
