@@ -1189,17 +1189,22 @@ annex_setpresentkey() {
 
 ########################################
 # Find duplicates
+annex_duplicates0() {
+  local DIR="${1:-.}"
+  local FILTER="${2:---all-repeated=separate}"
+  git annex find "$DIR" --include '*' --format='${file} ${escaped_key}\000' |
+      sort -zk2 | uniq -z $FILTER -f1 |
+      sed -z 's/ [^ ]*$//'
+}
 annex_duplicates() {
-  git annex find --include '*' --format='${file} ${escaped_key}\n' | \
-      sort -k2 | uniq --all-repeated=separate -f1 | \
-      sed 's/ [^ ]*$//'
+  annex_duplicates0 "$@" |
+    xargs -r0 -n1
 }
 
 # Remove one duplicate
 annex_rm_duplicates() {
-  git annex find --include '*' --format='${file} ${escaped_key}\n' | \
-      sort -k2 | uniq --repeated -f1 | sed 's/ [^ ]*$//' | \
-      xargs -d '\n' git rm
+  annex_duplicates0 "$1" --repeated |
+    xargs -r0 git rm
 }
 
 ########################################
