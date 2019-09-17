@@ -68,7 +68,7 @@ is_in() {
 # Returns true for interactive shells
 shell_isinteractive() {
   # Test whether stdin exists
-  [ -t "0" ] || [ -p /dev/stdin ]
+  [ -t "0" ] || ! [ -p /dev/stdin ]
   # Alternate method
   #case $- in
   #  *i*) return 0;;

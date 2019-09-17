@@ -1,6 +1,6 @@
 #!/bin/sh
 # Main user profile script
-# It should be compatible with all shells (dash, bash,...)
+# It should be kept compatible with all shells (dash, bash,...)
 
 # Main source function
 rc_source() {
@@ -135,5 +135,9 @@ rc_source() {
 # Global aliases
 alias rc='rc_source'
 
+# Do not autoload user env in non-interactive shells
+# This is also done in .bashrc
+! [ -t "0" ] && [ -p /dev/stdin ] && RC_NOAUTOLOAD=1
+
 # Source rc files
-[ -z "$RC_NOAUTOLOAD" -o $# -gt 0 ] && rc_source "$@"
+[ -z "$RC_NOAUTOLOAD" -a ! -f .rc.noautoload ] || [ $# -gt 0 ] && rc_source "$@"
