@@ -61,7 +61,8 @@ mkcscope() {
   # Build file list incrementally
   scancsdir "$SRC" "$DST"
   # Build tag file
-  command cscope $CSCOPE_OPTIONS -i "$CSCOPE_FILES" -f "$CSCOPE_DB"
+  command cscope $CSCOPE_OPTIONS -i "$CSCOPE_FILES" -f "$CSCOPE_DB" &&
+    rm "${CSCOPE_DB}.in" "${CSCOPE_DB}.po" 2>/dev/null
 }
 
 # Scan and make cscope db
@@ -78,7 +79,8 @@ mkcscope_clean() {
   local CSCOPE_DB="$DST/${_CSCOPE_OUT}"
   # Build tag file
   ( set -f; find -L "$SRC" $_CSCOPE_EXCLUDE -regextype posix-egrep -regex "$_CSCOPE_REGEX" -type f -execdir readlink -f "{}" \; |\
-    command cscope $CSCOPE_OPTIONS -i '-' -f "$CSCOPE_DB" )
+    command cscope $CSCOPE_OPTIONS -i '-' -f "$CSCOPE_DB" ) &&
+      rm "${CSCOPE_DB}.in" "${CSCOPE_DB}.po" 2>/dev/null
 }
 
 # Make id-utils db
