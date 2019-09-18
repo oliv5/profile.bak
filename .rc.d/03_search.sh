@@ -9,7 +9,7 @@ _ffind1() {
   shift 2>/dev/null
   local REGEX='s/;!/" -o -not '${FCASE}' "/g ; s/&!/" -a -not '${FCASE}' "/g ; s/;/" -o '${FCASE}' "/g ; s/&/" -a '${FCASE}' /g'
   ( set -f; FILES="\"$(echo $FILES | sed -e "$REGEX")\""
-    eval find -L "${DIR:-.}" -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} \\\( ${FILES:+$FCASE "$FILES"} -true \\\) ${FARGS} "$@")
+    eval find ${FOPTS} "${DIR:-.}" -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} \\\( ${FILES:+$FCASE "$FILES"} -true \\\) ${FARGS} "$@")
 }
 _ffind2() {
   local FCASE="${FCASE:--}regex"
@@ -17,7 +17,7 @@ _ffind2() {
   local DIR="${1%"$FILES"}"
   shift 2>/dev/null
   ( set -f; FILES="$(echo $FILES | sed -e 's/;/|/g ; s/\./\\./g ; s/*/.*/g')"
-    find -L "${DIR:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*/($FILES)"} ${FARGS} "$@")
+    find ${FOPTS} "${DIR:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*/($FILES)"} ${FARGS} "$@")
 }
 _ffind3() {
   local FCASE="${FCASE:--}regex"
@@ -26,7 +26,7 @@ _ffind3() {
   local FILES="$(echo "${1##*/}" | sed -e 's/;/|/g')"
   local REGEX="$(echo "$DIR/($FILES)" | sed -e 's/\./\\./g ; s/*/.*/g ; s;//;/;g')"
   shift 2>/dev/null
-  find -L "${ROOT:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*$REGEX"} ${FARGS} "$@"
+  find ${FOPTS} "${ROOT:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*$REGEX"} ${FARGS} "$@"
 }
 #~ _ffind_test() {
   #~ mkdir -p a/b/c
@@ -43,30 +43,30 @@ _ffind3() {
   #~ rmdir -p a/b/c
 #~ }
 alias _ffind='_ffind3'
-alias      ff='FCASE=   FTYPE=  FXTYPE=  FARGS= _ffind'
-alias     fff='FCASE=   FTYPE=f FXTYPE=  FARGS= _ffind'
-alias     ffd='FCASE=   FTYPE=d FXTYPE=  FARGS= _ffind'
-alias     ffl='FCASE=   FTYPE=l FXTYPE=  FARGS= _ffind'
-alias    fflf='FCASE=   FTYPE=l FXTYPE=f FARGS= _ffind'
-alias    fflb='FCASE=   FTYPE=l FXTYPE=l FARGS= _ffind'
-alias     iff='FCASE=-i FTYPE=  FXTYPE=  FARGS= _ffind'
-alias    ifff='FCASE=-i FTYPE=f FXTYPE=  FARGS= _ffind'
-alias    iffd='FCASE=-i FTYPE=d FXTYPE=  FARGS= _ffind'
-alias    iffl='FCASE=-i FTYPE=l FXTYPE=  FARGS= _ffind'
-alias   ifflf='FCASE=-i FTYPE=l FXTYPE=f FARGS= _ffind'
-alias   ifflb='FCASE=-i FTYPE=l FXTYPE=l FARGS= _ffind'
-alias    ffp0='FCASE=   FTYPE=  FXTYPE=  FARGS=-print0 _ffind'
-alias   fffp0='FCASE=   FTYPE=f FXTYPE=  FARGS=-print0 _ffind'
-alias   ffdp0='FCASE=   FTYPE=d FXTYPE=  FARGS=-print0 _ffind'
-alias   fflp0='FCASE=   FTYPE=l FXTYPE=  FARGS=-print0 _ffind'
-alias  fflfp0='FCASE=   FTYPE=l FXTYPE=f FARGS=-print0 _ffind'
-alias  fflbp0='FCASE=   FTYPE=l FXTYPE=l FARGS=-print0 _ffind'
-alias   iffp0='FCASE=-i FTYPE=  FXTYPE=  FARGS=-print0 _ffind'
-alias  ifffp0='FCASE=-i FTYPE=f FXTYPE=  FARGS=-print0 _ffind'
-alias  iffdp0='FCASE=-i FTYPE=d FXTYPE=  FARGS=-print0 _ffind'
-alias  ifflp0='FCASE=-i FTYPE=l FXTYPE=  FARGS=-print0 _ffind'
-alias ifflfp0='FCASE=-i FTYPE=l FXTYPE=f FARGS=-print0 _ffind'
-alias ifflbp0='FCASE=-i FTYPE=l FXTYPE=l FARGS=-print0 _ffind'
+alias      ff='FCASE=   FTYPE=  FXTYPE=  FOPTS="${FOPTS:+$FOPTS} -L" FARGS="${FARGS:+$FARGS}" _ffind'
+alias     fff='FCASE=   FTYPE=f FXTYPE=  FOPTS="${FOPTS:+$FOPTS} -L" FARGS="${FARGS:+$FARGS}" _ffind'
+alias     ffd='FCASE=   FTYPE=d FXTYPE=  FOPTS="${FOPTS:+$FOPTS} -L" FARGS="${FARGS:+$FARGS}" _ffind'
+alias     ffl='FCASE=   FTYPE=l FXTYPE=  FOPTS="${FOPTS:+$FOPTS}"    FARGS="${FARGS:+$FARGS}" _ffind'
+alias    fflf='FCASE=   FTYPE=l FXTYPE=f FOPTS="${FOPTS:+$FOPTS}"    FARGS="${FARGS:+$FARGS}" _ffind'
+alias    fflb='FCASE=   FTYPE=l FXTYPE=l FOPTS="${FOPTS:+$FOPTS}"    FARGS="${FARGS:+$FARGS}" _ffind'
+alias     iff='FCASE=-i FTYPE=  FXTYPE=  FOPTS="${FOPTS:+$FOPTS} -L" FARGS="${FARGS:+$FARGS}" _ffind'
+alias    ifff='FCASE=-i FTYPE=f FXTYPE=  FOPTS="${FOPTS:+$FOPTS} -L" FARGS="${FARGS:+$FARGS}" _ffind'
+alias    iffd='FCASE=-i FTYPE=d FXTYPE=  FOPTS="${FOPTS:+$FOPTS} -L" FARGS="${FARGS:+$FARGS}" _ffind'
+alias    iffl='FCASE=-i FTYPE=l FXTYPE=  FOPTS="${FOPTS:+$FOPTS}"    FARGS="${FARGS:+$FARGS}" _ffind'
+alias   ifflf='FCASE=-i FTYPE=l FXTYPE=f FOPTS="${FOPTS:+$FOPTS}"    FARGS="${FARGS:+$FARGS}" _ffind'
+alias   ifflb='FCASE=-i FTYPE=l FXTYPE=l FOPTS="${FOPTS:+$FOPTS}"    FARGS="${FARGS:+$FARGS}" _ffind'
+alias    ffp0='FARGS=-print0 ff'
+alias   fffp0='FARGS=-print0 fff'
+alias   ffdp0='FARGS=-print0 ffd'
+alias   fflp0='FARGS=-print0 ffl'
+alias  fflfp0='FARGS=-print0 fflf'
+alias  fflbp0='FARGS=-print0 fflb'
+alias   iffp0='FARGS=-print0 iff'
+alias  ifffp0='FARGS=-print0 ifff'
+alias  iffdp0='FARGS=-print0 iffd'
+alias  ifflp0='FARGS=-print0 iffl'
+alias ifflfp0='FARGS=-print0 ifflf'
+alias ifflbp0='FARGS=-print0 ifflb'
 alias     ffs='ff    2>/dev/null'
 alias    fffs='fff   2>/dev/null'
 alias    ffds='ffd   2>/dev/null'
@@ -79,30 +79,30 @@ alias   iffds='iffd  2>/dev/null'
 alias   iffls='iffl  2>/dev/null'
 alias  ifflfs='ifflf 2>/dev/null'
 alias  ifflbs='ifflb 2>/dev/null'
-alias     ff1='FCASE=   FTYPE=  FXTYPE=  FARGS="-maxdepth 1" _ffind'
-alias    fff1='FCASE=   FTYPE=f FXTYPE=  FARGS="-maxdepth 1" _ffind'
-alias    ffd1='FCASE=   FTYPE=d FXTYPE=  FARGS="-maxdepth 1" _ffind'
-alias    ffl1='FCASE=   FTYPE=l FXTYPE=  FARGS="-maxdepth 1" _ffind'
-alias   fflf1='FCASE=   FTYPE=l FXTYPE=f FARGS="-maxdepth 1" _ffind'
-alias   fflb1='FCASE=   FTYPE=l FXTYPE=l FARGS="-maxdepth 1" _ffind'
-alias    iff1='FCASE=-i FTYPE=  FXTYPE=  FARGS="-maxdepth 1" _ffind'
-alias   ifff1='FCASE=-i FTYPE=f FXTYPE=  FARGS="-maxdepth 1" _ffind'
-alias   iffd1='FCASE=-i FTYPE=d FXTYPE=  FARGS="-maxdepth 1" _ffind'
-alias   iffl1='FCASE=-i FTYPE=l FXTYPE=  FARGS="-maxdepth 1" _ffind'
-alias  ifflf1='FCASE=-i FTYPE=l FXTYPE=f FARGS="-maxdepth 1" _ffind'
-alias  ifflb1='FCASE=-i FTYPE=l FXTYPE=l FARGS="-maxdepth 1" _ffind'
-alias     ff2='FCASE=   FTYPE=  FXTYPE=  FARGS="-maxdepth 2" _ffind'
-alias    fff2='FCASE=   FTYPE=f FXTYPE=  FARGS="-maxdepth 2" _ffind'
-alias    ffd2='FCASE=   FTYPE=d FXTYPE=  FARGS="-maxdepth 2" _ffind'
-alias    ffl2='FCASE=   FTYPE=l FXTYPE=  FARGS="-maxdepth 2" _ffind'
-alias   fflf2='FCASE=   FTYPE=l FXTYPE=f FARGS="-maxdepth 2" _ffind'
-alias   fflb2='FCASE=   FTYPE=l FXTYPE=l FARGS="-maxdepth 2" _ffind'
-alias    iff2='FCASE=-i FTYPE=  FXTYPE=  FARGS="-maxdepth 2" _ffind'
-alias   ifff2='FCASE=-i FTYPE=f FXTYPE=  FARGS="-maxdepth 2" _ffind'
-alias   iffd2='FCASE=-i FTYPE=d FXTYPE=  FARGS="-maxdepth 2" _ffind'
-alias   iffl2='FCASE=-i FTYPE=l FXTYPE=  FARGS="-maxdepth 2" _ffind'
-alias  ifflf2='FCASE=-i FTYPE=l FXTYPE=f FARGS="-maxdepth 2" _ffind'
-alias  ifflb2='FCASE=-i FTYPE=l FXTYPE=l FARGS="-maxdepth 2" _ffind'
+alias    ff1='FARGS="-maxdepth 1" ff'
+alias   fff1='FARGS="-maxdepth 1" fff'
+alias   ffd1='FARGS="-maxdepth 1" ffd'
+alias   ffl1='FARGS="-maxdepth 1" ffl'
+alias  fflf1='FARGS="-maxdepth 1" fflf'
+alias  fflb1='FARGS="-maxdepth 1" fflb'
+alias   iff1='FARGS="-maxdepth 1" iff'
+alias  ifff1='FARGS="-maxdepth 1" ifff'
+alias  iffd1='FARGS="-maxdepth 1" iffd'
+alias  iffl1='FARGS="-maxdepth 1" iffl'
+alias ifflf1='FARGS="-maxdepth 1" ifflf'
+alias ifflb1='FARGS="-maxdepth 1" ifflb'
+alias    ff2='FARGS="-maxdepth 2" ff'
+alias   fff2='FARGS="-maxdepth 2" fff'
+alias   ffd2='FARGS="-maxdepth 2" ffd'
+alias   ffl2='FARGS="-maxdepth 2" ffl'
+alias  fflf2='FARGS="-maxdepth 2" fflf'
+alias  fflb2='FARGS="-maxdepth 2" fflb'
+alias   iff2='FARGS="-maxdepth 2" iff'
+alias  ifff2='FARGS="-maxdepth 2" ifff'
+alias  iffd2='FARGS="-maxdepth 2" iffd'
+alias  iffl2='FARGS="-maxdepth 2" iffl'
+alias ifflf2='FARGS="-maxdepth 2" ifflf'
+alias ifflb2='FARGS="-maxdepth 2" ifflb'
 
 ###########################################
 # Backward find
@@ -125,21 +125,19 @@ _bfind1() {
   echo "$FOUND"
 }
 alias _bfind='_bfind1'
-alias  bf='BTYPE=   _bfind'
-alias bff='BTYPE=-f _bfind'
-alias bfd='BTYPE=-d _bfind'
+alias  bff='BTYPE=   _bfind'
+alias bfff='BTYPE=-f _bfind'
+alias bffd='BTYPE=-d _bfind'
 
 ###########################################
 # Find breadth-first (width-first)
 #_wfind1() { _ffind "${@:-*}" -prune -printf '%d\t%p\n' | sort -nk1 | cut -f2-; }
-_wfind1() { _ffind "${@:-*}" -depth; }
-alias _wfind='_wfind1'
-alias   wf='FCASE= FTYPE=  FXTYPE=  FARGS= _wfind'
-alias  wff='FCASE= FTYPE=f FXTYPE=  FARGS= _wfind'
-alias  wfd='FCASE= FTYPE=d FXTYPE=  FARGS= _wfind'
-alias  wfl='FCASE= FTYPE=l FXTYPE=  FARGS= _wfind'
-alias wflf='FCASE= FTYPE=l FXTYPE=f FARGS= _wfind'
-alias wflb='FCASE= FTYPE=l FXTYPE=l FARGS= _wfind'
+alias   wff='FARGS=-depth ff'
+alias  wfff='FARGS=-depth fff'
+alias  wffd='FARGS=-depth ffd'
+alias  wffl='FARGS=-depth ffl'
+alias wfflf='FARGS=-depth fflf'
+alias wfflb='FARGS=-depth fflb'
 
 ###########################################
 # File grep implementations
@@ -163,10 +161,10 @@ _fgrep2() {
   (set -f; eval grep -RnH --color ${GCASE} ${GARGS} -e "$ARGS" ${FILES:+--include="$FILES"} "${DIR:-.}")
 }
 alias _fgrep='_fgrep2'
-alias    gg='FCASE= FTYPE=  FXTYPE=  FARGS= GCASE=   GARGS=   _fgrep'
-alias   igg='FCASE= FTYPE=  FXTYPE=  FARGS= GCASE=-i GARGS=   _fgrep'
-alias   ggl='FCASE= FTYPE=  FXTYPE=  FARGS= GCASE=   GARGS=-l _fgrep'
-alias  iggl='FCASE= FTYPE=  FXTYPE=  FARGS= GCASE=-i GARGS=-l _fgrep'
+alias    gg='FCASE= FTYPE= FXTYPE= FOPTS=-L FARGS= GCASE=   GARGS=   _fgrep'
+alias   igg='FCASE= FTYPE= FXTYPE= FOPTS=-L FARGS= GCASE=-i GARGS=   _fgrep'
+alias   ggl='FCASE= FTYPE= FXTYPE= FOPTS=   FARGS= GCASE=   GARGS=-l _fgrep'
+alias  iggl='FCASE= FTYPE= FXTYPE= FOPTS=   FARGS= GCASE=-i GARGS=-l _fgrep'
 alias   ggs='gg   2>/dev/null'
 alias  iggs='igg  2>/dev/null'
 alias  ggls='ggl  2>/dev/null'
@@ -206,10 +204,10 @@ _fsed2() {
   _ffind "$FILES" $SEXCLUDE -type f \
     -execdir sed $SEDOPT --in-place -e "s|$IN|$OUT|g" "{}" \;
 }
-alias  hh='FCASE=   FTYPE=  FXTYPE= FARGS= SEXCLUDE= _fsed1'
-alias ihh='FCASE=-i FTYPE=  FXTYPE= FARGS= SEXCLUDE= _fsed1'
-alias  hhf='FCASE=   FTYPE=  FXTYPE= FARGS= SEXCLUDE= _fsed2'
-alias ihhf='FCASE=-i FTYPE=  FXTYPE= FARGS= SEXCLUDE= _fsed2'
+alias   hh='FCASE=   FTYPE= FXTYPE= FOPTS= FARGS= SEXCLUDE= _fsed1'
+alias  ihh='FCASE=-i FTYPE= FXTYPE= FOPTS= FARGS= SEXCLUDE= _fsed1'
+alias  hhf='FCASE=   FTYPE= FXTYPE= FOPTS= FARGS= SEXCLUDE= _fsed2'
+alias ihhf='FCASE=-i FTYPE= FXTYPE= FOPTS= FARGS= SEXCLUDE= _fsed2'
 
 ###########################################
 # Find duplicate files in directory
