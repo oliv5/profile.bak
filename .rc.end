@@ -125,8 +125,12 @@ alias fs='stat -c "%s"'
 # Move
 alias mv="mv -i"
 
-# rm
+# rm files
+if command -v gio >/dev/null; then
+alias trash='gio trash'
+else
 alias trash='gvfs-trash'
+fi
 
 # mk/rm dir
 alias mkd='mkdir'
