@@ -1061,6 +1061,10 @@ git_fixup() {
   git_modified && git commit --fixup="$COMMIT"
   git rebase --interactive --autosquash "${COMMIT}~2"
 }
+git_squashn() {
+  local COMMIT="${1:-HEAD}"
+  git reset --soft ${COMMIT} &&  git commit --edit -m "$(git log --format=%B --reverse HEAD..HEAD@{1})"
+}
 
 ########################################
 # Test if remote is using gcrypt
