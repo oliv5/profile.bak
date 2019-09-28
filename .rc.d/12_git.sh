@@ -1179,6 +1179,7 @@ fi
 alias gt='git status -uno'
 alias gtu='gstu'
 alias gst='git_st'
+alias gst0='git_stx'
 alias gstv='git_stx | xargs -0 $GEDITOR'
 alias gstm='git status --porcelain -b | awk "NR==1 || /^(M.|.M)/"'    # modified
 alias gsta='git status --porcelain -b | awk "NR==1 || /^A[ MD]/"'     # added
