@@ -82,6 +82,7 @@ set backupdir=$XDG_CACHE_HOME/vim/vimbackup
 set viewdir=$XDG_CACHE_HOME/vim/vimview
 set directory=$XDG_CACHE_HOME/vim/vimswap
 set undodir=$XDG_CACHE_HOME/vim/vimundo
+silent !mkdir -p "$XDG_CACHE_HOME/vim/vimbackup" "$XDG_CACHE_HOME/vim/vimview" "$XDG_CACHE_HOME/vim/vimswap" "$XDG_CACHE_HOME/vim/vimundo" >/dev/null 2>&1
 
 " Save/restore part of edit session
 "  /10  :  search items
