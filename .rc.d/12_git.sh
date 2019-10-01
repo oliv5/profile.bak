@@ -1005,7 +1005,7 @@ git_find0() {
   done
 }
 git_find() {
-  git_find0 "$@" | xargs
+  git_find0 "$@" | xargs -r0
 }
 
 ########################################
