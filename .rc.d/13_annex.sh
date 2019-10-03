@@ -708,6 +708,9 @@ annex_drop_fast() {
 ########################################
 # Annex upkeep
 annex_upkeep() {
+  devcat() {
+    { command -v sudo >/dev/null && sudo cat "$1" 2>/dev/null || su root -c "cat '$1'"; } | tr '[:upper:]' '[:lower:]' | xargs printf '%s'
+  }
   local DBG=""
   # Add options
   local ADD=""
@@ -785,7 +788,7 @@ annex_upkeep() {
     set -- $CHARGE_STATUS
     local DEVICE="${1:-/sys/class/power_supply/battery/status}"
     shift
-    local CURRENT_STATUS="$({ command -v sudo >/dev/null && sudo cat "$DEVICE" 2>/dev/null || su root -c 'cat "$DEVICE"'; } | tr '[:upper:]' '[:lower:]')"
+    local CURRENT_STATUS="$(devcat "$DEVICE")"
     local EXPECTED_STATUS="$@"
     local REMAINING_STATUS="${EXPECTED_STATUS%${CURRENT_STATUS}*}"
     set --
@@ -798,7 +801,7 @@ annex_upkeep() {
   if [ -n "$CHARGE_LEVEL" ]; then
     set -- $CHARGE_LEVEL
     local DEVICE="${1:-/sys/class/power_supply/battery/capacity}"
-    local CURRENT_LEVEL="$({ command -v sudo >/dev/null && sudo cat "$DEVICE" 2>/dev/null || su root -c 'cat "$DEVICE"'; } | tr '[:upper:]' '[:lower:]')"
+    local CURRENT_LEVEL="$(devcat "$DEVICE")"
     local EXPECTED_LEVEL="${2:-75}"
     set --
     if [ "$CURRENT_LEVEL" -lt "$EXPECTED_LEVEL" 2>/dev/null ]; then
