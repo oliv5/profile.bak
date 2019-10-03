@@ -216,10 +216,11 @@ ssh_ping()        { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh op
 sshh_aria2()      { ssh(){ sshh "$@"; }; ssh_aria2 "$@"; }
 sshh_youtubedl()  { ssh(){ sshh "$@"; }; ssh_youtubedl "$@"; }
 sshh_ping()       { ssh(){ sshh "$@"; }; ssh_ping "$@"; }
-sshh_proxy()      { ssh(){ sshh "$@"; }; ssh_proxy "$@"; }
-sshh_vpn()        { ssh(){ sshh "$@"; }; ssh_vpn "$@"; }
+sshh_vpn_tcp()    { ssh(){ sshh "$@"; }; ssh_vpn_tcp "$@"; }
+sshh_vpn_udp()    { ssh(){ sshh "$@"; }; ssh_vpn_udp "$@"; }
 sshh_tunnel_open_local()  { ssh(){ sshh "$@"; }; ssh_tunnel_open_local "$@"; }
 sshh_tunnel_open_remote() { ssh(){ sshh "$@"; }; sshh_tunnel_open_remote "$@"; }
+sshh_proxy()      { ssh(){ sshh "$@"; }; ssh_proxy "$@"; }
 
 ############################
 # Open proxy through SSH tunnel
@@ -260,35 +261,45 @@ ssh_tunnel_ls() {
 }
 
 ##############################
-# VPN via SSH
-ssh_vpn() {
+# TCP VPN via SSH
+ssh_vpn_tcp() {
   echo "!!! UNDER TEST !!!"
   local RELAY_ADDR="${1:?No relay address specified...}"
   local RELAY_PORT="${2:?No relay port specified...}"
   local VPN_ADDR="${3:?No VPN address specified...}"
   local VPN_PORT="${4:?No VPN port specified...}"
   local VPN_CONF="${5:?No VPN config file specified...}"
-  local VPN_TYPE="${6:-UDP}"
+  # Main tunnel
+  ssh -fnxNT -L "$RELAY_PORT:$VPN_ADDR:$VPN_PORT" "$RELAY_ADDR"
+  # Openvpn blocking call
+  ( cd "$(dirname "$VPN_CONF")"
+    sudo openvpn --config "$VPN_CONF"
+  )
+  # Close tunnel
+  ssh_tunnel_close "$RELAY_PORT"
+}
+
+# UDP VPN via SSH
+ssh_vpn_udp() {
+  echo "!!! UNDER TEST !!!"
+  local RELAY_ADDR="${1:?No relay address specified...}"
+  local RELAY_PORT="${2:?No relay port specified...}"
+  local VPN_ADDR="${3:?No VPN address specified...}"
+  local VPN_PORT="${4:?No VPN port specified...}"
+  local VPN_CONF="${5:?No VPN config file specified...}"
   # Main tunnel
   ssh_tunnel_open_local "$RELAY_ADDR" "$RELAY_PORT"
-  # Setup the remote relay
+  # Setup the relays
+  sudo socat "UDP-LISTEN:0.0.0.0,bind=$VPN_PORT,su=nobody,fork,reuseaddr" "TCP:127.0.0.1:$RELAY_PORT"
   if [ "$RELAY_ADDR" != "$VPN_ADDR" ]; then
-    VPN_TYPE="$(echo $VPN_TYPE | tr "[:lower:]" "[:upper:]")"
-    ssh "$RELAY_ADDR" -t -- sudo -b socat "TCP-LISTEN:0.0.0.0,bind=$RELAY_PORT,su=nobody,fork,reuseaddr" "$VPN_TYPE:$VPN_ADDR:$VPN_PORT"
-  fi
-  # Setup the local UDP-to-TCP relay
-  if [ "$VPN_TYPE" = "UDP" ]; then
-    sudo socat "$VPN_TYPE-LISTEN:0.0.0.0,bind=$VPN_PORT,su=nobody,fork,reuseaddr" "TCP:127.0.0.1:$RELAY_PORT"
+    ssh "$RELAY_ADDR" -t -- sudo -b socat "TCP-LISTEN:0.0.0.0,bind=$RELAY_PORT,su=nobody,fork,reuseaddr" "UDP:$VPN_ADDR:$VPN_PORT"
   fi
   # Openvpn blocking call
   ( cd "$(dirname "$VPN_CONF")"
     sudo openvpn --config "$VPN_CONF"
   )
-  # Close the local relay
-  if [ "$VPN_TYPE" = "UDP" ]; then
-    sudo killall socat
-  fi
-  # Close the remote relay
+  # Close the relays
+  sudo killall socat
   if [ "$RELAY_ADDR" != "$VPN_ADDR" ]; then
     ssh "$RELAY_ADDR" -t -- sudo killall socat
   fi
