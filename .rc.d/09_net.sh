@@ -202,38 +202,22 @@ opened_port_in() {
 
 ##############################
 # SSH command shortcuts
-ssh_aria2()       { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output specified...}"; shift 2; ssh $SSHOPTS -- sh -c "cd \"$DIR\"; nohup aria2c \"$@\" >/dev/null 2>&1 &"; }
-ssh_youtubedl()   { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output specified...}"; shift 2; ssh $SSHOPTS -- sh -c "cd \"$DIR\"; nohup youtubedl \"$@\" >/dev/null 2>&1 &"; }
-ssh_top()         { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- top "$@"; }
-ssh_reboot()      { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo reboot "$@"; }
-ssh_shutdown()    { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo shutdown "$@"; }
-ssh_cancel()      { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo shutdown -c "$@"; }
-ssh_poweroff()    { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo poweroff "$@"; }
-ssh_halt()        { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo halt "$@"; }
-ssh_hibernate()   { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo hibernate "$@"; }
-ssh_ping()        { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- ping "$@"; }
-ssh_netstat()     { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo netstat "$@"; }
-ssh_mount()       { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo mount "$@"; }
+ssh_aria2()       { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output folder specified...}"; shift 2; ssh -t $SSHOPTS -- sh -c "cd \"$DIR\"; aria2c \"$@\""; }
+ssh_youtubedl()   { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output folder specified...}"; shift 2; ssh -t $SSHOPTS -- sh -c "cd \"$DIR\"; youtubedl \"$@\""; }
+ssh_ping()        { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- echo pong; }
 
 ##############################
-# Home ssh aliases examples (to be defined in .rc.local)
+# Home SSH aliases examples (to be defined in .rc.local)
 #alias sshh='command ssh -i ~/private/.ssh/id_rsa -F ~/private/.ssh/config'
 #alias scph='command scp -i ~/private/.ssh/id_rsa -F ~/private/.ssh/config'
 #alias rsynch='command rsync -e "ssh -i ~/private/.ssh/id_rsa -F ~/private/.ssh/config"'
 
-# SSH command shortcuts (rely on sshh)
+# SSH command shortcuts (rely on sshh, but cannot just alias ssh=sshh, has to create subfunction)
 sshh_aria2()      { ssh(){ sshh "$@"; }; ssh_aria2 "$@"; }
 sshh_youtubedl()  { ssh(){ sshh "$@"; }; ssh_youtubedl "$@"; }
-sshh_top()        { ssh(){ sshh "$@"; }; ssh_top "$@"; }
-sshh_reboot()     { ssh(){ sshh "$@"; }; ssh_reboot "$@"; }
-sshh_shutdown()   { ssh(){ sshh "$@"; }; ssh_shutdown "$@"; }
-sshh_cancel()     { ssh(){ sshh "$@"; }; ssh_cancel "$@"; }
-sshh_halt()       { ssh(){ sshh "$@"; }; ssh_halt "$@"; }
-sshh_hibernate()  { ssh(){ sshh "$@"; }; ssh_hibernate "$@"; }
 sshh_ping()       { ssh(){ sshh "$@"; }; ssh_ping "$@"; }
-sshh_netstat()    { ssh(){ sshh "$@"; }; ssh_netstat "$@"; }
-sshh_mount()      { ssh(){ sshh "$@"; }; ssh_mount "$@"; }
 sshh_proxy()      { ssh(){ sshh "$@"; }; ssh_proxy "$@"; }
+sshh_vpn()        { ssh(){ sshh "$@"; }; ssh_vpn "$@"; }
 sshh_tunnel_open_local()  { ssh(){ sshh "$@"; }; ssh_tunnel_open_local "$@"; }
 sshh_tunnel_open_remote() { ssh(){ sshh "$@"; }; sshh_tunnel_open_remote "$@"; }
 
@@ -252,7 +236,7 @@ ssh_proxy_close() {
 }
 
 ##############################
-# Ssh tunnel shortcuts
+# SSH tunnel shortcuts
 _ssh_tunnel_open() {
   local TYPE="${1:?No tunnel type specified (L/R)...}"
   local SERVER="${2:?No server specified...}"
@@ -275,6 +259,44 @@ ssh_tunnel_ls() {
   ps -ef | grep -E "ssh.* -L .*:.*:" | grep -v grep
 }
 
+##############################
+# VPN via SSH
+ssh_vpn() {
+  echo "!!! UNDER TEST !!!"
+  local RELAY_ADDR="${1:?No relay address specified...}"
+  local RELAY_PORT="${2:?No relay port specified...}"
+  local VPN_ADDR="${3:?No VPN address specified...}"
+  local VPN_PORT="${4:?No VPN port specified...}"
+  local VPN_CONF="${5:?No VPN config file specified...}"
+  local VPN_TYPE="${6:-UDP}"
+  # Main tunnel
+  ssh_tunnel_open_local "$RELAY_ADDR" "$RELAY_PORT"
+  # Setup the remote relay
+  if [ "$RELAY_ADDR" != "$VPN_ADDR" ]; then
+    VPN_TYPE="$(echo $VPN_TYPE | tr "[:lower:]" "[:upper:]")"
+    ssh "$RELAY_ADDR" -t -- sudo -b socat "TCP-LISTEN:0.0.0.0,bind=$RELAY_PORT,su=nobody,fork,reuseaddr" "$VPN_TYPE:$VPN_ADDR:$VPN_PORT"
+  fi
+  # Setup the local UDP-to-TCP relay
+  if [ "$VPN_TYPE" = "UDP" ]; then
+    sudo socat "$VPN_TYPE-LISTEN:0.0.0.0,bind=$VPN_PORT,su=nobody,fork,reuseaddr" "TCP:127.0.0.1:$RELAY_PORT"
+  fi
+  # Openvpn blocking call
+  ( cd "$(dirname "$VPN_CONF")"
+    sudo openvpn --config "$VPN_CONF"
+  )
+  # Close the local relay
+  if [ "$VPN_TYPE" = "UDP" ]; then
+    sudo killall socat
+  fi
+  # Close the remote relay
+  if [ "$RELAY_ADDR" != "$VPN_ADDR" ]; then
+    ssh "$RELAY_ADDR" -t -- sudo killall socat
+  fi
+  # Close tunnel
+  ssh_tunnel_close "$RELAY_PORT"
+}
+
+##############################
 # Add ssh dedicated command id in ~/.ssh/authorized_keys
 # Use ssh-copy-id for std login shells
 ssh_copy_id() {
