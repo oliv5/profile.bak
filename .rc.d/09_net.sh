@@ -202,8 +202,8 @@ opened_port_in() {
 
 ##############################
 # SSH command shortcuts
-ssh_aria2()       { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output specified...}"; shift 2; ssh -t $SSHOPTS -- sh -c "cd \"$DIR\"; aria2c \"$@\""; }
-ssh_youtubedl()   { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output specified...}"; shift 2; ssh -t $SSHOPTS -- sh -c "cd \"$DIR\"; youtubedl \"$@\""; }
+ssh_aria2()       { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output specified...}"; shift 2; ssh $SSHOPTS -- sh -c "cd \"$DIR\"; nohup aria2c \"$@\" >/dev/null 2>&1 &"; }
+ssh_youtubedl()   { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output specified...}"; shift 2; ssh $SSHOPTS -- sh -c "cd \"$DIR\"; nohup youtubedl \"$@\" >/dev/null 2>&1 &"; }
 ssh_top()         { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- top "$@"; }
 ssh_reboot()      { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo reboot "$@"; }
 ssh_shutdown()    { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo shutdown "$@"; }
