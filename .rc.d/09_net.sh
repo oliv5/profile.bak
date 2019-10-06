@@ -233,8 +233,23 @@ sshh_hibernate()  { ssh(){ sshh "$@"; }; ssh_hibernate "$@"; }
 sshh_ping()       { ssh(){ sshh "$@"; }; ssh_ping "$@"; }
 sshh_netstat()    { ssh(){ sshh "$@"; }; ssh_netstat "$@"; }
 sshh_mount()      { ssh(){ sshh "$@"; }; ssh_mount "$@"; }
+sshh_proxy()      { ssh(){ sshh "$@"; }; ssh_proxy "$@"; }
 sshh_tunnel_open_local()  { ssh(){ sshh "$@"; }; ssh_tunnel_open_local "$@"; }
 sshh_tunnel_open_remote() { ssh(){ sshh "$@"; }; sshh_tunnel_open_remote "$@"; }
+
+############################
+# Open proxy through SSH tunnel
+ssh_proxy() {
+  local SERVER="${1:?No server specified...}"
+  local CONFIG="${2:-config}"
+  ssh_tunnel_open_local "$SERVER" 5710
+  ssh -f "$SERVER" -- polipo -c "/etc/polipo/$CONFIG"
+}
+ssh_proxy_close() {
+  local SERVER="${1:?No server specified...}"
+  ssh "$SERVER" -- killall polipo
+  ssh_tunnel_close 5710
+}
 
 ##############################
 # Ssh tunnel shortcuts
