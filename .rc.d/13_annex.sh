@@ -709,7 +709,7 @@ annex_drop_fast() {
 # Annex upkeep
 annex_upkeep() {
   devcat() {
-    { command -v sudo >/dev/null && sudo cat "$1" 2>/dev/null || su -c "cat '$1' root"; } | tr '[:upper:]' '[:lower:]' | xargs printf '%s'
+    { command -v sudo >/dev/null && sudo cat "$1" || su -c "cat '$1'" root; } | tr '[:upper:]' '[:lower:]' | xargs printf '%s'
   }
   local DBG=""
   # Add options
