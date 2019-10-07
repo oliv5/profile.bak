@@ -219,22 +219,10 @@ sshh_ping()       { ssh(){ sshh "$@"; }; ssh_ping "$@"; }
 sshh_vpn_tcp()    { ssh(){ sshh "$@"; }; ssh_vpn_tcp "$@"; }
 sshh_vpn_udp()    { ssh(){ sshh "$@"; }; ssh_vpn_udp "$@"; }
 sshh_tunnel_open_local()  { ssh(){ sshh "$@"; }; ssh_tunnel_open_local "$@"; }
-sshh_tunnel_open_remote() { ssh(){ sshh "$@"; }; sshh_tunnel_open_remote "$@"; }
-sshh_proxy()      { ssh(){ sshh "$@"; }; ssh_proxy "$@"; }
-
-############################
-# Open proxy through SSH tunnel
-ssh_proxy() {
-  local SERVER="${1:?No server specified...}"
-  local CONFIG="${2:-config}"
-  ssh_tunnel_open_local "$SERVER" 5710
-  ssh -f "$SERVER" -- polipo -c "/etc/polipo/$CONFIG"
-}
-ssh_proxy_close() {
-  local SERVER="${1:?No server specified...}"
-  ssh "$SERVER" -- killall polipo
-  ssh_tunnel_close 5710
-}
+sshh_tunnel_open_remote() { ssh(){ sshh "$@"; }; ssh_tunnel_open_remote "$@"; }
+sshh_tunnel_open_dyn()    { ssh(){ sshh "$@"; }; ssh_tunnel_open_dyn "$@"; }
+sshh_proxyhttp()          { ssh(){ sshh "$@"; }; ssh_proxyhttp "$@"; }
+sshh_proxychains()        { ssh(){ sshh "$@"; }; ssh_proxychains "$@"; }
 
 ##############################
 # SSH tunnel shortcuts
@@ -258,6 +246,19 @@ ssh_tunnel_close() {
 }
 ssh_tunnel_ls() {
   ps -ef | grep -E "ssh.* -L .*:.*:" | grep -v grep
+}
+
+# http://www.guiguishow.info/2010/12/28/ssh-du-port-forwarding-au-vpn-bon-marche/#toc-846-la-redirection-dynamique
+# Dynamic (socks) port forwarding
+ssh_tunnel_open_dyn() {
+  local SERVER="${1:?No server specified...}"
+  local PORT="${2:?No port specified...}"
+  ssh -ND "$PORT" "$SERVER"
+}
+ssh_tunnel_close_dyn() {
+  local SERVER="${1:?No server specified...}"
+  local PORT="${2:?No port specified...}"
+  pgrep -f "ssh.*-ND $PORT .*$SERVER" | xargs -r kill
 }
 
 ##############################
@@ -290,21 +291,68 @@ ssh_vpn_udp() {
   # Main tunnel
   ssh_tunnel_open_local "$RELAY_ADDR" "$RELAY_PORT"
   # Setup the relays
-  sudo socat "UDP-LISTEN:0.0.0.0,bind=$VPN_PORT,su=nobody,fork,reuseaddr" "TCP:127.0.0.1:$RELAY_PORT"
+  socat -T15 udp4-recvfrom:$VPN_PORT,fork,reuseaddr tcp:localhost:$RELAY_PORT >/dev/null &
   if [ "$RELAY_ADDR" != "$VPN_ADDR" ]; then
-    ssh "$RELAY_ADDR" -t -- sudo -b socat "TCP-LISTEN:0.0.0.0,bind=$RELAY_PORT,su=nobody,fork,reuseaddr" "UDP:$VPN_ADDR:$VPN_PORT"
+    ssh "$RELAY_ADDR" -- "nohup socat tcp4-listen:$RELAY_PORT,fork,reuseaddr udp:$VPN_ADDR:$VPN_PORT > /dev/null &"
   fi
   # Openvpn blocking call
-  ( cd "$(dirname "$VPN_CONF")"
+  ( command cd "$(dirname "$VPN_CONF")"
     sudo openvpn --config "$VPN_CONF"
   )
   # Close the relays
-  sudo killall socat
+  killall socat
   if [ "$RELAY_ADDR" != "$VPN_ADDR" ]; then
-    ssh "$RELAY_ADDR" -t -- sudo killall socat
+    ssh "$RELAY_ADDR" -- killall socat
   fi
   # Close tunnel
   ssh_tunnel_close "$RELAY_PORT"
+  stty sane
+}
+
+##############################
+# Open HTTP proxy through SSH tunnel
+ssh_proxyhttp() {
+  local SERVER="${1:?No server specified...}"
+  local PORT="${2:-5710}"
+  local CONFIG="${3:-config}"
+  ssh_tunnel_open_local "$SERVER" "$PORT"
+  ssh -f "$SERVER" -- polipo -c "/etc/polipo/$CONFIG"
+}
+ssh_proxyhttp_close() {
+  local SERVER="${1:?No server specified...}"
+  local PORT="${2:-5710}"
+  ssh "$SERVER" -- killall polipo
+  ssh_tunnel_close "$PORT"
+}
+
+# Proxify an app
+ssh_proxychains() {
+  local SERVER="${1:?No server specified...}"
+  local PORT="${2:?No socks PROXY port specified...}"
+  local CONFIG="$HOME/.proxychains/proxychains.conf"
+  shift 2
+  if [ ! -e "$CONFIG" ]; then
+    mkdir -p "$(dirname "$CONFIG")"
+    cat > "$CONFIG" <<EOF
+# Strict - Each connection will be done via chained proxies
+# all proxies chained in the order as they appear in the list
+# all proxies must be online to play in chain
+# otherwise EINTR is returned to the app
+strict_chain
+
+# Quiet mode (no output from library)
+quiet_mode
+
+# Proxy DNS requests - no leak for DNS data
+proxy_dns
+
+[ProxyList]
+socks5 127.0.0.1 $PORT
+EOF
+  fi
+  ssh_tunnel_open_dyn "$SERVER" "$PORT" & true
+  proxychains "$@"
+  ssh_tunnel_close_dyn "$SERVER" "$PORT"
 }
 
 ##############################
