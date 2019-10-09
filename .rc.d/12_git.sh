@@ -1100,7 +1100,10 @@ git_fixup() {
 }
 git_squashn() {
   local COMMIT="${1:-HEAD}"
-  git reset --soft ${COMMIT} &&  git commit --edit -m "$(git log --format=%B --reverse HEAD..HEAD@{1})"
+  local HEAD="$(git_hash)"
+  git reset --soft "$COMMIT" &&
+    git commit --edit -m "$(git log --format=%B --reverse HEAD..HEAD@{1})" ||
+    git reset "$HEAD"
 }
 
 ########################################
