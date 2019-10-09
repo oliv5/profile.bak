@@ -291,9 +291,11 @@ ssh_vpn_udp() {
   # Main tunnel
   ssh_tunnel_open_local "$RELAY_ADDR" "$RELAY_PORT"
   # Setup the relays
-  socat -T15 udp4-recvfrom:$VPN_PORT,fork,reuseaddr tcp:localhost:$RELAY_PORT >/dev/null &
+  socat -T15 udp-recv:$VPN_PORT tcp:localhost:$RELAY_PORT >/dev/null &
+  socat -T15 tcp-listen:localhost:$RELAY_PORT,fork,reuseaddr udp:localhost:$VPN_PORT >/dev/null &
   if [ "$RELAY_ADDR" != "$VPN_ADDR" ]; then
-    ssh "$RELAY_ADDR" -- "nohup socat tcp4-listen:$RELAY_PORT,fork,reuseaddr udp:$VPN_ADDR:$VPN_PORT > /dev/null &"
+    ssh "$RELAY_ADDR" -- "nohup socat udp-recv:$VPN_PORT tcp:localhost:$RELAY_PORT > /dev/null &"
+    ssh "$RELAY_ADDR" -- "nohup socat tcp-listen:$RELAY_PORT,fork,reuseaddr udp:$VPN_ADDR:$VPN_PORT > /dev/null &"
   fi
   # Openvpn blocking call
   ( command cd "$(dirname "$VPN_CONF")"
