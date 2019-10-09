@@ -221,8 +221,8 @@ sshh_vpn_udp()    { ssh(){ sshh "$@"; }; ssh_vpn_udp "$@"; }
 sshh_tunnel_open_local()  { ssh(){ sshh "$@"; }; ssh_tunnel_open_local "$@"; }
 sshh_tunnel_open_remote() { ssh(){ sshh "$@"; }; ssh_tunnel_open_remote "$@"; }
 sshh_tunnel_open_dyn()    { ssh(){ sshh "$@"; }; ssh_tunnel_open_dyn "$@"; }
-sshh_proxyhttp()          { ssh(){ sshh "$@"; }; ssh_proxyhttp "$@"; }
-sshh_proxychains()        { ssh(){ sshh "$@"; }; ssh_proxychains "$@"; }
+sshh_proxify()            { ssh(){ sshh "$@"; }; ssh_proxify "$@"; }
+sshh_torify()             { ssh(){ sshh "$@"; }; ssh_torify "$@"; }
 
 ##############################
 # SSH tunnel shortcuts
@@ -310,30 +310,14 @@ ssh_vpn_udp() {
 }
 
 ##############################
-# Open HTTP proxy through SSH tunnel
-ssh_proxyhttp() {
+# Proxify an app using dynamic SSH tunnels
+sshh_proxify() {
   local SERVER="${1:?No server specified...}"
-  local PORT="${2:-5710}"
-  local CONFIG="${3:-config}"
-  ssh_tunnel_open_local "$SERVER" "$PORT"
-  ssh -f "$SERVER" -- polipo -c "/etc/polipo/$CONFIG"
-}
-ssh_proxyhttp_close() {
-  local SERVER="${1:?No server specified...}"
-  local PORT="${2:-5710}"
-  ssh "$SERVER" -- killall polipo
-  ssh_tunnel_close "$PORT"
-}
-
-# Proxify an app
-ssh_proxychains() {
-  local SERVER="${1:?No server specified...}"
-  local PORT="${2:?No socks PROXY port specified...}"
+  local PORT="${2-16001}"
   local CONFIG="$HOME/.proxychains/proxychains.conf"
   shift 2
-  if [ ! -e "$CONFIG" ]; then
-    mkdir -p "$(dirname "$CONFIG")"
-    cat > "$CONFIG" <<EOF
+  mkdir -p "$(dirname "$CONFIG")"
+  cat > "$CONFIG" <<EOF
 # Strict - Each connection will be done via chained proxies
 # all proxies chained in the order as they appear in the list
 # all proxies must be online to play in chain
@@ -349,10 +333,37 @@ proxy_dns
 [ProxyList]
 socks5 127.0.0.1 $PORT
 EOF
-  fi
   ssh_tunnel_open_dyn "$SERVER" "$PORT" & true
   proxychains "$@"
   ssh_tunnel_close_dyn "$SERVER" "$PORT"
+}
+
+# Proxify an app using tor
+ssh_torify() {
+  local SERVER="${1:?No server specified...}"
+  local PORT="${2-5709}"
+  local CONFIG="$HOME/.proxychains/proxychains.conf"
+  shift 2
+  mkdir -p "$(dirname "$CONFIG")"
+  cat > "$CONFIG" <<EOF
+# Strict - Each connection will be done via chained proxies
+# all proxies chained in the order as they appear in the list
+# all proxies must be online to play in chain
+# otherwise EINTR is returned to the app
+strict_chain
+
+# Quiet mode (no output from library)
+quiet_mode
+
+# Proxy DNS requests - no leak for DNS data
+proxy_dns
+
+[ProxyList]
+socks5 127.0.0.1 $PORT
+EOF
+  ssh_tunnel_tunnel_open "$SERVER" "$PORT" & true
+  proxychains "$@"
+  ssh_tunnel_tunnel_close "$SERVER" "$PORT"
 }
 
 ##############################
