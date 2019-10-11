@@ -202,9 +202,10 @@ opened_port_in() {
 
 ##############################
 # SSH command shortcuts
+ssh_ping()        { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh $SSHOPTS -- echo pong; }
+ssh_sudo()        { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo "$@"; }
 ssh_aria2()       { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output folder specified...}"; shift 2; ssh -t $SSHOPTS -- sh -c "cd \"$DIR\"; aria2c \"$@\""; }
 ssh_youtubedl()   { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output folder specified...}"; shift 2; ssh -t $SSHOPTS -- sh -c "cd \"$DIR\"; youtubedl \"$@\""; }
-ssh_ping()        { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- echo pong; }
 
 ##############################
 # Home SSH aliases examples (to be defined in .rc.local)
@@ -213,52 +214,48 @@ ssh_ping()        { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh op
 #alias rsynch='command rsync -e "ssh -i ~/private/.ssh/id_rsa -F ~/private/.ssh/config"'
 
 # SSH command shortcuts (rely on sshh, but cannot just alias ssh=sshh, has to create subfunction)
-sshh_aria2()      { ssh(){ sshh "$@"; }; ssh_aria2 "$@"; }
-sshh_youtubedl()  { ssh(){ sshh "$@"; }; ssh_youtubedl "$@"; }
-sshh_ping()       { ssh(){ sshh "$@"; }; ssh_ping "$@"; }
-sshh_vpn_tcp()    { ssh(){ sshh "$@"; }; ssh_vpn_tcp "$@"; }
-sshh_vpn_udp()    { ssh(){ sshh "$@"; }; ssh_vpn_udp "$@"; }
-sshh_tunnel_open_local()  { ssh(){ sshh "$@"; }; ssh_tunnel_open_local "$@"; }
-sshh_tunnel_open_remote() { ssh(){ sshh "$@"; }; ssh_tunnel_open_remote "$@"; }
-sshh_tunnel_open_dyn()    { ssh(){ sshh "$@"; }; ssh_tunnel_open_dyn "$@"; }
-sshh_proxify()            { ssh(){ sshh "$@"; }; ssh_proxify "$@"; }
-sshh_torify()             { ssh(){ sshh "$@"; }; ssh_torify "$@"; }
+sshh_ping()        { ssh(){ sshh "$@"; }; ssh_ping "$@"; }
+sshh_sudo()        { ssh(){ sshh "$@"; }; ssh_sudo "$@"; }
+sshh_aria2()       { ssh(){ sshh "$@"; }; ssh_aria2 "$@"; }
+sshh_youtubedl()   { ssh(){ sshh "$@"; }; ssh_youtubedl "$@"; }
+sshh_tunnel_open() { ssh(){ sshh "$@"; }; ssh_tunnel_open "$@"; }
+sshh_proxify()     { ssh(){ sshh "$@"; }; ssh_proxify "$@"; }
+sshh_torify()      { ssh(){ sshh "$@"; }; ssh_torify "$@"; }
+
+# ! UNDER TEST !
+sshh_vpn_tcp()     { ssh(){ sshh "$@"; }; ssh_vpn_tcp "$@"; }
+sshh_vpn_udp()     { ssh(){ sshh "$@"; }; ssh_vpn_udp "$@"; }
 
 ##############################
 # SSH tunnel shortcuts
-_ssh_tunnel_open() {
-  local TYPE="${1:?No tunnel type specified (L/R)...}"
-  local SERVER="${2:?No server specified...}"
-  local PORTS="${3:?No ports specified...}"
+# http://www.guiguishow.info/2010/12/28/ssh-du-port-forwarding-au-vpn-bon-marche/#toc-846-la-redirection-dynamique
+alias ssh_tunnel='ssh -fnxNT'
+ssh_tunnel_open() {
+  local SERVER="${1:?No server specified...}"
+  shift
   local TUNNEL=""
-  shift 3
-  for PORT in $PORTS; do
-    TUNNEL="${TUNNEL:+$TUNNEL }-$TYPE $PORT:127.0.0.1:$PORT"
+  for PORT; do
+    PORT="$(echo "$PORT" | tr -d '-')"
+    TYPE="$(echo "$PORT" | cut -c 1)"
+    [ "$TYPE" != "L" -a "$TYPE" != "R" -a "$TYPE" != "D" ] && TYPE="L"
+    set -- $(echo "${PORT#$TYPE}" | tr ':' ' ')
+    if [ "$TYPE" = "D" ]; then
+      TUNNEL="${TUNNEL:+$TUNNEL }-$TYPE $1"
+    else
+      TUNNEL="${TUNNEL:+$TUNNEL }-$TYPE $1:${2:-127.0.0.1}:${3:-$1}"
+    fi
   done
-  ssh -fnxNT "$@" "$SERVER" $TUNNEL
+  ssh -fnxNT "$SERVER" $TUNNEL
 }
-ssh_tunnel_open_local()  { _ssh_tunnel_open L "$@"; }
-ssh_tunnel_open_remote() { _ssh_tunnel_open R "$@"; }
 ssh_tunnel_close() {
   for PORT; do
-    pgrep -f "ssh.*-L $PORT:" | xargs -r kill
+    local LPORT="${PORT%%:*}"
+    pgrep -f "ssh.* -(L|R) $LPORT:" | xargs -r kill
+    pgrep -f "ssh.* -D $LPORT" | xargs -r kill
   done
 }
 ssh_tunnel_ls() {
-  ps -ef | grep -E "ssh.* -L .*:.*:" | grep -v grep
-}
-
-# http://www.guiguishow.info/2010/12/28/ssh-du-port-forwarding-au-vpn-bon-marche/#toc-846-la-redirection-dynamique
-# Dynamic (socks) port forwarding
-ssh_tunnel_open_dyn() {
-  local SERVER="${1:?No server specified...}"
-  local PORT="${2:?No port specified...}"
-  ssh -ND "$PORT" "$SERVER"
-}
-ssh_tunnel_close_dyn() {
-  local SERVER="${1:?No server specified...}"
-  local PORT="${2:?No port specified...}"
-  pgrep -f "ssh.*-ND $PORT .*$SERVER" | xargs -r kill
+  ps -ef | grep -E "ssh.* -(L|R|D) [0-9]*" | grep -v grep
 }
 
 ##############################
@@ -289,7 +286,7 @@ ssh_vpn_udp() {
   local VPN_PORT="${4:?No VPN port specified...}"
   local VPN_CONF="${5:?No VPN config file specified...}"
   # Main tunnel
-  ssh_tunnel_open_local "$RELAY_ADDR" "$RELAY_PORT"
+  ssh_tunnel_open "$RELAY_ADDR:127.0.0.1:$RELAY_PORT"
   # Setup the relays
   socat -T15 udp-recv:$VPN_PORT tcp:localhost:$RELAY_PORT >/dev/null &
   socat -T15 tcp-listen:localhost:$RELAY_PORT,fork,reuseaddr udp:localhost:$VPN_PORT >/dev/null &
@@ -313,59 +310,43 @@ ssh_vpn_udp() {
 
 ##############################
 # Proxify an app using dynamic SSH tunnels
-sshh_proxify() {
+ssh_proxify() {
   local SERVER="${1:?No server specified...}"
-  local PORT="${2-16001}"
+  local LPORT="${2:?No local port specified...}"
   local CONFIG="$HOME/.proxychains/proxychains.conf"
   shift 2
   mkdir -p "$(dirname "$CONFIG")"
   cat > "$CONFIG" <<EOF
-# Strict - Each connection will be done via chained proxies
-# all proxies chained in the order as they appear in the list
-# all proxies must be online to play in chain
-# otherwise EINTR is returned to the app
 strict_chain
-
-# Quiet mode (no output from library)
 quiet_mode
-
-# Proxy DNS requests - no leak for DNS data
 proxy_dns
-
 [ProxyList]
-socks5 127.0.0.1 $PORT
+socks5 127.0.0.1 $LPORT
 EOF
-  ssh_tunnel_open_dyn "$SERVER" "$PORT" & true
+  ssh_tunnel_open "$SERVER" "D$LPORT" & true
   proxychains "$@"
-  ssh_tunnel_close_dyn "$SERVER" "$PORT"
+  ssh_tunnel_close "$LPORT"
 }
 
 # Proxify an app using tor
 ssh_torify() {
   local SERVER="${1:?No server specified...}"
-  local PORT="${2-5709}"
+  local LPORT="${2:?No local port specified...}"
+  local DADDR="192.168.8.122"
+  local DPORT="5709"
   local CONFIG="$HOME/.proxychains/proxychains.conf"
   shift 2
   mkdir -p "$(dirname "$CONFIG")"
   cat > "$CONFIG" <<EOF
-# Strict - Each connection will be done via chained proxies
-# all proxies chained in the order as they appear in the list
-# all proxies must be online to play in chain
-# otherwise EINTR is returned to the app
 strict_chain
-
-# Quiet mode (no output from library)
 quiet_mode
-
-# Proxy DNS requests - no leak for DNS data
 proxy_dns
-
 [ProxyList]
-socks5 127.0.0.1 $PORT
+socks5 127.0.0.1 $LPORT
 EOF
-  ssh_tunnel_tunnel_open "$SERVER" "$PORT" & true
+  ssh_tunnel_open "$SERVER" "L$LPORT:$DADDR:$DPORT" & true
   proxychains "$@"
-  ssh_tunnel_tunnel_close "$SERVER" "$PORT"
+  ssh_tunnel_close "$LPORT"
 }
 
 ##############################
