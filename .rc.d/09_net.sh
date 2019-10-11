@@ -212,6 +212,8 @@ ssh_youtubedl()   { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh op
 #alias sshh='command ssh -i ~/private/.ssh/id_rsa -F ~/private/.ssh/config'
 #alias scph='command scp -i ~/private/.ssh/id_rsa -F ~/private/.ssh/config'
 #alias rsynch='command rsync -e "ssh -i ~/private/.ssh/id_rsa -F ~/private/.ssh/config"'
+#sshh_proxify() { ssh(){ sshh "$@"; }; local SRV="$1"; shift; ssh_proxify "$SRV" "16000" "$@"; }
+#sshh_torify()  { ssh(){ sshh "$@"; }; local SRV="$1"; shift; ssh_torify "$SRV" "16001" "192.168.8.122" "5709" "$@"; }
 
 # SSH command shortcuts (rely on sshh, but cannot just alias ssh=sshh, has to create subfunction)
 sshh_ping()        { ssh(){ sshh "$@"; }; ssh_ping "$@"; }
@@ -332,10 +334,10 @@ EOF
 ssh_torify() {
   local SERVER="${1:?No server specified...}"
   local LPORT="${2:?No local port specified...}"
-  local DADDR="192.168.8.122"
-  local DPORT="5709"
+  local DADDR="${3:?No tor bind address specified...}"
+  local DPORT="${4:?No tor bind port specified...}"
   local CONFIG="$HOME/.proxychains/proxychains.conf"
-  shift 2
+  shift 4
   mkdir -p "$(dirname "$CONFIG")"
   cat > "$CONFIG" <<EOF
 strict_chain
