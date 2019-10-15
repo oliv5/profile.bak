@@ -33,7 +33,8 @@ alias scl='svn cl'
 alias sclr='svn changelist --remove'
 # Commit aliases
 alias sci='svn ci'
-alias scid='svn ci -m "Development commit $(svn_date)"'
+alias scim='svn ci -m'
+alias scid='svn ci -m "WIP $(svn_date)"'
 # jump aliases
 alias sr='cd "$(svn_root)"'
 # merge aliases
