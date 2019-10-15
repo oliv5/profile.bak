@@ -202,10 +202,10 @@ opened_port_in() {
 
 ##############################
 # SSH command shortcuts
-ssh_ping()        { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh $SSHOPTS -- echo pong; }
-ssh_sudo()        { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo "$@"; }
-ssh_aria2()       { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output folder specified...}"; shift 2; ssh -t $SSHOPTS -- sh -c "cd \"$DIR\"; aria2c \"$@\""; }
-ssh_youtubedl()   { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output folder specified...}"; shift 2; ssh -t $SSHOPTS -- sh -c "cd \"$DIR\"; youtubedl \"$@\""; }
+ssh_ping()        { local SSH_OPTS="${SSH_OPTS:+$SSH_OPTS }${1:?No server or ssh option specified...}"; shift; ssh $SSH_OPTS -- echo pong; }
+ssh_sudo()        { local SSH_OPTS="${SSH_OPTS:+$SSH_OPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSH_OPTS -- sudo "$@"; }
+ssh_aria2()       { local SSH_OPTS="${SSH_OPTS:+$SSH_OPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output folder specified...}"; shift 2; ssh -t $SSH_OPTS -- sh -c "cd \"$DIR\"; aria2c \"$@\""; }
+ssh_youtubedl()   { local SSH_OPTS="${SSH_OPTS:+$SSH_OPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output folder specified...}"; shift 2; ssh -t $SSH_OPTS -- sh -c "cd \"$DIR\"; youtubedl \"$@\""; }
 
 ##############################
 # Home SSH aliases examples (to be defined in .rc.local)
@@ -223,10 +223,8 @@ sshh_youtubedl()   { ssh(){ sshh "$@"; }; ssh_youtubedl "$@"; }
 sshh_tunnel_open() { ssh(){ sshh "$@"; }; ssh_tunnel_open "$@"; }
 sshh_proxify()     { ssh(){ sshh "$@"; }; ssh_proxify "$@"; }
 sshh_torify()      { ssh(){ sshh "$@"; }; ssh_torify "$@"; }
-
-# ! UNDER TEST !
-sshh_vpn_tcp()     { ssh(){ sshh "$@"; }; ssh_vpn_tcp "$@"; }
-sshh_vpn_udp()     { ssh(){ sshh "$@"; }; ssh_vpn_udp "$@"; }
+sshh_socat_vpn_p2p() { ssh(){ sshh "$@"; }; ssh_socat_vpn_p2p "$@"; }
+sshh_socat_vpn()     { ssh(){ sshh "$@"; }; ssh_socat_vpn "$@"; }
 
 ##############################
 # SSH tunnel shortcuts
@@ -261,8 +259,8 @@ ssh_tunnel_ls() {
 }
 
 ##############################
-# TCP VPN via SSH
-ssh_vpn_tcp() {
+# TCP openvpn via SSH
+ssh_openvpn_tcp() {
   echo "!!! UNDER TEST !!!"
   local RELAY_ADDR="${1:?No relay address specified...}"
   local RELAY_PORT="${2:?No relay port specified...}"
@@ -279,8 +277,8 @@ ssh_vpn_tcp() {
   ssh_tunnel_close "$RELAY_PORT"
 }
 
-# UDP VPN via SSH
-ssh_vpn_udp() {
+# UDP openvpn via SSH
+ssh_openvpn_udp() {
   echo "!!! UNDER TEST !!!"
   local RELAY_ADDR="${1:?No relay address specified...}"
   local RELAY_PORT="${2:?No relay port specified...}"
@@ -288,13 +286,10 @@ ssh_vpn_udp() {
   local VPN_PORT="${4:?No VPN port specified...}"
   local VPN_CONF="${5:?No VPN config file specified...}"
   # Main tunnel
-  ssh_tunnel_open "$RELAY_ADDR:127.0.0.1:$RELAY_PORT"
+  ssh -fnxNT -L "$RELAY_PORT:127.0.0.1:$VPN_PORT" "$RELAY_ADDR"
   # Setup the relays
-  socat -T15 udp-recv:$VPN_PORT tcp:localhost:$RELAY_PORT >/dev/null &
-  socat -T15 tcp-listen:localhost:$RELAY_PORT,fork,reuseaddr udp:localhost:$VPN_PORT >/dev/null &
   if [ "$RELAY_ADDR" != "$VPN_ADDR" ]; then
-    ssh "$RELAY_ADDR" -- "nohup socat udp-recv:$VPN_PORT tcp:localhost:$RELAY_PORT > /dev/null &"
-    ssh "$RELAY_ADDR" -- "nohup socat tcp-listen:$RELAY_PORT,fork,reuseaddr udp:$VPN_ADDR:$VPN_PORT > /dev/null &"
+    ssh "$RELAY_ADDR" -- "nohup socat tcp-listen:$RELAY_PORT,fork,reuseaddr udp-sendto:$VPN_ADDR:$VPN_PORT > /dev/null &"
   fi
   # Openvpn blocking call
   ( command cd "$(dirname "$VPN_CONF")"
@@ -308,6 +303,59 @@ ssh_vpn_udp() {
   # Close tunnel
   ssh_tunnel_close "$RELAY_PORT"
   stty sane
+}
+
+##############################
+# Point-to-point socat VPN through SSH
+ssh_socat_vpn_p2p() {
+  local RELAY_ADDR="${1:?No relay address specified...}"
+  local RELAY_PORT="${2:-16000}"
+  local VPN_ADDR_SRV="${3:-192.168.9.1/24}"
+  local VPN_ADDR_CLIENT="${4:-192.168.9.2/24}"
+  local BACKGROUND="${5:+-b}"
+  # Set server TUN interface up; no fork, one connection only (no need to close it after use)
+  ssh_sudo "$RELAY_ADDR" -b socat "tcp-listen:$RELAY_PORT,reuseaddr" "tun:$VPN_ADDR_SRV,up"
+  # Set tunnel up; sleep 30s then close when tunnel is no in use (no need to close it after use)
+  ssh -fxT -L "$RELAY_PORT:127.0.0.1:$RELAY_PORT" "$RELAY_ADDR" sleep 30
+  # Set client TUN interface up. Blocks until user is done with it
+  sudo $BACKGROUND socat "tcp:127.0.0.1:$RELAY_PORT" "tun:$VPN_ADDR_CLIENT,up"
+}
+
+# Point-to-point socat VPN through SSH with routing
+#sudo socat -d -d tcp-listen:16000,reuseaddr,fork tun:192.168.4.1/24,up
+#sudo socat tcp:127.0.0.1:16000 tun:192.168.4.2/24,up
+#sudo ip route add 192.168.8.0/24 dev tun0 via 192.168.4.1
+#sudo echo 1 > /proc/sys/net/ipv4/ip_forward
+#sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE # eth0 is the outgoing interface which need masquerade
+ssh_socat_vpn() {
+  local RELAY_ADDR="${1:?No relay address specified...}"
+  local RELAY_PORT="${2:-16000}"
+  local VPN_ADDR_SRV="${3:-192.168.9.1/24}"
+  local VPN_ADDR_CLIENT="${4:-192.168.9.2/24}"
+  local LOCAL_TUN="${5:-tun0}"
+  local REMOTE_ITF="${6:-eth0}"
+  local LOCAL_ROUTES="$7"
+  # Set IP forwarding
+  # Set masquerading on eth0 (the remote output interface which needs address rewriting)
+  # Set server TUN interface up; no fork, one connection only (no need to close it after use)
+  ssh_sudo "$RELAY_ADDR" -b sh -c "\"
+    echo 1 > /proc/sys/net/ipv4/ip_forward
+    iptables -t nat -A POSTROUTING -o $REMOTE_ITF -j MASQUERADE
+    socat \"tcp-listen:$RELAY_PORT,reuseaddr\" \"tun:$VPN_ADDR_SRV,up\"
+    iptables -t nat -D POSTROUTING -o $REMOTE_ITF -j MASQUERADE
+  \"" _
+  # Set tunnel up; sleep 30s then close when tunnel is no in use (no need to close it after use)
+  ssh -fxT -L "$RELAY_PORT:127.0.0.1:$RELAY_PORT" "$RELAY_ADDR" sleep 30
+  # Set client TUN interface up. Blocks until user is done with it
+  sudo socat "tcp:127.0.0.1:$RELAY_PORT" "tun:$VPN_ADDR_CLIENT,up" &
+  sleep 1
+  # Set remote routes
+  for ROUTE in $LOCAL_ROUTES; do
+    sudo ip route add "$ROUTE" dev "$LOCAL_TUN" via "${VPN_ADDR_SRV%/*}"
+  done
+  # Wait childs or user input
+  echo "ctrl-c to stop vpn"
+  wait
 }
 
 ##############################
