@@ -1388,7 +1388,6 @@ alias grh='git reset HEAD'
 alias grh1='git reset HEAD~'
 alias grh2='git reset HEAD~2'
 alias grhh='git reset HEAD --hard'
-alias gro='git reset $(git_tracking)'
 alias grt='git reset $(git_tracking)'
 grev() { git reset "$@"; git checkout -- "$@"; }
 # Amend last commit
@@ -1404,7 +1403,7 @@ alias grbi2='git rebase -i HEAD~2'
 alias grbi3='git rebase -i HEAD~3'
 alias grbi4='git rebase -i HEAD~4'
 alias grbi5='git rebase -i HEAD~5'
-alias grbio='git rebase -i $(git_tracking)'
+alias grbit='git rebase -i $(git_tracking)'
 # Fetch/pull/push aliases
 alias gpu='git push'
 alias gpua='git_push_all'
@@ -1417,7 +1416,6 @@ else
 fi
 alias gfe='git fetch'
 alias gfa='git fetch --all --tags'
-alias grf='git rebase "$(git_tracking);"'
 # Config aliases
 alias gcg='git config --get'
 alias gcs='git config --set'
