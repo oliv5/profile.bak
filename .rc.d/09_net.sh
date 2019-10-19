@@ -226,6 +226,12 @@ sshh_torify()      { ssh(){ sshh "$@"; }; ssh_torify "$@"; }
 sshh_socat_vpn_p2p() { ssh(){ sshh "$@"; }; ssh_socat_vpn_p2p "$@"; }
 sshh_socat_vpn()     { ssh(){ sshh "$@"; }; ssh_socat_vpn "$@"; }
 
+# Under test !
+sshh_vpn()         { ssh(){ sshh "$@"; }; ssh_vpn "$@"; }
+sshh_shuttle()     { ssh(){ sshh "$@"; }; ssh_shuttle "$@"; }
+sshh_openvpn_tcp() { ssh(){ sshh "$@"; }; ssh_openvpn_tcp "$@"; }
+sshh_openvpn_udp() { ssh(){ sshh "$@"; }; ssh_openvpn_udp "$@"; }
+
 ##############################
 # SSH tunnel shortcuts
 # http://www.guiguishow.info/2010/12/28/ssh-du-port-forwarding-au-vpn-bon-marche/#toc-846-la-redirection-dynamique
@@ -349,7 +355,8 @@ ssh_socat_vpn() {
   # Set client TUN interface up. Blocks until user is done with it
   sudo socat "tcp:127.0.0.1:$RELAY_PORT" "tun:$VPN_ADDR_CLIENT,up" &
   sleep 1
-  # Set remote routes
+  # Set local routes
+  sudo ip route add "VPN_ADDR_SRV" via "${VPN_ADDR_SRV%/*}"
   for ROUTE in $LOCAL_ROUTES; do
     sudo ip route add "$ROUTE" dev "$LOCAL_TUN" via "${VPN_ADDR_SRV%/*}"
   done
@@ -359,7 +366,54 @@ ssh_socat_vpn() {
 }
 
 ##############################
-# Proxify an app using dynamic SSH tunnels
+# Point-to-point ssh VPN with routing
+ssh_vpn() {
+  echo "!!! UNDER TEST !!!"
+  local RELAY_ADDR="${1:?No relay address specified...}"
+  local LOCAL_ADDR="${2:-192.168.9.2/24}"
+  local LOCAL_TUN="${3:-10}"
+  local REMOTE_ADDR="${4:-192.168.9.1/24}"
+  local REMOTE_TUN="${5:-10}"
+  local REMOTE_OUTPUT_ITF="${6:-eth0}"
+  local LOCAL_ROUTES="$7"
+  # Local tun setup
+  sudo ip tuntap add "tun$LOCAL_TUN" mode tun
+  sudo ip addr add "$LOCAL_ADDR" dev "tun$LOCAL_TUN"
+  sudo ip link set dev "tun$LOCAL_TUN" up
+  # Remote tun setup
+  ssh_sudo "$RELAY_ADDR" -b sh -c "\"
+    echo 1 > /proc/sys/net/ipv4/ip_forward
+    iptables -t nat -A POSTROUTING -o $REMOTE_OUTPUT_ITF -j MASQUERADE
+    sudo ip tuntap add \"tun$REMOTE_TUN\" mode tun
+    sudo ip addr add \"$REMOTE_ADDR\" dev \"tun$REMOTE_TUN\"
+    sudo ip link set dev \"tun$REMOTE_TUN\" up
+  \"" _
+  # Set tun tunnel up
+  ssh -f -w "${LOCAL_TUN}:${REMOTE_TUN}" "$RELAY_ADDR" true
+  sleep 1
+  # Set local routes
+  sudo ip route add "REMOTE_ADDR" via "${REMOTE_ADDR%/*}"
+  for ROUTE in $LOCAL_ROUTES; do
+    sudo ip route add "$ROUTE" via "${REMOTE_ADDR%/*}"
+  done
+  # Wait childs or user input
+  echo "ctrl-c to stop vpn"
+  wait
+  # Kill tunnel
+  pgrep -f "ssh.* -w ${LOCAL_TUN}:${REMOTE_TUN}" | xargs -r kill
+  # Remove remote tun
+  ssh_sudo "$RELAY_ADDR" -b sh -c "\"
+    iptables -t nat -D POSTROUTING -o $REMOTE_OUTPUT_ITF -j MASQUERADE
+    sudo ip link set dev \"tun$REMOTE_TUN\" down
+    sudo ip tuntap del \"tun$REMOTE_TUN\"
+  \"" _
+  # Remove local tun
+  sudo ip link set dev "tun$REMOTE_TUN" down
+  sudo ip tuntap del "tun$REMOTE_TUN"
+}
+
+##############################
+# Proxify an app using dynamic SSH tunnels & proxychains
 ssh_proxify() {
   local SERVER="${1:?No server specified...}"
   local LPORT="${2:?No local port specified...}"
@@ -378,7 +432,7 @@ EOF
   ssh_tunnel_close "$LPORT"
 }
 
-# Proxify an app using tor
+# Proxify an app using tor/proxychains
 ssh_torify() {
   local SERVER="${1:?No server specified...}"
   local LPORT="${2:?No local port specified...}"
@@ -398,6 +452,10 @@ EOF
   proxychains "$@"
   ssh_tunnel_close "$LPORT"
 }
+
+# Proxify flux using sshuttle
+# https://github.com/sshuttle/sshutle.git
+ssh_shuttle() { sshuttle --dns -e "$(fct_tiny ssh)" -r "$@"; }
 
 ##############################
 # Add ssh dedicated command id in ~/.ssh/authorized_keys
