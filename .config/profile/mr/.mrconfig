@@ -16,6 +16,6 @@ lib = export PATH="$HOME/rbin:$PATH"
 # Include our repositories
 include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/lib.d/null"
 include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/.start" 2>/dev/null || true
-include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/"*
+include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/"* 2>/dev/null || true
 include = cat "${XDG_CONFIG_HOME:-$HOME/.config}/mr/config.d/.end" 2>/dev/null || true
 include = cat "$HOME/.mrconfig.local" 2>/dev/null || true
