@@ -142,6 +142,7 @@ git_branch() {
 # Get current branch tracking
 alias git_tracking_remote='git_tracking | sed -s "s;/.*;;"'
 alias git_tracking_branch='git_tracking | sed -s "s;.*/;;"'
+alias git_get_tracking='git_tracking'
 git_tracking() {
   git ${2:+--git-dir="$2"} rev-parse --abbrev-ref --symbolic-full-name "$1@{upstream}" 2>/dev/null | grep -v '@{upstream}'
   #git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD) 2>/dev/null
@@ -212,6 +213,9 @@ git_branch_delete() {
 git_branches_remote() {
   git ls-remote --heads | awk '{print substr($2,12)}'
 }
+
+# Prune local branches not in remote anymore
+alias git_branch_prune='git remote prune'
 
 # Delete remote untracked branch
 git_branch_delete_remote() {
@@ -1005,7 +1009,7 @@ git_find0() {
   done
 }
 git_find() {
-  git_find0 "$@" | xargs
+  git_find0 "$@" | xargs -r0
 }
 
 ########################################
@@ -1049,6 +1053,39 @@ git_tag_exists() {
   git show-ref --tags -d | grep -qe "$(git rev-parse "$REF")" >/dev/null 2>&1
 }
 
+# List local tags not in remote at all
+git_tag_local_only() {
+  #comm -1 -3 <(git ls-remote --tags origin | cut -d$'\t' -f1 | sort) <(git show-ref --tags | cut -d' ' -f1 | sort)
+  PIPE1="$(mktemp -u)"
+  mkfifo "$PIPE1"
+  PIPE2="$(mktemp -u)"
+  mkfifo "$PIPE2"
+  comm -2 -3 "$PIPE1" "$PIPE2" | uniq &
+  git show-ref --tags | cut -d' ' -f2 | sort -u >"$PIPE1"
+  git ls-remote --tags --refs "$@" | cut -d$'\t' -f2 | sort -u >"$PIPE2"
+  wait
+  rm "$PIPE1" "$PIPE2"
+}
+
+# Prune local tags not in remote at all
+if ! [ $(git_version) -gt $(git_version 1.7.8) ]; then
+  git_tag_remote_prune() {
+    # Confirmation
+    git fetch --dry-run --prune "${@:?No remote specified...}" "+refs/tags/*:refs/tags/*"
+    ask_question "Proceed? (y/n) " y Y >/dev/null || return 0
+    # Go !
+    git fetch --prune "$@" "+refs/tags/*:refs/tags/*"
+  }
+else
+  git_tag_remote_prune() {
+    # Confirmation
+    git_tag_local_only "$@"
+    ask_question "Proceed? (y/n) " y Y >/dev/null || return 0
+    # Go !
+    git_tag_local_only "$@" | xargs -r git tag -d
+  }
+fi
+
 ########################################
 # Easy amend of previous commit
 git_squash() {
@@ -1063,7 +1100,10 @@ git_fixup() {
 }
 git_squashn() {
   local COMMIT="${1:-HEAD}"
-  git reset --soft ${COMMIT} &&  git commit --edit -m "$(git log --format=%B --reverse HEAD..HEAD@{1})"
+  local HEAD="$(git_hash)"
+  git reset --soft "$COMMIT" &&
+    git commit --edit -m "$(git log --format=%B --reverse HEAD..HEAD@{1})" ||
+    git reset "$HEAD"
 }
 
 ########################################
@@ -1138,47 +1178,11 @@ git_checkout_ours() {
 }
 
 ########################################
-# Prune local branches not in remote anymore
-alias git_prune_branches='git remote prune'
-
-# List local tags not in remote at all
-git_ls_local_tags() {
-  #comm -1 -3 <(git ls-remote --tags origin | cut -d$'\t' -f1 | sort) <(git show-ref --tags | cut -d' ' -f1 | sort)
-  PIPE1="$(mktemp -u)"
-  mkfifo "$PIPE1"
-  PIPE2="$(mktemp -u)"
-  mkfifo "$PIPE2"
-  comm -2 -3 "$PIPE1" "$PIPE2" | uniq &
-  git show-ref --tags | cut -d' ' -f2 | sort -u >"$PIPE1"
-  git ls-remote --tags --refs "$@" | cut -d$'\t' -f2 | sort -u >"$PIPE2"
-  wait
-  rm "$PIPE1" "$PIPE2"
-}
-
-# Prune local tags not in remote at all
-if ! [ $(git_version) -gt $(git_version 1.7.8) ]; then
-  git_prune_local_tags() {
-    # Confirmation
-    git fetch --dry-run --prune "${@:?No remote specified...}" "+refs/tags/*:refs/tags/*"
-    ask_question "Proceed? (y/n) " y Y >/dev/null || return 0
-    # Go !
-    git fetch --prune "$@" "+refs/tags/*:refs/tags/*"
-  }
-else
-  git_prune_local_tags() {
-    # Confirmation
-    git_ls_local_tags "$@"
-    ask_question "Proceed? (y/n) " y Y >/dev/null || return 0
-    # Go !
-    git_ls_local_tags "$@" | xargs -r git tag -d
-  }
-fi
-
-########################################
 # Status aliases
 alias gt='git status -uno'
 alias gtu='gstu'
 alias gst='git_st'
+alias gst0='git_stx'
 alias gstv='git_stx | xargs -0 $GEDITOR'
 alias gstm='git status --porcelain -b | awk "NR==1 || /^(M.|.M)/"'    # modified
 alias gsta='git status --porcelain -b | awk "NR==1 || /^A[ MD]/"'     # added
@@ -1212,9 +1216,10 @@ alias glsi='git ls-files -o -i --exclude-standard'
 alias gd='git diff'
 alias gdd='git diff'
 alias gdm='git difftool -y'
-alias gdu='git diff $(git_tracking)'
-alias gddu='git diff $(git_tracking)'
-alias gdmu='git difftool -y $(git_tracking)'
+alias gdt='git diff $(git_tracking)'
+alias gddt='git diff $(git_tracking)'
+alias gdct='git diff --cached $(git_tracking)'
+alias gdmt='git difftool -y $(git_tracking)'
 alias gda='git_diff_all'
 alias gdda='git_diff_all'
 alias gdma='git_diffm_all'
@@ -1225,9 +1230,6 @@ alias gdl='git diff --name-only'
 alias gdlc='git diff --name-only --cached'
 alias gdll='git diff --name-status'
 alias gdllc='git diff --name-status --cached'
-alias gddr='git diff $(git_tracking)'
-alias gdmr='git difftool -y $(git_tracking)'
-alias gdcr='git diff --cached $(git_tracking)'
 alias gds='git diff stash'
 # Diff tree
 alias gdta='git diff-tree --diff-filter=A --name-only -r ' #added
@@ -1386,7 +1388,6 @@ alias grh='git reset HEAD'
 alias grh1='git reset HEAD~'
 alias grh2='git reset HEAD~2'
 alias grhh='git reset HEAD --hard'
-alias gro='git reset $(git_tracking)'
 alias grt='git reset $(git_tracking)'
 grev() { git reset "$@"; git checkout -- "$@"; }
 # Amend last commit
@@ -1402,7 +1403,7 @@ alias grbi2='git rebase -i HEAD~2'
 alias grbi3='git rebase -i HEAD~3'
 alias grbi4='git rebase -i HEAD~4'
 alias grbi5='git rebase -i HEAD~5'
-alias grbio='git rebase -i $(git_tracking)'
+alias grbit='git rebase -i $(git_tracking)'
 # Fetch/pull/push aliases
 alias gpu='git push'
 alias gpua='git_push_all'

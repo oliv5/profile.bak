@@ -96,8 +96,17 @@ alias shift7='command shift 7 2>/dev/null || set --'
 alias shift8='command shift 8 2>/dev/null || set --'
 alias shift9='command shift 9 2>/dev/null || set --'
 
-# Alias to get script path
+# Get script path
 alias shell_script='[ -n "$BASH_VERSION" ] && (builtin cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd) || readlink -f "$(dirname "$0")"'
+shell_path() {
+  if [ -n "$BASH_VERSION" ]; then
+    (builtin cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+  else
+    [ "$OSTYPE" = *darwin* ] && local READLINK_CMD='greadlink' || local READLINK_CMD='readlink'
+    $READLINK_CMD -f "$(dirname "$0")"
+    #(cd "$(dirname "$([ -L "$0" ] && $READLINK_CMD -f "$0" || echo "$0")")"; pwd)
+  fi
+}
 
 # Open shell with no ASLR. Set ADDR_NO_RANDOMIZE personality (man sys/personality.h) to all children.
 # Same as echo 0 | tee /proc/sys/kernel/randomize_va_space (0=no ASLR, 1=only shared lib, 2=global)

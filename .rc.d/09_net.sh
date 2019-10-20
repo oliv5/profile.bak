@@ -202,64 +202,262 @@ opened_port_in() {
 
 ##############################
 # SSH command shortcuts
-ssh_aria2()       { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output specified...}"; shift 2; ssh -t $SSHOPTS -- sh -c "cd \"$DIR\"; aria2c \"$@\""; }
-ssh_youtubedl()   { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output specified...}"; shift 2; ssh -t $SSHOPTS -- sh -c "cd \"$DIR\"; youtubedl \"$@\""; }
-ssh_top()         { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- top "$@"; }
-ssh_reboot()      { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo reboot "$@"; }
-ssh_shutdown()    { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo shutdown "$@"; }
-ssh_cancel()      { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo shutdown -c "$@"; }
-ssh_poweroff()    { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo poweroff "$@"; }
-ssh_halt()        { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo halt "$@"; }
-ssh_hibernate()   { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo hibernate "$@"; }
-ssh_ping()        { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- ping "$@"; }
-ssh_netstat()     { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo netstat "$@"; }
-ssh_mount()       { local SSHOPTS="${SSHOPTS:+$SSHOPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSHOPTS -- sudo mount "$@"; }
+ssh_ping()        { local SSH_OPTS="${SSH_OPTS:+$SSH_OPTS }${1:?No server or ssh option specified...}"; shift; ssh $SSH_OPTS -- echo pong; }
+ssh_sudo()        { local SSH_OPTS="${SSH_OPTS:+$SSH_OPTS }${1:?No server or ssh option specified...}"; shift; ssh -t $SSH_OPTS -- sudo "$@"; }
+ssh_aria2()       { local SSH_OPTS="${SSH_OPTS:+$SSH_OPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output folder specified...}"; shift 2; ssh -t $SSH_OPTS -- sh -c "cd \"$DIR\"; aria2c \"$@\""; }
+ssh_youtubedl()   { local SSH_OPTS="${SSH_OPTS:+$SSH_OPTS }${1:?No server or ssh option specified...}"; local DIR="${2:?No output folder specified...}"; shift 2; ssh -t $SSH_OPTS -- sh -c "cd \"$DIR\"; youtubedl \"$@\""; }
 
 ##############################
-# Home ssh aliases examples (to be defined in .rc.local)
+# Home SSH aliases examples (to be defined in .rc.local)
 #alias sshh='command ssh -i ~/private/.ssh/id_rsa -F ~/private/.ssh/config'
 #alias scph='command scp -i ~/private/.ssh/id_rsa -F ~/private/.ssh/config'
 #alias rsynch='command rsync -e "ssh -i ~/private/.ssh/id_rsa -F ~/private/.ssh/config"'
+#sshh_proxify() { ssh(){ sshh "$@"; }; local SRV="$1"; shift; ssh_proxify "$SRV" "16000" "$@"; }
+#sshh_torify()  { ssh(){ sshh "$@"; }; local SRV="$1"; shift; ssh_torify "$SRV" "16001" "192.168.8.122" "5709" "$@"; }
 
-# SSH command shortcuts (rely on sshh)
-sshh_aria2()      { ssh(){ sshh "$@"; }; ssh_aria2 "$@"; }
-sshh_youtubedl()  { ssh(){ sshh "$@"; }; ssh_youtubedl "$@"; }
-sshh_top()        { ssh(){ sshh "$@"; }; ssh_top "$@"; }
-sshh_reboot()     { ssh(){ sshh "$@"; }; ssh_reboot "$@"; }
-sshh_shutdown()   { ssh(){ sshh "$@"; }; ssh_shutdown "$@"; }
-sshh_cancel()     { ssh(){ sshh "$@"; }; ssh_cancel "$@"; }
-sshh_halt()       { ssh(){ sshh "$@"; }; ssh_halt "$@"; }
-sshh_hibernate()  { ssh(){ sshh "$@"; }; ssh_hibernate "$@"; }
-sshh_ping()       { ssh(){ sshh "$@"; }; ssh_ping "$@"; }
-sshh_netstat()    { ssh(){ sshh "$@"; }; ssh_netstat "$@"; }
-sshh_mount()      { ssh(){ sshh "$@"; }; ssh_mount "$@"; }
-sshh_tunnel_open_local()  { ssh(){ sshh "$@"; }; ssh_tunnel_open_local "$@"; }
-sshh_tunnel_open_remote() { ssh(){ sshh "$@"; }; sshh_tunnel_open_remote "$@"; }
+# SSH command shortcuts (rely on sshh, but cannot just alias ssh=sshh, has to create subfunction)
+sshh_ping()        { ssh(){ sshh "$@"; }; ssh_ping "$@"; }
+sshh_sudo()        { ssh(){ sshh "$@"; }; ssh_sudo "$@"; }
+sshh_aria2()       { ssh(){ sshh "$@"; }; ssh_aria2 "$@"; }
+sshh_youtubedl()   { ssh(){ sshh "$@"; }; ssh_youtubedl "$@"; }
+sshh_tunnel_open() { ssh(){ sshh "$@"; }; ssh_tunnel_open "$@"; }
+sshh_proxify()     { ssh(){ sshh "$@"; }; ssh_proxify "$@"; }
+sshh_torify()      { ssh(){ sshh "$@"; }; ssh_torify "$@"; }
+sshh_socat_vpn_p2p() { ssh(){ sshh "$@"; }; ssh_socat_vpn_p2p "$@"; }
+sshh_socat_vpn()     { ssh(){ sshh "$@"; }; ssh_socat_vpn "$@"; }
+
+# Under test !
+sshh_vpn()         { ssh(){ sshh "$@"; }; ssh_vpn "$@"; }
+sshh_shuttle()     { ssh(){ sshh "$@"; }; ssh_shuttle "$@"; }
+sshh_openvpn_tcp() { ssh(){ sshh "$@"; }; ssh_openvpn_tcp "$@"; }
+sshh_openvpn_udp() { ssh(){ sshh "$@"; }; ssh_openvpn_udp "$@"; }
 
 ##############################
-# Ssh tunnel shortcuts
-_ssh_tunnel_open() {
-  local TYPE="${1:?No tunnel type specified (L/R)...}"
-  local SERVER="${2:?No server specified...}"
-  local PORTS="${3:?No ports specified...}"
+# SSH tunnel shortcuts
+# http://www.guiguishow.info/2010/12/28/ssh-du-port-forwarding-au-vpn-bon-marche/#toc-846-la-redirection-dynamique
+alias ssh_tunnel='ssh -fnxNT'
+ssh_tunnel_open() {
+  local SERVER="${1:?No server specified...}"
+  shift
   local TUNNEL=""
-  shift 3
-  for PORT in $PORTS; do
-    TUNNEL="${TUNNEL:+$TUNNEL }-$TYPE $PORT:127.0.0.1:$PORT"
+  for PORT; do
+    PORT="$(echo "$PORT" | tr -d '-')"
+    TYPE="$(echo "$PORT" | cut -c 1)"
+    [ "$TYPE" != "L" -a "$TYPE" != "R" -a "$TYPE" != "D" ] && TYPE="L"
+    set -- $(echo "${PORT#$TYPE}" | tr ':' ' ')
+    if [ "$TYPE" = "D" ]; then
+      TUNNEL="${TUNNEL:+$TUNNEL }-$TYPE $1"
+    else
+      TUNNEL="${TUNNEL:+$TUNNEL }-$TYPE $1:${2:-127.0.0.1}:${3:-$1}"
+    fi
   done
-  ssh -fnxNT "$@" "$SERVER" $TUNNEL
+  ssh -fnxNT "$SERVER" $TUNNEL
 }
-ssh_tunnel_open_local()  { _ssh_tunnel_open L "$@"; }
-ssh_tunnel_open_remote() { _ssh_tunnel_open R "$@"; }
 ssh_tunnel_close() {
   for PORT; do
-    pgrep -f "ssh.*-L $PORT:" | xargs -r kill
+    local LPORT="${PORT%%:*}"
+    pgrep -f "ssh.* -(L|R) $LPORT:" | xargs -r kill
+    pgrep -f "ssh.* -D $LPORT" | xargs -r kill
   done
 }
 ssh_tunnel_ls() {
-  ps -ef | grep -E "ssh.* -L .*:.*:" | grep -v grep
+  ps -ef | grep -E "ssh.* -(L|R|D) [0-9]*" | grep -v grep
 }
 
+##############################
+# TCP openvpn via SSH
+ssh_openvpn_tcp() {
+  echo "!!! UNDER TEST !!!"
+  local RELAY_ADDR="${1:?No relay address specified...}"
+  local RELAY_PORT="${2:?No relay port specified...}"
+  local VPN_ADDR="${3:?No VPN address specified...}"
+  local VPN_PORT="${4:?No VPN port specified...}"
+  local VPN_CONF="${5:?No VPN config file specified...}"
+  # Main tunnel
+  ssh -fnxNT -L "$RELAY_PORT:$VPN_ADDR:$VPN_PORT" "$RELAY_ADDR"
+  # Openvpn blocking call
+  ( cd "$(dirname "$VPN_CONF")"
+    sudo openvpn --config "$VPN_CONF"
+  )
+  # Close tunnel
+  ssh_tunnel_close "$RELAY_PORT"
+}
+
+# UDP openvpn via SSH
+ssh_openvpn_udp() {
+  echo "!!! UNDER TEST !!!"
+  local RELAY_ADDR="${1:?No relay address specified...}"
+  local RELAY_PORT="${2:?No relay port specified...}"
+  local VPN_ADDR="${3:?No VPN address specified...}"
+  local VPN_PORT="${4:?No VPN port specified...}"
+  local VPN_CONF="${5:?No VPN config file specified...}"
+  # Main tunnel
+  ssh -fnxNT -L "$RELAY_PORT:127.0.0.1:$VPN_PORT" "$RELAY_ADDR"
+  # Setup the relays
+  if [ "$RELAY_ADDR" != "$VPN_ADDR" ]; then
+    ssh "$RELAY_ADDR" -- "nohup socat tcp-listen:$RELAY_PORT,fork,reuseaddr udp-sendto:$VPN_ADDR:$VPN_PORT > /dev/null &"
+  fi
+  # Openvpn blocking call
+  ( command cd "$(dirname "$VPN_CONF")"
+    sudo openvpn --config "$VPN_CONF"
+  )
+  # Close the relays
+  killall socat
+  if [ "$RELAY_ADDR" != "$VPN_ADDR" ]; then
+    ssh "$RELAY_ADDR" -- killall socat
+  fi
+  # Close tunnel
+  ssh_tunnel_close "$RELAY_PORT"
+  stty sane
+}
+
+##############################
+# Point-to-point socat VPN through SSH
+ssh_socat_vpn_p2p() {
+  local RELAY_ADDR="${1:?No relay address specified...}"
+  local RELAY_PORT="${2:-16000}"
+  local VPN_ADDR_SRV="${3:-192.168.9.1/24}"
+  local VPN_ADDR_CLIENT="${4:-192.168.9.2/24}"
+  local BACKGROUND="${5:+-b}"
+  # Set server TUN interface up; no fork, one connection only (no need to close it after use)
+  ssh_sudo "$RELAY_ADDR" -b socat "tcp-listen:$RELAY_PORT,reuseaddr" "tun:$VPN_ADDR_SRV,up"
+  # Set tunnel up; sleep 30s then close when tunnel is no in use (no need to close it after use)
+  ssh -fxT -L "$RELAY_PORT:127.0.0.1:$RELAY_PORT" "$RELAY_ADDR" sleep 30
+  # Set client TUN interface up. Blocks until user is done with it
+  sudo $BACKGROUND socat "tcp:127.0.0.1:$RELAY_PORT" "tun:$VPN_ADDR_CLIENT,up"
+}
+
+# Point-to-point socat VPN through SSH with routing
+#sudo socat -d -d tcp-listen:16000,reuseaddr,fork tun:192.168.4.1/24,up
+#sudo socat tcp:127.0.0.1:16000 tun:192.168.4.2/24,up
+#sudo ip route add 192.168.8.0/24 dev tun0 via 192.168.4.1
+#sudo echo 1 > /proc/sys/net/ipv4/ip_forward
+#sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE # eth0 is the outgoing interface which need masquerade
+ssh_socat_vpn() {
+  local RELAY_ADDR="${1:?No relay address specified...}"
+  local RELAY_PORT="${2:-16000}"
+  local VPN_ADDR_SRV="${3:-192.168.9.1/24}"
+  local VPN_ADDR_CLIENT="${4:-192.168.9.2/24}"
+  local LOCAL_TUN="${5:-tun0}"
+  local REMOTE_ITF="${6:-eth0}"
+  local LOCAL_ROUTES="$7"
+  # Set IP forwarding
+  # Set masquerading on eth0 (the remote output interface which needs address rewriting)
+  # Set server TUN interface up; no fork, one connection only (no need to close it after use)
+  ssh_sudo "$RELAY_ADDR" -b sh -c "\"
+    echo 1 > /proc/sys/net/ipv4/ip_forward
+    iptables -t nat -A POSTROUTING -o $REMOTE_ITF -j MASQUERADE
+    socat \"tcp-listen:$RELAY_PORT,reuseaddr\" \"tun:$VPN_ADDR_SRV,up\"
+    iptables -t nat -D POSTROUTING -o $REMOTE_ITF -j MASQUERADE
+  \"" _
+  # Set tunnel up; sleep 30s then close when tunnel is no in use (no need to close it after use)
+  ssh -fxT -L "$RELAY_PORT:127.0.0.1:$RELAY_PORT" "$RELAY_ADDR" sleep 30
+  # Set client TUN interface up. Blocks until user is done with it
+  sudo socat "tcp:127.0.0.1:$RELAY_PORT" "tun:$VPN_ADDR_CLIENT,up" &
+  sleep 1
+  # Set local routes
+  sudo ip route add "VPN_ADDR_SRV" via "${VPN_ADDR_SRV%/*}"
+  for ROUTE in $LOCAL_ROUTES; do
+    sudo ip route add "$ROUTE" dev "$LOCAL_TUN" via "${VPN_ADDR_SRV%/*}"
+  done
+  # Wait childs or user input
+  echo "ctrl-c to stop vpn"
+  wait
+}
+
+##############################
+# Point-to-point ssh VPN with routing
+ssh_vpn() {
+  echo "!!! UNDER TEST !!!"
+  local RELAY_ADDR="${1:?No relay address specified...}"
+  local LOCAL_ADDR="${2:-192.168.9.2/24}"
+  local LOCAL_TUN="${3:-10}"
+  local REMOTE_ADDR="${4:-192.168.9.1/24}"
+  local REMOTE_TUN="${5:-10}"
+  local REMOTE_OUTPUT_ITF="${6:-eth0}"
+  local LOCAL_ROUTES="$7"
+  # Local tun setup
+  sudo ip tuntap add "tun$LOCAL_TUN" mode tun
+  sudo ip addr add "$LOCAL_ADDR" dev "tun$LOCAL_TUN"
+  sudo ip link set dev "tun$LOCAL_TUN" up
+  # Remote tun setup
+  ssh_sudo "$RELAY_ADDR" -b sh -c "\"
+    echo 1 > /proc/sys/net/ipv4/ip_forward
+    iptables -t nat -A POSTROUTING -o $REMOTE_OUTPUT_ITF -j MASQUERADE
+    sudo ip tuntap add \"tun$REMOTE_TUN\" mode tun
+    sudo ip addr add \"$REMOTE_ADDR\" dev \"tun$REMOTE_TUN\"
+    sudo ip link set dev \"tun$REMOTE_TUN\" up
+  \"" _
+  # Set tun tunnel up
+  ssh -f -w "${LOCAL_TUN}:${REMOTE_TUN}" "$RELAY_ADDR" true
+  sleep 1
+  # Set local routes
+  sudo ip route add "REMOTE_ADDR" via "${REMOTE_ADDR%/*}"
+  for ROUTE in $LOCAL_ROUTES; do
+    sudo ip route add "$ROUTE" via "${REMOTE_ADDR%/*}"
+  done
+  # Wait childs or user input
+  echo "ctrl-c to stop vpn"
+  wait
+  # Kill tunnel
+  pgrep -f "ssh.* -w ${LOCAL_TUN}:${REMOTE_TUN}" | xargs -r kill
+  # Remove remote tun
+  ssh_sudo "$RELAY_ADDR" -b sh -c "\"
+    iptables -t nat -D POSTROUTING -o $REMOTE_OUTPUT_ITF -j MASQUERADE
+    sudo ip link set dev \"tun$REMOTE_TUN\" down
+    sudo ip tuntap del \"tun$REMOTE_TUN\"
+  \"" _
+  # Remove local tun
+  sudo ip link set dev "tun$REMOTE_TUN" down
+  sudo ip tuntap del "tun$REMOTE_TUN"
+}
+
+##############################
+# Proxify an app using dynamic SSH tunnels & proxychains
+ssh_proxify() {
+  local SERVER="${1:?No server specified...}"
+  local LPORT="${2:?No local port specified...}"
+  local CONFIG="$HOME/.proxychains/proxychains.conf"
+  shift 2
+  mkdir -p "$(dirname "$CONFIG")"
+  cat > "$CONFIG" <<EOF
+strict_chain
+quiet_mode
+proxy_dns
+[ProxyList]
+socks5 127.0.0.1 $LPORT
+EOF
+  ssh_tunnel_open "$SERVER" "D$LPORT" & true
+  proxychains "$@"
+  ssh_tunnel_close "$LPORT"
+}
+
+# Proxify an app using tor/proxychains
+ssh_torify() {
+  local SERVER="${1:?No server specified...}"
+  local LPORT="${2:?No local port specified...}"
+  local DADDR="${3:?No tor bind address specified...}"
+  local DPORT="${4:?No tor bind port specified...}"
+  local CONFIG="$HOME/.proxychains/proxychains.conf"
+  shift 4
+  mkdir -p "$(dirname "$CONFIG")"
+  cat > "$CONFIG" <<EOF
+strict_chain
+quiet_mode
+proxy_dns
+[ProxyList]
+socks5 127.0.0.1 $LPORT
+EOF
+  ssh_tunnel_open "$SERVER" "L$LPORT:$DADDR:$DPORT" & true
+  proxychains "$@"
+  ssh_tunnel_close "$LPORT"
+}
+
+# Proxify flux using sshuttle
+# https://github.com/sshuttle/sshutle.git
+ssh_shuttle() { sshuttle --dns -e "$(fct_tiny ssh)" -r "$@"; }
+
+##############################
 # Add ssh dedicated command id in ~/.ssh/authorized_keys
 # Use ssh-copy-id for std login shells
 ssh_copy_id() {

@@ -53,6 +53,21 @@ fsck_repair() {
 dd_status() {
   kill -10 $(pgrep '^dd$')
 }
+# Local to remote dd
+dd_ssh_to_remote() {
+  local DEV="${1:?No device specified...}"
+  local OUT="${2:?No local output file specified...}"
+  shift 2
+  sudo dd if="$DEV" | gzip -1 - | pv | ssh "${@:?No ssh remote specified...}" dd of="$OUT.gz"
+}
+# Remote to local dd
+dd_ssh_to_local() {
+  local DEV="${1:?No device specified...}"
+  local OUT="${2:?No local output file specified...}"
+  shift 2
+  echo -n "Enter password: "
+  ssh -t "${@:?No ssh remote specified...}" "sudo --prompt='' dd if=\"$DEV\" | gzip -f1 -" | dd of="$OUT.gz"
+}
 
 ################################
 # Make iso from block device
