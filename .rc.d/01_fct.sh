@@ -32,6 +32,14 @@ fct_content() {
   done
 }
 
+# Get alias content
+alias_content() {
+  for ALIAS; do
+    #alias "$ALIAS" 2>/dev/null | awk -F= "{gsub(/'/,\"\"); print \$2}"
+    type "$FCT" 2>/dev/null | awk -F '« | »' '/alias/{print $2}'
+  done
+}
+
 # Define and call fct. Useful with xargs/do-while when functions are not exported in subshells
 # ex: (set -vx; myfile() { for f in "$@"; do echo file="$# $f"; done; }; find . -type f -print0 | xargs -0 sh -c "$(fct_eval myfile \"\$@\")" _)
 fct_eval() {
