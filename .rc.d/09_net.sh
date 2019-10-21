@@ -368,14 +368,13 @@ ssh_socat_vpn() {
 ##############################
 # Point-to-point ssh VPN with routing
 ssh_vpn() {
-  echo "!!! UNDER TEST !!!"
   local RELAY_ADDR="${1:?No relay address specified...}"
-  local LOCAL_ADDR="${2:-192.168.9.2/24}"
-  local LOCAL_TUN="${3:-10}"
-  local REMOTE_ADDR="${4:-192.168.9.1/24}"
-  local REMOTE_TUN="${5:-10}"
-  local REMOTE_OUTPUT_ITF="${6:-eth0}"
-  local LOCAL_ROUTES="$7"
+  local LOCAL_ROUTES="$2"
+  local LOCAL_ADDR="${3:-192.168.99.2/24}"
+  local LOCAL_TUN="${4:-99}"
+  local REMOTE_ADDR="${5:-192.168.99.1/24}"
+  local REMOTE_TUN="${6:-99}"
+  local REMOTE_OUTPUT_ITF="${7:-eth0}"
   # Local tun setup
   sudo ip tuntap add "tun$LOCAL_TUN" mode tun
   sudo ip addr add "$LOCAL_ADDR" dev "tun$LOCAL_TUN"
@@ -392,24 +391,24 @@ ssh_vpn() {
   ssh -f -w "${LOCAL_TUN}:${REMOTE_TUN}" "$RELAY_ADDR" true
   sleep 1
   # Set local routes
-  sudo ip route add "REMOTE_ADDR" via "${REMOTE_ADDR%/*}"
+  sudo ip route add "$REMOTE_ADDR" via "${REMOTE_ADDR%/*}"
   for ROUTE in $LOCAL_ROUTES; do
     sudo ip route add "$ROUTE" via "${REMOTE_ADDR%/*}"
   done
   # Wait childs or user input
   echo "ctrl-c to stop vpn"
-  wait
+  read _
   # Kill tunnel
   pgrep -f "ssh.* -w ${LOCAL_TUN}:${REMOTE_TUN}" | xargs -r kill
   # Remove remote tun
   ssh_sudo "$RELAY_ADDR" -b sh -c "\"
     iptables -t nat -D POSTROUTING -o $REMOTE_OUTPUT_ITF -j MASQUERADE
     sudo ip link set dev \"tun$REMOTE_TUN\" down
-    sudo ip tuntap del \"tun$REMOTE_TUN\"
+    sudo ip tuntap delete \"tun$REMOTE_TUN\" mode tun
   \"" _
   # Remove local tun
   sudo ip link set dev "tun$REMOTE_TUN" down
-  sudo ip tuntap del "tun$REMOTE_TUN"
+  sudo ip tuntap delete "tun$REMOTE_TUN" mode tun
 }
 
 ##############################
@@ -453,9 +452,13 @@ EOF
   ssh_tunnel_close "$LPORT"
 }
 
-# Proxify flux using sshuttle
+# Proxify flux using sshuttle (TCP only)
 # https://github.com/sshuttle/sshutle.git
-ssh_shuttle() { sshuttle --dns -e "$(fct_tiny ssh)" -r "$@"; }
+ssh_shuttle() {
+  local SSH="$(fct_content ssh | sed 's/^\s*command // ; s/"$@"//g ; s/~/$HOME/g')"
+  SSH="$(eval echo "$SSH")"
+  sshuttle ${SSH:+-e "$SSH"} -r "$@"
+}
 
 ##############################
 # Add ssh dedicated command id in ~/.ssh/authorized_keys
