@@ -225,12 +225,8 @@ sshh_proxify()     { ssh(){ sshh "$@"; }; ssh_proxify "$@"; }
 sshh_torify()      { ssh(){ sshh "$@"; }; ssh_torify "$@"; }
 sshh_socat_vpn_p2p() { ssh(){ sshh "$@"; }; ssh_socat_vpn_p2p "$@"; }
 sshh_socat_vpn()     { ssh(){ sshh "$@"; }; ssh_socat_vpn "$@"; }
-
-# Under test !
 sshh_vpn()         { ssh(){ sshh "$@"; }; ssh_vpn "$@"; }
 sshh_shuttle()     { ssh(){ sshh "$@"; }; ssh_shuttle "$@"; }
-sshh_openvpn_tcp() { ssh(){ sshh "$@"; }; ssh_openvpn_tcp "$@"; }
-sshh_openvpn_udp() { ssh(){ sshh "$@"; }; ssh_openvpn_udp "$@"; }
 
 ##############################
 # SSH tunnel shortcuts
@@ -265,51 +261,53 @@ ssh_tunnel_ls() {
 }
 
 ##############################
-# TCP openvpn via SSH
-ssh_openvpn_tcp() {
-  echo "!!! UNDER TEST !!!"
-  local RELAY_ADDR="${1:?No relay address specified...}"
-  local RELAY_PORT="${2:?No relay port specified...}"
-  local VPN_ADDR="${3:?No VPN address specified...}"
-  local VPN_PORT="${4:?No VPN port specified...}"
-  local VPN_CONF="${5:?No VPN config file specified...}"
-  # Main tunnel
-  ssh -fnxNT -L "$RELAY_PORT:$VPN_ADDR:$VPN_PORT" "$RELAY_ADDR"
-  # Openvpn blocking call
-  ( cd "$(dirname "$VPN_CONF")"
-    sudo openvpn --config "$VPN_CONF"
-  )
-  # Close tunnel
-  ssh_tunnel_close "$RELAY_PORT"
-}
+#~ # TCP openvpn via SSH
+#~ sshh_openvpn_tcp() { ssh(){ sshh "$@"; }; ssh_openvpn_tcp "$@"; }
+#~ ssh_openvpn_tcp() {
+  #~ echo "!!! UNDER TEST !!!"
+  #~ local RELAY_ADDR="${1:?No relay address specified...}"
+  #~ local RELAY_PORT="${2:?No relay port specified...}"
+  #~ local VPN_ADDR="${3:?No VPN address specified...}"
+  #~ local VPN_PORT="${4:?No VPN port specified...}"
+  #~ local VPN_CONF="${5:?No VPN config file specified...}"
+  #~ # Main tunnel
+  #~ ssh -fnxNT -L "$RELAY_PORT:$VPN_ADDR:$VPN_PORT" "$RELAY_ADDR"
+  #~ # Openvpn blocking call
+  #~ ( cd "$(dirname "$VPN_CONF")"
+    #~ sudo openvpn --config "$VPN_CONF"
+  #~ )
+  #~ # Close tunnel
+  #~ ssh_tunnel_close "$RELAY_PORT"
+#~ }
 
-# UDP openvpn via SSH
-ssh_openvpn_udp() {
-  echo "!!! UNDER TEST !!!"
-  local RELAY_ADDR="${1:?No relay address specified...}"
-  local RELAY_PORT="${2:?No relay port specified...}"
-  local VPN_ADDR="${3:?No VPN address specified...}"
-  local VPN_PORT="${4:?No VPN port specified...}"
-  local VPN_CONF="${5:?No VPN config file specified...}"
-  # Main tunnel
-  ssh -fnxNT -L "$RELAY_PORT:127.0.0.1:$VPN_PORT" "$RELAY_ADDR"
-  # Setup the relays
-  if [ "$RELAY_ADDR" != "$VPN_ADDR" ]; then
-    ssh "$RELAY_ADDR" -- "nohup socat tcp-listen:$RELAY_PORT,fork,reuseaddr udp-sendto:$VPN_ADDR:$VPN_PORT > /dev/null &"
-  fi
-  # Openvpn blocking call
-  ( command cd "$(dirname "$VPN_CONF")"
-    sudo openvpn --config "$VPN_CONF"
-  )
-  # Close the relays
-  killall socat
-  if [ "$RELAY_ADDR" != "$VPN_ADDR" ]; then
-    ssh "$RELAY_ADDR" -- killall socat
-  fi
-  # Close tunnel
-  ssh_tunnel_close "$RELAY_PORT"
-  stty sane
-}
+#~ # UDP openvpn via SSH
+#~ sshh_openvpn_udp() { ssh(){ sshh "$@"; }; ssh_openvpn_udp "$@"; }
+#~ ssh_openvpn_udp() {
+  #~ echo "!!! UNDER TEST !!!"
+  #~ local RELAY_ADDR="${1:?No relay address specified...}"
+  #~ local RELAY_PORT="${2:?No relay port specified...}"
+  #~ local VPN_ADDR="${3:?No VPN address specified...}"
+  #~ local VPN_PORT="${4:?No VPN port specified...}"
+  #~ local VPN_CONF="${5:?No VPN config file specified...}"
+  #~ # Main tunnel
+  #~ ssh -fnxNT -L "$RELAY_PORT:127.0.0.1:$VPN_PORT" "$RELAY_ADDR"
+  #~ # Setup the relays
+  #~ if [ "$RELAY_ADDR" != "$VPN_ADDR" ]; then
+    #~ ssh "$RELAY_ADDR" -- "nohup socat tcp-listen:$RELAY_PORT,fork,reuseaddr udp-sendto:$VPN_ADDR:$VPN_PORT > /dev/null &"
+  #~ fi
+  #~ # Openvpn blocking call
+  #~ ( command cd "$(dirname "$VPN_CONF")"
+    #~ sudo openvpn --config "$VPN_CONF"
+  #~ )
+  #~ # Close the relays
+  #~ killall socat
+  #~ if [ "$RELAY_ADDR" != "$VPN_ADDR" ]; then
+    #~ ssh "$RELAY_ADDR" -- killall socat
+  #~ fi
+  #~ # Close tunnel
+  #~ ssh_tunnel_close "$RELAY_PORT"
+  #~ stty sane
+#~ }
 
 ##############################
 # Point-to-point socat VPN through SSH
