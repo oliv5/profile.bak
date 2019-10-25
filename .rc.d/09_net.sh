@@ -223,6 +223,7 @@ sshh_youtubedl()   { ssh(){ sshh "$@"; }; ssh_youtubedl "$@"; }
 sshh_tunnel_open() { ssh(){ sshh "$@"; }; ssh_tunnel_open "$@"; }
 sshh_proxify()     { ssh(){ sshh "$@"; }; ssh_proxify "$@"; }
 sshh_torify()      { ssh(){ sshh "$@"; }; ssh_torify "$@"; }
+sshh_torify_ff()   { ssh(){ sshh "$@"; }; ssh_torify_ff "$@"; }
 sshh_socat_vpn_p2p() { ssh(){ sshh "$@"; }; ssh_socat_vpn_p2p "$@"; }
 sshh_socat_vpn()     { ssh(){ sshh "$@"; }; ssh_socat_vpn "$@"; }
 sshh_vpn()         { ssh(){ sshh "$@"; }; ssh_vpn "$@"; }
@@ -447,6 +448,36 @@ socks5 127.0.0.1 $LPORT
 EOF
   ssh_tunnel_open "$SERVER" "L$LPORT:$DADDR:$DPORT" & true
   proxychains "$@"
+  ssh_tunnel_close "$LPORT"
+}
+
+# Proxify firefox using tor
+ssh_torify_ff() {
+  local SERVER="${1:?No server specified...}"
+  local LPORT="${2:?No local port specified...}"
+  local DADDR="${3:?No tor bind address specified...}"
+  local DPORT="${4:?No tor bind port specified...}"
+  local PROFILE_DIR="$HOME/.mozilla/firefox/profile.tor"
+  shift 4
+  # Setup firefox profile
+  firefox -CreateProfile "tor $PROFILE_DIR"
+  mkdir -p "$PROFILE_DIR"
+  [ -f "$PROFILE_DIR/user.js" ] &&
+    sed -e '/network.proxy.type/d' \
+        -e '/network.proxy.socks/d' \
+        -e '/network.proxy.socks_port/d' \
+        -e '/network.proxy.socks_remote_dns/d' \
+        -e '/network.proxy.socks_version/d' \
+        "$PROFILE_DIR/user.js"
+  echo 'user_pref("network.proxy.type",1);' >> "$PROFILE_DIR/user.js"
+  echo 'user_pref("network.proxy.socks","127.0.0.1");' >> "$PROFILE_DIR/user.js"
+  echo 'user_pref("network.proxy.socks_port",'$LPORT');' >> "$PROFILE_DIR/user.js"
+  echo 'user_pref("network.proxy.socks_remote_dns",true);' >> "$PROFILE_DIR/user.js"
+  echo 'user_pref("network.proxy.socks_version",5);' >> "$PROFILE_DIR/user.js"
+  # Run session
+  ssh_tunnel_open "$SERVER" "L$LPORT:$DADDR:$DPORT" & true
+  #~ firefox -P "$PROFILE_DIR" --no-remote
+  firefox -P "tor"
   ssh_tunnel_close "$LPORT"
 }
 
