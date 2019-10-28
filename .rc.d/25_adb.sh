@@ -3,9 +3,9 @@
 
 # Connect adb over wi-fi
 adb_wifi() {
-    #adb connect 192.168.8.122:5555
-    adb shell setprop service.adb.tcp.port 5555 && stop adbd && start adbd
-    adb connect
+    adb shell "setprop service.adb.tcp.port ${2:-5555} && stop adbd && start adbd"
+    adb connect "${1:?No IP address specified...}:${2:-5555}"
+    adb devices
 }
 
 # Unlock your Android screen
@@ -58,6 +58,14 @@ adb_clock_start() {
 # Stop clock app
 adb_clock_stop() {
     adb shell am force-stop com.google.android.deskclock
+}
+
+# Send termux cmd
+adb_termux_cmd() {
+    adb shell am start -n com.termux/.app.TermuxActivity &&
+    adb shell input text "$@" &&
+    adb shell input keyevent 113 &&
+    adb shell input keyevent 66
 }
 
 # Start wifi settings manager
