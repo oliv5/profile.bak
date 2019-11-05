@@ -162,7 +162,7 @@ git_set_tracking() {
   local BRANCH="${1:-$(git_branch)}"
   local REMOTE="${2:-$(git_remotes | cut -d' ' -f 1)}"
   if git for-each-ref "refs/remotes/$REMOTE" | grep -- "refs/remotes/$REMOTE/$BRANCH\$" >/dev/null; then
-    git branch --set-upstream "$REMOTE/$BRANCH" "$BRANCH"
+    git branch --set-upstream "$BRANCH" "$REMOTE/$BRANCH"
   fi
 }
 fi
@@ -1279,7 +1279,9 @@ alias gbDr='git push :'     # remove remote branch (any)
 alias gbdro='git fetch -p'  # remote all old remotes
 alias gbu='git branch --set-upstream-to '  # set branch upstream
 alias gb='git branch'
+# Tracking branches
 alias gst='git_set_tracking'
+alias ggt='git_get_tracking'
 # Stash aliases
 alias gsc='git_stash_create'
 alias gss='git_stash_save'
