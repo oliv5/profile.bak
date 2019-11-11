@@ -194,6 +194,10 @@ annex_special_remotes_uuid() {
     sort -u |
     xargs
 }
+annex_isspecial() {
+  git show git-annex:remote.log 2>/dev/null | grep "name=$1" >/dev/null
+}
+
 
 ########################################
 annex_hook_commit() {
@@ -227,10 +231,11 @@ annex_getinfo() {
 }
 
 # Lookup special remote keys
-annex_lookup_remote() {
+annex_lookup_special_remote() {
   # Preamble
   git_exists || return 1
   annex_std || return 2
+  annex_isspecial || return 3
   # Bash lookup_key
   bash_lookup_key() {
     bash -c '
@@ -346,10 +351,10 @@ annex_lookup_remote() {
 }
 
 # Lookup special remotes keys
-annex_lookup_remotes() {
-  local REMOTES="${@:-$(annex_remotes)}"
+annex_lookup_special_remotes() {
+  local REMOTES="${@:-$(annex_special_remotes)}"
   for REMOTE in $REMOTES; do
-    annex_lookup_remote "$REMOTE" 2>&1
+    annex_lookup_special_remote "$REMOTE" 2>&1
   done
 }
 
@@ -454,22 +459,22 @@ annex_info(){
 }
 
 # Enum special remotes
-_annex_enum_remotes() {
+_annex_enum_special_remotes() {
   [ -n "$OUT" ] || return 1
   OUT="${OUT%%.xz}"; OUT="${OUT%%.txt}.txt.xz"
   local OWNER="${1:-$USER}"
   local XZOPTS="${2:--9}"
-  annex_lookup_remotes > "${OUT%%.xz}"
+  annex_lookup_special_remotes > "${OUT%%.xz}"
   xz -k -z -S .xz --verbose ${XZOPTS} "${OUT%%.xz}" &&
     _git_secure_delete "${OUT%%.xz}"
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
 }
-annex_enum_remotes() {
+annex_enum_special_remotes() {
   if annex_bare; then
     echo "Repository '$(git_dir)' cannot be enumerated. Abort..."
     return 1
   else
-    _annex_archive "annex.enum_remotes.txt.xz" "$1" "$2" "$3" "_annex_enum_remotes" "$4" "$5"
+    _annex_archive "annex.enum_special_remotes.txt.xz" "$1" "$2" "$3" "_annex_enum_special_remotes" "$4" "$5"
   fi
 }
 
