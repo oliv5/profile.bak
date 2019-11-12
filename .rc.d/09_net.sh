@@ -222,6 +222,7 @@ sshh_aria2()       { ssh(){ sshh "$@"; }; ssh_aria2 "$@"; }
 sshh_youtubedl()   { ssh(){ sshh "$@"; }; ssh_youtubedl "$@"; }
 sshh_tunnel_open() { ssh(){ sshh "$@"; }; ssh_tunnel_open "$@"; }
 sshh_proxify()     { ssh(){ sshh "$@"; }; ssh_proxify "$@"; }
+sshh_proxify_ff()  { ssh(){ sshh "$@"; }; ssh_proxify_ff "$@"; }
 sshh_torify()      { ssh(){ sshh "$@"; }; ssh_torify "$@"; }
 sshh_torify_ff()   { ssh(){ sshh "$@"; }; ssh_torify_ff "$@"; }
 sshh_socat_vpn_p2p() { ssh(){ sshh "$@"; }; ssh_socat_vpn_p2p "$@"; }
@@ -253,8 +254,8 @@ ssh_tunnel_open() {
 ssh_tunnel_close() {
   for PORT; do
     local LPORT="${PORT%%:*}"
-    pgrep -f "ssh.* -(L|R) $LPORT:" | xargs -r kill
-    pgrep -f "ssh.* -D $LPORT" | xargs -r kill
+    pgrep -f "ssh.* -(L|R) ${LPORT}:" | xargs -r kill -9
+    pgrep -f "ssh.* -D $LPORT" | xargs -r kill -9
   done
 }
 ssh_tunnel_ls() {
@@ -411,6 +412,29 @@ ssh_vpn() {
 }
 
 ##############################
+# Set firefox proxy profile
+firefox_set_proxy() {
+  local PORT="${1:-16000}"
+  local PROFILE="${2:-$HOME/.mozilla/firefox/profile.proxy}"
+  local NAME="${3:-$(basename "$PROFILE")}"
+  # Setup firefox profile
+  firefox -CreateProfile "$NAME $PROFILE"
+  mkdir -p "$PROFILE"
+  [ -f "$PROFILE/user.js" ] &&
+    sed -e '/network.proxy.type/d' \
+        -e '/network.proxy.socks/d' \
+        -e '/network.proxy.socks_port/d' \
+        -e '/network.proxy.socks_remote_dns/d' \
+        -e '/network.proxy.socks_version/d' \
+        "$PROFILE/user.js"
+  echo 'user_pref("network.proxy.type",1);' >> "$PROFILE/user.js"
+  echo 'user_pref("network.proxy.socks","127.0.0.1");' >> "$PROFILE/user.js"
+  echo 'user_pref("network.proxy.socks_port",'$PORT');' >> "$PROFILE/user.js"
+  echo 'user_pref("network.proxy.socks_remote_dns",true);' >> "$PROFILE/user.js"
+  echo 'user_pref("network.proxy.socks_version",5);' >> "$PROFILE/user.js"
+}
+
+##############################
 # Proxify an app using dynamic SSH tunnels & proxychains
 ssh_proxify() {
   local SERVER="${1:?No server specified...}"
@@ -425,11 +449,24 @@ proxy_dns
 [ProxyList]
 socks5 127.0.0.1 $LPORT
 EOF
-  ssh_tunnel_open "$SERVER" "D$LPORT" & true
+  ssh_tunnel_open "$SERVER" "D$LPORT" & true &&
   proxychains "$@"
   ssh_tunnel_close "$LPORT"
 }
 
+# Proxify firefox using dynamic SSH tunnels only
+ssh_proxify_ff() {
+  local PROFILE="$HOME/.mozilla/firefox/profile.proxify"
+  local SERVER="${1:?No server specified...}"
+  local LPORT="${2:?No local port specified...}"
+  shift 2
+  firefox_set_proxy "$LPORT" "$PROFILE" "proxify"
+  ssh_tunnel_open "$SERVER" "D$LPORT" & true &&
+  firefox -P "proxify" "$@"
+  ssh_tunnel_close "$LPORT"
+}
+
+##############################
 # Proxify an app using tor/proxychains
 ssh_torify() {
   local SERVER="${1:?No server specified...}"
@@ -457,26 +494,12 @@ ssh_torify_ff() {
   local LPORT="${2:?No local port specified...}"
   local DADDR="${3:?No tor bind address specified...}"
   local DPORT="${4:?No tor bind port specified...}"
-  local PROFILE_DIR="$HOME/.mozilla/firefox/profile.tor"
+  local PROFILE="$HOME/.mozilla/firefox/profile.tor"
   shift 4
-  # Setup firefox profile
-  firefox -CreateProfile "tor $PROFILE_DIR"
-  mkdir -p "$PROFILE_DIR"
-  [ -f "$PROFILE_DIR/user.js" ] &&
-    sed -e '/network.proxy.type/d' \
-        -e '/network.proxy.socks/d' \
-        -e '/network.proxy.socks_port/d' \
-        -e '/network.proxy.socks_remote_dns/d' \
-        -e '/network.proxy.socks_version/d' \
-        "$PROFILE_DIR/user.js"
-  echo 'user_pref("network.proxy.type",1);' >> "$PROFILE_DIR/user.js"
-  echo 'user_pref("network.proxy.socks","127.0.0.1");' >> "$PROFILE_DIR/user.js"
-  echo 'user_pref("network.proxy.socks_port",'$LPORT');' >> "$PROFILE_DIR/user.js"
-  echo 'user_pref("network.proxy.socks_remote_dns",true);' >> "$PROFILE_DIR/user.js"
-  echo 'user_pref("network.proxy.socks_version",5);' >> "$PROFILE_DIR/user.js"
   # Run session
   ssh_tunnel_open "$SERVER" "L$LPORT:$DADDR:$DPORT" & true
   #~ firefox -P "$PROFILE_DIR" --no-remote
+  firefox_set_proxy "$LPORT" "$PROFILE" "tor"
   firefox -P "tor"
   ssh_tunnel_close "$LPORT"
 }
