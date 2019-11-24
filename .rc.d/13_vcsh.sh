@@ -20,16 +20,6 @@ vcsh_run() {
   ' _ "$@"
 }
 
-# vcsh clone
-vcsh_clone() {
-  local REPO="$(basename "$1" .git)"
-  vcsh clone "$1" "$REPO" || return 1
-  shift
-  if [ -n "$2" ]; then
-    vcsh run "$REPO" git remote rename origin "$2"
-  fi
-}
-
 ########################################
 ########################################
 # Last commands in file

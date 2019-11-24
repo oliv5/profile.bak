@@ -378,21 +378,17 @@ git_import() {
 ########################################
 
 # Push the current branch to all remotes
-git_push() { git_push_all "$2" "${1:-$(git_branch)}"; }
+git_push() { git_push_all "$1" "HEAD"; }
 
 # Batch push to all existing remote/branches
 git_push_all() {
   git_exists || return 1
   local IFS="$(printf ' \t\n')"
   local REMOTES="${1:-$(git_remotes)}"
-  local BRANCHES="${2:-$(git_branches)}"
+  local BRANCH="${2:---all}"
   for REMOTE in $REMOTES; do
-    for BRANCH in $BRANCHES; do
-      if git_branch_exists "$REMOTE/$BRANCH"; then
-        echo -n "Push $REMOTE/$BRANCH : "
-        git push "$REMOTE" "$BRANCH"
-      fi
-    done
+    echo -n "Push to $REMOTE: "
+    git push "$REMOTE" $BRANCH
   done
 }
 
