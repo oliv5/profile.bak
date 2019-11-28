@@ -5,18 +5,32 @@ alias remount_rw='sudo mount -o remount,rw'
 alias remount_ro='sudo mount -o remount,ro'
 
 # Mount checker
-mounted() {
-  case $(mount) in
-    *" $1 "*) return 0;;  # Mounted
-  esac
-  return 1  # NOT mounted
+_mounted_one() {
+  local PATTERN="${1:?No pattern specified...}"
+  local MOUNT="$(mount)"
+  shift 1
+  for M; do
+    echo "$MOUNT" | grep "on $M " | grep -q -e "$PATTERN" && return 0 # one mounted
+  done
+  return 1 # none mounted
 }
-mounted_rw() {
-  mount | grep " $1 " | head -n1 | grep -qi -e "[(\s,]rw[\s,)]"
+_mounted_all() {
+  local PATTERN="${1:?No pattern specified...}"
+  local MOUNT="$(mount)"
+  shift 1
+  for M; do
+    echo "$MOUNT" | grep "on $M " | grep -q -e "$PATTERN" || return 1 # not all mounted
+  done
+  return 0 # all mounted
 }
-mounted_ro() {
-  mount | grep " $1 " | head -n1 | grep -qi -e "[(\s,]ro[\s,)]"
-}
+mounted() { _mounted_all " " "$@"; }
+mounted_rw() { _mounted_one "[(\s,]rw[\s,)]" "$@"; }
+mounted_ro() { _mounted_one "[(\s,]ro[\s,)]" "$@"; }
+mounted_net() { _mounted_one "type \(cifs\|nfs\|fuse.sshfs\)" "$@"; }
+mounted_nfs() { _mounted_one "type nfs" "$@"; }
+mounted_cifs() { _mounted_one "type cifs" "$@"; }
+mounted_sshfs() { _mounted_one "type fuse.sshfs" "$@"; }
+mounted_autofs() { _mounted_one "type autofs" "$@"; }
 
 # Mount cleaner
 # Keep a number of mounts matching input regex
@@ -190,6 +204,7 @@ umount_img() {
   [ "$(readlink -f "$DST")" != "/mnt" ] && sudo rmdir "$DST"
 }
 
+#####################################
 # Unmount nfs
 alias umountall_nfs='umount -a -t nfs'
 umount_nfs() {
@@ -206,6 +221,7 @@ umount_nfs() {
   "
 }
 
+#####################################
 # Toggle autofs
 autofs_toggle() {
   sudo service autofs stop
@@ -216,8 +232,9 @@ autofs_toggle() {
   sudo service autofs start   
 }
 
+#####################################
 # Check logged on users have a local home
-check_nfs() {
+nfs_who() {
   for LOGGED_USER in $(who | awk '{print $1}' | sort | uniq); do
     if [ -f /etc/exports ] && ! command grep -E "^[^#]*$LOGGED_USER" /etc/exports >/dev/null; then
       echo "WARNING: user $LOGGED_USER is logged in using a remote home..."
@@ -225,11 +242,13 @@ check_nfs() {
   done
 }
 
+#####################################
 # Mount sshfs
 alias umount_sshfs='fusermount -u'
 alias mount_sshfs='sshfs -o cache=yes -o kernel_cache -o compression=no -o large_read'
 alias mount_sshfs_fast='sshfs -o cache=yes -o kernel_cache -o compression=no -o large_read -o Ciphers=arcfour'
 
+#####################################
 # Mount & exec command
 mount_exec() {
   local MOUNT="${1:?No mount specified...}"
