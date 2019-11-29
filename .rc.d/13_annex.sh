@@ -132,6 +132,15 @@ annex_init_gcrypt() {
   git config --add annex.sshcaching false
 }
 
+# Clone gcrypt annex
+annex_clone_gcrypt() {
+  local NAME="${1:?No remote name specified...}"
+  local REMOTEPATH="${2:-$(git_repo)}"
+  ! git-remote-gcrypt --check "$REMOTEPATH" && return 1
+  git clone "gcrypt::$REMOTEPATH" "$NAME" &&
+    git annex enableremote "$NAME" type=gcrypt gitrepo="$REMOTEPATH"
+}
+
 # Init rclone annex
 annex_init_rclone() {
   local NAME="${1:?No remote name specified...}"
@@ -1185,11 +1194,11 @@ annex_purge() {
 # DBG enable debug mode
 annex_setpresentkey() {
   local REMOTE="${1:?No remote specified...}"
-  local WHERE="${2:-${WHERE:---include '*'}}"
+  local WHERE="${2:-${WHERE:-*}}"
   local PRESENT="${3:-1}"
   local UUID="$(git config --get remote.${REMOTE}.annex-uuid)"
-  [ -z "$UUID" ] && { echo "Remote $REMOTE unknown...}" && return 1; }
-  eval git annex find "$WHERE" --format='\${key}\\000' | xargs -r0 -n1 sh -c '
+  [ -z "$UUID" ] && { echo "Remote $REMOTE unknown..." && return 1; }
+  eval git annex find --include "$WHERE" --format='\${key}\\000' | xargs -r0 -n1 sh -c '
     DBG="$1"; UUID="$2"; PRESENT="$3"; KEY="$4"
     $DBG git annex setpresentkey "$KEY" "$UUID" $PRESENT
   ' _ "${DBG:+echo [DBG]}" "$UUID" "$PRESENT"
