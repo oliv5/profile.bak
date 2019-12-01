@@ -62,7 +62,7 @@ git_setup() {
   git config --global core.excludesfile '~/.gitignore'
   # Disable push in gcrypt remotes; enable the one you want manually
   for REMOTE in $(git_remotes); do
-    git_gcrypt "$REMOTE" && echo "Disable push in remote $REMOTE" && git_push_disable "$REMOTE"
+    git_gcrypt_remotes "$REMOTE" && echo "Disable push in remote $REMOTE" && git_push_disable "$REMOTE"
   done
 }
 
@@ -376,7 +376,16 @@ git_import() {
 }
 
 ########################################
+# Pull versions
+if [ $(git_version) -gt $(git_version 2.9) ]; then
+git_pull() { git pull --rebase --autostash "$@"; }
+elif [ $(git_version) -ge $(git_version 1.7.10.4) ]; then
+git_pull() { git pull --rebase "$@"; }
+else
+git_pull() { git pull "$@"; }
+fi
 
+########################################
 # Push the current branch to all remotes
 git_push() { git_push_all "$1" "HEAD"; }
 
@@ -489,7 +498,7 @@ git_upkeep() {
   # Main
   git_exists || return 1
   # Force PULL if a remote is using gcrypt
-  if [ -z "$PULL" ] && [ -n "$PUSH" ] && git_gcrypt $REMOTES; then
+  if [ -z "$PULL" ] && [ -n "$PUSH" ] && git_gcrypt_remotes $REMOTES; then
     echo "Force pull because of gcrypt remote(s)"
     PULL=1
   fi
@@ -1104,11 +1113,25 @@ git_squashn() {
 
 ########################################
 # Test if remote is using gcrypt
-git_gcrypt() {
+git_gcrypt_remotes() {
   for REMOTE; do
-    git_url "$REMOTE" | grep '^gcrypt::' >/dev/null && return 0
+    git_url "$REMOTE" | grep '^gcrypt::' >/dev/null || return 1
   done
-  false
+  return 0
+}
+git_gcrypt() {
+  for DIR; do
+    git --git-dir="$DIR" config core.gcrypt-id >/dev/null 2>&1 || return 1
+  done
+  return 0
+}
+git_gcrypt_url() {
+  cd "$(mktemp -d)" || return 1
+  for URL; do
+    git-remote-gcrypt --check "$URL" >/dev/null 2>&1
+    [ $? -ne 100 ] || return 1    
+  done
+  return 0
 }
 
 # Git clone gcrypt repo
@@ -1405,13 +1428,7 @@ alias grbit='git rebase -i $(git_tracking)'
 # Fetch/pull/push aliases
 alias gpu='git push'
 alias gpua='git_push_all'
-if [ $(git_version) -gt $(git_version 2.9) ]; then
-  alias gup='git pull --rebase --autostash'
-elif [ $(git_version) -ge $(git_version 1.7.10.4) ]; then
-  alias gup='git pull --rebase'
-else
-  alias gup='git pull'
-fi
+alias gup='git_pull'
 alias gfe='git fetch'
 alias gfa='git fetch --all --tags'
 # Config aliases

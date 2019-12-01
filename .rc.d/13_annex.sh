@@ -164,7 +164,15 @@ annex_st() {
 # Get remote(s) uuid
 annex_uuid() {
   for REMOTE in "${@:-.*}"; do
-    git config --get-regexp remote\.${REMOTE}\.annex-uuid
+    git show git-annex:uuid.log | awk '$2=/'$REMOTE'/ {print $1}'
+  done
+}
+annex_uuid_local() {
+  git config annex.uuid
+}
+annex_uuid_remotes() {
+  for REMOTE in "${@:-.*}"; do
+    git config --get-regexp remote\.${REMOTE}\.annex-uuid | cut -d' ' -f 2
   done
 }
 
