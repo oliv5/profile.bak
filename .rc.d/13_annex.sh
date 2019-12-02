@@ -840,7 +840,7 @@ annex_upkeep() {
     unset SEND
   fi
   # Force PULL if a remote is using gcrypt
-  if [ -n "$NO_PULL" ] && git_gcrypt $REMOTES; then
+  if [ -n "$NO_PULL" ] && git_gcrypt_remotes $REMOTES; then
     echo "Force pull because of gcrypt remote(s)"
     unset NO_PULL
   fi
