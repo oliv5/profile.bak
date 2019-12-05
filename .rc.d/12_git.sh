@@ -92,7 +92,10 @@ git_worktree() {
 
 # Get git directory (alias git-dir)
 git_dir() {
-  readlink -f "${1:-${GIT_DIR:-$(git rev-parse --git-dir)}}"
+  local DIR="${1:-$PWD}"
+  readlink -f "$(git --git-dir="$DIR/.git" rev-parse --git-dir 2>/dev/null)" ||
+  readlink -f "$(git --git-dir="$DIR" rev-parse --git-dir 2>/dev/null)"
+  #readlink -f "$(git --git-dir="${DIR%%.git}" rev-parse --git-dir 2>/dev/null)"
 }
 git_user_dir() {
   echo "$(git_dir "$@")/user"
