@@ -90,7 +90,11 @@ alias llg='ll | grep'
 alias b='cdb'
 alias f='cdf'
 alias p='cd ..'
-alias r='if svn_exists; then cd "$(svn_root)"; elif git_exists; then cd "$(git_worktree)"; fi'
+
+# Repo helpers
+getr() { if svn_exists "$@"; then svn_root "$@"; elif git_exists "$@"; then git_worktree "$@"; fi };
+cdr() { cd "$(getr "$@")"; }
+alias r='cdr'
 
 # Gvim
 alias v='gvim'

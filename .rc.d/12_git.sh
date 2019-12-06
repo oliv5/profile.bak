@@ -1031,6 +1031,24 @@ git_find() {
   git_find0 "$@" | xargs -r0
 }
 
+# Find git repo backward
+# Similar to git_worktree but does not stop until it reaches /
+git_findb0() {
+  for DIR in "${@:-.}"; do
+    DIR="$(readlink -m "$DIR")"
+    while [ "$DIR" != "/" ]; do
+      if git --git-dir="$DIR" rev-parse >/dev/null 2>&1 ||
+         git --git-dir="$DIR/.git" rev-parse >/dev/null 2>&1; then
+        printf "%s\0" "$DIR"
+      fi
+      DIR="$(dirname "$DIR")"
+    done
+  done
+}
+git_findb() {
+  git_findb0 "$@" | xargs -r0
+}
+
 ########################################
 # Create a tag
 git_tag_create() {
