@@ -1110,8 +1110,9 @@ git_squashn() {
   local COMMIT="${1:-HEAD}"
   local HEAD="$(git_hash)"
   git reset --soft "$COMMIT" &&
-    git commit --edit -m "$(git log --format=%B --reverse HEAD..HEAD@{1})" ||
-    git reset "$HEAD"
+    git commit --edit -m "$(git log --format=%B --reverse HEAD..$COMMIT)"
+    #git commit --edit -m "$(git log --format=%B --reverse HEAD..$COMMIT)" ||
+    #git reset "$HEAD"
 }
 
 ########################################
