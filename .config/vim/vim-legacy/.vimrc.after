@@ -634,12 +634,9 @@ vnoremap <A-g><A-g>         "+y:RGrepCount<SPACE><C-r>=fnameescape("<C-r>"")<CR>
 " *******************************************************
 " } Make {
 " *******************************************************
-" Make program
+" Make program (default values)
 "set makeprg=make\ $*
 "set makeformat=%f:%l:%m
-
-" Abbrevations
-"cnoreabbrev make lmake
 
 " Fix make errors encoding
 function! QfRemoveAnsiColor()
@@ -655,6 +652,26 @@ endfunction
 if has('quickfix')
 	autocmd! QuickfixCmdPost make call QfRemoveAnsiColor()
 endif
+
+
+" *******************************************************
+" } Custom user make and run {
+" *******************************************************
+" Execute user script
+function! s:RunUserScript(script, ...)
+	let file = findfile(a:script, ".;")
+	if (filereadable(file))
+		execute "!sh -c ".fnamemodify(file,':p')
+	endif
+endfunction
+
+" User command
+command! -nargs=0 -bar Make      :call <SID>RunUserScript('.make', <f-args>)
+command! -nargs=0 -bar Run       :call <SID>RunUserScript('.run', <f-args>)
+
+" Key mappings
+FnNoremap <F9>   :Make<SPACE><CR>
+FnNoremap <S-F9>  :Run<SPACE><CR>
 
 
 " *******************************************************
