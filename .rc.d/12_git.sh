@@ -995,6 +995,17 @@ git_grep_all() {
 # Show history
 alias git_history='git log -p'
 
+# Show files in history by status
+git_log_added() {
+  git diff --name-only --diff-filter=A "${@:-HEAD~1..HEAD}"
+}
+git_log_removed() {
+  git diff --name-only --diff-filter=D "${@:-HEAD~1..HEAD}"
+}
+git_log_modified() {
+  git diff --name-only --diff-filter=M "${@:-HEAD~1..HEAD}"
+}
+
 ########################################
 # Git gc all
 alias git_gc='git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git gc"'
@@ -1359,7 +1370,8 @@ alias gl2='git log --oneline -n 2'
 alias gl3='git log --oneline -n 3'
 alias gl5='git log --oneline -n 5'
 alias gl10='git log --oneline -n 10'
-alias glf='git log --follow'
+alias glf='git diff-tree --no-commit-id --name-only -r'
+alias glff='git log --follow'
 alias gls='git log --stat'
 alias glS='git log -S'
 alias glt='git log --graph'
