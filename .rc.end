@@ -145,17 +145,13 @@ alias df='diff'
 alias md='meld'
 
 # Grep
+alias grep='grep --color'
 alias gp='grep'
 alias gv='grep -v'
 alias gc='grep --color'
 alias ig='grep -i'
 alias igv='grep -iv'
 alias pg='pgrep -l'
-# Colorize pattern
-gp() {
-  local PATTERN="$1"; shift
-  grep --color -E "$PATTERN|$" "$@"
-}
 
 # Kill
 alias kl='kill'
