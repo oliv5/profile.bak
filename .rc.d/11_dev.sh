@@ -1,30 +1,12 @@
 #!/bin/sh
 
-# Find based code search
-_dfind1() { local ARG1="$1"; shift; (set -f; _ffind "$ARG1" ${_DFEXCLUDE} "$@"); }
-alias _dfind='_dfind1'
-#_DFEXCLUDE="-and -not -path */.svn* -and -not -path */.git* -and -not -path */.repo*"
-_DFEXCLUDE="-and -not -path */.*"
-alias    dff='FCASE=   FTYPE=  FXTYPE=  FARGS= _dfind'
-alias   dfff='FCASE=   FTYPE=f FXTYPE=  FARGS= _dfind'
-alias   dffd='FCASE=   FTYPE=d FXTYPE=  FARGS= _dfind'
-alias   dffl='FCASE=   FTYPE=l FXTYPE=  FARGS= _dfind'
-alias  dffll='FCASE=   FTYPE=l FXTYPE=f FARGS= _dfind'
-alias  dfflb='FCASE=   FTYPE=l FXTYPE=l FARGS= _dfind'
-alias   idff='FCASE=-i FTYPE=  FXTYPE=  FARGS= _dfind'
-alias  idfff='FCASE=-i FTYPE=f FXTYPE=  FARGS= _dfind'
-alias  idffd='FCASE=-i FTYPE=d FXTYPE=  FARGS= _dfind'
-alias  idffl='FCASE=-i FTYPE=l FXTYPE=  FARGS= _dfind'
-alias idffll='FCASE=-i FTYPE=l FXTYPE=f FARGS= _dfind'
-alias idfflb='FCASE=-i FTYPE=l FXTYPE=l FARGS= _dfind'
-
 # Grep based code search
 _dgrep1()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; FARGS="${_DG1EXCLUDE} $@" _fgrep1 "$ARG2" "${ARG3:-.}/$ARG1"); }
 _dgrep2()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; _fgrep2 "$ARG2" ${_DG2EXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
-_dgrep3()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; git grep -n ${GCASE} "$@" "$ARG2" -- $(echo "$ARG1" | sed "s@^@${ARG3}*@ ; s@;@ ${ARG3}*@g")); }
+_dgrep3()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; git grep -n ${GCASE} ${GARGS} "$@" "$ARG2" -- $(echo "$ARG1" | sed "s@^@${ARG3}*@ ; s@;@ ${ARG3}*@g")); }
 _dgrep()    { if git_exists "$3"; then _dgrep3 "$@"; else _dgrep1 "$@"; fi; }
-_DG1EXCLUDE="$_DFEXCLUDE"
-#_DG2EXCLUDE="--exclude-dir=.svn --exclude-dir=.git --exclude-dir=.repo"
+#_DGEXCLUDE="--exclude-dir=.svn --exclude-dir=.git --exclude-dir=.repo"
+_DG1EXCLUDE="--exclude-dir=.*"
 _DG2EXCLUDE="--exclude-dir=.*"
 _DGEXT_C="*.c;*.cpp;*.cc"
 _DGEXT_H="*.h;*.hpp"
@@ -66,9 +48,9 @@ alias _dsearch='_dsearch1'
 _DGREGEX_FUNC='\w+\s+NAME\s*\(\s*($|\w+\s+\w+|void)'
 _DGREGEX_VAR='^[^\(]*\w+\s*(\*|&)*\s*NAME\s*(=.+|\(\w+\)|\[.+\])?\s*(;|,)'
 _DGREGEX_STRUCT='(struct|union|enum|class)\s*NAME\s*(\{|$)'
-_DGREGEX_TYPEDEF='(typedef\s+\w+\sNAME)|(^\s*NAME\s*;)'
+_DGREGEX_TYPEDEF='(typedef\s+\w+\s+NAME)|(^\s*NAME\s*;)'
 _DGREGEX_DEFINE='(#define\s+NAME|^\s*NAME\s*,)|(^\s*NAME\s*=.*,)'
-_DGREGEX_ALL='(#define\s+NAME|^\s*NAME\s*,)|(^\s*NAME\s*=.*,)'
+_DGREGEX_ALL="($_DGREGEX_FUNC)|($_DGREGEX_VAR)|($_DGREGEX_STRUCT)|($_DGREGEX_TYPEDEF)|($_DGREGEX_DEFINE)"
 alias      def='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dsearch "$_DGREGEX_ALL"'
 alias      var='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dsearch "$_DGREGEX_VAR"'
 alias     func='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dsearch "$_DGREGEX_FUNC"'
@@ -81,11 +63,6 @@ alias    ifunc='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGE
 alias  istruct='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGEX_STRUCT"'
 alias  idefine='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGEX_DEFINE"'
 alias itypedef='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dsearch "$_DGREGEX_TYPEDEF"'
-
-# Alias to cut part of search result
-alias c1='cut -d: -f 1'
-alias c2='cut -d: -f 2'
-alias c3='cut -d: -f 3'
 
 # Dev replace
 #_DSEXCLUDE="-not -path */.svn* -and -not -path */.git* -and -not -type l"

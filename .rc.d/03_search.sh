@@ -169,8 +169,11 @@ alias   ggs='gg   2>/dev/null'
 alias  iggs='igg  2>/dev/null'
 alias  ggls='ggl  2>/dev/null'
 alias iggls='iggl 2>/dev/null'
-#ggl() {  gg "$@" | cut -d : -f 1 | uniq; }
-#iggl(){ igg "$@" | cut -d : -f 1 | uniq; }
+
+# Alias to cut part of search result
+alias c1='cut -d: -f 1'
+alias c2='cut -d: -f 2'
+alias c3='cut -d: -f 3'
 
 ###########################################
 # Interactive search & replace
