@@ -141,11 +141,11 @@ alias mkd='mkdir'
 alias rmd='rmdir'
 
 # Diff
-alias d='diff'
-alias m='meld'
+alias df='diff'
+alias md='meld'
 
 # Grep
-alias g='grep'
+alias gp='grep'
 alias gv='grep -v'
 alias gc='grep --color'
 alias ig='grep -i'
@@ -158,7 +158,7 @@ gp() {
 }
 
 # Kill
-alias k='kill'
+alias kl='kill'
 alias k9='kill -9'
 alias pk='pkill'
 alias pk9='pkill -9'
@@ -204,20 +204,16 @@ dpkgln() { dpkgl "$@" | awk '{print $2}'; }
 dpkggn() { dpkgg "$@" | awk '{print $2}'; }
 
 # Head/tail
-alias he='head'
+alias hd='head'
 alias h1='head -n 1'
 alias h2='head -n 2'
 alias h5='head -n 5'
 alias h10='head -n 10'
-alias t='tail'
+alias tl='tail'
 alias t1='tail -n 1'
 alias t2='tail -n 2'
 alias t5='tail -n 5'
 alias t10='tail -n 10'
-
-# More/less
-alias m='more'
-alias l='less'
 
 # Network monitors
 alias ns='netstat -an'
@@ -250,9 +246,6 @@ alias mg='mount | grep'
 alias mount_private='mount_private_ecryptfs'
 alias umount_private='umount_private_ecryptfs'
 
-# Cat
-alias c='cat'
-
 # Rsync
 alias rcp='rsync_cp'
 alias rmv='rsync_mv'
@@ -264,6 +257,6 @@ alias rts='rsync_timestamp'
 # Misc
 alias mo='mimeopen'
 alias xo='xdg-open'
-alias s='silent'
+alias sil='silent'
 alias ag='alias | grep'
 alias agi='alias | grep -i'
