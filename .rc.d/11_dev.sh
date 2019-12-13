@@ -13,15 +13,17 @@ _DGEXT_H="*.h;*.hpp"
 _DGEXT_V="*.vhd;*.v"
 _DGEXT_PY="*.py"
 _DGEXT_MK="*.mk;Makefile"
+_DGEXT_SCONS="SConstruct;SConscript"
 _DGEXT_ASM="*.inc;*.S"
 _DGEXT_XML="*.xml"
 _DGEXT_TEX="*.tex"
 _DGEXT_SHELL="*.sh"
-_DGEXT_REF="*.c;*.cpp;*.cc;*.h;*.hpp;*.py;*.mk;Makefile;*.sh;*.vhd;*.v;*.inc;*.S;*.tex;*.lua"
+_DGEXT_REF="*.c;*.cpp;*.cc;*.h;*.hpp;*.py;*.mk;Makefile;*.sh;*.vhd;*.v;*.inc;*.S;*.tex;*.lua;SConstruct;SConscript"
 alias      c='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_C"'
 alias      h='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_H"'
 alias      v='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_V"'
 alias     ch='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_C;$_DGEXT_H"'
+alias     hc='ch'
 alias     py='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_PY"'
 alias     mk='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_MK"'
 alias    asm='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_ASM"'
@@ -33,6 +35,7 @@ alias     ic='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_C"'
 alias     ih='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_H"'
 alias     iv='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_V"'
 alias    ich='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_C;$_DGEXT_H"'
+alias    ihc='ich'
 alias    ipy='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_PY"'
 alias    imk='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_MK"'
 alias   iasm='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_ASM"'

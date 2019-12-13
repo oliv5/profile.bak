@@ -193,6 +193,7 @@ alias duhl3='du -hL -d3'
 alias duhl4='du -hL -d4'
 
 # Env | grep
+pv() { for V; do echo "$V=$(eval echo \$$V)"; done; }
 alias envg='env | grep -i'
 alias dpkgl='dpkg -l'
 alias dpkgg='dpkg -l | grep -i'
