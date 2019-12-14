@@ -640,7 +640,25 @@ if !exists('loaded_ansiesc')
 	let g:no_drchip_menu = 1
 	let g:no_ansiesc_menu = 1
 	" Key mapping
-	FnNoremap <localleader>a	:AnsiEsc<CR>
+	FnNoremap <leader>a	:AnsiEsc<CR>
+endif
+
+
+" *******************************************************
+" } vim-uncrustify {
+" https://github.com/cofyc/vim-uncrustify.git
+" *******************************************************
+if !exists('loaded_uncrustify')
+	let loaded_uncrustify = 1
+	" Options
+	let g:uncrustify_cfg_file_path = shellescape(fnamemodify('~/.config/uncrustify/default.cfg', ':p'))
+	" Key mapping
+	autocmd FileType c noremap <buffer> <leader>u :call Uncrustify('c')<CR>
+	autocmd FileType c vnoremap <buffer> <leader>u :call RangeUncrustify('c')<CR>
+	autocmd FileType cpp noremap <buffer> <leader>u :call Uncrustify('cpp')<CR>
+	autocmd FileType cpp vnoremap <buffer> <leader>u :call RangeUncrustify('cpp')<CR>
+	autocmd FileType java noremap <buffer> <leader>u :call Uncrustify('cpp')<CR>
+	autocmd FileType java vnoremap <buffer> <leader>u :call RangeUncrustify('cpp')<CR>
 endif
 
 
