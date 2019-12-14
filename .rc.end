@@ -140,10 +140,6 @@ fi
 alias mkd='mkdir'
 alias rmd='rmdir'
 
-# Diff
-alias df='diff'
-alias md='meld'
-
 # Grep
 alias grep='grep --color'
 alias gp='grep'
