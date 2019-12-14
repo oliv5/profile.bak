@@ -129,3 +129,9 @@ tab2space() {
 		done
 	' _ "$TABSIZE" "$TABNUM" "$SPACES"
 }
+
+# Uncrustify
+uncrustify() {
+	local CFG="${XDG_CONFIG_HOME:-$HOME/.config}/uncrustify/${2:-default}.cfg"
+	find "${1:-.}" -type f -regex '.*\.\(c\|h\|cpp\|cc\|hpp\)' -print0 | xargs -r0 -n1 -- uncrustify -c "$CFG" --no-backup -f
+}
