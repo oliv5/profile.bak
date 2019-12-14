@@ -131,7 +131,8 @@ tab2space() {
 }
 
 # Uncrustify
-uncrustify() {
-	local CFG="${XDG_CONFIG_HOME:-$HOME/.config}/uncrustify/${2:-default}.cfg"
-	find "${1:-.}" -type f -regex '.*\.\(c\|h\|cpp\|cc\|hpp\)' -print0 | xargs -r0 -n1 -- uncrustify -c "$CFG" --no-backup -f
+uncrust() {
+	command -v uncrustify >/dev/null 2>&1 && echo "ERROR: cannot find uncrustify..." && return 1
+	local CFG="${XDG_CONFIG_HOME:-$HOME/.config}/uncrustify/${2:-$(uncrustify --version)}.cfg"
+	find "${1:?No source folder specified...}" -type f -regex '.*\.\(c\|h\|cpp\|cc\|hpp\)' -print0 | xargs -r0 -n1 -- uncrustify -c "$CFG" --no-backup -f
 }
