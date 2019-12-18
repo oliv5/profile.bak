@@ -182,12 +182,12 @@ map <leader>H  :%!xxd -r<CR>
 " *******************************************************
 " } Ansi code management {
 " *******************************************************
-function! s:RmAnsi()
+function! s:AnsiStrip()
 	:%!sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g'
 endfunction
 
 " Key mapping
-map <leader>r 	:call <SID>RmAnsi()<CR>
+map <leader>r 	:call <SID>AnsiStrip()<CR>
 
 
 " *******************************************************
