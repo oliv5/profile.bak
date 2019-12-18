@@ -97,15 +97,13 @@ alias shift8='command shift 8 2>/dev/null || set --'
 alias shift9='command shift 9 2>/dev/null || set --'
 
 # Get script path
-alias shell_script='[ -n "$BASH_VERSION" ] && (builtin cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd) || readlink -f "$(dirname "$0")"'
+shell_script() {
+  if [ -n "$BASH_VERSION" ]; then echo "${BASH_SOURCE[0]}"; else
+  if [ "$OSTYPE" = *darwin* ]; then greadlink -f "$0"; else readlink -f "$0"; fi; fi
+}
 shell_path() {
-  if [ -n "$BASH_VERSION" ]; then
-    (builtin cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-  else
-    [ "$OSTYPE" = *darwin* ] && local READLINK_CMD='greadlink' || local READLINK_CMD='readlink'
-    $READLINK_CMD -f "$(dirname "$0")"
-    #(cd "$(dirname "$([ -L "$0" ] && $READLINK_CMD -f "$0" || echo "$0")")"; pwd)
-  fi
+  if [ -n "$BASH_VERSION" ]; then (builtin cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd); else
+  if [ "$OSTYPE" = *darwin* ]; then greadlink -f "$(dirname "$0")"; else readlink -f "$(dirname "$0")"; fi; fi
 }
 
 # Open shell with no ASLR. Set ADDR_NO_RANDOMIZE personality (man sys/personality.h) to all children.
