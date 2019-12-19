@@ -389,15 +389,13 @@ git_pull() { git pull "$@"; }
 fi
 
 ########################################
-# Push the current branch to all remotes
-git_push() { git_push_all "$1" "HEAD"; }
 
-# Batch push to all existing remote/branches
+# Batch push to all existing remotes, use --all as branch to push all branches
 git_push_all() {
   git_exists || return 1
   local IFS="$(printf ' \t\n')"
   local REMOTES="${1:-$(git_remotes)}"
-  local BRANCH="${2:---all}"
+  local BRANCH="${2:-HEAD}"
   for REMOTE in $REMOTES; do
     echo -n "Push to $REMOTE: "
     git push "$REMOTE" $BRANCH
@@ -1463,7 +1461,6 @@ alias grbit='git rebase -i $(git_tracking)'
 alias gpu='git push'
 alias gpua='git_push_all'
 alias gup='git_pull'
-alias gfe='git fetch'
 alias gfa='git fetch --all --tags'
 # Config aliases
 alias gcg='git config --get'
