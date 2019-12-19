@@ -161,34 +161,38 @@ annex_st() {
   git annex status | awk -F'#;#.' '/^[\? ]?'$1'[\? ]?/ {sub(/ /,"#;#.");print $2}'
 }
 
-# Get remote(s) uuid
+########################################
+# List remotes uuids
 annex_uuid() {
   for REMOTE in "${@:-.*}"; do
+    git config --get-regexp remote\.${REMOTE}\.annex-uuid | cut -d' ' -f 2
+  done | xargs
+}
+annex_uuid_all() {
+  for REMOTE in "${@:-.*}"; do
     git show git-annex:uuid.log | awk '$2=/'$REMOTE'/ {print $1}'
-  done
+  done | xargs
 }
 annex_uuid_local() {
   git config annex.uuid
 }
-annex_uuid_remotes() {
-  for REMOTE in "${@:-.*}"; do
-    git config --get-regexp remote\.${REMOTE}\.annex-uuid | cut -d' ' -f 2
-  done
-}
 
-# List annexed remotes
+####
+# List remotes
 annex_remotes() {
   git config --get-regexp "remote\..*\.annex-uuid" |
     awk -F. '{print $2}' |
     sort -u |
     xargs
 }
-annex_remotes_uuid() {
-  git config --get-regexp "remote\..*\.annex-uuid" |
-    awk -F' ' '{print $2}' |
-    sort -u |
+annex_remotes_all() {
+  git show git-annex:uuid.log |
+    awk '{print $2}' |
     xargs
 }
+
+####
+# List enabled local remotes
 annex_enabled() {
   local EXCLUDE="$(git config --get-regexp "remote\..*\.annex-ignore" true | awk -F. '{printf $2"|"}' | sed -e "s/|$//")"
   git config --get-regexp "remote\..*\.annex-uuid" |
@@ -198,6 +202,7 @@ annex_enabled() {
     xargs
 }
 
+####
 # List special remotes
 annex_special_remotes() {
   git show git-annex:remote.log 2>/dev/null |
@@ -214,7 +219,6 @@ annex_special_remotes_uuid() {
 annex_isspecial() {
   git show git-annex:remote.log 2>/dev/null | grep "name=$1" >/dev/null
 }
-
 
 ########################################
 annex_hook_commit() {
