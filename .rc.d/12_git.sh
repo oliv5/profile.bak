@@ -388,6 +388,18 @@ else
 git_pull() { git pull "$@"; }
 fi
 
+# Batch pull from all remotes
+git_pull_all() {
+  git_exists || return 1
+  local IFS="$(printf ' \t\n')"
+  local REMOTES="${1:-$(git_remotes)}"
+  local BRANCH="${2:-$(git_branch)}"
+  for REMOTE in $REMOTES; do
+    echo -n "Push to $REMOTE: "
+    git pull "$REMOTE" $BRANCH
+  done
+}
+
 ########################################
 
 # Batch push to all existing remotes, use --all as branch to push all branches
@@ -1461,6 +1473,7 @@ alias grbit='git rebase -i $(git_tracking)'
 alias gpu='git push'
 alias gpua='git_push_all'
 alias gup='git_pull'
+alias gupa='git_pull_all'
 alias gfa='git fetch --all --tags'
 # Config aliases
 alias gcg='git config --get'
