@@ -165,8 +165,8 @@ annex_st() {
 # List remotes uuids
 annex_uuid() {
   for REMOTE in "${@:-.*}"; do
-    git config --get-regexp remote\.${REMOTE}\.annex-uuid | cut -d' ' -f 2
-  done | xargs
+    git config --get-regexp remote\.${REMOTE}\.annex-uuid
+  done | cut -d' ' -f 2 | xargs
 }
 annex_uuid_all() {
   for REMOTE in "${@:-.*}"; do
@@ -180,15 +180,21 @@ annex_uuid_local() {
 ####
 # List remotes
 annex_remotes() {
-  git config --get-regexp "remote\..*\.annex-uuid" |
-    awk -F. '{print $2}' |
-    sort -u |
-    xargs
+  for REMOTE in "${@:-.*}"; do
+    git config --get-regexp "remote\..*${REMOTE}.*\.annex-uuid"
+  done | awk -F. '{print $2}' | sort -u | xargs
 }
 annex_remotes_all() {
-  git show git-annex:uuid.log |
-    awk '{print $2}' |
-    xargs
+  for REMOTE in "${@:-.*}"; do
+    git show git-annex:uuid.log |
+      awk "\$2 ~ /${REMOTE}/ {print \$2}"
+  done | xargs
+}
+annex_remotes_by_uuid() {
+  for UUID; do
+    git show git-annex:uuid.log |
+    awk "\$1 ~ /$UUID/ {print \$2}"
+  done | xargs
 }
 
 ####
@@ -200,6 +206,42 @@ annex_enabled() {
     awk -F. '{print $2}' |
     sort -u |
     xargs
+}
+
+####
+# Check if remote is dead
+annex_isdead_by_uuid() {
+  local STATUS
+  for UUID; do
+    STATUS="$(git show git-annex:trust.log | awk "\$1 ~ /$UUID/ {print \$2}")"
+    [ "$STATUS" = "X" ] || return 1
+  done
+}
+annex_isdead() {
+  annex_isdead_by_uuid $(annex_uuid_all "$@")
+}
+
+####
+# Get dead remotes names/uuids
+annex_dead_uuid() {
+  for REMOTE in $(annex_uuid_all "$@"); do
+    annex_isdead_by_uuid "$REMOTE" && echo "$REMOTE"
+  done | xargs
+}
+annex_dead() {
+  for REMOTE in $(annex_remotes_all "$@"); do
+    annex_isdead "$REMOTE" && echo "$REMOTE"
+  done | xargs
+}
+annex_notdead_uuid() {
+  for REMOTE in $(annex_uuid_all "$@"); do
+    ! annex_isdead_by_uuid "$REMOTE" && echo "$REMOTE"
+  done | xargs
+}
+annex_notdead() {
+  for REMOTE in $(annex_remotes_all "$@"); do
+    ! annex_isdead "$REMOTE" && echo "$REMOTE"
+  done | xargs
 }
 
 ####
@@ -218,6 +260,12 @@ annex_special_remotes_uuid() {
 }
 annex_isspecial() {
   git show git-annex:remote.log 2>/dev/null | grep "name=$1" >/dev/null
+}
+annex_special_remotes_dead() {
+  annex_dead $(annex_special_remotes "$@")
+}
+annex_special_remotes_not_dead() {
+  annex_notdead $(annex_special_remotes "$@")
 }
 
 ########################################
@@ -373,7 +421,7 @@ annex_lookup_special_remote() {
 
 # Lookup special remotes keys
 annex_lookup_special_remotes() {
-  local REMOTES="${@:-$(annex_special_remotes)}"
+  local REMOTES="${@:-$(annex_special_remotes_notdead)}"
   for REMOTE in $REMOTES; do
     annex_lookup_special_remote "$REMOTE" 2>&1
   done
