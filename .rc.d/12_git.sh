@@ -289,6 +289,11 @@ git_remote_exists() {
   git ${2:+--git-dir="$2"} remote | grep -E "$1" >/dev/null
 }
 
+# Is remote a valid git repo ?
+git_remote_valid() {
+  git ${2:+--git-dir="$2"} config --get "remote.$1.fetch" >/dev/null
+}
+
 # Get git backup name
 git_name() {
   echo "$(git_repo).${1:+$1.}$(uname -n).$(git_branch | tr '/' '_').$(date +%Y%m%d-%H%M%S).$(git_shorthash)${2:+.$2}"
@@ -395,8 +400,10 @@ git_pull_all() {
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCH="${2:-$(git_branch)}"
   for REMOTE in $REMOTES; do
-    echo -n "Push to $REMOTE: "
-    git pull "$REMOTE" $BRANCH
+    if git_remote_valid "$REMOTE"; then
+      echo -n "Pull from $REMOTE: "
+      git pull "$REMOTE" $BRANCH
+    fi
   done
 }
 
@@ -409,8 +416,10 @@ git_push_all() {
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCH="${2:-HEAD}"
   for REMOTE in $REMOTES; do
-    echo -n "Push to $REMOTE: "
-    git push "$REMOTE" $BRANCH
+    if git_remote_valid "$REMOTE"; then
+      echo -n "Push to $REMOTE: "
+      git push "$REMOTE" $BRANCH
+    fi
   done
 }
 
