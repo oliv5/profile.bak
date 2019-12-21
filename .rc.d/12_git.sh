@@ -92,9 +92,9 @@ git_worktree() {
 
 # Get git directory (alias git-dir)
 git_dir() {
-  local DIR="${1:-$PWD}"
-  readlink -f "$(git --git-dir="$DIR/.git" rev-parse --git-dir 2>/dev/null)" ||
-  readlink -f "$(git --git-dir="$DIR" rev-parse --git-dir 2>/dev/null)"
+  local DIR="$1"
+  readlink -f "$(git ${DIR:+--git-dir="$DIR/.git"} rev-parse --git-dir 2>/dev/null)" ||
+  readlink -f "$(git ${DIR:+--git-dir="$DIR"} rev-parse --git-dir 2>/dev/null)"
   #readlink -f "$(git --git-dir="${DIR%%.git}" rev-parse --git-dir 2>/dev/null)"
 }
 git_user_dir() {
