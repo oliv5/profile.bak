@@ -216,7 +216,7 @@ ssh_youtubedl()   { local SSH_OPTS="${SSH_OPTS:+$SSH_OPTS }${1:?No server or ssh
 #sshh_torify()  { ssh(){ sshh "$@"; }; local SRV="$1"; shift; ssh_torify "$SRV" "16001" "192.168.8.122" "5709" "$@"; }
 
 # SSH command shortcuts (rely on sshh, but cannot just alias ssh=sshh, has to create subfunction)
-sshh() { command ssh "$@"; } # default transparent ssh command
+sshh()             { command ssh "$@"; } # default transparent ssh command
 sshh_ping()        { ssh(){ sshh "$@"; }; ssh_ping "$@"; }
 sshh_sudo()        { ssh(){ sshh "$@"; }; ssh_sudo "$@"; }
 sshh_aria2()       { ssh(){ sshh "$@"; }; ssh_aria2 "$@"; }
