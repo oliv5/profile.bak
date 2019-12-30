@@ -23,8 +23,13 @@ alias gp='getprop'
 gppg() { getprop ${@:+| grep $@}; }
 
 # Setup apps
-alias pkg_install='pm install -r'
-alias pkg_uninstall='pm uninstall -k'
+alias pkg_install='sudo pm install -r'
+alias pkg_uninstall='sudo pm uninstall -k'
+pkg_install_all() {
+  for PKG; do
+    pkg_install "$PKG"
+  done
+}
 
 # Permissions management
 alias perm_add='pm grant'
