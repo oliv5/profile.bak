@@ -181,7 +181,7 @@ _fsed1() {
   # Get arguments
   #local SEDOPT="$(arg_rtrim 3 "$@")"; shift $(($#-3))
   local SEDOPT="--follow-symlinks"; [ $# -gt 3 ] && SEDOPT="${SEDOPT:+$SEDOPT }$1" && shift 1
-  local IN="$1"; local OUT="$2"; local FILES="$3"
+  local IN="$1"; local OUT="$2"; local FILES="${SFILES:-$3}"
   echo "Replace '$IN' by '$OUT' in files '$FILES' ${SEDOPT:+with options $SEDOPT}"
   # Ask for options
   local _SHOW; read -p "Show each line changed ? (Y/n) " _SHOW
@@ -202,15 +202,15 @@ _fsed2() {
   # Get arguments
   #local SEDOPT="$(arg_rtrim 3 "$@")"; shift $(($#-3))
   local SEDOPT="--follow-symlinks"; [ $# -gt 3 ] && SEDOPT="${SEDOPT:+$SEDOPT }$1" && shift 1
-  local IN="$1"; local OUT="$2"; local FILES="$3"
+  local IN="$1"; local OUT="$2"; local FILES="${SFILES:-$3}"
   # Call find and sed
   _ffind "$FILES" $SEXCLUDE -type f \
     -execdir sed $SEDOPT --in-place -e "s|$IN|$OUT|g" "{}" \;
 }
-alias   hh='FCASE=   FTYPE= FXTYPE= FOPTS= FARGS= SEXCLUDE= _fsed1'
-alias  ihh='FCASE=-i FTYPE= FXTYPE= FOPTS= FARGS= SEXCLUDE= _fsed1'
-alias  hhf='FCASE=   FTYPE= FXTYPE= FOPTS= FARGS= SEXCLUDE= _fsed2'
-alias ihhf='FCASE=-i FTYPE= FXTYPE= FOPTS= FARGS= SEXCLUDE= _fsed2'
+alias   hh='FCASE=   FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed1'
+alias  ihh='FCASE=-i FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed1'
+alias  hhf='FCASE=   FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed2'
+alias ihhf='FCASE=-i FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed2'
 
 ###########################################
 # Find duplicate files in directory
