@@ -434,7 +434,8 @@ _annex_archive() {
     annex_exists || return 1
     local OUT="${1:?No output file name specified...}"
     local DIR="${2:-$(git_dir)/bundle}"
-    OUT="$DIR/$(git_name).${OUT%%.*}.${OUT#*.}"
+    local NAME="$(git_repo).$(uname -n).$(date +%Y%m%d-%H%M%S).$(git_shorthash)"
+    OUT="$DIR/${NAME}.${OUT%%.*}.${OUT#*.}"
     local GPG_RECIPIENT="$3"
     local GPG_TRUST="${4:+--trust-model always}"
     shift 4

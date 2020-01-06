@@ -449,8 +449,9 @@ _git_secure_delete() {
 git_bundle() {
   ( set +e; # Need to go on
     git_exists || return 1
-    local OUT="${1:-$(git_user_dir)/bundle/$(git_name).bundle}"
-    [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/$(git_name).bundle"
+    local NAME="$(git_repo).$(uname -n).$(date +%Y%m%d-%H%M%S).$(git_shorthash)"
+    local OUT="${1:-$(git_user_dir)/bundle/${NAME}.bundle}"
+    [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/${NAME}.bundle"
     OUT="${OUT%%.xz}"; OUT="${OUT%%.git}.git.xz"
     mkdir -p "$(dirname "$OUT")"
     if [ $? -eq 0 ]; then
@@ -921,15 +922,15 @@ git_purge_gc() {
 # https://gist.github.com/Zoramite/2039636
 git_cleanup() {
   # Verifies the connectivity and validity of the objects in the database
-  git fsck —unreachable
+  git fsck --unreachable
   # Manage reflog information
-  git reflog expire —expire=0 —all
+  git reflog expire --expire=0 --all
   # Pack unpacked objects in a repository
   git repack -a -d -l
   # Prune all unreachable objects from the object database
   git prune
   # Cleanup unnecessary files and optimize the local repository
-  git gc —aggressive
+  git gc --aggressive
 }
 
 # Truncate history from a given commit
