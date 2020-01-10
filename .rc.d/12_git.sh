@@ -129,6 +129,14 @@ git_unlock() {
   rm -v "$(git_dir "$@")/index.lock"
 }
 
+# Refresh index
+git_update_index() {
+  gstx | xargs -r0 -n1 git update-index -q --refresh
+}
+git_update_index_all() {
+  git ls-files -z | xargs -r0 -n1 git update-index -q --refresh
+}
+
 ########################################
 
 # Get current branch name
