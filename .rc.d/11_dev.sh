@@ -5,8 +5,7 @@ _dgrep1()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] &&
 _dgrep2()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; _fgrep2 "$ARG2" ${_DG2EXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
 _dgrep3()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; git grep -n ${GCASE} ${GARGS} "$@" "$ARG2" -- $(echo "$ARG1" | sed "s@^@${ARG3}*@ ; s@;@ ${ARG3}*@g")); }
 _dgrep()    { if git_exists "$3"; then _dgrep3 "$@"; else _dgrep1 "$@"; fi; }
-#_DGEXCLUDE="--exclude-dir=.svn --exclude-dir=.git --exclude-dir=.repo"
-_DG1EXCLUDE="--exclude-dir=.*"
+_DG1EXCLUDE="-and -not -path '/.*/'"
 _DG2EXCLUDE="--exclude-dir=.*"
 _DGEXT_C="*.c;*.cpp;*.cc"
 _DGEXT_H="*.h;*.hpp"
