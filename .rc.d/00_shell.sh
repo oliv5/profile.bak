@@ -142,6 +142,9 @@ die() {
   } || exit $ERRCODE;
 }
 
+# Set error code
+err() { return ${1:-0}; }
+
 ################################
 # Directory management
 dir_empty() {
