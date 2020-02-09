@@ -224,7 +224,25 @@ find_duplicates() {
   #awk '{print $1}' "$TMP1" | sort | uniq -d > "$TMP2"
   sort -k 1 "$TMP1" | cut -d' ' -f 1 | uniq -d > "$TMP2"
   while read SUM; do
-    grep "$SUM" "$TMP1" | cut -d' ' -f 2- | sort
+    command grep "^$SUM" "$TMP1" | cut -d' ' -f 2- | sort
+    echo
+  done < "$TMP2"
+  rm "$TMP1" "$TMP2" 2>/dev/null
+}
+
+find_duplicates0() {
+  echo "WIP..."
+  return 1
+  local TMP1="$(tempfile)"
+  local TMP2="$(tempfile)"
+  for DIR in "${@:-.}"; do
+    #~ find "${DIR:-.}" \( -type f -o -type l \) -exec md5sum "{}" \; | sed -e 's/^\\//' >> "$TMP1"
+    find "${DIR:-.}" \( -type f -o -type l \) -exec md5sum -z "{}" \; >> "$TMP1"
+  done
+  sort -z -k 1 "$TMP1" | cut -z -d' ' -f 1 | uniq -z -d | xargs -0 -n1 > "$TMP2"
+  while read SUM; do
+    #~ command grep -zZ "^$SUM" "$TMP1" | awk '{printf "%s\0", $2}'
+    command grep -zZ "$SUM" "$TMP1" | sed -z -e "s/$SUM\s*//"
     echo
   done < "$TMP2"
   rm "$TMP1" "$TMP2" 2>/dev/null
@@ -233,7 +251,7 @@ find_duplicates() {
 # Remove duplicated files
 alias rm_dup='rm_duplicates'
 rm_duplicates() {
-  find_duplicates "$@" | sed '1d ; /^$/{N;d}' | xargs -r -- echo rm --
+  find_duplicates "$@" | sed '1d ; /^$/{N;d}' | xargs -r -- echo rm -I --
 }
 
 # Find empty directories/files
