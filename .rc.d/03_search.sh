@@ -214,6 +214,7 @@ alias ihhf='FCASE=-i FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed2'
 
 ###########################################
 # Find duplicate files in directory
+# Does not handle filenames with \n inside
 alias ff_dup='find_duplicates'
 find_duplicates() {
   local TMP1="$(tempfile)"
@@ -224,34 +225,50 @@ find_duplicates() {
   #awk '{print $1}' "$TMP1" | sort | uniq -d > "$TMP2"
   sort -k 1 "$TMP1" | cut -d' ' -f 1 | uniq -d > "$TMP2"
   while read SUM; do
-    command grep "^$SUM" "$TMP1" | cut -d' ' -f 2- | sort
-    echo
-  done < "$TMP2"
-  rm "$TMP1" "$TMP2" 2>/dev/null
-}
-
-find_duplicates0() {
-  echo "WIP..."
-  return 1
-  local TMP1="$(tempfile)"
-  local TMP2="$(tempfile)"
-  for DIR in "${@:-.}"; do
-    #~ find "${DIR:-.}" \( -type f -o -type l \) -exec md5sum "{}" \; | sed -e 's/^\\//' >> "$TMP1"
-    find "${DIR:-.}" \( -type f -o -type l \) -exec md5sum -z "{}" \; >> "$TMP1"
-  done
-  sort -z -k 1 "$TMP1" | cut -z -d' ' -f 1 | uniq -z -d | xargs -0 -n1 > "$TMP2"
-  while read SUM; do
-    #~ command grep -zZ "^$SUM" "$TMP1" | awk '{printf "%s\0", $2}'
-    command grep -zZ "$SUM" "$TMP1" | sed -z -e "s/$SUM\s*//"
+    grep "^$SUM" "$TMP1" | cut -d' ' -f 2- | sort
     echo
   done < "$TMP2"
   rm "$TMP1" "$TMP2" 2>/dev/null
 }
 
 # Remove duplicated files
+# Does not handle filenames with \n inside
+# Dry-run only, does not execute the rm command
 alias rm_dup='rm_duplicates'
 rm_duplicates() {
   find_duplicates "$@" | sed '1d ; /^$/{N;d}' | xargs -r -- echo rm -I --
+}
+
+# Find duplicate files in directory
+find_duplicates0() {
+  local TMP1="$(tempfile)"
+  local TMP2="$(tempfile)"
+  for DIR in "${@:-.}"; do
+    find "${DIR:-.}" \( -type f -o -type l \) -exec md5sum -z "{}" \; >> "$TMP1"
+  done
+  sort -z -k 1 "$TMP1" | cut -z -d' ' -f 1 | uniq -z -d | xargs -0 -n1 > "$TMP2"
+  while read SUM; do
+    printf "$SUM\0"
+    grep -zZ "$SUM" "$TMP1" | sed -z -e "s/$SUM\s*//"
+  done < "$TMP2"
+  rm "$TMP1" "$TMP2" 2>/dev/null
+}
+
+# Remove duplicated files
+# Does not handle filenames with \n inside
+# Dry-run only, does not execute the rm command
+alias rm_dup0='rm_duplicates0'
+rm_duplicates0() {
+  find_duplicates0 "$@" | xargs -r0 sh -c '
+    while [ $# -gt 0 ]; do
+      F="$1"; shift
+      if [ ! -e "$F" ] && [ ${#F} -eq 32 ]; then
+        shift # Skip next file
+      elif [ -e "$F" ]; then
+        printf "$F\0"
+      fi
+    done
+  ' _ | xargs -r0 -- echo rm -I --
 }
 
 # Find empty directories/files
