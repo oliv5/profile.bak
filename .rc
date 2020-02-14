@@ -43,14 +43,12 @@ rc_source() {
 
   # Source module when executable or listed in .rc.list 
   rc_sourcemod() {
-    local LIST1="$RC_DIR/.rc.list"
-    local LIST2="$RC_DIR_LOCAL/.rc.local.list"
     set -- $@
     for FILE; do
       if [ -n "$RC_ALL" ] ||
           test -x "$FILE" ||
-          grep -Ee "^${FILE##$RC_DIR/}|^${FILE##$RC_DIR_LOCAL/}" "$LIST1" >/dev/null 2>&1 ||
-          grep -Ee "^${FILE##$RC_DIR/}|^${FILE##$RC_DIR_LOCAL/}" "$LIST2" >/dev/null 2>&1; then
+          grep -Ee "^${FILE##$RC_DIR/}" "$RC_DIR/.rc.list" >/dev/null 2>&1 ||
+          grep -Ee "^${FILE##$RC_DIR_LOCAL/}" "$RC_DIR_LOCAL/.rc.local.list" >/dev/null 2>&1; then
         rc_sourcefile "$FILE"
       fi
     done
@@ -97,23 +95,18 @@ rc_source() {
   RC_ALL="${1:+1}"
   set +f # Enable glob expansion
   for PATTERN in "${@:-*}"; do
-    # Load scripts by pattern search
-    rc_sourcemod "$RC_DIR/.rc.d/*$PATTERN*.sh"
-    if [ -n "$BASH_VERSION" ]; then
-      rc_sourcemod "$RC_DIR/.rc.d/bash/*$PATTERN*.sh"
-    fi
-    if [ -n "$ANDROID_ROOT" ]; then
-      rc_sourcemod "$RC_DIR/.rc.d/android/*$PATTERN*.sh"
-    fi
-    #rc_sourcemod "$RC_DIR_LOCAL/.rc.local.d/*$PATTERN*.sh"
-    #if [ -n "$BASH_VERSION" ]; then
-    #  rc_sourcemod "$RC_DIR_LOCAL/.rc.local.d/bash/*$PATTERN*.sh"
-    #fi
-    # Load explicit files/directories
-    if [ -d "$PATTERN" ]; then
+    if [ -d "$PATTERN" ]; then # Load explicit directories
       rc_sourcemod "$PATTERN/*.sh"
-    elif [ -r "$PATTERN" ]; then
+    elif [ -f "$PATTERN" ]; then # Load explicit files
       rc_sourcemod "$PATTERN"
+    else # Load scripts by pattern search
+      rc_sourcemod "$RC_DIR/.rc.d/*$PATTERN*.sh"
+      if [ -n "$BASH_VERSION" ]; then
+        rc_sourcemod "$RC_DIR/.rc.d/bash/*$PATTERN*.sh"
+      fi
+      if [ -n "$ANDROID_ROOT" ]; then
+        rc_sourcemod "$RC_DIR/.rc.d/android/*$PATTERN*.sh"
+      fi
     fi   
   done
 
