@@ -43,12 +43,14 @@ rc_source() {
 
   # Source module when executable or listed in .rc.list 
   rc_sourcemod() {
-    local LIST="$RC_DIR_LOCAL/.rc.list"
+    local LIST1="$RC_DIR/.rc.list"
+    local LIST2="$RC_DIR_LOCAL/.rc.local.list"
     set -- $@
     for FILE; do
       if [ -n "$RC_ALL" ] ||
           test -x "$FILE" ||
-          grep -Ee "^${FILE##$RC_DIR/}|^${FILE##$RC_DIR_LOCAL/}" "$LIST" >/dev/null 2>&1; then
+          grep -Ee "^${FILE##$RC_DIR/}|^${FILE##$RC_DIR_LOCAL/}" "$LIST1" >/dev/null 2>&1 ||
+          grep -Ee "^${FILE##$RC_DIR/}|^${FILE##$RC_DIR_LOCAL/}" "$LIST2" >/dev/null 2>&1; then
         rc_sourcefile "$FILE"
       fi
     done
@@ -92,6 +94,7 @@ rc_source() {
 
   ##############
   # Main scripts
+  RC_ALL="${1:+1}"
   set +f # Enable glob expansion
   for PATTERN in "${@:-*}"; do
     # Load scripts by pattern search
