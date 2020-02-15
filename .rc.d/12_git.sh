@@ -416,6 +416,8 @@ git_pull_all() {
 }
 
 ########################################
+# Alias for compatibility
+alias git_push='git push'
 
 # Batch push to all existing remotes, use --all as branch to push all branches
 git_push_all() {
