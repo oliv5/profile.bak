@@ -426,6 +426,7 @@ endif
 " } CTRLP plugin {
 " *******************************************************
 if !exists('g:loaded_ctrlp')
+	" See https://github.com/kien/ctrlp.vim/blob/master/doc/ctrlp.txt
 	" Options
 	let g:ctrlp_map = '<c-p>'
 	let g:ctrlp_cmd = 'CtrlP'
@@ -439,10 +440,14 @@ if !exists('g:loaded_ctrlp')
 	let g:ctrlp_switch_buffer = ''
 	let g:ctrlp_open_new_file = 'r'
 	let g:ctrlp_max_height = 25
+	let g:ctrlp_use_caching = 1
+	let g:ctrlp_clear_cache_on_exit = 1
+	let g:ctrlp_show_hidden = 1
 	" Close NERDTree window
-	let g:ctrlp_dont_split = 'NERD'	" Key mapping
-	FnNoremap <C-p>     :exec 'CtrlP'.g:FindRootDir()<CR>
-	"FnNoremap <C-p>     :CtrlP<CR>
+	let g:ctrlp_dont_split = 'NERD'
+	" Key mapping
+	"FnNoremap <C-p>     :exec 'CtrlP'.g:FindRootDir()<CR>
+	FnNoremap <C-p>     :CtrlP<CR>
 	FnNoremap <C-A-p>   :CtrlPMixed<CR>
 	FnNoremap <C-o>     :CtrlPMRU<CR>
 	FnNoremap <C-A-o>   :CtrlPTag<CR>
