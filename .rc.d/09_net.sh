@@ -533,3 +533,7 @@ ssh_get_server_pubkey() {
 quvi_get() {
   quvi "$@" --exec 'wget %u -O %t.%e'
 }
+# youtube-dl download
+youtube() {
+  youtube-dl --geo-bypass --hls-prefer-native -o "%(autonumber)s-%(title)s.%(ext)s" "$@"
+}
