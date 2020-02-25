@@ -427,27 +427,30 @@ endif
 " *******************************************************
 if !exists('g:loaded_ctrlp')
 	" See https://github.com/kien/ctrlp.vim/blob/master/doc/ctrlp.txt
-	" Options
-	let g:ctrlp_map = '<c-p>'
-	let g:ctrlp_cmd = 'CtrlP'
-	let g:ctrlp_working_path_mode = 'ra'
+	"" Key mapping
+	let g:ctrlp_map = '' " Disabled
+	"" CtrlP root search does not work for .svn/ folders with svn < 1.7
+	let g:ctrlp_working_path_mode = ''
 	let g:ctrlp_custom_ignore = {
 	\ 'dir':  '\v[\/]\.(git|hg|svn|tmp)$',
 	\ 'file': '\v\.(exe|so|dll|o|pyc|swp|zip|7z|tar|tgz)$',
 	\ }
-	"let g:ctrlp_root_markers = ['.git','.hg','.svn','.bzr','_darcs']
+	"" Buffer management
 	"let g:ctrlp_switch_buffer = 'et'
 	let g:ctrlp_switch_buffer = ''
+	"" Re-use windows (ctrlp_dont_split => ctrlp_reuse_window)
+	let g:ctrlp_dont_split = 'NERD\|netrw\|help\|quickfix'
+	let g:ctrlp_reuse_window = 'NERD\|netrw\|help\|quickfix'
+	"" File list
+	let g:ctrlp_max_files = 10000
+	let g:ctrlp_show_hidden = 1
 	let g:ctrlp_open_new_file = 'r'
 	let g:ctrlp_max_height = 25
+	"" Cache
 	let g:ctrlp_use_caching = 1
 	let g:ctrlp_clear_cache_on_exit = 1
-	let g:ctrlp_show_hidden = 1
-	" Close NERDTree window
-	let g:ctrlp_dont_split = 'NERD'
 	" Key mapping
-	"FnNoremap <C-p>     :exec 'CtrlP'.g:FindRootDir()<CR>
-	FnNoremap <C-p>     :CtrlP<CR>
+	FnNoremap <C-p>     :exec 'CtrlP'.g:FindRootDir()<CR>
 	FnNoremap <C-A-p>   :CtrlPMixed<CR>
 	FnNoremap <C-o>     :CtrlPMRU<CR>
 	FnNoremap <C-A-o>   :CtrlPTag<CR>

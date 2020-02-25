@@ -83,52 +83,37 @@ FnNoremap <A-X>   <C-x>
 " *******************************************************
 
 " Look for the best root directory
-if v:version < 704
-	function! g:FindRootDir()
-		" Ctags/cscope files
-		let dblist = (exists('g:tags_db') ? g:tags_db : [])
-		let dblist += (exists('g:cscope_db') ? g:cscope_db : [])
-		for file in dblist
+function! g:FindRootDir()
+	" Ctags/cscope files
+	let dblist = (exists('g:tags_db') ? g:tags_db : [])
+	let dblist += (exists('g:cscope_db') ? g:cscope_db : [])
+	for file in dblist
+		if v:version < 704
 			silent! let file=eval(file)
-			let file = findfile(file, ".;")
-			if (filereadable(file))
-				return fnamemodify(file, ':p:h')
-			endif
-		endfor
-		" SVN/GIT directory
-		for dir in ['.svn', '.git']
-			let _dir = finddir(dir, ".;", -1)
-			if (!empty(_dir))
-				return fnamemodify(_dir[-1], ':p:h:h')
-			endif
-		endfor
-		" No match
-		return '%:p:h'
-		"return getcwd()
-	endfunction
-else
-	function! g:FindRootDir()
-		" Ctags/cscope files
-		let dblist = (exists('g:tags_db') ? g:tags_db : [])
-		let dblist += (exists('g:cscope_db') ? g:cscope_db : [])
-		for file in dblist
-			let file = findfile(file, ".;")
-			if (filereadable(file))
-				return fnamemodify(file, ':p:h')
-			endif
-		endfor
-		" SVN/GIT directory
-		for dir in ['.svn', '.git']
-			let _dir = finddir(dir, ".;", -1)
-			if (!empty(_dir))
-				return fnamemodify(_dir[0], ':p:h:h')
-			endif
-		endfor
-		" No match
-		return '%:p:h'
-		"return getcwd()
-	endfunction
-endif
+		endif
+		let file = findfile(file, ".;")
+		if (filereadable(file))
+			return fnamemodify(file, ':p:h')
+		endif
+	endfor
+	" Last matching directory
+	for dir in ['.svn']
+		let _dir = finddir(dir, ".;", -1)
+		if (!empty(_dir))
+			return fnamemodify(_dir[len(_dir)-1], ':p:h:h')
+		endif
+	endfor
+	" First matching directory
+	for dir in ['.git']
+		let _dir = finddir(dir, ".;", -1)
+		if (!empty(_dir))
+			return fnamemodify(_dir[0], ':p:h:h')
+		endif
+	endfor
+	" No match
+	return '%:p:h'
+	"return getcwd()
+endfunction
 
 " Directory autochange
 if exists('g:vimrc_autochdir')
