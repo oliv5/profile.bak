@@ -45,7 +45,7 @@ rc_source() {
   rc_sourcemod() {
     set -- $@
     for FILE; do
-      PATTERN="^${FILE##$RC_DIR/}|^${FILE##$RC_DIR_LOCAL/}"
+      local PATTERN="^${FILE##$RC_DIR/}|^${FILE##$RC_DIR_LOCAL/}"
       if [ -n "$RC_ALL" ] ||
           test -x "$FILE" ||
           grep -Ee "$PATTERN" "$RC_DIR/.rc.list" >/dev/null 2>&1 ||
@@ -94,6 +94,7 @@ rc_source() {
   ##############
   # Main scripts
   RC_ALL="${1:+1}"
+  local PATTERN
   set +f # Enable glob expansion
   for PATTERN in "${@:-*}"; do
     if [ -d "$PATTERN" ]; then # Load explicit directories
