@@ -61,6 +61,14 @@ annex_init_direct() {
   annex_init "$@" && git --git-dir="${1:-.}" annex direct
 }
 
+# Setup v7 annex in dual mode: plain & annexed files
+# https://git-annex.branchable.com/forum/Annex_v7_repos_and_plain_git_files/
+# https://git-annex.branchable.com/forum/lets_discuss_git_add_behavior/#comment-37e0ecaf8e0f763229fd7b8ee9b5a577
+annex_setup_dual_mode() {
+  git config --replace-all annex.largefiles "nothing"
+  git config --replace-all annex.gitaddtoannex "false"
+}
+
 ########################################
 # Init hubic annex
 annex_init_hubic() {
@@ -975,12 +983,12 @@ annex_preferred() {
   local REQUIRED="${2:-$REQUIRED_FILE}"
   local WANTED="${3:-$WANTED_FILE}"
   if [ -r "$REQUIRED" ]; then
-    cat "$REQUIRED" | xargs -ri git annex required "$REPO" "{}"
+    cat "$REQUIRED" | xargs -r -n2 git annex required
   elif [ "$REQUIRED" != "$REQUIRED_FILE" ]; then
     git annex required "$REPO" "$REQUIRED"
   fi
   if [ -r "$WANTED" ]; then
-    cat "$WANTED" | xargs -ri git annex wanted "$REPO" "{}"
+    cat "$WANTED" | xargs -r -n2 git annex wanted
   elif [ "$WANTED" != "$WANTED_FILE" ]; then
     git annex wanted "$REPO" "$WANTED"
   fi
