@@ -236,7 +236,7 @@ find_duplicates() {
 # Dry-run only, does not execute the rm command
 alias rm_dup='rm_duplicates'
 rm_duplicates() {
-  find_duplicates "$@" | sed '1d ; /^$/{N;d}' | xargs -r -- echo rm -I --
+  find_duplicates "$@" | sed '1d ; /^$/{N;d}' | xargs -r -i -- echo "rm -I -- '{}'"
 }
 
 # Find duplicate files in directory
