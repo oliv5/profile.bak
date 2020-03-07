@@ -9,6 +9,7 @@ rc_source() {
   export RC_DIR_LOCAL="${RC_DIR_LOCAL:-$HOME}"
 
   # Local variables
+  local RC_LIST="$RC_DIR_LOCAL/.rc.tmp.list"
   local RC_VERBOSE="$RC_VERBOSE"
   local RC_DRYRUN="$RC_DRYRUN"
   local RC_ALL="$RC_ALL"
@@ -47,11 +48,12 @@ rc_source() {
     local FILE
     set -- $@
     for FILE; do
-      local PATTERN="^${FILE##$RC_DIR/}|^${FILE##$RC_DIR_LOCAL/}"
       if [ -n "$RC_ALL" ] ||
           test -x "$FILE" ||
-          { [ -r "$RC_DIR/.rc.list" ] && grep -Ee "$PATTERN" "$RC_DIR/.rc.list" >/dev/null 2>&1; } ||
-          { [ -r "$RC_DIR_LOCAL/.rc.local.list" ] && grep -Ee "$PATTERN" "$RC_DIR_LOCAL/.rc.local.list" >/dev/null 2>&1; } then
+          { [ -r "$RC_LIST" ] &&
+            PATTERN="^${FILE##$RC_DIR/}|^${FILE##$RC_DIR_LOCAL/}" &&
+            grep -Ee "$PATTERN" "$RC_LIST" >/dev/null 2>&1; }
+          then
         rc_sourcefile "$FILE"
       fi
     done
@@ -79,6 +81,16 @@ rc_source() {
     esac
   done
   shift $(expr $OPTIND - 1)
+
+  ##############
+  # Merge file lists if chmod -x has no effect
+  touch "$RC_LIST"
+  chmod +x "$RC_LIST"
+  if [ -x "$RC_LIST" ]; then
+    rm "$RC_LIST"
+  else
+    cat "$RC_DIR/.rc.list" "$RC_DIR_LOCAL/.rc.local.list" 2>/dev/null | sort -u > "$RC_LIST"
+  fi
 
   ##############
   # Startup scripts
