@@ -47,16 +47,24 @@ rc_source() {
   rc_sourcemod() {
     local FILE
     set -- $@
-    for FILE; do
-      if [ -n "$RC_ALL" ] ||
-          test -x "$FILE" ||
-          { [ -r "$RC_LIST" ] &&
-            PATTERN="^${FILE##$RC_DIR/}|^${FILE##$RC_DIR_LOCAL/}" &&
-            grep -Ee "$PATTERN" "$RC_LIST" >/dev/null 2>&1; }
-          then
+    if [ -n "$RC_ALL" ]; then
+      for FILE; do
         rc_sourcefile "$FILE"
-      fi
-    done
+      done
+    elif ! [ -r "$RC_LIST" ]; then
+      for FILE; do
+        if test -x "$FILE"; then
+          rc_sourcefile "$FILE"
+        fi
+      done
+    else
+      for FILE; do
+        PATTERN="^${FILE##$RC_DIR/}|^${FILE##$RC_DIR_LOCAL/}"
+        if grep -Ee "$PATTERN" "$RC_LIST" >/dev/null 2>&1; then
+          rc_sourcefile "$FILE"
+        fi
+      done
+    fi
   }
 
   ##############
