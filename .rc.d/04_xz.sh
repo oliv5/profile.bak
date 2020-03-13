@@ -17,7 +17,7 @@ xzq() {
 xza() {
   local ARCHIVE="${1:?No archive to create...}"
   shift 1
-  xz -zk9c "$@" > "$ARCHIVE"
+  command xz -zk9c "$@" > "$ARCHIVE"
 }
 
 # xz deflate
@@ -28,7 +28,7 @@ xzd() {
   mkdir -p "$DST"
   ( command cd "$DST"
     for SRC; do
-      xz -dk "$SRC"
+      command xz -dk "$SRC"
     done
   )
 }
@@ -52,7 +52,7 @@ xzga(){
   local KEY="${1:?No encryption key specified...}"
   local ARCHIVE="${2:?No archive to create...}"
   shift 2
-  xz -zk9c "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
+  command xz -zk9c "$@" | gpg --encrypt --batch --recipient "$KEY" > "$ARCHIVE"
 }
 
 # gpg > xz deflate
@@ -63,7 +63,7 @@ xzgd(){
   mkdir -p "$DST"
   ( command cd "$DST"
     for SRC; do
-      gpg --decrypt --batch "$SRC" | xz -d > "${SRC%.xz.gpg}"
+      gpg --decrypt --batch "$SRC" | command xz -d > "${SRC%.xz.gpg}"
     done
   )
 }
