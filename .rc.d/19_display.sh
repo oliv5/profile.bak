@@ -39,6 +39,7 @@ xrandr_enable() {
   local SCREEN="${1:?No screen specified...}"
   local MODE="${2:?No mode specified... ex: 1024x768}"
   shift 2
+  xrandr --addmode "${SCREEN}" "${MODE}"
   xrandr --output "${SCREEN}" --mode "${MODE}" "$@"
 }
 xrandr_disable() {
