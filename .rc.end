@@ -150,7 +150,7 @@ alias igv='grep -iv'
 alias pg='pgrep -l'
 
 # Kill
-alias kl='kill'
+alias k='kill'
 alias k9='kill -9'
 alias pk='pkill'
 alias pk9='pkill -9'
