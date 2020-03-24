@@ -60,7 +60,11 @@ mount_ecryptfs() {
   local CIPHER="${5:-aes}"
   local KEYLEN="${6:-32}"
   shift $(min 6 $#)
-  local OPT="key=passphrase,ecryptfs_enable_filename_crypto=yes,no_sig_cache=yes,ecryptfs_passthrough=no${@:+,$@}"
+  local OPT="$@"
+  local VERSION="$(ecryptfsd -V | awk '{print $3;exit}' | bc)"
+  if [ $VERSION -lt 111 ]; then
+    local OPT="key=passphrase,ecryptfs_enable_filename_crypto=yes,no_sig_cache=yes,ecryptfs_passthrough=no${@:+,$@}"
+  fi
   OPT="ecryptfs_cipher=$CIPHER,ecryptfs_key_bytes=$KEYLEN,ecryptfs_sig=$KEY1,ecryptfs_fnek_sig=$KEY2,ecryptfs_unlink_sigs${OPT:+,$OPT}"
   if [ "$SRC" = "$DST" ]; then
     echo "ERROR: same source and destination directories."
@@ -68,7 +72,11 @@ mount_ecryptfs() {
   fi
   chmod 500 "$SRC"
   sudo ecryptfs-add-passphrase --fnek
-  sudo mount -i -t ecryptfs -o "$OPT" "$SRC" "$DST"
+  if [ $VERSION -lt 111 ]; then
+    sudo mount -i -t ecryptfs -o "$OPT" "$SRC" "$DST"
+  else
+    sudo mount -v -t ecryptfs -o "$OPT" "$SRC" "$DST"
+  fi
   chmod 700 "$DST"
 }
 umount_ecryptfs() {
@@ -82,7 +90,7 @@ mount_private_ecryptfs() {
   local SRC="${1:-$HOME/.private}"
   local DST="${2:-$HOME/private}"
   local SIG="${3:-$HOME/.ecryptfs/private.sig}"
-  local KEY="$(cat "$SIG" 2>/dev/null)"
+  local KEY="$(cat "$SIG" 2>/dev/null | head -n 1)"
   mkdir -p "$DST"
   mount_ecryptfs "$SRC" "$DST" "$KEY"
 }
@@ -105,13 +113,13 @@ ecryptfs_unwrap_passphrase() {
 }
 
 # User mount ecryptfs (no root)
-# WIP: need use of temp file & user_mount_private in .ecryptfs & unmount fcts
+# Mount options are hardcoded: AES, key 16b
 user_mount_ecryptfs() {
   local SRC="${1:?Missing source directory...}"
   local DST="${2:?Missing dest directory...}"
   local KEY1="${3:?Missing content key...}"
   local KEY2="${4:-$KEY1}"
-  local CONFNAME="${5:-vault}"
+  local CONFNAME="${5:-private}"
   local CONF="$HOME/.ecryptfs/$CONFNAME.conf"
   local SIG="$HOME/.ecryptfs/$CONFNAME.sig"
   chmod 700 "$HOME/.ecryptfs"
@@ -123,8 +131,8 @@ user_mount_ecryptfs() {
   chmod 500 "$HOME/.ecryptfs"
 }
 user_umount_ecryptfs() {
-  local CONFNAME="${1:-vault}"
-  mount.ecryptfs_private "$CONFNAME"
+  local CONFNAME="${1:-private}"
+  umount.ecryptfs_private "$CONFNAME"
   keyctl clear @u
 }
 
@@ -133,7 +141,7 @@ user_mount_private() {
   local SRC="${1:-$HOME/.private}"
   local DST="${2:-$HOME/private}"
   local SIG="${3:-$HOME/.ecryptfs/private.sig}"
-  local KEY="$(cat "$SIG" 2>/dev/null)"
+  local KEY="$(cat "$SIG" 2>/dev/null | head -n 1)"
   local CONFNAME="${4:-$(basename "$DST")}"
   mkdir -p "$DST"
   user_mount_ecryptfs "$SRC" "$DST" "$KEY" "" "$CONFNAME"
