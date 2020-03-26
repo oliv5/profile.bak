@@ -71,11 +71,11 @@ mount_ecryptfs() {
     return 1
   fi
   chmod 500 "$SRC"
-  sudo ecryptfs-add-passphrase --fnek
   if [ $VERSION -lt 111 ]; then
+    sudo ecryptfs-add-passphrase --fnek
     sudo mount -i -t ecryptfs -o "$OPT" "$SRC" "$DST"
   else
-    sudo mount -v -t ecryptfs -o "$OPT" "$SRC" "$DST"
+    sudo mount -t ecryptfs -o "$OPT" "$SRC" "$DST"
   fi
   chmod 700 "$DST"
 }
