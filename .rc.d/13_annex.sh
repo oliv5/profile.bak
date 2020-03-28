@@ -65,8 +65,13 @@ annex_init_direct() {
 # https://git-annex.branchable.com/forum/Annex_v7_repos_and_plain_git_files/
 # https://git-annex.branchable.com/forum/lets_discuss_git_add_behavior/#comment-37e0ecaf8e0f763229fd7b8ee9b5a577
 annex_setup_dual_mode() {
-  git config --replace-all annex.largefiles "nothing"
-  git config --replace-all annex.gitaddtoannex "false"
+  local SIZE="${1:-largerthan=500kb}"
+  git config --replace-all annex.largefiles "$SIZE"
+  if [ "$SIZE" = "nothing" ]; then
+    git config --replace-all annex.gitaddtoannex "false"
+  else
+    git config --replace-all annex.gitaddtoannex "true"
+  fi
 }
 
 ########################################
