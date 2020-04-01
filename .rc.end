@@ -190,6 +190,9 @@ duhl0() { du -hL -d0 "$@" | sort -h; }
 duhl1() { du -hL -d1 "$@" | sort -h; }
 duhl2() { du -hL -d2 "$@" | sort -h; }
 
+# df
+alias dfh='df -h | grep -v /snap/'
+
 # Env | grep
 pv() { for V; do echo "$V=$(eval echo \$$V)"; done; }
 alias envg='env | grep -i'
