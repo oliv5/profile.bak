@@ -62,15 +62,30 @@ annex_init_direct() {
 }
 
 # Setup v7 annex in dual mode: plain & annexed files
+# https://git-annex.branchable.com/git-annex/
+# https://git-annex.branchable.com/tips/largefiles/
 # https://git-annex.branchable.com/forum/Annex_v7_repos_and_plain_git_files/
 # https://git-annex.branchable.com/forum/lets_discuss_git_add_behavior/#comment-37e0ecaf8e0f763229fd7b8ee9b5a577
-annex_setup_dual_mode() {
-  local SIZE="${1:-largerthan=500kb}"
-  git config --replace-all annex.largefiles "$SIZE"
-  if [ "$SIZE" = "nothing" ]; then
-    git config --replace-all annex.gitaddtoannex "false"
+annex_mixed_content() {
+  local SIZE="${1:-nothing}"
+  local LOCAL="${2:-1}"
+  if [ -n "$LOCAL" ]; then
+    _set_config() { git config --replace-all "$@"; }
   else
-    git config --replace-all annex.gitaddtoannex "true"
+    _set_config() { git annex config --set "$@"; }
+  fi
+  if [ "$SIZE" = "anything" ] || [ "$SIZE" = "all" ]; then
+    _set_config annex.gitaddtoannex "true"
+    _set_config annex.addsmallfiles "true"
+    _set_config annex.largefiles "anything"
+  elif [ "$SIZE" = "nothing" ] || [ "$SIZE" = "none" ]; then
+    _set_config annex.gitaddtoannex "false"
+    _set_config annex.addsmallfiles "false"
+    _set_config annex.largefiles "nothing"
+  else
+    _set_config annex.gitaddtoannex "false"
+    _set_config annex.addsmallfiles "false"
+    _set_config annex.largefiles "$SIZE"
   fi
 }
 
