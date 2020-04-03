@@ -117,6 +117,12 @@ if ! command -v gksu >/dev/null && ! command -v gksudo >/dev/null; then
   gksudo() { pkexec env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTHORITY" "$@" & }
   alias gksu='gksudo'
 fi
+runas() {
+  # script -qc makes a script believe stdout is a tty
+	local ME="${1:-root}"
+	shift 2>/dev/null
+	sudo -u "$ME" -i -- script -qc "$@"
+}
 
 # Search and process
 ffv()  { ff "${@:-""}" -print0       | xargs -0 gvim; }
