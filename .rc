@@ -133,7 +133,7 @@ rc_source() {
   # Main scripts
   RC_ALL="${1:+1}"
   local PATTERN
-  set +f # Enable glob expansion
+  local -; set +f # Enable glob expansion locally
   for PATTERN in "${@:-*}"; do
     if [ -d "$PATTERN" ]; then # Load explicit directories
       rc_sourcemod "$PATTERN/*.sh"

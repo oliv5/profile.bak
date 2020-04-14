@@ -3,21 +3,23 @@
 ###########################################
 # Find files implementations
 _ffind1() {
+  local -; set -f # disable glob expansion
   local FCASE="${FCASE:--}name"
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
   shift 2>/dev/null
   local REGEX='s/;!/" -o -not '${FCASE}' "/g ; s/&!/" -a -not '${FCASE}' "/g ; s/;/" -o '${FCASE}' "/g ; s/&/" -a '${FCASE}' /g'
-  ( set -f; FILES="\"$(echo $FILES | sed -e "$REGEX")\""
-    eval find ${FOPTS} "${DIR:-.}" -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} \\\( ${FILES:+$FCASE "$FILES"} -true \\\) ${FARGS} "$@")
+  FILES="\"$(echo $FILES | sed -e "$REGEX")\""
+  eval find ${FOPTS} "${DIR:-.}" -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} \\\( ${FILES:+$FCASE "$FILES"} -true \\\) ${FARGS} "$@"
 }
 _ffind2() {
+  local -; set -f # disable glob expansion
   local FCASE="${FCASE:--}regex"
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
   shift 2>/dev/null
-  ( set -f; FILES="$(echo $FILES | sed -e 's/;/|/g ; s/\./\\./g ; s/*/.*/g')"
-    find ${FOPTS} "${DIR:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*/($FILES)"} ${FARGS} "$@")
+  FILES="$(echo $FILES | sed -e 's/;/|/g ; s/\./\\./g ; s/*/.*/g')"
+  find ${FOPTS} "${DIR:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*/($FILES)"} ${FARGS} "$@"
 }
 _ffind3() {
   local FCASE="${FCASE:--}regex"
@@ -142,14 +144,16 @@ alias wfflb='FARGS=-depth fflb'
 ###########################################
 # File grep implementations
 _fgrep1() {
+  local -; set -f # disable glob expansion
   if [ $# -gt 1 ]; then
     local ARGS="$(arg_rtrim 1 "$@")"; shift $(($#-1))
   else
     local ARGS="$1"; shift $#
   fi
-  (set -f; _ffind1 "${@:-}" -type f -print0 | eval xargs -0 grep -nH --color ${GCASE} ${GARGS} -e "${ARGS:-''}")
+  _ffind1 "${@:-}" -type f -print0 | eval xargs -0 grep -nH --color ${GCASE} ${GARGS} -e "${ARGS:-''}"
 }
 _fgrep2() {
+  local -; set -f # disable glob expansion
   if [ $# -gt 1 ]; then
     local ARGS="$(arg_rtrim 1 "$@")"; shift $(($#-1))
   else
@@ -158,7 +162,7 @@ _fgrep2() {
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
   FILES="$(echo "${FILES}" | sed -e 's/;/ --include=/g')"
-  (set -f; eval grep -RnH --color ${GCASE} ${GARGS} -e "$ARGS" ${FILES:+--include="$FILES"} "${DIR:-.}")
+  eval grep -RnH --color ${GCASE} ${GARGS} -e "$ARGS" ${FILES:+--include="$FILES"} "${DIR:-.}"
 }
 alias _fgrep='_fgrep2'
 alias    gg='FCASE= FTYPE= FXTYPE= FOPTS=-L FARGS= GCASE=   GARGS=   _fgrep'
