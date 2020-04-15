@@ -245,6 +245,9 @@ alias hi='history'
 alias hg='history | grep'
 alias hgi='history | grep -i'
 
+# Re-execute commands
+alias r='fc -s'
+
 # Mount
 alias mg='mount | grep'
 alias mount_private='mount_private_ecryptfs'
