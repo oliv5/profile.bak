@@ -1,9 +1,9 @@
 #!/bin/sh
 
 # Grep based code search
-_dgrep1()   { local -; set -f; local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; FARGS="${_DG1EXCLUDE} $@" _fgrep1 "$ARG2" "${ARG3:-.}/$ARG1"; }
-_dgrep2()   { local -; set -f; local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; _fgrep2 "$ARG2" ${_DG2EXCLUDE} "$@" "${ARG3:-.}/$ARG1"; }
-_dgrep3()   { local -; set -f; local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; git grep -n ${GCASE} ${GARGS} "$@" "$ARG2" -- $(echo "$ARG1" | sed "s@^@${ARG3}*@ ; s@;@ ${ARG3}*@g"); }
+_dgrep1()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; FARGS="${_DG1EXCLUDE} $@" _fgrep1 "$ARG2" "${ARG3:-.}/$ARG1"); }
+_dgrep2()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; _fgrep2 "$ARG2" ${_DG2EXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
+_dgrep3()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; git grep -n ${GCASE} ${GARGS} "$@" "$ARG2" -- $(echo "$ARG1" | sed "s@^@${ARG3}*@ ; s@;@ ${ARG3}*@g")); }
 _dgrep()    { if git_exists "$3"; then _dgrep3 "$@"; else _dgrep1 "$@"; fi; }
 _DG1EXCLUDE="-and -not -path '/.*/'"
 _DG2EXCLUDE="--exclude-dir=.*"
@@ -44,7 +44,7 @@ alias ishell='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_SHEL
 alias   iref='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_REF"'
 
 # Grep based code block search
-_dsearch1() { local -; set -f; local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); GARGS=-E _dgrep $_DGEXT_REF "${ARG1//NAME/$ARG2}" "$@"; }
+_dsearch1() { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; GARGS=-E _dgrep $_DGEXT_REF "${ARG1//NAME/$ARG2}" "$@"); }
 alias _dsearch='_dsearch1'
 #_DGREGEX_FUNC='(^|\s+|::)NAME\s*\(([^;]*$|[^\}]\})'
 _DGREGEX_FUNC='\w+\s+NAME\s*\(\s*($|\w+\s+\w+|void)'
