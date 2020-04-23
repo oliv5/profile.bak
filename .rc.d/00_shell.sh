@@ -379,3 +379,35 @@ shell_attach() {
   echo "quit" >> "$GDBINIT"
   sudo sh -c "gdb -p \"$PID\" -nh -nx -x \"$GDBINIT\""
 }
+
+################################
+# Implement a basic lock (simple but with a race condition flaw)
+shell_block_take() {
+  local LOCKFILE="${1:?No lock file specified...}"
+  if [ -e ${LOCKFILE} ] && kill -0 $(cat "${LOCKFILE}"); then
+    return 1
+  fi
+  trap 'rm -f "${LOCKFILE}"; exit' INT TERM EXIT
+  echo $$ > "${LOCKFILE}"
+}
+shell_block_release() {
+  trap '' INT TERM EXIT
+  rm -f "${LOCKFILE}"
+}
+
+# Implement locks with flock
+shell_flock_take() {
+  local LOCKFILE="${1:?No lock file specified...}"
+  local DESCR="${2:-100}"
+  local TIMEOUT="$3"
+  exec $DESCR > $LOCKFILE || return 1
+  flock ${TIMEOUT:+-w $TIMEOUT} $DESCR || return 2
+  trap 'rm -f "${LOCKFILE}"; exit' INT TERM EXIT
+  return 0
+}
+shell_flock_release() {
+  local LOCKFILE="${1:?No lock file specified...}"
+  local DESCR="${2:-100}"
+  exec $DESCR<&-
+  rm -f "${LOCKFILE}"
+}
