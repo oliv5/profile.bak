@@ -411,3 +411,11 @@ shell_flock_release() {
   exec "$DESCR" <&-
   rm -f "${FILE}"
 }
+
+################################
+# Return shell option string
+# Restore with eval
+shell_getopts() {
+  set +o
+  shopt -p 2>/dev/null
+}
