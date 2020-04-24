@@ -9,7 +9,7 @@ rc_source() {
   export RC_DIR_LOCAL="${RC_DIR_LOCAL:-$HOME}"
 
   # Local variables
-  local RC_SHELLOPTS="$(set +o); $(shopt -p 2>/dev/null)" # Shell global options
+  local RC_SHELLOPTS="$(set +o | grep noglob)" # shell options
   local RC_LIST="$RC_DIR_LOCAL/.rc.tmp.list"
   local RC_VERBOSE="$RC_VERBOSE" # for recursive calls
   local RC_DRYRUN="$RC_DRYRUN" # for recursive calls
@@ -163,7 +163,7 @@ rc_source() {
   if [ "$RC_CNT" = "1" ]; then
     unset -f rc_log rc_sourcemod rc_sourcefile
     [ -f "$RC_LIST" ] && rm "$RC_LIST"
-    # Restore shell global options
+    # Restore shell options
     eval "$RC_SHELLOPTS"
   fi
   return $RC_ERR
