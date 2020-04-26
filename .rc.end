@@ -246,7 +246,7 @@ alias hg='history | grep'
 alias hgi='history | grep -i'
 
 # Re-execute commands
-alias r='fc -s'
+alias hr='fc -s'
 
 # Mount
 alias mg='mount | grep'
