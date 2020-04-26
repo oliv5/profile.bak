@@ -395,21 +395,35 @@ shell_block_release() {
   rm -f "${FILE}"
 }
 
+#~ Traditional form using flock
+#~ exec 9> /tmp/mylockfile || return 1
+#~ flock 9 || return 2
+#~ trap "exec 9>&-; flock -u 9; rm -f /tmp/mylockfile; trap '' INT TERM EXIT; exit" INT TERM EXIT
+#~ # ...
+
+# Convenient form using flock
+#~ (
+#~   flock 9
+#~   # ...
+#~ ) 9>/tmp/mylockfile
+
 # Implement locks with flock
 shell_flock_take() {
   local FILE="${1:?No lock file specified...}"
-  local DESCR="${2:-100}"
-  local TIMEOUT="$3"
-  exec "$DESCR" > "$FILE" || return 1
-  flock ${TIMEOUT:+-w "$TIMEOUT"} "$DESCR" || return 2
-  trap "exec \"$DESCR\" <&-; rm -f \"${FILE}\"; exit" INT TERM EXIT
+  local DESCR="${2:-9}" # dash cannot open more than 10 file handlers
+  local TIMEOUT="$3" # 0=fail immediatly; if not specified, then wait until lock available
+  local TYPE="${4:--x}" # -x = exclusive (write), -s = shared (read)
+  exec "$DESCR"> "$FILE" || return 1
+  flock ${TIMEOUT:+-w "$TIMEOUT"} ${TYPE} "$DESCR" || return 2
+  trap "shell_flock_release '$FILE' '$DESCR'; trap '' INT TERM EXIT; exit" INT TERM EXIT
   return 0
 }
 shell_flock_release() {
   local FILE="${1:?No lock file specified...}"
-  local DESCR="${2:-100}"
-  exec "$DESCR" <&-
-  rm -f "${FILE}"
+  local DESCR="${2:-9}"
+  flock -u "$DESCR"
+  exec "$DESCR"<&-
+  rm -f "$FILE"
 }
 
 ################################
