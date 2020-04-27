@@ -140,3 +140,8 @@ alias gps_enable_network='selinux_wrapper settings put secure location_providers
 alias gps_enable_full='selinux_wrapper "settings put secure location_providers_allowed +gps ; settings put secure location_providers_allowed +network"'
 alias gps_disable='selinux_wrapper "settings put secure location_providers_allowed -gps ; settings put secure location_providers_allowed -network"'
 alias gps_status='selinux_wrapper settings get secure location_providers_allowed'
+
+# Manage permissions
+# Ex: su root -- cmd appops set <pkg> RUN_IN_BACKGROUND [ignore|allow]
+set_perm() { su root -- cmd appops set "${1:?No package specified...}" "${2:?No permission specified...}" "${3:?No value specified...}"; }
+get_perm() { su root -- cmd appops get "${1:?No package specified...}" "${2:?No permission specified...}"; }
