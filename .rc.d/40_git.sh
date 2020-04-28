@@ -260,6 +260,14 @@ git_branch_rename_remote() {
   git push "$REMOTE" "$NEW"
 }
 
+# Check if branches are merged together
+git_merged() {
+  local A="${1:-HEAD}"
+  local B="${2:-HEAD}"
+  git branch --merged "$A" | grep "$B" >/dev/null ||
+  git branch --merged "$B" | grep "$A" >/dev/null
+}
+
 ########################################
 # Get remote url
 git_url() {
