@@ -71,17 +71,24 @@ annex_mixed_content() {
   local LOCAL="${2:-1}"
   if [ -n "$LOCAL" ]; then
     _set_config() { git config --replace-all "$@"; }
+    _rm_config() { git config --unset-all "$1"; }
   else
     _set_config() { git annex config --set "$@"; }
+    _rm_config() { git annex config --unset "$1"; }
   fi
-  if [ "$SIZE" = "anything" ] || [ "$SIZE" = "all" ]; then
+  if [ "$SIZE" = "remove" ] || [ "$SIZE" = "rm" ]; then
+    _rm_config annex.gitaddtoannex
+    _rm_config annex.addsmallfiles
+    _rm_config annex.largefiles
+  elif [ "$SIZE" = "anything" ] || [ "$SIZE" = "all" ]; then
     _set_config annex.gitaddtoannex "true"
     _set_config annex.addsmallfiles "true"
     _set_config annex.largefiles "anything"
   elif [ "$SIZE" = "nothing" ] || [ "$SIZE" = "none" ]; then
     _set_config annex.gitaddtoannex "false"
     _set_config annex.addsmallfiles "false"
-    _set_config annex.largefiles "nothing"
+    #_set_config annex.largefiles "nothing"
+    _rm_config annex.largefiles
   else
     _set_config annex.gitaddtoannex "false"
     _set_config annex.addsmallfiles "false"
