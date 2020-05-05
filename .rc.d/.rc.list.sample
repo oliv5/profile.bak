@@ -1,11 +1,15 @@
-# sample rc file list
+# Nexus4 rc file list
 .rc.d/00_shell.sh
-.rc.d/01_fct.sh
-.rc.d/01_math.sh
+#.rc.d/01_fct.sh
+#.rc.d/01_math.sh
 .rc.d/01_path.sh
-.rc.d/01_str.sh
+#.rc.d/01_str.sh
 .rc.d/02_cd.sh
-.rc.d/03_search.sh
-.rc.d/05_diff.sh
-.rc.d/android/03_search.sh
-.rc.d/android/08_sys.sh
+#.rc.d/10_search.sh
+#.rc.d/10_diff.sh
+.rc.d/40_git.sh
+.rc.d/41_annex.sh
+.rc.d/50_agents.sh
+.rc.d/android/10_search.sh
+.rc.d/android/28_sys.sh
+.rc.d/android/50_termux.sh
