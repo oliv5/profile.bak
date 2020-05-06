@@ -1,5 +1,11 @@
 #!/bin/sh
 # Note: this file must be independant, it can be sourced by external scripts
+if ! command -v git_exists >/dev/null; then
+  . "$RC_DIR/.rc.d"/*_git.sh
+fi
+if ! command -v snv_exists >/dev/null; then
+  . "$RC_DIR/.rc.d"/*_svn.sh
+fi
 
 # Ctags settings
 _CTAGS_OPTS='--fields=+iaS --extra=+qf --c++-kinds=+p --python-kinds=-i'
@@ -108,6 +114,21 @@ mkgtags() {
     xargs -r0 -n1 | gtags $_GTAGS_OPTS $* -f - "$DST"
 }
 
+# Make incremental tag db
+mkinc() {
+  local FCT="${1:?No tag make function defined...}"
+  local DST="$(eval echo ${2:-$PWD})" # Remove ~/
+  local REGEX="$3"
+  local EXCLUDE="$4"
+  shift $(($#<=4?$#:4))
+  echo -n > .tagfilelist
+  for SRC in "${@:-.}"; do
+    _scandir "$SRC" "$REGEX" "$EXCLUDE" >> .tagfilelist
+  done
+  $FCT .tagfilelist "$DST"
+  rm .tagfilelist
+}
+
 # Make all tags
 mktags() {
   mkctags "$@"
@@ -180,33 +201,18 @@ mkalltags() {
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".cscope.path" ]; then
         rmcscope
-        echo -n > .tagfilelist
-        for SRC in $(cat "$TAGNAME"); do
-          echo "[cscope] add: $SRC"
-          _scandir "$SRC" "$_CSCOPE_REGEX" "$_CSCOPE_EXCLUDE" >> .tagfilelist
-        done
-        mkcscope .tagfilelist .
-        rm .tagfilelist
+        cat "$TAGNAME" | xargs -r echo "[cscope] add: "
+        mkinc mkcscope . $(cat "$TAGNAME" | xargs -r)
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".id.path" ]; then
         rmids
-        echo -n > .tagfilelist
-        for SRC in $(cat "$TAGNAME"); do
-          echo "[id] add: $SRC"
-          _scandir "$SRC" "$_MKID_REGEX" "$_MKID_EXCLUDE" >> .tagfilelist
-        done
-        mkids .tagfilelist .
-        rm .tagfilelist
+        cat "$TAGNAME" | xargs -r echo "[mkid] add: "
+        mkinc mkids . $(cat "$TAGNAME" | xargs -r)
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".pycscope.path" ]; then
         rmpycscope
-        echo -n > .tagfilelist
-        for SRC in $(cat "$TAGNAME"); do
-          echo "[pycscope] add: $SRC"
-          _scandir "$SRC" "$_PYCSCOPE_REGEX" "$_PYCSCOPE_EXCLUDE" >> .tagfilelist
-        done
-        mkpycscope .tagfilelist .
-        rm .tagfilelist
+        cat "$TAGNAME" | xargs -r echo "[pycscope] add: "
+        mkinc mkpycscope . $(cat "$TAGNAME" | xargs -r)
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".gtags.path" ]; then
         rmgtags
