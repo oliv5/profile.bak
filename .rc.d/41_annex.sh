@@ -1112,32 +1112,24 @@ annex_gethashpathmixed() {
 }
 
 ########################################
-# List unused files matching pattern
+# List unused files
 annex_unused() {
   ! annex_bare || return 1
-  unset IFS
-  local PATTERNS=""
-  for ARG; do PATTERNS="${PATTERNS:+$PATTERNS }-e '$ARG'"; done
   annex_fromkey0 $(git annex unused ${FROM:+--from $FROM} | awk "/^\s+[0-9]+\s/{print \$2}") |
-    eval grep -zF "${PATTERNS:-''}" |
-      xargs -r0 -n1
+    xargs -r0 -n1
 }
 annex_unusedc() {
   annex_unused "$@" | wc -l
 }
 
-# List unused files matching pattern
-annex_listunused() {
+# List unused files
+annex_unused_with_key() {
   ! annex_bare || return 1
-  unset IFS
-  local PATTERNS=""
-  for ARG; do PATTERNS="${PATTERNS:+$PATTERNS }-e '$ARG'"; done
   git annex unused ${FROM:+--from $FROM} | grep -E '^\s+[0-9]+\s' |
     while IFS=' ' read -r NUM KEY; do
       echo "Key  : $KEY"
       annex_fromkey0 "$KEY" |
-        eval grep -zF "${PATTERNS:-''}" |
-          xargs -r0 -n1 echo "File :"
+        xargs -r0 -n1 echo "File :"
     done
 }
 
