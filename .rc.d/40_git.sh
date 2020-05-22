@@ -137,6 +137,17 @@ git_update_index_all() {
   git ls-files -z | xargs -r0 -n1 git update-index -q --refresh
 }
 
+# Find repos and execute commands in them
+git_foreach() {
+  git_find0 | xargs -r0 -- sh -c '
+    git_root() { [ "$(git --git-dir="$1" config --get core.bare)" = "true" ] && echo "$1" || echo "$1/.."; }
+    CMD="$1"; shift
+    for DIR; do
+      (cd "$(git_root "$DIR")" && pwd && eval "${CMD}")
+    done
+  ' _ "$*"
+}
+
 ########################################
 
 # Get current branch name
