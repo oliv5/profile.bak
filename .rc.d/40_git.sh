@@ -1299,6 +1299,23 @@ git_checkout_ours() {
 }
 
 ########################################
+# Repair broken repo; need a good one as reference
+# https://git-annex.branchable.com/tips/recovering_from_a_corrupt_git_repository/
+git_repair() {
+  local - _
+  local BAD="${1:?No bad repository specified...}"
+  local GOOD="${2:?No good repository specified...}"
+  set -e
+  echo "Good repo: $GOOD"
+  echo "Bad repo: $BAD"
+  echo "Enter to go on, ctrl-c to cancel..."
+  read _
+  cd "$BAD"
+  echo "$GOOD/.git/objects/" > .git/objects/info/alternates
+  git repack -a -d
+}
+
+########################################
 # Status aliases
 alias gt='git status -uno'
 alias gtu='gstu'
