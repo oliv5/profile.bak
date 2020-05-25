@@ -822,6 +822,7 @@ annex_upkeep() {
     { if command -v sudo >/dev/null; then sudo cat "$1"; else su -c "cat '$1'" root; fi; } | tr '[:upper:]' '[:lower:]' | xargs printf '%s'
   }
   local DBG=""
+  local IFS="$(printf ' \t\n')"
   # Add options
   local ADD=""
   local DEL=""
@@ -899,7 +900,7 @@ annex_upkeep() {
     local DEVICE="${1:-/sys/class/power_supply/battery/status}"
     shift
     local CURRENT_STATUS="$(devcat "$DEVICE")"
-    local EXPECTED_STATUS="$@"
+    local EXPECTED_STATUS="$*"
     local REMAINING_STATUS="${EXPECTED_STATUS%${CURRENT_STATUS}*}"
     set --
     if [ "$REMAINING_STATUS" = "$EXPECTED_STATUS" ]; then
