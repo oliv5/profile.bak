@@ -514,7 +514,7 @@ git_incbundle() {
   local PREV="$(git_shorthash "${TAGNAME}_last")"
   local NEXT="$(git_shorthash)"
   if [ -n "$PREV" ]; then
-    local NAME="${PREV}..${NEXT}.bundle.inc"
+    local NAME="${PREV}.${NEXT}.bundle.inc"
     echo "Make incremental bundle from ${TAGNAME}_last ($PREV) to HEAD ($NEXT)"
     git_bundle "$1" "$2" "$3" "$4" "$5" "$NAME" --branches --tags "${TAGNAME}_last.."
   else
