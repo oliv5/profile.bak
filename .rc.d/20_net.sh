@@ -537,3 +537,6 @@ quvi_get() {
 youtube() {
   youtube-dl --geo-bypass --hls-prefer-native -o "%(autonumber)s-%(title)s.%(ext)s" "$@"
 }
+youtube_best_mp4() {
+  youtube-dl --geo-bypass -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio' --merge-output-format mp4 -o "%(autonumber)s-%(title)s.%(ext)s" "$@"
+}
