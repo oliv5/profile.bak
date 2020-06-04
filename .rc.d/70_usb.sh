@@ -47,14 +47,14 @@ usb_ls_dev() {
 usb_bus_off() {
     for BUS; do
 	echo -n "$BUS" | grep -E "[0-9]+:[0-9]+:1" |
-	    tee /sys/bus/pci/drivers/uhci_hcd/unbind /sys/bus/pci/drivers/ohci_hcd/unbind /sys/bus/pci/drivers/ehci_hcd/unbind /sys/bus/pci/drivers/xhci_hcd/unbind 2>/dev/null
+	    sudo tee /sys/bus/pci/drivers/uhci_hcd/unbind /sys/bus/pci/drivers/ohci_hcd/unbind /sys/bus/pci/drivers/ehci_hcd/unbind /sys/bus/pci/drivers/xhci_hcd/unbind 2>/dev/null
     done
 }
 
 usb_bus_on() {
     for BUS; do
 	echo -n "$BUS" | grep -E "[0-9]+:[0-9]+:1" |
-	    tee /sys/bus/pci/drivers/uhci_hcd/bind /sys/bus/pci/drivers/ohci_hcd/bind /sys/bus/pci/drivers/ehci_hcd/bind /sys/bus/pci/drivers/xhci_hcd/bind 2>/dev/null
+	    sudo tee /sys/bus/pci/drivers/uhci_hcd/bind /sys/bus/pci/drivers/ohci_hcd/bind /sys/bus/pci/drivers/ehci_hcd/bind /sys/bus/pci/drivers/xhci_hcd/bind 2>/dev/null
     done
 }
 
