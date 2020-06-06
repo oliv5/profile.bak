@@ -1,3 +1,7 @@
 // Place your settings in this file to overwrite the default settings
 {
+    "editor.minimap.enabled": false,
+    "editor.renderControlCharacters": true,
+    "Lua.completion.callSnippet": "Both",
+    "workbench.colorTheme": "Visual Studio Light Theme"
 }
