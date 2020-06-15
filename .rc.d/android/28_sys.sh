@@ -5,7 +5,9 @@
 
 # Su/sudo
 unalias sudo 2>/dev/null
-sudo() { su root -- "$@"; stty sane; }
+if ! command -v sudo >/dev/null; then
+  sudo() { su root -c "PATH=\"$PATH\"; "$@""; stty sane; }
+fi
 
 # Process monitoring
 alias pg='pgrep -fl'

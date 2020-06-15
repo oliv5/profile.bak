@@ -819,7 +819,7 @@ annex_drop_fast() {
 # Annex upkeep
 annex_upkeep() {
   devcat() {
-    { if command -v sudo >/dev/null; then sudo cat "$1"; else su -c "cat '$1'" root; fi; } | tr '[:upper:]' '[:lower:]' | xargs printf '%s'
+    { if command -v sudo >/dev/null; then sudo cat "$1"; else su -c "cat '$1'" root; stty sane 2>/dev/null; fi; } | tr '[:upper:]' '[:lower:]' | xargs printf '%s'
   }
   local DBG=""
   local IFS="$(printf ' \t\n')"
