@@ -15,3 +15,16 @@ snap_rm_disabled() {
 snap_set_num_retained() {
   sudo snap set system refresh.retain="${1:-2}"
 }
+
+# Update snaps by enabling/disabling the snapd service
+snap_update_all() {
+  sudo sh -c '
+    set -x
+    systemctl unmask snapd.service
+    systemctl start snapd.service
+    systemctl status --no-pager snapd.service
+    snap refresh
+    systemctl mask snapd.service
+    systemctl stop snapd.service
+  '
+}
