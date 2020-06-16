@@ -476,52 +476,58 @@ _git_secure_delete() {
 
 # Create a bundle
 git_bundle() {
-  ( set +e; # Need to go on
-    git_exists || return 1
-    local PREFIX="${6:-$(git_repo).$(uname -n)}"
-    local SUFFIX="${7:-$(git_shorthash).bundle}"
-    local NAME="${PREFIX}.$(date +%Y%m%d-%H%M%S).${SUFFIX}"
-    local OUT="${1:-$(git_user_dir)/bundle/${NAME}}"
-    [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/${NAME}"
-    OUT="${OUT%%.xz}"; OUT="${OUT%%.git}.git.xz"
-    if ! mkdir -p "$(dirname "$OUT")"; then
-      echo "Cannot create directory '$(dirname "$OUT")'. Abort..."
-      exit 1
-    fi
-    local GPG_RECIPIENT="$2"
-    local GPG_TRUST="${3:+--trust-model always}"
-    local OWNER="${4:-$USER}"
-    local XZOPTS="$5"
-    [ $# -le 7 ] && shift $# || shift 7
-    echo "Git bundle into $OUT"
-    git bundle create "${OUT%%.xz}" ${@:---branches --tags}
-    xz -k -z -S .xz --verbose $XZOPTS "${OUT%%.xz}" &&
-      _git_secure_delete "${OUT%%.xz}"
-    chown "$OWNER" "$OUT"
-    if [ ! -z "$GPG_RECIPIENT" ]; then
-      echo "Encrypting bundle into '${OUT}.gpg'"
-      gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
-        _git_secure_delete "${OUT}"
-      chown "$OWNER" "${OUT}.gpg"
-    fi
-    ls -l "${OUT}"*
-  )
+  local -; set -e
+  git_exists || return 1
+  local PREFIX="${6:-$(git_repo).$(uname -n)}"
+  local SUFFIX="${7:-$(git_shorthash).bundle}"
+  local NAME="${PREFIX}.$(date +%Y%m%d-%H%M%S).${SUFFIX}"
+  local OUT="${1:-$(git_user_dir)/bundle/${NAME}}"
+  [ -z "${OUT##*/}" ] && OUT="${OUT%/*}/${NAME}"
+  OUT="${OUT%%.xz}"; OUT="${OUT%%.git}.git.xz"
+  if ! mkdir -p "$(dirname "$OUT")"; then
+    echo "Cannot create directory '$(dirname "$OUT")'. Abort..."
+    exit 2
+  fi
+  local GPG_RECIPIENT="$2"
+  local GPG_TRUST="${3:+--trust-model always}"
+  local OWNER="${4:-$USER}"
+  local XZOPTS="$5"
+  [ $# -le 7 ] && shift $# || shift 7
+  echo "Git bundle into $OUT"
+  git bundle create "${OUT%%.xz}" ${@:---branches --tags}
+  xz -k -z -S .xz --verbose $XZOPTS "${OUT%%.xz}" &&
+    _git_secure_delete "${OUT%%.xz}"
+  chown "$OWNER" "$OUT"
+  if [ ! -z "$GPG_RECIPIENT" ]; then
+    echo "Encrypting bundle into '${OUT}.gpg'"
+    gpg -v --output "${OUT}.gpg" --encrypt --recipient "$GPG_RECIPIENT" $GPG_TRUST "${OUT}" &&
+      _git_secure_delete "${OUT}"
+    chown "$OWNER" "${OUT}.gpg"
+  fi
+  ls -l "${OUT}"*
 }
 
 # Create an incremental bundle
 git_incbundle() {
-  local TAGNAME="${1:-incbundle.$(uname -n)}"
+  local TAGNAME="$(basename "${1:-incbundle.$(uname -n)}")"
   [ $# -ge 1 ] && shift
   local PREV="$(git_shorthash "${TAGNAME}_last")"
   local NEXT="$(git_shorthash)"
   if [ -n "$PREV" ]; then
-    echo "Make incremental bundle from ${TAGNAME}_last ($PREV) to HEAD ($NEXT)"
-    local NAME="${PREV}.${NEXT}.bundle.inc"
-    git_bundle "$1" "$2" "$3" "$4" "$5" "$6" "$NAME" --branches --tags "${TAGNAME}_last.."
+    if [ "$PREV" = "$NEXT" ]; then
+      echo "New incremental bundle from ${TAGNAME}_last ($PREV) to HEAD ($NEXT) would be empty. Skip it..."
+      return 0
+    else
+      echo "Make incremental bundle from ${TAGNAME}_last ($PREV) to HEAD ($NEXT)"
+      local NAME="${PREV}.${NEXT}.bundle.inc"
+      git_bundle "$1" "$2" "$3" "$4" "$5" "$6" "$NAME" --branches --tags "${TAGNAME}_last.." ||
+        return $?
+    fi
   else
     echo "Make initial full bundle up to HEAD ($NEXT)"
     local NAME="${NEXT}.bundle.full"
-    git_bundle "$1" "$2" "$3" "$4" "$5" "$6" "$NAME" --branches --tags
+    git_bundle "$1" "$2" "$3" "$4" "$5" "$6" "$NAME" --branches --tags ||
+      return $?
   fi
   # Set tags
   git tag -f "${TAGNAME}_last" "HEAD"
