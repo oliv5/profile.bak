@@ -172,13 +172,13 @@ rc_source() {
 
 ################################
 # Look for pattern in rc scripts and load the script found
-# Not robust to newlines in paths but cannot run in subshell...
+# This version should be robust to newlines in paths
 rc_search() {
-    local IFS=$'\n'
+    local IFS=$' \t\n'
     for PATTERN; do
-        for SCRIPT in $(grep -lr "$PATTERN" "$RC_DIR/.rc.d/" 2>/dev/null; grep -lr "$PATTERN" "$RC_DIR_LOCAL/.rc.local.d/" 2>/dev/null); do
+        for SCRIPT in $({ grep -lr "$PATTERN" "$RC_DIR/.rc.d/" 2>/dev/null; grep -lr "$PATTERN" "$RC_DIR_LOCAL/.rc.local.d/" 2>/dev/null; } | xargs -r0); do
             echo "Loading '$SCRIPT'..."
-            IFS=$' \t\n' . "$SCRIPT"
+            . "$SCRIPT"
         done
     done
 }
