@@ -13,3 +13,8 @@ alias find_photos='find_media image'
 # Idendity codec
 alias lscodec='mplayer -vo null -ao null -frames 0 -identify'
 alias lscodec2='mediainfo --fullscan'
+
+# MKV to MP4
+mkv2mp4() {
+  ffmpeg -i "$1" -c copy -map 0 "$2"
+}

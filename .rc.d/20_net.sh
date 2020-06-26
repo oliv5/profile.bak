@@ -540,3 +540,6 @@ youtube() {
 youtube_best_mp4() {
   youtube-dl --geo-bypass -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio' --merge-output-format mp4 -o "%(autonumber)s-%(title)s.%(ext)s" "$@"
 }
+youtube_best_not_webm() {
+  youtube-dl --geo-bypass -f 'bestvideo[ext!=webm]‌​+bestaudio[ext!=webm]‌​/best[ext!=webm]' -o "%(autonumber)s-%(title)s.%(ext)s" "$@"
+}

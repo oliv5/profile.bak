@@ -29,7 +29,9 @@ snap_exec() {
 }
 
 # Update snaps by enabling/disabling the snapd service
+snap_update() {
+  snap_exec snap refresh "$@"
+}
 snap_update_all() {
   snap_exec snap refresh
 }
-
