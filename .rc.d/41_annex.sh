@@ -1011,12 +1011,12 @@ annex_preferred() {
   local REQUIRED="${2:-$REQUIRED_FILE}"
   local WANTED="${3:-$WANTED_FILE}"
   if [ -r "$REQUIRED" ]; then
-    cat "$REQUIRED" | xargs -r -n2 git annex required
+    cat "$REQUIRED" | xargs -d\\n -r -n1 -- sh -c 'eval git annex required $*' _
   elif [ "$REQUIRED" != "$REQUIRED_FILE" ]; then
     git annex required "$REPO" "$REQUIRED"
   fi
   if [ -r "$WANTED" ]; then
-    cat "$WANTED" | xargs -r -n2 git annex wanted
+    cat "$WANTED" | xargs -d\\n -r -n1 -- sh -c 'eval git annex wanted $*' _
   elif [ "$WANTED" != "$WANTED_FILE" ]; then
     git annex wanted "$REPO" "$WANTED"
   fi
