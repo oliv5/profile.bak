@@ -6,8 +6,6 @@
 [ -z "$VISUAL" ] && export VISUAL="$(command -v vim || command -v vi || command -v nano || command -v false)"
 [ -z "$PAGER" ] && export PAGER="less -FXr"
 export LESS="-FXr" # Don't stop when less than 1 page, color
-
-# Graphical editor
 export GEDITOR="$(command -v geany || command -v gvim || command -v gedit || command -v false)"
 
 #########################
@@ -57,3 +55,7 @@ fi
 alias si='PREFIX="$HOME/.wineprefix/sourceinsight" si.sh'
 alias si2='PREFIX="$HOME/.wineprefix/sourceinsight2" si.sh'
 alias si3='PREFIX="$HOME/.wineprefix/sourceinsight3" si.sh'
+
+#########################
+# Graphic editor
+export GEDITOR="$(command -v geany || command -v gvim || command -v gedit || command -v false)"

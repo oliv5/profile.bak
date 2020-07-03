@@ -58,6 +58,15 @@ iptables_flush() {
 alias dhcp_renew='sudo dhclient -r; sudo dhclient -1'
 
 ############################
+# IPv6
+ipv6_supported() {
+  test -f /proc/net/if_inet6 && echo "IPv6 supported" || echo "IPv6 not supported"
+}
+ipv6_enabled() {
+  sysctl -a 2>/dev/null | grep disable_ipv6
+}
+
+############################
 # Wget mirror website
 alias wget_mirror='wget --mirror --convert-links --adjust-extension --page-requisites --no-parent'
 alias wget_flat='wget_mirror -nd'
