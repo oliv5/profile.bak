@@ -1261,20 +1261,17 @@ annex_forget_remote() {
 # Delete all versions of a file
 # https://git-annex.branchable.com/tips/deleting_unwanted_files/
 annex_purge() {
+  local REPLY
   annex_exists || return 1
-  local IFS="$(printf ' \t\n')"
-  for F; do
-    echo "Delete file '$F' ? (y/n)"
-    read REPLY </dev/tty
-    [ "$REPLY" = "y" -o "$REPLY" = "Y" ] || continue
-    git annex whereis "$F"
-    git annex drop --force "$F"
-    for R in $(annex_enabled); do
-      git annex drop --force "$F" --from "$R"
-    done
-    rm "$F" 2>/dev/null
+  [ $# -gt 0 ] || return 2
+  printf "You are about to delete %d file(s) or folder(s) definitively !\n\n%s\n\nProceed ? (y/n) " $# "$*"
+  read REPLY </dev/tty
+  [ "$REPLY" = "y" -o "$REPLY" = "Y" ] || return
+  for R in $(annex_enabled); do
+    git annex drop --force --from "$R" "$@" || return $?
   done
-  git annex sync
+  git annex drop --force "$@" || return $?
+  git rm -r "$@"
 }
 
 ########################################
