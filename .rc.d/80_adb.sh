@@ -129,6 +129,18 @@ adb_stop_pkg() {
     adb shell "pm list packages -f" | awk -F= "/${PACKAGE}/ {print \$2}" | xargs -I {} -r -n1 adb shell am force-stop -n "{}"
 }
 
+# Uninstall package
+adb_uninstall_pkg() {
+    for P; do
+        adb shell "pm uninstall -k $P"
+    done
+}
+adb_uninstall_pkg_root() {
+    for P; do
+        adb shell "pm uninstall -k --user 0 $P"
+    done
+}
+
 # Android backup (files only, Android4.0+)
 alias adb_backup_userapp='adb_backup "" -all -apk -oob -no-system'
 alias adb_backup_systemapp='adb_backup "" -all -apk -oob -system'
