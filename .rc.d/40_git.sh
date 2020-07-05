@@ -421,6 +421,7 @@ git_pull() { git pull "$@"; }
 fi
 
 # Batch pull from all remotes
+# Fast-forward only, stop on error
 git_pull_all() {
   git_exists || return 1
   local IFS="$(printf ' \t\n')"
@@ -429,7 +430,7 @@ git_pull_all() {
   for REMOTE in $REMOTES; do
     if git_remote_valid "$REMOTE"; then
       echo -n "Pull from $REMOTE: "
-      git pull "$REMOTE" $BRANCH
+      git pull --ff-only "$REMOTE" $BRANCH || return 2
     fi
   done
 }
@@ -1557,7 +1558,8 @@ alias gpu='git push'
 alias gpua='git_push_all'
 alias gup='git_pull'
 alias gupa='git_pull_all'
-alias gfa='git fetch --all --tags'
+alias gfa='git fetch --all'
+alias gfat='git fetch --all --tags'
 # Config aliases
 alias gcg='git config --get'
 alias gcs='git config --set'
