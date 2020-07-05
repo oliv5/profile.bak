@@ -187,6 +187,21 @@ adb_backup_nandroid() {
 # pc: gzip -c mmcblk0.raw | nc -l -p 5555
 # phone: /sbin/busybox nc 127.0.0.1 5555 | gunzip -c | dd bs=4096 of=/dev/block/mmcblk0
 
+# Clipboard rigths management
+adb_clipboard_status() {
+    adb shall cmd appops query-op --user 0 READ_CLIPBOARD allow
+}
+adb_clipboard_disable() {
+    for PKG; do
+        adb shall cmd appops set "$PKG" READ_CLIPBOARD ignore
+    done
+}
+adb_clipboard_enable() {
+    for PKG; do
+        adb shall cmd appops set "$PKG" READ_CLIPBOARD allow
+    done
+}
+
 ########################################
 ########################################
 # Last commands in file
