@@ -49,7 +49,13 @@ _scandir() {
   elif svn_exists "$SRC"; then
     svn ls "$SRC" | tr '\n' '\0'
   else
-    find -L "$SRC" $EXCLUDING -regextype posix-egrep -regex "$MATCHING" -type f -print0 | xargs -r0 readlink -ze
+    # Check readlink -z is supported
+    if readlink -z / >/dev/null 2>&1; then
+      find -L "$SRC" $EXCLUDING -regextype posix-egrep -regex "$MATCHING" -type f -print0 | xargs -r0 readlink -ze
+    else
+      # readlink does not support -z nor multiple input files
+      find -L "$SRC" $EXCLUDING -regextype posix-egrep -regex "$MATCHING" -type f -print0 | xargs -r0 -n1 readlink -e | xargs -r printf "%s\0"
+    fi
   fi
 }
 
