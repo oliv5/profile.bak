@@ -36,15 +36,13 @@ _GTAGS_OPTS=''
 _GTAGS_REGEX='.*\.(h|c|cc|cpp|hpp|inc|py|S)$'
 _GTAGS_EXCLUDE='-not -path "*.svn*" -and -not -path "*.git" -and -not -path "/tmp/*"'
 
-# Scan for files either from a filelist, a repository or fallback to a bare recursive file scan
+# Scan for files either from a git/svn repository or fallback to a bare recursive file scan
 _scandir() {
   local SRC="$(eval echo ${1:-$PWD})" # Remove ~/
   local MATCHING="${2:-.*}"
   local EXCLUDING="${3:--not -path '*.svn*' -and -not -path '*.git' -and -not -path '/tmp/*'}"
   shift $(($#<=3?$#:3))
-  if [ -f "$SRC" ]; then
-    cat "$SRC"
-  elif git_exists "$SRC/.git"; then
+  if git_exists "$SRC/.git"; then
     git --git-dir="$SRC/.git" ls-files -z
   elif svn_exists "$SRC"; then
     svn ls "$SRC" | tr '\n' '\0'
@@ -200,10 +198,8 @@ mkalltags() {
       TAGNAME="$(basename $TAGPATH)"
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".ctags.path" ]; then
         rmctags
-        for SRC in $(cat "$TAGNAME"); do
-          echo "[ctags] add: $SRC"
-          mkctags "$SRC" . --append
-        done
+        cat "$TAGNAME" | xargs -r echo "[ctags] add: "
+        mkinc mkctags . $(cat "$TAGNAME" | xargs -r)
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".cscope.path" ]; then
         rmcscope
@@ -222,10 +218,8 @@ mkalltags() {
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".gtags.path" ]; then
         rmgtags
-        for SRC in $(cat "$TAGNAME"); do
-          echo "[gtags] add: $SRC"
-          mkgtags "$SRC" . -i
-        done
+        cat "$TAGNAME" | xargs -r echo "[gtags] add: "
+        mkinc mkgtags . $(cat "$TAGNAME" | xargs -r)
       fi
       echo "** Done."
     done
