@@ -42,7 +42,9 @@ _scandir() {
   local MATCHING="${2:-.*}"
   local EXCLUDING="${3:--not -path '*.svn*' -and -not -path '*.git' -and -not -path '/tmp/*'}"
   shift $(($#<=3?$#:3))
-  if git_exists "$SRC/.git"; then
+  if [ -f "$SRC" ] && [ "$(head -n 1 "$SRC" | cut -c -23)" = "## rc tags file list ##" ]; then
+    tail -n +2 "$SRC"
+  elif git_exists "$SRC/.git"; then
     git --git-dir="$SRC/.git" ls-files -z
   elif svn_exists "$SRC"; then
     svn ls "$SRC" | tr '\n' '\0'
@@ -125,7 +127,7 @@ mkinc() {
   local REGEX="$3"
   local EXCLUDE="$4"
   shift $(($#<=4?$#:4))
-  echo -n > .tagfilelist
+  echo "## rc tags file list ##" > .tagfilelist
   for SRC in "${@:-.}"; do
     _scandir "$SRC" "$REGEX" "$EXCLUDE" >> .tagfilelist
   done
@@ -199,27 +201,27 @@ mkalltags() {
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".ctags.path" ]; then
         rmctags
         cat "$TAGNAME" | xargs -r echo "[ctags] add: "
-        mkinc mkctags . $(cat "$TAGNAME" | xargs -r)
+        mkinc mkctags . "$_CTAGS_REGEX" "$_CTAGS_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".cscope.path" ]; then
         rmcscope
         cat "$TAGNAME" | xargs -r echo "[cscope] add: "
-        mkinc mkcscope . $(cat "$TAGNAME" | xargs -r)
+        mkinc mkcscope . "$_CSCOPE_REGEX" "$_CSCOPE_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".id.path" ]; then
         rmids
         cat "$TAGNAME" | xargs -r echo "[mkid] add: "
-        mkinc mkids . $(cat "$TAGNAME" | xargs -r)
+        mkinc mkids . "$_MKID_REGEX" "$_MKID_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".pycscope.path" ]; then
         rmpycscope
         cat "$TAGNAME" | xargs -r echo "[pycscope] add: "
-        mkinc mkpycscope . $(cat "$TAGNAME" | xargs -r)
+        mkinc mkpycscope . "$_PYCSCOPE_REGEX" "$_PYCSCOPE_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".gtags.path" ]; then
         rmgtags
         cat "$TAGNAME" | xargs -r echo "[gtags] add: "
-        mkinc mkgtags . $(cat "$TAGNAME" | xargs -r)
+        mkinc mkgtags . "$_GTAGS_REGEX" "$_GTAGS_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
       echo "** Done."
     done
