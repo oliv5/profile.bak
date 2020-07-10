@@ -37,24 +37,33 @@ _GTAGS_REGEX='.*\.(h|c|cc|cpp|hpp|inc|py|S)$'
 _GTAGS_EXCLUDE='-not -path "*.svn*" -and -not -path "*.git" -and -not -path "/tmp/*"'
 
 # Scan for files either from a git/svn repository or fallback to a bare recursive file scan
-_scandir() {
-  local SRC="$(eval echo ${1:-$PWD})" # Remove ~/
+# File paths are zero terminated (NUL)
+_tags_scandir() {
+  local SRC="$(readlink -e "${1:-$PWD}")" # also removes ~/
   local MATCHING="${2:-.*}"
-  local EXCLUDING="${3:--not -path '*.svn*' -and -not -path '*.git' -and -not -path '/tmp/*'}"
-  shift $(($#<=3?$#:3))
-  if [ -f "$SRC" ] && [ "$(head -n 1 "$SRC" | cut -c -23)" = "## rc tags file list ##" ]; then
-    tail -n +2 "$SRC"
-  elif git_exists "$SRC/.git"; then
-    git --git-dir="$SRC/.git" ls-files -z
-  elif svn_exists "$SRC"; then
-    svn ls "$SRC" | tr '\n' '\0'
-  else
-    # Check readlink -z is supported
-    if readlink -z / >/dev/null 2>&1; then
-      find -L "$SRC" $EXCLUDING -regextype posix-egrep -regex "$MATCHING" -type f -print0 | xargs -r0 readlink -ze
+  if [ ! -e "$SRC" ]; then
+    return
+  elif [ -f "$SRC" ]; then
+    # Special list of file ?
+    if [ "$(head -n 1 "$SRC" | cut -c -23)" = "## rc tags file list ##" ]; then
+      tail -n +2 "$SRC"
     else
-      # readlink does not support -z nor multiple input files
-      find -L "$SRC" $EXCLUDING -regextype posix-egrep -regex "$MATCHING" -type f -print0 | xargs -r0 -n1 readlink -e | xargs -r printf "%s\0"
+      printf "$SRC\0"
+    fi
+  else
+    ( command cd "$SRC" 2>/dev/null && git ls-files -z 2>/dev/null ) | grep -zZE "$MATCHING" | xargs -r0 sh -c "for P; do printf \"$SRC/%s\0\" \"\$P\"; done" _
+    if [ $? -ne 0 ]; then
+      svn ls "$SRC" 2>/dev/null | grep -E "$MATCHING" | xargs -r sh -c "for P; do printf \"$SRC/%s\0\" \"\$P\"; done" _
+      if [ $? -ne 0 ]; then
+        local EXCLUDING="${3:--not -path '*.svn*' -and -not -path '*.git' -and -not -path '/tmp/*'}"
+        # Check readlink -z is supported
+        if readlink -z / >/dev/null 2>&1; then
+          find -L "$SRC" $EXCLUDING -regextype posix-egrep -regex "$MATCHING" -type f -print0 2>/dev/null | xargs -r0 readlink -ze
+        else
+          # readlink does not support -z nor multiple input files
+          find -L "$SRC" $EXCLUDING -regextype posix-egrep -regex "$MATCHING" -type f -print0 2>/dev/null | xargs -r0 -n1 readlink -e | tr '\n' '\0'
+        fi
+      fi
     fi
   fi
 }
@@ -67,7 +76,7 @@ mkctags() {
   local DB="${DST}/${_CTAGS_OUT}"
   shift $(($#<=2?$#:2))
   # Build tag file
-  _scandir "$SRC" "$_CTAGS_REGEX" "$_CTAGS_EXCLUDE" |
+  _tags_scandir "$SRC" "$_CTAGS_REGEX" "$_CTAGS_EXCLUDE" |
     xargs -r0 ctags $_CTAGS_OPTS $* -f "${DB}"
   ln -fs "${DB}" "${DST}/tags"
 }
@@ -80,7 +89,7 @@ mkcscope() {
   local DB="$DST/${_CSCOPE_OUT}"
   shift $(($#<=2?$#:2))
   # Build tag file
-  _scandir "$SRC" "$_CSCOPE_REGEX" "$_CSCOPE_EXCLUDE" |
+  _tags_scandir "$SRC" "$_CSCOPE_REGEX" "$_CSCOPE_EXCLUDE" |
     xargs -r0 cscope $_CSCOPE_OPTS $* -f "$DB" &&
       rm "${DB}.in" "${DB}.po" 2>/dev/null
 }
@@ -93,7 +102,7 @@ mkids() {
   local DB="$DST/${_MKID_OUT}"
   shift $(($#<=2?$#:2))
   # Build tag file
-  _scandir "$SRC" "$_MKID_REGEX" "$_MKID_EXCLUDE" |
+  _tags_scandir "$SRC" "$_MKID_REGEX" "$_MKID_EXCLUDE" |
     xargs -r0 mkid $_MKID_OPTS $* -o "$DB"
 }
 
@@ -105,7 +114,7 @@ mkpycscope() {
   local DB="$DST/${_PYCSCOPE_OUT}"
   shift $(($#<=2?$#:2))
   # Build tag file
-  _scandir "$SRC" "$_PYCSCOPE_REGEX" "$_PYCSCOPE_EXCLUDE" |
+  _tags_scandir "$SRC" "$_PYCSCOPE_REGEX" "$_PYCSCOPE_EXCLUDE" |
     xargs -r0 pycscope $_PYCSCOPE_OPTS $* -f "$DB"
 }
 
@@ -116,7 +125,7 @@ mkgtags() {
   local DST="$(eval echo ${2:-$PWD})" # Remove ~/
   shift $(($#<=2?$#:2))
   # Build tag files
-  _scandir "$SRC" "$_GTAGS_REGEX" "$_GTAGS_EXCLUDE" |
+  _tags_scandir "$SRC" "$_GTAGS_REGEX" "$_GTAGS_EXCLUDE" |
     xargs -r0 -n1 | gtags $_GTAGS_OPTS $* -f - "$DST"
 }
 
@@ -127,12 +136,14 @@ mkinc() {
   local REGEX="$3"
   local EXCLUDE="$4"
   shift $(($#<=4?$#:4))
-  echo "## rc tags file list ##" > .tagfilelist
+  echo -n "" > .tags_tmp
   for SRC in "${@:-.}"; do
-    _scandir "$SRC" "$REGEX" "$EXCLUDE" >> .tagfilelist
+    _tags_scandir "$SRC" "$REGEX" "$EXCLUDE" >> .tags_tmp
   done
-  $FCT .tagfilelist "$DST"
-  rm .tagfilelist
+  echo "## rc tags file list ##" > .tags_files
+  sort -z -u .tags_tmp >> .tags_files
+  $FCT .tags_files "$DST"
+  rm .tags_tmp .tags_files
 }
 
 # Make all tags
@@ -227,4 +238,3 @@ mkalltags() {
     done
   ' _
 }
-
