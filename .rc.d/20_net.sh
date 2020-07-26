@@ -547,7 +547,9 @@ youtube() {
   youtube-dl --geo-bypass --hls-prefer-native -o "%(autonumber)s-%(title)s.%(ext)s" "$@"
 }
 youtube_best_mp4() {
-  youtube-dl --geo-bypass -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio' --merge-output-format mp4 -o "%(autonumber)s-%(title)s.%(ext)s" "$@"
+  # see https://askubuntu.com/questions/486297/how-to-select-video-quality-from-youtube-dl/1097056#1097056
+  #youtube-dl --geo-bypass -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio' --merge-output-format mp4 -o "%(autonumber)s-%(title)s.%(ext)s" "$@"
+  youtube-dl --geo-bypass -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best' --merge-output-format mp4 -o "%(autonumber)s-%(title)s.%(ext)s" "$@"
 }
 youtube_best_not_webm() {
   youtube-dl --geo-bypass -f 'bestvideo[ext!=webm]‌​+bestaudio[ext!=webm]‌​/best[ext!=webm]' -o "%(autonumber)s-%(title)s.%(ext)s" "$@"
