@@ -303,6 +303,38 @@ annex_special_remotes_not_dead() {
   annex_notdead $(annex_special_remotes "$@")
 }
 
+####
+# List pure annexes
+annex_pure() {
+  annex_enabled "$@" | sed "s/ \?$(annex_exports "$@" | sed 's/ /\\|/g') \?//g"
+}
+annex_ispure() {
+  local LIST="$(annex_pure "$@")"
+  for REPO; do
+    echo "$LIST" | grep "$REPO" >/dev/null || return 1
+  done
+  return 0
+}
+annex_enabled_pure() {
+  annex_enabled "$@" | grep -o "$(annex_pure "$@" | sed 's/ /\\|/g')"
+}
+
+####
+# List exported annexes
+annex_exports() {
+  git show git-annex:remote.log | awk '/exporttree=yes/{sub("^.*name=","");sub(" (.*$)","");print $0}' | sort -u | xargs
+}
+annex_isexported() {
+  local LIST="$(annex_exports "$@")"
+  for REPO; do
+    echo "$LIST" | grep "$REPO" >/dev/null || return 1
+  done
+  return 0
+}
+annex_enabled_exports() {
+  annex_enabled "$@" | grep -o "$(annex_exports "$@" | sed 's/ /\\|/g')"
+}
+
 ########################################
 annex_hook_commit() {
   local HOOK="$(git_dir)/hooks/pre-commit"
@@ -1266,9 +1298,12 @@ annex_purge() {
   [ $# -gt 0 ] || return 2
   printf "You are about to delete %d file(s) or folder(s) definitively !\n\n%s\n\nProceed ? (y/n) " $# "$*"
   read REPLY </dev/tty
-  [ "$REPLY" = "y" -o "$REPLY" = "Y" ] || return
-  for R in $(annex_enabled); do
+  [ "$REPLY" = "y" -o "$REPLY" = "Y" ] || return 1
+  for R in $(annex_enabled_pure); do
     git annex drop --force --from "$R" "$@" || return $?
+  done
+  for R in $(annex_enabled_exports); do
+    git annex export "$(git_branch)" --to "$R"
   done
   git annex drop --force "$@" || return $?
   git rm -r "$@"
