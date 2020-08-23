@@ -12,7 +12,7 @@
 !/.config/Code/User/keybindings.json
 !/.config/Code/User/settings.json
 !/.config/geany
-!/.config/geany/geany.conf
+/.config/geany/geany.conf
 !/.config/geany/keybindings.conf
 !/.config/profile
 !/.config/profile/backup
