@@ -866,6 +866,7 @@ annex_upkeep() {
   local NO_PULL="--no-pull"
   local NO_PUSH="--no-push"
   local CONTENT=""
+  local DROP=""
   # Copy options
   local GET=""
   local SEND=""
@@ -877,7 +878,7 @@ annex_upkeep() {
   local CHARGE_STATUS="";
   # Get arguments
   OPTIND=1
-  while getopts "adoscpum:gefti:v:w:zh" OPTFLAG; do
+  while getopts "adoscpum:gexfti:v:w:zh" OPTFLAG; do
     case "$OPTFLAG" in
       # Add
       a) ADD=1;;
@@ -893,16 +894,16 @@ annex_upkeep() {
       # UL/DL
       g) GET=1;;
       e) SEND=1;;
-      r) REMOTES="${OPTARG}";;
+      x) DROP=1;;
       f) FAST="--fast";;
       # Misc
       i) NETWORK_DEVICE="${OPTARG}";;
       v) CHARGE_LEVEL="${OPTARG}";;
       w) CHARGE_STATUS="${OPTARG}";;
       z) set -vx; DBG="true";;
-      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-o] [-s] [-t] [-c] [-p] [-u] [-m 'msg'] [-g] [-e] [-f] [-i itf] [-v 'var lvl'] [-w 'var status1 status2 ...'] [-z] [remote1 remote2 ...] "
-         echo >&2 "-a (a)dd new files"
-         echo >&2 "-d add (d)eleted files"
+      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-o] [-s] [-t] [-c] [-p] [-u] [-m 'msg'] [-g] [-e] [-x] [-f] [-i itf] [-v 'var lvl'] [-w 'var status1 status2 ...'] [-z] [remote1 remote2 ...] "
+         echo >&2 "-a (a)dd files"
+         echo >&2 "-d commit (d)eleted files"
          echo >&2 "-o f(o)rce add/delete files"
          echo >&2 "-s (s)ync, similar to -cpu"
          echo >&2 "-t sync conten(t)"
@@ -912,6 +913,7 @@ annex_upkeep() {
          echo >&2 "-m (m)essage"
          echo >&2 "-g (g)et"
          echo >&2 "-e s(e)nd to remotes"
+         echo >&2 "-x drop files"
          echo >&2 "-f (f)ast get/send"
          echo >&2 "-i check network (i)nterface connection"
          echo >&2 "-v check device charging le(v)el"
@@ -959,6 +961,7 @@ annex_upkeep() {
     unset CONTENT
     unset GET
     unset SEND
+    unset DROP
   fi
   # Force PULL if a remote is using gcrypt
   if [ -n "$NO_PULL" ] && git_gcrypt_remotes $REMOTES; then
@@ -982,11 +985,15 @@ annex_upkeep() {
   if [ -n "$GET" ]; then
       $DBG git annex get ${FAST} || return $?
   fi
-  # Upload
+  # Send
   if [ -n "$SEND" ]; then
     for REMOTE in ${REMOTES}; do
-      $DBG git annex copy --to "$REMOTE" ${FAST} || return $?
+      $DBG git annex copy --to "$REMOTE" ${FAST} . || return $?
     done
+  fi
+  # Drop
+  if [ -n "$DROP" ]; then
+    $DBG git annex drop . || return $?
   fi
   return 0
 }
