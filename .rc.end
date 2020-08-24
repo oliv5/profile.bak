@@ -49,6 +49,10 @@ cmd_unset which find grep awk sed xargs cut
 hash -r
 
 ################################
+# Disable TTY Software Flow Control (XON/XOFF flow control)
+# https://unix.stackexchange.com/questions/72086/ctrl-s-hangs-the-terminal-emulator
+stty -ixon
+
 # Default prompt
 if [ ${#PS1} -lt 5 ]; then
   export PS1='${USER}${HOSTNAME:+@$HOSTNAME}: $PWD\$ '
