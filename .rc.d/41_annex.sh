@@ -1303,17 +1303,19 @@ annex_purge() {
   local REPLY
   annex_exists || return 1
   [ $# -gt 0 ] || return 2
+  ! git_modified || { echo "Error: the repo is not clean."; return 3; }
   printf "You are about to delete %d file(s) or folder(s) definitively !\n\n%s\n\nProceed ? (y/n) " $# "$*"
   read REPLY </dev/tty
   [ "$REPLY" = "y" -o "$REPLY" = "Y" ] || return 1
   for R in $(annex_enabled_pure); do
     git annex drop --force --from "$R" "$@" || return $?
   done
-  for R in $(annex_enabled_exports); do
-    git annex export "$(git_branch)" --to "$R"
-  done
   git annex drop --force "$@" || return $?
   git rm -r "$@"
+  git annex sync
+  for R in $(annex_enabled_exports); do
+    git annex export --fast "$(git_branch)" --to "$R"
+  done
 }
 
 ########################################
