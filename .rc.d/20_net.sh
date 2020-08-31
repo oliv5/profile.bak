@@ -58,6 +58,27 @@ iptables_flush() {
 alias dhcp_renew='sudo dhclient -r; sudo dhclient -1'
 
 ############################
+ip_addr_get() {
+  local FILTER="${1:-inet}"
+  if [ $# -gt 1 ]; then
+    shift
+    for DEV; do
+      ip address show dev "$DEV"
+    done
+  else
+    ip address
+  fi | awk "/$FILTER/ {print \$2}"
+}
+
+ipv4_addr_get() {
+  ip_addr_get "inet " "$@"
+}
+
+ipv6_addr_get() {
+  ip_addr_get "inet6" "$@"
+}
+
+############################
 # IPv6
 ipv6_supported() {
   test -f /proc/net/if_inet6 && echo "IPv6 supported" || echo "IPv6 not supported"
