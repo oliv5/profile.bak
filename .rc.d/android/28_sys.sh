@@ -18,6 +18,14 @@ selinux_wrapper() {
     su root -c "setenforce 0; ${@:?Nothing to do...}"
 }
 
+# Key events
+keyevent() {
+  if [ "$USER" = "shell" ]; then
+    for K; do input keyevent "$K"; done
+  else
+    su root -c "for K in $@; do input keyevent \"\$K\"; done"; fi
+}
+
 # Adb
 adb_start() { su root -c 'setprop persist.service.adb.enable 1; start adbd'; }
 adb_stop() { su root -c 'setprop persist.service.adb.enable 0; stop adbd'; }
@@ -32,18 +40,18 @@ adb_toggle() {
 }
 
 # Lock/unlock screen
-unlock() { input keyevent 82; }
-lock() { input keyevent 6; input keyevent 26; }
+unlock() { keyevent 82; }
+lock() { keyevent 6 26; }
 
 # Open default browser
-browser() { input keyevent 23; }
+browser() { keyevent 23; }
 
 # Volume
-volp() { input keyevent 24; }
-voln() { input keyevent 25; }
+volp() { keyevent 24; }
+voln() { keyevent 25; }
 
 # Go to home screen
-home() { input keyevent 3; }
+home() { keyevent 3; }
 
 # Screenshot
 screenshot() { screenshot "${1:-/sdcard/screenshot-$(date +%s).png}"; }
