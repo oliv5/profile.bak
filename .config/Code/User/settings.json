@@ -3,5 +3,15 @@
     "editor.minimap.enabled": false,
     "editor.renderControlCharacters": true,
     "Lua.completion.callSnippet": "Both",
-    "workbench.colorTheme": "Visual Studio Light Theme"
+    "editor.suggestSelection": "first",
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+    "workbench.sideBar.location": "right",
+    "editor.multiCursorModifier": "alt",
+    "workbench.enableExperiments": false,
+    "workbench.settings.enableNaturalLanguageSearch": false,
+    "telemetry.enableCrashReporter": false,
+    "telemetry.enableTelemetry": false,
+    "settingsSync.keybindingsPerPlatform": false,
+    "extensions.autoUpdate": false,
+    "update.mode": "manual"
 }
