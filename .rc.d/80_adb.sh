@@ -1,144 +1,16 @@
 #!/bin/sh
 # https://thangamaniarun.wordpress.com/2013/04/19/useful-android-adb-commands-over-usbwi-fi/
 
+# Execute command through adb wrapper in /sdcard/.adbrc
+adb_exec() {
+    adb shell /sdcard/.adbrc "$@"
+}
+
 # Connect adb over wi-fi
 adb_wifi() {
     adb shell "setprop service.adb.tcp.port ${2:-5555} && stop adbd && start adbd"
     adb connect "${1:?No IP address specified...}:${2:-5555}"
     adb devices
-}
-
-# Unlock your Android screen
-adb_unlock() {
-    adb shell input keyevent 82
-}
-
-# Lock your Android screen
-adb_lock() {
-    adb shell input keyevent 6
-    adb shell input keyevent 26
-}
-
-# Open default browser
-adb_browser() {
-    adb shell input keyevent 23
-}
-
-# Keep your android phone volume up(+)
-adb_volp() {
-    adb shell input keyevent 24
-}
-
-# Keep your android phone volume down(-)
-adb_voln() {
-    adb shell input keyevent 25
-}
-
-# Go to your Android Home screen
-adb_home() {
-    adb shell input keyevent 3
-}
-
-# Take Screenshot from adb
-adb_screenshot() {
-    adb shell screenshot /sdcard/test.png
-}
-
-# Another Screen capture command
-#screencap [-hp] [-d display-id] [FILENAME]
-# -h: this message
-# -p: save the file as a png.
-# -d: specify the display id to capture, default 0
-
-# Start clock app
-adb_clock_start() {
-    adb shell am start com.google.android.deskclock
-}
-
-# Stop clock app
-adb_clock_stop() {
-    adb shell am force-stop com.google.android.deskclock
-}
-
-# Send termux cmd
-adb_termux_cmd() {
-    adb shell am start -n com.termux/.app.TermuxActivity &&
-    adb shell input text "$@" &&
-    adb shell input keyevent 113 &&
-    adb shell input keyevent 66
-}
-
-# Start wifi settings manager
-adb_wifi_mgr() {
-    adb shell am start -a android.intent.action.MAIN -n com.android.settings/.wifi.WifiSettings
-}
-
-# Testing wifi status – Thanks Saimadhu
-adb_wifi_status() {
-    adb shell am start -n com.android.settings/.wifi.WifiStatusTest
-}
-
-# Wifi on (root only)
-adb_wifi_on() {
-    adb shell svc wifi enable
-}
-
-# Wifi off (root only)
-adb_wifi_off() {
-    adb shell svc wifi disable
-}
-
-# Mobile Data on (root only)
-adb_data_on() {
-    adb shell svc data enable
-}
-
-# Mobile Data off (root only)
-adb_data_off() {
-    adb shell svc data disable
-}
-
-# Mobile Data eco off (root only)
-adb_data_eco_off() {
-    adb shell cmd netpolicy set restrict-background false
-}
-
-# Mobile Data echo on (root only)
-adb_data_eco_off() {
-    adb shell cmd netpolicy set restrict-background true
-}
-
-# Get logcat (root only)
-adb_logcat() {
-    adb shell logcat
-}
-
-# List packages
-adb_ls_packages() {
-    adb shell "pm list packages -f" | cut -f 2 -d "=" | sort
-}
-
-# Start/stop an app from its package partial name
-adb_start_pkg() {
-    local PACKAGE="${1:?No package name specified...}"
-    local ACTIVITY="${2:-.MainActivity}"
-    adb shell "pm list packages -f" | awk -F= "/${PACKAGE}/ {print \$2}" | xargs -I {} -r -n1 adb shell am start -n "{}/$ACTIVITY"
-}
-adb_stop_pkg() {
-    local PACKAGE="${1:?No package name specified...}"
-    adb shell "pm list packages -f" | awk -F= "/${PACKAGE}/ {print \$2}" | xargs -I {} -r -n1 adb shell am force-stop -n "{}"
-}
-
-# Uninstall package
-adb_uninstall_pkg() {
-    for P; do
-        adb shell "pm uninstall -k $P"
-    done
-}
-adb_uninstall_pkg_root() {
-    for P; do
-        adb shell "pm uninstall -k --user 0 $P"
-    done
 }
 
 # Android backup (files only, Android4.0+)
@@ -186,21 +58,6 @@ adb_backup_nandroid() {
 # Beware of bootloader / recovery partitions
 # pc: gzip -c mmcblk0.raw | nc -l -p 5555
 # phone: /sbin/busybox nc 127.0.0.1 5555 | gunzip -c | dd bs=4096 of=/dev/block/mmcblk0
-
-# Clipboard rigths management
-adb_clipboard_status() {
-    adb shall cmd appops query-op --user 0 READ_CLIPBOARD allow
-}
-adb_clipboard_disable() {
-    for PKG; do
-        adb shall cmd appops set "$PKG" READ_CLIPBOARD ignore
-    done
-}
-adb_clipboard_enable() {
-    for PKG; do
-        adb shall cmd appops set "$PKG" READ_CLIPBOARD allow
-    done
-}
 
 ########################################
 ########################################
