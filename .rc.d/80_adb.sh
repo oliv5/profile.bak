@@ -1,9 +1,9 @@
 #!/bin/sh
 # https://thangamaniarun.wordpress.com/2013/04/19/useful-android-adb-commands-over-usbwi-fi/
 
-# Execute command through adb wrapper in /sdcard/.adbrc
+# Execute command through wrapper
 adb_exec() {
-    adb shell /sdcard/.adbrc "$@"
+    adb shell "/sdcard/private/home/bin/aapi.sh" "$@"
 }
 
 # Connect adb over wi-fi
