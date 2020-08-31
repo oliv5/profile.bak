@@ -58,6 +58,7 @@ iptables_flush() {
 alias dhcp_renew='sudo dhclient -r; sudo dhclient -1'
 
 ############################
+# Local IP addr get
 ip_addr_get() {
   local FILTER="${1:-inet}"
   if [ $# -gt 1 ]; then
@@ -76,6 +77,24 @@ ipv4_addr_get() {
 
 ipv6_addr_get() {
   ip_addr_get "inet6" "$@"
+}
+
+############################
+# Local IP addr monitor
+ip_monit() {
+  for DEV; do
+    sh -c "ip monitor address dev '$DEV'" &
+  done
+}
+ip_monit_new() {
+  for DEV; do
+    sh -c "ip monitor address dev '$DEV' | awk '! /Deleted/ && /inet/ {system(\". ip.monit.send.sh '$DEV' \" \$4 )}' " &
+  done
+}
+ip_monit_del() {
+  for DEV; do
+    sh -c "ip monitor address dev '$DEV' | awk '/Deleted/ && /inet/ {system(\". ip.monit.send.sh '$DEV' \" \$4 )}' " &
+  done
 }
 
 ############################
