@@ -36,6 +36,12 @@ _GTAGS_OPTS=''
 _GTAGS_REGEX='.*\.(h|c|cc|cpp|hpp|inc|py|S)$'
 _GTAGS_EXCLUDE='-not -path "*.svn*" -and -not -path "*.git" -and -not -path "/tmp/*"'
 
+# Starscope settings
+_STARSCOPE_OPTS='-e cscope'
+_STARSCOPE_REGEX='.*\.(js|go|rb)$'
+_STARSCOPE_EXCLUDE='-not -path "*.svn*" -and -not -path "*.git" -and -not -path "/tmp/*"'
+_STARSCOPE_OUT='.starscope.db'
+
 # Scan for files either from a git/svn repository or fallback to a bare recursive file scan
 # File paths are zero terminated (NUL)
 _tags_scandir() {
@@ -129,7 +135,19 @@ mkgtags() {
     xargs -r0 -n1 | gtags $_GTAGS_OPTS $* -f - "$DST"
 }
 
-# Make incremental tag db
+# Make starscope db
+mkstarscope() {
+  command -v >/dev/null starscope || return
+  local SRC="$(eval echo ${1:-$PWD})" # Remove ~/
+  local DST="$(eval echo ${2:-$PWD})" # Remove ~/
+  local DB="$DST/${_STARSCOPE_OUT}"
+  shift $(($#<=2?$#:2))
+  # Build tag file
+  _tags_scandir "$SRC" "$_STARSCOPE_REGEX" "$_STARSCOPE_EXCLUDE" |
+    xargs -r0 starscope $_STARSCOPE_OPTS $* -f "$DB"
+}
+
+# General purpose: make incremental tag db
 mkinc() {
   local FCT="${1:?No tag make function defined...}"
   local DST="$(eval echo ${2:-$PWD})" # Remove ~/
@@ -153,6 +171,7 @@ mktags() {
   mkcscope "$@"
   mkids "$@"
   mkpycscope "$@"
+  mkstarscope "$@"
 }
 
 # Clean ctags
@@ -190,6 +209,13 @@ rmgtags() {
   rm -v "${DIR}/GPATH" "${DIR}/GRTAGS" "${DIR}/GSYMS" "${DIR}/GTAGS" 2>/dev/null
 }
 
+# Clean starscope db
+rmstarscope() {
+  # Get directories, remove ~/
+  local DIR="$(eval echo ${1:-$PWD})"
+  rm -v "${DIR}/${_STARSCOPE_OUT}" 2>/dev/null
+}
+
 # Clean all tags
 rmtags() {
   rmctags "$@"
@@ -197,6 +223,7 @@ rmtags() {
   rmcscope "$@"
   rmids "$@"
   rmpycscope "$@"
+  rmstarscope "$@"
 }
 
 # Make all tags recursively based on local config files
@@ -233,6 +260,11 @@ mkalltags() {
         rmgtags
         cat "$TAGNAME" | xargs -r echo "[gtags] add: "
         mkinc mkgtags . "$_GTAGS_REGEX" "$_GTAGS_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
+      fi
+      if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".starscope.path" ]; then
+        rmstarscope
+        cat "$TAGNAME" | xargs -r echo "[starscope] add: "
+        mkinc mkstarscope . "$_STARSCOPE_REGEX" "$_STARSCOPE_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
       echo "** Done."
     done
