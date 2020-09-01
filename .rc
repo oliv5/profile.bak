@@ -145,9 +145,10 @@ rc_source() {
       if [ -n "$BASH_VERSION" ]; then
         rc_sourcemod "$RC_DIR/.rc.d/bash/*$PATTERN*.sh"
       fi
-      if [ -n "$ANDROID_ROOT" ]; then
-        rc_sourcemod "$RC_DIR/.rc.d/android/*$PATTERN*.sh"
-      fi
+      # Android rc scripts are loaded by rc.list
+      #if [ -n "$ANDROID_ROOT" ]; then
+      #  rc_sourcemod "$RC_DIR/.rc.d/android/*$PATTERN*.sh"
+      #fi
     fi   
   done
 
