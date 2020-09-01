@@ -10,16 +10,14 @@
 if command -v "locale" >/dev/null 2>&1; then
   ## Order of priority: LANGUAGE LC_ALL LC_xxx LANG
   # Set the default locale variable LANG
-  LOCALES="$(locale -a 2>/dev/null | sed -e 's/utf8/UTF-8/')"
-  if ! echo "$LOCALES" | grep -w "$LANG" >/dev/null; then
-    for LANG in \
-        "$(echo $LOCALES | xargs -rn1 | grep -ie "fr_fr.*utf-\?8" | head -n 1)" \
-        "$(echo $LOCALES | xargs -rn1 | grep -ie "utf-\?8" | head -n 1)" \
-        "$(echo $LOCALES | xargs -rn1 -l1)"; do
-      export LANG="$LANG"
-      break
-    done
-  fi
+  LOCALES="$(locale -a 2>/dev/null | sort -u | sed -e 's/utf8/UTF-8/')"
+  for LANG in \
+      "$(echo $LOCALES | xargs -rn1 | grep -ie "fr_fr.*utf-\?8" | head -n 1)" \
+      "$(echo $LOCALES | xargs -rn1 | grep -ie "utf-\?8" | head -n 1)" \
+      "$(echo $LOCALES | xargs -rn1 -l1)"; do
+    export LANG="$LANG"
+    break
+  done
   unset LOCALES
   # Remove all specific locale variables
   unset LANGUAGE LC_ALL LC_NAME LC_TIME LC_CTYPE
@@ -96,6 +94,7 @@ alias f='cdf'
 alias p='cd ..'
 
 # Repo helpers
+unalias getr cdr 2>/dev/null || true
 getr() { if svn_exists "$@"; then svn_root "$@"; elif git_exists "$@"; then git_worktree "$@"; fi };
 cdr() { cd "$(getr "$@")"; }
 alias r='cdr'
@@ -129,6 +128,7 @@ runas() {
 }
 
 # Search and process
+unalias ffv ffv1 ffp ffp1 ffe ffe1 ffo ffo1 ffc 2>/dev/null || true
 ffv()  { ff "${@:-""}" -print0       | xargs -0 gvim; }
 ffv1() { ff "${@:-""}" -print0 -quit | xargs -0 gvim; }
 ffp()  { ff "${@:-""}" -print0       | xargs -0 ${PAGER:-false}; }
@@ -191,6 +191,7 @@ alias pg='pgrep -fl'
 alias lsofg='lsof | grep -i'
 
 # Du
+unalias duh duh0 duh1 duh2 duhl duhl0 duhl1 duhl2 2>/dev/null || true
 duh() { du -h "$@"; }
 duh0() { du -h -d0 "$@"; }
 duh1() { du -h -d1 "$@" | sort -h; }
@@ -204,6 +205,7 @@ duhl2() { du -hL -d2 "$@" | sort -h; }
 alias dfh='df -h | grep -v /snap/'
 
 # Env | grep
+unalias pv 2>/dev/null || true
 pv() { for V; do echo "$V=$(eval echo \$$V)"; done; }
 alias envg='env | grep -i'
 alias dpkgl='dpkg -l'
