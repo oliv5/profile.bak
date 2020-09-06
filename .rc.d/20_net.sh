@@ -140,20 +140,6 @@ wget_pdf() {
 }
 
 ############################
-# Execute on remote host
-alias remote_exec='exec-remote'
-exec_remote() {
-  local HOST="${1:?No host specified}"
-  shift $(min 1 $#)
-  local CMD="${@:?No command specified}"
-  if [ "$HOST" != "$HOSTNAME" ]; then
-    ssh -X $HOST "$CMD"
-  else
-    eval "\\$CMD"
-  fi
-}
-
-############################
 # Send email using mutt or mail
 send_mail() {
   local DEST="${1:?No dest email address specified}"
@@ -248,6 +234,15 @@ opened_port_in() {
   fi
 }
 
+############################
+# Ssh running sudo and pipe
+# Use full for piping ssh sudo output
+# Ex: (ask_passwd; echo) | ssh -tt user@server "sudo -k -S 2>/dev/null dd if=/dev/mmcblk0" | dd of=image.dat status=progress
+ssh_sudo_askpass() {
+  local SSH_OPTS="${1:?No ssh server/opts specified...}"
+  shift
+  ask_passwd | ssh -tt "$SSH_OPTS" 'cat - | sudo -S "$@"'
+}
 
 ##############################
 # SSH command shortcuts

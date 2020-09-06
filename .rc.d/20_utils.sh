@@ -76,10 +76,12 @@ ask_file() {
 # Get password
 ask_passwd() {
   local PASSWD
-  trap "stty echo; trap INT" INT; stty -echo
-  read -p "${1:-Password: }" PASSWD; echo
-  stty echo; trap - INT
-  echo $PASSWD
+  trap "stty echo; trap - INT TERM QUIT EXIT" INT TERM QUIT EXIT
+  stty -echo
+  read -p "${1:-Password: }" PASSWD
+  stty echo
+  trap - INT TERM QUIT EXIT
+  echo -n $PASSWD
 }
 
 ################################

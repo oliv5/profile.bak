@@ -247,6 +247,7 @@ alias snsupg='sudo netstat -anup | grep'
 alias snh='sudo nethogs'
 
 # History
+export HISTIGNORE="sudo -S*" # ignore "sudo -S"
 alias hi='history'
 alias hg='history | grep'
 alias hgi='history | grep -i'
