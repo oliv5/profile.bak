@@ -1187,65 +1187,80 @@ annex_unusednc() {
   done
 }
 
+# Drop partially transfered files
+annex_dropunused_partial() {
+  git annex unused ${FROM:+--from $FROM} --fast | 
+    awk '/^\s+[0-9]+\s+/ {print $1}' | 
+    xargs git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force}
+}
+
 # Drop all unused files
 annex_dropunused_all() {
   local LAST="$(git annex unused ${FROM:+--from $FROM} | awk '/^\s+[0-9]+\s/ {a=$1} END{print a}')"
   git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force} "$@" 1-${LAST:?Nothing to drop...}
 }
 
-# Drop partially transfered files
-annex_dropunused_tmp() {
-  git annex unused ${FROM:+--from $FROM} --fast | 
-    awk '/^\s+[0-9]+\s+/ {print $1}' | 
-    xargs git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force}
+# Drop all unused files interactively
+annex_dropunused_all_interactive() {
+  ! annex_bare || return 1
+  local IFS="$(printf ' \t\n')"
+  local LAST="$(git annex unused ${FROM:+--from $FROM} | awk '/^\s+[0-9]+\s/ {a=$1} END{print a}')"
+  git annex unused ${FROM:+--from $FROM} | grep -E '^\s+[0-9]+\s' | 
+    while read -r NUM KEY; do
+      printf "Key: $KEY\nFile: "
+      annex_fromkey0 "$KEY"
+      echo
+      read -r -p "Delete file $NUM/$LAST? (y/f/n) " REPLY < /dev/tty
+      if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
+        sh -c "git annex dropunused ${FROM:+--from $FROM} ""$@"" $NUM" &
+        wait
+      elif [ "$REPLY" = "f" -o "$REPLY" = "F" ]; then
+        sh -c "git annex dropunused --force ${FROM:+--from $FROM} ""$@"" $NUM" &
+        wait
+      fi
+      echo "~"
+    done
 }
 
-# Drop unused files matching pattern
-annex_dropunused() {
+# Plumbering: process unused files matching pattern
+_annex_listunused() {
   ! annex_bare || return 1
-  local TMPFILE="$(mktemp)" || return 2
   local IFS="$(printf ' \t\n')"
   local PATTERNS=""
   for ARG; do PATTERNS="${PATTERNS:+$PATTERNS }-e '$ARG'"; done
   git annex unused ${FROM:+--from $FROM} | grep -E '^\s+[0-9]+\s' | 
     while IFS=' ' read -r NUM KEY; do
       annex_fromkey0 "$KEY" |
-        eval grep -zF "${PATTERNS:-''}" &&
-          echo && 
-          echo -en "$NUM " >> "$TMPFILE"
+        eval grep --color=never -z "${PATTERNS:-''}" &&
+          echo -e "$NUM $KEY" && break
     done
-  cat "$TMPFILE" | xargs git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force} &&
-    rm "$TMPFILE" ||
-    echo "Dropunused failed using tmp file $TMPFILE"
 }
 
-# Drop all unused files interactively
-annex_dropunused_interactive() {
+# Drop unused files matching pattern
+annex_dropunused() {
   ! annex_bare || return 1
-  local IFS="$(printf ' \t\n')"
-  local REPLY; read -r -p "Delete unused files? (a/y/n/s) " REPLY
-  if [ "$REPLY" = "a" -o "$REPLY" = "A" ]; then
-    ${FROM:+FROM="$FROM"} annex_dropunused_all
-  elif [ "$REPLY" = "s" -o "$REPLY" = "S" ]; then
-    ${FROM:+FROM="$FROM"} annex_listunused
-  elif [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
-    local LAST="$(git annex unused ${FROM:+--from $FROM} | awk '/^\s+[0-9]+\s/ {a=$1} END{print a}')"
-    git annex unused ${FROM:+--from $FROM} | grep -E '^\s+[0-9]+\s' | 
-      while read -r NUM KEY; do
-        printf "Key: $KEY\nFile: "
-        annex_fromkey0 "$KEY"
-        echo
-        read -r -p "Delete file $NUM/$LAST? (y/f/n) " REPLY < /dev/tty
-        if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then
-          sh -c "git annex dropunused ${FROM:+--from $FROM} ""$@"" $NUM" &
-          wait
-        elif [ "$REPLY" = "f" -o "$REPLY" = "F" ]; then
-          sh -c "git annex dropunused --force ${FROM:+--from $FROM} ""$@"" $NUM" &
-          wait
-        fi
-        echo "~"
-      done
-  fi
+  local TMPFILE="$(mktemp)" || return 2
+  _annex_listunused | awk -F' ' '{printf "%d " $1}' >> "$TMPFILE"
+  cat "$TMPFILE" | xargs -r git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force}
+  rm "$TMPFILE"
+}
+
+# Copy unused files matching pattern
+annex_copyunused() {
+  ! annex_bare || return 1
+  local TMPFILE="$(mktemp)" || return 2
+  _annex_listunused | awk -F' ' '{printf "%d " $1}' >> "$TMPFILE"
+  cat "$TMPFILE" | xargs -rn1 -I{} -- git annex copy --key={} ${FROM:+--from $FROM} ${TO:+--to $TO} ${FORCE:+--force}
+  rm "$TMPFILE"
+}
+
+# Move unused files matching pattern
+annex_moveunused() {
+  ! annex_bare || return 1
+  local TMPFILE="$(mktemp)" || return 2
+  _annex_listunused | awk -F' ' '{printf "%d " $1}' >> "$TMPFILE"
+  cat "$TMPFILE" | xargs -rn1 -I{} -- git annex move --key={} ${FROM:+--from $FROM} ${TO:+--to $TO} ${FORCE:+--force}
+  rm "$TMPFILE"
 }
 
 ########################################
