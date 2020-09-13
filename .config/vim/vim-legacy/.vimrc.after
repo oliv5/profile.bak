@@ -84,18 +84,6 @@ FnNoremap <A-X>   <C-x>
 
 " Look for the best root directory
 function! g:FindRootDir()
-	" Ctags/cscope files
-	let dblist = (exists('g:tags_db') ? g:tags_db : [])
-	let dblist += (exists('g:cscope_db') ? g:cscope_db : [])
-	for file in dblist
-		if v:version < 704
-			silent! let file=eval(file)
-		endif
-		let file = findfile(file, ".;")
-		if (filereadable(file))
-			return fnamemodify(file, ':p:h')
-		endif
-	endfor
 	" Last matching directory
 	for dir in ['.svn']
 		let _dir = finddir(dir, ".;", -1)
@@ -108,6 +96,18 @@ function! g:FindRootDir()
 		let _dir = finddir(dir, ".;", -1)
 		if (!empty(_dir))
 			return fnamemodify(_dir[0], ':p:h:h')
+		endif
+	endfor
+	" Ctags/cscope files
+	let dblist = (exists('g:tags_db') ? g:tags_db : [])
+	let dblist += (exists('g:cscope_db') ? g:cscope_db : [])
+	for file in dblist
+		if v:version < 704
+			silent! let file=eval(file)
+		endif
+		let file = findfile(file, ".;")
+		if (filereadable(file))
+			return fnamemodify(file, ':p:h')
 		endif
 	endfor
 	" No match
@@ -1122,6 +1122,7 @@ noremap <C-ENTER>           :Ttag<CR>
 noremap <C-BACKSPACE>       <C-t>
 nnoremap <silent>t          :execute (&previewwindow ? 'P' : 'T').'next'<CR>
 nnoremap <silent>T          :execute (&previewwindow ? 'P' : 'T').'prev'<CR>
+noremap <C-A-t>             :execute '!mkalltags' g:FindRootDir()<CR>
 
 
 " *******************************************************

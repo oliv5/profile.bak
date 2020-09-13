@@ -57,10 +57,10 @@ _tags_scandir() {
       printf "$SRC\0"
     fi
   else
-    ( command cd "$SRC" 2>/dev/null && git ls-files -z 2>/dev/null ) | grep -zZE "$MATCHING" | xargs -r0 sh -c "for P; do printf \"$SRC/%s\0\" \"\$P\"; done" _
-    if [ $? -ne 0 ]; then
-      svn ls "$SRC" 2>/dev/null | grep -E "$MATCHING" | xargs -r sh -c "for P; do printf \"$SRC/%s\0\" \"\$P\"; done" _
-      if [ $? -ne 0 ]; then
+    ( command cd "$SRC" 2>/dev/null && git ls-files --exclude-standard -z 2>/dev/null ) | grep -zZE "$MATCHING" | xargs -r0 sh -c "for P; do printf \"$SRC/%s\0\" \"\$P\"; done; exit 1" _
+    if [ $? -ne 123 ]; then
+      svn ls "$SRC" 2>/dev/null | grep -E "$MATCHING" | xargs -r sh -c "for P; do printf \"$SRC/%s\0\" \"\$P\"; done; exit 1" _
+      if [ $? -ne 123 ]; then
         local EXCLUDING="${3:--not -path '*.svn*' -and -not -path '*.git' -and -not -path '/tmp/*'}"
         # Check readlink -z is supported
         if readlink -z / >/dev/null 2>&1; then
@@ -226,47 +226,49 @@ rmtags() {
   rmstarscope "$@"
 }
 
-# Make all tags recursively based on local config files
+# Make all tags recursively in folders where .path files are,
 mkalltags() {
   local SRC="$(readlink -m "${1:-$PWD}")"
-  export RC_DIR="${RC_DIR:-$HOME}"
-  find -L "$SRC" -maxdepth ${2:-5} -type f -name ".*.path" -print0 2>/dev/null | xargs -r0 -- sh -c '
+  local MAXDEPTH="${2:-5}"
+  find -L "$SRC" -maxdepth "$MAXDEPTH" -type f -name ".*.path" -print0 2>/dev/null | xargs -r0 -- sh -c '
+    RC_DIR="$1"; shift
     . "$RC_DIR/.rc.d"/*_tags.sh
     for TAGPATH; do
       echo "** Processing file $TAGPATH"
       command cd "$(dirname $TAGPATH)" || continue
       TAGNAME="$(basename $TAGPATH)"
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".ctags.path" ]; then
-        rmctags
-        cat "$TAGNAME" | xargs -r echo "[ctags] add: "
+        rmctags .
+        cat "$TAGNAME" | xargs -r echo "[ctags] add:"
         mkinc mkctags . "$_CTAGS_REGEX" "$_CTAGS_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".cscope.path" ]; then
-        rmcscope
-        cat "$TAGNAME" | xargs -r echo "[cscope] add: "
+        rmcscope .
+        cat "$TAGNAME" | xargs -r echo "[cscope] add:"
         mkinc mkcscope . "$_CSCOPE_REGEX" "$_CSCOPE_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".id.path" ]; then
-        rmids
-        cat "$TAGNAME" | xargs -r echo "[mkid] add: "
+        rmids .
+        cat "$TAGNAME" | xargs -r echo "[mkid] add:"
         mkinc mkids . "$_MKID_REGEX" "$_MKID_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".pycscope.path" ]; then
-        rmpycscope
-        cat "$TAGNAME" | xargs -r echo "[pycscope] add: "
+        rmpycscope .
+        cat "$TAGNAME" | xargs -r echo "[pycscope] add:"
         mkinc mkpycscope . "$_PYCSCOPE_REGEX" "$_PYCSCOPE_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".gtags.path" ]; then
-        rmgtags
-        cat "$TAGNAME" | xargs -r echo "[gtags] add: "
+        rmgtags .
+        cat "$TAGNAME" | xargs -r echo "[gtags] add:"
         mkinc mkgtags . "$_GTAGS_REGEX" "$_GTAGS_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
       if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".starscope.path" ]; then
-        rmstarscope
-        cat "$TAGNAME" | xargs -r echo "[starscope] add: "
+        rmstarscope .
+        cat "$TAGNAME" | xargs -r echo "[starscope] add:"
         mkinc mkstarscope . "$_STARSCOPE_REGEX" "$_STARSCOPE_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
       echo "** Done."
     done
-  ' _
+  ' _ "$RC_DIR"
 }
+
