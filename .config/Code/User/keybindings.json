@@ -77,18 +77,37 @@
 { "key": "ctrl+alt+u",            "command": "editor.foldAll", "when": "editorFocus" },
 { "key": "ctrl+alt+shift+u" ,     "command": "editor.unfoldAll", "when": "editorFocus" },
 
-// Intellisense
-{ "key": "ctrl+t",                "command": "workbench.action.showAllSymbols" },
-{ "key": "ctrl+shift+t",          "command": "workbench.action.gotoSymbol" },
-{ "key": "ctrl+alt+t",            "command": "editor.action.previewDeclaration", "when": "editorTextFocus" },
-{ "key": "ctrl+enter",            "command": "editor.action.goToDeclaration", "when": "editorTextFocus" },
-{ "key": "ctrl+shift+d",          "command": "editor.action.goToTypeDeclaration", "when": "editorTextFocus" },
-{ "key": "ctrl+alt+d",            "command": "editor.action.openDeclarationToTheSide", "when": "editorTextFocus" },
-{ "key": "ctrl+d ctrl+c",         "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
-{ "key": "ctrl+d ctrl+backspace", "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
-{ "key": "ctrl+d ctrl+e",         "command": "editor.action.revealDeclaration" },
-{ "key": "ctrl+d ctrl+d",         "command": "editor.action.revealDefinition", "when": "editorHasDefinitionProvider && editorTextFocus && !isInEmbeddedEditor" },
-{ "key": "ctrl+d ctrl+t",         "command": "editor.action.goToTypeDefinition" },
+// Intellisense command bar
+{ "key": "ctrl+t",              "command": "workbench.action.gotoSymbol" },
+{ "key": "ctrl+backspace", "command": "workbench.action.showAllSymbols" },
+// Intellisense peek/preview
+{ "key": "ctrl+d d",            "command": "editor.action.previewDeclaration", "when": "editorTextFocus" }, // same as editor.action.peekDefinition
+{ "key": "ctrl+d c",           "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" }, // same as editor.action.revealDefinition
+{ "key": "ctrl+d t",            "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" }, // same as editor.action.revealDefinition
+{ "key": "ctrl+d backspace",  "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" }, // same as editor.action.revealDefinition
+// Intellisense goto
+{ "key": "ctrl+enter",      "command": "editor.action.goToDeclaration", "when": "editorTextFocus" },
+
+// Cscope: https://github.com/SeungukShin/cscope-code
+//{ "key": "ctrl+d ctrl+d",         "command": "extension.cscope-code.definition", "when": "editorTextFocus" },
+//{ "key": "ctrl+d ctrl+c",         "command": "extension.cscope-code.caller", "when": "editorTextFocus" },
+//{ "key": "ctrl+d ctrl+e",         "command": "extension.cscope-code.callee", "when": "editorTextFocus" },
+//{ "key": "ctrl+d ctrl+backspace", "command": "extension.cscope-code.symbol", "when": "editorTextFocus" },
+//{ "key": "ctrl+d ctrl+t",         "command": "extension.cscope-code.symbol", "when": "editorTextFocus" },
+
+// Cscope: https://github.com/xulion/scope4code
+{ "key": "ctrl+d ctrl+d",         "command": "extension.findDefinition", "when": "editorTextFocus" },
+{ "key": "ctrl+d ctrl+c",         "command": "extension.findCaller", "when": "editorTextFocus" },
+{ "key": "ctrl+d ctrl+e",         "command": "extension.findCallee", "when": "editorTextFocus" },
+{ "key": "ctrl+d ctrl+backspace", "command": "extension.findSymbol", "when": "editorTextFocus" },
+{ "key": "ctrl+d ctrl+t",         "command": "extension.findSymbol", "when": "editorTextFocus" },
+{ "key": "ctrl+d ctrl+g",         "command": "extension.findText", "when": "editorTextFocus" },
+{ "key": "ctrl+d ctrl+i",         "command": "extension.findInclude", "when": "editorTextFocus" },
+
+// Tags
+// https://stackoverflow.com/questions/50725243/vscode-how-to-keybind-an-external-command/50749571#50749571
+// https://stackoverflow.com/questions/52786022/shortcut-for-running-terminal-command-in-vs-code
+{ "key": "ctrl+alt+t",         "command": "workbench.action.terminal.sendSequence", "args": { "text": "mkalltags . \u000D" }},
 
 // Comments
 { "key": "ctrl+q",                "command": "editor.action.commentLine", "when": "editorTextFocus" },
