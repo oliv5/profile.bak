@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Find file in a CVS, fallback to std file search otherwise
+alias dff='_dfind'
+_dfind()  { if git_exists "$(dirname "$1")"; then git ls-files "*$@"; elif svn_exists "$(dirname "$1")"; then svn ls -R "$(dirname "$1")" | grep -E "$@"; else _ffind "$@"; fi; }
+
 # Grep based code search
 _dgrep1()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; FARGS="${_DG1EXCLUDE} $@" _fgrep1 "$ARG2" "${ARG3:-.}/$ARG1"); }
 _dgrep2()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; _fgrep2 "$ARG2" ${_DG2EXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
@@ -11,13 +15,13 @@ _DGEXT_C="*.c;*.cpp;*.cc"
 _DGEXT_H="*.h;*.hpp"
 _DGEXT_V="*.vhd;*.v"
 _DGEXT_PY="*.py"
-_DGEXT_MK="*.mk;Makefile"
-_DGEXT_SCONS="SConstruct;SConscript"
+_DGEXT_SCONS="SConstruct;SConscript;sconstruct;sconscript"
+_DGEXT_MK="*.mk;Makefile;$_DGEXT_SCONS"
 _DGEXT_ASM="*.inc;*.S"
 _DGEXT_XML="*.xml"
 _DGEXT_TEX="*.tex"
 _DGEXT_SHELL="*.sh"
-_DGEXT_REF="*.c;*.cpp;*.cc;*.h;*.hpp;*.py;*.mk;Makefile;*.sh;*.vhd;*.v;*.inc;*.S;*.tex;*.lua;SConstruct;SConscript"
+_DGEXT_REF="*.c;*.cpp;*.cc;*.h;*.hpp;*.py;*.mk;Makefile;*.sh;*.vhd;*.v;*.inc;*.S;*.tex;*.lua;$_DGEXT_SCONS"
 alias      c='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_C"'
 alias      h='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_H"'
 alias      v='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_V"'
