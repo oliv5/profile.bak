@@ -156,3 +156,11 @@ check_hash() {
   done
   return 0
 }
+
+################################
+if ! command -v rename >/dev/null; then
+  rename() {
+    find "${4:-.}" -name "${1:?No file specified...}" -execdir \
+      sh -c 'REP="$1"; shift; for F; do mv -vi "$F" "$(echo $F | sed -e "$REP")"; done' _ "${2:?No sed replace pattern specified...}" {} \;
+  }
+fi
