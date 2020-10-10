@@ -1,5 +1,14 @@
 #!/bin/sh
 
+#####
+# Set default file access rights
+#
+# https://www.linuxquestions.org/questions/linux-desktop-74/applying-default-permissions-for-newly-created-files-within-a-specific-folder-605129/
+#
+# umask: umask 0022 /folder (0022 is removed from 666 or 777)
+# GID: chmod g+s /folder
+# ACL: setfacl -d -m g::rwx /folder
+
 ################################
 # File size
 alias fsize='stat -L -c %s'
