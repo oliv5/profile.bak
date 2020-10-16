@@ -26,6 +26,7 @@
             {
                 "find_cmd": "find ${src_path} -type f -name *.c -o -type f -name *.h -o -type f -name *.cpp -o -type f -name *.cc -o -type f -name *.mm",
                 "database_cmd": "cscope -b -q -k",
+                "database_path": "${src_path}/.cscope.out",
                 "find_all_ref": "cscope -q -k -L0 ${text}",
                 "find_define": "cscope -q -k -L1 ${text}",
                 "find_callee": "cscope -q -k -L2 ${text}",
@@ -35,6 +36,7 @@
             {
                 "find_cmd": "cmd /C dir /s/a/b ${src_path}\\*.c ${src_path}\\*.h ${src_path}\\*.cpp ${src_path}\\*.cc ${src_path}\\*.mm",
                 "database_cmd": "cscope -b -q -k",
+                "database_path": "${src_path}\\.cscope.out",
                 "find_all_ref": "cscope -q -k -L0 ${text}",
                 "find_define": "cscope -q -k -L1 ${text}",
                 "find_callee": "cscope -q -k -L2 ${text}",
@@ -43,4 +45,7 @@
             }
         ]
     },
+    "cscopeCode.auto": false,
+    "cscopeCode.build": "/usr/bin/cscope -RbU",
+    "gitlens.keymap": "none",
 }
