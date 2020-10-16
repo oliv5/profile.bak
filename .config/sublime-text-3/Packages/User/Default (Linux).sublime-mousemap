@@ -1,0 +1,5 @@
+[
+    // CTags plugin
+    { "button": "button1", "modifiers": ["ctrl"], "command": "navigate_to_definition" },
+    { "button": "button2", "modifiers": ["ctrl"], "command": "jump_prev" },
+]
