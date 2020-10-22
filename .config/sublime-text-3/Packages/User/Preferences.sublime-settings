@@ -1,5 +1,5 @@
 {
-	"color_scheme": "Packages/User/SublimeLinter/Made of Code (SL).tmTheme",
+	"color_scheme": "Packages/colorschemes/Made of Code.tmTheme",
 	"file_exclude_patterns":
 	[
 		"*.pyc",
@@ -32,6 +32,7 @@
 	],
 	"ignored_packages":
 	[
+		"CTags",
 		"Vintage"
 	],
 	"theme": "Aristocat.sublime-theme",
