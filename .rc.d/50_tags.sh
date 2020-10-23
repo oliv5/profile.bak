@@ -1,6 +1,6 @@
 #!/bin/sh
 # Note: this file must be independant, it can be sourced by external scripts
-RC_DIR="${RC_DIR:-$HOME/.rc.d}"
+RC_DIR="${RC_DIR:-$HOME}"
 if ! command -v git_exists >/dev/null; then
   . "$RC_DIR/.rc.d"/*_git.sh
 fi
