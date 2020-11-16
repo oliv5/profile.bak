@@ -245,7 +245,7 @@ annex_enabled() {
 
 ####
 # Check if remote is dead
-annex_isdead_by_uuid() {
+annex_isdead_uuid() {
   local STATUS
   for UUID; do
     STATUS="$(git show git-annex:trust.log | awk "\$1 ~ /$UUID/ {print \$2}")"
@@ -253,14 +253,14 @@ annex_isdead_by_uuid() {
   done
 }
 annex_isdead() {
-  annex_isdead_by_uuid $(annex_uuid_all "$@")
+  annex_isdead_uuid $(annex_uuid_all "$@")
 }
 
 ####
 # Get dead remotes names/uuids
 annex_dead_uuid() {
   for REMOTE in $(annex_uuid_all "$@"); do
-    annex_isdead_by_uuid "$REMOTE" && echo "$REMOTE"
+    annex_isdead_uuid "$REMOTE" && echo "$REMOTE"
   done | xargs
 }
 annex_dead() {
@@ -270,7 +270,7 @@ annex_dead() {
 }
 annex_notdead_uuid() {
   for REMOTE in $(annex_uuid_all "$@"); do
-    ! annex_isdead_by_uuid "$REMOTE" && echo "$REMOTE"
+    ! annex_isdead_uuid "$REMOTE" && echo "$REMOTE"
   done | xargs
 }
 annex_notdead() {
@@ -281,13 +281,13 @@ annex_notdead() {
 
 ####
 # List special remotes
-annex_special_remotes() {
+annex_specials() {
   git show git-annex:remote.log 2>/dev/null |
     perl -n -e'/^'$1'.*name=(\w+)/ && print "$1\n"' |
     sort -u |
     xargs
 }
-annex_special_remotes_uuid() {
+annex_specials_uuid() {
   git show git-annex:remote.log 2>/dev/null |
     awk '/'$1'/{print $1}' |
     sort -u |
@@ -296,17 +296,17 @@ annex_special_remotes_uuid() {
 annex_isspecial() {
   git show git-annex:remote.log 2>/dev/null | grep "name=$1" >/dev/null
 }
-annex_special_remotes_dead() {
-  annex_dead $(annex_special_remotes "$@")
+annex_specials_dead() {
+  annex_dead $(annex_specials "$@")
 }
-annex_special_remotes_not_dead() {
-  annex_notdead $(annex_special_remotes "$@")
+annex_specials_not_dead() {
+  annex_notdead $(annex_specials "$@")
 }
 
 ####
 # List pure annexes
 annex_pure() {
-  annex_enabled "$@" | sed "s/ \?$(annex_exports "$@" | sed 's/ /\\|/g') \?//g"
+  git show git-annex:remote.log | awk '$0 !~ /exporttree=yes/ {sub("^.*name=","");sub(" (.*$)","");print $0}' | sort -u | xargs
 }
 annex_ispure() {
   local LIST="$(annex_pure "$@")"
@@ -316,7 +316,7 @@ annex_ispure() {
   return 0
 }
 annex_enabled_pure() {
-  annex_enabled "$@" | grep -o "$(annex_pure "$@" | sed 's/ /\\|/g')"
+  annex_enabled "$@" | grep -o "$(annex_pure "$@" | sed 's/ /\\|/g')" | xargs
 }
 
 ####
@@ -332,7 +332,7 @@ annex_isexported() {
   return 0
 }
 annex_enabled_exports() {
-  annex_enabled "$@" | grep -o "$(annex_exports "$@" | sed 's/ /\\|/g')"
+  annex_enabled "$@" | grep -oe "$(annex_exports "$@" | sed 's/ /\\|/g')"
 }
 
 ########################################
@@ -488,7 +488,7 @@ annex_lookup_special_remote() {
 
 # Lookup special remotes keys
 annex_lookup_special_remotes() {
-  local REMOTES="${@:-$(annex_special_remotes_notdead)}"
+  local REMOTES="${@:-$(annex_specials_notdead)}"
   for REMOTE in $REMOTES; do
     annex_lookup_special_remote "$REMOTE" 2>&1
   done
