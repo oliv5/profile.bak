@@ -114,6 +114,7 @@ ecryptfs_unwrap_passphrase() {
 
 # User mount ecryptfs (no root)
 # Mount options are hardcoded: AES, key 16b
+# See https://github.com/dustinkirkland/ecryptfs-utils/blob/master/src/utils/mount.ecryptfs_private.c
 user_mount_ecryptfs() {
   local SRC="${1:?Missing source directory...}"
   local DST="${2:?Missing dest directory...}"
