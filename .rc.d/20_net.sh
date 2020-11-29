@@ -279,9 +279,10 @@ sshh_shuttle()     { ssh(){ sshh "$@"; }; ssh_shuttle "$@"; }
 # SSH tunnel shortcuts
 # http://www.guiguishow.info/2010/12/28/ssh-du-port-forwarding-au-vpn-bon-marche/#toc-846-la-redirection-dynamique
 alias ssh_tunnel='ssh -fnxNT'
-ssh_tunnel_open() {
-  local SERVER="${1:?No server specified...}"
-  shift
+_ssh_tunnel_open() {
+  local SSHOPTS="${1:?No ssh options specified...}"
+  local SERVER="${2:?No server specified...}"
+  shift 2
   local TUNNEL=""
   for PORT; do
     PORT="$(echo "$PORT" | tr -d '-')"
@@ -294,13 +295,19 @@ ssh_tunnel_open() {
       TUNNEL="${TUNNEL:+$TUNNEL }-$TYPE $1:${2:-127.0.0.1}:${3:-$1}"
     fi
   done
-  ssh -fnxNT "$SERVER" $TUNNEL
+  ssh -${SSHOPTS} -nxNT "$SERVER" $TUNNEL
+}
+ssh_tunnel_open() {
+  _ssh_tunnel_open -f "$@"
+}
+ssh_tunnel_open4() {
+  _ssh_tunnel_open -f4 "$@"
 }
 ssh_tunnel_close() {
   for PORT; do
     local LPORT="${PORT%%:*}"
-    pgrep -f "ssh.* -(L|R) ${LPORT}:" | xargs -r kill -9
-    pgrep -f "ssh.* -D $LPORT" | xargs -r kill -9
+    pgrep -f "ssh.* -(L|R) ?${LPORT}:" | xargs -r kill -9
+    pgrep -f "ssh.* -D ?$LPORT" | xargs -r kill -9
   done
 }
 ssh_tunnel_ls() {
