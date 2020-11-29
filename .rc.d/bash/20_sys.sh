@@ -1,35 +1,15 @@
 #!/bin/bash
 
 ################################
-# Install file notifier
-alias write_notify='notify close_write'
-alias read_notify='notify close_read'
-alias rw_notify='notify "close_read,close_write"'
-alias create_notify='notify create'
-alias mv_notify='notify moved_to'
-alias notify='_notify_file'
-
-# Basic notification method with a loop
-# Pros: file move is captured
-# Cons: may miss event, high system resource consumption on large directories
-_notify_loop() {
-  local TRIGGER="${1:?No event to monitor}"
-  local FILE="${2:?No dir/file to monitor}"
-  shift $(min 2 $#)
-  local SCRIPT="${@:?No action to execute}"
-  while true; do
-    inotifywait -qq -e "$TRIGGER" "$FILE"
-    eval "$SCRIPT"
-  done
-}
+# inotify bash helpers
 
 # Main notification method
 # Pros: only a single inotifywait process & set of pipes
 # Cons: does not capture file moves properly
-_notify_proc() {
+inotify_bash_nomove() {
   local TRIGGER="${1:?No event to monitor}"
   local FILE="${2:?No dir/file to monitor}"
-  shift $(min 2 $#)
+  shift 2
   local SCRIPT="${@:?No action to execute}"
 
   # Start child shell process, open pipes
@@ -65,12 +45,12 @@ _notify_proc() {
 # Monitor the root directory, filter events on file names
 # Pros: uses _notify_proc low resource method
 # Cons: it is triggered for every file event of the root directory
-_notify_file() {
+inotify_bash() {
   local TRIGGER="${1:?No event to monitor}"
   local FILE="${2:?No dir/file to monitor}"
-  shift $(min 2 $#)
+  shift 2
   local SCRIPT="${@:?No action to execute}"
-  _notify_proc "$TRIGGER" "$(dirname "$FILE")" 'if [ "$(readlink -f "$DIR$FILE")" = "$(readlink -f "'$FILE'")" ]; then '$SCRIPT'; fi'
+  inotify_bash_nomove "$TRIGGER" "$(dirname "$FILE")" "if [ \"$(readlink -f \"$DIR$FILE\")\" = \"$(readlink -f \"$FILE\")\" ]; then \"$SCRIPT\"; fi"
 }
 
 ################################

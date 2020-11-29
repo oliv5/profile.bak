@@ -171,3 +171,23 @@ date_fromweb() {
     curl -sD - "$WEBSERVER" | grep '^Date:' | cut -d' ' -f3-6
   done
 }
+
+################################
+# inotify helpers
+alias notify_write='notify close_write'
+alias notify_read='notify close_read'
+alias notify_rw='notify "close_read,close_write"'
+alias notify_create='notify create'
+alias notify_mv='notify moved_to'
+alias notify='inotify_loop'
+
+# Basic notification method with a loop
+# Pros: file move is captured
+# Cons: may miss event, high system resource consumption on large directories
+inotify_loop() {
+  local TRIGGER="${1:?No event to monitor}"
+  local FILE="${2:?No dir/file to monitor}"
+  shift 2
+  local SCRIPT="${@:?No action to execute}"
+  sh -c "while true; do inotifywait -qq -e \"$TRIGGER\" \"$FILE\"; eval \"$SCRIPT\"; done" &
+}
