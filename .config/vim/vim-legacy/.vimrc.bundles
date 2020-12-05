@@ -671,5 +671,17 @@ endif
 
 
 " *******************************************************
+" } vim-autotag {
+" https://github.com/craigemery/vim-autotag.git
+" *******************************************************
+if !exists('loaded_vimautotag')
+	let loaded_vimautotag = 1
+	" Options
+	let g:autotagCtagsCmd = 'ctags --fields=+iaS --extra=+qf --c++-kinds=+p --python-kinds=-i'
+	let g:autotagTagsFile = '.tags'
+endif
+
+
+" *******************************************************
 " } The end
 " *******************************************************
