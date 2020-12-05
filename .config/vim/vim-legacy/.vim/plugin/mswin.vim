@@ -69,10 +69,12 @@ endif
 " CTRL-Z is Undo; not in cmdline though
 noremap <C-Z> u
 inoremap <C-Z> <C-O>:undo<CR>
+vnoremap <C-Z> <C-C>:undo<CR>
 
 " CTRL-Y is Redo (although not repeat); not in cmdline though
 noremap <C-Y> <C-R>
 inoremap <C-Y> <C-O>:redo<CR>
+vnoremap <C-Y> <C-C>:redo<CR>
 
 " Alt-Space is System menu
 if has("gui")
