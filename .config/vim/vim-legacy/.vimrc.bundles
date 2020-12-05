@@ -437,7 +437,7 @@ if !exists('g:loaded_ctrlp')
 	\ }
 	"" Buffer management
 	"let g:ctrlp_switch_buffer = 'et'
-	let g:ctrlp_switch_buffer = ''
+	let g:ctrlp_switch_buffer = '0'
 	"" Re-use windows (ctrlp_dont_split => ctrlp_reuse_window)
 	let g:ctrlp_dont_split = 'NERD\|netrw\|help\|quickfix'
 	let g:ctrlp_reuse_window = 'NERD\|netrw\|help\|quickfix'
