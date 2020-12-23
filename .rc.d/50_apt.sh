@@ -21,9 +21,12 @@ alias pkg_locked='dpkg_locked'
 
 # Lock/unlock packages
 # https://askubuntu.com/questions/18654/how-to-prevent-updating-of-a-specific-package
-dpkg_locked() {
-  # Install/lock/uninstall
+dpkg_status() {
+  # status: install/hold/deinstall/purge
   eval dpkg --get-selections ${1:+| grep "$1"}
+}
+dpkg_locked() {
+  dpkg --get-selections | awk '$2 = "hold" {print}'
 }
 dpkg_lock() {
   echo "${1:?No package specified...} hold" | sudo dpkg --set-selections
