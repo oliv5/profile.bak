@@ -655,13 +655,19 @@ _annex_transfer() {
     echo "BARE REPOS NOT SUPPORTED YET"
   else
     # Plain git repositories
-    git annex sync
     # 1) copy the local files
     for REPO in $REPOS; do
-      while ! $DBG git annex copy --to "$REPO" --fast "$@"; do sleep 1; done
+      if annex_isexported "$REPO"; then
+        $DBG git annex export HEAD --to "$REPO" | grep -v "export $REPO"
+      else
+        while ! $DBG git annex copy --to "$REPO" --fast "$@"; do sleep 1; done
+      fi
     done
     # 2) get, copy and drop the remote files
     git annex find --include='*' $SELECT --print0 "$@" | xargs -0 -r sh -c '
+      annex_isexported() {
+        git show git-annex:remote.log | grep "exporttree=yes.*name=$1" >/dev/null
+      }
       DBG="$1";REPOS="$2";MAXSIZE="$3";FROM="$4"
       shift 4
       TOTALSIZE=0
@@ -685,7 +691,11 @@ _annex_transfer() {
           if [ $# -gt 0 ]; then
             while ! $DBG git annex get ${FROM:+--from "$FROM"} "$@"; do sleep 1; done
             for REPO in $REPOS; do
-              while ! $DBG git annex copy --to "$REPO" "$@"; do sleep 1; done
+              if annex_isexported "$REPO"; then
+                $DBG git annex export HEAD --to "$REPO" | grep -v "export $REPO"
+              else
+                while ! $DBG git annex copy --to "$REPO" "$@"; do sleep 1; done
+              fi
             done
             $DBG git annex drop "$@"
           fi
@@ -723,7 +733,6 @@ _annex_rsync() {
   if git_bare; then
     # Bare repositories do not have "git annex find"
     echo "BARE REPOS NOT TESTED YET. Press enter to go on..." && read NOP
-    git annex sync
     find annex/objects -type f | while read SRCNAME; do
       annex_fromkey0 "$SRCNAME" | xargs -0 -rn1 echo | while read DSTNAME; do
         DST_DIR="$(dirname "${DST##*:}/${DSTNAME}")"
@@ -732,7 +741,6 @@ _annex_rsync() {
     done
   else
     # Plain git repositories
-    git annex sync
     # 1) copy the local files
     for FILE; do
       DST_DIR="$(dirname "${DST##*:}/${FILE}")"
