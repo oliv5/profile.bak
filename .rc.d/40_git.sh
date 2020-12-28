@@ -43,6 +43,7 @@ ask_question() {
 ########################################
 # Env setup
 git_setup() {
+echo <<EOF
   # Push (either simple, upstream or current)
   git config --global --unset-all push.default
   git config --global --add push.default current
@@ -64,6 +65,23 @@ git_setup() {
   for REMOTE in $(git_remotes); do
     git_gcrypt_remotes "$REMOTE" && echo "Disable push in remote $REMOTE" && git_push_disable "$REMOTE"
   done
+  # Git memory usage options
+  # https://stackoverflow.com/questions/4826639/repack-of-git-repository-fails
+  # https://stackoverflow.com/questions/10292903/git-on-windows-out-of-memory-malloc-failed
+  # http://git-scm.com/book/en/Git-Internals-Git-Objects
+  if [ "$1" = "low" ];
+    # git core
+    git config core.packedGitWindowSize 32m
+    git config core.packedGitLimit 32m
+    git config core.deltaCacheSize 32m
+    # git repack
+    git config pack.windowMemory 32m
+    git config pack.packSizeLimit 32m
+    git config pack.deltacachesize 32m
+    #git config pack.window 2 # 0 to disable delta compression globally (larger repo size on disk)
+    git config pack.threads 1
+  fi
+EOF
 }
 
 ########################################
@@ -982,13 +1000,21 @@ git_cleanup() {
   # Verifies the connectivity and validity of the objects in the database
   git fsck --unreachable
   # Manage reflog information
-  git reflog expire --expire=0 --all
+  git reflog expire --expire=30 --all
   # Pack unpacked objects in a repository
-  git repack -a -d -l
+  if [ -z "$1" ]; then
+    git repack -a -d -l
+  elif [ "$1" = "low" ]; then
+    git repack -a -d -l --threads=1 --window=3 --depth=25 --window-memory=32m --max-pack-size=32m
+  elif [ "$1" = "medium" ]; then
+    git repack -a -d -l --threads=2 --window=10 --depth=50 --window-memory=256m --max-pack-size=256m
+  elif [ "$1" = "high" ]; then
+    git repack -a -d -l --threads=4 --window=10 --depth=50 --window-memory=1g --max-pack-size=1g
+  fi
   # Prune all unreachable objects from the object database
   git prune
   # Cleanup unnecessary files and optimize the local repository
-  git gc --aggressive
+  git gc
 }
 
 # Truncate history from a given commit
