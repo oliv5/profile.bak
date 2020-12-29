@@ -1011,8 +1011,6 @@ git_cleanup() {
   elif [ "$1" = "high" ]; then
     git repack -a -d -l --threads=4 --window=10 --depth=50 --window-memory=1g --max-pack-size=1g
   fi
-  # Prune all unreachable objects from the object database
-  git prune
   # Cleanup unnecessary files and optimize the local repository
   git gc
 }
