@@ -239,6 +239,9 @@ git_branch_merged() {
 git_branch_jump() {
   git fetch . "${2:?No destination specified...}" "${1:?No source specified...}"
 }
+git_branch_jump2() {
+  git push . "${1:?No source specified...}":"${2:?No destination specified...}"
+}
 
 # Delete local untracked branch (safely)
 git_branch_delete() {
@@ -969,8 +972,11 @@ git_amend_file() {
   )
 }
 
+########################################
+# https://git-scm.com/book/en/v2/Git-Internals-Maintenance-and-Data-Recovery
+
 # Prune a given file from history
-git_prune_file() {
+git_purge_file() {
   local FILE="${1:?No path specified...}"
   git filter-branch --force --index-filter \
     "git rm --cached --ignore-unmatch '$FILE'" \
@@ -978,7 +984,7 @@ git_prune_file() {
 }
 
 # Purge commits from a given author
-git_prune_author() {
+git_purge_author() {
   local NAME="${1:?No name specified...}"
   local REV="${2:-HEAD}"
   git filter-branch --commit-filter \
@@ -986,22 +992,21 @@ git_prune_author() {
     "$REV"
 }
 
-########################################
-# Forced garbage-collector (use after purge_file) 
+# Forced garbage-collector (use after git_purge_file) 
 git_purge_gc() {
-  git for-each-ref --format='delete %(refname)' refs/original | git update-ref --stdin
-  git reflog expire --expire=now --all
-  git gc --prune=now
+  # Purge known remotes refs
+  rm -rf .git/refs/remotes/ .git/*_HEAD
+  # Remove git filter-branch backups
+  rm -rf .git/refs/original/ .git/logs/
+  git for-each-ref --format="%(refname)" refs/original/ | \
+    xargs -n1 --no-run-if-empty git update-ref -d
+  # Cleanup reflog & prune
+  git reflog expire --expire-unreachable="${1:-now}" --all
+  git gc --prune="${1:-now}"
 }
 
-# Git cleanup
-# https://gist.github.com/Zoramite/2039636
-git_cleanup() {
-  # Verifies the connectivity and validity of the objects in the database
-  git fsck --unreachable
-  # Manage reflog information
-  git reflog expire --expire=30 --all
-  # Pack unpacked objects in a repository
+# Repack with different memory usage settings
+git_repack() {
   if [ -z "$1" ]; then
     git repack -a -d -l
   elif [ "$1" = "low" ]; then
@@ -1011,8 +1016,6 @@ git_cleanup() {
   elif [ "$1" = "high" ]; then
     git repack -a -d -l --threads=4 --window=10 --depth=50 --window-memory=1g --max-pack-size=1g
   fi
-  # Cleanup unnecessary files and optimize the local repository
-  git gc
 }
 
 # Truncate history from a given commit
@@ -1022,6 +1025,35 @@ git_truncate() {
   echo "Check the repo history. Go on ? (enter/ctrl-c)"
   read
   git filter-branch --tag-name-filter cat -- --all
+}
+
+########################################
+# List blob files & sizes
+# https://gist.github.com/magnetikonline/dd5837d597722c9c2d5dfa16d8efe5b9
+git_ls_blobs() {
+	local IFS=$'\n'
+	local SHA
+	local TMPFILE="$(eval mktemp ${1:+-t -p "$1"})"
+  trap "rm \"$TMPFILE\"; trap - INT TERM QUIT EXIT" INT TERM QUIT EXIT
+
+  # List all blobs
+	for SHA in $(git rev-list --all); do
+    git ls-tree -r --long "$SHA" >> "$TMPFILE"
+	done
+
+	# Sort files by SHA1, de-dupe list and finally re-sort by filesize
+	sort --key 3 "$TMPFILE" |
+		uniq |
+		sort --key 4 --numeric-sort --reverse
+}
+git_inspect_pack() {
+  for PACKFILE; do
+    echo "Inspecting packfile '$PACKFILE'"
+    git verify-pack -v "$PACKFILE" | awk '/blob/{print $1}' | xargs -r -- sh -c '
+      echo "Processing blobs $@"
+      git rev-list --objects --all "$@"
+    ' _
+  done
 }
 
 ########################################
