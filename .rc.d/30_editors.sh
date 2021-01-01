@@ -29,11 +29,12 @@ fi
 #########################
 # Vim
 export COLORTERM="xterm" # backspace bug in vim
-export VIM="$(command -v vim || command -v vi)"
+export VI="$(command -v vim || command -v vi)"
+unset VIM # bug at startup if defined
 
 # Start gvim
 if command -v gvim >/dev/null; then
-  export VIM="gvim"
+  export VI="gvim"
   gvim() {
     local ARGS=""
     local ARG1="$1"

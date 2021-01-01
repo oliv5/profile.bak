@@ -100,9 +100,9 @@ cdr() { cd "$(getr "$@")"; }
 alias r='cdr'
 
 # Vim & co
-alias v='${VIM:-false}'
-alias ssv='ss | cut -c 9- | xargs ${VIM:-false}'
-alias gsv='gs | grep modified | cut -d : -f 2 | xargs ${VIM:-false}'
+alias v='${VI:-false}'
+alias ssv='ss | cut -c 9- | xargs ${VI:-false}'
+alias gsv='gs | grep modified | cut -d : -f 2 | xargs ${VI:-false}'
 
 # Graphical editor
 alias e='${GEDITOR:-false}'
