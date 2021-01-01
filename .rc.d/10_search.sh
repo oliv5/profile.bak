@@ -217,8 +217,8 @@ alias ihhf='FCASE=-i FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed2'
 # Does not handle filenames with \n inside
 alias ff_dup='find_duplicates'
 find_duplicates() {
-  local TMP1="$(tempfile)"
-  local TMP2="$(tempfile)"
+  local TMP1="$(mktemp)"
+  local TMP2="$(mktemp)"
   for DIR in "${@:-.}"; do
     find "${DIR:-.}" \( -type f -o -type l \) -exec md5sum "{}" \; | sed -e 's/^\\//' >> "$TMP1"
   done
@@ -241,8 +241,8 @@ rm_duplicates() {
 
 # Find duplicate files in directory
 find_duplicates0() {
-  local TMP1="$(tempfile)"
-  local TMP2="$(tempfile)"
+  local TMP1="$(mktemp)"
+  local TMP2="$(mktemp)"
   for DIR in "${@:-.}"; do
     find "${DIR:-.}" \( -type f -o -type l \) -exec md5sum -z "{}" \; >> "$TMP1"
   done
