@@ -99,21 +99,23 @@ getr() { if svn_exists "$@"; then svn_root "$@"; elif git_exists "$@"; then git_
 cdr() { cd "$(getr "$@")"; }
 alias r='cdr'
 
-# Gvim
-alias v='gvim'
-alias ssv='ss | cut -c 9- | xargs gvim'
-alias gsv='gs | grep modified | cut -d : -f 2 | xargs gvim'
+# Vim & co
+alias v='${VIM:-false}'
+alias ssv='ss | cut -c 9- | xargs ${VIM:-false}'
+alias gsv='gs | grep modified | cut -d : -f 2 | xargs ${VIM:-false}'
 
 # Graphical editor
 alias e='${GEDITOR:-false}'
 alias sse='ss | cut -c 9- | xargs ${GEDITOR:-false}'
 alias gse='gs | grep modified | cut -d : -f 2 | xargs ${GEDITOR:-false}'
 
+# Source insight
+alias si='WINEPREFIX="$HOME/.wineprefix/sourceinsight" sourceinsight'
+alias si2='WINEPREFIX="$HOME/.wineprefix/sourceinsight2" sourceinsight'
+alias si3='WINEPREFIX="$HOME/.wineprefix/sourceinsight3" sourceinsight'
+
 # File manager
-alias n='${FMANAGER:-false}'
-if [ -z "$FMANAGER" ];then
-  export FMANAGER="$(command -v nautilus || command -v konqueror || command -v dolphin || command -v gnome-commander)"
-fi
+alias n='${FMANAGER:-false} >/dev/null 2>&1'
 
 # Sudo & co
 if ! command -v gksu >/dev/null && ! command -v gksudo >/dev/null; then

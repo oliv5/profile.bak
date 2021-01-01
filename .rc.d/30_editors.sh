@@ -29,9 +29,11 @@ fi
 #########################
 # Vim
 export COLORTERM="xterm" # backspace bug in vim
+export VIM="$(command -v vim || command -v vi)"
 
 # Start gvim
 if command -v gvim >/dev/null; then
+  export VIM="gvim"
   gvim() {
     local ARGS=""
     local ARG1="$1"
@@ -51,11 +53,20 @@ if command -v gvim >/dev/null; then
 fi
 
 #########################
-# Source insight
-alias si='PREFIX="$HOME/.wineprefix/sourceinsight" si.sh'
-alias si2='PREFIX="$HOME/.wineprefix/sourceinsight2" si.sh'
-alias si3='PREFIX="$HOME/.wineprefix/sourceinsight3" si.sh'
+# Source insight via wine
+if command -v wine >/dev/null; then
+  sourceinsight() {
+    local WINEPREFIX="${WINEPREFIX:-$HOME/.wineprefix/sourceinsight}"
+    local DIR="$WINEPREFIX/drive_c/Program Files (x86)/Source Insight 3"
+    if [ ! -d "$DIR" ]; then
+      DIR="$WINEPREFIX/drive_c/Program Files/Source Insight 3"
+    fi
+    WINEPREFIX="$WINEPREFIX" wine "$DIR/Insight3.exe" "$@" 2>/dev/null &
+  }
+fi
 
 #########################
-# Graphic editor
-export GEDITOR="$(command -v geany || command -v gvim || command -v gedit || command -v false)"
+# File manager
+if [ -z "$FMANAGER" ];then
+  export FMANAGER="$(command -v nautilus || command -v konqueror || command -v dolphin || command -v gnome-commander)"
+fi
