@@ -1139,8 +1139,7 @@ nnoremap <silent>L        :Lprev<CR>
 " *******************************************************
 " Set tags root
 let g:tags_db=['.tags']
-"set tags=./.tags,.tags;$HOME
-set tags=./.tags;$HOME
+set tags=./.tags,.tags;
 
 " User commands
 command! -nargs=0 -bar Tnext    call s:Wnext('t')
