@@ -673,12 +673,30 @@ map <localleader>n  :set nu!<CR>
 FnNoremap  <C-j> :
 vnoremap <C-j>  <C-c>:
 
+" Cursor jump selection
+" https://vim.fandom.com/wiki/Jumping_to_previously_visited_locations
+function! GotoJump()
+  jumps
+  let j = input("Please select your jump: ")
+  if j != ''
+    let pattern = '\v\c^\+'
+    if j =~ pattern
+      let j = substitute(j, pattern, '', 'g')
+      execute "normal " . j . "\<c-i>"
+    else
+      execute "normal " . j . "\<c-o>"
+    endif
+  endif
+endfunction
+
 " Prev/next cursor jump location
 " :help jump-motions
 FnNoremap <A-Left>  <C-o>
 FnNoremap <A-Right> <C-i>
+FnNoremap <A-j>  :call GotoJump()<CR>
 vnoremap <A-Left>   <C-c><C-o>
 vnoremap <A-Right>  <C-c><C-i>
+vnoremap <A-j>  <C-c>:call GotoJump()<CR>
 
 " Prev/next cursor location
 " :help restore-position
@@ -691,6 +709,11 @@ FnNoremap <C-A-Left>  g;
 FnNoremap <C-A-Right> g,
 vnoremap <C-A-Left>   <C-c>g;
 vnoremap <C-A-Right>  <C-c>g,
+
+" Add k/j move to the jumplist - using a mark
+" https://medium.com/breathe-publication/understanding-vims-jump-list-7e1bfc72cdf0
+nnoremap <expr> k (v:count > 1 ? "m'" . v:count : '' ) . 'gk'
+nnoremap <expr> j (v:count > 1 ? "m'" . v:count : '' ) . 'gj'
 
 
 " *******************************************************
@@ -795,6 +818,13 @@ function! s:ToggleWndMax()
 		do maxCurrWin WinEnter
 	endif
 endfunction
+
+" Save cursor position in window when switching buffers
+" https://stackoverflow.com/questions/4251533/vim-keep-window-position-when-switching-buffers
+if v:version >= 700
+  au BufLeave * let b:winview = winsaveview()
+  au BufEnter * if(exists('b:winview')) | call winrestview(b:winview) | endif
+endif
 
 " Key maps
 nnoremap <localleader>X     :call <SID>ToggleWndMax()<CR>
