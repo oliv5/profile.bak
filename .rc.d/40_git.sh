@@ -443,7 +443,7 @@ git_pull() { git pull "$@"; }
 fi
 
 # Batch pull from all remotes
-# Fast-forward only, stop on error
+# Fast-forward only
 git_pull_all() {
   git_exists || return 1
   local IFS="$(printf ' \t\n')"
@@ -452,7 +452,7 @@ git_pull_all() {
   for REMOTE in $REMOTES; do
     if git_remote_valid "$REMOTE"; then
       echo -n "Pull from $REMOTE: "
-      git pull --ff-only "$REMOTE" $BRANCH || return 2
+      git pull --ff-only "$REMOTE" $BRANCH
     fi
   done
 }
@@ -462,6 +462,7 @@ git_pull_all() {
 alias git_push='git push'
 
 # Batch push to all existing remotes, use --all as branch to push all branches
+alias git_push_all_all='git_push_all "" --all'
 git_push_all() {
   git_exists || return 1
   local IFS="$(printf ' \t\n')"

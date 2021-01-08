@@ -824,7 +824,6 @@ _annex_populate() {
   local DST="${1:?No dst directory specified...}"
   local SRC="${2:-$PWD}"
   local WHERE="${3:-${WHERE:---include '*'}}"
-  git annex sync
   eval git annex find "$WHERE" --format='\${file}\\000\${hashdirlower}\${key}/\${key}\\000' | xargs -r0 -n2 sh -c '
     DBG="$1"; MOVE="$2"; SRCDIR="$3; DSTDIR="$4"; SRC="$SRCDIR/$5"; DST="$DSTDIR/$6"
     echo "$SRC -> $DST"
