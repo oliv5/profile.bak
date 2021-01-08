@@ -84,6 +84,7 @@ shell_islogin() {
 
 # Few shift aliases to prevent fatal error 
 # and eat all arguments when over-shifting
+# Other method: shift 2>/dev/null || set --
 # Other method: shift $(min $# number)
 # Other method: [ $# -ge number ] && shift number || shift $#
 alias shift1='command shift 1 2>/dev/null'
@@ -353,7 +354,7 @@ ansi_printf() {
 }
 
 # Strip ANSI codes
-alias ansi_strip='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'
+alias ansi_strip='sed "s/\x1b\[[0-9;]*m//g"'
 
 ################################
 # Attach terminal to process
