@@ -1346,16 +1346,32 @@ annex_purge() {
 # DBG enable debug mode
 annex_setpresentkey() {
   local REMOTE="${1:?No remote specified...}"
-  local WHERE="${2:-${WHERE:-*}}"
+  local WHERE="${2:-${WHERE:-\*}}"
   local PRESENT="${3:-1}"
   local UUID="$(git config --get remote.${REMOTE}.annex-uuid)"
   [ -z "$UUID" ] && { echo "Remote $REMOTE unknown..." && return 1; }
-  eval git annex find --include "$WHERE" --format='\${key}\\000' | xargs -r0 sh -c '
-    DBG="$1"; UUID="$2"; PRESENT="$3"; shift 3
-    for KEY; do
-      $DBG git annex setpresentkey "$KEY" "$UUID" $PRESENT
-    done
-  ' _ "${DBG:+echo [DBG]}" "$UUID" "$PRESENT"
+  eval git annex find --include "$WHERE" --format="\${key} $UUID $PRESENT\n" |
+    git annex setpresentkey --batch
+}
+
+# Declare present and missing files; Files must be accessible from a mountpoint
+# WHERE selects which files & repo to look for
+# DBG enable debug mode
+annex_setpresentfiles() {
+  local REMOTE="${1:?No remote specified...}"
+  local DIR="${2:?No remote folder specified...}"
+  local WHERE="${3:-${WHERE:-\*}}"
+  local PRESENT="$4"
+  local UUID="$(git config --get remote.${REMOTE}.annex-uuid)"
+  [ -z "$UUID" ] && { echo "Remote $REMOTE unknown..." && return 1; }
+  eval git annex find --include "$WHERE" --format='\${key}\\000\${file}\\000' | xargs -r0 -n2 sh -c '
+    DBG="$1"; UUID="$2"; DIR="$3"; PRESENT="$4"; KEY="$5"; FILE="$6"
+    if [ -z "$PRESENT" ]; then
+      [ -f "$DIR/$FILE" ] && PRESENT=1 || PRESENT=0
+    fi
+    ${DBG} echo "$PRESENT $FILE"
+    $DBG git annex setpresentkey "$KEY" "$UUID" $PRESENT
+  ' _ "${DBG:+echo [DBG]}" "$UUID" "$DIR" "$PRESENT"
 }
 
 ########################################
