@@ -1106,7 +1106,7 @@ annex_fromkey0() {
     KEY="$(basename "$KEY")"
     #git show -999999 -p --no-color --word-diff=porcelain -S "$KEY" | 
     #git log -n 1 -p --no-color --word-diff=porcelain -S "$KEY" |
-    git log -p --no-color --word-diff=porcelain -S "$KEY" |
+    git log -p --all --no-color --word-diff=porcelain -S "$KEY" |
       awk '/^(---|\+\+\+) (a|b)/{line=$0} /'$KEY'/{printf "%s\0",substr(line,5)}' |
       # Remove leading/trailing double quotes, leading "a/", trailing spaces. Escape '%'
       sed -z -e 's/\s*$//' -e 's/^"//' -e 's/"$//' -e 's/^..//' -e 's/%/\%/g' |
