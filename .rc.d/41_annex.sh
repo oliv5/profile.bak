@@ -1350,9 +1350,11 @@ annex_setpresentkey() {
   local PRESENT="${3:-1}"
   local UUID="$(git config --get remote.${REMOTE}.annex-uuid)"
   [ -z "$UUID" ] && { echo "Remote $REMOTE unknown..." && return 1; }
-  eval git annex find --include "$WHERE" --format='\${key}\\000' | xargs -r0 -n1 sh -c '
-    DBG="$1"; UUID="$2"; PRESENT="$3"; KEY="$4"
-    $DBG git annex setpresentkey "$KEY" "$UUID" $PRESENT
+  eval git annex find --include "$WHERE" --format='\${key}\\000' | xargs -r0 sh -c '
+    DBG="$1"; UUID="$2"; PRESENT="$3"; shift 3
+    for KEY; do
+      $DBG git annex setpresentkey "$KEY" "$UUID" $PRESENT
+    done
   ' _ "${DBG:+echo [DBG]}" "$UUID" "$PRESENT"
 }
 
