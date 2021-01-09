@@ -258,9 +258,6 @@ git_branches_remote() {
   git ls-remote --heads | awk '{print substr($2,12)}'
 }
 
-# Prune local branches not in remote anymore
-alias git_branch_prune='git remote prune'
-
 # Delete remote untracked branch
 git_branch_delete_remote() {
   for REFS; do
@@ -1001,9 +998,16 @@ git_purge_gc() {
   rm -rf .git/refs/original/ .git/logs/
   git for-each-ref --format="%(refname)" refs/original/ | \
     xargs -n1 --no-run-if-empty git update-ref -d
+  # Fsck
+  git fsck
   # Cleanup reflog & prune
   git reflog expire --expire-unreachable="${1:-now}" --all
   git gc --prune="${1:-now}"
+}
+
+# Git garbage collector
+git_gc() {
+  git fsck; git prune; git gc
 }
 
 # Repack with different memory usage settings
