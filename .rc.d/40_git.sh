@@ -530,6 +530,8 @@ git_bundle() {
 
 # Create an incremental bundle
 git_incbundle() {
+  local -; set -e
+  git_exists || return 1
   local TAGNAME="$(basename "${1:-incbundle.$(uname -n)}")"
   [ $# -ge 1 ] && shift
   local PREV="$(git_shorthash "${TAGNAME}_last")"
@@ -553,6 +555,12 @@ git_incbundle() {
   # Set tags
   git tag -f "${TAGNAME}_last" "HEAD"
   git tag -f "${TAGNAME}_$(date +%Y%m%d-%H%M%S)" "HEAD"
+}
+
+# Reset incremental bundles chain; next bundle will be full
+git_incbundle_reset() {
+  local TAGNAME="$(basename "${1:-incbundle.$(uname -n)}")"
+  git tag -d "${TAGNAME}_last"
 }
 
 # Git upkeep
