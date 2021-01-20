@@ -7,7 +7,7 @@ _dfind()  { if git_exists "$(dirname "$1")"; then git ls-files "*$@"; elif svn_e
 # Grep based code search
 _dgrep1()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; FARGS="${_DG1EXCLUDE} $@" _fgrep1 "$ARG2" "${ARG3:-.}/$ARG1"); }
 _dgrep2()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; _fgrep2 "$ARG2" ${_DG2EXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
-_dgrep3()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; git grep -n ${GCASE} ${GARGS} "$@" "$ARG2" -- $(echo "$ARG1" | sed "s@^@${ARG3}/*@ ; s@;@ ${ARG3}/*@g")); }
+_dgrep3()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; git grep -nE ${GCASE} ${GARGS} "$@" "$ARG2" -- $(echo "$ARG1" | sed "s@^@${ARG3}/*@ ; s@;@ ${ARG3}/*@g")); }
 _dgrep()    { if git_exists "$3"; then _dgrep3 "$@"; else _dgrep1 "$@"; fi; }
 _DG1EXCLUDE=""
 _DG2EXCLUDE="--exclude-dir=.*"
