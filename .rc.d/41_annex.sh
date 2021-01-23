@@ -851,7 +851,7 @@ annex_drop_fast() {
   local COPIES="$(echo "$REPOS" | wc -w)"
   local LOCATION="$(echo "$REPOS" | sed -e 's/ / --and --in /g')"
   [ $# -gt 0 ] && shift
-  git annex drop --in $LOCATION -N "$COPIES" "$@"
+  git annex drop --in "$LOCATION" -N "$COPIES" "$@"
 }
 
 ########################################
