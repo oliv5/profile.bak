@@ -153,7 +153,14 @@ dir_empty() {
 }
 
 ################################
+# Get error status of piped commands:
+# option #1: bash set -o pipefail and ${PIPESTATUS[0]}
+# option #2: use mispipe (sudo apt install mispipe)
+# option #3: use named pipes
+# https://stackoverflow.com/questions/17757039/equivalent-of-pipefail-in-dash-shell
+
 # Create an unamed pipe
+# Input is a stream number > 2
 mkpipe() {
   for P; do
     # Create a temporary named pipe
@@ -206,17 +213,18 @@ pipe_writer() {
   rm -r "$DIR"
 }
 
-# Returns the status or the first piped command
+# Custom mispipe using redirects
+# Executes 2 cmds in a pipe & returns the status of the first one
 # https://unix.stackexchange.com/a/16709
-pipe_status() {
+mispipe() {
   # Ex: ( exec 4>&1; ERR=$({ { (echo 'toto titi'; false); echo $? >&3; } | grep toto; } 3>&1 >&4); exec 4>&-; echo "Errcode=$ERR" )
   local CMD1="${1:?No command 1 specified...}"
   local CMD2="${2:?No command 2 specified...}"
   local PIPE1="${3:-3}"
   local PIPE2="${4:-4}"
-  eval "exec ${PIPE2}>&1"
-  local ERR=$(eval "{ { ($CMD1); echo \$? >&${PIPE1}; } | $CMD2; } ${PIPE1}>&1 >&${PIPE2}")
-  eval "exec ${PIPE2}>&-"
+  exec ${PIPE2}>&1
+  local ERR=$(eval "{ { ("$CMD1"); echo \$? >&${PIPE1}; } | "$CMD2"; } ${PIPE1}>&1 >&${PIPE2}")
+  exec ${PIPE2}>&-
   return $ERR
 }
 
