@@ -488,10 +488,12 @@ annex_lookup_special_remote() {
 
 # Lookup special remotes keys
 annex_lookup_special_remotes() {
-  local REMOTES="${@:-$(annex_specials_notdead)}"
+  local RET=0
+  local REMOTES="${@:-$(annex_specials_not_dead)}" || return 1
   for REMOTE in $REMOTES; do
-    annex_lookup_special_remote "$REMOTE" 2>&1
+    annex_lookup_special_remote "$REMOTE" 2>&1 || RET=2
   done
+  return $RET
 }
 
 ########################################
@@ -571,6 +573,7 @@ _annex_enum() {
       echo "$FILE" | base64 -w 0
       echo
     ' _ > "${OUT%%.txt.xz}.txt"
+    test -s "${OUT%%.txt.xz}.txt" || return 2
     xz -k -z -S .xz --verbose ${XZOPTS} "${OUT%%.txt.xz}.txt" &&
       _git_secure_delete "${OUT%%.txt.xz}.txt"
   fi
@@ -587,6 +590,7 @@ _annex_info() {
   local OWNER="${1:-$USER}"
   local XZOPTS="${2:--9}"
   annex_getinfo > "${OUT%%.xz}"
+  test -s "${OUT%%.xz}" || return 2
   xz -k -z -S .xz --verbose ${XZOPTS} "${OUT%%.xz}" &&
     _git_secure_delete "${OUT%%.xz}"
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
@@ -602,6 +606,7 @@ _annex_enum_special_remotes() {
   local OWNER="${1:-$USER}"
   local XZOPTS="${2:--9}"
   annex_lookup_special_remotes > "${OUT%%.xz}"
+  test -s "${OUT%%.xz}" || return 2
   xz -k -z -S .xz --verbose ${XZOPTS} "${OUT%%.xz}" &&
     _git_secure_delete "${OUT%%.xz}"
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
