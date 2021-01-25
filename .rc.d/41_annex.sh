@@ -397,12 +397,14 @@ annex_getinfo() {
   done
 }
 
-# Lookup special remote keys
+# Lookup keys of a single special remote
 annex_lookup_special_remote() {
-  # Preamble
+  # Preambles
   git_exists || return 1
   annex_std || return 2
-  annex_isspecial || return 3
+  local UUID="${1:?No UUID specified...}"
+  annex_isuuid "$UUID" || return 3
+  annex_isspecial "$UUID" || return 4
   # Bash lookup_key
   bash_lookup_key() {
     bash -c '
@@ -488,21 +490,20 @@ annex_lookup_special_remote() {
     ' _ "$@"
   }
   # Main variables
-  local REMOTE="${1:?No remote specified...}"
-  local REMOTE_CONFIG="$(git show git-annex:remote.log | grep 'name='"$REMOTE " | head -n 1)"
+  local REMOTE_CONFIG="$(git show git-annex:remote.log | grep "^$UUID" | head -n 1)"
   local ENCRYPTION="$(echo "$REMOTE_CONFIG" | grep -oP 'encryption\=.*? ' | tr -d ' \n' | sed 's/encryption=//')"
   local CIPHER="$(echo "$REMOTE_CONFIG" | grep -oP 'cipher\=.*? ' | tr -d ' \n' | sed 's/cipher=//')"
-  local UUID="$(echo "$REMOTE_CONFIG" | cut -d ' ' -f 1)"
+  local REMOTE="$(echo "$REMOTE_CONFIG" | grep -oP 'name\=.*? ' | tr -d ' \n' | sed 's/name=//')"
   local MAC="$(echo "$REMOTE_CONFIG" | grep -oP 'mac\=.*? ' | tr -d ' \n' | sed 's/mac=//')"
-  [ -z "$REMOTE_CONFIG" ] && { echo >&2 "Remote '$REMOTE' config not found..."; return 3; }
-  [ -z "$ENCRYPTION" ] && { echo >&2 "Remote '$REMOTE' encryption not found..."; return 3; }
-  [ -z "$CIPHER" -a "$ENCRYPTION" != "none" ] && { echo >&2 "Remote '$REMOTE' cipher not found..."; return 3; }
-  [ -z "$UUID" ] && { echo >&2 "Remote '$REMOTE' uuid not found..."; return 3; }
+  [ -z "$REMOTE_CONFIG" ] && { echo >&2 "UUID '$UUID' config not found..."; return 10; }
+  [ -z "$ENCRYPTION" ] && { echo >&2 "UUID '$UUID' encryption not found..."; return 10; }
+  [ -z "$CIPHER" -a "$ENCRYPTION" != "none" ] && { echo >&2 "UUID '$UUID' cipher not found..."; return 10; }
+  [ -z "$REMOTE" ] && { echo >&2 "UUID '$UUID' remote name not found..."; return 10; }
   [ -z "$MAC" ] && MAC=HMACSHA1
   shift 1
   # Main processing
-  echo "## Remote $REMOTE"
   echo "## Uuid $UUID"
+  echo "## Remote $REMOTE"
   echo "## Encryption $ENCRYPTION"
   echo "## Cipher $CIPHER"
   echo "## Mac $MAC"
@@ -546,7 +547,7 @@ _annex_archive() {
     fi
     echo "Generate $OUT"
     eval "$@"
-    if [ ! -r "${OUT}" ]; then
+    if [ ! -s "${OUT}" ]; then
       echo "Output file '${OUT}' is missing or empty. Abort..."
       return 1
     fi
@@ -581,6 +582,7 @@ _annex_bundle() {
         xz -z -c --verbose ${XZOPTS} - > "${OUT}"
   fi
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
+  return 0
 }
 annex_bundle() {
   _annex_archive "annex.bundle.tar.xz" "$1" "$2" "$3" "_annex_bundle" "$4" "$5"
@@ -604,11 +606,12 @@ _annex_enum() {
       echo "$FILE" | base64 -w 0
       echo
     ' _ > "${OUT%%.txt.xz}.txt"
-    test -s "${OUT%%.txt.xz}.txt" || return 2
+    test -s "${OUT%%.txt.xz}.txt" || { rm "${OUT%%.txt.xz}.txt" 2>/dev/null; return 2; }
     xz -k -z -S .xz --verbose ${XZOPTS} "${OUT%%.txt.xz}.txt" &&
       _git_secure_delete "${OUT%%.txt.xz}.txt"
   fi
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
+  return 0
 }
 annex_enum() {
   _annex_archive "annex.enum_local.txt.xz" "$1" "$2" "$3" "_annex_enum" "$4" "$5"
@@ -621,10 +624,11 @@ _annex_info() {
   local OWNER="${1:-$USER}"
   local XZOPTS="${2:--9}"
   annex_getinfo > "${OUT%%.xz}"
-  test -s "${OUT%%.xz}" || return 2
+  test -s "${OUT%%.xz}" || { rm "${OUT%%.xz}" 2>/dev/null; return 2; }
   xz -k -z -S .xz --verbose ${XZOPTS} "${OUT%%.xz}" &&
     _git_secure_delete "${OUT%%.xz}"
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
+  return 0
 }
 annex_info(){
   _annex_archive "annex.info.txt.xz" "$1" "$2" "$3" "_annex_info" "$4" "$5"
@@ -637,10 +641,11 @@ _annex_enum_special_remotes() {
   local OWNER="${1:-$USER}"
   local XZOPTS="${2:--9}"
   annex_lookup_special_remotes > "${OUT%%.xz}"
-  test -s "${OUT%%.xz}" || return 2
+  test -s "${OUT%%.xz}" || { rm "${OUT%%.xz}" 2>/dev/null; return 2; }
   xz -k -z -S .xz --verbose ${XZOPTS} "${OUT%%.xz}" &&
     _git_secure_delete "${OUT%%.xz}"
   [ -f "$OUT" ] && chown "$OWNER" "$OUT"
+  return 0
 }
 annex_enum_special_remotes() {
   if annex_bare; then
