@@ -197,143 +197,174 @@ annex_st() {
 }
 
 ########################################
-# List remotes uuids
+# Check if inputs are all uuids
+annex_isuuid() {
+  echo "$*" | sed 's/-//g' | grep --color -E '^(\s?[a-zA-Z0-9]{32}\s?)+$' >/dev/null || return 1
+  return 0
+}
+
+# Get local uuid
 annex_uuid() {
-  for REMOTE in "${@:-.*}"; do
-    git config --get-regexp remote\.${REMOTE}\.annex-uuid
-  done | cut -d' ' -f 2 | xargs
-}
-annex_uuid_all() {
-  for REMOTE in "${@:-.*}"; do
-    git show git-annex:uuid.log | awk '$2=/'$REMOTE'/ {print $1}'
-  done | xargs
-}
-annex_uuid_local() {
-  git config annex.uuid
+  [ $# -eq 0 ] && git config annex.uuid
 }
 
 ####
-# List remotes
+# List remotes by name or uuid
+annex_uuids() {
+  for REMOTE in "${@:-.*}"; do
+    if annex_isuuid "$REMOTE"; then
+      git show git-annex:uuid.log | awk -v pattern="$REMOTE" '$1~pattern {print $1}'
+    else
+      git show git-annex:uuid.log | awk -v pattern="$REMOTE" '$2~pattern {print $1}'
+    fi
+  done | sort -u | xargs -r
+}
 annex_remotes() {
   for REMOTE in "${@:-.*}"; do
-    git config --get-regexp "remote\..*${REMOTE}.*\.annex-uuid"
-  done | awk -F. '{print $2}' | sort -u | xargs
-}
-annex_remotes_all() {
-  for REMOTE in "${@:-.*}"; do
-    git show git-annex:uuid.log |
-      awk "\$2 ~ /${REMOTE}/ {print \$2}"
-  done | xargs
-}
-annex_remotes_by_uuid() {
-  for UUID; do
-    git show git-annex:uuid.log |
-    awk "\$1 ~ /$UUID/ {print \$2}"
-  done | xargs
-}
-
-####
-# List enabled local remotes
-annex_enabled() {
-  local EXCLUDE="$(git config --get-regexp "remote\..*\.annex-ignore" true | awk -F. '{printf $2"|"}' | sed -e "s/|$//")"
-  git config --get-regexp "remote\..*\.annex-uuid" |
-    grep -vE "${EXCLUDE:-$^}" | 
-    awk -F. '{print $2}' |
-    sort -u |
-    xargs
-}
-
-####
-# Check if remote is dead
-annex_isdead_uuid() {
-  local STATUS
-  for UUID; do
-    STATUS="$(git show git-annex:trust.log | awk "\$1 ~ /$UUID/ {print \$2}")"
-    [ "$STATUS" = "X" ] || return 1
-  done
-}
-annex_isdead() {
-  annex_isdead_uuid $(annex_uuid_all "$@")
+    if annex_isuuid "$REMOTE"; then
+      git show git-annex:uuid.log | awk -v pattern="$REMOTE" '$1~pattern {print $2}'
+    else
+      git show git-annex:uuid.log | awk -v pattern="$REMOTE" '$2~pattern {print $2}'
+    fi
+  done | sort -u | xargs -r
 }
 
 ####
 # Get dead remotes names/uuids
 annex_dead_uuid() {
-  for REMOTE in $(annex_uuid_all "$@"); do
-    annex_isdead_uuid "$REMOTE" && echo "$REMOTE"
-  done | xargs
-}
-annex_dead() {
-  for REMOTE in $(annex_remotes_all "$@"); do
-    annex_isdead "$REMOTE" && echo "$REMOTE"
-  done | xargs
+  git show git-annex:trust.log 2>/dev/null |
+    awk '$2 ~ /X/ {print $1}' |
+    sort -u | xargs -r
 }
 annex_notdead_uuid() {
-  for REMOTE in $(annex_uuid_all "$@"); do
-    ! annex_isdead_uuid "$REMOTE" && echo "$REMOTE"
-  done | xargs
+  local UUIDS="$(annex_dead_uuid | sed 's/ /|/g')"
+  annex_uuids | xargs -n1 |
+    command grep -vE "$UUIDS" |
+    sort -u | xargs -r
+}
+# Check all (listed) remotes are dead
+annex_isdead() {
+  local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
+  local NUM=$(echo $UUIDS | command grep -o '|' | wc -l)
+  local N=$(annex_dead_uuid | xargs -n1 | command grep -E "${UUIDS:-not a uuid}" | wc -l)
+  test $N -gt 0 && test $N -eq $(($NUM + 1))
+}
+# Do not use in scripts, 2 remotes can have the same name; use the uuid version instead
+annex_dead() {
+  annex_remotes $(annex_dead_uuid)
 }
 annex_notdead() {
-  for REMOTE in $(annex_remotes_all "$@"); do
-    ! annex_isdead "$REMOTE" && echo "$REMOTE"
-  done | xargs
+  annex_remotes $(annex_notdead_uuid)
 }
 
 ####
 # List special remotes
-annex_specials() {
-  git show git-annex:remote.log 2>/dev/null |
-    perl -n -e'/^'$1'.*name=(\w+)/ && print "$1\n"' |
-    sort -u |
-    xargs
+annex_special_uuid() {
+  local UUIDS="$(annex_uuids | sed 's/ /|/g')"
+  git show git-annex:remote.log 2>/dev/null | awk "/^($UUIDS)/{print \$1}" |
+    sort -u | xargs -r
 }
-annex_specials_uuid() {
-  git show git-annex:remote.log 2>/dev/null |
-    awk '/'$1'/{print $1}' |
-    sort -u |
-    xargs
+annex_special_dead_uuid() {
+  local UUIDS="$(annex_special_uuid | sed 's/ /|/g')"
+  annex_dead_uuid | command grep -oE "$UUIDS" |
+    sort -u | xargs -r
 }
+annex_special_notdead_uuid() {
+  local UUIDS="$(annex_special_uuid | sed 's/ /|/g')"
+  annex_notdead_uuid | command grep -oE "$UUIDS" |
+    sort -u | xargs -r
+}
+# Check all (listed) remotes are special
 annex_isspecial() {
-  git show git-annex:remote.log 2>/dev/null | grep "name=$1" >/dev/null
+  local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
+  local NUM=$(echo $UUIDS | command grep -o '|' | wc -l)
+  local N=$(annex_special_uuid | xargs -n1 | command grep -E "${UUIDS:-not a uuid}" | wc -l)
+  test $N -gt 0 && test $N -eq $(($NUM + 1))
 }
-annex_specials_dead() {
-  annex_dead $(annex_specials "$@")
+# Do not use in scripts, 2 remotes can have the same name; use the uuid version instead
+annex_special() {
+  annex_remotes $(annex_special_uuid)
 }
-annex_specials_not_dead() {
-  annex_notdead $(annex_specials "$@")
+annex_special_dead() {
+  annex_remotes $(annex_special_dead_uuid)
+}
+annex_special_notdead() {
+  annex_remotes $(annex_special_notdead_uuid)
+}
+
+####
+# List enabled local remotes
+annex_enabled_uuid() {
+  local EXCLUDE="$(git config --get-regexp "remote\..*\.annex-ignore" true | awk -F. '{printf $2"|"}' | sed -e "s/|$//")"
+  git config --get-regexp "remote\..*\.annex-uuid" |
+    grep -vE "${EXCLUDE:-$^}" | 
+    awk -F' ' '{print $2}' |
+    sort -u | xargs -r
+}
+# Check all (listed) remotes are enabled
+annex_isenabled() {
+  local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
+  local NUM=$(echo $UUIDS | command grep -o '|' | wc -l)
+  local N=$(annex_enabled_uuid | xargs -n1 | command grep -E "${UUIDS:-not a uuid}" | wc -l)
+  test $N -gt 0 && test $N -eq $(($NUM + 1))
+}
+# Do not use in scripts, 2 remotes can have the same name; use the uuid version instead
+annex_enabled() {
+  annex_remotes $(annex_enabled_uuid)
 }
 
 ####
 # List pure annexes
-annex_pure() {
-  git show git-annex:remote.log | awk '$0 !~ /exporttree=yes/ {sub("^.*name=","");sub(" (.*$)","");print $0}' | sort -u | xargs
+annex_pure_uuid() {
+  git show git-annex:remote.log | awk '$0 !~ /exporttree=yes/ {print $1}' |
+    sort -u | xargs -r
 }
+annex_pure_enabled_uuid() {
+  local UUIDS="$(annex_enabled_uuid | sed 's/ /|/g')"
+  annex_pure_uuid | command grep -oE "$UUIDS" |
+    sort -u | xargs -r
+}
+# Check all (listed) remotes are pure
 annex_ispure() {
-  local LIST="$(annex_pure "$@")"
-  for REPO; do
-    echo "$LIST" | grep "$REPO" >/dev/null || return 1
-  done
-  return 0
+  local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
+  local NUM=$(echo $UUIDS | command grep -o '|' | wc -l)
+  local N=$(annex_pure_uuid | xargs -n1 | command grep -E "${UUIDS:-not a uuid}" | wc -l)
+  test $N -gt 0 && test $N -eq $(($NUM + 1))
 }
-annex_enabled_pure() {
-  annex_enabled "$@" | grep -o "$(annex_pure "$@" | sed 's/ /\\|/g')" | xargs
+# Do not use in scripts, 2 remotes can have the same name; use the uuid version instead
+annex_pure() {
+  annex_remotes $(annex_pure_uuid)
+}
+annex_pure_enabled() {
+  annex_remotes $(annex_pure_enabled_uuid)
 }
 
 ####
 # List exported annexes
-annex_exports() {
-  git show git-annex:remote.log | awk '/exporttree=yes/{sub("^.*name=","");sub(" (.*$)","");print $0}' | sort -u | xargs
+annex_exported_uuid() {
+  git show git-annex:remote.log | awk '/exporttree=yes/{print $1}' |
+    sort -u | xargs -r
 }
+annex_exported_enabled_uuid() {
+  local UUIDS="$(annex_enabled_uuid | sed 's/ /|/g')"
+  annex_exported_uuid | command grep -oE "$UUIDS" |
+    sort -u | xargs -r
+}
+# Check all (listed) remotes are exported
 annex_isexported() {
-  local LIST="$(annex_exports "$@")"
-  for REPO; do
-    echo "$LIST" | grep "$REPO" >/dev/null || return 1
-  done
-  return 0
+  local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
+  local NUM=$(echo $UUIDS | command grep -o '|' | wc -l)
+  local N=$(annex_exported_uuid | xargs -n1 | command grep -E "${UUIDS:-not a uuid}" | wc -l)
+  test $N -gt 0 && test $N -eq $(($NUM + 1))
 }
-annex_enabled_exports() {
-  annex_enabled "$@" | grep -oe "$(annex_exports "$@" | sed 's/ /\\|/g')"
+# Do not use in scripts, 2 remotes can have the same name; use the uuid version instead
+annex_exported() {
+  annex_remotes $(annex_exported_uuid)
 }
+annex_exported_enabled() {
+  annex_remotes $(annex_exported_enabled_uuid)
+}
+
 
 ########################################
 annex_hook_commit() {
@@ -489,7 +520,7 @@ annex_lookup_special_remote() {
 # Lookup special remotes keys
 annex_lookup_special_remotes() {
   local RET=0
-  local REMOTES="${@:-$(annex_specials_not_dead)}" || return 1
+  local REMOTES="${@:-$(annex_special_notdead_uuid)}" || return 1
   for REMOTE in $REMOTES; do
     annex_lookup_special_remote "$REMOTE" 2>&1 || RET=2
   done
@@ -1334,13 +1365,13 @@ annex_purge() {
   printf "You are about to delete %d file(s) or folder(s) definitively !\n\n%s\n\nProceed ? (y/n) " $# "$*"
   read REPLY </dev/tty
   [ "$REPLY" = "y" -o "$REPLY" = "Y" ] || return 1
-  for R in $(annex_enabled_pure); do
+  for R in $(annex_pure_enabled); do
     git annex drop --force --from "$R" "$@" || return $?
   done
   git annex drop --force "$@" || return $?
   git rm -r "$@"
   git annex sync
-  for R in $(annex_enabled_exports); do
+  for R in $(annex_exported_enabled); do
     git annex export --fast "$(git_branch)" --to "$R"
   done
 }
