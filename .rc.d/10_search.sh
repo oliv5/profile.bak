@@ -190,7 +190,8 @@ alias c3='cut -d: -f 3'
 _fsed1() {
   # Get arguments
   #local SEDOPT="$(arg_rtrim 3 "$@")"; shift $(($#-3))
-  local SEDOPT="--follow-symlinks"; [ $# -gt 3 ] && SEDOPT="${SEDOPT:+$SEDOPT }$1" && shift 1
+  #local SEDOPT="--follow-symlinks"; [ $# -gt 3 ] && SEDOPT="${SEDOPT:+$SEDOPT }$1" && shift 1
+  local SEDOPT=""; [ $# -gt 3 ] && SEDOPT="$1" && shift 1
   local IN="$1"; local OUT="$2"; local FILES="${SFILES:-$3}"
   echo "Replace '$IN' by '$OUT' in files '$FILES' ${SEDOPT:+with options $SEDOPT}"
   # Ask for options
@@ -207,20 +208,20 @@ _fsed1() {
     ${_BACKUP:+-execdir sh -c "grep '$IN' '{}' >/dev/null" \;} \
     -execdir sed $SEDOPT --in-place${_BACKUP:+=$_BACKUP} ${_SHOW:+-e "\|$IN|{w /dev/stderr" -e "}"} -e "s|$IN|$OUT|g" "{}" \;
 }
-# Bare search & replace
+# Bare search & replace, no questions
 _fsed2() {
   # Get arguments
   #local SEDOPT="$(arg_rtrim 3 "$@")"; shift $(($#-3))
-  local SEDOPT="--follow-symlinks"; [ $# -gt 3 ] && SEDOPT="${SEDOPT:+$SEDOPT }$1" && shift 1
+  #local SEDOPT="--follow-symlinks"; [ $# -gt 3 ] && SEDOPT="${SEDOPT:+$SEDOPT }$1" && shift 1
+  local SEDOPT=""; [ $# -gt 3 ] && SEDOPT="$1" && shift 1
   local IN="$1"; local OUT="$2"; local FILES="${SFILES:-$3}"
   # Call find and sed
   _ffind "$FILES" $SEXCLUDE -type f \
     -execdir sed $SEDOPT --in-place -e "s|$IN|$OUT|g" "{}" \;
 }
-alias   hh='FCASE=   FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed1'
-alias  ihh='FCASE=-i FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed1'
-alias  hhf='FCASE=   FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed2'
-alias ihhf='FCASE=-i FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed2'
+alias _fsed='_fsed1'
+alias   hh='FCASE=   FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed'
+alias  ihh='FCASE=-i FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed'
 
 ###########################################
 # Find duplicate files in directory
