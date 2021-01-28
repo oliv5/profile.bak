@@ -9,7 +9,7 @@ if ! command -v snv_exists >/dev/null; then
 fi
 
 # Ctags settings
-_CTAGS_OPTS='--fields=+iaS --extra=+qf --c++-kinds=+p --python-kinds=-i'
+_CTAGS_OPTS='--append --fields=+iaS --extra=+qf --c++-kinds=+p --python-kinds=-i'
 _CTAGS_REGEX='.*\.(h|c|cc|cpp|hpp|inc|py|S)$'
 _CTAGS_EXCLUDE='-not -path "*.svn*" -and -not -path "*.git" -and -not -path "/tmp/*"'
 _CTAGS_OUT='.tags'
@@ -159,6 +159,7 @@ mkinc() {
   for SRC in "${@:-.}"; do
     _tags_scandir "$SRC" "$REGEX" "$EXCLUDE" >> .tags_tmp
   done
+  # tag file list is a marker + \n + list of files with \0
   echo "## rc tags file list ##" > .tags_files
   sort -z -u .tags_tmp >> .tags_files
   $FCT .tags_files "$DST"
