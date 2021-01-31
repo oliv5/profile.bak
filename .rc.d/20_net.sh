@@ -139,6 +139,14 @@ wget_pdf() {
   done
 }
 
+################################
+# Get date from webserver
+date_fromweb() {
+  for WEBSERVER; do
+    curl -sD - "$WEBSERVER" | grep '^Date:' | cut -d' ' -f3-6
+  done
+}
+
 ############################
 # Send email using mutt or mail
 send_mail() {

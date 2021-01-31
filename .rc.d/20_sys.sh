@@ -165,14 +165,6 @@ alias bb_on='sudo sh -c "echo ON > /proc/acpi/bbswitch"'
 alias bb_off='sudo sh -c "echo OFF > /proc/acpi/bbswitch"'
 
 ################################
-# Get date from webserver
-date_fromweb() {
-  for WEBSERVER; do
-    curl -sD - "$WEBSERVER" | grep '^Date:' | cut -d' ' -f3-6
-  done
-}
-
-################################
 # inotify helpers
 alias notify_write='notify close_write'
 alias notify_read='notify close_read'
@@ -190,4 +182,19 @@ inotify_loop() {
   shift 2
   local SCRIPT="${@:?No action to execute}"
   sh -c "while true; do inotifywait -qq -e \"$TRIGGER\" \"$FILE\"; eval \"$SCRIPT\"; done" &
+}
+
+################################
+# List displays
+# https://unix.stackexchange.com/questions/17255/is-there-a-command-to-list-all-open-displays-on-a-machine
+lsdisplay() {
+  # Local display
+  (cd /tmp/.X11-unix && for x in X*; do echo ":${x#X}"; done)
+  # Remote displays (open TCP ports above 6000)
+  netstat -lnt | awk '
+  sub(/.*:/,"",$4) && $4 >= 6000 && $4 < 6100 {
+    print ($1 == "tcp6" ? "ip6-localhost:" : "localhost:") ($4 - 6000)
+  }'
+  # Show which program has port 60xx opened
+  lsof -i -n | awk '$9 ~ /:60[0-9][0-9]$/ {print}'
 }
