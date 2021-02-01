@@ -249,13 +249,6 @@ annex_isdead() {
   local N=$(annex_dead_uuids | xargs -n1 | command grep -E "${UUIDS:-not a uuid}" | wc -l)
   test $N -gt 0 && test $N -eq $(($NUM + 1))
 }
-# Do not use in scripts, 2 remotes can have the same name; use the uuid version instead
-annex_dead() {
-  annex_remotes $(annex_dead_uuids)
-}
-annex_notdead() {
-  annex_remotes $(annex_notdead_uuids)
-}
 
 ####
 # List special remotes
@@ -281,16 +274,6 @@ annex_isspecial() {
   local N=$(annex_special_uuids | xargs -n1 | command grep -E "${UUIDS:-not a uuid}" | wc -l)
   test $N -gt 0 && test $N -eq $(($NUM + 1))
 }
-# Do not use in scripts, 2 remotes can have the same name; use the uuid version instead
-annex_special() {
-  annex_remotes $(annex_special_uuids)
-}
-annex_special_dead() {
-  annex_remotes $(annex_special_dead_uuids)
-}
-annex_special_notdead() {
-  annex_remotes $(annex_special_notdead_uuids)
-}
 
 ####
 # List enabled local remotes
@@ -307,10 +290,6 @@ annex_isenabled() {
   local NUM=$(echo $UUIDS | command grep -o '|' | wc -l)
   local N=$(annex_enabled_uuids | xargs -n1 | command grep -E "${UUIDS:-not a uuid}" | wc -l)
   test $N -gt 0 && test $N -eq $(($NUM + 1))
-}
-# Do not use in scripts, 2 remotes can have the same name; use the uuid version instead
-annex_enabled() {
-  annex_remotes $(annex_enabled_uuids)
 }
 
 ####
@@ -331,13 +310,6 @@ annex_ispure() {
   local N=$(annex_pure_uuids | xargs -n1 | command grep -E "${UUIDS:-not a uuid}" | wc -l)
   test $N -gt 0 && test $N -eq $(($NUM + 1))
 }
-# Do not use in scripts, 2 remotes can have the same name; use the uuid version instead
-annex_pure() {
-  annex_remotes $(annex_pure_uuids)
-}
-annex_pure_enabled() {
-  annex_remotes $(annex_pure_enabled_uuids)
-}
 
 ####
 # List exported annexes
@@ -356,13 +328,6 @@ annex_isexported() {
   local NUM=$(echo $UUIDS | command grep -o '|' | wc -l)
   local N=$(annex_exported_uuids | xargs -n1 | command grep -E "${UUIDS:-not a uuid}" | wc -l)
   test $N -gt 0 && test $N -eq $(($NUM + 1))
-}
-# Do not use in scripts, 2 remotes can have the same name; use the uuid version instead
-annex_exported() {
-  annex_remotes $(annex_exported_uuids)
-}
-annex_exported_enabled() {
-  annex_remotes $(annex_exported_enabled_uuids)
 }
 
 
@@ -683,7 +648,7 @@ annex_upload() {
 alias annex_transfer='DBG= FROM= ALL= _annex_transfer'
 _annex_transfer() {
   annex_exists || return 1
-  local REPOS="${1:-$(annex_enabled)}"
+  local REPOS="${1:-$(annex_enabled_uuids)}"
   local MAXSIZE="${2:-1073741824}"
   local DBG="${DBG:+echo}"
   local SELECT=""
@@ -884,10 +849,10 @@ _annex_populate() {
 
 ########################################
 # Drop local files which are in the specified remote repos
-alias annex_drop='git annex drop -N $(annex_enabled | wc -w)'
+alias annex_drop='git annex drop -N $(annex_enabled_uuids | wc -w)'
 annex_drop_fast() {
   annex_exists || return 1
-  local REPOS="${1:-$(annex_enabled)}"
+  local REPOS="${1:-$(annex_enabled_uuids)}"
   local COPIES="$(echo "$REPOS" | wc -w)"
   local LOCATION="$(echo "$REPOS" | sed -e 's/ / --and --in /g')"
   [ $# -gt 0 ] && shift
@@ -972,7 +937,7 @@ annex_upkeep() {
   shift "$((OPTIND-1))"
   unset OPTFLAG OPTARG
   OPTIND=1
-  REMOTES="${@:-$(annex_enabled)}"
+  REMOTES="${@:-$(annex_enabled_uuids)}"
   # Base check
   annex_exists || return 1
   # Charging status
@@ -1357,13 +1322,13 @@ annex_purge() {
   printf "You are about to delete %d file(s) or folder(s) definitively !\n\n%s\n\nProceed ? (y/n) " $# "$*"
   read REPLY </dev/tty
   [ "$REPLY" = "y" -o "$REPLY" = "Y" ] || return 1
-  for R in $(annex_pure_enabled); do
+  for R in $(annex_pure_enabled_uuids); do
     git annex drop --force --from "$R" "$@" || return $?
   done
   git annex drop --force "$@" || return $?
   git rm -r "$@"
   git annex sync
-  for R in $(annex_exported_enabled); do
+  for R in $(annex_exported_enabled_uuids); do
     git annex export --fast "$(git_branch)" --to "$R"
   done
 }
