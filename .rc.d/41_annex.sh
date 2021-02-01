@@ -230,80 +230,80 @@ annex_remotes() {
 }
 
 ####
-# Get dead remotes names/uuids
-annex_dead_uuids() {
+# List dead remotes
+annex_dead() {
   local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
   git show git-annex:trust.log 2>/dev/null |
     awk -v uuids="${UUIDS:-^$}" '$1 ~ uuids && $2 ~ /X/ {print $1}' |
     xargs -rn1 | sort -u | xargs -r
 }
-annex_notdead_uuids() {
-  local UUIDS="$(annex_dead_uuids | sed 's/ /|/g')"
+annex_notdead() {
+  local UUIDS="$(annex_dead | sed 's/ /|/g')"
   annex_uuids "$@" | xargs -rn1 |
     command grep -vE "${UUIDS:-^$}" |
     sort -u | xargs -r
 }
 # Check one of the (listed) remotes is dead
 annex_isdead() {
-  [ -n "$(annex_dead_uuids "$@")" ]
+  [ -n "$(annex_dead "$@")" ]
 }
 
 ####
 # List special remotes
-annex_special_uuids() {
+annex_special() {
   local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
   git show git-annex:remote.log 2>/dev/null |
     awk -v uuids="${UUIDS:-^$}" '$0 ~ uuids {print $1}' |
     sort -u | xargs -r
 }
-annex_notspecial_uuids() {
-  local UUIDS="$(annex_special_uuids | sed 's/ /|/g')"
+annex_notspecial() {
+  local UUIDS="$(annex_special | sed 's/ /|/g')"
   annex_uuids "$@" | xargs -rn1 |
     command grep -vE "${UUIDS:-^$}" |
     sort -u | xargs -r
 }
 # Check one of the (listed) remotes is  special
 annex_isspecial() {
-  [ -n "$(annex_special_uuids "$@")" ]
+  [ -n "$(annex_special "$@")" ]
 }
 
 ####
 # List enabled local remotes
-annex_enabled_uuids() {
+annex_enabled() {
   local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
   local EXCLUDE="$(git config --get-regexp "remote\..*\.annex-ignore" true | awk -F. '{printf $2"|"}' | sed -e "s/|$//")"
   git config --get-regexp "remote\..*\.annex-uuid" |
     awk -v uuids="${UUIDS:-^$}" -v excluded="${EXCLUDE:-^$}" '$1 !~ excluded && $2 ~ uuids {print $2}' |
     sort -u | xargs -r
 }
-annex_notenabled_uuids() {
-  local UUIDS="$(annex_enabled_uuids | sed 's/ /|/g')"
+annex_notenabled() {
+  local UUIDS="$(annex_enabled | sed 's/ /|/g')"
   annex_uuids "$@" | xargs -rn1 |
     command grep -vE "${UUIDS:-^$}" |
     sort -u | xargs -r
 }
 # Check one of the (listed) remotes is enabled
 annex_isenabled() {
-  [ -n "$(annex_enabled_uuids "$@")" ]
+  [ -n "$(annex_enabled "$@")" ]
 }
 
 ####
 # List exported annexes
-annex_exported_uuids() {
+annex_exported() {
   local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
   git show git-annex:remote.log |
     awk -v uuids="${UUIDS:-^$}" '$1 ~ uuids && /exporttree=yes/{print $1}' |
     sort -u | xargs -r
 }
-annex_notexported_uuids() {
-  local UUIDS="$(annex_exported_uuids | sed 's/ /|/g')"
+annex_notexported() {
+  local UUIDS="$(annex_exported | sed 's/ /|/g')"
   annex_uuids "$@" | xargs -rn1 |
     command grep -vE "${UUIDS:-^$}" |
     sort -u | xargs -r
 }
 # Check one of the (listed) remotes is exported
 annex_isexported() {
-  [ -n "$(annex_exported_uuids "$@")" ]
+  [ -n "$(annex_exported "$@")" ]
 }
 
 
@@ -332,7 +332,7 @@ EOF
 annex_getinfo() {
   git annex info .
   git show git-annex:remote.log
-  for UUID in $(annex_notdead_uuids "$@"); do
+  for UUID in $(annex_notdead "$@"); do
     echo '-------------------------'
     git annex info "$UUID"
   done
@@ -462,7 +462,7 @@ annex_lookup_special_remote() {
 # Lookup special remotes keys
 annex_lookup_special_remotes() {
   local RET=0
-  for UUID in $(annex_notdead_uuids $(annex_special_uuids "$@")); do
+  for UUID in $(annex_notdead $(annex_special "$@")); do
     annex_lookup_special_remote "$UUID" 2>&1 || RET=2
   done
   return $RET
@@ -610,7 +610,7 @@ annex_upload() {
      fi
      PREV="$ARG"
   done
-  for UUID in $(annex_enabled_uuids "$TO"); do
+  for UUID in $(annex_enabled "$TO"); do
     eval git annex copy ${ARGS:-.} --to "$UUID"
   done
 }
@@ -624,7 +624,7 @@ annex_upload() {
 alias annex_transfer='DBG= FROM= ALL= _annex_transfer'
 _annex_transfer() {
   annex_exists || return 1
-  local REPOS="${1:-$(annex_enabled_uuids)}"
+  local REPOS="${1:-$(annex_enabled)}"
   local MAXSIZE="${2:-1073741824}"
   local DBG="${DBG:+echo}"
   local SELECT=""
@@ -825,10 +825,10 @@ _annex_populate() {
 
 ########################################
 # Drop local files which are in the specified remote repos
-alias annex_drop='git annex drop -N $(annex_enabled_uuids | wc -w)'
+alias annex_drop='git annex drop -N $(annex_enabled | wc -w)'
 annex_drop_fast() {
   annex_exists || return 1
-  local REPOS="${1:-$(annex_enabled_uuids)}"
+  local REPOS="${1:-$(annex_enabled)}"
   local COPIES="$(echo "$REPOS" | wc -w)"
   local LOCATION="$(echo "$REPOS" | sed -e 's/ / --and --in /g')"
   [ $# -gt 0 ] && shift
@@ -913,7 +913,7 @@ annex_upkeep() {
   shift "$((OPTIND-1))"
   unset OPTFLAG OPTARG
   OPTIND=1
-  REMOTES="${@:-$(annex_enabled_uuids)}"
+  REMOTES="${@:-$(annex_enabled)}"
   # Base check
   annex_exists || return 1
   # Charging status
@@ -1004,14 +1004,14 @@ annex_lost()  { git annex list "$@" | grep -E "^_+ "; }
 annex_lostc() { git annex list "$@" | grep -E "^_+ " | wc -l; }
 
 # Grouped find aliases
-annex_existingn() { for UUID in $(annex_notdead_uuids "$@"); do echo "*** Existing in $(annex_remotes $UUID) ($UUID) ***"; annex_existing "$UUID"; done; }
-annex_missingn()  { for UUID in $(annex_notdead_uuids "$@"); do echo "*** Missing in $(annex_remotes $UUID) ($UUID) ***"; annex_missing "$UUID"; done; }
-annex_wantgetn()  { for UUID in $(annex_notdead_uuids "$@"); do echo "*** Want-get in $(annex_remotes $UUID) ($UUID) ***"; annex_wantget "$UUID"; done; }
-annex_wantdropn() { for UUID in $(annex_notdead_uuids "$@"); do echo "*** Want-drop in $(annex_remotes $UUID) ($UUID) ***"; annex_wantdrop "$UUID"; done; }
-annex_existingnc() { for UUID in $(annex_notdead_uuids "$@"); do echo -n "Num existing in $(annex_remotes $UUID) ($UUID) : "; annex_existing "$UUID" | wc -l; done; }
-annex_missingnc()  { for UUID in $(annex_notdead_uuids "$@"); do echo -n "Num missing in $(annex_remotes $UUID) ($UUID) : "; annex_missing "$UUID" | wc -l; done; }
-annex_wantgetnc()  { for UUID in $(annex_notdead_uuids "$@"); do echo -n "Num want-get in $(annex_remotes $UUID) ($UUID) : "; annex_wantget "$UUID" | wc -l; done; }
-annex_wantdropnc() { for UUID in $(annex_notdead_uuids "$@"); do echo -n "Num want-drop in $(annex_remotes $UUID) ($UUID) : "; annex_wantdrop "$UUID" | wc -l; done; }
+annex_existingn() { for UUID in $(annex_notdead "$@"); do echo "*** Existing in $(annex_remotes $UUID) ($UUID) ***"; annex_existing "$UUID"; done; }
+annex_missingn()  { for UUID in $(annex_notdead "$@"); do echo "*** Missing in $(annex_remotes $UUID) ($UUID) ***"; annex_missing "$UUID"; done; }
+annex_wantgetn()  { for UUID in $(annex_notdead "$@"); do echo "*** Want-get in $(annex_remotes $UUID) ($UUID) ***"; annex_wantget "$UUID"; done; }
+annex_wantdropn() { for UUID in $(annex_notdead "$@"); do echo "*** Want-drop in $(annex_remotes $UUID) ($UUID) ***"; annex_wantdrop "$UUID"; done; }
+annex_existingnc() { for UUID in $(annex_notdead "$@"); do echo -n "Num existing in $(annex_remotes $UUID) ($UUID) : "; annex_existing "$UUID" | wc -l; done; }
+annex_missingnc()  { for UUID in $(annex_notdead "$@"); do echo -n "Num missing in $(annex_remotes $UUID) ($UUID) : "; annex_missing "$UUID" | wc -l; done; }
+annex_wantgetnc()  { for UUID in $(annex_notdead "$@"); do echo -n "Num want-get in $(annex_remotes $UUID) ($UUID) : "; annex_wantget "$UUID" | wc -l; done; }
+annex_wantdropnc() { for UUID in $(annex_notdead "$@"); do echo -n "Num want-drop in $(annex_remotes $UUID) ($UUID) : "; annex_wantdrop "$UUID" | wc -l; done; }
 
 # Is file in annex ?
 annex_isin() {
@@ -1054,7 +1054,7 @@ annex_preferred() {
 annex_fsck() {
   local PARAM1="$1"
   [ $# -ge 1 ] && shift
-  for UUID in $(annex_notdead_uuids "$PARAM1"); do
+  for UUID in $(annex_notdead "$PARAM1"); do
     git annex fsck --from="${UUID}" "$@"
   done
 }
@@ -1160,8 +1160,8 @@ annex_unused_with_key() {
 }
 
 # Group list unused files
-annex_unusedn() { for UUID in $(annex_notdead_uuids "$@"); do echo "*** Unused in $(annex_remotes $UUID) ($UUID) ***"; FROM="$UUID" annex_unused; done; }
-annex_unusednc() { for UUID in $(annex_notdead_uuids "$@"); do echo -n "Num unused in $(annex_remotes $UUID) ($UUID) : "; FROM="$UUID" annex_unused | wc -l; done; }
+annex_unusedn() { for UUID in $(annex_notdead "$@"); do echo "*** Unused in $(annex_remotes $UUID) ($UUID) ***"; FROM="$UUID" annex_unused; done; }
+annex_unusednc() { for UUID in $(annex_notdead "$@"); do echo -n "Num unused in $(annex_remotes $UUID) ($UUID) : "; FROM="$UUID" annex_unused | wc -l; done; }
 
 # Drop partially transfered files
 annex_dropunused_partial() {
@@ -1298,13 +1298,13 @@ annex_purge() {
   printf "You are about to delete %d file(s) or folder(s) definitively !\n\n%s\n\nProceed ? (y/n) " $# "$*"
   read REPLY </dev/tty
   [ "$REPLY" = "y" -o "$REPLY" = "Y" ] || return 1
-  for R in $(annex_enabled_uuids $(annex_notexported_uuids "$@")); do
+  for R in $(annex_enabled $(annex_notexported "$@")); do
     git annex drop --force --from "$R" "$@" || return $?
   done
   git annex drop --force "$@" || return $?
   git rm -r "$@"
   git annex sync
-  for R in $(annex_enabled_uuids $(annex_exported_uuids "$@")); do
+  for R in $(annex_enabled $(annex_exported "$@")); do
     git annex export --fast "$(git_branch)" --to "$R"
   done
 }
