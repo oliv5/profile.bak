@@ -199,7 +199,7 @@ annex_st() {
 ########################################
 # Check if inputs are all uuids
 annex_isuuid() {
-  echo "$*" | sed 's/-//g' | grep --color -E '^(\s?[a-zA-Z0-9]{32}\s?)+$' >/dev/null || return 1
+  echo "$*" | sed 's/-//g' | command grep -E '^(\s?[a-zA-Z0-9]{32}\s?)+$' >/dev/null || return 1
   return 0
 }
 
@@ -232,102 +232,78 @@ annex_remotes() {
 ####
 # Get dead remotes names/uuids
 annex_dead_uuids() {
+  local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
   git show git-annex:trust.log 2>/dev/null |
-    awk '$2 ~ /X/ {print $1}' |
-    sort -u | xargs -r
+    awk -v uuids="${UUIDS:-^$}" '$1 ~ uuids && $2 ~ /X/ {print $1}' |
+    xargs -rn1 | sort -u | xargs -r
 }
 annex_notdead_uuids() {
   local UUIDS="$(annex_dead_uuids | sed 's/ /|/g')"
-  annex_uuids | xargs -n1 |
-    command grep -vE "$UUIDS" |
+  annex_uuids "$@" | xargs -rn1 |
+    command grep -vE "${UUIDS:-^$}" |
     sort -u | xargs -r
 }
-# Check all (listed) remotes are dead
+# Check one of the (listed) remotes is dead
 annex_isdead() {
-  local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
-  local NUM=$(echo $UUIDS | command grep -o '|' | wc -l)
-  local N=$(annex_dead_uuids | xargs -n1 | command grep -E "${UUIDS:-not a uuid}" | wc -l)
-  test $N -gt 0 && test $N -eq $(($NUM + 1))
+  [ -n "$(annex_dead_uuids "$@")" ]
 }
 
 ####
 # List special remotes
 annex_special_uuids() {
-  local UUIDS="$(annex_uuids | sed 's/ /|/g')"
-  git show git-annex:remote.log 2>/dev/null | awk "/^($UUIDS)/{print \$1}" |
-    sort -u | xargs -r
-}
-annex_special_dead_uuids() {
-  local UUIDS="$(annex_special_uuids | sed 's/ /|/g')"
-  annex_dead_uuids | command grep -oE "$UUIDS" |
-    sort -u | xargs -r
-}
-annex_special_notdead_uuids() {
-  local UUIDS="$(annex_special_uuids | sed 's/ /|/g')"
-  annex_notdead_uuids | command grep -oE "$UUIDS" |
-    sort -u | xargs -r
-}
-# Check all (listed) remotes are special
-annex_isspecial() {
   local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
-  local NUM=$(echo $UUIDS | command grep -o '|' | wc -l)
-  local N=$(annex_special_uuids | xargs -n1 | command grep -E "${UUIDS:-not a uuid}" | wc -l)
-  test $N -gt 0 && test $N -eq $(($NUM + 1))
+  git show git-annex:remote.log 2>/dev/null |
+    awk -v uuids="${UUIDS:-^$}" '$0 ~ uuids {print $1}' |
+    sort -u | xargs -r
+}
+annex_notspecial_uuids() {
+  local UUIDS="$(annex_special_uuids | sed 's/ /|/g')"
+  annex_uuids "$@" | xargs -rn1 |
+    command grep -vE "${UUIDS:-^$}" |
+    sort -u | xargs -r
+}
+# Check one of the (listed) remotes is  special
+annex_isspecial() {
+  [ -n "$(annex_special_uuids "$@")" ]
 }
 
 ####
 # List enabled local remotes
 annex_enabled_uuids() {
+  local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
   local EXCLUDE="$(git config --get-regexp "remote\..*\.annex-ignore" true | awk -F. '{printf $2"|"}' | sed -e "s/|$//")"
   git config --get-regexp "remote\..*\.annex-uuid" |
-    grep -vE "${EXCLUDE:-$^}" | 
-    awk -F' ' '{print $2}' |
+    awk -v uuids="${UUIDS:-^$}" -v excluded="${EXCLUDE:-^$}" '$1 !~ excluded && $2 ~ uuids {print $2}' |
     sort -u | xargs -r
 }
-# Check all (listed) remotes are enabled
-annex_isenabled() {
-  local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
-  local NUM=$(echo $UUIDS | command grep -o '|' | wc -l)
-  local N=$(annex_enabled_uuids | xargs -n1 | command grep -E "${UUIDS:-not a uuid}" | wc -l)
-  test $N -gt 0 && test $N -eq $(($NUM + 1))
-}
-
-####
-# List pure annexes
-annex_pure_uuids() {
-  git show git-annex:remote.log | awk '$0 !~ /exporttree=yes/ {print $1}' |
-    sort -u | xargs -r
-}
-annex_pure_enabled_uuids() {
+annex_notenabled_uuids() {
   local UUIDS="$(annex_enabled_uuids | sed 's/ /|/g')"
-  annex_pure_uuids | command grep -oE "$UUIDS" |
+  annex_uuids "$@" | xargs -rn1 |
+    command grep -vE "${UUIDS:-^$}" |
     sort -u | xargs -r
 }
-# Check all (listed) remotes are pure
-annex_ispure() {
-  local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
-  local NUM=$(echo $UUIDS | command grep -o '|' | wc -l)
-  local N=$(annex_pure_uuids | xargs -n1 | command grep -E "${UUIDS:-not a uuid}" | wc -l)
-  test $N -gt 0 && test $N -eq $(($NUM + 1))
+# Check one of the (listed) remotes is enabled
+annex_isenabled() {
+  [ -n "$(annex_enabled_uuids "$@")" ]
 }
 
 ####
 # List exported annexes
 annex_exported_uuids() {
-  git show git-annex:remote.log | awk '/exporttree=yes/{print $1}' |
-    sort -u | xargs -r
-}
-annex_exported_enabled_uuids() {
-  local UUIDS="$(annex_enabled_uuids | sed 's/ /|/g')"
-  annex_exported_uuids | command grep -oE "$UUIDS" |
-    sort -u | xargs -r
-}
-# Check all (listed) remotes are exported
-annex_isexported() {
   local UUIDS="$(annex_uuids "$@" | sed 's/ /|/g')"
-  local NUM=$(echo $UUIDS | command grep -o '|' | wc -l)
-  local N=$(annex_exported_uuids | xargs -n1 | command grep -E "${UUIDS:-not a uuid}" | wc -l)
-  test $N -gt 0 && test $N -eq $(($NUM + 1))
+  git show git-annex:remote.log |
+    awk -v uuids="${UUIDS:-^$}" '$1 ~ uuids && /exporttree=yes/{print $1}' |
+    sort -u | xargs -r
+}
+annex_notexported_uuids() {
+  local UUIDS="$(annex_exported_uuids | sed 's/ /|/g')"
+  annex_uuids "$@" | xargs -rn1 |
+    command grep -vE "${UUIDS:-^$}" |
+    sort -u | xargs -r
+}
+# Check one of the (listed) remotes is exported
+annex_isexported() {
+  [ -n "$(annex_exported_uuids "$@")" ]
 }
 
 
@@ -486,7 +462,7 @@ annex_lookup_special_remote() {
 # Lookup special remotes keys
 annex_lookup_special_remotes() {
   local RET=0
-  for UUID in $(annex_special_notdead_uuids "$@"); do
+  for UUID in $(annex_notdead_uuids $(annex_special_uuids "$@")); do
     annex_lookup_special_remote "$UUID" 2>&1 || RET=2
   done
   return $RET
@@ -1322,13 +1298,13 @@ annex_purge() {
   printf "You are about to delete %d file(s) or folder(s) definitively !\n\n%s\n\nProceed ? (y/n) " $# "$*"
   read REPLY </dev/tty
   [ "$REPLY" = "y" -o "$REPLY" = "Y" ] || return 1
-  for R in $(annex_pure_enabled_uuids); do
+  for R in $(annex_enabled_uuids $(annex_notexported_uuids "$@")); do
     git annex drop --force --from "$R" "$@" || return $?
   done
   git annex drop --force "$@" || return $?
   git rm -r "$@"
   git annex sync
-  for R in $(annex_exported_enabled_uuids); do
+  for R in $(annex_enabled_uuids $(annex_exported_uuids "$@")); do
     git annex export --fast "$(git_branch)" --to "$R"
   done
 }
