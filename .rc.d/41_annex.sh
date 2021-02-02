@@ -211,22 +211,18 @@ annex_local_uuid() {
 ####
 # List remotes by name or uuid
 annex_uuids() {
-  for REMOTE in "${@:-.*}"; do
-    if annex_isuuid "$REMOTE"; then
-      git show git-annex:uuid.log | awk -v pattern="$REMOTE" '$1~pattern {print $1}'
-    else
-      git show git-annex:uuid.log | awk -v pattern="$REMOTE" '$2~pattern {print $1}'
-    fi
-  done | sort -u | xargs -r
+  local PATTERN=""
+  for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
+  git show git-annex:uuid.log |
+    awk -v pattern="$PATTERN" '$1~pattern || $2~pattern {print $1}' |
+    sort -u | xargs -r
 }
 annex_remotes() {
-  for REMOTE in "${@:-.*}"; do
-    if annex_isuuid "$REMOTE"; then
-      git show git-annex:uuid.log | awk -v pattern="$REMOTE" '$1~pattern {print $2}'
-    else
-      git show git-annex:uuid.log | awk -v pattern="$REMOTE" '$2~pattern {print $2}'
-    fi
-  done | sort -u | xargs -r
+  local PATTERN=""
+  for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
+  git show git-annex:uuid.log |
+    awk -v pattern="$PATTERN" '$1~pattern || $2~pattern {print $2}' |
+    sort -u | xargs -r
 }
 
 ####
