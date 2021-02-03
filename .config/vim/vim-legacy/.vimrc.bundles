@@ -442,7 +442,7 @@ if !exists('g:loaded_ctrlp')
 	let g:ctrlp_dont_split = 'NERD\|netrw\|help\|quickfix'
 	let g:ctrlp_reuse_window = 'NERD\|netrw\|help\|quickfix'
 	"" File list
-	let g:ctrlp_max_files = 10000
+	let g:ctrlp_max_files = 0 " No limit
 	let g:ctrlp_show_hidden = 1
 	let g:ctrlp_open_new_file = 'r'
 	let g:ctrlp_max_height = 25
