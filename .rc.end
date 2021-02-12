@@ -118,6 +118,13 @@ alias si3='WINEPREFIX="$HOME/.wineprefix/sourceinsight3" sourceinsight'
 alias n='${FMANAGER:-false} >/dev/null 2>&1'
 
 # Sudo & co
+if command -v sudo >/dev/null 2>&1; then
+  # Sudo now supports alias expansion
+  # http://www.shellperson.net/using-sudo-with-an-alias/
+  alias sudo='sudo '
+else 
+  alias sudo='su root --'
+fi
 if ! command -v gksu >/dev/null && ! command -v gksudo >/dev/null; then
   gksudo() { pkexec env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTHORITY" "$@" & }
   alias gksu='gksudo'

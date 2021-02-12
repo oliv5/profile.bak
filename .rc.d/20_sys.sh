@@ -17,16 +17,6 @@ alias cpu_performence='sudo sh -c "echo performance > /sys/devices/system/cpu/cp
 alias cpu_ondemand='sudo sh -c "echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"'
 
 ################################
-# Sudo
-if command -v sudo >/dev/null 2>&1; then
-  # Sudo now supports alias expansion
-  # http://www.shellperson.net/using-sudo-with-an-alias/
-  alias sudo='sudo '
-else 
-  alias sudo='su root --'
-fi
-
-################################
 # Event tester
 alias event_list='xev'
 alias event_showkey='showkey -s'
