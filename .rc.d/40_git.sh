@@ -180,6 +180,13 @@ git_branch() {
   git ${2:+--git-dir="$2"} symbolic-ref --short "${1:-HEAD}" 2>/dev/null || echo "detached_head"
 }
 
+# Show the last commit of each branch
+git_branches_head() {
+  for BRANCH in $(git branch -r | grep -v HEAD); do
+    echo -e $(git show --format="%ai %ar by %an" $BRANCH | head -n 1) \\t$BRANCH
+  done | sort -r
+}
+
 # Get current branch tracking
 alias git_tracking_remote='git_tracking | sed -s "s;/.*;;"'
 alias git_tracking_branch='git_tracking | sed -s "s;.*/;;"'
