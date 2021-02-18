@@ -56,7 +56,7 @@ echo <<EOF
   git config --global merge.tool mymerge
   git config --global merge.conflictstyle diff3
   git config --global mergetool.mymerge.cmd \
-    'meld --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --diff "$LOCAL" "$MERGED" "$REMOTE"'
+    'meld --diff "$LOCAL" "$MERGED" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE"'
   git config --global mergetool.mymerge.trustExitCode true
   # Misc
   git config --global rerere.enabled true
