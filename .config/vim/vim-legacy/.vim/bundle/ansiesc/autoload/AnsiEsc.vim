@@ -2260,6 +2260,16 @@ fun! s:Ansi2Gui(code)
 endfun
 
 " ---------------------------------------------------------------------
+" AnsiEsc#BufReadPost: updates ansi-escape code visualization if it was alredy
+" on for the buffer{{{2
+fun! AnsiEsc#BufReadPost()
+  let bn= bufnr("%")
+  if exists("s:AnsiEsc_enabled_{bn}") && s:AnsiEsc_enabled_{bn}
+   call AnsiEsc#AnsiEsc(1)
+  endif
+endfun
+
+" ---------------------------------------------------------------------
 "  Restore: {{{1
 let &cpo= s:keepcpo
 unlet s:keepcpo
