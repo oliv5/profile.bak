@@ -145,6 +145,13 @@
 "                  (Thanks Andrew Ho)
 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+if exists("g:loaded_buftabs")
+  finish
+endif
+let g:loaded_buftabs = 1
+
+let w:buftabs_enabled = 0
+let w:original_statusline = matchstr(&statusline, "%=.*")
 
 "
 " Don't bother when in diff mode
@@ -154,29 +161,14 @@ if &diff
 	finish
 endif     
 
+
 "
-" Global vars
+" Called on VimEnter event
 "
-if exists("g:loaded_buftabs")
-  finish
-endif
-let g:loaded_buftabs = 1
 
-if !exists("g:buftabs_marker_modified")
-	let g:buftabs_marker_modified = "!"
-endif
-
-if !exists("g:buftabs_separator")
-	let g:buftabs_separator = "-"
-endif
-
-if !exists("g:buftabs_marker_start")
-	let g:buftabs_marker_start = "["
-endif
-
-if !exists("g:buftabs_marker_end")
-	let g:buftabs_marker_end = "]"
-endif
+function! Buftabs_enable()
+	let w:buftabs_enabled = 1
+endfunction
 
 
 "
@@ -205,8 +197,33 @@ function! Buftabs_show(deleted_buf)
 	let s:list = ''
 	let l:start = 0
 	let l:end = 0
-	let l:buftabs_marker_start = g:buftabs_marker_start
-	let l:buftabs_marker_end = g:buftabs_marker_end
+	if ! exists("w:from") 
+		let w:from = 0
+	endif
+
+	if ! exists("w:buftabs_enabled")
+		return
+	endif
+
+	let l:buftabs_marker_modified = "!"
+	if exists("g:buftabs_marker_modified")
+		let l:buftabs_marker_modified = g:buftabs_marker_modified
+	endif
+
+	let l:buftabs_separator = "-"
+	if exists("g:buftabs_separator")
+		let l:buftabs_separator = g:buftabs_separator
+	endif
+
+	let l:buftabs_marker_start = "["
+	if exists("g:buftabs_marker_start")
+		let l:buftabs_marker_start = g:buftabs_marker_start
+	endif
+
+	let l:buftabs_marker_end = "]"
+	if exists("g:buftabs_marker_end")
+		let l:buftabs_marker_end = g:buftabs_marker_end
+	endif
 
 	" Walk the list of buffers
 
@@ -234,21 +251,23 @@ function! Buftabs_show(deleted_buf)
 			if winbufnr(winnr()) == l:i
 				let l:start = strlen(s:list)
 				let s:list = s:list . "\x01"
+			else
+				let s:list = s:list . ' '
 			endif
 				
-			let s:list = s:list . l:i . g:buftabs_separator
-			let s:list = s:list . (strlen(l:name)>0 ? l:name : "unamed")
+			let s:list = s:list . l:i . l:buftabs_separator
+			let s:list = s:list . l:name
 
 			if getbufvar(l:i, "&modified") == 1
-				let s:list = s:list . g:buftabs_marker_modified
+				let s:list = s:list . l:buftabs_marker_modified
 			endif
 			
 			if winbufnr(winnr()) == l:i
 				let s:list = s:list . "\x02"
 				let l:end = strlen(s:list)
+			else
+				let s:list = s:list . ' '
 			endif
-			let s:list = s:list . ' '
-
 		end
 
 		let l:i = l:i + 1
@@ -256,10 +275,17 @@ function! Buftabs_show(deleted_buf)
 
 	" If the resulting list is too long to fit on the screen, chop
 	" out the appropriate part
-	if !exists("g:buftabs_in_statusline")
-		let l:width = winwidth(0)
-		let s:list = strpart(s:list, max([0, l:start - l:width/2]), l:width)
+
+	let l:width = winwidth(0) - 12
+
+	if(l:start < w:from) 
+		let w:from = l:start - 1
 	endif
+	if l:end > w:from + l:width
+		let w:from = l:end - l:width 
+	endif
+		
+	let s:list = strpart(s:list, w:from, l:width)
 
 	" Replace the magic characters by visible markers for highlighting the
 	" current buffer. The markers can be simple characters like square brackets,
@@ -268,13 +294,14 @@ function! Buftabs_show(deleted_buf)
 	if exists("g:buftabs_active_highlight_group")
 		if exists("g:buftabs_in_statusline")
 			let l:buftabs_marker_start = "%#" . g:buftabs_active_highlight_group . "#" . l:buftabs_marker_start
-			let l:buftabs_marker_end = l:buftabs_marker_end . "%##%<"
+			let l:buftabs_marker_end = l:buftabs_marker_end . "%##"
 		end
 	end
 
 	if exists("g:buftabs_inactive_highlight_group")
 		if exists("g:buftabs_in_statusline")
-			let s:list = '%<%#' . g:buftabs_inactive_highlight_group . '#' . s:list . '%##'
+			let s:list = '%#' . g:buftabs_inactive_highlight_group . '#' . s:list
+			let s:list .= '%##'
 			let l:buftabs_marker_end = l:buftabs_marker_end . '%#' . g:buftabs_inactive_highlight_group . '#'
 		end
 	end
@@ -287,15 +314,16 @@ function! Buftabs_show(deleted_buf)
 	" (persistent)
 
 	if exists("g:buftabs_in_statusline")
-		if exists("g:buftabs_replace_statusline")
-			let &l:statusline = s:list
-		endif
+		" Only overwrite the statusline if buftabs#statusline() has not been
+		" used to specify a location
+		if match(&statusline, "%{buftabs#statusline()}") == -1
+			let &l:statusline = s:list . w:original_statusline
+		end
 	else
 		redraw
 		call s:Pecho(s:list)
 	end
 
-	return s:list
 endfunction
 
 
@@ -306,12 +334,7 @@ endfunction
 "
 
 function! buftabs#statusline(...)
-	let start = stridx(s:list, g:buftabs_marker_start)
-	let width = exists('a:1') ? a:1 : winwidth(0)
-	if width <= 0
-		let width = winwidth(0) + width
-	endif
-	return strpart(s:list, max([0, start - width/2]), width-4) . "..."
+	return s:list
 endfunction
 
 
@@ -319,14 +342,13 @@ endfunction
 " Hook to events to show buftabs at startup, when creating and when switching
 " buffers
 "
-augroup buftabs
-	autocmd!
-	autocmd! VimEnter,BufNew,BufEnter,BufWritePost * call Buftabs_show(-1)
-	autocmd! BufDelete * call Buftabs_show(expand('<abuf>'))
-	if version >= 700
-		autocmd! InsertLeave,VimResized * call Buftabs_show(-1)
-	end
-augroup END
+
+autocmd VimEnter * call Buftabs_enable()
+autocmd VimEnter,BufNew,BufEnter,BufWritePost * call Buftabs_show(-1)
+autocmd BufDelete * call Buftabs_show(expand('<abuf>'))
+if version >= 700
+	autocmd InsertLeave,VimResized * call Buftabs_show(-1)
+end
 
 " vi: ts=2 sw=2
 
