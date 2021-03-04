@@ -243,11 +243,9 @@ git_branch_merged() {
 }
 
 # Set an existing branch to a given SHA1 without checking it out
+# Push it with: git push <remote> <branch>:<branch>
 git_branch_jump() {
-  git fetch . "${2:?No destination specified...}" "${1:?No source specified...}"
-}
-git_branch_jump2() {
-  git push . "${1:?No source specified...}":"${2:?No destination specified...}"
+  git update-ref "refs/heads/${1:?No branch specified...}" "${2:?No destination specified...}"
 }
 
 # Delete local untracked branch (safely)
