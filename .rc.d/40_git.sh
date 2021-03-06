@@ -1140,7 +1140,8 @@ git_grep() {
 
 # Search for a string in all the commits
 git_grep_all() {
-  git grep "$@" $(git rev-list --all) ||
+  # git grep "$@" $(git rev-list --all) # Can report error: line too long
+  git rev-list --all | xargs git grep "$@" ||
     git log -S "$@" --source --all
 }
 
