@@ -1132,17 +1132,11 @@ git_graph() {
   git log --graph --pretty=format:'%C(blue)%h - %C(bold cyan)%an %C(bold green)(%ar)%C(bold yellow)%d%n''          %C(bold red)%s%C(reset)%n''%w(0,14,14)%b' "$@"
 }
 
-# Search for a string from HEAD
-git_grep() {
-  git grep "$@" ||
-    git log -S "$@"
-}
-
 # Search for a string in all the commits
 git_grep_all() {
+  # git log -S "$@" --source --all
   # git grep "$@" $(git rev-list --all) # Can report error: line too long
-  git rev-list --all | xargs git grep "$@" ||
-    git log -S "$@" --source --all
+  git rev-list --all | xargs git grep "$@"
 }
 
 # Show history
