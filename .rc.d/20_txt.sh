@@ -117,3 +117,15 @@ txt_get_line_num_all() {
 		grep -n -e "$MATCH" "$FILE" | cut -f1 -d:
 	done
 }
+
+# Get num lines
+txt_num_lines() {
+	wc -l "$@" | cut -d ' ' -f 1
+}
+
+# Get random line in file; Warning: srand() uses one seed per second only
+txt_random_line() {
+	local FILE="${1:?No file specified...}"
+	shift
+	awk "$@" -v num=$(txt_num_lines "$FILE") 'BEGIN{srand(); line=int(num*rand())+1} NR==line {print $0; exit}' "$FILE"
+}
