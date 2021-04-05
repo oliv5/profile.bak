@@ -155,6 +155,10 @@ alias bb_on='sudo sh -c "echo ON > /proc/acpi/bbswitch"'
 alias bb_off='sudo sh -c "echo OFF > /proc/acpi/bbswitch"'
 
 ################################
+# nvidia-prime commands
+alias primerun='DRI_PRIME=1'
+
+################################
 # inotify helpers
 alias notify_write='notify close_write'
 alias notify_read='notify close_read'
