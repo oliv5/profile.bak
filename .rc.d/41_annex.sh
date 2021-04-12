@@ -598,15 +598,16 @@ annex_upload() {
   local ARGS=""
   local PREV=""
   local TO=""
-  for ARG; do
-     if [ "$PREV" = "--to" ]; then
-      TO="${TO:+$TO }'$ARG'"
-     elif [ "$ARG" != "--to" ]; then
-      ARGS="${ARGS:+$ARGS }'$ARG'"
+  while [ $# -gt 0 ]; do
+     if [ "$1" = "--to" ]; then
+      TO="${TO:+$TO }$2"
+      shift 2
+     else
+      ARGS="${ARGS:+$ARGS }'$1'"
+      shift
      fi
-     PREV="$ARG"
   done
-  for UUID in $(annex_enabled "$TO"); do
+  for UUID in $(annex_enabled $TO); do
     eval git annex copy ${ARGS:-.} --to "$UUID"
   done
 }
