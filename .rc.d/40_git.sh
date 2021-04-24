@@ -1648,6 +1648,8 @@ alias gls='git_ls'
 alias glsg='git_ls | grep'
 alias glsc='git_ls_commit'
 alias glscg='git_ls_commit | grep'
+# BFG
+alias bfg='java -jar "$RC_DIR/rbin/bfg.jar"'
 
 
 ########################################
