@@ -137,7 +137,7 @@ runas() {
 }
 
 # Search and process
-unalias ffv ffv1 ffp ffp1 ffe ffe1 ffo ffo1 ffc 2>/dev/null || true
+unalias ffv ffv1 ffp ffp1 ffe ffe1 ffo ffo1 ffc ffc1 ffwc 2>/dev/null || true
 ffv()  { ff "${@:-""}" -print0       | xargs -0 gvim; }
 ffv1() { ff "${@:-""}" -print0 -quit | xargs -0 gvim; }
 ffp()  { ff "${@:-""}" -print0       | xargs -0 ${PAGER:-false}; }
@@ -146,7 +146,9 @@ ffe()  { ff "${@:-""}" -print0       | xargs -0 ${GEDITOR:-false}; }
 ffe1() { ff "${@:-""}" -print0 -quit | xargs -0 ${GEDITOR:-false}; }
 ffo()  { ff "${@:-""}" -print0       | xargs -0 mimeopen; }
 ffo1() { ff "${@:-""}" -print0 -quit | xargs -0 mimeopen; }
-ffc()  { ff "${@:-""}" -print        | wc -l; }
+ffc()  { ff "${@:-""}" -print0       | xargs -0 cat ; }
+ffc1() { ff "${@:-""}" -print0 -quit | xargs -0 cat ; }
+ffwc() { ff "${@:-""}" -print        | wc -l; }
 
 # Stat
 alias fs='stat -c "%s"'
