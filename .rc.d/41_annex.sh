@@ -222,7 +222,7 @@ annex_remotes() {
   for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
   git show git-annex:uuid.log |
     awk -v pattern="$PATTERN" '$1~pattern || $2~pattern {print $2}' |
-    sort -u | xargs -r
+    uniq | xargs -r
 }
 
 ####
