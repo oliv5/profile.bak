@@ -13,6 +13,7 @@ PASSPHRASE=""
 RECIPIENT=""
 NB_ENCRYPT=0
 NB_DECRYPT=0
+NB_FAILED=0
 GPG_VERSION=$(gpg --version | cut -f3 -d' ' | awk -F'.' '{printf "%.d%.2d%.2d",$1,$2,$3; exit}')
 GPG_VERSION_2_2_4=20204
 
@@ -173,6 +174,8 @@ Decrypt(){
   # One more file!
   if [ -f "$OUTPUT" ]; then
     NB_DECRYPT=$(($NB_DECRYPT+1))
+  else
+    NB_FAILED=$(($NB_FAILED+1))
   fi
 
   # Delete original file if new one is present
@@ -221,6 +224,8 @@ Encrypt() {
   # One more file!
   if [ -f "$OUTPUT" ]; then
     NB_ENCRYPT=$(($NB_ENCRYPT+1))
+  else
+    NB_FAILED=$(($NB_FAILED+1))
   fi
 
   # Delete original file if new one is present
@@ -259,5 +264,5 @@ for SRC; do
 done
 
 # Exit status
-$VERBOSE DisplayInfo "Job complete!" "Encrypted files: $NB_ENCRYPT\nDecrypted files: $NB_DECRYPT"
+$VERBOSE DisplayInfo "Job complete!" "Encrypted files: $NB_ENCRYPT\nDecrypted files: $NB_DECRYPT\nFailed files: $NB_FAILED"
 exit 0
