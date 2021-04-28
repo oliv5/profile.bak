@@ -1568,6 +1568,7 @@ alias grl2='git reflog -n 2'
 alias grl3='git reflog -n 3'
 alias grl5='git reflog -n 5'
 alias grl10='git reflog -n 10'
+alias grl25='git reflog -n 25'
 # Tag aliases
 alias gta='git tag -a'
 alias gtl='git tag -l'

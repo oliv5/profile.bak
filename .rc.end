@@ -190,6 +190,12 @@ alias spk9='sudo pkill -9'
 alias ska='sudo killall'
 alias ska9='sudo killall -9'
 alias xk='xkill'
+alias stop='kill -STOP'
+alias cont='kill -CONT'
+alias ks='killall -STOP'
+alias kc='killall -CONT'
+alias sks='sudo killall -STOP'
+alias skc='sudo killall -CONT'
 
 # Ps
 alias pse='ps -ef'
