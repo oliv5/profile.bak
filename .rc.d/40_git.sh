@@ -450,7 +450,7 @@ git_pull_all() {
   git_exists || return 1
   local IFS="$(printf ' \t\n')"
   local REMOTES="${1:-$(git_remotes)}"
-  local BRANCH="${2:-$(git_branch)}"
+  local BRANCH="${2:-HEAD}"
   for REMOTE in $REMOTES; do
     if git_remote_valid "$REMOTE"; then
       echo -n "Pull from $REMOTE: "
