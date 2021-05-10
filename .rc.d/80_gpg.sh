@@ -1,6 +1,12 @@
 #!/bin/sh
 
-# Aliases
+# Test GPG encryption key
+gpg_test_key() {
+	local WHO="${1:?No recipient specified...}"
+	echo "1234" | gpg --no-use-agent -o /dev/null --local-user "$WHO" -as - && echo "The correct passphrase was entered for this key"
+}
+
+# Exports
 alias gpg_export_pub='gpg --armor --export'
 alias gpg_export_priv='gpg --armor --export-secret-key'
 gpg_export_all() {

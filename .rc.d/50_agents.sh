@@ -53,6 +53,24 @@ gpg_agent_ssh() {
 	gpg_agent --enable-ssh-support
 }
 
+# Reload gpg-agent
+gpg_agent_reload() {
+	gpg-connect-agent reloadagent /bye
+}
+
+# Disable GPG agent
+# Set TTL of 0 (see gpg-agent.conf too)
+gpg_agent_disable() {
+	killall gpg-agent
+	gpg-agent --default-cache-ttl 0 -q -s --daemon "$@"
+}
+gpg_agent_disable_perm() {
+	echo "default-cache-ttl-ssh::0" | gpgconf --change-options gpg-agent
+	echo "default-cache-ttl::0" | gpgconf --change-options gpg-agent
+	echo "max-cache-ttl::0" | gpgconf --change-options gpg-agent
+	gpg-connect-agent reloadagent /bye
+}
+
 # Start gnome keyring daemon
 gnome_keyring_agent() {
 	command -v gnome-keyring-daemon >/dev/null 2>&1 || return 1
