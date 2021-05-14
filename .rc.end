@@ -14,7 +14,7 @@ if command -v "locale" >/dev/null 2>&1; then
   for LANG in \
       "$(echo $LOCALES | xargs -rn1 | grep -ie "fr_fr.*utf-\?8" | head -n 1)" \
       "$(echo $LOCALES | xargs -rn1 | grep -ie "utf-\?8" | head -n 1)" \
-      "$(echo $LOCALES | xargs -rn1 -l1)"; do
+      "$(echo $LOCALES | xargs -r -l1)"; do
     export LANG="$LANG"
     break
   done
