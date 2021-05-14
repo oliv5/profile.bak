@@ -9,7 +9,7 @@ alias pkg_search='dpkg -S'
 alias pkg_ls='dpkg -l'
 alias pkg_ls_conf='dpkg -l | grep -E ^rc'
 alias pkg_clean='sudo apt-get autoclean; sudo apt-get clean; sudo apt-get autoremove'
-alias pkg_clean_conf='dpkg -l | grep -E ^rc | xargs sudo apt-get purge'
+alias pkg_clean_conf='dpkg -l | awk "\$1 ~ /rc/ {print \$2}" | xargs -r sudo apt-get purge'
 alias pkg_rm_forced='sudo pkg --remove --force-remove-reinstreq'
 alias pkg_rm_ppa='sudo add-apt-repository --remove'
 alias pkg_search_old='apt-show-versions | grep "No available version"'
@@ -26,7 +26,7 @@ dpkg_status() {
   eval dpkg --get-selections ${1:+| grep "$1"}
 }
 dpkg_locked() {
-  dpkg --get-selections | awk '$2 = "hold" {print}'
+  dpkg --get-selections | awk '$2 == "hold" {print}'
 }
 dpkg_lock() {
   echo "${1:?No package specified...} hold" | sudo dpkg --set-selections
