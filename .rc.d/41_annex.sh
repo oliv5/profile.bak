@@ -1057,6 +1057,26 @@ annex_fsck() {
 }
 
 ########################################
+# Rename normal remote
+annex_rename_remote() {
+  local FROM="${1:?No remote to rename from...}"
+  local TO="${2:?No remote to rename to...}"
+  annex_exists || return 1
+  ! annex_modified || return 2
+  local BRANCH="$(git_branch)"
+  git config --rename-section filter.annex tmp_annex
+  git checkout git-annex
+  sed -ie "s/ $FROM / $TO /" uuid.log
+  git diff
+  read -p "Press enter to go on" _
+  git add uuid.log &&
+    git commit -m "Rename remote $FROM into $TO"
+  git diff HEAD~1
+  read -p "Press enter to go on" _
+  git checkout "$BRANCH"
+  git config --rename-section tmp_annex filter.annex
+}
+
 # Rename special remotes
 annex_rename_special() {
 	git config remote.$1.fetch "dummy"
