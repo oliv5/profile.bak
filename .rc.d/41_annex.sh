@@ -212,17 +212,25 @@ annex_local_uuid() {
 # List remotes by name or uuid
 annex_uuids() {
   local PATTERN=""
-  for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
-  git show git-annex:uuid.log |
-    awk -v pattern="$PATTERN" '$1~pattern || $2~pattern {print $1}' |
-    sort -u | xargs -r
+  #~ for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
+  #~ git show git-annex:uuid.log |
+    #~ awk -v pattern="$PATTERN" '$1~pattern || $2~pattern {print $1}' |
+    #~ sort -u | xargs -r
+  for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^\\\[?$REMOTE\\\]?\$"; done
+  git annex info --fast |
+    awk -v pattern="$PATTERN" '($1~/([0-9a-f-]{36})/) && ($1~pattern || $3~pattern) {print $1}' |
+      sort -u | xargs -r
 }
 annex_remotes() {
   local PATTERN=""
-  for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
-  git show git-annex:uuid.log |
-    awk -v pattern="$PATTERN" '$1~pattern || $2~pattern {print $2}' |
-    uniq | xargs -r
+  #~ for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^$REMOTE\$"; done
+  #~ git show git-annex:uuid.log |
+    #~ awk -v pattern="$PATTERN" '$1~pattern || $2~pattern {print $2}' |
+    #~ uniq | xargs -r
+  for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^\\\[?$REMOTE\\\]?\$"; done
+  git annex info --fast |
+    awk -v pattern="$PATTERN" '($1~/([0-9a-f-]{36})/) && ($1~pattern || $3~pattern) {print $3}' |
+      tr -d '][' | sort -u | xargs -r
 }
 
 ####
