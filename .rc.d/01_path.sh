@@ -124,7 +124,9 @@ path_reset() { export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/s
 
 # LD_LIBRARY_PATH aliases
 # Warning: we should not use LD_LIBRARY_PATH
+# see https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html
 # see ftp://linuxmafia.com/faq/Admin/ld-lib-path.html
+# see http://www.visi.com/~barr/ldpath.html
 ldlibpath_prepend() { _path_prepend LD_LIBRARY_PATH "$@"; }
 ldlibpath_append() { _path_append LD_LIBRARY_PATH "$@"; }
 ldlibpath_remove() { _path_remove LD_LIBRARY_PATH "$@"; }
@@ -132,4 +134,9 @@ ldlibpath_remove_fs() { _path_remove_fs LD_LIBRARY_PATH "$@"; }
 ldlibpath_remove_absent() { _path_remove_absent LD_LIBRARY_PATH "$@"; }
 ldlibpath_cleanup() { _path_cleanup LD_LIBRARY_PATH "$@"; }
 ldlibpath_find() { _path_find LD_LIBRARY_PATH "$@"; }
-ldlibpath_reset() { export LD_LIBRARY_PATH=""; }
+ldlibpath_reset() { unset LD_LIBRARY_PATH; }
+
+# Cleanup environement from some dangerous lib hijacking technics
+# See https://repo.zenk-security.com/Techniques%20d.attaques%20%20.%20%20Failles/Quelques%20astuces%20avec%20LD_PRELOAD.pdf
+ld_cleanup() { unset LD_LIBRARY_PATH LD_PRELOAD LD_DEBUG; }
+ld_cleanup # clean now
