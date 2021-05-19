@@ -5,17 +5,18 @@
     "Lua.completion.callSnippet": "Both",
     "editor.suggestSelection": "first",
     "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
-    "workbench.sideBar.location": "right",
     "editor.multiCursorModifier": "alt",
+    "workbench.sideBar.location": "right",
     "workbench.enableExperiments": false,
     "workbench.settings.enableNaturalLanguageSearch": false,
     "telemetry.enableCrashReporter": false,
     "telemetry.enableTelemetry": false,
     "settingsSync.keybindingsPerPlatform": false,
+    "debug.console.closeOnEnd": true,
+    "debug.onTaskErrors": "showErrors",
     "extensions.autoUpdate": false,
     "update.mode": "manual",
     "scope4code.engineCommands": {
-    
         "config_index": {
             "cscope": {
                 "win32": 1,
@@ -48,4 +49,18 @@
     "cscopeCode.auto": false,
     "cscopeCode.build": "/usr/bin/cscope -RbU",
     "gitlens.keymap": "none",
+    "timeline.excludeSources": [
+        "git-history"
+    ],
+    "vssolution.createTemplateFolderQuestion": false,
+    "vssolution.altSolutionFolders": [
+        "VsProj"
+    ],
+    "vssolution.showMode": "explorer",
+    "eventCommandMapper.eventMaps": [
+        {"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.view.debug"},
+        {"event":"vscode.debug.onDidTerminateDebugSession", 
+            ["command":"workbench.action.closePanel", "command":"workbench.action.closeSidebar"]
+        },
+    ],
 }

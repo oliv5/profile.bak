@@ -7,12 +7,6 @@
 //
 { "key": "ctrl+w",                "command": "" },
 
-//
-// User config
-//
-// Files
-{ "key": "ctrl+f5",               "command": "workbench.action.reloadWindow" },
-
 // Panels
 { "key": "ctrl+alt+d",            "command": "workbench.view.debug" },
 { "key": "ctrl+alt+e",            "command": "workbench.view.explorer" },
@@ -24,27 +18,46 @@
 { "key": "ctrl+alt+q",            "command": "workbench.action.output.toggleOutput" },
 
 // Panels quick bindings
-{ "key": "f12",                   "command": "workbench.action.toggleFullScreen" },
+{ "key": "f11",                   "command": "workbench.action.toggleFullScreen" },
+{ "key": "f12",                   "command": "workbench.action.toggleSidebarVisibility" },
 { "key": "shift+f12",             "command": "workbench.action.togglePanel" },
-{ "key": "ctrl+f12",              "command": "workbench.action.toggleSidebarVisibility" },
-{ "key": "ctrl+shift+f12",        "command": "workbench.action.toggleSidebarPosition" },
 { "key": "ctrl+e",                "command": "workbench.view.explorer" },
+{ "key": "ctrl+e",                "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
+{ "key": "ctrl+r",                "command": "workbench.view.search" },
+{ "key": "ctrl+r",                "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
 { "key": "escape",                "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
 
-// Editors management
+// Quick actions (searches / navigate)
 { "key": "ctrl+p",                "command": "workbench.action.quickOpen" },
+{ "key": "ctrl+shift+p",          "command": "workbench.action.showCommands" },
+{ "key": "ctrl+o",                "command": "workbench.action.openRecent" },
+{ "key": "ctrl+shit+o",           "command": "workbench.action.gotoSymbol" },
 { "key": "ctrl+tab",              "command": "workbench.action.quickOpenPreviousRecentlyUsedEditorInGroup" },
-{ "key": "ctrl+shift+n",          "command": "workbench.action.newWindow" },
+{ "key": "ctrl+i",                "command": "editWithShell.runCommand" },
+
+// Views (a.k.a windows) management
+{ "key": "ctrl+w ctrl+up",        "command": "workbench.action.focusAboveGroup" },
+{ "key": "ctrl+w ctrl+down",      "command": "workbench.action.focusBelowGroup" },
+{ "key": "ctrl+w ctrl+left",      "command": "workbench.action.focusLeftGroup" },
+{ "key": "ctrl+w ctrl+right",     "command": "workbench.action.focusRightGroup" },
+{ "key": "ctrl+w up",             "command": "views.moveViewUp" },
+{ "key": "ctrl+w down",           "command": "views.moveViewDown" },
+{ "key": "ctrl+w left",           "command": "views.moveViewLeft" },
+{ "key": "ctrl+w right",          "command": "views.moveViewRight" },
 { "key": "ctrl+w ctrl+s",         "command": "workbench.action.splitEditor" },
-{ "key": "ctrl+w ctrl+c",         "command": "workbench.action.closeActiveEditor" },
+{ "key": "ctrl+w shift+s",        "command": "workbench.action.splitEditorDown" },
+{ "key": "ctrl+w ctrl+c",         "command": "workbench.action.joinTwoGroups" },
+{ "key": "ctrl+w ctrl+q",         "command": "workbench.action.joinAllGroups" },
 { "key": "ctrl+f4",               "command": "workbench.action.closeActiveEditor" },
 { "key": "ctrl++",                "command": "workbench.action.zoomIn" },
 { "key": "ctrl+-",                "command": "workbench.action.zoomOut" },
+{ "key": "ctrl+w ctrl+n",         "command": "workbench.action.newWindow" },
 
 // Undo/redo
 { "key": "ctrl+z",                "command": "undo", "when": "editorTextFocus" },
 { "key": "ctrl+y",                "command": "redo", "when": "editorTextFocus" },
 { "key": "ctrl+shift+z",          "command": "redo", "when": "editorTextFocus" },
+{ "key": "ctrl+shift+r",          "command": "workbench.action.files.revert", "when": "editorTextFocus" },
 
 // Search & replace
 { "key": "ctrl+f",                "command": "actions.find" },
@@ -55,6 +68,10 @@
 { "key": "alt+c",                 "command": "toggleFindCaseSensitive", "when": "editorFocus" },
 { "key": "alt+r",                 "command": "toggleFindRegex", "when": "editorFocus" },
 { "key": "alt+w",                 "command": "toggleFindWholeWord", "when": "editorFocus" },
+
+// Error markers
+{ "key": "f2",                    "command": "editor.action.marker.next", "when": "editorFocus" },
+{ "key": "shift+f2",              "command": "editor.action.marker.prev", "when": "editorFocus" },
 
 // Search navigation
 { "key": "f3",                    "command": "editor.action.nextMatchFindAction", "when": "editorFocus" },
@@ -67,10 +84,6 @@
 { "key": "alt+right",             "command": "workbench.action.navigateForward" },
 { "key": "ctrl+j",                "command": "workbench.action.gotoLine" },
 
-// Error markers
-{ "key": "f2",                    "command": "editor.action.marker.next", "when": "editorFocus" },
-{ "key": "shift+f2",              "command": "editor.action.marker.prev", "when": "editorFocus" },
-
 // Folding
 { "key": "ctrl+u",                "command": "editor.fold", "when": "editorFocus" },
 { "key": "ctrl+shift+u",          "command": "editor.unfold", "when": "editorFocus" },
@@ -78,15 +91,19 @@
 { "key": "ctrl+alt+shift+u" ,     "command": "editor.unfoldAll", "when": "editorFocus" },
 
 // Intellisense command bar
-{ "key": "ctrl+t",              "command": "workbench.action.gotoSymbol" },
-{ "key": "ctrl+backspace", "command": "workbench.action.showAllSymbols" },
+{ "key": "ctrl+t",                "command": "workbench.action.gotoSymbol" },
+{ "key": "ctrl+backspace",        "command": "workbench.action.showAllSymbols" },
 // Intellisense peek/preview
-{ "key": "ctrl+d d",            "command": "editor.action.previewDeclaration", "when": "editorTextFocus" }, // same as editor.action.peekDefinition
-{ "key": "ctrl+d c",           "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" }, // same as editor.action.revealDefinition
-{ "key": "ctrl+d t",            "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" }, // same as editor.action.revealDefinition
-{ "key": "ctrl+d backspace",  "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" }, // same as editor.action.revealDefinition
+{ "key": "ctrl+d d",              "command": "editor.action.previewDeclaration", "when": "editorTextFocus" }, // same as editor.action.peekDefinition
+{ "key": "ctrl+d c",              "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" }, // same as editor.action.revealDefinition
+{ "key": "ctrl+d t",              "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" }, // same as editor.action.revealDefinition
+{ "key": "ctrl+d backspace",      "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" }, // same as editor.action.revealDefinition
 // Intellisense goto
-{ "key": "ctrl+enter",      "command": "editor.action.goToDeclaration", "when": "editorTextFocus" },
+{ "key": "ctrl+enter",            "command": "editor.action.goToDeclaration", "when": "editorTextFocus" },
+
+// Build & debugging
+//{ "key": "shift+f5",            "command": "extension.multiCommand.execute", "args": 
+//    { "sequence": [ "workbench.action.debug.stop", "workbench.action.closePanel", "workbench.action.closeSidebar" ] } }
 
 // Cscope: https://github.com/SeungukShin/cscope-code
 //{ "key": "ctrl+d ctrl+d",         "command": "extension.cscope-code.definition", "when": "editorTextFocus" },
@@ -107,15 +124,14 @@
 // Tags
 // https://stackoverflow.com/questions/50725243/vscode-how-to-keybind-an-external-command/50749571#50749571
 // https://stackoverflow.com/questions/52786022/shortcut-for-running-terminal-command-in-vs-code
-{ "key": "ctrl+alt+t",         "command": "workbench.action.terminal.sendSequence", "args": { "text": "mkalltags . \u000D" }},
+{ "key": "ctrl+alt+t",            "command": "workbench.action.terminal.sendSequence", "args": { "text": "mkalltags . \u000D" }},
 
 // Comments
 { "key": "ctrl+q",                "command": "editor.action.commentLine", "when": "editorTextFocus" },
 { "key": "ctrl+shift+q",          "command": "editor.action.blockComment", "when": "editorTextFocus" },
 
 // Extension tomhultonharrop.switch-corresponding
-{ "key": "ctrl+b",                "command": "extension.switch_corresponding_same_workspace", "when": "editorTextFocus" },
-{ "key": "ctrl+shift+b",          "command": "extension.switch_corresponding", "when": "editorTextFocus" },
+{ "key": "ctrl+b ctrl+b",         "command": "extension.switch_corresponding_same_workspace", "when": "editorTextFocus" },
 
 //
 // Tests & automatically added by vscode itself
