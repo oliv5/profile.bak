@@ -2,7 +2,11 @@
 
 # Find file in a CVS, fallback to std file search otherwise
 alias dff='_dfind'
-_dfind()  { if git_exists "$(dirname "$1")"; then git ls-files "*$@"; elif svn_exists "$(dirname "$1")"; then svn ls -R "$(dirname "$1")" | grep -E "$@"; else _ffind "$@"; fi; }
+_dfind() { if git_exists "$(dirname "$1")"; then git ls-files "*$@"; elif svn_exists "$(dirname "$1")"; then svn ls -R "$(dirname "$1")" | grep -E "$@"; else _ffind "$@"; fi; }
+
+# Find a CVS root folder
+alias rffd='_rfind'
+_rfind() { if svn_exists "$@"; then svn_root "$@"; elif git_exists "$@"; then git_worktree "$@"; fi };
 
 # Grep based code search
 _dgrep1()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; FARGS="${_DG1EXCLUDE} $@" _fgrep1 "$ARG2" "${ARG3:-.}/$ARG1"); }

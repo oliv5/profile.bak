@@ -94,9 +94,8 @@ alias f='cdf'
 alias p='cd ..'
 
 # Repo helpers
-unalias getr cdr 2>/dev/null || true
-getr() { if svn_exists "$@"; then svn_root "$@"; elif git_exists "$@"; then git_worktree "$@"; fi };
-cdr() { cd "$(getr "$@")"; }
+unalias cdr 2>/dev/null || true
+cdr() { cd "$(_rfind "$@")"; }
 alias r='cdr'
 
 # Vim & co

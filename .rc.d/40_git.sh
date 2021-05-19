@@ -99,6 +99,16 @@ git_exists() {
   git ${1:+--git-dir="${1}/.git"} rev-parse >/dev/null 2>&1
 }
 
+# Get git directory (alias git-dir)
+git_dir() {
+  local DIR="$1"
+  readlink -f "$(git ${DIR:+--git-dir="$DIR/.git"} rev-parse --git-dir 2>/dev/null)" ||
+  readlink -f "$(git ${DIR:+--git-dir="$DIR"} rev-parse --git-dir 2>/dev/null)"
+}
+git_user_dir() {
+  echo "$(git_dir "$@")/user"
+}
+
 # Check bare repo attribute
 git_bare() {
   [ "$(git ${1:+--git-dir="$1"} config --get core.bare)" = "true" ]
@@ -107,17 +117,6 @@ git_bare() {
 # Get git worktree directory
 git_worktree() {
   git ${1:+--git-dir="$1"} rev-parse --show-toplevel
-}
-
-# Get git directory (alias git-dir)
-git_dir() {
-  local DIR="$1"
-  readlink -f "$(git ${DIR:+--git-dir="$DIR/.git"} rev-parse --git-dir 2>/dev/null)" ||
-  readlink -f "$(git ${DIR:+--git-dir="$DIR"} rev-parse --git-dir 2>/dev/null)"
-  #readlink -f "$(git --git-dir="${DIR%%.git}" rev-parse --git-dir 2>/dev/null)"
-}
-git_user_dir() {
-  echo "$(git_dir "$@")/user"
 }
 
 # Get git exec-path
