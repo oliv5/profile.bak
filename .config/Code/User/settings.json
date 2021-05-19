@@ -16,6 +16,8 @@
     "debug.onTaskErrors": "showErrors",
     "extensions.autoUpdate": false,
     "update.mode": "manual",
+    "scope4code.databasePath": "${workspaceRoot}/",
+    "scope4code.executablePath": "/usr/bin/cscope",
     "scope4code.engineCommands": {
         "config_index": {
             "cscope": {
@@ -58,9 +60,9 @@
     ],
     "vssolution.showMode": "explorer",
     "eventCommandMapper.eventMaps": [
-        {"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.view.debug"},
-        {"event":"vscode.debug.onDidTerminateDebugSession", 
-            ["command":"workbench.action.closePanel", "command":"workbench.action.closeSidebar"]
-        },
+        {"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.debug.action.toggleRepl"},
+        {"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.panel.repl.view.focus"},
+        {"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.closePanel"},
+        {"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.closeSidebar"},
     ],
 }

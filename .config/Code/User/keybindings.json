@@ -7,33 +7,44 @@
 //
 { "key": "ctrl+w",                "command": "" },
 
-// Panels
-{ "key": "ctrl+alt+d",            "command": "workbench.view.debug" },
-{ "key": "ctrl+alt+e",            "command": "workbench.view.explorer" },
-{ "key": "ctrl+alt+g",            "command": "workbench.view.git" },
-{ "key": "ctrl+alt+s",            "command": "workbench.view.search" },
-{ "key": "ctrl+alt+f",            "command": "workbench.action.toggleFullScreen" },
-{ "key": "ctrl+alt+p",            "command": "workbench.action.togglePanel" },
-{ "key": "ctrl+alt+b",            "command": "workbench.action.toggleSidebarVisibility" },
-{ "key": "ctrl+alt+q",            "command": "workbench.action.output.toggleOutput" },
-
-// Panels quick bindings
+// Fullscreen
 { "key": "f11",                   "command": "workbench.action.toggleFullScreen" },
+
+// Sidebar
+{ "key": "escape",                "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
 { "key": "f12",                   "command": "workbench.action.toggleSidebarVisibility" },
-{ "key": "shift+f12",             "command": "workbench.action.togglePanel" },
+{ "key": "ctrl+alt+b",            "command": "workbench.action.toggleSidebarVisibility" },
+{ "key": "ctrl+alt+d",            "command": "workbench.view.debug" },
+{ "key": "ctrl+alt+d",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
+{ "key": "ctrl+alt+e",            "command": "workbench.view.explorer" },
+{ "key": "ctrl+alt+e",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
+{ "key": "ctrl+alt+g",            "command": "workbench.view.git" },
+{ "key": "ctrl+alt+g",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
+{ "key": "ctrl+alt+s",            "command": "workbench.view.search" },
+{ "key": "ctrl+alt+s",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
 { "key": "ctrl+e",                "command": "workbench.view.explorer" },
 { "key": "ctrl+e",                "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
 { "key": "ctrl+r",                "command": "workbench.view.search" },
 { "key": "ctrl+r",                "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
-{ "key": "escape",                "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
+
+// Panel
+//{ "key": "escape",                "command": "workbench.action.closeSidebar", "when" : "panelFocus" },
+{ "key": "shift+f12",             "command": "workbench.action.togglePanel" },
+{ "key": "ctrl+alt+p",            "command": "workbench.action.togglePanel" },
+{ "key": "ctrl+alt+y",            "command": "workbench.debug.action.toggleRepl" },
+{ "key": "ctrl+alt+q",            "command": "workbench.action.output.toggleOutput" },
+{ "key": "ctrl+alt+t",            "command": "workbench.action.terminal.toggleTerminal" },
 
 // Quick actions (searches / navigate)
+{ "key": "ctrl+tab",              "command": "workbench.action.quickOpenPreviousRecentlyUsedEditorInGroup" },
+{ "key": "ctrl+[backquote]",      "command": "workbench.action.openPreviousRecentlyUsedEditorInGroup" },
+{ "key": "ctrl+shift+[backquote]","command": "workbench.action.openNextRecentlyUsedEditorInGroup" },
 { "key": "ctrl+p",                "command": "workbench.action.quickOpen" },
 { "key": "ctrl+shift+p",          "command": "workbench.action.showCommands" },
 { "key": "ctrl+o",                "command": "workbench.action.openRecent" },
-{ "key": "ctrl+shit+o",           "command": "workbench.action.gotoSymbol" },
-{ "key": "ctrl+tab",              "command": "workbench.action.quickOpenPreviousRecentlyUsedEditorInGroup" },
-{ "key": "ctrl+i",                "command": "editWithShell.runCommand" },
+{ "key": "ctrl+shift+o",          "command": "editWithShell.runCommand" },
+{ "key": "ctrl+t",                "command": "workbench.action.gotoSymbol" },
+{ "key": "ctrl+shift+t",          "command": "workbench.action.showAllSymbols" },
 
 // Views (a.k.a windows) management
 { "key": "ctrl+w ctrl+up",        "command": "workbench.action.focusAboveGroup" },
@@ -90,14 +101,11 @@
 { "key": "ctrl+alt+u",            "command": "editor.foldAll", "when": "editorFocus" },
 { "key": "ctrl+alt+shift+u" ,     "command": "editor.unfoldAll", "when": "editorFocus" },
 
-// Intellisense command bar
-{ "key": "ctrl+t",                "command": "workbench.action.gotoSymbol" },
-{ "key": "ctrl+backspace",        "command": "workbench.action.showAllSymbols" },
 // Intellisense peek/preview
-{ "key": "ctrl+d d",              "command": "editor.action.previewDeclaration", "when": "editorTextFocus" }, // same as editor.action.peekDefinition
-{ "key": "ctrl+d c",              "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" }, // same as editor.action.revealDefinition
-{ "key": "ctrl+d t",              "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" }, // same as editor.action.revealDefinition
-{ "key": "ctrl+d backspace",      "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" }, // same as editor.action.revealDefinition
+{ "key": "ctrl+backspace",        "command": "editor.action.revealDefinition", "when": "editorTextFocus" }, // same as editor.action.peekDefinition / editor.action.previewDeclaration ?
+{ "key": "ctrl+d d",              "command": "editor.action.revealDefinition", "when": "editorTextFocus" }, // same as editor.action.peekDefinition / editor.action.previewDeclaration ?
+{ "key": "ctrl+shift+backspace",  "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
+{ "key": "ctrl+d c",              "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
 // Intellisense goto
 { "key": "ctrl+enter",            "command": "editor.action.goToDeclaration", "when": "editorTextFocus" },
 
@@ -113,6 +121,7 @@
 //{ "key": "ctrl+d ctrl+t",         "command": "extension.cscope-code.symbol", "when": "editorTextFocus" },
 
 // Cscope: https://github.com/xulion/scope4code
+{ "key": "ctrl+d ctrl+b",         "command": "extension.build", "when": "editorTextFocus" },
 { "key": "ctrl+d ctrl+d",         "command": "extension.findDefinition", "when": "editorTextFocus" },
 { "key": "ctrl+d ctrl+c",         "command": "extension.findCaller", "when": "editorTextFocus" },
 { "key": "ctrl+d ctrl+e",         "command": "extension.findCallee", "when": "editorTextFocus" },
@@ -124,7 +133,7 @@
 // Tags
 // https://stackoverflow.com/questions/50725243/vscode-how-to-keybind-an-external-command/50749571#50749571
 // https://stackoverflow.com/questions/52786022/shortcut-for-running-terminal-command-in-vs-code
-{ "key": "ctrl+alt+t",            "command": "workbench.action.terminal.sendSequence", "args": { "text": "mkalltags . \u000D" }},
+{ "key": "ctrl+alt+b",            "command": "workbench.action.terminal.sendSequence", "args": { "text": "mkalltags . \u000D" }},
 
 // Comments
 { "key": "ctrl+q",                "command": "editor.action.commentLine", "when": "editorTextFocus" },
