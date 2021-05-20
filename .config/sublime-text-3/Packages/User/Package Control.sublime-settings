@@ -1,6 +1,6 @@
 {
-	"bootstrapped": true,
 	"auto_upgrade": false,
+	"bootstrapped": true,
 	"in_process_packages":
 	[
 	],
@@ -11,6 +11,7 @@
 		"BracketHighlighter",
 		"C++ Snippets",
 		"CTags",
+		"Debugger",
 		"DocBlockr",
 		"File History",
 		"FileDiffs",
