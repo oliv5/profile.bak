@@ -218,7 +218,7 @@ annex_uuids() {
     #~ sort -u | xargs -r
   for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^\\\[?$REMOTE\\\]?\$"; done
   git annex info --fast |
-    awk -v pattern="$PATTERN" '($1~/([0-9a-f-]{36})/) && ($1~pattern || $3~pattern) {print $1}' |
+    awk -v pattern="$PATTERN" '$1~/([0-9a-f-]{36})/ && $1!~/[0-]{35}[12]/ && ($1~pattern || $3~pattern) {print $1}' |
       sort -u | xargs -r
 }
 annex_remotes() {
@@ -229,7 +229,7 @@ annex_remotes() {
     #~ uniq | xargs -r
   for REMOTE in "${@:-.*}"; do PATTERN="${PATTERN:+$PATTERN|}^\\\[?$REMOTE\\\]?\$"; done
   git annex info --fast |
-    awk -v pattern="$PATTERN" '($1~/([0-9a-f-]{36})/) && ($1~pattern || $3~pattern) {print $3}' |
+    awk -v pattern="$PATTERN" '$1~/([0-9a-f-]{36})/ && $1!~/[0-]{35}[12]/ && ($1~pattern || $3~pattern) {print $3}' |
       tr -d '][' | sort -u | xargs -r
 }
 
