@@ -72,7 +72,7 @@
 
 // Go back to editor, stop debugging, close all other windows/panels/bars
 { "key": "ctrl+w ctrl+w",         "command": "extension.multiCommand.execute", "args":
-    { "sequence": [ "workbench.action.debug.stop", "workbench.action.closePanel", "workbench.action.closeSidebar" ] } }
+    { "sequence": [ "workbench.action.debug.stop", "workbench.action.closePanel", "workbench.action.closeSidebar" ] } },
 
 // Zooms
 { "key": "ctrl++",                "command": "workbench.action.zoomIn" },
@@ -177,5 +177,10 @@
 { "key": "ctrl+i",                "command": "editWithShell.runCommand" },
 
 //////////////////////////////////////////////////
+// Added by vscode automatically, first is a placeholder
+{
+    "key": "",
+    "command": ""
+},
 
 ]
