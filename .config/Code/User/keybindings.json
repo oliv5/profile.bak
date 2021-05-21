@@ -46,6 +46,15 @@
 { "key": "ctrl+t",                "command": "workbench.action.gotoSymbol" },
 { "key": "ctrl+shift+t",          "command": "workbench.action.showAllSymbols" },
 
+// Cursor/focus navigation
+{ "key": "alt+left",              "command": "workbench.action.navigateBack" },
+{ "key": "alt+right",             "command": "workbench.action.navigateForward" },
+{ "key": "ctrl+left",             "command": "workbench.action.navigateLeft" },
+{ "key": "ctrl+right",            "command": "workbench.action.navigateRight" },
+{ "key": "ctrl+up",               "command": "workbench.action.navigateUp" },
+{ "key": "ctrl+down",             "command": "workbench.action.navigateDown" },
+{ "key": "ctrl+j",                "command": "workbench.action.gotoLine" },
+
 // Views (a.k.a windows) management
 { "key": "ctrl+w ctrl+n",         "command": "workbench.action.newWindow" },
 { "key": "ctrl+w ctrl+up",        "command": "workbench.action.focusAboveGroup" },
@@ -60,6 +69,12 @@
 { "key": "ctrl+w shift+s",        "command": "workbench.action.splitEditorDown" },
 { "key": "ctrl+w ctrl+c",         "command": "workbench.action.joinTwoGroups" },
 { "key": "ctrl+w ctrl+q",         "command": "workbench.action.joinAllGroups" },
+
+// Go back to editor, stop debugging, close all other windows/panels/bars
+{ "key": "ctrl+w ctrl+w",         "command": "extension.multiCommand.execute", "args":
+    { "sequence": [ "workbench.action.debug.stop", "workbench.action.closePanel", "workbench.action.closeSidebar" ] } }
+
+// Zooms
 { "key": "ctrl++",                "command": "workbench.action.zoomIn" },
 { "key": "ctrl+-",                "command": "workbench.action.zoomOut" },
 
@@ -102,11 +117,6 @@
 { "key": "shift+f4",              "command": "search.action.focusPreviousSearchResult", "when": "editorFocus && hasSearchResult" },
 { "key": "ctrl+f4",               "command": "search.action.clearSearchResults", "when": "hasSearchResult" },
 
-// Cursor navigation
-{ "key": "alt+left",              "command": "workbench.action.navigateBack" },
-{ "key": "alt+right",             "command": "workbench.action.navigateForward" },
-{ "key": "ctrl+j",                "command": "workbench.action.gotoLine" },
-
 // Folding
 { "key": "ctrl+u",                "command": "editor.fold", "when": "editorFocus" },
 { "key": "ctrl+shift+u",          "command": "editor.unfold", "when": "editorFocus" },
@@ -125,11 +135,17 @@
 // Intellisense goto
 { "key": "ctrl+enter",            "command": "editor.action.goToDeclaration", "when": "editorTextFocus" },
 
+// Quickfix proposals
+{ "key": "ctrl+shift+space",      "command": "editor.action.quickFix", "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly" },
+{ "key": "ctrl+shift+[Comma]",    "command": "-editor.action.quickFix", "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly" },
+{ "key": "ctrl+shift+space",      "command": "problems.action.showQuickFixes", "when": "problemFocus" },
+{ "key": "ctrl+shift+[Comma]",    "command": "-problems.action.showQuickFixes", "when": "problemFocus" },
+
 //////////////////////////////////////////////////
 // Extensions
 
 // Build & debugging
-//{ "key": "shift+f5",            "command": "extension.multiCommand.execute", "args": 
+//{ "key": "shift+f5",            "command": "extension.multiCommand.execute", "args":
 //    { "sequence": [ "workbench.action.debug.stop", "workbench.action.closePanel", "workbench.action.closeSidebar" ] } }
 
 // Cscope: https://github.com/SeungukShin/cscope-code
@@ -157,7 +173,7 @@
 // Extension tomhultonharrop.switch-corresponding
 { "key": "ctrl+b ctrl+b",         "command": "extension.switch_corresponding_same_workspace", "when": "editorTextFocus" },
 
-// Run shell command on selection
+// Extension edit with shell (run shell command on selection)
 { "key": "ctrl+i",                "command": "editWithShell.runCommand" },
 
 //////////////////////////////////////////////////

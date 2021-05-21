@@ -2,20 +2,22 @@
 {
     "editor.minimap.enabled": false,
     "editor.renderControlCharacters": true,
-    "Lua.completion.callSnippet": "Both",
     "editor.suggestSelection": "first",
-    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
     "editor.multiCursorModifier": "alt",
+    "editor.semanticHighlighting.enabled": true,
     "workbench.sideBar.location": "right",
     "workbench.enableExperiments": false,
     "workbench.settings.enableNaturalLanguageSearch": false,
-    "telemetry.enableCrashReporter": false,
-    "telemetry.enableTelemetry": false,
     "settingsSync.keybindingsPerPlatform": false,
     "debug.console.closeOnEnd": true,
     "debug.onTaskErrors": "showErrors",
-    "extensions.autoUpdate": false,
+    "telemetry.enableCrashReporter": false,
+    "telemetry.enableTelemetry": false,
     "update.mode": "manual",
+
+    // Extensions
+    "extensions.autoUpdate": false,
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
     "scope4code.databasePath": "${workspaceRoot}/",
     "scope4code.executablePath": "/usr/bin/cscope",
     "scope4code.engineCommands": {
@@ -65,4 +67,6 @@
         {"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.closePanel"},
         {"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.closeSidebar"},
     ],
+    "Lua.completion.callSnippet": "Both",
+    "Lua.telemetry.enable": false,
 }
