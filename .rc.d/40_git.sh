@@ -236,15 +236,17 @@ git_branch_exists() {
   git ${2:+--git-dir="$2"} show-ref "refs/${BRANCH}" >/dev/null
 }
 
-# Get merged branches
-git_branch_merged() {
-  git ${3:+--git-dir="$3"} branch --${2:+no-}merged ${1}
-}
-
 # Set an existing branch to a given SHA1 without checking it out
 # Push it with: git push <remote> <branch>:<branch>
 git_branch_jump() {
   git update-ref "refs/heads/${1:?No branch specified...}" "${2:?No destination specified...}"
+}
+
+# Set default ref branch.
+# Useful to set default checked-out branch in bare repos
+# Ex: git symbolic-ref HEAD refs/heads/master -> set bare repo HEAD to master
+git_branch_set_ref() {
+  git symbolic-ref "${2:?No ref specified...}" "refs/heads/${1:?No branch specified...}"
 }
 
 # Delete local untracked branch (safely)
@@ -262,7 +264,7 @@ git_branches_remote() {
   git ls-remote --heads | awk '{print substr($2,12)}'
 }
 
-# Delete remote untracked branch
+# Delete remote untracked branch (safely)
 git_branch_delete_remote() {
   for REFS; do
     local REMOTE="${REFS%%/*}"
@@ -294,8 +296,13 @@ git_branch_rename_remote() {
   git push "$REMOTE" "$NEW"
 }
 
+# Get merged branches
+git_branch_ls_merged() {
+  git ${3:+--git-dir="$3"} branch --${2:+no-}merged ${1}
+}
+
 # Check if branches are merged together
-git_merged() {
+git_branch_merged() {
   local A="${1:-HEAD}"
   local B="${2:-HEAD}"
   git branch --merged "$A" | grep "$B" >/dev/null ||
