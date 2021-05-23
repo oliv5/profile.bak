@@ -61,6 +61,12 @@ is_in() {
     return 1
 }
 
+# Save & restore shell parameters
+arg_save_var() { local _VAR_="${1:-__}"; [ $# -ge 1 ] && shift; local _VAL_="$(arg_quote "$@")"; eval "$_VAR_=\"$_VAL_\""; }
+alias arg_save='__="$(arg_quote "$@")"'
+alias arg_reset='arg_save; set --'
+alias arg_restore='eval set -- "$__"'
+
 ################################
 # https://stackoverflow.com/questions/18186929/differences-between-login-shell-and-interactive-shell
 # http://www.tldp.org/LDP/abs/html/intandnonint.html
