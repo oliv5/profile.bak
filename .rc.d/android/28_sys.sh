@@ -5,7 +5,7 @@
 # http://delphi.org/2013/11/installing-and-running-android-apps-from-command-line/
 
 # Su/sudo
-unalias sudo 2>/dev/null
+unalias sudo 2>/dev/null || true
 if ! command -v sudo >/dev/null; then
   sudo() { su root -c "PATH=\"$PATH\"; "$@""; stty sane 2>/dev/null; }
 fi

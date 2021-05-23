@@ -9,7 +9,7 @@ cdf() { cdb "$@"; }
 cd() { cda "$@"; }
 
 # Clean up all custom mappings
-cdu() { unalias cd cda cdb cdf 2>/dev/null; unset -f cd cda cdb cdf 2>/dev/null; }
+cdu() { unalias cd cda cdb cdf 2>/dev/null || true; unset -f cd cda cdb cdf 2>/dev/null; }
 
 # Make and cd
 mkcd () { mkdir -p "$@" && cd "$@"; }

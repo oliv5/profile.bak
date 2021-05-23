@@ -239,7 +239,7 @@ cmd_exists() {
 
 # Cmd unset
 cmd_unset() {
-  unalias $* 2>/dev/null
+  unalias $* 2>/dev/null || true
   unset -f $* 2>/dev/null
 }
 
@@ -247,7 +247,7 @@ cmd_unset() {
 cmd_unalias() {
   for FILE; do
     for FCT in $(awk -F'(' '/\w\s*\(\)/ {print $1}' "$FILE"); do
-      unalias "$CMD" 2>/dev/null
+      unalias "$CMD" 2>/dev/null || true
     done
   done
 }
@@ -255,7 +255,7 @@ cmd_unalias() {
 # Unalias all existing commands
 cmd_unalias_all() {
   for CMD in $(set | grep " () $" | cut -d" " -f1); do
-    unalias "$CMD" 2>/dev/null
+    unalias "$CMD" 2>/dev/null || true
   done
 }
 
