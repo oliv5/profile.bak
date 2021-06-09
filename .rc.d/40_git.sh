@@ -43,7 +43,7 @@ ask_question() {
 ########################################
 # Env setup
 git_setup() {
-echo <<EOF
+cat <<EOF
   # Push (either simple, upstream or current)
   git config --global --unset-all push.default
   git config --global --add push.default current
