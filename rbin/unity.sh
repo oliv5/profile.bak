@@ -50,6 +50,19 @@ unity_launcher_pos() {
   gsettings set com.canonical.Unity.Launcher launcher-position "${1:-Left}"
 }
 
+#############################
+# Restart unity
+# https://qastack.fr/ubuntu/38579/how-do-i-restart-a-unity-session-from-the-terminal
+unity_restart() {
+  nohup unity --replace &
+}
+unity_restart_compiz() {
+  nohup compiz --display :0 --replace &
+}
+unity_restart_lightdm() {
+  sudo service lightdm restart
+}
+
 ##########################
 ##########################
 # Execute command
