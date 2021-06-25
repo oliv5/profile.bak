@@ -168,7 +168,7 @@ alias rmd='rmdir'
 
 # Grep
 alias grep='grep --color'
-alias gp='grep'
+alias g='grep'
 alias gv='grep -v'
 alias gc='grep --color'
 alias ig='grep -i'
