@@ -39,6 +39,11 @@ path_append /usr/local/bin /usr/local/sbin /usr/bin /usr/sbin /bin /sbin
 path_cleanup
 
 ################################
+# Load plugins
+# https://github.com/junegunn/fzf
+[ -r "$RC_DIR/rbin/fzf/.fzf.bash" ] && source "$RC_DIR/rbin/fzf/.fzf.bash"
+
+################################
 # Remove some aliases/fct shortcuts
 cmd_unset which find grep awk sed xargs cut
 
