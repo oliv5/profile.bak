@@ -71,4 +71,19 @@
     ],
     "Lua.completion.callSnippet": "Both",
     "Lua.telemetry.enable": false,
+    "search.exclude": {
+        "tags": true,
+        ".tags": true,
+        ".tags.*": true,
+        "cscope.*": true,
+        ".cscope.*": true,
+        ".cscope.*": true,
+        ".id": true,
+        "GPATH": true,
+        "GRTAGS": true,
+        "GSYMS": true,
+        "GTAGS": true,
+        ".pycscope.out": true,
+        ".starscope.db": true
+    },
 }
