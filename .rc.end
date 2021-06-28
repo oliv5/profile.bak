@@ -288,6 +288,10 @@ alias rcptree='rsync_cptree'
 alias rmvtree='rsync_mvtree'
 alias rts='rsync_timestamp'
 
+# xargs
+alias x='xargs -r'
+alias x0='xargs -r0'
+
 # Misc
 alias mo='mimeopen'
 alias xo='xdg-open'
