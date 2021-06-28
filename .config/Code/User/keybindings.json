@@ -29,6 +29,8 @@
 
 // Panel
 //{ "key": "escape",                "command": "workbench.action.closeSidebar", "when" : "panelFocus" },
+{ "key": "ctrl+escape",           "command": "extension.multiCommand.execute", "args":
+    { "sequence": [ "workbench.action.closeSidebar", "workbench.action.closePanel" ] } },
 { "key": "shift+f12",             "command": "workbench.action.togglePanel" },
 { "key": "ctrl+alt+p",            "command": "workbench.action.togglePanel" },
 { "key": "ctrl+alt+y",            "command": "workbench.debug.action.toggleRepl" },
