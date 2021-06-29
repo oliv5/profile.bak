@@ -107,11 +107,13 @@ alias r='cdr'
 
 # Vim & co
 alias v='${VI:-false}'
+alias V='command ${VI:-false}'
 alias ssv='ss | cut -c 9- | xargs ${VI:-false}'
 alias gsv='gs | grep modified | cut -d : -f 2 | xargs ${VI:-false}'
 
 # Graphical editor
 alias e='${GEDITOR:-false}'
+alias E='command ${GEDITOR:-false}'
 alias sse='ss | cut -c 9- | xargs ${GEDITOR:-false}'
 alias gse='gs | grep modified | cut -d : -f 2 | xargs ${GEDITOR:-false}'
 
