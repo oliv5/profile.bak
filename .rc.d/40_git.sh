@@ -85,6 +85,19 @@ EOF
 }
 
 ########################################
+# Shallow (=partial) clones
+git_clone_shallow() {
+  local URL="${URL:?No url specified...}"
+  local HISTORY="${2:-1}"
+  local BRANCH="$3"
+  shift $(($# > 3 ? 3 : $#))
+  git clone ${BRANCH:+-b $BRANCH} "$URL" --depth $HISTORY "$*"
+}
+git_clone_shallow_single() {
+  git_clone_shallow "$@" --single-branch
+}
+
+########################################
 # Get git version
 git_version() {
   local VERSION="${1:-$(git --version 2>/dev/null | cut -d' ' -f 3)}"
@@ -428,16 +441,6 @@ git_extract() {
   local REF="${2:?No refs specified...}"
   local DIR="${3:?No DIR specified...}"
   git archive --format=tar --remote="$URL" "$REF" -- "$DIR" | tar xv
-}
-
-########################################
-# Full-import (including all branches/tags)
-git_import_bare() {
-  git clone --mirror "${1:?No source specified...}"
-}
-git_import() {
-  git_import_bare "$1" &&
-  git_frombare "$1"
 }
 
 ########################################
