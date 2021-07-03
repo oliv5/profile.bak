@@ -17,6 +17,9 @@ ssh_agent() {
 	fi
 	return 0
 }
+ssh_agent_kill() {
+	eval $(ssh-agent -k)
+}
 
 # Disable SSH-agent forwarding for the local user
 # https://developer.github.com/v3/guides/using-ssh-agent-forwarding/
