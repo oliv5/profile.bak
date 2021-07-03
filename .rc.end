@@ -41,7 +41,10 @@ path_cleanup
 ################################
 # Load plugins
 # https://github.com/junegunn/fzf
-[ -r "$RC_DIR/rbin/fzf/.fzf.bash" ] && source "$RC_DIR/rbin/fzf/.fzf.bash"
+if [ -r "$RC_DIR/rbin/fzf/.fzf.bash" ]; then
+  source "$RC_DIR/rbin/fzf/.fzf.bash"
+  export FZF_DEFAULT_OPTS="--bind=tab:accept"
+fi
 
 ################################
 # Remove some aliases/fct shortcuts
