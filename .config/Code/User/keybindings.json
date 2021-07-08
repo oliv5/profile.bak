@@ -7,9 +7,10 @@
 
 // Disable defaults
 { "key": "ctrl+w",                "command": "" },
+{ "key": "f11",                   "command": "" },
 
 // Fullscreen
-{ "key": "f11",                   "command": "workbench.action.toggleFullScreen" },
+{ "key": "ctrl+f12",              "command": "workbench.action.toggleFullScreen" },
 
 // Sidebar
 // Exception: the search bar is managed somewhere else
@@ -131,9 +132,9 @@
 
 // Intellisense peek/preview
 { "key": "ctrl+backspace",        "command": "editor.action.revealDefinition", "when": "editorTextFocus" }, // same as editor.action.peekDefinition / editor.action.previewDeclaration ?
-{ "key": "ctrl+d d",              "command": "editor.action.revealDefinition", "when": "editorTextFocus" }, // same as editor.action.peekDefinition / editor.action.previewDeclaration ?
+{ "key": "ctrl+d ctrl+d",         "command": "editor.action.revealDefinition", "when": "editorTextFocus" }, // same as editor.action.peekDefinition / editor.action.previewDeclaration ?
 { "key": "ctrl+shift+backspace",  "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
-{ "key": "ctrl+d c",              "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
+{ "key": "ctrl+d ctrl+c",         "command": "editor.action.goToReferences", "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor" },
 // Intellisense goto
 { "key": "ctrl+enter",            "command": "editor.action.goToDeclaration", "when": "editorTextFocus" },
 
@@ -142,6 +143,21 @@
 { "key": "ctrl+shift+[Comma]",    "command": "-editor.action.quickFix", "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly" },
 { "key": "ctrl+shift+space",      "command": "problems.action.showQuickFixes", "when": "problemFocus" },
 { "key": "ctrl+shift+[Comma]",    "command": "-problems.action.showQuickFixes", "when": "problemFocus" },
+
+// Debugger
+{ "key": "f9",                    "command": "editor.debug.action.toggleBreakpoint" },
+{ "key": "f5",                    "command": "workbench.action.debug.start", "when": "!inDebugMode" },
+{ "key": "f5",                    "command": "workbench.action.debug.continue", "when": "inDebugMode" },
+{ "key": "ctrl+f5",               "command": "workbench.action.debug.restart", "when": "inDebugMode" },
+{ "key": "shift+f5",              "command": "workbench.action.debug.stop", "when": "inDebugMode" },
+{ "key": "f5",                    "command": "workbench.action.debug.pause", "when": "debugState == 'running'" },
+{ "key": "f10",                   "command": "workbench.action.debug.stepOver", "when": "inDebugMode" },
+{ "key": "f11",                   "command": "workbench.action.debug.stepInto", "when": "inDebugMode" },
+{ "key": "shift+f11",             "command": "workbench.action.debug.stepOut", "when": "inDebugMode" },
+
+// Tasks
+{ "key": "f6",                    "command": "workbench.action.tasks.build", "when": "!inDebugMode" },
+{ "key": "shift+f6",              "command": "workbench.action.tasks.test", "when": "!inDebugMode" },
 
 //////////////////////////////////////////////////
 // Extensions
