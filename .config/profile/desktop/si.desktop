@@ -9,7 +9,6 @@ Type=Application
 Categories=Utility;
 Actions=new_window;
 
-[Desktop Action new_window]
+[Desktop Action new window]
 Name=New Window
 Exec=/bin/sh -c 'WINEPREFIX="$HOME/.wine-sourceinsight" wine "$HOME/.wine-sourceinsight/drive_c/Program Files/Source Insight 3/Insight3.exe"'
-OnlyShowIn=Unity;
