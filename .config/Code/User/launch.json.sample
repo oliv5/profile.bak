@@ -1,15 +1,14 @@
+// See https://code.visualstudio.com/docs/cpp/cpp-debug
+// See https://go.microsoft.com/fwlink/?linkid=830387
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Build and run CLM",
+            "name": "Build and run XC binary for x86",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/Debug/CLMRunner",
-            "args": ["-c", "${workspaceFolder}/Tests/CellSearch/CellSearch.cfg"],
+            "program": "${workspaceFolder}/Debug/runme",
+            "args": ["-c", "${workspaceFolder}/Tests/myconfig.cfg"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/Debug",
             "environment": [
@@ -26,6 +25,10 @@
                     "ignoreFailures": true
                 }
             ],
+            // External source files (replacement "original path" : "replacement path")
+            "sourceFileMap": {},
+            // Additional symbols (separated by ;)
+            "additionalSOLibSearchPath": "",
         }
     ]
 }

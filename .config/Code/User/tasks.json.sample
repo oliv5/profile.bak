@@ -1,11 +1,15 @@
+// See https://code.visualstudio.com/docs/editor/tasks
 {
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "shell",
 			"label": "Make",
+			"detail": "Build using make",
+			"type": "shell",
 			"command": "/usr/bin/make",
-			"args": [ "-s" ],
+			"args": [ 
+				"-s"
+			],
 			"options": {
 				"cwd": "${workspaceFolder}"
 			},
@@ -28,23 +32,45 @@
 				"kind": "build",
 				"isDefault": true
 			},
-			"detail": "Build using make"
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
 		},
 		{
-			"type": "shell",
 			"label": "Make clean",
+			"detail": "Clean using make",
+			"type": "shell",
 			"command": "/usr/bin/make",
-			"args": [ 
-				"-s", "clean"
+			"args": [
+				"-s",
+				"clean"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}"
 			},
-			"group": {
-				"kind": "none",
-				"isDefault": false
-			},
-			"detail": "Clean using make"
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
 		},
+		{
+			"label": "Test",
+			"detail": "Run a test",
+			"type": "shell",
+			"command": "test.sh",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": {
+				"kind" : "test",
+				"isDefault": true
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		}
 	]
 }
