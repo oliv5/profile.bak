@@ -521,7 +521,7 @@ git_bundle() {
   OUT="${OUT%%.xz}"; OUT="${OUT%%.git}.git.xz"
   if ! mkdir -p "$(dirname "$OUT")"; then
     echo "Cannot create directory '$(dirname "$OUT")'. Abort..."
-    exit 2
+    return 2
   fi
   local GPG_RECIPIENT="$2"
   local GPG_TRUST="${3:+--trust-model always}"
