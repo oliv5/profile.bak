@@ -1,23 +1,29 @@
 // Place your settings in this file to overwrite the default settings
 {
+    // Editor
     "editor.minimap.enabled": false,
     "editor.renderControlCharacters": true,
     "editor.suggestSelection": "first",
     "editor.multiCursorModifier": "alt",
     "editor.semanticHighlighting.enabled": true,
+
+    // Workbench
     "workbench.sideBar.location": "right",
     "workbench.enableExperiments": false,
     "workbench.settings.enableNaturalLanguageSearch": false,
     "workbench.activityBar.visible": false,
-    "search.searchEditor.reusePriorSearchConfiguration": true,
-    "search.seedOnFocus": true,
-    "debug.console.closeOnEnd": false,
-    "debug.onTaskErrors": "showErrors",
+    "workbench.colorTheme": "Atom Just Black",
+
+    // Misc
     "git.enabled": false,
     "settingsSync.keybindingsPerPlatform": false,
     "telemetry.enableCrashReporter": false,
     "telemetry.enableTelemetry": false,
     "update.mode": "manual",
+
+    // Search
+    "search.searchEditor.reusePriorSearchConfiguration": true,
+    "search.seedOnFocus": true,
     "search.exclude": {
         "tags": true,
         ".tags": true,
@@ -32,6 +38,38 @@
         ".pycscope.out": true,
         ".starscope.db": true
     },
+
+    // Debug
+    "debug.terminal.clearBeforeReusing": true,
+    "debug.console.closeOnEnd": false,
+    "debug.onTaskErrors": "showErrors",
+
+    // Terminal
+    "terminal.integrated.profiles.linux": {
+        "bash": {
+            "path": "bash"
+        },
+        "zsh": {
+            "path": "zsh"
+        },
+        "fish": {
+            "path": "fish"
+        },
+        "tmux": {
+            "path": "tmux",
+            "icon": "terminal-tmux"
+        },
+        "pwsh": {
+            "path": "pwsh",
+            "icon": "terminal-powershell"
+        },
+        "dash": {
+            "path": "/bin/dash"
+        }
+    },
+    "terminal.integrated.defaultProfile.linux": "bash",
+    "terminal.integrated.altClickMovesCursor": false,
+    "terminal.integrated.tabs.enabled": false,
 
     // Extensions
     "extensions.autoUpdate": false,
@@ -80,11 +118,16 @@
     ],
     "vssolution.showMode": "explorer",
     "eventCommandMapper.eventMaps": [
-       {"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.debug.action.toggleRepl"},
-       {"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.panel.repl.view.focus"},
-       //{"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.closePanel"},
-       {"event":"vscode.debug.onDidTerminateDebugSession", "command":"terminal.focus"},
-       {"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.closeSidebar"},
+        {"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.action.focusActiveEditorGroup"},
+        // {"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.action.terminal.focus"},
+        // {"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.debug.action.toggleRepl"},
+        // {"event":"vscode.debug.onDidStartDebugSession", "command":"workbench.panel.repl.view.focus"},
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        {"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.focusActiveEditorGroup"},
+        {"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.closeSidebar"},
+        // {"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.closePanel"},
+        // {"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.terminal.focus"},
+        // {"event":"vscode.debug.onDidTerminateDebugSession", "command":"workbench.action.terminal.toggleTerminal"},
     ],
     "Lua.completion.callSnippet": "Both",
     "C_Cpp.errorSquiggles": "Disabled",
