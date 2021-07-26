@@ -9,6 +9,10 @@
 { "key": "ctrl+w",                "command": "" },
 { "key": "f11",                   "command": "" },
 
+// Focus
+{ "key": "escape",                "command": "workbench.action.focusActiveEditorGroup", "when":"panelFocus || sideBarFocus" },
+//{ "key": "escape",                "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
+
 // F12 bar toggling
 { "key": "f12",                   "command": "extension.multiCommand.execute", "args":
     { "sequence": [ "workbench.action.closeSidebar", "workbench.action.closePanel" ] } },
@@ -19,7 +23,6 @@
 
 // Sidebar
 // Exception: the search bar is managed somewhere else
-{ "key": "escape",                "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
 { "key": "ctrl+alt+b",            "command": "workbench.action.toggleSidebarVisibility" },
 { "key": "ctrl+alt+d",            "command": "workbench.view.debug" },
 { "key": "ctrl+alt+d",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
