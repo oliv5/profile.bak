@@ -41,7 +41,7 @@ path_cleanup
 ################################
 # Load plugins
 # https://github.com/junegunn/fzf
-if [ -r "$RC_DIR/rbin/fzf/.fzf.bash" ]; then
+if [ -n "$BASH_VERSION" ] && [ -r "$RC_DIR/rbin/fzf/.fzf.bash" ] ; then
   source "$RC_DIR/rbin/fzf/.fzf.bash"
   export FZF_DEFAULT_OPTS="--bind=tab:accept"
 fi
