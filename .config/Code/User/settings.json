@@ -12,7 +12,6 @@
     "workbench.enableExperiments": false,
     "workbench.settings.enableNaturalLanguageSearch": false,
     "workbench.activityBar.visible": false,
-    "workbench.colorTheme": "Atom Just Black",
 
     // Misc
     "git.enabled": false,
