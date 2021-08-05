@@ -31,16 +31,21 @@ fi
 export COLORTERM="xterm" # backspace bug in vim
 export VI="$(command -v vim || command -v vi)"
 unset VIM # bug at startup if defined
+unset VIM_USETABS
+unset VIM_NOREMOTE
 
 # Start gvim
 if command -v gvim >/dev/null; then
+  # Open gvim server when file is specified
+  # Otherwise open bare gvim
   export VI="gvim"
   gvim() {
-    local ARGS=""
-    local ARG1="$1"
-    if [ -n "$ARG1" -a "$ARG1" != "-" ]; then
-      ARG1="$(echo "$ARG1" | awk -F':' '{printf "+%s \"%s\"",$2,$1}')"
-      ARG1="${ARG1:+--remote-${VIM_USETABS:+tab-}silent }$ARG1"
+    local ARGS="$1"
+    if [ -n "$ARGS" -a "$ARGS" != "-" ]; then
+      ARGS="$(echo "$ARGS" | awk -F':' '{printf "+%s \"%s\"",$2,$1}')"
+      if [ -z "$VIM_NOREMOTE" ]; then
+        ARGS="${ARGS:+--remote-${VIM_USETABS:+tab-}silent }$ARGS"
+      fi
     fi
     shift
     for ARG; do
@@ -49,7 +54,7 @@ if command -v gvim >/dev/null; then
       fi
       ARGS="${ARGS:+$ARGS }$ARG"
     done
-    eval command gvim $ARG1 $ARGS
+    eval command gvim $ARGS
   }
 fi
 

@@ -109,7 +109,7 @@ alias r='cdr'
 
 # Vim & co
 alias v='${VI:-false}'
-alias V='command ${VI:-false}'
+alias V='VIM_NOREMOTE=1 ${VI:-false}'
 alias ssv='ss | cut -c 9- | xargs ${VI:-false}'
 alias gsv='gs | grep modified | cut -d : -f 2 | xargs ${VI:-false}'
 
