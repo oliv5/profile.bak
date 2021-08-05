@@ -58,20 +58,18 @@ _tags_scandir() {
       printf "$SRC\0"
     fi
   else
-    ( command cd "$SRC" 2>/dev/null && git ls-files --exclude-standard -z 2>/dev/null ) | grep -zZE "$MATCHING" | xargs -r0 sh -c "for P; do printf \"$SRC/%s\0\" \"\$P\"; done; exit 1" _
-    if [ $? -ne 123 ]; then
-      svn ls "$SRC" 2>/dev/null | grep -E "$MATCHING" | xargs -r sh -c "for P; do printf \"$SRC/%s\0\" \"\$P\"; done; exit 1" _
+    {
+      ( command cd "$SRC" 2>/dev/null && git ls-files --exclude-standard -z 2>/dev/null ) | grep -zZE "$MATCHING" | xargs -r0 sh -c "for P; do printf \"$SRC/%s\0\" \"\$P\"; done; exit 1" _
       if [ $? -ne 123 ]; then
-        local EXCLUDING="${3:--not -path '*.svn*' -and -not -path '*.git' -and -not -path '/tmp/*'}"
-        # Check readlink -z is supported
-        if readlink -z / >/dev/null 2>&1; then
+        svn ls "$SRC" 2>/dev/null | grep -E "$MATCHING" | xargs -r sh -c "for P; do printf \"$SRC/%s\0\" \"\$P\"; done; exit 1" _
+        if [ $? -ne 123 ]; then
+          local EXCLUDING="${3:--not -path '*.svn*' -and -not -path '*.git' -and -not -path '/tmp/*'}"
           find -L "$SRC" $EXCLUDING -regextype posix-egrep -regex "$MATCHING" -type f -print0 2>/dev/null | xargs -r0 readlink -ze
-        else
-          # readlink does not support -z nor multiple input files
-          find -L "$SRC" $EXCLUDING -regextype posix-egrep -regex "$MATCHING" -type f -print0 2>/dev/null | xargs -r0 -n1 readlink -e | tr '\n' '\0'
         fi
       fi
-    fi
+    } | 
+      # Check readlink -z is supported (when not supported, it does not support multiple input files neither !!??)
+      if readlink -z / >/dev/null 2>&1; then cat - | xargs -r0 readlink -ze; else cat - | xargs -r0 -n1 readlink -e | tr '\n' '\0'; fi
   fi
 }
 
