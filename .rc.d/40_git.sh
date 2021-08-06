@@ -529,6 +529,7 @@ git_bundle() {
   local XZOPTS="$5"
   [ $# -le 7 ] && shift $# || shift 7
   echo "Git bundle into $OUT"
+  git fetch --all
   git bundle create -q "${OUT%%.xz}" ${@:---branches --tags}
   xz -k -z -S .xz --verbose $XZOPTS "${OUT%%.xz}" &&
     _git_secure_delete "${OUT%%.xz}"
