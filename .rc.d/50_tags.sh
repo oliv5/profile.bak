@@ -9,7 +9,7 @@ if ! command -v snv_exists >/dev/null; then
 fi
 
 # Ctags settings
-_CTAGS_OPTS='--append --fields=+iaS --extra=+qf --c++-kinds=+p --python-kinds=-i'
+_CTAGS_OPTS='--append --fields=+iaS --extra=+qf --c-types=+l --c++-kinds=+p --python-kinds=-i'
 _CTAGS_REGEX='.*\.(h|c|cc|cpp|hpp|inc|py|S)$'
 _CTAGS_EXCLUDE='-not -path "*.svn*" -and -not -path "*.git" -and -not -path "/tmp/*"'
 _CTAGS_OUT='.tags'
