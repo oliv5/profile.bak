@@ -9,6 +9,7 @@ if ! command -v snv_exists >/dev/null; then
 fi
 
 # Ctags settings
+# Currently using Exuberant Ctags 5.9~svn20110310
 _CTAGS_OPTS='--append --fields=+iaS --extra=+qf --c-types=+l --c++-kinds=+p --python-kinds=-i'
 _CTAGS_REGEX='.*\.(h|c|cc|cpp|hpp|inc|py|S)$'
 _CTAGS_EXCLUDE='-not -path "*.svn*" -and -not -path "*.git" -and -not -path "/tmp/*"'
