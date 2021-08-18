@@ -28,11 +28,13 @@ def parseArguments(arguments):
   nextIsInclude = False
   nextIsDefine = False
   nextIsIncludeFile = False
+  nextIsIsystem = False
 
   includes = []
   defines = []
   include_file = []
   options = []
+  isystem = []
 
   for arg in arguments:
     if nextIsInclude:
@@ -44,6 +46,9 @@ def parseArguments(arguments):
     elif nextIsIncludeFile:
       include_file += [arg]
       nextIsIncludeFile = False
+    elif nextIsIsystem:
+      isystem += [arg]
+      nextIsIsystem = False
     elif arg == "-I":
       nextIsInclude = True
     elif arg == "-D":
@@ -54,7 +59,13 @@ def parseArguments(arguments):
       defines += [arg[2:]]
     elif arg == "-include":
       nextIsIncludeFile = True
+    elif arg == "-isystem":
+      nextIsIsystem = True
     elif arg.startswith('-std='):
+      options.append(arg)
+    elif arg == '-ansi':
+      options.append(arg)
+    elif arg.startswith('-pedantic'):
       options.append(arg)
     elif arg.startswith('-W'):
       options.append(arg)
@@ -62,6 +73,7 @@ def parseArguments(arguments):
   result = list(map(lambda x: "-I" + x, includes))
   result.extend(map(lambda x: "-D" + x, defines))
   result.extend(map(lambda x: "-include " + x, include_file))
+  result.extend(map(lambda x: "-isystem" + x, isystem))
   result.extend(options)
 
   return result

@@ -2,13 +2,6 @@
 " Maintainer:  Vissale NEANG
 " Last Change: 27 sept. 2007
 
-" OLA ++
-if exists('g:omnicpp_complete_loaded')
-  finish
-endif
-let g:omnicpp_complete_loaded = 1
-" OLA ++
-
 if v:version < 700
     echohl WarningMsg
     echomsg "omni#cpp#complete.vim: Please install vim 7.0 or higher for omni-completion"

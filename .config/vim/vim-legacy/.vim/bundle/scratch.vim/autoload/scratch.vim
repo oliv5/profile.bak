@@ -3,11 +3,13 @@
 " window handling
 
 function! s:activate_autocmds(bufnr)
-  augroup ScratchAutoHide
-    autocmd!
-    execute 'autocmd WinEnter <buffer=' . a:bufnr . '> nested call <SID>close_window(0)'
-    execute 'autocmd Winleave <buffer=' . a:bufnr . '> nested call <SID>close_window(1)'
-  augroup END
+  if g:scratch_autohide
+    augroup ScratchAutoHide
+      autocmd!
+      execute 'autocmd WinEnter <buffer=' . a:bufnr . '> nested call <SID>close_window(0)'
+      execute 'autocmd Winleave <buffer=' . a:bufnr . '> nested call <SID>close_window(1)'
+    augroup END
+  endif
 endfunction
 
 function! s:deactivate_autocmds()
@@ -22,7 +24,7 @@ function! s:open_window(position)
   let scr_bufnr = bufnr('__Scratch__')
   if scr_bufnr == -1
     let cmd = g:scratch_horizontal ? 'new' : 'vnew'
-    execute a:position . s:resolve_height(g:scratch_height) . cmd . ' __Scratch__'
+    execute a:position . s:resolve_size(g:scratch_height) . cmd . ' __Scratch__'
     execute 'setlocal filetype=' . g:scratch_filetype
     setlocal bufhidden=hide
     setlocal nobuflisted
@@ -32,9 +34,17 @@ function! s:open_window(position)
     setlocal nonumber
     setlocal noswapfile
     setlocal winfixheight
-    if g:scratch_autohide
-      call s:activate_autocmds(bufnr('%'))
+    setlocal winfixwidth
+    if strlen(g:scratch_persistence_file) > 0
+      if filereadable(fnamemodify(g:scratch_persistence_file, ':p'))
+        let cpo = &cpo
+        set cpo-=a
+        execute ':r ' . g:scratch_persistence_file
+        let &cpo = cpo
+        execute 'normal! ggdd'
+      endif
     endif
+    call s:activate_autocmds(bufnr('%'))
   else
     let scr_winnr = bufwinnr(scr_bufnr)
     if scr_winnr != -1
@@ -43,13 +53,16 @@ function! s:open_window(position)
       endif
     else
       let cmd = g:scratch_horizontal ? 'split' : 'vsplit'
-      execute a:position . s:resolve_height(g:scratch_height) . cmd . ' +buffer' . scr_bufnr
+      execute a:position . s:resolve_size(g:scratch_height) . cmd . ' +buffer' . scr_bufnr
     endif
   endif
 endfunction
 
 function! s:close_window(force)
   " close scratch window if it is the last window open, or if force
+  if strlen(g:scratch_persistence_file) > 0
+    execute ':w! ' . g:scratch_persistence_file
+  endif
   if a:force
     let prev_bufnr = bufnr('#')
     let scr_bufnr = bufnr('__Scratch__')
@@ -73,15 +86,15 @@ endfunction
 
 " utility
 
-function! s:resolve_height(height)
-  " if g:scratch_height is an int, return that number, else it is a float
-  " interpret it as a fraction of the screen height and return the
+function! s:resolve_size(size)
+  " if a:size is an int, return that number, else it is a float
+  " interpret it as a fraction of the screen size and return the
   " corresponding number of lines
-  if has('float') && type(a:height) ==# 5 " type number for float
-    let abs_height = a:height * winheight(0)
-    return float2nr(abs_height)
+  if has('float') && type(a:size) ==# 5 " type number for float
+    let win_size = g:scratch_horizontal ? winheight(0) : winwidth(0)
+    return float2nr(a:size * win_size)
   else
-    return a:height
+    return a:size
   endif
 endfunction
 
@@ -148,4 +161,17 @@ function! scratch#selection(reset) range
   endif
   " remove trailing white space
   silent! execute '%s/\s\+$/'
+endfunction
+
+function! scratch#preview()
+  " toggle scratch window, keeping cursor in current window
+  let scr_winnr = bufwinnr('__Scratch__')
+  if scr_winnr != -1
+    execute scr_winnr . 'close'
+  else
+    call scratch#open(0)
+    call s:deactivate_autocmds()
+    execute bufwinnr(bufnr('#')) . 'wincmd w'
+    call s:activate_autocmds(bufnr('__Scratch__'))
+  endif
 endfunction

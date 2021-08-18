@@ -45,8 +45,10 @@
 "   script work in Console mode (Ver 1.6)
 "
 
+" Modified by: Le Tan <tamlokveer@gmail.com>
 
-if exists("loaded_highlight") 
+
+if exists("loaded_highlight")
    finish
 endif
 let loaded_highlight = ""
@@ -55,92 +57,94 @@ syntax on
 
 " -- Normal mode mappings --
 
-" Highlight current line 
-noremap  <silent> <C-h><C-h> :call <SID>Highlight("h") \| nohls<CR>
+" Highlight current line
+noremap  <silent> <leader>hl :call <SID>Highlight("h") \| nohls<CR>
 " Advance color for next line highlight
-noremap  <silent> <C-h><C-a> :call <SID>Highlight("a")<CR>
+noremap  <silent> <leader>hn :call <SID>Highlight("a")<CR>
+" Step back color for next line highlight
+noremap  <silent> <leader>hp :call <SID>Highlight("b")<CR>
 " Clear last line highlight
-noremap  <silent> <C-h><C-r> :call <SID>Highlight("r")<CR>
+noremap  <silent> <leader>hu :call <SID>Highlight("r")<CR>
 
 " Highlight word under cursor (whole word match)
-noremap  <silent> <C-h><C-w> :call <SID>Highlight("w") \| nohls<CR>
+noremap  <silent> <leader>hw :call <SID>Highlight("w") \| nohls<CR>
 " Highlight all lines having word under cursor (whole word match)
-noremap  <silent> <C-h><C-l> :call <SID>Highlight("l") \| nohls<CR>
+" noremap  <silent> <C-h><C-l> :call <SID>Highlight("l") \| nohls<CR>
 " Highlight word under cursor (partial word match)
-noremap  <silent> <C-h><C-f> :call <SID>Highlight("f") \| nohls<CR>
+" noremap  <silent> <C-h><C-f> :call <SID>Highlight("f") \| nohls<CR>
 " Highlight all lines having word under cursor (partial word match)
-noremap  <silent> <C-h><C-k> :call <SID>Highlight("k") \| nohls<CR>
+" noremap  <silent> <C-h><C-k> :call <SID>Highlight("k") \| nohls<CR>
 " Highlight last search pattern
-noremap  <silent> <C-h><C-s> :call <SID>Highlight("s") \| nohls<CR>
+noremap  <silent> <leader>hs :call <SID>Highlight("s") \| nohls<CR>
 " Highlight all lines having last search pattern
-noremap  <silent> <C-h><C-j> :call <SID>Highlight("j") \| nohls<CR>
+" noremap  <silent> <C-h><C-j> :call <SID>Highlight("j") \| nohls<CR>
 " Clear last pattern highlight
-noremap  <silent> <C-h><C-d> :call <SID>Highlight("d")<CR>
+" noremap  <silent> <C-h><C-d> :call <SID>Highlight("d")<CR>
 
 " Clear all highlights
-noremap  <silent> <C-h><C-n> :call <SID>Highlight("n")<CR>
+noremap  <silent> <leader>hc :call <SID>Highlight("n")<CR>
 
 
 " -- Insert mode mappings --
 
-" Highlight current line 
-inoremap <silent> <C-h><C-h> <C-o>:call <SID>Highlight("h")<CR>
+" Highlight current line
+" inoremap <silent> <C-h><C-h> <C-o>:call <SID>Highlight("h")<CR>
 " Advance color for next line highlight
-inoremap <silent> <C-h><C-a> <C-o>:call <SID>Highlight("a")<CR>
+" inoremap <silent> <C-h><C-a> <C-o>:call <SID>Highlight("a")<CR>
 " Clear last line highlight
-inoremap <silent> <C-h><C-r> <C-o>:call <SID>Highlight("r")<CR>
+" inoremap <silent> <C-h><C-r> <C-o>:call <SID>Highlight("r")<CR>
 
 " Highlight word under cursor (whole word match)
-inoremap <silent> <C-h><C-w> <C-o>:call <SID>Highlight("w") \| nohls<CR>
+" inoremap <silent> <C-h><C-w> <C-o>:call <SID>Highlight("w") \| nohls<CR>
 " Highlight all lines having word under cursor (whole word match)
-inoremap <silent> <C-h><C-l> <C-o>:call <SID>Highlight("l") \| nohls<CR>
+" inoremap <silent> <C-h><C-l> <C-o>:call <SID>Highlight("l") \| nohls<CR>
 " Highlight word under cursor (partial word match)
-inoremap <silent> <C-h><C-f> <C-o>:call <SID>Highlight("f") \| nohls<CR>
+" inoremap <silent> <C-h><C-f> <C-o>:call <SID>Highlight("f") \| nohls<CR>
 " Highlight all lines having word under cursor (partial word match)
-inoremap <silent> <C-h><C-k> <C-o>:call <SID>Highlight("k") \| nohls<CR>
+" inoremap <silent> <C-h><C-k> <C-o>:call <SID>Highlight("k") \| nohls<CR>
 " Highlight last search pattern
-inoremap <silent> <C-h><C-s> <C-o>:call <SID>Highlight("s") \| nohls<CR>
+" inoremap <silent> <C-h><C-s> <C-o>:call <SID>Highlight("s") \| nohls<CR>
 " Highlight all lines having last search pattern
-inoremap <silent> <C-h><C-j> <C-o>:call <SID>Highlight("j") \| nohls<CR>
+" inoremap <silent> <C-h><C-j> <C-o>:call <SID>Highlight("j") \| nohls<CR>
 " Clear last pattern highlight
-inoremap <silent> <C-h><C-d> <C-o>:call <SID>Highlight("d")<CR>
+" inoremap <silent> <C-h><C-d> <C-o>:call <SID>Highlight("d")<CR>
 
 " Clear all highlights
-inoremap <silent> <C-h><C-n> <C-o>:call <SID>Highlight("n")<CR>
+" inoremap <silent> <C-h><C-n> <C-o>:call <SID>Highlight("n")<CR>
 
 
 " Define colors for Line highlight
 if !exists('g:lcolor_bg')
-   let g:lcolor_bg = "purple,seagreen,violet,lightred,lightgreen,lightblue,darkmagenta,slateblue"
+   let g:lcolor_bg = "#8700af,#5faf87,#df87df,#df8787,#af875f,#dfaf00,#87afdf,#005f87"
 endif
 
 if !exists('g:lcolor_fg')
-   let g:lcolor_fg = "white,white,black,black,black,black,white,white"
+   let g:lcolor_fg = "#dadada,#222222,#222222,#222222,#222222,#222222,#222222,#dadada"
 endif
 
 if !exists('g:lcolor_bg_cterm')
-   let g:lcolor_bg_cterm = "Blue,Green,Cyan,Red,Yellow,Magenta,Brown,LightGray"
+   let g:lcolor_bg_cterm = "91,72,176,174,137,178,110,24"
 endif
 
 if !exists('g:lcolor_fg_cterm')
-   let g:lcolor_fg_cterm = "White,White,White,White,White,White,Black,Black"
+   let g:lcolor_fg_cterm = "253,235,235,235,235,235,235,253"
 endif
 
 " Define colors for Pattern highlight
 if !exists('g:pcolor_bg')
-   let g:pcolor_bg = "yellow,blue,green,magenta,cyan,brown,orange,red"
+   let g:pcolor_bg = "#8700af,#5faf87,#df87df,#df8787,#af875f,#dfaf00,#87afdf,#005f87"
 endif
 
 if !exists('g:pcolor_fg')
-   let g:pcolor_fg = "black,white,black,white,black,white,black,white"
+   let g:pcolor_fg = "#dadada,#222222,#222222,#222222,#222222,#222222,#222222,#dadada"
 endif
 
 if !exists('g:pcolor_bg_cterm')
-   let g:pcolor_bg_cterm = "DarkBlue,DarkGreen,DarkCyan,DarkRed,Yellow,Magenta,Brown,LightGray"
+   let g:pcolor_bg_cterm = "91,72,176,174,137,178,110,24"
 endif
 
 if !exists('g:pcolor_fg_cterm')
-   let g:pcolor_fg_cterm = "White,Black,White,White,White,White,Black,Black"
+   let g:pcolor_fg_cterm = "253,235,235,235,235,235,235,253"
 endif
 
 
@@ -153,6 +157,8 @@ function! <SID>Highlight(mode)
       exec 'syn match '. s:lcolor_grp . s:lcolor_n . ' "' . match_pat . '" containedin=ALL'
    elseif a:mode == 'a'
       let s:lcolor_n = s:lcolor_n == s:lcolor_max - 1 ? 0 : s:lcolor_n + 1
+   elseif a:mode == 'b'
+      let s:lcolor_n = s:lcolor_n == 0 ? s:lcolor_max - 1 : s:lcolor_n - 1
    elseif a:mode == 'r'
       exec 'syn clear ' . s:lcolor_grp . s:lcolor_n
       let s:lcolor_n = s:lcolor_n == 0 ? 0 : s:lcolor_n - 1

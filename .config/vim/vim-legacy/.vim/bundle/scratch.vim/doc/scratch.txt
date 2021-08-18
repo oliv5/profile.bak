@@ -1,4 +1,4 @@
-*scratch.txt* Scratch and forget.                                         v2.1
+*scratch.txt* Scratch and forget.                                         v3.3
 *Scratch*
 
 ==============================================================================
@@ -9,6 +9,7 @@ CONTENTS                                                     *ScratchContents*
       2.1 |:Scratch|
       2.2 |:ScratchInsert|
       2.3 |:ScratchSelection|
+      2.4 |:ScratchPreview|
     3. Configuration ..................... |ScratchConfig|
       3.1 |g:scratch_autohide|
       3.2 |g:scratch_insert_autohide|
@@ -17,6 +18,7 @@ CONTENTS                                                     *ScratchContents*
       3.5 |g:scratch_height|
       3.6 |g:scratch_top|
       3.7 |g:scratch_horizontal|
+      3.8 |g:scratch_persistence_file|
     4. Mappings ........................ |ScratchMappings|
     5. Changes .......................... |ScratchChanges|
 
@@ -58,6 +60,13 @@ Open scratch buffer and append current selection.
 
 With [!] or when using the |v_gS| mapping, the buffer will also be cleared 
 before opening.
+
+
+------------------------------------------------------------------------------
+2.4 :ScratchPreview                                          *:ScratchPreview*
+
+Toggle scratch buffer and keep cursor in current window. If called from the 
+scratch buffer, close it.
 
 
 ==============================================================================
@@ -111,6 +120,19 @@ Open the scratch window in a horizontal split instead of a vertical one (see
 also |g:scratch_top| to configure the position of the new window).
 
 
+------------------------------------------------------------------------------
+3.8 g:scratch_persistence_file = ''               *g:scratch_persistence_file*
+
+If set to a valid file path the scratch window contents will be written to
+that path whenever the scratch window gets hidden. Contents won't be lost
+when exiting vim. When opening the scratch window for the first time the
+contents will be read into the scratch window.
+Absolute path results in global scratchpad:
+let g:scratch_persistence_file = '/tmp/scratch.vim'
+Projectwise scratchpads:
+let g:scratch_persistence_file = '.scratch.vim'
+
+
 ==============================================================================
 4. Mappings                                                  *ScratchMappings*
 
@@ -128,6 +150,16 @@ And set your favorite keys like below: >
 
 ==============================================================================
 5. Changes                                                    *ScratchChanges*
+
+3.3 (05/20/2018)
+  + Support `~` in persistence file path.
+  + Fix auto-close on first open with persistence enabled.
+
+3.1 (07/02/2015)
+  + Add |:ScratchPreview| command.
+
+2.2 (04/21/2015)
+  + Add support for relative width.
 
 2.1 (03/20/2015)
   + Add |g:scratch_horizontal| option.

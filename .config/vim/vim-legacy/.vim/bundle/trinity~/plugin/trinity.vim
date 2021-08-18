@@ -3,12 +3,12 @@
 "                                                                              "
 " File Name:   Trinity                                                         "
 " Abstract:    A (G)Vim plugin for building 'Source Explorer', 'Taglist' and   "
-"              'NERD tree' into an IDE which works like the "Source Insignt".  "
+"              'NERD tree' into an IDE.                                        "
 " Authors:     Wenlong Che <wenlong.che@gmail.com>                             "
-" Homepage:    http://www.vim.org/scripts/script.php?script_id=2347            "
-" GitHub:      https://github.com/wesleyche/Trinity                            "
-" Version:     2.1                                                             "
-" Last Change: March 21th, 2013                                                "
+" Homepage:    https://www.vim.org/scripts/script.php?script_id=2347           "
+" GitHub:      https://www.github.com/wesleyche/Trinity                        "
+" Version:     2.2                                                             "
+" Last Change: June 18th, 2018                                                 "
 " Licence:     This program is free software; you can redistribute it and / or "
 "              modify it under the terms of the GNU General Public License as  "
 "              published by the Free Software Foundation; either version 2, or "
@@ -98,9 +98,9 @@ let s:source_explorer_title  = "Source_Explorer"
 function! <SID>Trinity_InitTagList()
 
     " Split to the right side of the screen
-    let g:Tlist_Use_Right_Window = 0
+    let g:Tlist_Use_Left_Window = 1
     " Set the window width
-    let g:Tlist_WinWidth = 20
+    let g:Tlist_WinWidth = 40
     " Sort by the order
     let g:Tlist_Sort_Type = "order"
     " Do not display the help info
@@ -124,7 +124,11 @@ function! <SID>Trinity_InitSourceExplorer()
 
     " // Set the height of Source Explorer window                                  "
     if has("unix")
-        let g:SrcExpl_winHeight = 8
+        if has('gui_running')
+            let g:SrcExpl_winHeight = 10
+        else
+            let g:SrcExpl_winHeight = 11
+        endif
     else
         let g:SrcExpl_winHeight = 8
     endif
@@ -143,10 +147,24 @@ function! <SID>Trinity_InitSourceExplorer()
         \ s:source_explorer_title,
         \ "-MiniBufExplorer-"
     \ ]
+    " // The color schemes used by Source Explorer. There are five color schemes   "
+    " // supported for now - Red, Cyan, Green, Yellow and Magenta. Source Explorer "
+    " // will pick up one of them randomly when initialization.                    "
+     let g:SrcExpl_colorSchemeList = [
+             \ "Red",
+             \ "Cyan",
+             \ "Green",
+             \ "Yellow",
+             \ "Magenta"
+     \ ]
     " // Enable/Disable the local definition searching, and note that this is not  "
     " // guaranteed to work, the Source Explorer doesn't check the syntax for now. "
     " // It only searches for a match with the keyword according to command 'gd'   "
     let g:SrcExpl_searchLocalDef = 1
+    " // Workaround for Vim bug @https://goo.gl/TLPK4K as any plugins using        "
+    " // autocmd for BufReadPre might have conflicts with Source Explorer. e.g.    "
+    " // YCM, Syntastic etc.                                                       "
+    let g:SrcExpl_nestedAutoCmd = 1
     " // Do not let the Source Explorer update the tags file when opening          "
     let g:SrcExpl_isUpdateTags = 0
     " // Use program 'ctags' with argument '--sort=foldcase -R' to create or       "
@@ -155,9 +173,9 @@ function! <SID>Trinity_InitSourceExplorer()
     " // Set "<F12>" key for updating the tags file artificially                   "
     " let g:SrcExpl_updateTagsKey = "<F12>"
     " // Set "<F3>" key for displaying the previous definition in the jump list    "
-    "let g:SrcExpl_prevDefKey = "<F3>"
+    let g:SrcExpl_prevDefKey = "<F3>"
     " // Set "<F4>" key for displaying the next definition in the jump list        "
-    "let g:SrcExpl_nextDefKey = "<F4>"
+    let g:SrcExpl_nextDefKey = "<F4>"
 
 endfunction " }}}
 
@@ -168,7 +186,7 @@ endfunction " }}}
 function! <SID>Trinity_InitNERDTree()
 
     " Set the window width
-    let g:NERDTreeWinSize = 20
+    let g:NERDTreeWinSize = 23
     " Set the window position
     let g:NERDTreeWinPos = "right"
     " Auto centre

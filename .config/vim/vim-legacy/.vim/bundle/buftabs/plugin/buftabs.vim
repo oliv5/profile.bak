@@ -145,10 +145,6 @@
 "                  (Thanks Andrew Ho)
 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-if exists("g:loaded_buftabs")
-  finish
-endif
-let g:loaded_buftabs = 1
 
 let w:buftabs_enabled = 0
 let w:original_statusline = matchstr(&statusline, "%=.*")
