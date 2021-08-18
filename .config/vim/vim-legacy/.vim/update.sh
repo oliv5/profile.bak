@@ -201,7 +201,6 @@ set -- "$@" https://github.com/Raimondi/yaifa.git yaifa
 set --
 set -- "$@" https://www.vim.org/scripts/download_script.php?src_id=21906 bufline
 set -- "$@" https://www.vim.org/scripts/download_script.php?src_id=6273 project
-set -- "$@" https://downloads.sourceforge.net/project/vim-latex/releases/vim-latex-1.10.0.tar.gz vim-latex
 [ -n "$TAR" ] && $DBG update_tars "$@"
 
 # Update zip
