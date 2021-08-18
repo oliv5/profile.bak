@@ -1,26 +1,34 @@
 § =============================================================
-§  User Macros
+§  Interface Version
+§
+§  enable advanced features
 § =============================================================
 
-SetMacro( 'AUTHOR',      'Dr. Fritz Mehner' )
-SetMacro( 'AUTHORREF',   'fgm' )
-SetMacro( 'COMPANY',     '' )
-SetMacro( 'COPYRIGHT',   'Copyright (c) |YEAR|, |AUTHOR|' )
-SetMacro( 'EMAIL',       'mehner.fritz@fh-swf.de' )
-SetMacro( 'LICENSE',     'GNU General Public License' )
-SetMacro( 'ORGANIZATION','FH Südwestfalen, Iserlohn' )
+InterfaceVersion ( '1.0' )
+
+§ =============================================================
+§  Settings
+§ =============================================================
+
+SetMacro( 'AUTHOR',       'YOUR NAME' )
+SetMacro( 'AUTHORREF',    '' )
+SetMacro( 'EMAIL',        '' )
+SetMacro( 'ORGANIZATION', '' )
+SetMacro( 'COMPANY',      '' )
+SetMacro( 'COPYRIGHT',    'Copyright (c) |YEAR|, |AUTHOR|' )
+SetMacro( 'LICENSE',      'GNU General Public License' )
 
 SetFormat( 'DATE', '%x' )
-SetFormat( 'TIME', '%H:%M' )
+SetFormat( 'TIME', '%X' )
 SetFormat( 'YEAR', '%Y' )
 
+§ pretty dates:
+§ - DATE_PRETTY1 is a nicer date formatting, such as "January 06 2016"
+§ - DATE_PRETTY2 is a shorter version, such as "Jan 06 2016"
+SetFormat( 'DATE_PRETTY1', '%B %d %Y' )
+SetFormat( 'DATE_PRETTY2', '%b %d %Y' )
+
 SetStyle( 'default' )
-
-§ browser for help templates (UNIX)
-SetMacro( 'HELP_BROWSER', 'firefox' )
-
-§ browser for help templates, the executable is escaped using quotes (Windows)
-§SetMacro( 'HELP_BROWSER', '"C:\Program Files\Mozilla Firefox\firefox.exe"' )
 
 § =============================================================
 §  File Includes and Shortcuts
@@ -44,10 +52,10 @@ IncludeFile( 'documentation.templates' )
 §  Help
 § =============================================================
 
-SetMacro( 'HelpPathEnglish',   'http://en.wiktionary.org/wiki/' )
+SetMacro( 'HelpPathEnglish', 'http://en.wiktionary.org/wiki/' )
 
-== HELP: Help.english == map:he, sc:e ==
+== HELP: Help.English == map:he, sc:e ==
 |Word( '' )|
 |Substitute( '\W', '', 'g' )|
-|System( '|HELP_BROWSER| |HelpPathEnglish||PICK:l|' )|
+|Browser( '|HelpPathEnglish||PICK:l|' )|
 == ENDTEMPLATE ==

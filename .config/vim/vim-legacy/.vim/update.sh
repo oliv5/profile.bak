@@ -5,7 +5,7 @@ git_exists() {
 }
 
 git_pull() {
-	(set -e; cd "$1"; git stash; git pull --rebase; git stash pop)
+	(set -e; cd "$1"; STASH=""; git stash && STASH=1; git pull --rebase; [ -n "$STASH" ] && git stash pop)
 }
 
 git_update() {

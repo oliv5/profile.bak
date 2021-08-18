@@ -2,14 +2,16 @@
 %%
 %%         File:  vim-hotkeys.tex
 %%
-%%  Description:  vim-support.vim : Key mappings for Vim without GUI.
+%%  Description:  vim-support.vim : Key mappings
 %%                
-%%                
-%%       Author:  Dr.-Ing. Fritz Mehner
-%%        Email:  mehner@fh-swf.de
-%%    Copyright:  Copyright (C)  2012-2013  Dr.-Ing. Fritz Mehner  (mehner@fh-swf.de)
 %%      Version:  see \Pluginversion
 %%      Created:  22.01.2012
+%%     Revision:  09.07.2017
+%%
+%%       Author:  Wolfgang Mehner (WM), wolfgang-mehner@web.de
+%%                Dr. Fritz Mehner (fgm), mehner.fritz@web.de
+%%    Copyright:  Copyright (c) 2012-2015, Dr. Fritz Mehner
+%%                Copyright (c) 2016-2017, Wolfgang Mehner
 %%                
 %%=====================================================================================
 
@@ -28,7 +30,7 @@
 
 \setlength\parindent{0pt}
 
-\newcommand{\Pluginversion}{2.2.1pre}
+\newcommand{\Pluginversion}{2.5beta}
 \newcommand{\Rep}{{\scriptsize{[n]}}}
 
 %%----------------------------------------------------------------------
@@ -50,12 +52,11 @@
 %%----------------------------------------------------------------------
 %%  hyperref
 %%----------------------------------------------------------------------
-\usepackage[ps2pdf]{hyperref}
-\hypersetup{pdfauthor={Dr.-Ing. Fritz Mehner, FH Südwestfalen, Iserlohn, Germany}}
-\hypersetup{pdfkeywords={Vim, VimScript}}
-\hypersetup{pdfsubject={Vim-plugin,  vim-support.vim, hot keys}}
-\hypersetup{pdftitle={Vim-plugin,  vim-support.vim, hot keys}}
-
+\usepackage{hyperref}
+\hypersetup{pdfauthor={Wolfgang Mehner, Germany, wolfgang-mehner@web.de}}
+\hypersetup{pdfkeywords={Vim, VimL, VimScript}}
+\hypersetup{pdfsubject={Vim-plug-in, vim-support.vim, hot keys}}
+\hypersetup{pdftitle={Vim Plug-in : vim-support.vim}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  START OF DOCUMENT
@@ -69,32 +70,32 @@
 %%======================================================================
 %%  title				[[[1
 %%======================================================================
-\textbf{\textsc{\small{Vim-Plugin}}}\\
+\textbf{\textsc{\small{Vim-Plug-in}}}\\
 \textbf{\LARGE{vim-support.vim}}\\
 \textbf{\textsc{\small{Version \Pluginversion}}}\\
-\vspace{5mm}%
+\vspace{1mm}%
 \textbf{\textsc{\Huge{Hot keys}}}\\ 
-\vspace{5mm}%
-Key mappings for Vim and gVim.\\
-Plugin: http://vim.sourceforge.net\\
-Fritz Mehner (mehner.fritz@fh-swf.de)\\
+\vspace{1mm}%
+Key mappings for Vim/gVim/Neovim\\
+{\tiny  \texttt{http://www.vim.org}\hspace{1.5mm}---\hspace{1.5mm}\textbf{Wolfgang Mehner},  \texttt{wolfgang-mehner@web.de}}\\
 \vspace{1.0mm}
-{\normalsize (i)} insert mode, {\normalsize (n)} normal mode, {\normalsize (v)} visual mode\\
-\vspace{4.0mm}
-
+{\normalsize (i)} insert mode, {\normalsize (n)} normal mode, {\normalsize (v)} visual mode,\\
+{\normalsize (T)} tab-completion
+\vspace{1.0mm}
+%
 %%======================================================================
 %%  table, left part				[[[1
 %%======================================================================
 %%~~~~~ TABULAR : begin ~~~~~~~~~~
-\begin{tabular}[]{|p{18mm}|p{56mm}|}
+\begin{tabular}[]{|p{11mm}|p{58mm}|}
 %%----------------------------------------------------------------------
 %%  show plugin help
 %%----------------------------------------------------------------------
 \hline 
 \multicolumn{2}{|r|}{\textsl{\underline{H}elp}}\\[1.0ex]
-\hline \verb'\he'                 & English dictionary   \hfill (n,i)\\
-\hline \verb'\hk' \verb'<S-F1>'   & help (Vim functions) \hfill (n,i)\\
-\hline \verb'\hp'                 & help (vim-support)   \hfill (n,i)\\
+\hline \verb'\he'                 & English dictionary   \hfill (n, i)\\
+\hline \verb'\hk'                 & help (Vim functions) \hfill (n, i)\\
+\hline \verb'\hp'                 & help (vim-support)   \hfill (n, i)\\
 \hline 
 %%----------------------------------------------------------------------
 %%  menu comments
@@ -105,7 +106,7 @@ Fritz Mehner (mehner.fritz@fh-swf.de)\\
 \hline \Rep\verb'\cj'   & adjust end-of-line comments       \hfill (n, v, i)\\
 \hline     \verb'\cs'   & set end-of-line comment col.      \hfill (n)   \\
 \hline \Rep\verb'\cc'   & comment code                      \hfill (n, i, v)\\
-\hline \Rep\verb'\cu'   & uncomment code                    \hfill (n, i, v)\\
+\hline \Rep\verb'\co'   & uncomment code                    \hfill (n, i, v)\\
 \hline     \verb'\ca'   & function description (auto)       \hfill (n, i, v)\\
 %
 \hline     \verb'\cfr'  & frame comment                     \hfill (n, i)\\
@@ -115,8 +116,8 @@ Fritz Mehner (mehner.fritz@fh-swf.de)\\
 \hline     \verb'\ct'   & date \& time                      \hfill (n, i)\\
 \hline
 %
-\hline     \verb'\ck'   & keyword comments                  \hfill (n, i)\\
-\hline     \verb'\cma'  & plugin macros                     \hfill (n, i)\\
+\hline     \verb'\ck'   & keyword comments                  \hfill (n, i, T)\\
+\hline     \verb'\cma'  & plugin macros                     \hfill (n, i, T)\\
 \hline
 \end{tabular}\\
 %%~~~~~ TABULAR :  end  ~~~~~~~~~~
@@ -126,7 +127,7 @@ Fritz Mehner (mehner.fritz@fh-swf.de)\\
 %%======================================================================
 %
 %%~~~~~ TABULAR : begin ~~~~~~~~~~
-\begin{tabular}[]{|p{11mm}|p{56mm}|}
+\begin{tabular}[]{|p{11mm}|p{58mm}|}
 %%----------------------------------------------------------------------
 %%  menu statements
 %%----------------------------------------------------------------------
@@ -148,32 +149,10 @@ Fritz Mehner (mehner.fritz@fh-swf.de)\\
 %%----------------------------------------------------------------------
 \hline
 \multicolumn{2}{|r|}{\textsl{\underline{I}dioms}}                 \\[1.0ex]
-\hline \verb'\ii'  & iterators      \hfill (n, v, i)   \\
-%
+\hline \verb'\ib' & builtin functions         \hfill (n, i, T)\\
+\hline \verb'\ii' & iterators                 \hfill (n, v, i, T)\\
 \hline \verb'\if' & function                  \hfill (n, v, i)\\
 \hline
-%%----------------------------------------------------------------------
-%%  snippet menu
-%%----------------------------------------------------------------------
-\hline
-\multicolumn{2}{|r|}{\textsl{S\underline{n}ippet}}                \\[1.0ex]
-\hline \verb'\nr'  & read code snippet         \hfill (n, i)   \\
-\hline \verb'\nw'  & write code snippet        \hfill (n, v, i)\\
-\hline \verb'\ne'  & edit code snippet         \hfill (n, i)   \\
-%
-%\hline \verb'\ntl' & edit local templates      \hfill (n, i)\\
-%\hline \verb'\ntg' & edit global templates$^1$ \hfill (n, i)\\
-%\hline \verb'\ntr' & reread the templates      \hfill (n, i)\\
-\hline
-\end{tabular}\\
-%%~~~~~ TABULAR :  end  ~~~~~~~~~~
-%
-%%======================================================================
-%%  table, right part				[[[1
-%%======================================================================
-%
-%%~~~~~ TABULAR : begin ~~~~~~~~~~
-\begin{tabular}[]{|p{11mm}|p{60mm}|}
 %%----------------------------------------------------------------------
 %%  menu regex menu
 %%----------------------------------------------------------------------
@@ -183,8 +162,8 @@ Fritz Mehner (mehner.fritz@fh-swf.de)\\
 \hline \verb'\xbc' & branch                  \hfill (n, i, v)\\
 \hline \verb'\xbn' & branch, no capture      \hfill (n, i, v)\\
 \hline \verb'\xw'  & word                    \hfill (n, i)\\
-\hline \verb'\xcc' & character classes       \hfill (n, i)\\
-\hline \verb'\xs'  & switches                \hfill (n, i)\\
+\hline \verb'\xcc' & character classes       \hfill (n, i, T)\\
+\hline \verb'\xs'  & switches                \hfill (n, i, T)\\
 \hline
 %%----------------------------------------------------------------------
 %%  menu Perl
@@ -199,28 +178,54 @@ Fritz Mehner (mehner.fritz@fh-swf.de)\\
 \hline \verb'\pme'  & \texttt{Vim::Msg( "", "Warning" )} \hfill (n, i)\\
 \hline \verb'\pmw'  & \texttt{Vim::Msg( "", "ErrorMsg")} \hfill (n, i)\\
 \hline
+\end{tabular}\\
+%%~~~~~ TABULAR :  end  ~~~~~~~~~~
+%
+%%======================================================================
+%%  table, right part				[[[1
+%%======================================================================
+%
+%%~~~~~ TABULAR : begin ~~~~~~~~~~
+\begin{tabular}[]{|p{11mm}|p{58mm}|}
 %%----------------------------------------------------------------------
 %%  menu Documentation
 %%----------------------------------------------------------------------
 \hline
 \multicolumn{2}{|r|}{\textsl{\underline{D}ocumentation}}                 \\[1.0ex]
-\hline \verb'\dcc' & chapter, contents             \hfill (n, i)\\
-\hline \verb'\dcs' & section, contents             \hfill (n, i)\\
-\hline \verb'\dcu' & subsection, contents          \hfill (n, i)\\
-\hline \verb'\dtc' & chapter, text                 \hfill (n, i)\\
-\hline \verb'\dts' & section, text                 \hfill (n, i)\\
-\hline \verb'\dtu' & subsection, text              \hfill (n, i)\\
+\hline \verb'\dcc' & table-of-contents, chapter    \hfill (n, i)\\
+\hline \verb'\dcs' & table-of-contents, section    \hfill (n, i)\\
+\hline \verb'\dcu' & table-of-contents, subsection \hfill (n, i)\\
+\hline \verb'\dtc' & text, chapter                 \hfill (n, i)\\
+\hline \verb'\dts' & text, section                 \hfill (n, i)\\
+\hline \verb'\dtu' & text, subsection              \hfill (n, i)\\
 \hline \verb'\df'  & function description          \hfill (n, i)\\
 \hline \verb'\de'  & example                       \hfill (n, v, i)\\
-\hline \verb'\dl'  & list item                     \hfill (n, i)\\
+\hline
+%%----------------------------------------------------------------------
+%%  snippet menu
+%%----------------------------------------------------------------------
+\hline
+\multicolumn{2}{|r|}{\textsl{S\underline{n}ippet}}                \\[1.0ex]
+\hline \verb'\nr'  & read code snippet         \hfill (n, i)   \\
+\hline \verb'\nw'  & write code snippet        \hfill (n, v, i)\\
+\hline \verb'\nv'  & view code snippet         \hfill (n, i)   \\
+\hline \verb'\ne'  & edit code snippet         \hfill (n, i)   \\
+%
+\hline \verb'\ntl' & edit local templates      \hfill (n, i)\\
+\hline \verb'\ntc' & edit custom templates     \hfill (n, i)\\
+\hline \verb'\ntp' & edit personal templates   \hfill (n, i)\\
+\hline \verb'\ntr' & reread the templates      \hfill (n, i)\\
+\hline \verb'\ntw' & template setup wizard     \hfill (n, i)\\
+\hline \verb'\nts' & choose template style     \hfill (n, i, T)\\
+%
 \hline
 %%----------------------------------------------------------------------
 %%  menu run
 %%----------------------------------------------------------------------
 \hline
 \multicolumn{2}{|r|}{\textsl{\underline{R}un}} \\[1.0ex]
-\hline \verb'\rh'    & hardcopy buffer                          \hfill (n, v, i)\\
-\hline \verb'\rs'    & plugin settings \hfill (n,i)\\
+\hline \verb'\rh'    & hardcopy buffer to postscript \hfill (n, v, i)\\
+\hline \verb'\rs'    & plugin settings \hfill (n, i)\\
 \hline
 \end{tabular}\\
 %%~~~~~ TABULAR :  end  ~~~~~~~~~~

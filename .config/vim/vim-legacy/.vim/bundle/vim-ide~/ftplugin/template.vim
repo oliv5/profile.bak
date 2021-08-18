@@ -9,8 +9,8 @@
 "  Organization:  
 "       Version:  1.0
 "       Created:  30.08.2011
-"      Revision:  08.07.2014
-"       License:  Copyright (c) 2012-2014, Wolfgang Mehner
+"      Revision:  04.01.2016
+"       License:  Copyright (c) 2012-2016, Wolfgang Mehner
 "                 This program is free software; you can redistribute it and/or
 "                 modify it under the terms of the GNU General Public License as
 "                 published by the Free Software Foundation, version 2 of the
@@ -21,43 +21,24 @@
 "                 PURPOSE.
 "                 See the GNU General Public License version 2 for more details.
 "===============================================================================
-"
+
 " only do this when not done yet for this buffer
 if exists("b:did_Template_ftplugin")
   finish
 endif
 let b:did_Template_ftplugin = 1
-"
-if ! exists ( '*g:Templates_CodeComment' )
-	"----------------------------------------------------------------------
-	" g:Templates_CommentCode : Comment -> Code   {{{1
-	"----------------------------------------------------------------------
-	function! g:Templates_CodeComment() range
-		"
-		" add '§' at the beginning of the lines
-		silent exe ':'.a:firstline.','.a:lastline.'s/^/§/'
-		"
-	endfunction    " ----------  end of function g:Templates_CodeComment  ----------
-	"
-	"----------------------------------------------------------------------
-	" g:Templates_CommentCode : Comment -> Code   {{{1
-	"----------------------------------------------------------------------
-	function! g:Templates_CommentCode() range
-		"
-		" remove '§' from the beginning of the line
-		silent exe ':'.a:firstline.','.a:lastline.'s/^\§//'
-		"
-	endfunction    " ----------  end of function g:Templates_CommentCode  ----------
-	" }}}1
-endif
-"
- noremap    <buffer>  <silent>  <LocalLeader>cc         :call g:Templates_CodeComment()<CR>
-inoremap    <buffer>  <silent>  <LocalLeader>cc    <Esc>:call g:Templates_CodeComment()<CR>
- noremap    <buffer>  <silent>  <LocalLeader>cu         :call g:Templates_CommentCode()<CR>
-inoremap    <buffer>  <silent>  <LocalLeader>cu    <Esc>:call g:Templates_CommentCode()<CR>
-"
-inoremap  {+  {++}<Left><Left>
-inoremap  {-  {--}<Left><Left>
-vnoremap  {+  s{++}<Left><Esc>P<Right>%
-vnoremap  {-  s{--}<Left><Esc>P<Right>%
-"
+
+"-------------------------------------------------------------------------------
+" Editing: repeat comments, ...
+"-------------------------------------------------------------------------------
+
+" default: -something-
+setlocal comments=sO:§\ -,mO:§\ \ ,eO:§§,:§
+" default: tcq
+" - remove auto-wrap text
+" - keep autowrap comments
+" - add insertion of comment leader after hitting <Enter>, o, O
+" - add do not break lines which were already to long
+setlocal formatoptions-=t
+setlocal formatoptions+=rol
+
