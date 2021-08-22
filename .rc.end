@@ -43,6 +43,8 @@ path_cleanup
 # https://github.com/junegunn/fzf
 if [ -n "$BASH_VERSION" ] && [ -r "$RC_DIR/rbin/fzf/.fzf.bash" ] ; then
   source "$RC_DIR/rbin/fzf/.fzf.bash"
+fi
+if command -v fzf >/dev/null 2>&1; then
   export FZF_DEFAULT_OPTS="--bind=tab:accept"
 fi
 
