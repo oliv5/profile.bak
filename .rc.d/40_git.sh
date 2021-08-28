@@ -463,7 +463,7 @@ git_pull_all() {
   for REMOTE in $REMOTES; do
     if git_remote_valid "$REMOTE"; then
       echo -n "Pull from $REMOTE: "
-      git pull --ff-only "$REMOTE" $BRANCH
+      git_pull --ff-only "$REMOTE" $BRANCH
     fi
   done
 }
