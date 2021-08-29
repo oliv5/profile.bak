@@ -45,6 +45,9 @@ alias kernel_ls="dpkg -l 'linux-*'"
 alias kernel_current='uname -r | sed "s/\(.*\)-\([^0-9]\+\)/\1/"'
 alias kernel_others="dpkg -l 'linux-*' | sed '/^ii/!d;/'$(uname -r | sed "s/\(.*\)-\([^0-9]\+\)/\1/")'/d;s/^[^ ]* [^ ]* \([^ ]*\).*/\1/;/[0-9]/!d'"
 
+# Rebuild DKMS modules
+alias dkms_rebuild='sudo sh -c "ls /lib/modules | sudo xargs -n1 /usr/lib/dkms/dkms_autoinstaller start"'
+
 # Make deb package from source
 deb_make() {
   local ARCHIVE="${1:?No input archive specified}"
