@@ -1182,6 +1182,9 @@ annex_dropunused() {
   local LAST="$(annex_unused | awk '/^\s+[0-9]+\s/ {a=$1} END{print a}')"
   git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force} "$@" 1-${LAST:?Nothing to drop...}
 }
+annex_dropunused_all() {
+  REFS=+HEAD annex_dropunused "$@"
+}
 
 # Drop partially transfered files
 annex_dropunused_partial() {
