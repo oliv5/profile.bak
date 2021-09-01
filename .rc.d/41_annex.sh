@@ -1179,23 +1179,26 @@ annex_unusednc() { for UUID in $(annex_notdead "$@"); do echo -n "Num unused in 
 
 # Drop all unused files
 annex_dropunused() {
+  annex_exists && ! annex_bare || return 1
   local LAST="$(annex_unused | awk '/^\s+[0-9]+\s/ {a=$1} END{print a}')"
   git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force} "$@" 1-${LAST:?Nothing to drop...}
 }
 annex_dropunused_all() {
+  annex_exists && ! annex_bare || return 1
   REFS=+HEAD annex_dropunused "$@"
 }
 
 # Drop partially transfered files
 annex_dropunused_partial() {
+  annex_exists && ! annex_bare || return 1
   annex_unused --fast | 
     awk '/^\s+[0-9]+\s+/ {print $1}' | 
-    xargs git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force}
+    xargs -r git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force}
 }
 
-# Plumbering: process unused files matching pattern
+# List unused files, matching pattern
 annex_listunused_by_pattern() {
-  ! annex_bare || return 1
+  annex_exists && ! annex_bare || return 1
   local IFS="$(printf ' \t\n')"
   local PATTERNS=""
   for ARG; do PATTERNS="${PATTERNS:+$PATTERNS }-e '$ARG'"; done
@@ -1209,29 +1212,26 @@ annex_listunused_by_pattern() {
 
 # Drop unused files matching pattern
 annex_dropunused_by_pattern() {
-  ! annex_bare || return 1
-  local TMPFILE="$(mktemp)" || return 2
-  annex_listunused_by_pattern | awk -F' ' '{printf "%d " $1}' >> "$TMPFILE"
-  cat "$TMPFILE" | xargs -r git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force}
-  rm "$TMPFILE"
+  annex_exists && ! annex_bare || return 1
+  annex_listunused_by_pattern |
+    awk -F' ' '{printf "%d " $1}' >> "$TMPFILE" |
+    xargs -r git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force}
 }
 
 # Copy unused files matching pattern
 annex_copyunused_by_pattern() {
-  ! annex_bare || return 1
-  local TMPFILE="$(mktemp)" || return 2
-  annex_listunused_by_pattern | awk -F' ' '{printf "%d " $1}' >> "$TMPFILE"
-  cat "$TMPFILE" | xargs -rn1 -I{} -- git annex copy --key={} ${FROM:+--from $FROM} ${TO:+--to $TO} ${FORCE:+--force}
-  rm "$TMPFILE"
+  annex_exists && ! annex_bare || return 1
+  annex_listunused_by_pattern |
+    awk -F' ' '{printf "%d " $1}' >> "$TMPFILE" |
+    xargs -rn1 -I{} -- git annex copy --key={} ${FROM:+--from $FROM} ${TO:+--to $TO} ${FORCE:+--force}
 }
 
 # Move unused files matching pattern
 annex_moveunused_by_pattern() {
-  ! annex_bare || return 1
-  local TMPFILE="$(mktemp)" || return 2
-  annex_listunused_by_pattern | awk -F' ' '{printf "%d " $1}' >> "$TMPFILE"
-  cat "$TMPFILE" | xargs -rn1 -I{} -- git annex move --key={} ${FROM:+--from $FROM} ${TO:+--to $TO} ${FORCE:+--force}
-  rm "$TMPFILE"
+  annex_exists && ! annex_bare || return 1
+  annex_listunused_by_pattern |
+    awk -F' ' '{printf "%d " $1}' >> "$TMPFILE" |
+    xargs -rn1 -I{} -- git annex move --key={} ${FROM:+--from $FROM} ${TO:+--to $TO} ${FORCE:+--force}
 }
 
 ########################################
