@@ -95,8 +95,12 @@
 { "key": "ctrl++",                "command": "workbench.action.zoomIn" },
 { "key": "ctrl+-",                "command": "workbench.action.zoomOut" },
 
-// File management
-{ "key": "ctrl+shift+f4",         "command": "workbench.action.closeActiveEditor" },
+// Editor management
+{ "key": "ctrl+shift+f4",         "command": "workbench.action.closeActiveEditor", "when": "editorTextFocus" },
+{ "key": "ctrl+w ctrl+k",         "command": "workbench.action.closeActiveEditor", "when": "editorTextFocus" },
+{ "key": "ctrl+w ctrl+shift+k",   "command": "workbench.action.closeAllEditors" },
+{ "key": "alt+up",                "command": "workbench.action.previousEditor", "when": "editorTextFocus" },
+{ "key": "alt+down",              "command": "workbench.action.nextEditor", "when": "editorTextFocus" },
 
 // Undo/redo
 { "key": "ctrl+z",                "command": "undo", "when": "editorTextFocus" },
@@ -175,9 +179,9 @@
 { "key": "ctrl+f5",               "command": "workbench.action.debug.restart", "when": "inDebugMode" },
 { "key": "ctrl+shift+f5",         "command": "editor.debug.action.runToCursor", "when": "inDebugMode" },
 { "key": "f10",                   "command": "workbench.action.debug.stepOver", "when": "inDebugMode" },
-{ "key": "shift+f10",             "command": "workbench.action.debug.stepInto", "when": "inDebugMode" },
-{ "key": "ctrl+f10",              "command": "workbench.action.debug.stepOut", "when": "inDebugMode" },
-{ "key": "ctrl+shift+f10",        "command": "editor.debug.action.runToCursor", "when": "inDebugMode" },
+{ "key": "shift+f10",             "command": "editor.debug.action.runToCursor", "when": "inDebugMode" },
+{ "key": "f11",                   "command": "workbench.action.debug.stepInto", "when": "inDebugMode" },
+{ "key": "shift+f11",             "command": "workbench.action.debug.stepOut", "when": "inDebugMode" },
 { "key": "f9",                    "command": "editor.debug.action.toggleBreakpoint" },
 { "key": "ctrl+f9",               "command": "workbench.debug.viewlet.action.disableAllBreakpoints" },
 { "key": "shift+f9",              "command": "workbench.debug.viewlet.action.enableAllBreakpoints" },
@@ -192,6 +196,10 @@
 
 //////////////////////////////////////////////////
 // Extensions
+
+// Extension Microsoft C/C++ intellisense
+{ "key": "ctrl+b ctrl+b",         "command": "C_Cpp.SwitchHeaderSource", "when": "editorTextFocus && editorLangId == 'c' || editorTextFocus && editorLangId == 'cpp' || editorTextFocus && editorLangId == 'cuda-cpp'" },
+{ "key": "alt+o",                 "command": "-C_Cpp.SwitchHeaderSource", "when": "editorTextFocus && editorLangId == 'c' || editorTextFocus && editorLangId == 'cpp' || editorTextFocus && editorLangId == 'cuda-cpp'" },
 
 // Build & debugging
 //{ "key": "shift+f5",            "command": "extension.multiCommand.execute", "args":
@@ -220,12 +228,16 @@
 { "key": "ctrl+alt+b",            "command": "workbench.action.terminal.sendSequence", "args": { "text": "mkalltags . \u000D" }},
 
 // Extension tomhultonharrop.switch-corresponding
-{ "key": "ctrl+b ctrl+b",         "command": "extension.switch_corresponding_same_workspace", "when": "editorTextFocus" },
+// { "key": "ctrl+b ctrl+b",         "command": "extension.switch_corresponding_same_workspace", "when": "editorTextFocus" },
 
 // Extension edit with shell (run shell command on selection)
 { "key": "ctrl+i",                "command": "editWithShell.runCommand" },
 
 //////////////////////////////////////////////////
-// Added by vscode automatically, first is a placeholder
+// Empty placeholder for vscode to append new keybindings afterwards
+{
+    "key": "",
+    "command": ""
+},
 
 ]
