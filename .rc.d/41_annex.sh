@@ -1213,24 +1213,24 @@ annex_listunused_by_pattern() {
 # Drop unused files matching pattern
 annex_dropunused_by_pattern() {
   annex_exists && ! annex_bare || return 1
-  annex_listunused_by_pattern |
-    awk -F' ' '{printf "%d " $1}' >> "$TMPFILE" |
+  annex_listunused_by_pattern "$@" |
+    awk -F' ' '{print $1}' |
     xargs -r git annex dropunused ${FROM:+--from $FROM} ${FORCE:+--force}
 }
 
 # Copy unused files matching pattern
 annex_copyunused_by_pattern() {
   annex_exists && ! annex_bare || return 1
-  annex_listunused_by_pattern |
-    awk -F' ' '{printf "%d " $1}' >> "$TMPFILE" |
+  annex_listunused_by_pattern "$@" |
+    awk -F' ' '{print $1}' |
     xargs -rn1 -I{} -- git annex copy --key={} ${FROM:+--from $FROM} ${TO:+--to $TO} ${FORCE:+--force}
 }
 
 # Move unused files matching pattern
 annex_moveunused_by_pattern() {
   annex_exists && ! annex_bare || return 1
-  annex_listunused_by_pattern |
-    awk -F' ' '{printf "%d " $1}' >> "$TMPFILE" |
+  annex_listunused_by_pattern "$@" |
+    awk -F' ' '{print $1}' |
     xargs -rn1 -I{} -- git annex move --key={} ${FROM:+--from $FROM} ${TO:+--to $TO} ${FORCE:+--force}
 }
 
