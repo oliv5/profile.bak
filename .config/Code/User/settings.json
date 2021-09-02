@@ -6,6 +6,7 @@
     "editor.suggestSelection": "first",
     "editor.multiCursorModifier": "alt",
     "editor.semanticHighlighting.enabled": true,
+    "editor.mouseWheelZoom": true,
 
     // Workbench
     "workbench.sideBar.location": "right",

@@ -7,6 +7,7 @@
 
 // Disable defaults
 { "key": "ctrl+w",                "command": "" },
+{ "key": "ctrl+g",                "command": "" },
 { "key": "f1",                    "command": "" },
 { "key": "f7",                    "command": "" },
 { "key": "f8",                    "command": "" },
@@ -134,9 +135,10 @@
 // Search bar: search & replace in all files
 { "key": "ctrl+g",                "command": "extension.multiCommand.execute", "when" : "!sideBarFocus", "args":
     { "sequence": [ "editor.action.addSelectionToNextFindMatch", "workbench.action.findInFiles" ] } },
+{ "key": "ctrl+g",                "command": "search.action.openInEditor", "when" : "sideBarFocus" },
 // Search bar: navigation
-{ "key": "f4",                    "command": "search.action.focusNextSearchResult", "when": "editorFocus && hasSearchResult" },
-{ "key": "shift+f4",              "command": "search.action.focusPreviousSearchResult", "when": "editorFocus && hasSearchResult" },
+{ "key": "f4",                    "command": "search.action.focusNextSearchResult", "when": "hasSearchResult || inSearchEditor" },
+{ "key": "shift+f4",              "command": "search.action.focusPreviousSearchResult", "when": "hasSearchResult || inSearchEditor" },
 { "key": "ctrl+f4",               "command": "search.action.clearSearchResults", "when": "hasSearchResult" },
 
 // Folding
@@ -188,11 +190,12 @@
 { "key": "ctrl+shift+f9",         "command": "workbench.debug.viewlet.action.removeAllBreakpoints" },
 
 // Tasks
-{ "key": "f6",                    "command": "workbench.action.tasks.build", "when": "!inDebugMode" },
+{ "key": "f6",                    "command": "extension.multiCommand.execute", "when": "!inDebugMode", "args":
+    { "sequence": [ "closeMarkersNavigation", "workbench.action.tasks.build" ] } },
+// { "key": "f6",                    "command": "extension.multiCommand.execute", "when": "inDebugMode", "args":
+    // { "sequence": [ "closeMarkersNavigation", "workbench.action.debug.stop", "workbench.action.tasks.build", "workbench.action.debug.start" ] } },
 { "key": "shift+f6",              "command": "workbench.action.tasks.runTask", "when": "!inDebugMode", "args": "Make clean" },
 { "key": "ctrl+f6",               "command": "workbench.action.tasks.test", "when": "!inDebugMode" },
-// { "key": "f6",                    "command": "extension.multiCommand.execute", "when": "inDebugMode", "args":
-    // { "sequence": [ "workbench.action.debug.stop", "workbench.action.tasks.build", "workbench.action.debug.start" ] } },
 
 //////////////////////////////////////////////////
 // Extensions
