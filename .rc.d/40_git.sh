@@ -479,10 +479,11 @@ git_push_all() {
   local IFS="$(printf ' \t\n')"
   local REMOTES="${1:-$(git_remotes)}"
   local BRANCH="${2:-HEAD}"
+  shift $(($# > 2 ? 2 : $#))
   for REMOTE in $REMOTES; do
     if git_remote_valid "$REMOTE"; then
       echo -n "Push to $REMOTE: "
-      git push "$REMOTE" $BRANCH
+      git push "$REMOTE" "$BRANCH" "$@"
     fi
   done
 }
