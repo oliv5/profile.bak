@@ -865,10 +865,6 @@ annex_upkeep() {
   local SEND=""
   local FAST="--all"
   local REMOTES=""
-  # Misc options
-  local NETWORK_DEVICE="";
-  local CHARGE_LEVEL="";
-  local CHARGE_STATUS="";
   # Get arguments
   OPTIND=1
   while getopts "adoscpum:gexfti:v:w:zh" OPTFLAG; do
@@ -890,11 +886,8 @@ annex_upkeep() {
       x) DROP=1;;
       f) FAST="--fast";;
       # Misc
-      i) NETWORK_DEVICE="${OPTARG}";;
-      v) CHARGE_LEVEL="${OPTARG}";;
-      w) CHARGE_STATUS="${OPTARG}";;
       z) set -vx; DBG="true";;
-      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-o] [-s] [-t] [-c] [-p] [-u] [-m 'msg'] [-g] [-e] [-x] [-f] [-i itf] [-v 'var lvl'] [-w 'var status1 status2 ...'] [-z] [remote1 remote2 ...] "
+      *) echo >&2 "Usage: annex_upkeep [-a] [-d] [-o] [-s] [-t] [-c] [-p] [-u] [-m 'msg'] [-g] [-e] [-x] [-f] [-z] [remote1 remote2 ...] "
          echo >&2 "-a (a)dd files"
          echo >&2 "-d commit (d)eleted files"
          echo >&2 "-o f(o)rce add/delete files"
@@ -908,9 +901,6 @@ annex_upkeep() {
          echo >&2 "-e s(e)nd to remotes"
          echo >&2 "-x drop files"
          echo >&2 "-f (f)ast get/send"
-         echo >&2 "-i check network (i)nterface connection"
-         echo >&2 "-v check device charging le(v)el"
-         echo >&2 "-w check device charging status"
          echo >&2 "-z simulate operations"
          return 1;;
     esac
@@ -921,41 +911,6 @@ annex_upkeep() {
   REMOTES="${@:-$(annex_enabled)}"
   # Base check
   annex_exists || return 1
-  # Charging status
-  if [ -n "$CHARGE_STATUS" ]; then
-    set -- $CHARGE_STATUS
-    local DEVICE="${1:-/sys/class/power_supply/battery/status}"
-    shift
-    local CURRENT_STATUS="$(devcat "$DEVICE")"
-    local EXPECTED_STATUS="$*"
-    local REMAINING_STATUS="${EXPECTED_STATUS%${CURRENT_STATUS}*}"
-    set --
-    if [ "$REMAINING_STATUS" = "$EXPECTED_STATUS" ]; then
-      echo "[warning] device is not in charge ($CURRENT_STATUS / $EXPECTED_STATUS). Abort..."
-      return 3
-    fi
-  fi
-  # Charging level
-  if [ -n "$CHARGE_LEVEL" ]; then
-    set -- $CHARGE_LEVEL
-    local DEVICE="${1:-/sys/class/power_supply/battery/capacity}"
-    local CURRENT_LEVEL="$(devcat "$DEVICE")"
-    local EXPECTED_LEVEL="${2:-75}"
-    set --
-    if [ "$CURRENT_LEVEL" -lt "$EXPECTED_LEVEL" 2>/dev/null ]; then
-      echo "[warning] device charge level ($CURRENT_LEVEL) is lower than threshold ($EXPECTED_LEVEL). Abort..."
-      return 2
-    fi
-  fi
-  # Connected network device
-  #if [ -n "$NETWORK_DEVICE" ] && ! ip addr show dev "$NETWORK_DEVICE" 2>/dev/null | grep "state UP" >/dev/null; then
-  if [ -n "$NETWORK_DEVICE" ] && ! ip addr show dev "$NETWORK_DEVICE" 2>/dev/null | head -n 1 | grep "UP" >/dev/null; then
-    echo "[warning] network interface '$NETWORK_DEVICE' is not connected. Disable file content transfer..."
-    unset CONTENT
-    unset GET
-    unset SEND
-    unset DROP
-  fi
   # Force PULL if a remote is using gcrypt
   if [ -n "$NO_PULL" ] && git_gcrypt_remotes $REMOTES; then
     echo "Force pull because of gcrypt remote(s)"
