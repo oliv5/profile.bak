@@ -34,23 +34,23 @@ test_locales() {
 
 ################################
 # Setup path
-[ -n "${HOME##*/}" ] && path_prepend "$HOME/bin" "$HOME/.local/bin" "$HOME/rbin" "$HOME/rbin/wrappers" "$HOME/go/bin"
+[ -n "${HOME##*/}" ] && path_prepend "$HOME/bin" "$HOME/.local/bin" "$HOME/bin/profile" "$HOME/bin/profile/wrappers" "$HOME/go/bin"
 path_append /usr/local/bin /usr/local/sbin /usr/bin /usr/sbin /bin /sbin
 path_cleanup
 
 ################################
 # Load plugins
 # https://github.com/junegunn/fzf
-if [ -n "$BASH_VERSION" ] && [ -r "$RC_DIR/rbin/fzf/.fzf.bash" ] ; then
-  source "$RC_DIR/rbin/fzf/.fzf.bash"
+if [ -n "$BASH_VERSION" ] && [ -r "$RC_DIR/bin/profile/fzf/.fzf.bash" ] ; then
+  source "$RC_DIR/bin/profile/fzf/.fzf.bash"
 fi
 if command -v fzf >/dev/null 2>&1; then
   export FZF_DEFAULT_OPTS="--bind=tab:accept"
 fi
 # RPL
 # https://github.com/kcoyner/rpl
-if [ -x "$RC_DIR/rbin/rpl/rpl" ] ; then
-  path_append "$RC_DIR/rbin/rpl"
+if [ -x "$RC_DIR/bin/profile/rpl/rpl" ] ; then
+  path_append "$RC_DIR/bin/profile/rpl"
 fi
 # Others
 # https://github.com/sharkdp/fd
