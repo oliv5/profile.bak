@@ -11,26 +11,26 @@ _rfind() { if svn_exists "$@"; then svn_root "$@"; elif git_exists "$@"; then gi
 # Grep based code search
 _dgrep1()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; FARGS="${_DG1EXCLUDE} $@" _fgrep1 "$ARG2" "${ARG3:-.}/$ARG1"); }
 _dgrep2()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; _fgrep2 "$ARG2" ${_DG2EXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
-_dgrep3()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; git grep -nE ${GCASE} ${GARGS} "$@" "$ARG2" -- $(echo "$ARG1" | sed "s@^@${ARG3:-.}/*@ ; s@;@ ${ARG3:-.}/*@g")); }
+_dgrep3()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; git grep -nE ${GCASE} ${GARGS} "$@" "$ARG2" -- $(_fglob "$ARG1" "${ARG3:-.}/*" " ")); }
 _dgrep4()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; _rgrep "$ARG2" "${ARG3:-.}/$ARG1" ${GCASE} "$@"); }
 _dgrep()    { if command -v _rgrep >/dev/null; then _dgrep4 "$@"; elif git_exists "$3"; then _dgrep3 "$@"; else _dgrep1 "$@"; fi; }
 _DG1EXCLUDE=""
 _DG2EXCLUDE="--exclude-dir=.git --exclude-dir=.svn"
-_DGEXT_C="*.c;*.cpp;*.cc"
-_DGEXT_H="*.h;*.hpp"
-_DGEXT_V="*.vhd;*.v;*.sv"
+_DGEXT_C="*.c|*.cpp|*.cc"
+_DGEXT_H="*.h|*.hpp"
+_DGEXT_V="*.vhd|*.v|*.sv"
 _DGEXT_PY="*.py"
-_DGEXT_SCONS="SConstruct;SConscript;sconstruct;sconscript"
-_DGEXT_MK="*.mk;Makefile;makefile;GNUmakefile;gnumakefile;$_DGEXT_SCONS"
-_DGEXT_ASM="*.inc;*.S;*.s"
+_DGEXT_SCONS="SConstruct|SConscript|sconstruct|sconscript"
+_DGEXT_MK="*.mk|Makefile|makefile|GNUmakefile|gnumakefile|$_DGEXT_SCONS"
+_DGEXT_ASM="*.inc|*.S|*.s"
 _DGEXT_XML="*.xml"
 _DGEXT_TEX="*.tex"
 _DGEXT_SHELL="*.sh"
-_DGEXT_REF="$_DGEXT_C;$_DGEXT_H;$_DGEXT_V;$_DGEXT_PY;$_DGEXT_SCONS;$_DGEXT_MK;$_DGEXT_ASM;$_DGEXT_XML;$_DGEXT_SHELL"
+_DGEXT_REF="$_DGEXT_C|$_DGEXT_H|$_DGEXT_V|$_DGEXT_PY|$_DGEXT_SCONS|$_DGEXT_MK|$_DGEXT_ASM|$_DGEXT_XML|$_DGEXT_SHELL"
 alias      c='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_C"'
 alias      h='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_H"'
 alias      v='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_V"'
-alias     ch='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_C;$_DGEXT_H"'
+alias     ch='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_C|$_DGEXT_H"'
 alias     hc='ch'
 alias     py='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_PY"'
 alias     mk='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_MK"'
@@ -42,7 +42,7 @@ alias    ref='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=   GARGS= _dgrep "$_DGEXT_REF"
 alias     ic='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_C"'
 alias     ih='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_H"'
 alias     iv='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_V"'
-alias    ich='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_C;$_DGEXT_H"'
+alias    ich='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_C|$_DGEXT_H"'
 alias    ihc='ich'
 alias    ipy='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_PY"'
 alias    imk='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_MK"'

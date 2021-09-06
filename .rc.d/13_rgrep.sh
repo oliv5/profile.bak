@@ -8,9 +8,9 @@ _rgrep() {
   local PATTERN="$1"
   local FILES="${2##*/}"
   local DIR="${2%"$FILES"}"
-  FILES="$(echo "${FILES}" | sed -e 's/;/|/g')"
+  FILES="$(_fglob "${FILES}" "-g " " ")"
   shift 2
-  command rg --no-heading -n ${GARGS} -g "${FILES}" "$@" "${PATTERN}" "${DIR:-.}"
+  (set -f; command rg --no-heading -n ${GARGS} "$@" "${PATTERN}" ${FILES} "${DIR:-.}")
 }
 unset GARGS
 alias    gg='GARGS="" _rgrep'

@@ -6,7 +6,7 @@ alias fd='fdfind'
 _fdfind() {
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
-  FILES="$(echo "${FILES}" | sed -e 's/;/|/g')"
+  FILES="$(_fregex "${FILES}")"
   shift
   fdfind -H ${FTYPE:+-t $FTYPE} ${FCASE} ${FARGS} -p "${FILES:-.*}" "$@" "${DIR:-.}"
 }

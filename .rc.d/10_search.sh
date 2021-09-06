@@ -1,30 +1,31 @@
 #!/bin/sh
 
 ###########################################
-# Find files implementations
-_ffind1() {
-  local FCASE="${FCASE:--}name"
-  local FILES="${1##*/}"
-  local DIR="${1%"$FILES"}"
-  shift 2>/dev/null
-  local REGEX='s/;!/" -o -not '${FCASE}' "/g ; s/&!/" -a -not '${FCASE}' "/g ; s/;/" -o '${FCASE}' "/g ; s/&/" -a '${FCASE}' /g'
-  ( set -f; FILES="\"$(echo $FILES | sed -e "$REGEX")\""
-    eval find ${FOPTS} "${DIR:-.}" -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} \\\( ${FILES:+$FCASE "$FILES"} -true \\\) ${FARGS} "$@")
+# Generic glob/regex command line management
+_fregex() {
+  echo "$1" | sed -Ee 's/(\()?(\|)?\*\.(\|)?(\))?/\1\2.*\\.\3\4/g ; s;//;/;g' ${2:+-e "$2"}
 }
+_fglob() {
+  # $1=txt $2=prefix $3=delimitor
+  echo "${2}${1}" | sed "s@|@${3}${2}@g ; s/(\|)//g"
+}
+
+###########################################
+# Find files implementations
 _ffind2() { # support regex in filename only
   local FCASE="${FCASE:--}regex"
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
   shift 2>/dev/null
-  ( set -f; FILES="$(echo $FILES | sed -e 's/;/|/g ; s/\./\\./g ; s/*/.*/g')"
+  ( set -f; FILES="$(_fregex $FILES)"
     find ${FOPTS} "${DIR:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*/($FILES)"} ${FARGS} "$@")
 }
 _ffind3() { # support regex in path; slower (3 sed)
   local FCASE="${FCASE:--}regex"
   local ROOT="$(echo "$1" | sed -r -e 's;[^/]*$;;g' -e 's;[^/]*\*.*$;;g')"
   local DIR="${1#$ROOT}"; DIR="${DIR%"${1##*/}"}"
-  local FILES="$(echo "${1##*/}" | sed -e 's/;/|/g')"
-  local REGEX="$(echo "$DIR/($FILES)" | sed -e 's/\./\\./g ; s/*/.*/g ; s;//;/;g')"
+  local FILES="${1##*/}"
+  local REGEX="$DIR/($(_fregex "$FILES"))"
   shift 2>/dev/null
   find ${FOPTS} "${ROOT:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*$REGEX"} ${FARGS} "$@"
 }
@@ -169,7 +170,7 @@ _fgrep2() {
   fi
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
-  FILES="$(echo "${FILES}" | sed -e 's/;/ --include=/g')"
+  FILES="$(echo "${FILES}" | sed -e 's/|/ --include=/g')"
   (set -f; eval grep -RnH --color ${GCASE} ${GARGS} -e "$ARGS" ${FILES:+--include="$FILES"} "${DIR:-.}")
 }
 _fgrep() { _fgrep2 "$@"; }
@@ -275,10 +276,6 @@ rm_duplicates0() {
     done
   ' _ | xargs -r0 -- echo rm -I --
 }
-
-# Find empty directories/files
-alias fd_empty='find . -type d -empty'
-alias ff_empty='find . -type f -empty'
 
 # Find duplicate links of all links (good/bad)
 ffl_dup() {
