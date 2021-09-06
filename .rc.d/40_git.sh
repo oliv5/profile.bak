@@ -50,7 +50,6 @@ cat <<EOF
   # Diff
   git config --global --unset-all diff.tool; git config --unset-all diff.tool
   git config --global diff.tool meld
-  git config --global alias.meld '!$HOME/bin/profile/git-meld.pl'
   # Merge
   git config --global --unset-all merge.tool; git config --unset-all merge.tool
   git config --global merge.tool mymerge
