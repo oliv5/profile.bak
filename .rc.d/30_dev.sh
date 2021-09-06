@@ -9,10 +9,10 @@ alias rffd='_rfind'
 _rfind() { if svn_exists "$@"; then svn_root "$@"; elif git_exists "$@"; then git_worktree "$@"; fi };
 
 # Grep based code search
-_dgrep1()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; FARGS="${_DG1EXCLUDE} $@" _fgrep1 "$ARG2" "${ARG3:-.}/$ARG1"); }
-_dgrep2()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; _fgrep2 "$ARG2" ${_DG2EXCLUDE} "$@" "${ARG3:-.}/$ARG1"); }
-_dgrep3()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; git grep -nE ${GCASE} ${GARGS} "$@" "$ARG2" -- $(_fglob "$ARG1" "${ARG3:-.}/*" " ")); }
-_dgrep4()   { local ARG1="$1"; local ARG2="$2"; local ARG3="$3"; [ $# -lt 3 ] && shift $# || shift 3; (set -f; _rgrep "$ARG2" "${ARG3:-.}/$ARG1" ${GCASE} "$@"); }
+_dgrep1()   { local A="$2" B="$1" C="$3"; shift $(($#<3?$#:3)); (set -f; FARGS="${_DG1EXCLUDE} $@" _fgrep1 "$A" "${C:-.}/$B"); }
+_dgrep2()   { local A="$2" B="$1" C="$3"; shift $(($#<3?$#:3)); (set -f; _fgrep2 "$A" ${_DG2EXCLUDE} "$@" "${C:-.}/$B"); }
+_dgrep3()   { local A="$2" B="$1" C="$3"; shift $(($#<3?$#:3)); (set -f; git grep -nE ${GCASE} ${GARGS} "$@" "$A" -- $(_fglob "$B" "${C:-.}/*" " ")); }
+_dgrep4()   { local A="$2" B="$1" C="$3"; shift $(($#<3?$#:3)); (set -f; _rgrep "$A" "${C:-.}/($B)" ${GCASE} "$@"); }
 _dgrep()    { if command -v _rgrep >/dev/null; then _dgrep4 "$@"; elif git_exists "$3"; then _dgrep3 "$@"; else _dgrep1 "$@"; fi; }
 _DG1EXCLUDE=""
 _DG2EXCLUDE="--exclude-dir=.git --exclude-dir=.svn"
