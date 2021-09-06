@@ -1,5 +1,6 @@
 #!/bin/sh
 # Note: this file must be independant, it can be sourced by external scripts
+# Note: don't use "$@" in this main script, it will be filled with paths when mkalltags() is called
 RC_DIR="${RC_DIR:-$HOME}"
 if ! command -v git_exists >/dev/null; then
   . "$RC_DIR/.rc.d"/*_git.sh
@@ -231,45 +232,49 @@ rmtags() {
 mkalltags() {
   local SRC="$(readlink -m "${1:-$PWD}")"
   local MAXDEPTH="${2:-5}"
+  local TAGTYPES="${3:-ctags cscope mkid pycscope gtags starscope}"
   find -L "$SRC" -maxdepth "$MAXDEPTH" -type f -name ".*.path" -print0 2>/dev/null | xargs -r0 -- sh -c '
-    RC_DIR="$1"; shift
+    RC_DIR="$1"; TAGTYPES="$2"; shift 2
     . "$RC_DIR/.rc.d"/*_tags.sh
+    tag_selected() { echo " $TAGTYPES " | grep -F " $1 " >/dev/null && [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".${2}.path" ]; }
     for TAGPATH; do
       echo "** Processing file $TAGPATH"
       command cd "$(dirname $TAGPATH)" || continue
       TAGNAME="$(basename $TAGPATH)"
-      if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".ctags.path" ]; then
+      if tag_selected ctags ctags; then
         rmctags .
         cat "$TAGNAME" | xargs -r echo "[ctags] add:"
         mkinc mkctags . "$_CTAGS_REGEX" "$_CTAGS_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
-      if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".cscope.path" ]; then
+      if tag_selected cscope cscope; then
         rmcscope .
         cat "$TAGNAME" | xargs -r echo "[cscope] add:"
         mkinc mkcscope . "$_CSCOPE_REGEX" "$_CSCOPE_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
-      if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".id.path" ]; then
+      if tag_selected mkid id; then
         rmids .
         cat "$TAGNAME" | xargs -r echo "[mkid] add:"
         mkinc mkids . "$_MKID_REGEX" "$_MKID_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
-      if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".pycscope.path" ]; then
+      if tag_selected pycscope pycscope; then
         rmpycscope .
         cat "$TAGNAME" | xargs -r echo "[pycscope] add:"
         mkinc mkpycscope . "$_PYCSCOPE_REGEX" "$_PYCSCOPE_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
-      if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".gtags.path" ]; then
+      if tag_selected gtags gtags; then
         rmgtags .
         cat "$TAGNAME" | xargs -r echo "[gtags] add:"
         mkinc mkgtags . "$_GTAGS_REGEX" "$_GTAGS_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
-      if [ "$TAGNAME" = ".tags.path" -o "$TAGNAME" = ".starscope.path" ]; then
+      if tag_selected starscope starscope; then
         rmstarscope .
         cat "$TAGNAME" | xargs -r echo "[starscope] add:"
         mkinc mkstarscope . "$_STARSCOPE_REGEX" "$_STARSCOPE_EXCLUDE" $(cat "$TAGNAME" | xargs -r)
       fi
       echo "** Done."
     done
-  ' _ "$RC_DIR"
+  ' _ "$RC_DIR" "$TAGTYPES"
 }
 
+# Note: don't use "$@" in this main script, it will be filled with paths when mkalltags() is called
+# END
