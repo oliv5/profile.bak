@@ -190,41 +190,29 @@ alias c3='cut -d: -f 3'
 
 ###########################################
 # Interactive search & replace
-_fsed1() {
+_fsed() {
   # Get arguments
   #local SEDOPT="$(arg_rtrim 3 "$@")"; shift $(($#-3))
   #local SEDOPT="--follow-symlinks"; [ $# -gt 3 ] && SEDOPT="${SEDOPT:+$SEDOPT }$1" && shift 1
   local SEDOPT=""; [ $# -gt 3 ] && SEDOPT="$1" && shift 1
   local IN="$1"; local OUT="$2"; local FILES="${SFILES:-$3}"
-  echo "Replace '$IN' by '$OUT' in files '$FILES' ${SEDOPT:+with options $SEDOPT}"
   # Ask for options
-  local _SHOW; read -p "Show each line changed ? (Y/n) " _SHOW
-  local _BACKUP; read -p "Backup each file ? (Y/n) " _BACKUP
-  local _CONFIRM; read -p "Confirm each file change ? (Y/n) " _CONFIRM
-  # Manage options
-  [ "$_SHOW" != "n" -a "$_SHOW" != "N" ] && _SHOW=1 || unset _SHOW
-  [ "$_CONFIRM" != "n" -a "$_CONFIRM" != "N" ] && _CONFIRM=1 || unset _CONFIRM
-  [ "$_BACKUP" != "n" -a "$_BACKUP" != "N" ] && _BACKUP=".$(date +%Y%m%d-%H%M%S).bak" || unset _BACKUP
+  local _SHOW="" _BACKUP="" _CONFIRM=""
+  if [ -z "$SNOCONFIRM" ]; then
+    echo "Replace '$IN' by '$OUT' in files '$FILES' ${SEDOPT:+with options $SEDOPT}"
+    read -p "Show each line changed ? (Y/n) " _SHOW
+    read -p "Backup each file ? (Y/n) " _BACKUP
+    read -p "Confirm each file change ? (Y/n) " _CONFIRM
+    [ "$_SHOW" != "n" -a "$_SHOW" != "N" ] && _SHOW=1 || unset _SHOW
+    [ "$_CONFIRM" != "n" -a "$_CONFIRM" != "N" ] && _CONFIRM=1 || unset _CONFIRM
+    [ "$_BACKUP" != "n" -a "$_BACKUP" != "N" ] && _BACKUP=".$(date +%Y%m%d-%H%M%S).bak" || unset _BACKUP
+  fi
   # Call find and sed
   _ffind "$FILES" ${SEXCLUDE} -type f \
     ${_CONFIRM:+-exec sh -c 'read -p "Processing file {} ? (enter/ctrl-c)" DUMMY' \;} \
     ${_BACKUP:+-execdir sh -c "grep '$IN' '{}' >/dev/null" \;} \
     -execdir sed ${SEDOPT} --in-place${_BACKUP:+=$_BACKUP} ${_SHOW:+-e "\|$IN|{w /dev/stderr" -e "}"} -e "s|$IN|$OUT|g" "{}" \;
 }
-# Bare search & replace, no questions
-_fsed2() {
-  # Get arguments
-  #local SEDOPT="$(arg_rtrim 3 "$@")"; shift $(($#-3))
-  #local SEDOPT="--follow-symlinks"; [ $# -gt 3 ] && SEDOPT="${SEDOPT:+$SEDOPT }$1" && shift 1
-  local SEDOPT=""; [ $# -gt 3 ] && SEDOPT="$1" && shift 1
-  local IN="$1"; local OUT="$2"; local FILES="${SFILES:-$3}"
-  ${SNOCONFIRM} echo "Replace '$IN' by '$OUT' in files '$FILES' ${SEDOPT:+with options $SEDOPT}"
-  ${SNOCONFIRM} read -p "Confirm ? (enter/ctrl-c) " _
-  # Call find and sed
-  _ffind "$FILES" ${SEXCLUDE} -type f \
-    -execdir sed ${SEDOPT} --in-place -e "s|$IN|$OUT|g" "{}" \;
-}
-_fsed() { _fsed1 "$@"; }
 unset SFILES SEXCLUDE SNOCONFIRM
 alias   hh='FCASE=   FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed'
 alias  ihh='FCASE=-i FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed'
