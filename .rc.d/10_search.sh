@@ -11,7 +11,7 @@ _ffind1() {
   ( set -f; FILES="\"$(echo $FILES | sed -e "$REGEX")\""
     eval find ${FOPTS} "${DIR:-.}" -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} \\\( ${FILES:+$FCASE "$FILES"} -true \\\) ${FARGS} "$@")
 }
-_ffind2() {
+_ffind2() { # support regex in filename only
   local FCASE="${FCASE:--}regex"
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
@@ -19,7 +19,7 @@ _ffind2() {
   ( set -f; FILES="$(echo $FILES | sed -e 's/;/|/g ; s/\./\\./g ; s/*/.*/g')"
     find ${FOPTS} "${DIR:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*/($FILES)"} ${FARGS} "$@")
 }
-_ffind3() {
+_ffind3() { # support regex in path; slower (3 sed)
   local FCASE="${FCASE:--}regex"
   local ROOT="$(echo "$1" | sed -r -e 's;[^/]*$;;g' -e 's;[^/]*\*.*$;;g')"
   local DIR="${1#$ROOT}"; DIR="${DIR%"${1##*/}"}"
@@ -153,13 +153,13 @@ alias wfflb='FARGS=-depth fflb'
 
 ###########################################
 # File grep implementations
-_fgrep1() {
+_fgrep1() { # Can be faster than grep -r when selecting files
   if [ $# -gt 1 ]; then
     local ARGS="$(arg_rtrim 1 "$@")"; shift $(($#-1))
   else
     local ARGS="$1"; shift $#
   fi
-  (set -f; _ffind1 "${@:-}" -type f -print0 | eval xargs -0 grep -nH --color ${GCASE} ${GARGS} -e "${ARGS:-''}")
+  (set -f; _ffind2 "${@:-}" -type f -print0 | eval xargs -0 grep -nH --color ${GCASE} ${GARGS} -e "${ARGS:-''}")
 }
 _fgrep2() {
   if [ $# -gt 1 ]; then
