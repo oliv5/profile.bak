@@ -1,6 +1,6 @@
 # Setup fzf
 # ---------
-FZF_DIR="$RC_DIR/rbin/fzf"
+FZF_DIR="$RC_DIR/bin/profile/fzf"
 if [[ ! "$PATH" == *"$FZF_DIR"/bin* ]]; then
   export PATH="${PATH:+${PATH}:}$FZF_DIR/bin"
 fi
