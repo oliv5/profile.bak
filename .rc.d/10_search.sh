@@ -29,6 +29,7 @@ _ffind3() {
   find ${FOPTS} "${ROOT:-.}" -regextype posix-extended -nowarn ${FTYPE:+-type $FTYPE} ${FXTYPE:+-xtype $FXTYPE} ${FILES:+$FCASE ".*$REGEX"} ${FARGS} "$@"
 }
 #~ _ffind_test() {
+  #~ cd $(mktemp -d)
   #~ mkdir -p a/b/c
   #~ touch a/b/c/toto.txt a/b/c/toto.txt2
   #~ echo "Test"; _ffind "toto.txt"
@@ -42,7 +43,8 @@ _ffind3() {
   #~ rm a/b/c/toto.txt a/b/c/toto.txt2
   #~ rmdir -p a/b/c
 #~ }
-alias _ffind='_ffind3'
+_ffind() { _ffind3 "$@"; }
+unset FCASE FTYPE FXTYPE FARGS FOPTS
 alias      ff='FCASE=   FTYPE=  FXTYPE=  FOPTS="${FOPTS:+$FOPTS} -L" FARGS="${FARGS:+$FARGS}" _ffind'
 alias     fff='FCASE=   FTYPE=f FXTYPE=  FOPTS="${FOPTS:+$FOPTS} -L" FARGS="${FARGS:+$FARGS}" _ffind'
 alias    ffff='FCASE=   FTYPE=f FXTYPE=f FOPTS="${FOPTS:+$FOPTS} -L" FARGS="${FARGS:+$FARGS}" _ffind'
@@ -57,20 +59,20 @@ alias    iffd='FCASE=-i FTYPE=d FXTYPE=  FOPTS="${FOPTS:+$FOPTS} -L" FARGS="${FA
 alias    iffl='FCASE=-i FTYPE=l FXTYPE=  FOPTS="${FOPTS:+$FOPTS}"    FARGS="${FARGS:+$FARGS}" _ffind'
 alias   ifflf='FCASE=-i FTYPE=l FXTYPE=f FOPTS="${FOPTS:+$FOPTS}"    FARGS="${FARGS:+$FARGS}" _ffind'
 alias   ifflb='FCASE=-i FTYPE=l FXTYPE=l FOPTS="${FOPTS:+$FOPTS}"    FARGS="${FARGS:+$FARGS}" _ffind'
-alias    ffp0='FARGS=-print0 ff'
-alias   fffp0='FARGS=-print0 fff'
-alias  ffffp0='FARGS=-print0 ffff'
-alias   ffdp0='FARGS=-print0 ffd'
-alias   fflp0='FARGS=-print0 ffl'
-alias  fflfp0='FARGS=-print0 fflf'
-alias  fflbp0='FARGS=-print0 fflb'
-alias   iffp0='FARGS=-print0 iff'
-alias  ifffp0='FARGS=-print0 ifff'
-alias iffffp0='FARGS=-print0 iffff'
-alias  iffdp0='FARGS=-print0 iffd'
-alias  ifflp0='FARGS=-print0 iffl'
-alias ifflfp0='FARGS=-print0 ifflf'
-alias ifflbp0='FARGS=-print0 ifflb'
+alias    ff0='FARGS=-print0 ff'
+alias   fff0='FARGS=-print0 fff'
+alias  ffff0='FARGS=-print0 ffff'
+alias   ffd0='FARGS=-print0 ffd'
+alias   ffl0='FARGS=-print0 ffl'
+alias  fflf0='FARGS=-print0 fflf'
+alias  fflb0='FARGS=-print0 fflb'
+alias   iff0='FARGS=-print0 iff'
+alias  ifff0='FARGS=-print0 ifff'
+alias iffff0='FARGS=-print0 iffff'
+alias  iffd0='FARGS=-print0 iffd'
+alias  iffl0='FARGS=-print0 iffl'
+alias ifflf0='FARGS=-print0 ifflf'
+alias ifflb0='FARGS=-print0 ifflb'
 alias     ffs='ff    2>/dev/null'
 alias    fffs='fff   2>/dev/null'
 alias   ffffs='ffff  2>/dev/null'
@@ -170,7 +172,8 @@ _fgrep2() {
   FILES="$(echo "${FILES}" | sed -e 's/;/ --include=/g')"
   (set -f; eval grep -RnH --color ${GCASE} ${GARGS} -e "$ARGS" ${FILES:+--include="$FILES"} "${DIR:-.}")
 }
-alias _fgrep='_fgrep2'
+_fgrep() { _fgrep2 "$@"; }
+unset GCASE GARGS
 alias    gg='FCASE= FTYPE= FXTYPE= FOPTS=-L FARGS= GCASE=   GARGS=   _fgrep'
 alias   igg='FCASE= FTYPE= FXTYPE= FOPTS=-L FARGS= GCASE=-i GARGS=   _fgrep'
 alias   ggl='FCASE= FTYPE= FXTYPE= FOPTS=   FARGS= GCASE=   GARGS=-l _fgrep'
@@ -203,10 +206,10 @@ _fsed1() {
   [ "$_CONFIRM" != "n" -a "$_CONFIRM" != "N" ] && _CONFIRM=1 || unset _CONFIRM
   [ "$_BACKUP" != "n" -a "$_BACKUP" != "N" ] && _BACKUP=".$(date +%Y%m%d-%H%M%S).bak" || unset _BACKUP
   # Call find and sed
-  _ffind "$FILES" $SEXCLUDE -type f \
+  _ffind "$FILES" ${SEXCLUDE} -type f \
     ${_CONFIRM:+-exec sh -c 'read -p "Processing file {} ? (enter/ctrl-c)" DUMMY' \;} \
     ${_BACKUP:+-execdir sh -c "grep '$IN' '{}' >/dev/null" \;} \
-    -execdir sed $SEDOPT --in-place${_BACKUP:+=$_BACKUP} ${_SHOW:+-e "\|$IN|{w /dev/stderr" -e "}"} -e "s|$IN|$OUT|g" "{}" \;
+    -execdir sed ${SEDOPT} --in-place${_BACKUP:+=$_BACKUP} ${_SHOW:+-e "\|$IN|{w /dev/stderr" -e "}"} -e "s|$IN|$OUT|g" "{}" \;
 }
 # Bare search & replace, no questions
 _fsed2() {
@@ -215,11 +218,14 @@ _fsed2() {
   #local SEDOPT="--follow-symlinks"; [ $# -gt 3 ] && SEDOPT="${SEDOPT:+$SEDOPT }$1" && shift 1
   local SEDOPT=""; [ $# -gt 3 ] && SEDOPT="$1" && shift 1
   local IN="$1"; local OUT="$2"; local FILES="${SFILES:-$3}"
+  ${SNOCONFIRM} echo "Replace '$IN' by '$OUT' in files '$FILES' ${SEDOPT:+with options $SEDOPT}"
+  ${SNOCONFIRM} read -p "Confirm ? (enter/ctrl-c) " _
   # Call find and sed
-  _ffind "$FILES" $SEXCLUDE -type f \
-    -execdir sed $SEDOPT --in-place -e "s|$IN|$OUT|g" "{}" \;
+  _ffind "$FILES" ${SEXCLUDE} -type f \
+    -execdir sed ${SEDOPT} --in-place -e "s|$IN|$OUT|g" "{}" \;
 }
-alias _fsed='_fsed1'
+_fsed() { _fsed1 "$@"; }
+unset SFILES SEXCLUDE SNOCONFIRM
 alias   hh='FCASE=   FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed'
 alias  ihh='FCASE=-i FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed'
 
