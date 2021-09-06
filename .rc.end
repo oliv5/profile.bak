@@ -47,6 +47,14 @@ fi
 if command -v fzf >/dev/null 2>&1; then
   export FZF_DEFAULT_OPTS="--bind=tab:accept"
 fi
+# RPL
+# https://github.com/kcoyner/rpl
+if [ -x "$RC_DIR/rbin/rpl/rpl" ] ; then
+  path_append "$RC_DIR/rbin/rpl"
+fi
+# Others
+# https://github.com/sharkdp/fd
+# https://github.com/BurntSushi/ripgrep
 
 ################################
 # Remove some aliases/fct shortcuts
