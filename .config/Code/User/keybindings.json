@@ -35,15 +35,20 @@
 // Sidebar
 // Exception: the search bar is managed somewhere else
 { "key": "ctrl+alt+b",            "command": "workbench.action.toggleSidebarVisibility" },
-{ "key": "ctrl+alt+d",            "command": "workbench.view.debug" },
+{ "key": "ctrl+alt+d",            "command": "workbench.view.debug", "when" : "!sideBarFocus" },
 { "key": "ctrl+alt+d",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
-{ "key": "ctrl+alt+e",            "command": "workbench.view.extensions" },
+{ "key": "ctrl+alt+e",            "command": "workbench.view.extensions", "when" : "!sideBarFocus" },
 { "key": "ctrl+alt+e",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
 { "key": "ctrl+alt+g",            "command": "workbench.view.scm", "when": "workbench.scm.active" },
 { "key": "ctrl+alt+g",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
-{ "key": "ctrl+alt+s",            "command": "workbench.view.search" },
+{
+    "key": "ctrl+alt+s",
+    "command": "workbench.view.search",
+    "when": "!sideBarFocus"
+},
 { "key": "ctrl+alt+s",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
-{ "key": "ctrl+e",                "command": "workbench.view.explorer" },
+{ "key": "ctrl+e",                   "command": "extension.multiCommand.execute", "when" : "!sideBarFocus", "args":
+    { "sequence": [ "workbench.view.explorer", "workbench.explorer.fileView.focus" ] } },
 { "key": "ctrl+e",                "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
 
 // Panel
@@ -111,7 +116,7 @@
 
 // Error markers
 { "key": "f1",                    "command": "editor.action.marker.nextInFiles" },
-{ "key": "shift+f1",              "command": "editor.action.marker.prevInFiles", "when": "editorFocus" },
+{ "key": "shift+f1",              "command": "editor.action.marker.prevInFiles" },
 { "key": "ctrl+f1",               "command": "workbench.actions.view.problems", "when": "workbench.panel.markers.view.active" },
 
 // Quick selection & multi-cursor
@@ -135,7 +140,7 @@
 // Search bar: search & replace in all files
 { "key": "ctrl+g",                "command": "extension.multiCommand.execute", "when" : "!sideBarFocus", "args":
     { "sequence": [ "editor.action.addSelectionToNextFindMatch", "workbench.action.findInFiles" ] } },
-{ "key": "ctrl+g",                "command": "search.action.openInEditor", "when" : "sideBarFocus" },
+{ "key": "ctrl+g",                "command": "search.action.openInEditor", "when" : "hasSearchResult && searchViewletFocus" },
 // Search bar: navigation
 { "key": "f4",                    "command": "search.action.focusNextSearchResult", "when": "hasSearchResult || inSearchEditor" },
 { "key": "shift+f4",              "command": "search.action.focusPreviousSearchResult", "when": "hasSearchResult || inSearchEditor" },
@@ -241,6 +246,5 @@
 {
     "key": "",
     "command": ""
-},
-
+}
 ]
