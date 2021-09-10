@@ -192,3 +192,12 @@ lsdisplay() {
   # Show which program has port 60xx opened
   lsof -i -n | awk '$9 ~ /:60[0-9][0-9]$/ {print}'
 }
+
+################################
+# Get/check battery status
+bat_charging_level() {
+  sudo cat "${1:-/sys/class/power_supply/battery/capacity}"
+}
+bat_charging_status() {
+  sudo cat "${1:-/sys/class/power_supply/battery/status}" #| tr '[:upper:]' '[:lower:]'
+}
