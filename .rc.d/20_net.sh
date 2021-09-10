@@ -32,8 +32,20 @@ alias ipv6_disable_persistent='sudo sed -i -e "s/disable_ipv6\s*=.*/disable_ipv6
 alias ipv6_enable_persistent='sudo sed -i -e "s/disable_ipv6\s*=.*/disable_ipv6 = 0/" /etc/sysctl.conf'
 
 ############################
+# Test if itf exists/up/down
+net_itf_exists() {
+  ip addr show dev "$1" >/dev/null 2>$1
+}
+net_itf_up() {
+  ip addr show dev "$1" 2>/dev/null | head -n 1 | grep "UP" >/dev/null
+}
+net_itf_down() {
+  ip addr show dev "$1" 2>/dev/null | head -n 1 | grep "DOWN" >/dev/null
+}
+
+############################
 # iptables list all
-iptables_flush() {
+iptables_ls() {
   for TABLE in filter nat mangle raw security; do
     echo "** Table $TABLE **"
     sudo iptables -vL -t $TABLE
