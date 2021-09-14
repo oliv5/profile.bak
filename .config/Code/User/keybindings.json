@@ -115,13 +115,16 @@
 { "key": "ctrl+shift+r",          "command": "workbench.action.files.revert", "when": "editorTextFocus" },
 
 // Error markers
-{ "key": "f1",                    "command": "editor.action.marker.nextInFiles" },
-{ "key": "shift+f1",              "command": "editor.action.marker.prevInFiles" },
+{ "key": "f1",                    "command": "editor.action.marker.next" },
+{ "key": "shift+f1",              "command": "editor.action.marker.prev" },
+{ "key": "meta+f1",               "command": "editor.action.marker.nextInFiles" },
+{ "key": "meta+shift+f1",         "command": "editor.action.marker.prevInFiles" },
 { "key": "ctrl+f1",               "command": "workbench.actions.view.problems", "when": "workbench.panel.markers.view.active" },
 
 // Quick selection & multi-cursor
 { "key": "f2",                    "command": "editor.action.addSelectionToNextFindMatch", "when": "editorFocus" },
 { "key": "shift+f2",              "command": "editor.action.addSelectionToPreviousFindMatch", "when": "editorFocus" },
+{ "key": "ctrl+f2",               "command": "editor.action.selectHighlights", "when": "editorFocus" },
 { "key": "ctrl+shift+f2",         "command": "editor.action.selectHighlights", "when": "editorFocus" },
 
 // Quick match: search & replace in current file

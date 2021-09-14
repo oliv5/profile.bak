@@ -13,6 +13,7 @@
     "workbench.enableExperiments": false,
     "workbench.settings.enableNaturalLanguageSearch": false,
     "workbench.activityBar.visible": false,
+    "workbench.colorTheme": "Aramok's GLX Black",
 
     // Misc
     "git.enabled": false,
