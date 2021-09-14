@@ -865,39 +865,46 @@ git_cat() {
   done
 }
 
-# List deleted files
-git_deleted() {
-  git diff-tree -r "${@:-HEAD}" --diff-filter=AD --raw | awk '
+# List files by action (A=added, D=deleted, M=modified)
+git_filter_by_status() {
+  local FILTER="${1:?No status filter ADM specified...}"
+  local STATUS="${2:?No file status ADM specified...}"
+  shift 2
+  git diff-tree -r "${@:-HEAD}" --diff-filter=$FILTER --raw | awk '
     function basename(file) {
       sub(".*/", "", file)
       return file
     }
     {
-      # Remove empty hash
-      gsub("0{40}","")
-      # Get parameters, nullify $1-$4
-      hash=$3
-      action=$4
-      $1=$2=$3=$4=""
-      file=$0
+      # Get parameters
+      hash=$3 $4
+      action=$5
+      file=$6
       sub("    ", "", file)
       name=basename(file)
-      # Filter added-deleted files
+      # Filter files, reject already seen ones
       if ((hash in seen) || (name in seen)) {
-        delete deleted[hash]
-      } else if (action == "D") {
-        deleted[hash]=file
+        delete validated[hash]
+        delete validated[name]
+      } else if (action == "'$STATUS'") {
+        validated[hash]=file
       }
       seen[hash]=file
       seen[name]=file
     }
     END {
-      for (x in deleted) {
-        print deleted[x]
+      for (x in validated) {
+        print validated[x]
       }
     }
   '
 }
+
+# List created/deleted/modified files
+git_deleted() { git_filter_by_status AD D "$@"; }
+git_created() { git_filter_by_status AD A "$@"; }
+git_updated() { git_filter_by_status DM M "$@"; }
+git_modified() { git_filter_by_status M M "$@"; }
 
 ########################################
 # Subtrees
