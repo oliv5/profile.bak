@@ -358,7 +358,9 @@ if !exists('g:loaded_airline') && !exists('g:vimrc_nostatusline')
 	" Set the status line
 	if !exists("g:loaded_vimrc")
 		augroup vimrc_statuline
-			autocmd! BufWinEnter * windo call s:Statusline('local')
+			" Error: not allowed to modify another buffer
+			"autocmd! BufWinEnter * windo call s:Statusline('local')
+			autocmd! BufWinEnter * :call s:Statusline('local')
 		augroup END
 	endif
 
@@ -395,6 +397,8 @@ function! s:Tabfix() abort
 	update
 	if exists(':YAIFAMagic')
 		normal! YAIFAMagic
+	elseif exists(':Yaifa')
+		normal! Yaifa
 	endif
 endfunction
 
