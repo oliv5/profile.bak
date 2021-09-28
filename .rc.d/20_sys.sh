@@ -57,9 +57,9 @@ fstab2autofs() {
 }
 
 ################################
-# Add to user crontab, ensure uniqness
+# Add to user crontab
 cron_useradd() {
-  (crontab -l; echo "$@") | sort - | uniq - | crontab -
+  (crontab -l; echo "$@") | crontab -
 }
 # Add to system crontab
 cron_sysadd() {
@@ -84,7 +84,10 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 # period  delay  job-identifier  command
 #1         10     testjob         test.sh
 EOF
-  cron_useradd "@hourly /usr/sbin/anacron -s -t $HOME/.anacron/etc/anacrontab -S $HOME/.anacron/spool"
+  if ! crontab -l | grep "@hourly /usr/sbin/anacron" >/dev/null; then
+    echo "Register anacron in user crontab"
+    cron_useradd "@hourly /usr/sbin/anacron -s -t $HOME/.anacron/etc/anacrontab -S $HOME/.anacron/spool"
+  fi
 }
 
 ################################
