@@ -15,6 +15,16 @@
     "workbench.activityBar.visible": false,
     "workbench.colorTheme": "Aramok's GLX Black",
 
+    // Explorer pane sidebar
+    "explorer.openEditors.visible": 50,
+
+    // File handling
+    "files.watcherExclude": {
+        "**/.git/**": true,
+        "**/.svn/**": true,
+        "**/node_modules/*/**": true
+    },
+    
     // Misc
     "git.enabled": false,
     "settingsSync.keybindingsPerPlatform": false,
@@ -26,6 +36,9 @@
     "search.searchEditor.reusePriorSearchConfiguration": true,
     "search.seedOnFocus": true,
     "search.exclude": {
+        ".o": true,
+        ".a": true,
+        ".so": true,
         "tags": true,
         ".tags": true,
         ".tags.*": true,

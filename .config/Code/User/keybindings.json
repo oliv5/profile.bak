@@ -33,7 +33,6 @@
 { "key": "ctrl+shift+f12",        "command": "workbench.action.toggleFullScreen" },
 
 // Sidebar
-// Exception: the search bar is managed somewhere else
 { "key": "ctrl+alt+b",            "command": "workbench.action.toggleSidebarVisibility" },
 { "key": "ctrl+alt+d",            "command": "workbench.view.debug", "when" : "!sideBarFocus" },
 { "key": "ctrl+alt+d",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
@@ -41,13 +40,11 @@
 { "key": "ctrl+alt+e",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
 { "key": "ctrl+alt+g",            "command": "workbench.view.scm", "when": "workbench.scm.active" },
 { "key": "ctrl+alt+g",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
-{
-    "key": "ctrl+alt+s",
-    "command": "workbench.view.search",
-    "when": "!sideBarFocus"
-},
+{ "key": "ctrl+alt+s",            "command": "workbench.view.search", "when": "!sideBarFocus" },
 { "key": "ctrl+alt+s",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
-{ "key": "ctrl+e",                   "command": "extension.multiCommand.execute", "when" : "!sideBarFocus", "args":
+{ "key": "ctrl+alt+f",            "command": "workbench.view.search", "when": "!sideBarFocus" }, // alias for ctrl+alt+s not working
+{ "key": "ctrl+alt+f",            "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" }, // alias for ctrl+alt+s not working
+{ "key": "ctrl+e",                "command": "extension.multiCommand.execute", "when" : "!sideBarFocus", "args":
     { "sequence": [ "workbench.view.explorer", "workbench.explorer.fileView.focus" ] } },
 { "key": "ctrl+e",                "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
 
@@ -79,19 +76,26 @@
 { "key": "ctrl+j",                "command": "workbench.action.gotoLine" },
 
 // Views (a.k.a windows) management
+{ "key": "ctrl+w up",             "command": "views.moveViewUp" },
+{ "key": "ctrl+w down",           "command": "views.moveViewDown" },
+{ "key": "ctrl+w left",           "command": "views.moveViewLeft" },
+{ "key": "ctrl+w right",          "command": "views.moveViewRight" },
 { "key": "ctrl+w ctrl+n",         "command": "workbench.action.newWindow" },
 { "key": "ctrl+w ctrl+up",        "command": "workbench.action.focusAboveGroup" },
 { "key": "ctrl+w ctrl+down",      "command": "workbench.action.focusBelowGroup" },
 { "key": "ctrl+w ctrl+left",      "command": "workbench.action.focusLeftGroup" },
 { "key": "ctrl+w ctrl+right",     "command": "workbench.action.focusRightGroup" },
-{ "key": "ctrl+w up",             "command": "views.moveViewUp" },
-{ "key": "ctrl+w down",           "command": "views.moveViewDown" },
-{ "key": "ctrl+w left",           "command": "views.moveViewLeft" },
-{ "key": "ctrl+w right",          "command": "views.moveViewRight" },
 { "key": "ctrl+w ctrl+s",         "command": "workbench.action.splitEditor" },
 { "key": "ctrl+w shift+s",        "command": "workbench.action.splitEditorDown" },
-{ "key": "ctrl+w ctrl+c",         "command": "workbench.action.joinTwoGroups" },
-{ "key": "ctrl+w ctrl+q",         "command": "workbench.action.joinAllGroups" },
+{ "key": "ctrl+w ctrl+t",         "command": "workbench.action.joinTwoGroups" },
+{ "key": "ctrl+w ctrl+a",         "command": "workbench.action.joinAllGroups" },
+{ "key": "ctrl+shift+f4",         "command": "workbench.action.closeActiveEditor", "when": "editorTextFocus" },
+{ "key": "ctrl+w ctrl+c",         "command": "workbench.action.closeActiveEditor", "when": "editorTextFocus" },
+{ "key": "ctrl+w ctrl+shift+c",   "command": "workbench.action.closeAllEditors" },
+{ "key": "ctrl+w ctrl+p",         "command": "workbench.action.pinEditor", "when": "!activeEditorIsPinned" },
+{ "key": "ctrl+w ctrl+p",         "command": "workbench.action.unpinEditor", "when": "activeEditorIsPinned" },
+{ "key": "alt+up",                "command": "workbench.action.previousEditor", "when": "editorTextFocus" },
+{ "key": "alt+down",              "command": "workbench.action.nextEditor", "when": "editorTextFocus" },
 
 // Go back to editor, stop debugging, close all other windows/panels/bars
 { "key": "ctrl+w ctrl+w",         "command": "extension.multiCommand.execute", "args":
@@ -100,13 +104,6 @@
 // Zooms
 { "key": "ctrl++",                "command": "workbench.action.zoomIn" },
 { "key": "ctrl+-",                "command": "workbench.action.zoomOut" },
-
-// Editor management
-{ "key": "ctrl+shift+f4",         "command": "workbench.action.closeActiveEditor", "when": "editorTextFocus" },
-{ "key": "ctrl+w ctrl+k",         "command": "workbench.action.closeActiveEditor", "when": "editorTextFocus" },
-{ "key": "ctrl+w ctrl+shift+k",   "command": "workbench.action.closeAllEditors" },
-{ "key": "alt+up",                "command": "workbench.action.previousEditor", "when": "editorTextFocus" },
-{ "key": "alt+down",              "command": "workbench.action.nextEditor", "when": "editorTextFocus" },
 
 // Undo/redo
 { "key": "ctrl+z",                "command": "undo", "when": "editorTextFocus" },
@@ -130,16 +127,17 @@
 // Quick match: search & replace in current file
 { "key": "ctrl+f",                "command": "actions.find" },
 { "key": "ctrl+h",                "command": "editor.action.startFindReplaceAction" },
-// Quick match options
-{ "key": "alt+c",                 "command": "toggleFindCaseSensitive", "when": "editorFocus" },
-{ "key": "alt+r",                 "command": "toggleFindRegex", "when": "editorFocus" },
-{ "key": "alt+w",                 "command": "toggleFindWholeWord", "when": "editorFocus" },
 // Quick match navigation
 { "key": "f3",                    "command": "editor.action.nextMatchFindAction", "when": "editorFocus && !editorHasSelection" },
 { "key": "f3",                    "command": "editor.action.nextSelectionMatchFindAction", "when": "editorFocus && editorHasSelection" },
 { "key": "shift+f3",              "command": "editor.action.previousMatchFindAction", "when": "editorFocus && !editorHasSelection" },
 { "key": "shift+f3",              "command": "editor.action.previousSelectionMatchFindAction", "when": "editorFocus && editorHasSelection" },
+{ "key": "ctrl+f3",               "command": "extension.multiCommand.execute", "when" : "editorFocus && editorHasSelection", "args":
+    { "sequence": [ "toggleFindWholeWord", "editor.action.nextSelectionMatchFindAction" ] } },
 
+// Search bar: open/toggle
+{ "key": "ctrl+shift+f",    "command": "workbench.action.findInFiles", "when" : "!sideBarFocus" },
+{ "key": "ctrl+shift+f",    "command": "workbench.action.closeSidebar", "when" : "sideBarFocus" },
 // Search bar: search & replace in all files
 { "key": "ctrl+g",                "command": "extension.multiCommand.execute", "when" : "!sideBarFocus", "args":
     { "sequence": [ "editor.action.addSelectionToNextFindMatch", "workbench.action.findInFiles" ] } },
@@ -148,6 +146,14 @@
 { "key": "f4",                    "command": "search.action.focusNextSearchResult", "when": "hasSearchResult || inSearchEditor" },
 { "key": "shift+f4",              "command": "search.action.focusPreviousSearchResult", "when": "hasSearchResult || inSearchEditor" },
 { "key": "ctrl+f4",               "command": "search.action.clearSearchResults", "when": "hasSearchResult" },
+
+// Quick match / search options
+{ "key": "alt+c",               "command": "extension.multiCommand.execute", "when" : "editorFocus", "args":
+    { "sequence": [ "toggleFindCaseSensitive", "toggleSearchCaseSensitive" ] } },
+{ "key": "alt+r",               "command": "extension.multiCommand.execute", "when" : "editorFocus", "args":
+    { "sequence": [ "toggleFindRegex", "toggleSearchRegex" ] } },
+{ "key": "alt+w",               "command": "extension.multiCommand.execute", "when" : "editorFocus", "args":
+    { "sequence": [ "toggleFindWholeWord", "toggleSearchWholeWord" ] } },
 
 // Folding
 { "key": "ctrl+u",                "command": "editor.fold", "when": "editorFocus" },
@@ -249,5 +255,5 @@
 {
     "key": "",
     "command": ""
-}
+},
 ]
