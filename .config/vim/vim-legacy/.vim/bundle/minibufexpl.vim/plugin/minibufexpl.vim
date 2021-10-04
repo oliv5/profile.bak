@@ -610,6 +610,12 @@ function! <SID>StartExplorer(curBufNum)
     return
   endif
 
+  " OLA
+  " Disable mouse selection in MBE window
+  noremap  <window><LeftDrag>  <LeftMouse>
+  noremap! <window><LeftDrag>  <LeftMouse>
+  " OLA
+
   " Set filetype for MBE buffer
   set filetype=minibufexpl
 
@@ -1148,11 +1154,11 @@ function! <SID>ResizeWindow()
       setlocal modifiable
 
       exec "setlocal textwidth=".l:width
-      normal gg
-      normal gq}
-      normal G
+      normal! gg
+      normal! gq}
+      normal! G
       let l:height = line('.')
-      normal gg
+      normal! gg
 
       " Prevent the buffer from being modified.
       setlocal nomodifiable
