@@ -6,6 +6,7 @@
 quote() { [ $# -gt 0 ] && printf '"%s" ' "$@"; return 0; }
 arg_quote() {
   local SEP=''
+  local ARG
   for ARG; do
     SQESC=$(printf '%s\n' "${ARG}" | sed -e "s/'/'\\\\''/g")
     printf '%s' "${SEP}'${SQESC}'"
@@ -17,6 +18,7 @@ arg_quote() {
 arg_rtrim() {
   local IFS=$'\n\t '
   local LAST="$(($#-$1))"
+  local ARG
   for ARG in $(seq 2 $LAST); do 
     eval ARG="\${$ARG}"
     ARG=$(printf '%s\n' "${ARG}" | sed -e "s/'/'\\\\''/g")
@@ -34,6 +36,7 @@ arg_ltrim() {
 arg_concat() {
   local DELIM="${1:?No delimiter defined...}"
   shift
+  local ARG
   for ARG; do
     printf '%s %s ' "$DELIM" "$ARG"
   done
@@ -44,21 +47,22 @@ alias arg_last='command shift $(($#-1)) >/dev/null 2>&1'
 
 # Get last in list
 last() {
-    shift $(($#-1))
-    echo "$1"
+  shift $(($#-1))
+  echo "$1"
 }
 lastn() {
-    shift $(($#-$1-1))
-    echo "$1"
+  shift $(($#-$1-1))
+  echo "$1"
 }
 
 # Is in list?
 is_in() {
-    [ $# -lt 2 ] && return 0
-    local Q="$1"
-    shift
-    for A; do [ "$A" = "$Q" ] && return 0; done
-    return 1
+  [ $# -lt 2 ] && return 0
+  local Q="$1"
+  shift
+  local A
+  for A; do [ "$A" = "$Q" ] && return 0; done
+  return 1
 }
 
 # Save & restore shell parameters
@@ -168,6 +172,7 @@ dir_empty() {
 # Create an unamed pipe
 # Input is a stream number > 2
 mkpipe() {
+  local P
   for P; do
     # Create a temporary named pipe
     PIPE="$(mktemp -u)"
@@ -181,6 +186,7 @@ mkpipe() {
 
 # Close an unamed pipe
 rmpipe() {
+  local P
   for P; do
     eval "exec $P>&-"
   done
@@ -193,6 +199,7 @@ pipe_reader() {
   local READER="${1:?Reader command not specified...}"
   shift
   local DIR="$(mktemp -d)"
+  local W
   for W in $(seq $#); do
     mkfifo -m 600 "$DIR/$W"
   done
@@ -208,6 +215,7 @@ pipe_writer() {
   local WRITER="${1:?Writer command not specified...}"
   shift
   local DIR="$(mktemp -d)"
+  local R
   for R in $(seq $#); do
     mkfifo -m 600 "$DIR/$R"
   done
@@ -237,6 +245,7 @@ mispipe() {
 ################################
 # Cmd exist test
 cmd_exists() {
+  local CMD
   for CMD; do
     command -v "$CMD" >/dev/null 2>&1 || return 1
   done
@@ -251,6 +260,8 @@ cmd_unset() {
 
 # Unalias a script commands
 cmd_unalias() {
+  local FILE
+  local FCT
   for FILE; do
     for FCT in $(awk -F'(' '/\w\s*\(\)/ {print $1}' "$FILE"); do
       unalias "$CMD" 2>/dev/null || true
@@ -260,6 +271,7 @@ cmd_unalias() {
 
 # Unalias all existing commands
 cmd_unalias_all() {
+  local CMD
   for CMD in $(set | grep " () $" | cut -d" " -f1); do
     unalias "$CMD" 2>/dev/null || true
   done
@@ -282,6 +294,7 @@ filter_stdout() {
 cmd_exists which ||
 which() {
   local IFS=:
+  local DIR
   [ $# -gt 0 ] &&
     for DIR in $PATH; do
       ls -1 "$DIR/$1" 2>/dev/null && return 0

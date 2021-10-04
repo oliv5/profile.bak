@@ -15,6 +15,7 @@ ask_question() {
   read ANSWER
   echo "$ANSWER" >&2
   shift
+  local ARG
   for ARG; do
     [ "$ARG" = "$ANSWER" ] && return 0
   done
@@ -372,6 +373,7 @@ git_name() {
 # Check a set of commands exist
 git_cmd_exists() {
   local EXECPATH="$(git_exp)"
+  local CMD
   for CMD; do
     [ -x "${EXECPATH}/git-${CMD}" ] || return 1
   done

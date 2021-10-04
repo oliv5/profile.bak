@@ -48,6 +48,7 @@ if command -v gvim >/dev/null; then
       fi
     fi
     shift
+    local ARG
     for ARG; do
       if [ "$ARG" != "-" ]; then
         ARG="$(echo "$ARG" | awk -F':' '{printf "\"%s\"",$1}')"

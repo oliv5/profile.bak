@@ -1153,6 +1153,7 @@ annex_listunused_by_pattern() {
   annex_exists && ! annex_bare || return 1
   local IFS="$(printf ' \t\n')"
   local PATTERNS=""
+  local ARG
   for ARG; do PATTERNS="${PATTERNS:+$PATTERNS }-e '$ARG'"; done
   annex_unused | grep -E '^\s+[0-9]+\s' | 
     while IFS=' ' read -r NUM KEY; do
