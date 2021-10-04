@@ -665,8 +665,16 @@ if !exists('loaded_uncrustify')
 	autocmd FileType c vnoremap <buffer> <leader>u :call RangeUncrustify('c')<CR>
 	autocmd FileType cpp noremap <buffer> <leader>u :call Uncrustify('cpp')<CR>
 	autocmd FileType cpp vnoremap <buffer> <leader>u :call RangeUncrustify('cpp')<CR>
-	autocmd FileType java noremap <buffer> <leader>u :call Uncrustify('cpp')<CR>
-	autocmd FileType java vnoremap <buffer> <leader>u :call RangeUncrustify('cpp')<CR>
+	autocmd FileType java noremap <buffer> <leader>u :call Uncrustify('java')<CR>
+	autocmd FileType java vnoremap <buffer> <leader>u :call RangeUncrustify('java')<CR>
+	autocmd FileType cs noremap <buffer> <leader>u :call Uncrustify('cs')<CR>
+	autocmd FileType cs vnoremap <buffer> <leader>u :call RangeUncrustify('cs')<CR>
+	autocmd FileType d noremap <buffer> <leader>u :call Uncrustify('d')<CR>
+	autocmd FileType d vnoremap <buffer> <leader>u :call RangeUncrustify('d')<CR>
+	autocmd FileType oc noremap <buffer> <leader>u :call Uncrustify('oc')<CR>
+	autocmd FileType oc vnoremap <buffer> <leader>u :call RangeUncrustify('oc')<CR>
+	autocmd FileType oc+ noremap <buffer> <leader>u :call Uncrustify('oc+')<CR>
+	autocmd FileType oc+ vnoremap <buffer> <leader>u :call RangeUncrustify('oc+')<CR>
 endif
 
 
