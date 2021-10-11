@@ -825,16 +825,16 @@ git_stash_backup() {
 ########################################
 # Clean repo back to given CL
 # remove unversionned files
-git_clean() {
+alias git_clean='PROCEED= BACKUP= _git_clean'
+_git_clean() {
   git_exists || return 1
   # Confirmation
-  if [ "$1" != "-y" ]; then
+  if [ "$PROCEED" != "-y" ]; then
     git clean -d -n --exclude=".*" "$@"
     ! ask_question "Proceed? (y/n) " y Y >/dev/null && return 0
   fi
-  shift
   # Backup
-  if [ "$2" != "-y" ] && ask_question "Backup? (y/n) " y Y >/dev/null; then
+  if [ "$BACKUP" != "-y" ] && ask_question "Backup? (y/n) " y Y >/dev/null; then
     local DST="$(git_user_dir)/clean"
     mkdir -p "$DST"
     git_stx '??' | xargs -0 7z a "$DST/clean.$(git_name).7z"
