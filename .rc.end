@@ -112,8 +112,8 @@ alias b='cdb'
 alias f='cdf'
 alias p='cd ..'
 
-# Repo helpers
-unalias cdr 2>/dev/null || true
+# Cd helper
+cdrp() { cd "$(realpath "$@")"; }
 cdr() { cd "$(_rfind "$@")"; }
 alias r='cdr'
 
