@@ -28,8 +28,7 @@
     // Misc
     "git.enabled": false,
     "settingsSync.keybindingsPerPlatform": false,
-    "telemetry.enableCrashReporter": false,
-    "telemetry.enableTelemetry": false,
+    "telemetry.telemetryLevel": "off",
     "update.mode": "manual",
 
     // Search
