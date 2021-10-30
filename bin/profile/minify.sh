@@ -23,7 +23,7 @@ minify_generate() {
 }
 
 minify_test() {
-    (unalias -a; for F in "${@:-*.min}"; do source $F; done)
+    (unalias -a; for F in "${@:-*.min}"; do sh $F; done)
 }
 
 ########################################

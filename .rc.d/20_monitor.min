@@ -5,11 +5,11 @@ alias kernel_name='uname -sr';alias kernel_ver='uname -v';alias dist_name='cat /
   NR == 1 { print;next }
   { a[$1] += $2;b[$1] += $3;}
   END {
-    for(i in a){
+    for(i in a) {
       size_in_bytes = b[i] * 1024
       split("B KB MB GB TB PB", unit)
       human_readable = 0
-      if(size_in_bytes == 0){
+      if(size_in_bytes == 0) {
         human_readable = 0
         j = 0
       }
