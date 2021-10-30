@@ -288,6 +288,7 @@ export HISTIGNORE="sudo -S*" # ignore "sudo -S"
 alias hi='history'
 alias hg='history | grep'
 alias hgi='history | grep -i'
+alias hc='history -c; rm "$HOME/.bash_history"'
 
 # Re-execute commands
 alias hr='fc -s'
