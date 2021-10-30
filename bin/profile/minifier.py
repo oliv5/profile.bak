@@ -1,4 +1,9 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 import sys
 
@@ -213,7 +218,7 @@ class BashFileIterator:
             self.pos += 1
 
         assert not self.isInsideGroup(), 'Invalid syntax'
-        raise StopIteration
+        # ~ raise StopIteration
 
     def isEscaped(self):
         return self.pos in self._indices_of_escaped_characters
