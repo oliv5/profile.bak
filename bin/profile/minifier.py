@@ -315,8 +315,6 @@ def minify(src):
                     src += ';;'
             elif it.getNextCharacter() != "" and it.getPreviousCharacter() not in (";", '|'):
                 src += ";"
-            elif it.getPreviousCharacter() == ")":
-                continue
 
     # Workaround for issue where ;; is on a standalone line
     import re; src = re.sub( r";{3,}", ";;", src);
