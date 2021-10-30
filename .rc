@@ -14,6 +14,7 @@ rc_source() {
   local RC_VERBOSE="$RC_VERBOSE" # for recursive calls
   local RC_DRYRUN="$RC_DRYRUN" # for recursive calls
   local RC_ALL="$RC_ALL" # for recursive calls
+  local RC_EXT="sh"
   local RC_CNT=$(($RC_CNT+1))
   local RC_ERR=0
 
@@ -35,7 +36,8 @@ rc_source() {
       if [ -r "$FILE" ]; then
         rc_log "Source '$FILE'"
         # Find all functions and unalias them
-        for FCT in $(awk -F'(' '/^[a-zA-Z_-]*\s*\(\)/ {print $1}' "$FILE"); do
+        #~ for FCT in $(awk -F'(' '/^[a-zA-Z_-]*\s*\(\)/ {print $1}' "$FILE"); do
+        for FCT in $(grep -Eo '[a-zA-Z_]+\s*\(\)' "$FILE" | sed -e 's/()//'); do
           ${RC_DRYRUN} unalias "$FCT" 2>/dev/null
         done
         # Source the file
@@ -137,17 +139,17 @@ rc_source() {
   local PATTERN
   for PATTERN in "${@:-*}"; do
     if [ -d "$PATTERN" ]; then # Load explicit directories
-      rc_sourcemod "$PATTERN/*.sh"
+      rc_sourcemod "$PATTERN/*.${RC_EXT}"
     elif [ -f "$PATTERN" ]; then # Load explicit files
       rc_sourcemod "$PATTERN"
     else # Load scripts by pattern search
-      rc_sourcemod "$RC_DIR/.rc.d/*$PATTERN*.sh"
+      rc_sourcemod "$RC_DIR/.rc.d/*$PATTERN*.${RC_EXT}"
       if [ -n "$BASH_VERSION" ]; then
-        rc_sourcemod "$RC_DIR/.rc.d/bash/*$PATTERN*.sh"
+        rc_sourcemod "$RC_DIR/.rc.d/bash/*$PATTERN*.${RC_EXT}"
       fi
       # Android rc scripts are loaded by rc.list
       #if [ -n "$ANDROID_ROOT" ]; then
-      #  rc_sourcemod "$RC_DIR/.rc.d/android/*$PATTERN*.sh"
+      #  rc_sourcemod "$RC_DIR/.rc.d/android/*$PATTERN*.${RC_EXT}"
       #fi
     fi   
   done
