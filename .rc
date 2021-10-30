@@ -14,7 +14,7 @@ rc_source() {
   local RC_VERBOSE="$RC_VERBOSE" # for recursive calls
   local RC_DRYRUN="$RC_DRYRUN" # for recursive calls
   local RC_ALL="$RC_ALL" # for recursive calls
-  local RC_EXT="sh"
+  local RC_EXT="min"
   local RC_CNT=$(($RC_CNT+1))
   local RC_ERR=0
 

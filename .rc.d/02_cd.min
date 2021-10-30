@@ -1,0 +1,1 @@
+cda(){ command cd "$@";};cdb(){ command cd "$OLDPWD";};cdf(){ cdb "$@";};cd(){ cda "$@";};cdu(){ unalias cd cda cdb cdf 2>/dev/null||true;unset -f cd cda cdb cdf 2>/dev/null;};mkcd(){ mkdir -p "$@"&&cd "$@";};gcd(){ cda *"$1"*"$2"*"$3"*"$4"*"$5"*"$6"*"$7"*"$8"*"$9"*;}
