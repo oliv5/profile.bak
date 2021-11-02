@@ -4,7 +4,7 @@
 minify_generate() {
     local SRC DST
     for SRC in "${@:-*.sh}"; do
-	DST="$(basename "${SRC}" .sh).min"    
+	DST="${SRC%.*}.min"
 	#~ rm "$DST" 2>/dev/null
 	test -f "$SRC" || continue
 	test -e "$DST" && continue
@@ -14,11 +14,7 @@ minify_generate() {
 	    test -x "$SRC" && chmod +x "$DST"
 	    bash -n "$DST"
 	    bash "$DST"
-	) || {
-	    echo "Skip $SRC..."
-	    rm "$DST"
-	    ln -s "$SRC" "$DST"
-	}
+	)
     done
 }
 
