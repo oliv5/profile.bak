@@ -326,6 +326,11 @@ git_branch_merged() {
 git_url() {
   git ${2:+--git-dir="$2"} config --get remote.${1}.url
 }
+git_urls() {
+  for REMOTE in $(git_remotes "$1"); do
+    git ${1:+--git-dir="$1"} config --get remote.${REMOTE}.url
+  done
+}
 
 # Check if a repo has been modified
 # https://stackoverflow.com/questions/5139290/how-to-check-if-theres-nothing-to-be-committed-in-the-current-branch
