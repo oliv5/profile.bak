@@ -41,8 +41,8 @@ rc_source() {
       if [ -r "$FILE" ]; then
         rc_log "Source '$FILE'"
         # Find all functions and unalias them
-        #~ for FCT in $(awk -F'(' '/^[a-zA-Z_-]*\s*\(\)/ {print $1}' "$FILE"); do
-        for FCT in $(grep -Eo '[a-zA-Z_]+\s*\(\)' "$FILE" | sed -e 's/()//'); do
+        # Take care of: fct defined in comments, minified files on one single line
+        for FCT in $(grep -Eo '[a-zA-Z_]+\s*\(\)' "$FILE" | sed -e 's/\s*()//'); do
           ${RC_DRYRUN} unalias "$FCT" 2>/dev/null
         done
         # Source the file
