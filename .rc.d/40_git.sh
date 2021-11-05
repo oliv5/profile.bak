@@ -544,7 +544,8 @@ git_bundle() {
   [ $# -le 7 ] && shift $# || shift 7
   echo "Git bundle into $OUT"
   git fetch --all
-  git bundle create -q "${OUT%%.xz}" ${@:---branches --tags}
+  #git bundle create -q "${OUT%%.xz}" ${@:---branches --tags}
+  git bundle create -q "${OUT%%.xz}" ${@:---all}
   xz -k -z -S .xz --verbose $XZOPTS "${OUT%%.xz}" &&
     _git_secure_delete "${OUT%%.xz}"
   chown "$OWNER" "$OUT"
