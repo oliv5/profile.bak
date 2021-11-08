@@ -227,9 +227,9 @@ mispipe() {
   local CMD2="${2:?No command 2 specified...}"
   local PIPE1="${3:-3}"
   local PIPE2="${4:-4}"
-  exec ${PIPE2}>&1
+  eval "exec ${PIPE2}>&1"
   local ERR=$(eval "{ { ("$CMD1"); echo \$? >&${PIPE1}; } | "$CMD2"; } ${PIPE1}>&1 >&${PIPE2}")
-  exec ${PIPE2}>&-
+  eval "exec ${PIPE2}>&-"
   return $ERR
 }
 
