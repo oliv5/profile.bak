@@ -7,10 +7,10 @@ minify_generate() {
 	DST="${SRC%.*}.min"
 	#~ rm "$DST" 2>/dev/null
 	test -f "$SRC" || continue
-	test -e "$DST" && continue
+	test -s "$DST" && continue
 	( set -e
 	    unalias -a
-	    python2.7 "$(which minifier.py)" "$SRC" > "$DST"
+	    python2.7 "$RC_DIR/bin/profile/minifier.py" "$SRC" > "$DST"
 	    test -x "$SRC" && chmod +x "$DST"
 	    bash -n "$DST"
 	    bash "$DST"
