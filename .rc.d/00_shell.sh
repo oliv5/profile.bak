@@ -186,7 +186,7 @@ rmpipe() {
 # Pipe multiple writers into a single reader
 # Same as bash process substitution
 # "reader <(writer1) <(writer2)"
-pipe_reader() {
+wrpipe() {
   local READER="${1:?Reader command not specified...}"
   shift
   local DIR="$(mktemp -d)"
@@ -202,7 +202,7 @@ pipe_reader() {
   rm -r "$DIR"
 }
 # Pipe a single writer into multiple readers
-pipe_writer() {
+rdpipe() {
   local WRITER="${1:?Writer command not specified...}"
   shift
   local DIR="$(mktemp -d)"
