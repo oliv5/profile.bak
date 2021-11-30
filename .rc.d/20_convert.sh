@@ -71,9 +71,13 @@ alias pdf2booklet='pdfbook --short-edge'
 
 # Search into pdf
 pdf_search() {
-  local PATTERN="$1"
-  shift
-  ff "${@:-.}/*.pdf" -exec sh -c 'pdftotext "{}" - | grep --with-filename --label="{}" --color '"$PATTERN" \;
+  if command -v pdfgrep >/dev/null 2>&1; then
+    pdfgrep -n "$@"
+  else
+    local PATTERN="$1"
+    shift
+    ff "${@:-.}/*.pdf" -exec sh -c 'pdftotext "{}" - | grep --with-filename --label="{}" --color '"$PATTERN" \;
+  fi
 }
 
 # Shuffle 2 pdf pages
