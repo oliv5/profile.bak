@@ -6,6 +6,7 @@
 // Default keymaps
 
 // Disable defaults
+{ "key": "ctrl+q",                "command": "" },
 { "key": "ctrl+w",                "command": "" },
 { "key": "ctrl+g",                "command": "" },
 { "key": "f1",                    "command": "" },

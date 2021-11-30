@@ -5,6 +5,7 @@
     "editor.renderControlCharacters": true,
     "editor.suggestSelection": "first",
     "editor.multiCursorModifier": "alt",
+    "editor.occurrencesHighlight": false,
     "editor.semanticHighlighting.enabled": true,
     "editor.mouseWheelZoom": true,
 
