@@ -616,3 +616,12 @@ youtube_best_mp4() {
 youtube_best_not_webm() {
   youtube-dl --geo-bypass -f 'bestvideo[ext!=webm]‌​+bestaudio[ext!=webm]‌​/best[ext!=webm]' -o "%(autonumber)s-%(title)s.%(ext)s" "$@"
 }
+
+############################
+# Fail2ban
+fail2ban_winners() {
+  grep "Ban " /var/log/fail2ban.log | grep $(date +%Y-%m-%d) | awk '{print $NF}' | sort | awk '{print $1}' | uniq -c | sort -n
+  sudo fail2ban-client status sshd
+  sudo fail2ban-client status recidive
+  true
+}
