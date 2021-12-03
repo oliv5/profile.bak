@@ -30,14 +30,14 @@ _fdfind() {
 
 ##########
 unset FCASE FTYPE FARGS
-alias      ff='FCASE=   FTYPE=  FARGS="${FOPTS:+$FOPTS} -L" _fdfind'
-alias     fff='FCASE=   FTYPE=f FARGS="${FOPTS:+$FOPTS} -L" _fdfind'
-alias     ffd='FCASE=   FTYPE=d FARGS="${FOPTS:+$FOPTS} -L" _fdfind'
-alias     ffl='FCASE=   FTYPE=l FARGS="${FOPTS:+$FARGS}"    _fdfind'
-alias     iff='FCASE=-i FTYPE=  FARGS="${FOPTS:+$FARGS} -L" _fdfind'
-alias    ifff='FCASE=-i FTYPE=f FARGS="${FOPTS:+$FARGS} -L" _fdfind'
-alias    iffd='FCASE=-i FTYPE=d FARGS="${FOPTS:+$FARGS} -L" _fdfind'
-alias    iffl='FCASE=-i FTYPE=l FARGS="${FOPTS:+$FARGS}"    _fdfind'
+alias      ff='FCASE=   FTYPE=  FARGS="${FOPTS:+$FOPTS}" fdfind'
+alias     fff='FCASE=   FTYPE=f FARGS="${FOPTS:+$FOPTS}" fdfind'
+alias     ffd='FCASE=   FTYPE=d FARGS="${FOPTS:+$FOPTS}" fdfind'
+alias     ffl='FCASE=   FTYPE=l FARGS="${FOPTS:+$FARGS}" fdfind'
+alias     iff='FCASE=-i FTYPE=  FARGS="${FOPTS:+$FARGS}" fdfind'
+alias    ifff='FCASE=-i FTYPE=f FARGS="${FOPTS:+$FARGS}" fdfind'
+alias    iffd='FCASE=-i FTYPE=d FARGS="${FOPTS:+$FARGS}" fdfind'
+alias    iffl='FCASE=-i FTYPE=l FARGS="${FOPTS:+$FARGS}" fdfind'
 alias     ff0='FARGS=-0 ff'
 alias    fff0='FARGS=-0 fff'
 alias    ffd0='FARGS=-0 ffd'
