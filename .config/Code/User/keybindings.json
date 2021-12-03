@@ -209,8 +209,10 @@
     { "sequence": [ "closeMarkersNavigation", "workbench.action.tasks.build" ] } },
 // { "key": "f6",                    "command": "extension.multiCommand.execute", "when": "inDebugMode", "args":
     // { "sequence": [ "closeMarkersNavigation", "workbench.action.debug.stop", "workbench.action.tasks.build", "workbench.action.debug.start" ] } },
-{ "key": "shift+f6",              "command": "workbench.action.tasks.runTask", "when": "!inDebugMode", "args": "Make clean" },
+{ "key": "shift+f6",              "command": "workbench.action.tasks.runTask", "when": "!inDebugMode", "args": "Clean" },
 { "key": "ctrl+f6",               "command": "workbench.action.tasks.test", "when": "!inDebugMode" },
+{ "key": "ctrl+shift+f6",         "command": "workbench.action.tasks.build" },
+{ "key": "ctrl+shift+b",          "command": "workbench.action.tasks.build" },
 
 //////////////////////////////////////////////////
 // Extensions

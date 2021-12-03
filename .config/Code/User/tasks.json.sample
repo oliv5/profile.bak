@@ -1,4 +1,5 @@
 // See https://code.visualstudio.com/docs/editor/tasks
+// Can also be put in the .code-workspace file directly under key "tasks"
 {
 	"version": "2.0.0",
 	"tasks": [
@@ -7,17 +8,15 @@
 			"detail": "Build using make",
 			"type": "shell",
 			"command": "/usr/bin/make",
-			"args": [ 
-				"-s"
-			],
+			"args": [ "-s" ],
 			"options": {
-				"cwd": "${workspaceFolder}"
+				"cwd": "${fileWorkspaceFolder}"
 			},
 			"problemMatcher": {
 				"owner": "cpp",
 				"fileLocation": [
 					"relative",
-					"${workspaceFolder}"
+					"${fileWorkspaceFolder}"
 				],
 				"pattern": {
 					"regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
@@ -38,16 +37,13 @@
 			}
 		},
 		{
-			"label": "Make clean",
+			"label": "Clean",
 			"detail": "Clean using make",
 			"type": "shell",
 			"command": "/usr/bin/make",
-			"args": [
-				"-s",
-				"clean"
-			],
+			"args": [ "-s", "clean" ],
 			"options": {
-				"cwd": "${workspaceFolder}"
+				"cwd": "${fileWorkspaceFolder}"
 			},
 			"group": "build",
 			"presentation": {
@@ -60,8 +56,9 @@
 			"detail": "Run a test",
 			"type": "shell",
 			"command": "test.sh",
+			"args": [ "arg1", "arg2" ],
 			"options": {
-				"cwd": "${workspaceFolder}"
+				"cwd": "${fileWorkspaceFolder}"
 			},
 			"group": {
 				"kind" : "test",
