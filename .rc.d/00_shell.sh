@@ -221,6 +221,8 @@ rdpipe() {
 # Custom mispipe using redirects
 # Executes 2 cmds in a pipe & returns the status of the first one
 # https://unix.stackexchange.com/a/16709
+# https://linux.die.net/man/1/mispipe
+if ! command -v mispipe >/dev/null 2>&1; then
 mispipe() {
   # Ex: ( exec 4>&1; ERR=$({ { (echo 'toto titi'; false); echo $? >&3; } | grep toto; } 3>&1 >&4); exec 4>&-; echo "Errcode=$ERR" )
   local CMD1="${1:?No command 1 specified...}"
@@ -232,6 +234,28 @@ mispipe() {
   eval "exec ${PIPE2}>&-"
   return $ERR
 }
+fi
+
+# Filter stderr using named pipes
+# https://unix.stackexchange.com/questions/3514/how-to-grep-standard-error-stream-stderr
+# Ex: { cmd1 2>&1 1>&3 | cmd2 1>&2; } 3>&1
+filter_stderr() {
+  local CMD1="${1:-true}"
+  local CMD2="${2:-true}"
+  local PIPE="${3:-3}"
+  eval "{ { ${CMD1}; } 2>&1 1>&${PIPE} | ${CMD2} 1>&2; } ${PIPE}>&1"
+}
+
+# Filter stderr using unamed pipes (bash only)
+# https://unix.stackexchange.com/questions/3514/how-to-grep-standard-error-stream-stderr
+# Ex: cmd1 2> >(cmd2)
+if [ -n "$BASH_VERSION" ]; then
+filter_stderr2() {
+  local CMD1="${1:-true}"
+  local CMD2="${2:-true}"
+  eval "{ ${CMD1}; } 2> >(${CMD2})"
+}
+fi
 
 ################################
 # Cmd exist test
@@ -277,11 +301,6 @@ alias noerror='2>/dev/null'
 alias noerr='2>/dev/null'
 alias noout='>/dev/null'
 alias silent='>/dev/null 2>&1'
-
-# Run a command and filter stdout by another one
-filter_stdout() {
-  { eval "$1" 2>&1 1>&3 | eval "$2" 1>&2; } 3>&1
-}
 
 # which replacement when missing
 cmd_exists which ||
