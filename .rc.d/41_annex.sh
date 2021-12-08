@@ -280,6 +280,7 @@ annex_enabled() {
     awk -v uuids="${UUIDS:-^$}" -v excluded="${EXCLUDE:-^$}" '$1 !~ excluded && $2 ~ uuids {print $2}' |
     sort -u | xargs -r
 }
+alias annex_disabled='annex_notenabled'
 annex_notenabled() {
   local UUIDS="$(annex_enabled | sed 's/ /|/g')"
   annex_uuids "$@" | xargs -rn1 |
