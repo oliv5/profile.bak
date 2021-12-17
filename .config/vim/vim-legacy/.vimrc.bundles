@@ -341,10 +341,10 @@ if !exists('g:loaded_yaifa')
 	" Options
 	let g:yaifa_max_lines=512
 	" Map Yaifa
-	nmap <localleader><tab>   :call YAIFA()<CR>
+	nmap <localleader><tab>   :Yaifa<CR>
 	" autocall when entering file
 	augroup YAIFA_vimrc
-		autocmd! BufRead * silent! call YAIFA()
+		autocmd! BufRead * silent! Yaifa
 	augroup END
 endif
 
@@ -433,7 +433,7 @@ if !exists('g:loaded_ctrlp')
 	let g:ctrlp_working_path_mode = ''
 	let g:ctrlp_custom_ignore = {
 	\ 'dir':  '\v[\/]\.(git|hg|svn|tmp)$',
-	\ 'file': '\v\.(exe|so|dll|o|pyc|swp|zip|7z|tar|tgz)$',
+	\ 'file': '\v\.(exe|so|dll|o|d|pyc|swp|zip|7z|tar|tgz)$',
 	\ }
 	"" Buffer management
 	"let g:ctrlp_switch_buffer = 'et'
