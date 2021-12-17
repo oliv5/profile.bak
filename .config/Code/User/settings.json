@@ -10,6 +10,7 @@
     "editor.mouseWheelZoom": true,
 
     // Workbench
+    "workbench.editor.tabSizing": "shrink",
     "workbench.sideBar.location": "right",
     "workbench.enableExperiments": false,
     "workbench.settings.enableNaturalLanguageSearch": false,
