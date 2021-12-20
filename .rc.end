@@ -74,9 +74,11 @@ if [ ${#PS1} -lt 5 ]; then
 fi
 
 # User anacron
-if [ -r "${HOME}/.anacron/etc/anacrontab" ]; then
-  mkdir -p "${HOME}/.anacron/spool"
-  anacron -s -t "${HOME}/.anacron/etc/anacrontab" -S "${HOME}/.anacron/spool"
+if command -v anacron >/dev/null 2>&1; then
+  if [ -r "${HOME}/.anacron/etc/anacrontab" ]; then
+    mkdir -p "${HOME}/.anacron/spool"
+    anacron -s -t "${HOME}/.anacron/etc/anacrontab" -S "${HOME}/.anacron/spool"
+  fi
 fi
 
 # Gnome keyring/GPG/SSH agents
