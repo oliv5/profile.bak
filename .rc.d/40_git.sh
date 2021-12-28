@@ -1050,21 +1050,21 @@ git_purge_gc() {
   git gc --prune="${1:-now}"
 }
 
-# Git garbage collector
-git_gc() {
-  git fsck; git prune; git gc
-}
+########################################
+
+# Various cleanup fcts
+git_gc_all() { git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git gc"; }
 
 # Repack with different memory usage settings
-git_repack() {
+git_repack_all() {
   if [ -z "$1" ]; then
-    git repack -a -d -l
+    git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack -a -d -l"
   elif [ "$1" = "low" ]; then
-    git repack -a -d -l --threads=1 --window=3 --depth=25 --window-memory=32m --max-pack-size=32m
+    git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack -a -d -l --threads=1 --window=3 --depth=25 --window-memory=32m --max-pack-size=32m"
   elif [ "$1" = "medium" ]; then
-    git repack -a -d -l --threads=2 --window=10 --depth=50 --window-memory=256m --max-pack-size=256m
+    git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack -a -d -l --threads=2 --window=10 --depth=50 --window-memory=256m --max-pack-size=256m"
   elif [ "$1" = "high" ]; then
-    git repack -a -d -l --threads=4 --window=10 --depth=50 --window-memory=1g --max-pack-size=1g
+    git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack -a -d -l --threads=4 --window=10 --depth=50 --window-memory=1g --max-pack-size=1g"
   fi
 }
 
@@ -1186,11 +1186,6 @@ git_log_modified() {
 }
 
 ########################################
-# Git gc all
-alias git_gc='git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git gc"'
-alias git_repack='git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack -d"'
-alias git_pack='git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack -d; git prune; git gc"'
-
 # Find git repo
 git_find0() {
   ## Bash only (read -d)
