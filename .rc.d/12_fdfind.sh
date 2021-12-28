@@ -79,7 +79,8 @@ _fdgrep1() {
   else
     local ARGS="$1"; shift $#
   fi
-  (set -f; _fdfind "$@" -t f -0 | eval xargs -0 grep -nH --color ${GCASE} ${GARGS} -e "${ARGS:-''}")
+  (set -f; _fdfind "$@" -t f -0 |
+    eval xargs -r0 grep -nH --color ${GCASE} ${GARGS} -e "${ARGS:-''}")
 }
 _fdgrep() { _fdgrep1 "$@"; }
 unset GCASE GARGS
@@ -100,8 +101,8 @@ _fdsed1() {
   ${SNOCONFIRM:+true} echo "Replace '$IN' by '$OUT' in files '$FILES' ${SEDOPT:+with options $SEDOPT}"
   ${SNOCONFIRM:+true} read -p "Confirm ? (enter/ctrl-c) " _
   # Call find and sed
-  _fdfind "$FILES" ${SEXCLUDE} -t f \
-    -exec sed ${SEDOPT} --in-place -e "s|$IN|$OUT|g" "{}" \;
+  _fdfind "$FILES" ${SEXCLUDE} -t f -0 |
+    xargs -r0 sed ${SEDOPT} --in-place -e "s|$IN|$OUT|g"
 }
 unset SFILES SEXCLUDE SNOCONFIRM
 _fdsed() { _fdsed1 "$@"; }
