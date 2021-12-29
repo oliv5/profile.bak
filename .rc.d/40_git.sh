@@ -85,17 +85,28 @@ EOF
 }
 
 ########################################
-# Shallow (=partial) clones
-git_clone_shallow() {
-  local URL="${URL:?No url specified...}"
-  local HISTORY="${2:-1}"
-  local BRANCH="$3"
-  shift $(($# > 3 ? 3 : $#))
-  git clone ${BRANCH:+-b $BRANCH} "$URL" --depth $HISTORY "$*"
+# Set shadow-like clone (only specific branch)
+git_set_shallow() {
+  local REMOTE="${1:?No remote specified...}"
+  local BRANCH="${2:-*}"
+  git config --unset-all "remote.$REMOTE.fetch"
+  for BRANCH in $BRANCHES; do
+    git config "remote.$REMOTE.fetch" "+refs/heads/$BRANCH:refs/remotes/$REMOTE/$BRANCH"
+  done
 }
-git_clone_shallow_single() {
-  git_clone_shallow "$@" --single-branch
+
+# Set sparse checkout (only specific refs/folders)
+git_set_sparse_checkout() {
+  git config core.sparseCheckout true
+  for D; do
+    echo "$D" >> .git/info/sparse-checkout
+  done
 }
+
+# Partial clones
+git_clone_empty() { git clone --no-checkout "$@"; }
+git_clone_shallow() { git clone --no-checkout --depth "$@"; } # implies --single-branch
+git_clone_single() { git clone --no-checkout --single-branch -b "$@"; }
 
 ########################################
 # Get git version
