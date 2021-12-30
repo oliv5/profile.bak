@@ -501,7 +501,7 @@ endif
 " *******************************************************
 " } buftabs plugin {
 " *******************************************************
-if !exists('g:loaded_buftabs')
+if !exists('g:loaded_buftabs') " Unused by the plugin !
 	" Options
 	let g:buftabs_only_basename = 1
 	let g:buftabs_in_statusline = 1
