@@ -1,5 +1,8 @@
 #!/bin/sh
 
+###############
+# Xrandr
+
 # List devices
 alias xrandr_ls="xrandr -q | awk '/connected/ {print \$1}'"
 alias xrandr_connected="xrandr -q | awk '/ connected/{print \$1}'"
@@ -65,6 +68,9 @@ xrandr_pos() {
   xrandr --output "${SCREEN2}" --${POS}-of "${SCREEN1}" "$@"
 }
 
+###############
+# Backlight
+
 # Set backlight
 alias backlight_100='backlight 100'
 alias backlight_150='backlight 150'
@@ -82,3 +88,19 @@ backlight() {
 	sudo sh -c "echo ${1:-500} > /sys/class/backlight/${2:-intel}_backlight/brightness"
 }
 
+###############
+# Optimus/primusrun
+
+# Define our own wrappers to manage nvidia-prime blacklist-nvidia.conf file
+# Note: primusrun perfs > optirun perfs
+optirun() { primusrun "$@"; }
+primusrun() {
+  sudo sh -c '
+    CONF=/usr/lib/modprobe.d/blacklist-nvidia.conf
+    trap "if [ -f "${CONF}.tmp" ]; then mv -v \"${CONF}.tmp\" \"$CONF\"; fi; trap - INT TERM EXIT" INT TERM EXIT
+    if [ -f "$CONF" ]; then mv -v "$CONF" "${CONF}.tmp"; fi
+    modprobe nvidia
+    vblank_mode=0 command primusrun "$@"
+    #rmmod nvidia nvidia_modeset nvidia_drm
+  ' _ "$@"
+}
