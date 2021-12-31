@@ -8,7 +8,7 @@ _fdfind() {
   local DIR="${1%"$FILES"}"
   FILES="$(_fregex "${FILES}")"
   shift
-  fdfind -H ${FTYPE:+-t $FTYPE} ${FCASE} ${FARGS} --no-ignore "${FILES:-.*}" "$@" "${DIR:-.}"
+  fdfind -H ${FTYPE:+-t $FTYPE} ${FCASE} ${FARGS} --no-ignore --hidden "${FILES:-.*}" "$@" "${DIR:-.}"
 }
 
 #~ _fdfind_test() {
@@ -30,14 +30,14 @@ _fdfind() {
 
 ##########
 unset FCASE FTYPE FARGS
-alias      ff='FCASE=   FTYPE=  FARGS="${FOPTS:+$FOPTS}" fdfind'
-alias     fff='FCASE=   FTYPE=f FARGS="${FOPTS:+$FOPTS}" fdfind'
-alias     ffd='FCASE=   FTYPE=d FARGS="${FOPTS:+$FOPTS}" fdfind'
-alias     ffl='FCASE=   FTYPE=l FARGS="${FOPTS:+$FARGS}" fdfind'
-alias     iff='FCASE=-i FTYPE=  FARGS="${FOPTS:+$FARGS}" fdfind'
-alias    ifff='FCASE=-i FTYPE=f FARGS="${FOPTS:+$FARGS}" fdfind'
-alias    iffd='FCASE=-i FTYPE=d FARGS="${FOPTS:+$FARGS}" fdfind'
-alias    iffl='FCASE=-i FTYPE=l FARGS="${FOPTS:+$FARGS}" fdfind'
+alias      ff='FCASE=   FTYPE=  FARGS="${FOPTS:+$FOPTS}" _fdfind'
+alias     fff='FCASE=   FTYPE=f FARGS="${FOPTS:+$FOPTS}" _fdfind'
+alias     ffd='FCASE=   FTYPE=d FARGS="${FOPTS:+$FOPTS}" _fdfind'
+alias     ffl='FCASE=   FTYPE=l FARGS="${FOPTS:+$FARGS}" _fdfind'
+alias     iff='FCASE=-i FTYPE=  FARGS="${FOPTS:+$FARGS}" _fdfind'
+alias    ifff='FCASE=-i FTYPE=f FARGS="${FOPTS:+$FARGS}" _fdfind'
+alias    iffd='FCASE=-i FTYPE=d FARGS="${FOPTS:+$FARGS}" _fdfind'
+alias    iffl='FCASE=-i FTYPE=l FARGS="${FOPTS:+$FARGS}" _fdfind'
 alias     ff0='FARGS=-0 ff'
 alias    fff0='FARGS=-0 fff'
 alias    ffd0='FARGS=-0 ffd'
