@@ -1064,13 +1064,13 @@ annex_fromkey0() {
     #git show -999999 -p --no-color --word-diff=porcelain -S "$KEY" | 
     #git log -n 1 -p --no-color --word-diff=porcelain -S "$KEY" |
     git log -p --all --no-color --word-diff=porcelain -S "$KEY" |
-      awk '/^(---|\+\+\+) (a|b)/{line=$0} /'$KEY'/{printf "%s\0",substr(line,5)}' |
+      awk '/^(---|\+\+\+) (a|b)/{line=$0} /'$KEY'/{printf "%s\0",substr(line,5); exit 0}' |
       # Remove leading/trailing double quotes, leading "a/", trailing spaces. Escape '%'
       sed -z -e 's/\s*$//' -e 's/^"//' -e 's/"$//' -e 's/^..//' -e 's/%/\%/g' |
       # Remove duplicated files
-      uniq -z | 
+      uniq -z |
       # printf does evaluate octal charaters from UTF8
-      xargs -r0 -n1 -I {} -- printf "{}\0"
+      xargs -r0 -I {} -- printf "{}\0"
       # Sanity extension check between key and file
       #xargs -r0 -n1 sh -c '
         #[ "${1##*.}" != "${2##*.}" ] && printf "Warning: key extension ${2##*.} mismatch %s\n" "${1##*/}" >&2
