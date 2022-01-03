@@ -251,6 +251,13 @@ nfs_who() {
   done
 }
 
+# Give a user home server - if it is mounted locally
+nfs_where() {
+  for USER in ${@:-$(whoami)}; do
+    mount | grep "$USER" | grep : | cut -d: -f 1
+  done
+}
+
 #####################################
 # Mount sshfs
 alias umount_sshfs='fusermount -u'
