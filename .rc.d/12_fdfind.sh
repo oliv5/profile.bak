@@ -8,7 +8,7 @@ _fdfind() {
   local DIR="${1%"$FILES"}"
   FILES="$(_fregex "${FILES}")"
   shift
-  fdfind -H ${FTYPE:+-t $FTYPE} ${FCASE} ${FARGS} --no-ignore --hidden "${FILES:-.*}" "$@" "${DIR:-.}"
+  fdfind ${FTYPE:+-t $FTYPE} ${FCASE} ${FARGS} --no-ignore --hidden "${FILES:-.*}" "$@" "${DIR:-.}"
 }
 
 #~ _fdfind_test() {
