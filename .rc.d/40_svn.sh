@@ -40,6 +40,12 @@ alias sr='cd "$(svn_root)"'
 # merge aliases
 smm='svn_merge'
 
+# Min fct
+command -v min >/dev/null 2>&1 ||
+min() {
+  echo $(("$1" < "$2" ? "$1" : "$2"))
+}
+
 # Ask user
 svn_askuser() {
   # Warning: don't put a pipe after ask_question or the return code will be modified
@@ -194,7 +200,7 @@ svn_exists() {
 # Tells when repo has been modified
 svn_modified() {
   # Avoid ?, X, Performing status on external item at '...'
-  [ $(svn_st "^[^\?\X\P]" | wc -l) -gt 0 ]
+  [ $(svn_st "^[^\?\X\P]...[^X]" | wc -l) -gt 0 ]
 }
 
 # Clean repo, remove unversionned files
@@ -449,6 +455,41 @@ alias svn_diffzip='__svn_diffzip _7zdiff'
 alias svn_diffzipc='__svn_diffzip _7zdiffd 2>/dev/null | wc -l'
 alias svn_diffzipm='__svn_diffzip _7zdiffm'
 alias svn_diffzipd='__svn_diffzip _7zdiffd'
+
+# Make a bundle of all files with/without history (.svn files)
+# svn checkout: keep history
+# svn export: skip history
+_svn_bundle() {
+  svn_exists || return 1
+  local ACTION="${1:-checkout}"
+  local REV="${2:-$(svn_rev)}"
+  local ARCHIVE="${3:-$(svn_bckdir)/$(svn_bckname "bundle_$ACTION" "" "$REV").txz}"
+  shift $(($# >= 3 ? 3 : $#))
+  # Cannot work on modified repos
+  if svn_modified; then
+    echo "Some local files are modified..."
+    return 1
+  fi
+  # Check action to run
+  if [ "$ACTION" != "checkout" ] && [ "$ACTION" != "export" ]; then
+    echo "Unknown action '$ACTION'..."
+    return 2
+  fi
+  # Check target archive presence
+  local TMPDIR="$(dirname "$ARCHIVE")/$(basename "$ARCHIVE" .txz)"
+  if [ -e "$ARCHIVE" ]; then
+    echo "File '$ARCHIVE' exists already..."
+    return 3
+  fi
+  # Export / checkout
+  svn "$ACTION" "$(svn_url)@$REV" "$TMPDIR" "$@"
+  XZ_OPT=-e9 tar -cJf "$ARCHIVE" -C "$TMPDIR" . &&
+    command rm -rI "$TMPDIR"
+  ls -la "$ARCHIVE"
+}
+alias svn_export_files='_svn_bundle export'
+alias svn_bundle='_svn_bundle checkout'
+
 
 ########################################
 ########################################
