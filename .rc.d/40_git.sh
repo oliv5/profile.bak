@@ -536,6 +536,7 @@ _git_secure_delete() {
 
 # Create a bundle
 git_bundle() {
+  (
   local -; set -e
   git_exists || return 1
   local PREFIX="${6:-$(git_repo).$(uname -n)}"
@@ -555,8 +556,12 @@ git_bundle() {
   [ $# -le 7 ] && shift $# || shift 7
   echo "Git bundle into $OUT"
   git fetch --all
-  #git bundle create -q "${OUT%%.xz}" ${@:---branches --tags}
-  git bundle create -q "${OUT%%.xz}" ${@:---all}
+  # --all should be equivalent to --branches --tags --remotes
+  if [ $(git_version) -le $(git_version 2.20.1) ]; then
+    git bundle create "${OUT%%.xz}" ${@:---all}
+  else
+    git bundle create -q "${OUT%%.xz}" ${@:---all}
+  fi
   xz -k -z -S .xz --verbose $XZOPTS "${OUT%%.xz}" &&
     _git_secure_delete "${OUT%%.xz}"
   chown "$OWNER" "$OUT"
@@ -567,6 +572,7 @@ git_bundle() {
     chown "$OWNER" "${OUT}.gpg"
   fi
   ls -l "${OUT}"*
+  )
 }
 
 # Create an incremental bundle
