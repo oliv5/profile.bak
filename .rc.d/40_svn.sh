@@ -463,7 +463,10 @@ _svn_bundle() {
   svn_exists || return 1
   local ACTION="${1:-checkout}"
   local REV="${2:-$(svn_rev)}"
-  local ARCHIVE="${3:-$(svn_bckdir)/$(svn_bckname "bundle_$ACTION" "" "$REV").txz}"
+  local NAME="$(svn_bckname "svnbundle_$ACTION" "" "$REV").txz"
+  local ARCHIVE="${3:-$(svn_bckdir)/$NAME}"
+  [ -z "${ARCHIVE##*/}" ] && ARCHIVE="${ARCHIVE%/*}/${NAME}"
+  ARCHIVE="${ARCHIVE%%.txz}.txz"
   shift $(($# >= 3 ? 3 : $#))
   # Cannot work on modified repos
   if svn_modified; then
@@ -482,9 +485,11 @@ _svn_bundle() {
     return 3
   fi
   # Export / checkout
-  svn "$ACTION" "$(svn_url)@$REV" "$TMPDIR" "$@"
+  mkdir -p "$TMPDIR" &&
+    svn "$ACTION" "$(svn_url)@$REV" "$TMPDIR" "$@"
   XZ_OPT=-e9 tar -cJf "$ARCHIVE" -C "$TMPDIR" . &&
-    command rm -rI "$TMPDIR"
+    command chmod -R +wX "$TMPDIR" &&
+    command rm -r --one-file-system "$TMPDIR"
   ls -la "$ARCHIVE"
 }
 alias svn_export_files='_svn_bundle export'
