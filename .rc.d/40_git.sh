@@ -590,7 +590,7 @@ git_incbundle() {
     else
       echo "Make incremental bundle from ${TAGNAME}_last ($PREV) to HEAD ($NEXT)"
       local NAME="${PREV}.${NEXT}.bundle.inc"
-      git_bundle "$1" "$2" "$3" "$4" "$5" "$6" "$NAME" --branches --tags "${TAGNAME}_last.." ||
+      git_bundle "$1" "$2" "$3" "$4" "$5" "$6" "$NAME" --branches --tags "${TAGNAME}_last~1.." ||
         return $?
     fi
   else
