@@ -190,6 +190,15 @@ alias spp='setprop'
 alias gpp='getprop'
 gppg() { getprop ${@:+| grep $@}; }
 
+# Notifications & alerts
+# Setup: sudo apt --reinstall install libnotify-bin notify-osd
+# Usages:
+#    popup "I am happy"
+#    notify "I am happy"
+#    sleep 2; alert
+alias popup='notify-send -t 0'
+alias notify='notify-send --urgency=critical'
+alias alert='notify-send --urgency=critical -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
 ########################################
 ########################################
