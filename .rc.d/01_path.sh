@@ -6,13 +6,18 @@ realpath() {
     python -c "import os.path; print os.path.relpath('$1', '${2:-$PWD}')"
 }
 
+# Timeout wrapper
+command -v timeout >/dev/null &&
+_path_timeout() { timeout 0.5s "$@"; } ||
+_path_timeout() { "$@"; }
+
 # Prepend to path
 _path_prepend() {
   local VAR="${1:-PATH}"
   shift
   local DIR
   for DIR; do
-    if [ -d "$DIR" ]; then
+    if _path_timeout [ -d "$DIR" ]; then
       eval trap "\"export $VAR='\${$VAR}'; trap - EXIT\"" EXIT
       eval export $VAR="${DIR}\${$VAR:+:\$$VAR}"
     fi
@@ -26,7 +31,7 @@ _path_append() {
   shift
   local DIR
   for DIR; do
-    if [ -d "$DIR" ]; then
+    if _path_timeout [ -d "$DIR" ]; then
       eval trap "\"export $VAR='\${$VAR}'; trap - EXIT\"" EXIT
       eval export $VAR="\${$VAR:+\$$VAR:}${DIR}"
     fi
@@ -72,7 +77,7 @@ _path_remove_absent() {
   local IFS=":"
   local RES=""
   for D in $VAL; do
-    [ -d "$D" ] && RES="${RES:+$RES:}$D"
+    _path_timeout [ -d "$D" ] && RES="${RES:+$RES:}$D"
   done
   export $VAR="$RES"
 }
