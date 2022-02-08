@@ -96,9 +96,10 @@ if has("cscope")
       command! -nargs=* Cs :cs <args>
     endif
 
+    " OLA: <ctrl-d><ctrl-c> mapping refuses to work anymore
     nnoremap <C-d><C-s> :Cs find s <C-R>=expand("<cword>")<CR><CR>
     nnoremap <C-d><C-d> :Cs find d <C-R>=expand("<cword>")<CR><CR>
-    nnoremap <C-d><C-c> :Cs find c <C-R>=expand("<cword>")<CR><CR>
+    "nnoremap <C-d><C-c> :Cs find c <C-R>=expand("<cword>")<CR><CR>
     nnoremap <C-d><C-t> :Cs find t <C-R>=expand("<cword>")<CR><CR>
     nnoremap <C-d><C-e> :Cs find e <C-R>=expand("<cword>")<CR><CR>
     nnoremap <C-d><C-f> :Cs find f <C-R>=expand("<cfile>")<CR><CR>
@@ -107,16 +108,31 @@ if has("cscope")
 
     vnoremap <C-d><C-s> "+y:Cs find s <C-R>"<CR>
     vnoremap <C-d><C-d> "+y:Cs find d <C-R>"<CR>
-    vnoremap <C-d><C-c> "+y:Cs find c <C-R>"<CR>
+    "vnoremap <C-d><C-c> "+y:Cs find c <C-R>"<CR>
     vnoremap <C-d><C-t> "+y:Cs find t <C-R>"<CR>
     vnoremap <C-d><C-e> "+y:Cs find e <C-R>"<CR>
     vnoremap <C-d><C-f> "+y:Cs find f <C-R>"<CR>
     vnoremap <C-d><C-i> "+y:Cs find i <C-R>"<CR>
     vnoremap <C-d><C-g> "+y:Cs find g <C-R>"<CR>
 
-    " OLA mappings (because ctrl-c cannot be used in key mappings anymore)
-    nnoremap <C-d>c     :Cs find c <C-R>=expand("<cword>")<CR><CR>
-    vnoremap <C-d>c     "+y:Cs find c <C-R>"<CR>
+    " OLA mappings for full compatibility (because <ctrl-d><ctrl-c> refuses to work anymore)
+    nnoremap <C-d>s :Cs find s <C-R>=expand("<cword>")<CR><CR>
+    nnoremap <C-d>d :Cs find d <C-R>=expand("<cword>")<CR><CR>
+    nnoremap <C-d>c :Cs find c <C-R>=expand("<cword>")<CR><CR>
+    nnoremap <C-d>t :Cs find t <C-R>=expand("<cword>")<CR><CR>
+    nnoremap <C-d>e :Cs find e <C-R>=expand("<cword>")<CR><CR>
+    nnoremap <C-d>f :Cs find f <C-R>=expand("<cfile>")<CR><CR>
+    nnoremap <C-d>i :Cs find i <C-R>=expand("<cfile>")<CR>$<CR>
+    nnoremap <C-d>g :Cs find g <C-R>=expand("<cword>")<CR><CR>
+
+    vnoremap <C-d>s "+y:Cs find s <C-R>"<CR>
+    vnoremap <C-d>d "+y:Cs find d <C-R>"<CR>
+    vnoremap <C-d>c "+y:Cs find c <C-R>"<CR>
+    vnoremap <C-d>t "+y:Cs find t <C-R>"<CR>
+    vnoremap <C-d>e "+y:Cs find e <C-R>"<CR>
+    vnoremap <C-d>f "+y:Cs find f <C-R>"<CR>
+    vnoremap <C-d>i "+y:Cs find i <C-R>"<CR>
+    vnoremap <C-d>g "+y:Cs find g <C-R>"<CR>
 
     " Using 'CTRL-spacebar' (intepreted as CTRL-@ by vim) then a search type
     " makes the vim window split horizontally, with search result displayed in
@@ -127,7 +143,7 @@ if has("cscope")
     "    nnoremap <C-@>s <C-W><C-S> :cs find s <C-R>=expand("<cword>")<CR><CR>
     "    nnoremap <C-@>s :scs find s <C-R>=expand("<cword>")<CR><CR>
     "
-    " OLA: remove these mappings
+    " OLA: removed these mappings
 
     " Hitting CTRL-space *twice* before the search type does a vertical
     " split instead of a horizontal one (vim 6 and up only)
@@ -136,7 +152,7 @@ if has("cscope")
     " if you prefer the new window on the right instead of the left
     "    nnoremap <C-@><C-@>s :vert scs find s <C-R>=expand("<cword>")<CR><CR>
     "
-    " OLA: remove these mappings
+    " OLA: removed these mappings
 
 
     """"""""""""" key map timeouts
