@@ -211,7 +211,7 @@ rdpipe() {
     mkfifo -m 600 "$DIR/$R"
   done
   for R in $(seq $#); do
-    eval "$R" < "$DIR/$R" &
+    eval "$1" < "$DIR/$R" &
     shift
   done
   eval "$WRITER" | tee "$DIR"/* >/dev/null
