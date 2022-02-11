@@ -74,13 +74,30 @@ pdf_search() {
   if command -v pdfgrep >/dev/null 2>&1; then
     pdfgrep -n "$@"
   else
-    local PATTERN="$1"
+    local PATTERN="${1:?No pattern specified...}"
     shift
-    ff "${@:-.}/*.pdf" -exec sh -c 'pdftotext "{}" - | grep --with-filename --label="{}" --color '"$PATTERN" \;
+    ff "${@:-.}/*.pdf" -exec sh -c 'pdftotext "{}" - | grep -i --with-filename --label="{}" --color=always --line-number '"$PATTERN" \;
   fi
 }
 
 # Shuffle 2 pdf pages
 pdf_shuffle() {
   pdftk A="${1:?No recto pdf specified...}" B="${2:?No verso pdf specified...}" shuffle A Bend-1 output "${3:-output.pdf}"
+}
+
+################################
+# Docx: sudo apt install docx2txt
+
+# Grep in docx
+docx_grep() {
+  local FILE="${1:?No file specified...}"
+  shift
+  docx2txt "$FILE" - | grep -i "$PATTERN"
+}
+
+# Search in docx
+docx_search() {
+  local PATTERN="${1:?No pattern specified...}"
+  shift
+  ff0 "${@:-.}/*.docx"  -exec sh -c 'docx2txt "{}" - | grep -i --with-filename --label="{}" --color=always --line-number  '"$PATTERN" \;
 }
