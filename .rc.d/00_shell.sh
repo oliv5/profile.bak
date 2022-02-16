@@ -160,22 +160,34 @@ dir_empty() {
 # option #3: use named pipes
 # https://stackoverflow.com/questions/17757039/equivalent-of-pipefail-in-dash-shell
 
-# Create an unamed pipe
+# Create a named fifo/pipe
+crpipe() {
+  local PIPE="${1:-$(mktemp -u)}"
+  mkfifo -m 600 "$PIPE"
+  echo "$PIPE"
+}
+
+# Wait data from pipe and discard it
+wtpipe() {
+  cat >/dev/null <"$1"
+}
+
+# Create unamed pipes linked to a local stream (not stdin/stdout/stderr)
 # Input is a stream number > 2
 mkpipe() {
   local P
   for P; do
-    # Create a temporary named pipe
-    PIPE="$(mktemp -u)"
-    mkfifo -m 600 "$PIPE"
+    # Create a temporary named pipe/fifo
+    local FIFO="$(mktemp -u)"
+    mkfifo -m 600 "$FIFO"
     # Attach to file descriptor in rw mode "<>"
-    eval "exec $P<>\"$PIPE\""
-    # Unlink the named pipe
-    rm "$PIPE"
+    eval "exec $P<>\"$FIFO\""
+    # Unlink the named pipe/fifo
+    rm "$FIFO"
   done
 }
 
-# Close an unamed pipe
+# Close unamed pipes
 rmpipe() {
   local P
   for P; do
