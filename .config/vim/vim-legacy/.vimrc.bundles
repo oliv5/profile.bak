@@ -691,5 +691,19 @@ endif
 
 
 " *******************************************************
+" } vim-gutentags {
+" https://github.com/ludovicchabant/vim-gutentags.git
+" https://github.com/skywind3000/gutentags_plus.git
+" *******************************************************
+if !exists('g:loaded_gutentags')
+	" Options
+	let g:gutentags_ctags_tagfile = '.tags'
+	let g:gutentags_tagfile = '.tags'
+	let g:gutentags_scopefile = '.cscope'
+	let g:gutentags_modules = [ 'ctags', 'cscope' ]
+endif
+
+
+" *******************************************************
 " } The end
 " *******************************************************
