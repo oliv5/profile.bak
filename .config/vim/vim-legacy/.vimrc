@@ -267,32 +267,34 @@ nnoremap <localleader>c  :set invlist<CR>
 " *******************************************************
 " } Load plugins {
 " *******************************************************
-" Disable unused plugins
-let g:loaded_bbye = 1
-let g:loaded_project = 1
-let g:loaded_taglist = 1
+" Disable specific plugins entirely or configuration of plugins only
+"let g:loaded_bbye = 1
+"let g:loaded_project = 1
+"let g:loaded_taglist = 1
 "let g:loaded_tagbar = 1
-let g:loaded_srcexpl = 1
-let g:loaded_nerd_tree = 1
-let g:loaded_trinity = 1
-let g:ccvext_version = 1
-let g:loaded_yankring = 1
-let g:loaded_cctree = 1
-let g:command_t_loaded = 1
+"let g:loaded_srcexpl = 1
+"let g:loaded_nerd_tree = 1
+"let g:loaded_trinity = 1
+"let g:ccvext_version = 1
+"let g:loaded_yankring = 1
+"let g:loaded_cctree = 1
+"let g:command_t_loaded = 1
 "let g:loaded_minibufexplorer = 1
 "let g:loaded_yaifa = 1
 "let g:loaded_ctrlp = 1
-let g:loaded_easytags = 1
-let g:c_complete_loaded = 1
-let g:syntax_complete_loaded = 1
+"let g:loaded_easytags = 1
+let g:c_complete_loaded = 1 " Not clear where it comes from (?)
+let g:syntax_complete_loaded = 1 " Officially included in vim, configuration only !
 "let g:omnicpp_complete_loaded = 1
 let g:clang_complete_loaded = 1
 "let g:loaded_commentary = 1
-let g:loaded_bufline = 1
-let g:loaded_buftabs = 1 " Unused by the plugin !
+"let g:loaded_bufline = 1
+let g:loaded_buftabs = 1 " Unused by the plugin, configuration only !
 "let g:loaded_scratch = 1
 "let g:loaded_ansiesc = 1
 "let g:loaded_uncrustify = 1
+"let g:loaded_vimautotag = 1
+"let g:loaded_gutentags = 1
 
 " Load bundles config
 if filereadable(expand("~/.vimrc.bundles"))
