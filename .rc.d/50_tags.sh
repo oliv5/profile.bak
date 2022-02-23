@@ -65,8 +65,12 @@ _tags_scandir() {
       if [ $? -ne 123 ]; then
         svn ls "$SRC" 2>/dev/null | grep -E "$MATCHING" | xargs -r sh -c "for P; do printf \"$SRC/%s\0\" \"\$P\"; done; exit 1" _
         if [ $? -ne 123 ]; then
-          local EXCLUDING="${3:--not -path '*.svn*' -and -not -path '*.git' -and -not -path '/tmp/*'}"
-          find -L "$SRC" $EXCLUDING -regextype posix-egrep -regex "$MATCHING" -type f -print0 2>/dev/null | xargs -r0 readlink -ze
+          local EXCLUDING="${3:---exclude '*.svn' --exclude '*.git' --exclude '*/tmp/*'}"
+          command -v fdfind >/dev/null 2>&1 && fdfind -0 $EXCLUDING --regex "$MATCHING" "$SRC"
+          if [ $? -ne 0 ]; then
+            local EXCLUDING="${3:--not -path '*.svn*' -and -not -path '*.git' -and -not -path '/tmp/*'}"
+            find -L "$SRC" $EXCLUDING -regextype posix-egrep -regex "$MATCHING" -type f -print0 2>/dev/null | xargs -r0 readlink -ze
+          fi
         fi
       fi
     } | 
