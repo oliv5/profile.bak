@@ -555,7 +555,7 @@ git_bundle() {
   local XZOPTS="$5"
   [ $# -le 7 ] && shift $# || shift 7
   echo "Git bundle into $OUT"
-  git fetch --all
+  git fetch --all || true
   # --all should be equivalent to --branches --tags --remotes
   if [ $(git_version) -le $(git_version 2.20.1) ]; then
     git bundle create "${OUT%%.xz}" ${@:---all}
