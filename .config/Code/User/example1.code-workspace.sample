@@ -1,0 +1,189 @@
+{
+	"folders": [
+		{
+			"path": "folder1"
+		},
+		{
+			"path": "folder2"
+		},
+	],
+	"settings": {
+		"files.exclude": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/CVS": true,
+			"**/*.o": true,
+			"**/*.d": true,
+			"**/*.lin": true,
+			"**/*.lst": true
+			"**/folder3": true,
+			"**/3rdParty": true
+		},
+		"search.exclude": {
+			"**/*.o": true,
+			"**/*.d": true,
+			"**/*.lin": true,
+			"**/*.lst": true
+		},
+		"files.associations": {
+			"cctype": "cpp",
+			"clocale": "cpp",
+			"cmath": "cpp",
+			"cstdarg": "cpp",
+			"cstddef": "cpp",
+			"cstdio": "cpp",
+			"cstdlib": "cpp",
+			"cstring": "cpp",
+			"ctime": "cpp",
+			"cwchar": "cpp",
+			"cwctype": "cpp",
+			"array": "cpp",
+			"atomic": "cpp",
+			"strstream": "cpp",
+			"*.tcc": "cpp",
+			"chrono": "cpp",
+			"codecvt": "cpp",
+			"cstdint": "cpp",
+			"deque": "cpp",
+			"list": "cpp",
+			"unordered_map": "cpp",
+			"unordered_set": "cpp",
+			"vector": "cpp",
+			"exception": "cpp",
+			"algorithm": "cpp",
+			"functional": "cpp",
+			"iterator": "cpp",
+			"map": "cpp",
+			"memory": "cpp",
+			"memory_resource": "cpp",
+			"numeric": "cpp",
+			"optional": "cpp",
+			"random": "cpp",
+			"ratio": "cpp",
+			"set": "cpp",
+			"string": "cpp",
+			"string_view": "cpp",
+			"system_error": "cpp",
+			"tuple": "cpp",
+			"type_traits": "cpp",
+			"utility": "cpp",
+			"fstream": "cpp",
+			"initializer_list": "cpp",
+			"iomanip": "cpp",
+			"iosfwd": "cpp",
+			"iostream": "cpp",
+			"istream": "cpp",
+			"limits": "cpp",
+			"new": "cpp",
+			"ostream": "cpp",
+			"sstream": "cpp",
+			"stdexcept": "cpp",
+			"streambuf": "cpp",
+			"cinttypes": "cpp",
+			"typeinfo": "cpp",
+			"bit": "cpp",
+			"thread": "cpp",
+			"cassert": "cpp",
+			"cerrno": "cpp",
+			"locale": "cpp",
+			"csignal": "cpp",
+			"bitset": "cpp",
+			"complex": "cpp",
+			"condition_variable": "cpp",
+			"regex": "cpp",
+			"rope": "cpp",
+			"slist": "cpp",
+			"future": "cpp",
+			"mutex": "cpp",
+			"cfenv": "cpp",
+			"typeindex": "cpp",
+			"valarray": "cpp",
+			"variant": "cpp",
+			"stdio.h": "c",
+			"*.ipp": "c",
+			"libcstdarg.h": "c"
+		},
+		"editor.detectIndentation": false,
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"type": "shell",
+				"label": "Clean all",
+				"detail": "Clean all using make",
+				"command": "/usr/bin/make",
+				"args": [
+					"-s",
+					"clean"
+				],
+				"options": {
+					"cwd": "${workspaceFolder}/.."
+				},
+				"group": "build"
+			},
+			{
+				"type": "shell",
+				"label": "Make all",
+				"detail": "Build all using make",
+				"command": "/usr/bin/make",
+				"args": [
+					"-s",
+					"all"
+				],
+				"options": {
+					"cwd": "${workspaceFolder}/.."
+				},
+				"problemMatcher": {
+					"owner": "cpp",
+					"fileLocation": [
+						"relative",
+						"${workspaceFolder}"
+					],
+					"pattern": {
+						"regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+						"file": 1,
+						"line": 2,
+						"column": 3,
+						"severity": 4,
+						"message": 5
+					}
+				},
+				"group": "build"
+			},
+		]
+	},
+	"launch": {
+		// Use IntelliSense to learn about possible attributes.
+		// Hover to view descriptions of existing attributes.
+		// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+		"version": "0.2.0",
+		"configurations": [			
+			{
+				"name": "Build and run x86/amd64 binary with gdb",
+				"type": "cppdbg",
+				"request": "launch",
+				"program": "${workspaceFolder:folder1}/Debug/binary",
+				"args": [ "-c", "${workspaceFolder:folder1}/Debug/config1.cfg"],
+				"stopAtEntry": false,
+				"cwd": "${workspaceFolder:folder1}/Debug",
+				"environment": [
+					{ "name": "LD_LIBRARY_PATH", "value": "${workspaceFolder:folder1}/Debug" },
+				],
+				"externalConsole": false,
+				"preLaunchTask": "Make all",
+				"MIMode": "gdb",
+				"miDebuggerPath": "/usr/bin/gdb",
+				"setupCommands": [
+					{
+						"description": "Activer l'impression en mode Pretty pour gdb",
+						"text": "-enable-pretty-printing",
+						"ignoreFailures": true
+					}
+				],
+			},
+		],
+		"compounds": []
+	},
+}
