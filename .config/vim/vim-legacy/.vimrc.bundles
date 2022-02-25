@@ -697,7 +697,7 @@ endif
 " *******************************************************
 if !exists('g:loaded_gutentags')
 	" Options
-	let g:gutentags_modules = [ 'ctags', 'cscope' ]
+	let g:gutentags_modules = []
 	let g:gutentags_exclude_filetypes = []
 	let g:gutentags_exclude_project_root = []
 	let g:gutentags_file_list_command = {
@@ -708,11 +708,16 @@ if !exists('g:loaded_gutentags')
 	\	},
 	\}
 
+	let g:gutentags_modules += [ 'ctags' ]
 	let g:gutentags_ctags_tagfile = '.tags'
 	let g:gutentags_ctags_exclude = []
 	let g:gutentags_ctags_exclude_wildignore = 1
 
-	let g:gutentags_scopefile = '.cscope'
+	"let g:gutentags_modules += [ 'cscope' ]
+	"let g:gutentags_scopefile = '.cscope.out'
+
+	"let g:gutentags_modules += [ 'gtags-cscope' ]
+	"let g:gutentags_gtags_options_file = '.gutgtags'
 endif
 
 
