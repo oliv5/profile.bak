@@ -53,8 +53,7 @@ alias ishell='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_SHEL
 alias   iref='FCASE= FTYPE=  FXTYPE= FARGS= GCASE=-i GARGS= _dgrep "$_DGEXT_REF"'
 
 # Grep based code block search
-_dsearch1() { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; GARGS=-E _dgrep1 $_DGEXT_REF "${ARG1//NAME/$ARG2}" "$@"); }
-alias _dsearch='_dsearch1'
+_dsearch() { local ARG1="$1"; local ARG2="$2"; shift $(min 2 $#); (set -f; GARGS=-E _dgrep1 $_DGEXT_REF "${ARG1//NAME/$ARG2}" "$@"); }
 #_DGREGEX_FUNC='(^|\s+|::)NAME\s*\(([^;]*$|[^\}]\})'
 _DGREGEX_FUNC='\w+\s+NAME\s*\(\s*($|\w+\s+\w+|void)'
 _DGREGEX_VAR='^[^\(]*\w+\s*(\*|&)*\s*NAME\s*(=.+|\(\w+\)|\[.+\])?\s*(;|,)'
