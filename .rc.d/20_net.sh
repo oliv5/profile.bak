@@ -255,6 +255,15 @@ opened_port_in() {
 }
 
 ############################
+# Execute a function remotely via ssh
+ssh_fct() {
+  local SSH_OPTS="${1:?No ssh server/opts specified...}"
+  local FCT="${2:?No fct specified...}"
+  shift 2
+  ssh $SSH_OPTS -- "$(fct_def $FCT); ${FCT%% *} $(arg_quote "$@")"
+}
+
+############################
 # Ssh running sudo and pipe
 # Use full for piping ssh sudo output
 # Ex: (ask_passwd; echo) | ssh -tt user@server "sudo -k -S 2>/dev/null dd if=/dev/mmcblk0" | dd of=image.dat status=progress
