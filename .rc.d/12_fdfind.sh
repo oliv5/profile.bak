@@ -3,7 +3,8 @@ if command -v fdfind >/dev/null; then
 alias fd='fdfind'
 
 ###########################################
-_fdfind() {
+# double underscore: _fdfind is defined by fdfind already...
+__fdfind() {
   local FILES="${1##*/}"
   local DIR="${1%"$FILES"}"
   FILES="$(_fregex "${FILES}")"
@@ -30,14 +31,14 @@ _fdfind() {
 
 ##########
 unset FCASE FTYPE FARGS
-alias      ff='FCASE=   FTYPE=  FARGS="${FARGS}" _fdfind'
-alias     fff='FCASE=   FTYPE=f FARGS="${FARGS}" _fdfind'
-alias     ffd='FCASE=   FTYPE=d FARGS="${FARGS}" _fdfind'
-alias     ffl='FCASE=   FTYPE=l FARGS="${FARGS}" _fdfind'
-alias     iff='FCASE=-i FTYPE=  FARGS="${FARGS}" _fdfind'
-alias    ifff='FCASE=-i FTYPE=f FARGS="${FARGS}" _fdfind'
-alias    iffd='FCASE=-i FTYPE=d FARGS="${FARGS}" _fdfind'
-alias    iffl='FCASE=-i FTYPE=l FARGS="${FARGS}" _fdfind'
+alias      ff='FCASE=   FTYPE=  FARGS="${FARGS}" __fdfind'
+alias     fff='FCASE=   FTYPE=f FARGS="${FARGS}" __fdfind'
+alias     ffd='FCASE=   FTYPE=d FARGS="${FARGS}" __fdfind'
+alias     ffl='FCASE=   FTYPE=l FARGS="${FARGS}" __fdfind'
+alias     iff='FCASE=-i FTYPE=  FARGS="${FARGS}" __fdfind'
+alias    ifff='FCASE=-i FTYPE=f FARGS="${FARGS}" __fdfind'
+alias    iffd='FCASE=-i FTYPE=d FARGS="${FARGS}" __fdfind'
+alias    iffl='FCASE=-i FTYPE=l FARGS="${FARGS}" __fdfind'
 alias     ff0='FARGS=-0 ff'
 alias    fff0='FARGS=-0 fff'
 alias    ffd0='FARGS=-0 ffd'
@@ -79,7 +80,7 @@ _fdgrep1() {
   else
     local ARGS="$1"; shift $#
   fi
-  (set -f; _fdfind "$@" -t f -0 |
+  (set -f; __fdfind "$@" -t f -0 |
     eval xargs -r0 grep -nH --color ${GCASE} ${GARGS} -e "${ARGS:-''}")
 }
 _fdgrep() { _fdgrep1 "$@"; }
@@ -101,7 +102,7 @@ _fdsed1() {
   ${SNOCONFIRM:+true} echo "Replace '$IN' by '$OUT' in files '$FILES' ${SEDOPT:+with options $SEDOPT}"
   ${SNOCONFIRM:+true} read -p "Confirm ? (enter/ctrl-c) " _
   # Call find and sed
-  _fdfind "$FILES" ${SEXCLUDE} -t f -0 |
+  __fdfind "$FILES" ${SEXCLUDE} -t f -0 |
     xargs -r0 sed ${SEDOPT} --in-place -e "s|$IN|$OUT|g"
 }
 unset SFILES SEXCLUDE SNOCONFIRM
