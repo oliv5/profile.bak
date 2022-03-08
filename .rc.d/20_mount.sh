@@ -51,6 +51,20 @@ mount_cleaner() {
 # https://wiki.archlinux.org/index.php/ECryptfs#Encrypting_a_data_directory
 # https://wiki.archlinux.org/index.php/ECryptfs#Manual_setup
 
+############
+# Mount helpers
+ecryptfs_wrap_passphrase() {
+  local FILE="${1:-$HOME/.ecryptfs/wrapped-passphrase}"
+  ( stty -echo; printf "Passphrase: " 1>&2; read PASSWORD; stty echo; echo "$PASSWORD"; ) |
+    xargs printf "%s\n%s" $(od -x -N 100 --width=30 /dev/random | head -n 1 | sed "s/^0000000//" | sed "s/\s*//g") |
+    ecryptfs-wrap-passphrase "$FILE"
+}
+ecryptfs_unwrap_passphrase() {
+  local FILE="${1:-$HOME/.ecryptfs/wrapped-passphrase}"
+  ( stty -echo; printf "Passphrase: " 1>&2; read PASSWORD; stty echo; echo "$PASSWORD"; ) |
+    ecryptfs-insert-wrapped-passphrase-into-keyring "$FILE" -
+}
+
 # Raw mount ecryptfs using root
 mount_ecryptfs_root() {
   local SRC="${1:?Missing source directory...}"
@@ -85,20 +99,6 @@ umount_ecryptfs_root() {
   sudo keyctl clear @u
 }
 
-# Private mount wrappers
-mount_private_ecryptfs_root() {
-  local SRC="${1:-$HOME/.private}"
-  local DST="${2:-$HOME/private}"
-  local SIG="${3:-$HOME/.ecryptfs/private.sig}"
-  local KEY="$(cat "$SIG" 2>/dev/null | head -n 1)"
-  mkdir -p "$DST"
-  mount_ecryptfs_root "$SRC" "$DST" "$KEY"
-}
-umount_private_ecryptfs_root() {
-  local DST="${1:-$HOME/private}"
-  umount_ecryptfs_root "$DST"
-}
-
 ############
 # User mount ecryptfs (no root)
 # Mount options are hardcoded: AES, key 16b
@@ -108,7 +108,9 @@ mount_ecryptfs_user() {
   local DST="${2:?Missing dest directory...}"
   local KEY1="${3:?Missing content key...}"
   local KEY2="${4:-$KEY1}"
-  local CONFNAME="${5:-private}"
+  local CIPHER="aes" # Param 5 unused
+  local KEYLEN="16" # Param 6 unused
+  local CONFNAME="${7:-private}"
   local CONF="$HOME/.ecryptfs/$CONFNAME.conf"
   local SIG="$HOME/.ecryptfs/$CONFNAME.sig"
   chmod 700 "$HOME/.ecryptfs"
@@ -123,21 +125,6 @@ umount_ecryptfs_user() {
   local CONFNAME="${1:-private}"
   umount.ecryptfs_private "$CONFNAME"
   keyctl clear @u
-}
-
-# Private user mount wrappers
-mount_private_ecryptfs_user() {
-  local SRC="${1:-$HOME/.private}"
-  local DST="${2:-$HOME/private}"
-  local SIG="${3:-$HOME/.ecryptfs/private.sig}"
-  local KEY="$(cat "$SIG" 2>/dev/null | head -n 1)"
-  local CONFNAME="${4:-$(basename "$DST")}"
-  mkdir -p "$DST"
-  mount_ecryptfs_user "$SRC" "$DST" "$KEY" "" "$CONFNAME"
-}
-umount_private_ecryptfs_user() {
-  local DST="${1:-$HOME/private}"
-  umount_ecryptfs_user "$(basename "$DST")"
 }
 
 ############
@@ -167,35 +154,28 @@ umount_ecryptfs_simple() {
   ecryptfs-simple -uk "${1:?Missing mounted directory...}"
 }
 
-# Private user mount using ecryptfs-simple (no root)
-mount_private_ecryptfs_simple() {
+############
+# Private folder mount wrappers
+mount_private_ecryptfs() {
   local SRC="${1:-$HOME/.private}"
   local DST="${2:-$HOME/private}"
   local SIG="${3:-$HOME/.ecryptfs/private.sig}"
   local KEY="$(cat "$SIG" 2>/dev/null | head -n 1)"
+  local CONFNAME="${4:-$(basename "$DST")}"
+  local TOOL="$5"
+  if [ -z "$TOOL" ]; then
+    command -v ecryptfs-simple >/dev/null && TOOL=mount_ecryptfs_simple || TOOL=mount_ecryptfs_root
+  fi
   mkdir -p "$DST"
-  mount_ecryptfs_simple "$SRC" "$DST" "$KEY"
+  "$TOOL" "$SRC" "$DST" "$KEY" "" "" "" "$CONFNAME"
 }
-umount_private_ecryptfs_simple() {
+umount_private_ecryptfs() {
   local DST="${1:-$HOME/private}"
-  umount_ecryptfs_simple "$DST"
-}
-
-############
-# Mount helpers
-mount_ecryptfs()   { command -v ecryptfs-simple >/dev/null && mount_ecryptfs_simple "$@" || mount_ecryptfs_root "$@"; }
-umount_ecryptfs() { command -v ecryptfs-simple >/dev/null && umount_ecryptfs_simple "$@" || umount_ecryptfs_root "$@"; }
-
-ecryptfs_wrap_passphrase() {
-  local FILE="${1:-$HOME/.ecryptfs/wrapped-passphrase}"
-  ( stty -echo; printf "Passphrase: " 1>&2; read PASSWORD; stty echo; echo "$PASSWORD"; ) |
-    xargs printf "%s\n%s" $(od -x -N 100 --width=30 /dev/random | head -n 1 | sed "s/^0000000//" | sed "s/\s*//g") |
-    ecryptfs-wrap-passphrase "$FILE"
-}
-ecryptfs_unwrap_passphrase() {
-  local FILE="${1:-$HOME/.ecryptfs/wrapped-passphrase}"
-  ( stty -echo; printf "Passphrase: " 1>&2; read PASSWORD; stty echo; echo "$PASSWORD"; ) |
-    ecryptfs-insert-wrapped-passphrase-into-keyring "$FILE" -
+  local TOOL="$2"
+  if [ -z "$TOOL" ]; then
+    command -v ecryptfs-simple >/dev/null && TOOL=umount_ecryptfs_simple || TOOL=umount_ecryptfs_root
+  fi
+  "$TOOL" "$(basename "$DST")"
 }
 
 
