@@ -81,6 +81,8 @@ cat <<EOF
     #git config pack.window 2 # 0 to disable delta compression globally (larger repo size on disk)
     git config pack.threads 1
   fi
+  # Autosquash all interactive rebases
+  git config --global rebase.autosquash true
 EOF
 }
 
@@ -1318,21 +1320,14 @@ fi
 # Easy amend of previous commit
 git_squash() {
   local COMMIT="${1:-HEAD}"
-  git_modified && git commit --squash="$COMMIT"
-  git rebase --interactive --autosquash "${COMMIT}~2"
-}
-git_fixup() {
-  local COMMIT="${1:-HEAD}"
-  git_modified && git commit --fixup="$COMMIT"
-  git rebase --interactive --autosquash "${COMMIT}~2"
-}
-git_squashn() {
-  local COMMIT="${1:-HEAD}"
   local HEAD="$(git_hash)"
   git reset --soft "$COMMIT" &&
     git commit --edit -m "$(git log --format=%B --reverse HEAD..$COMMIT)"
-    #git commit --edit -m "$(git log --format=%B --reverse HEAD..$COMMIT)" ||
-    #git reset "$HEAD"
+}
+git_fixup() {
+  local COMMIT="${1:-HEAD}"
+  git_modified && git commit --fixup="$COMMIT" # Like --squash=
+  git rebase --interactive --autosquash "${COMMIT}~2"
 }
 
 ########################################
