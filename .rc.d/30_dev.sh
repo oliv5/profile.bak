@@ -93,7 +93,7 @@ pmake() {
 		local TRAP="ipcrm -s '$IPCMD_SEMID'; trap INT"
 		ipcmd semctl -s "$IPCMD_SEMID" setall 1
 		trap "ipcrm -s '$TRAP'" INT
-		make AR="$AR" RANLIB="$RANLIB" PYTHON="$PYTHON" "$@"
+		command make AR="$AR" RANLIB="$RANLIB" PYTHON="$PYTHON" "$@"
 		local RETCODE=$?
 		eval "$TRAP"
 		return $RETCODE
