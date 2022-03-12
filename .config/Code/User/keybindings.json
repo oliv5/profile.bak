@@ -253,6 +253,10 @@
 // Extension edit with shell (run shell command on selection)
 { "key": "ctrl+i",                "command": "editWithShell.runCommand" },
 
+// Extension AutoHide
+{ "key": "ctrl+alt+shift+b",      "command": "autoHide.toggleHideSideBar" },
+{ "key": "ctrl+alt+shift+p",      "command": "autoHide.toggleHidePanel" },
+
 //////////////////////////////////////////////////
 // Empty placeholder for vscode to append new keybindings afterwards
 {

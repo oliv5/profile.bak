@@ -146,4 +146,9 @@
     ],
     "Lua.completion.callSnippet": "Both",
     "C_Cpp.errorSquiggles": "Disabled",
+    "autoHide.autoHideSideBar": "true",
+    "autoHide.autoHidePanel": "false",
+    "autoHide.sideBarDelay": 750,
+    "autoHide.panelDelay": 750,
+    "autoHide.hideOnOpen": "true",
 }
