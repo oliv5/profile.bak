@@ -163,8 +163,8 @@ dir_empty() {
 # Create a named fifo/pipe
 crpipe() {
   local PIPE="${1:-$(mktemp -u)}"
-  mkfifo -m 600 "$PIPE"
-  echo "$PIPE"
+  mkfifo -m 600 "$PIPE" &&
+    echo "$PIPE"
 }
 
 # Wait data from pipe and discard it
@@ -234,7 +234,7 @@ rdpipe() {
 # Executes 2 cmds in a pipe & returns the status of the first one
 # https://unix.stackexchange.com/a/16709
 # https://linux.die.net/man/1/mispipe
-if ! command -v mispipe >/dev/null 2>&1; then
+command -v mispipe >/dev/null 2>&1 ||
 mispipe() {
   # Ex: ( exec 4>&1; ERR=$({ { (echo 'toto titi'; false); echo $? >&3; } | grep toto; } 3>&1 >&4); exec 4>&-; echo "Errcode=$ERR" )
   local CMD1="${1:?No command 1 specified...}"
@@ -246,28 +246,55 @@ mispipe() {
   eval "exec ${PIPE2}>&-"
   return $ERR
 }
-fi
 
-# Filter stderr using named pipes
+# Filter stderr using unamed pipes
 # https://unix.stackexchange.com/questions/3514/how-to-grep-standard-error-stream-stderr
-# Ex: { cmd1 2>&1 1>&3 | cmd2 1>&2; } 3>&1
-filter_stderr() {
-  local CMD1="${1:-true}"
-  local CMD2="${2:-true}"
-  local PIPE="${3:-3}"
-  eval "{ { ${CMD1}; } 2>&1 1>&${PIPE} | ${CMD2} 1>&2; } ${PIPE}>&1"
-}
-
-# Filter stderr using unamed pipes (bash only)
-# https://unix.stackexchange.com/questions/3514/how-to-grep-standard-error-stream-stderr
-# Ex: cmd1 2> >(cmd2)
 if [ -n "$BASH_VERSION" ]; then
-filter_stderr2() {
-  local CMD1="${1:-true}"
-  local CMD2="${2:-true}"
-  eval "{ ${CMD1}; } 2> >(${CMD2})"
-}
+  # Ex: cmd1 2> >(cmd2)
+  filter_stderr() {
+    local CMD1="${1:-true}"
+    local CMD2="${2:-true}"
+    eval "{ ${CMD1}; } 2> >(${CMD2})"
+  }
+else
+  # Ex: { cmd1 2>&1 1>&3 | cmd2 1>&2; } 3>&1
+  filter_stderr() {
+    local CMD1="${1:-true}"
+    local CMD2="${2:-true}"
+    local PIPE="${3:-3}"
+    eval "{ { ${CMD1}; } 2>&1 1>&${PIPE} | ${CMD2} 1>&2; } ${PIPE}>&1"
+  }
 fi
+
+################################
+# Send / receive messages using named pipes
+
+# Send msg into named pipe
+msg_send() {
+  local MSG="$1"
+  local TIMEOUT="${2:-0}"
+  local PIPE="${3:-$(dirname $(mktemp -u))/msg}"
+  crpipe "$PIPE" >/dev/null 2>&1
+  timeout "$TIMEOUT" sh -c '
+    echo "$1" > "$2"
+  ' _ "$MSG" "$PIPE"
+  # Don't delete the pipe, someone is still reading from it
+}
+
+# Wait msg from named pipe
+msg_wait() {
+  local MSG="$1"
+  local TIMEOUT="${2:-0}"
+  local PIPE="${3:-$(dirname $(mktemp -u))/msg}"
+  crpipe "$PIPE" >/dev/null 2>&1
+  timeout "$TIMEOUT" sh -c '
+    while read M < "$2"; do
+      [ -z "$1" ] || [ "$1" = "$M" ] && break
+    done
+  ' _ "$MSG" "$PIPE"
+  test -p "$PIPE" && rm "$PIPE" 2>/dev/null
+}
+
 
 ################################
 # Cmd exist test
