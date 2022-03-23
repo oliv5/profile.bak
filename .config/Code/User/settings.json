@@ -15,6 +15,8 @@
     "workbench.enableExperiments": false,
     "workbench.settings.enableNaturalLanguageSearch": false,
     "workbench.activityBar.visible": false,
+    "workbench.editor.openPositioning": "right",
+    "workbench.colorCustomizations": {},
     "workbench.colorTheme": "Aramok's GLX Black",
 
     // Explorer pane sidebar
@@ -32,6 +34,7 @@
     "settingsSync.keybindingsPerPlatform": false,
     "telemetry.telemetryLevel": "off",
     "update.mode": "manual",
+    "http.systemCertificates": false,
 
     // Search
     "search.searchEditor.reusePriorSearchConfiguration": true,
