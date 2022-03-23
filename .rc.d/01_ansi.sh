@@ -79,6 +79,11 @@ msg_error() {
   echo -ne "\33[31m[✘]\33[0m" "$@"
 }
 
+# Erase
+erase_eol() {
+  echo -ne "\033[K"
+}
+
 # Move cursor
 cursor_xy() {
   echo -ne "\033[$2;$1H"
@@ -102,6 +107,7 @@ counter() {
     echo -n "$5$F"
     sleep ${4:-1}
     cursor_left $(($F / 10 + 1))
+    erase_eol
   done
 }
 countup() {
