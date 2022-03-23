@@ -71,10 +71,48 @@ alias ansi_strip='sed "s/\x1b\[[0-9;]*m//g"'
 
 # Success display function
 msg_success() {
-  printf "\33[32m[✔]\33[0m" "$@"
+  echo -ne "\33[32m[✔]\33[0m" "$@"
 }
 
 # Error display function
 msg_error() {
-  printf "\33[31m[✘]\33[0m" "$@"
+  echo -ne "\33[31m[✘]\33[0m" "$@"
+}
+
+# Move cursor
+cursor_xy() {
+  echo -ne "\033[$2;$1H"
+}
+cursor_left() {
+  echo -ne "\e[${1:-1}D"
+}
+cursor_right() {
+  echo -ne "\e[${1:-1}C"
+}
+cursor_up() {
+  echo -ne "\e[${1:-1}A"
+}
+cursor_down() {
+  echo -ne "\e[${1:-1}B"
+}
+
+# Counters
+counter() {
+  for F in $(seq ${1:-1} ${3:-1} ${2:-${1:-1}}); do
+    echo -n "$5$F"
+    sleep ${4:-1}
+    cursor_left $(($F / 10 + 1))
+  done
+}
+countup() {
+  local A="${1:-1}"
+  local B="${2:-1}"
+  [ "$A" -gt "$B" ] && { local C="$A"; A="$B"; B="$C"; }
+  counter $A $B 1 "$3"
+}
+countdown() {
+  local A="${1:-1}"
+  local B="${2:-1}"
+  [ "$A" -lt "$B" ] && { local C="$A"; A="$B"; B="$C"; }
+  counter $A $B -1 "$3"
 }
