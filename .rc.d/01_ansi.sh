@@ -102,7 +102,7 @@ cursor_down() {
 }
 
 # Counters
-counter() {
+count() {
   for F in $(seq ${1:-1} ${3:-1} ${2:-${1:-1}}); do
     echo -n "$5$F"
     sleep ${4:-1}
@@ -110,15 +110,15 @@ counter() {
     erase_eol
   done
 }
-countup() {
+count_up() {
   local A="${1:-1}"
   local B="${2:-1}"
   [ "$A" -gt "$B" ] && { local C="$A"; A="$B"; B="$C"; }
-  counter $A $B 1 "$3"
+  count $A $B 1 "$3"
 }
-countdown() {
+count_down() {
   local A="${1:-1}"
   local B="${2:-1}"
   [ "$A" -lt "$B" ] && { local C="$A"; A="$B"; B="$C"; }
-  counter $A $B -1 "$3"
+  count $A $B -1 "$3"
 }
