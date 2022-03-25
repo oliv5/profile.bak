@@ -286,15 +286,23 @@ msg_wait() {
   local MSG="$1"
   local TIMEOUT="${2:-0}"
   local PIPE="${3:-$(dirname $(mktemp -u))/msg}"
+  local KEEP="$4"
   crpipe "$PIPE" >/dev/null 2>&1
   timeout "$TIMEOUT" sh -c '
     while read M < "$2"; do
       [ -z "$1" ] || [ "$1" = "$M" ] && break
     done
   ' _ "$MSG" "$PIPE"
-  test -p "$PIPE" && rm "$PIPE" 2>/dev/null
+  local RET=$?
+  [ -z "$KEEP" ] && [ -p "$PIPE" ] && rm "$PIPE" 2>/dev/null
+  return $RET
 }
 
+# Handshake
+handshake() {
+  msg_wait "$1" 1 "$3" 1 ||
+    msg_send "$@"
+}
 
 ################################
 # Cmd exist test
