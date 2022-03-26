@@ -1,0 +1,141 @@
+{
+	"folders": [
+		{
+			"name": "root",
+			"path": "."
+		},
+	],
+	"settings": {
+		"files.exclude": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/CVS": true,
+			"**/.DS_Store": true,
+			"**/Thumbs.db": true,
+			"**/.*": true,
+		},
+		"search.exclude": {
+			"**/*.o": true,
+			"**/*.d": true,
+			"**/*.lin": true,
+			"**/*.lst": true,
+			"**/*.orig": true,
+		},
+		"files.associations": {
+		},
+		"editor.detectIndentation": false,
+		// C_cpp intellisense: see https://code.visualstudio.com/docs/cpp/faq-cpp and https://code.visualstudio.com/docs/cpp/customize-default-settings-cpp
+		// "C_Cpp.intelliSenseEngine": "Tag Parser",
+		"C_Cpp.errorSquiggles": "Enabled",
+		"C_Cpp.default.compilerPath": "/usr/bin/g++",
+		"C_Cpp.default.cStandard": "c99",
+		"C_Cpp.default.cppStandard": "c++17",
+		"C_Cpp.default.intelliSenseMode": "gcc-x64",
+		"C_Cpp.default.compilerArgs": [ "-Wno-unused-parameters", "-Wno-unused-variable", "-Wno-missing-field-initializers" ],
+		"C_Cpp.default.defines": [ ],
+		"C_Cpp.default.includePath": [
+			"${workspaceFolder:root}/**",
+		],
+		"C_Cpp.default.browse.path": [ // Recursive by default (use * to disable)
+			"${workspaceFolder:root}/",
+		],
+		"C_Cpp.default.browse.limitSymbolsToIncludedHeaders": false,
+		// "C_Cpp.loggingLevel": "Debug",
+		// "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
+		"makefile.configurations" : [
+			{
+				"name": "Default",
+				"makeDirectory": "./",
+				"makefilePath": "GNUmakefile",
+			},
+		],
+		"makefile.makeDirectory": "./",
+		"makefile.makefilePath": "GNUmakefile",
+		"makefile.extensionOutputFolder": "./.vscode",
+		"docwriter.progress.trackFunctions": false,
+		"docwriter.style": "Doxygen",
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"type": "shell",
+				"label": "Clean all",
+				"detail": "Clean all using make",
+				"command": "/usr/bin/make",
+				"args": [
+					"-s",
+					"clean"
+				],
+				"options": {
+					"cwd": "${workspaceFolder}"
+				},
+				"group": "build"
+			},
+			{
+				"type": "shell",
+				"label": "Make",
+				"detail": "Build using make",
+				"command": "/usr/bin/make",
+				"args": [
+					"-s"
+				],
+				"options": {
+					"cwd": "${workspaceFolder:root}"
+				},
+				"problemMatcher": {
+					"owner": "cpp",
+					"fileLocation": [
+						"relative",
+						"${workspaceFolder:root}"
+					],
+					"pattern": {
+						"regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+						"file": 1,
+						"line": 2,
+						"column": 3,
+						"severity": 4,
+						"message": 5
+					}
+				},
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				}
+			}
+		]
+	},
+	"launch": {
+		// Use IntelliSense to learn about possible attributes.
+		// Hover to view descriptions of existing attributes.
+		// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+		"version": "0.2.0",
+		"configurations": [			
+			{
+				"name": "Build and run",
+				"type": "cppdbg",
+				"request": "launch",
+				"program": "${workspaceFolder:root}/Debug/binary",
+				"args": [ ],
+				"stopAtEntry": false,
+				"cwd": "${workspaceFolder:root}/Debug",
+				"environment": [
+					{ "name": "LD_LIBRARY_PATH", "value": "${workspaceFolder:root}/Debug" },
+				],
+				"externalConsole": false,
+				"preLaunchTask": "Make",
+				"MIMode": "gdb",
+				"miDebuggerPath": "/usr/bin/gdb",
+				"setupCommands": [
+					{
+						"description": "Activer l'impression en mode Pretty pour gdb",
+						"text": "-enable-pretty-printing",
+						"ignoreFailures": true
+					}
+				],
+			}
+		],
+		"compounds": []
+	},
+}

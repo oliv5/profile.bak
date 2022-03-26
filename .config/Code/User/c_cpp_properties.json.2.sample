@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${default}"
+            ],
+            "defines": [ 
+                "${default}",
+            ],
+            "compilerPath": "${default}",
+            "compilerArgs": [ "-Wno-unused-parameters", "-Wno-unused-variable", "-Wno-missing-field-initializers" ],
+            "cStandard": "${default}",
+            "cppStandard": "${default}",
+            "browse": {
+                "path" : [
+                    "${workspaceFolder}",
+                    "${default}"
+                ]
+            }
+        }
+    ],
+    "version": 4
+}
