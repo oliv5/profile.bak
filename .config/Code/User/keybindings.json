@@ -157,6 +157,7 @@
     { "sequence": [ "toggleFindWholeWord", "toggleSearchWholeWord" ] } },
 
 // Folding
+{ "key": "ctrl+u",                "command": "-cursorUndo", "when": "textInputFocus"  },
 { "key": "ctrl+u",                "command": "editor.fold", "when": "editorFocus" },
 { "key": "ctrl+shift+u",          "command": "editor.unfold", "when": "editorFocus" },
 { "key": "ctrl+alt+u",            "command": "editor.foldAll", "when": "editorFocus" },
