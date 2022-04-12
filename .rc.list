@@ -1,0 +1,13 @@
+.rc.d/00_shell.sh
+.rc.d/01_fct.sh
+.rc.d/01_math.sh
+.rc.d/01_path.sh
+.rc.d/02_cd.sh
+.rc.d/10_find.sh
+.rc.d/15_gz.sh
+.rc.d/15_tar.sh
+.rc.d/15_zip.sh
+.rc.d/40_git.sh
+.rc.d/41_annex.sh
+.rc.d/50_agents.sh
+.rc.d/98_screen.sh
