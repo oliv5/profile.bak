@@ -30,12 +30,13 @@ alias uint32='_int $((1<<32))'
 alias uint64='_int $((1<<64))'
 
 # Computations using bc
-alias calc2='calc "obase=2;"'
-alias calc8='calc "obase=8;"'
-alias calc10='calc "obase=10;"'
-alias calc16='calc "obase=16;"'
-alias int2hex='calc16'
-alias hex2int='calc10'
+# Note: always set "ibase" last !
+alias int2bin='calc "obase=2;"'
+alias bin2int='calc "ibase=2;"'
+alias int2hex='calc "obase=16;"'
+alias hex2int='calc "ibase=16;"'
+alias bin2hex='calc "obase=16;ibase=2;"'
+alias hex2bin='calc "obase=2;ibase=16;"'
 calc() {
   echo "$@" | bc
 }
