@@ -83,12 +83,12 @@ diffhr() {
 
 # Diff a list of files in a root folder
 _diff2() {
-  local DIFF="${1:?Diff command not specified...}"
+  local CMD="${1:?Diff command not specified...}"
   local DIR1="${2:?No folder1 specified...}"
   local DIR2="${3:?No folder2 specified...}"
   shift 3
   for F; do
-    "$DIFF" "$DIR1/$F" "$DIR2/$F"
+    "$CMD" "$DIR1/$F" "$DIR2/$F"
   done
 }
 diff2() { _diff2 "diff" "$@"; }
