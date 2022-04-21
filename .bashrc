@@ -121,6 +121,11 @@ fi
 # Set load flag
 export ENV_BASHRC=$((ENV_BASHRC+1))
 
+# Load local .bashrc
+if [ -r "$RC_DIR_LOCAL/.bashrc.local" ]; then
+  . "$RC_DIR_LOCAL/.bashrc.local"
+fi
+
 # Bootstrap user profile
 if [ -r "$HOME/.rc" ]; then
   . "$HOME/.rc"
