@@ -131,7 +131,6 @@ rc_source() {
   ##############
   # Startup scripts
   if [ $# -eq 0 ]; then
-    # Start loading scripts
     export ENV_RC=$((ENV_RC+1))
     rc_log "Source $RC_DIR/.rc"
     if [ -z "$ENV_PROFILE" ]; then # when not already done
@@ -178,19 +177,6 @@ rc_source() {
     eval "$RC_SHELLOPTS"
   fi
   return $RC_ERR
-}
-
-################################
-# Look for pattern in rc scripts and load the script found
-# This version should be robust to newlines in paths
-rc_search() {
-    local IFS=$' \t\n'
-    for PATTERN; do
-        for SCRIPT in $({ grep -lr "$PATTERN" "$RC_DIR/.rc.d/" 2>/dev/null; grep -lr "$PATTERN" "$RC_DIR_LOCAL/.rc.local.d/" 2>/dev/null; } | xargs -r0); do
-            echo "Loading '$SCRIPT'..."
-            . "$SCRIPT"
-        done
-    done
 }
 
 ################################
