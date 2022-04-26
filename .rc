@@ -57,39 +57,33 @@ rc_source() {
     local FILE PATTERN
     if [ -n "$RC_ALL" ]; then
       # Load all files
+      # Note: no double-quotes around $@ below !
       set -- $@
       for FILE; do
         rc_sourcefile "$FILE"
       done
     elif ! [ -r "$RC_LIST" ]; then
       # Load executable files
+      # Note: no double-quotes around $@ below !
       set -- $@
       for FILE; do
         if test -x "$FILE"; then
           rc_sourcefile "$FILE"
         fi
       done
-    elif true; then
+    else
       # Load files from "$RC_LIST" matching pattern
+      # when they are in $RC_DIR or $RC_DIR_LOCAL
       for PATTERN; do
         PATTERN="^${PATTERN##$RC_DIR/}|^${PATTERN##$RC_DIR_LOCAL/}"
         PATTERN="$(echo $PATTERN | sed -e 's/\./\./g; s/\*/.*/g')"
-        for FILE in $(command grep -Ee "$PATTERN" "$RC_LIST"); do
+        for FILE in $(command grep -Ee "$PATTERN" "$RC_LIST" 2>/dev/null); do
           if [ -r "$RC_DIR/$FILE" ]; then
             rc_sourcefile "$RC_DIR/$FILE"
           elif [ -r "$RC_DIR_LOCAL/$FILE" ]; then
             rc_sourcefile "$RC_DIR_LOCAL/$FILE"
           fi
         done
-      done
-    else
-      # Load files from "$RC_LIST" matching pattern
-      set -- $@
-      for FILE; do
-        PATTERN="^${FILE##$RC_DIR/}|^${FILE##$RC_DIR_LOCAL/}"
-        if grep -Ee "$PATTERN" "$RC_LIST" >/dev/null 2>&1; then
-          rc_sourcefile "$FILE"
-        fi
       done
     fi
   }
@@ -153,10 +147,12 @@ rc_source() {
       if [ -n "$BASH_VERSION" ]; then
         rc_sourcemod "$RC_DIR/.rc.d/bash/*$PATTERN*.${RC_EXT_SRC}"
       fi
-      # Android rc scripts are loaded by rc.list
-      #if [ -n "$ANDROID_ROOT" ]; then
-      #  rc_sourcemod "$RC_DIR/.rc.d/android/*$PATTERN*.${RC_EXT_SRC}"
-      #fi
+      if [ -n "$ANDROID_ROOT" ]; then
+        rc_sourcemod "$RC_DIR/.rc.d/android/*$PATTERN*.${RC_EXT_SRC}"
+      fi
+      if [ -d "$RC_DIR_LOCAL/.rc.local.d" ]; then
+        rc_sourcemod "$RC_DIR_LOCAL/.rc.local.d/*$PATTERN*.${RC_EXT_SRC}"
+      fi
     fi   
   done
 
