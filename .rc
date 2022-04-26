@@ -14,8 +14,6 @@ rc_source() {
   local RC_VERBOSE="$RC_VERBOSE" # for recursive calls
   local RC_DRYRUN="$RC_DRYRUN" # for recursive calls
   local RC_ALL="$RC_ALL" # for recursive calls
-  local RC_EXT_SRC="sh"
-  local RC_EXT_MIN="min"
   local RC_CNT=$(($RC_CNT+1))
   local RC_ERR=0
 
@@ -34,7 +32,7 @@ rc_source() {
   rc_sourcefile() {
     local FILE FCT
     for FILE; do
-      local MINIFIED="${FILE%.*}.${RC_EXT_MIN}"
+      local MINIFIED="${FILE%.*}.min"
       if [ -r "$MINIFIED" ]; then
         FILE="$MINIFIED"
       fi
@@ -139,19 +137,19 @@ rc_source() {
   local PATTERN
   for PATTERN in "${@:-*}"; do
     if [ -d "$PATTERN" ]; then # Load explicit directories
-      rc_sourcemod "$PATTERN/*.${RC_EXT_SRC}"
+      rc_sourcemod "$PATTERN/*.sh"
     elif [ -f "$PATTERN" ]; then # Load explicit files
       rc_sourcemod "$PATTERN"
     else # Load scripts by pattern search
-      rc_sourcemod "$RC_DIR/.rc.d/*$PATTERN*.${RC_EXT_SRC}"
+      rc_sourcemod "$RC_DIR/.rc.d/*$PATTERN*.sh"
       if [ -n "$BASH_VERSION" ]; then
-        rc_sourcemod "$RC_DIR/.rc.d/bash/*$PATTERN*.${RC_EXT_SRC}"
+        rc_sourcemod "$RC_DIR/.rc.d/bash/*$PATTERN*.sh"
       fi
       if [ -n "$ANDROID_ROOT" ]; then
-        rc_sourcemod "$RC_DIR/.rc.d/android/*$PATTERN*.${RC_EXT_SRC}"
+        rc_sourcemod "$RC_DIR/.rc.d/android/*$PATTERN*.sh"
       fi
       if [ -d "$RC_DIR_LOCAL/.rc.local.d" ]; then
-        rc_sourcemod "$RC_DIR_LOCAL/.rc.local.d/*$PATTERN*.${RC_EXT_SRC}"
+        rc_sourcemod "$RC_DIR_LOCAL/.rc.local.d/*$PATTERN*.sh"
       fi
     fi   
   done
