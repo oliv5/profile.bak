@@ -11,3 +11,5 @@
 .rc.d/41_annex.sh
 .rc.d/50_agents.sh
 .rc.d/98_screen.sh
+.rc.d/bash/01_stack.sh
+.rc.d/bash/02_cd.sh
