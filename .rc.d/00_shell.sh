@@ -1,39 +1,51 @@
 #!/bin/bash
 
-# This function prints each argument wrapped in single quotes
-# (separated by spaces).  Any single quotes embedded in the
-# arguments are escaped.
-quote() { [ $# -gt 0 ] && printf '"%s" ' "$@"; return 0; }
+# Quote all shell parameters
 arg_quote() {
-  local SEP=''
   local ARG
   for ARG; do
     SQESC=$(printf '%s\n' "${ARG}" | sed -e "s/'/'\\\\''/g")
-    printf '%s' "${SEP}'${SQESC}'"
-    SEP=' '
+    printf '%s ' "'${SQESC}'"
   done
 }
-
-# Right trim shell parameters. Adds quotes
-arg_rtrim() {
-  local IFS=$'\n\t '
-  local LAST="$(($#-$1))"
+arg_dblquote() {
   local ARG
-  for ARG in $(seq 2 $LAST); do 
-    eval ARG="\${$ARG}"
-    ARG=$(printf '%s\n' "${ARG}" | sed -e "s/'/'\\\\''/g")
-    printf '%s' "'${ARG}' "
+  for ARG; do
+    SQESC=$(printf '%s\n' "${ARG}" | sed -e 's/"/\\"/g')
+    printf '%s ' '"'${SQESC}'"'
   done
 }
+# Quote all shell parameters.
+# Unsafe: does not escape inner quotes
+arg_quote_unsafe() {
+  printf "'%s' " "$@"
+}
+arg_dblquote_unsafe() {
+  printf '"%s" ' "$@"
+}
 
-# Left trim shell parameters. Adds quotes
+# Left/right trim shell parameters. Adds quotes
+arg_rtrim() {
+  local ARG
+  for ARG in $(seq 2 $(($#-$1))); do 
+    eval SQESC="\${$ARG}"
+    SQESC=$(printf '%s\n' "${SQESC}" | sed -e "s/'/'\\\\''/g")
+    printf '%s ' "'${SQESC}'"
+  done
+}
 arg_ltrim() {
   command shift ${1:-1} >/dev/null 2>&1
   arg_quote "$@"
 }
 
+# Right shift parameters "a.k.a remove last parameters". Does not add quotes.
+alias rshift='arg_rshift'
+arg_rshift() {
+  eval set -- $(arg_rtrim 1 "$@")
+}
+
 # Concat parameters separated by a fixed delimiter
-arg_concat() {
+arg_join() {
   local DELIM="${1:?No delimiter defined...}"
   shift
   local ARG
@@ -42,21 +54,17 @@ arg_concat() {
   done
 }
 
-# Last shell parameter
-alias arg_last='command shift $(($#-1)) >/dev/null 2>&1'
-
 # Get last in list
-last() {
-  shift $(($#-1))
-  echo "$1"
+arg_last() {
+  [ $# -gt 0 ] && command shift $(($#-1)) && echo "$1"
 }
-lastn() {
-  shift $(($#-$1-1))
-  echo "$1"
+arg_lastn() {
+  [ $# -gt 1 ] && command shift $(($#-$1)) && echo "$1"
 }
 
 # Is in list?
-is_in() {
+alias is_in='arg_is_in'
+arg_is_in() {
   [ $# -lt 2 ] && return 0
   local Q="$1"
   shift

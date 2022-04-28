@@ -33,7 +33,7 @@ question2() {
     local Q="$1" D="$2"
     shift 2
     local A=""
-    while ! is_in "$A" "$@" ; do
+    while ! arg_is_in "$A" "$@" ; do
         A="$(question "$Q" "$D")"
     done
     echo "$A"
