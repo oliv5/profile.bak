@@ -364,8 +364,7 @@ git_st() {
   git ${2:+--git-dir="$2"} status -s --porcelain --untracked | awk '/^^[\? ]?'$1'/{print $2}'
 }
 git_stx() {
-  #git ${2:+--git-dir="$2"} status -z | awk 'BEGIN{RS="\0"; ORS="\0"}/'"^[\? ]?$1"'/{print substr($0,4)}'
-  git ${2:+--git-dir="$2"} status -z -s --porcelain --untracked | awk 'BEGIN{RS="\0"; ORS="\0"} /^^[\? ]?'$1'/{print $2}'
+  git ${2:+--git-dir="$2"} status -z | awk 'BEGIN{RS="\0"; ORS="\0"}/'"^[\? ]?$1"'/{print substr($0,4)}'
 }
 
 # Get remote names
