@@ -266,11 +266,21 @@ if [ -n "$BASH_VERSION" ]; then
   }
 else
   # Ex: { cmd1 2>&1 1>&3 | cmd2 1>&2; } 3>&1
-  filter_stderr() {
+  # Errcode: cmd2
+  filter_stderr_simple() {
     local CMD1="${1:-true}"
     local CMD2="${2:-true}"
     local PIPE="${3:-3}"
     eval "{ { ${CMD1}; } 2>&1 1>&${PIPE} | ${CMD2} 1>&2; } ${PIPE}>&1"
+  }
+  # Ex: return $({ { cmd1 3>&1 1>&2 2>&3; echo $? >&4; } | cmd2 >&2; } 4>&1)
+  # Errcode: cmd1
+  filter_stderr() {
+    local CMD1="${1:-true}"
+    local CMD2="${2:-true}"
+    local PIPE1="${3:-3}"
+    local PIPE2="${4:-4}"
+    return $(eval "{ { { ${CMD1}; } ${PIPE1}>&1 1>&2 2>&${PIPE1}; echo \$? >&${PIPE2}; } | { ${CMD2}; } >&2; } ${PIPE2}>&1")
   }
 fi
 
