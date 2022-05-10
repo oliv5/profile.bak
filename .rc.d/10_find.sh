@@ -3,7 +3,8 @@
 ###########################################
 # Generic glob/regex command line management
 _fregex() {
-  echo "$1" | sed -Ee 's/(\()?(\|)?\*\.(\|)?(\))?/\1\2.*\\.\3\4/g ; s;//;/;g' ${2:+-e "$2"}
+  #~   echo "$1" | sed -Ee 's/(\()?(\|)?\*\.(\|)?(\))?/\1\2.*\\.\3\4/g ; s;//;/;g' ${2:+-e "$2"}
+  echo "$1" | sed -Ee 's/\./\\./g ; s/\*/.*/g ; s;//;/;g' ${2:+-e "$2"}
 }
 _fglob() {
   # $1=txt $2=prefix $3=delimitor
