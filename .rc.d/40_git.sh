@@ -1071,7 +1071,7 @@ git_purge_gc() {
 ########################################
 
 # Various cleanup fcts
-git_gc_all() { git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git gc"; }
+git_gc_all() { git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git gc --prune=now"; }
 
 # Repack with different memory usage settings
 git_repack_all() {
