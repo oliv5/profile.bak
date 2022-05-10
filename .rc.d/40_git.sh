@@ -183,12 +183,11 @@ git_update_index_all() {
 # Find repos and execute commands in them
 git_foreach() {
   git_find0 | xargs -r0 -- sh -c '
-    git_root() { [ "$(git --git-dir="$1" config --get core.bare)" = "true" ] && echo "$1" || echo "$1/.."; }
     CMD="$1"; shift
     for DIR; do
-      (cd "$(git_root "$DIR")" && pwd && eval "${CMD}")
+      (export GIT_DIR="$DIR"; echo "$DIR"; eval "${CMD}")
     done
-  ' _ "$*"
+  ' _ "$@"
 }
 
 ########################################
@@ -1071,18 +1070,18 @@ git_purge_gc() {
 ########################################
 
 # Various cleanup fcts
-git_gc_all() { git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git gc --prune=now"; }
+git_gc_all() { git_find0 | xargs -r0 -I {} -n 1 sh -c "echo \"{}\"; git --git-dir=\"{}\" gc --prune=now"; }
 
 # Repack with different memory usage settings
 git_repack_all() {
   if [ -z "$1" ]; then
-    git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack -a -d -l"
+    git_find0 | xargs -r0 -I {} -n 1 sh -c "echo \"{}\"; git --git-dir=\"{}\" repack -a -d -l"
   elif [ "$1" = "low" ]; then
-    git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack -a -d -l --threads=1 --window=3 --depth=25 --window-memory=32m --max-pack-size=32m"
+    git_find0 | xargs -r0 -I {} -n 1 sh -c "echo \"{}\"; git --git-dir=\"{}\" repack -a -d -l --threads=1 --window=3 --depth=25 --window-memory=32m --max-pack-size=32m"
   elif [ "$1" = "medium" ]; then
-    git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack -a -d -l --threads=2 --window=10 --depth=50 --window-memory=256m --max-pack-size=256m"
+    git_find0 | xargs -r0 -I {} -n 1 sh -c "echo \"{}\"; git --git-dir=\"{}\" repack -a -d -l --threads=2 --window=10 --depth=50 --window-memory=256m --max-pack-size=256m"
   elif [ "$1" = "high" ]; then
-    git_find0 | xargs -r0 -I {} -n 1 sh -c "cd \"{}\"; pwd; git repack -a -d -l --threads=4 --window=10 --depth=50 --window-memory=1g --max-pack-size=1g"
+    git_find0 | xargs -r0 -I {} -n 1 sh -c "echo \"{}\"; git --git-dir=\"{}\" repack -a -d -l --threads=4 --window=10 --depth=50 --window-memory=1g --max-pack-size=1g"
   fi
 }
 
