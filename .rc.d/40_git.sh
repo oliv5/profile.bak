@@ -1571,6 +1571,7 @@ alias gcm='git commit -m'
 alias gcim='git commit -m'
 alias gcam='git commit -am'
 alias gcimw='git commit -m "wip on $(git_branch) the $(date)"'
+alias gcims='git commit -m "squash this commit made on $(git_branch) the $(date)"'
 # Misc aliases
 alias grm='git rm'
 alias grmu='git clean -fn'
