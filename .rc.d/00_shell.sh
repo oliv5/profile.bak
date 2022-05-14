@@ -162,6 +162,16 @@ dir_empty() {
 }
 
 ################################
+# Remove a string from variable
+var_remove() {
+  local VAR="${1:?No variable name defined...}"
+  local PATTERN="$2"
+  if [ "$(eval echo \${$VAR##*$PATTERN})" != "$(eval echo \$${VAR})" ]; then
+    eval "$VAR=\${${VAR}%%$PATTERN*}\${${VAR}##*$PATTERN}"
+  fi
+}
+
+################################
 # Get error status of piped commands:
 # option #1: bash set -o pipefail and ${PIPESTATUS[0]}
 # option #2: use mispipe (sudo apt install mispipe)
