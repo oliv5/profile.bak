@@ -165,10 +165,22 @@ dir_empty() {
 # Remove a string from variable
 var_remove() {
   local VAR="${1:?No variable name defined...}"
-  local PATTERN="$2"
-  if [ "$(eval echo \${$VAR##*$PATTERN})" != "$(eval echo \$${VAR})" ]; then
-    eval "$VAR=\${${VAR}%%$PATTERN*}\${${VAR}##*$PATTERN}"
-  fi
+  shift
+  for PAT; do
+    if [ "$(eval echo \${$VAR##*$PAT})" != "$(eval echo \$${VAR})" ]; then
+      eval "$VAR=\${${VAR}%%$PAT*}\${${VAR}##*$PAT}"
+    fi
+  done
+}
+
+# Is pattern in string
+var_has() {
+  local VAR="${1:?No variable name defined...}"
+  shift
+  for PAT; do
+    [ "$(eval echo \${$VAR##*$PAT})" == "$(eval echo \$${VAR})" ] && return 1
+  done
+  return 0
 }
 
 ################################
