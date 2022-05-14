@@ -168,8 +168,49 @@ rc_source() {
 }
 
 ################################
+# RC directory hooks to load local environment
+# Similar to direnv: https://direnv.net
+rc_hook() {
+  local RET=$?
+  if [ -n "$BASH_VERSION" ] && [ -z "$RC_SUBSHELL" ] && [ -r "$PWD/.rc.shell" ] && command grep "$PWD/.rc.shell" "${RC_LOCAL_DIR:-$HOME}/.rc.local.shell" >/dev/null 2>&1; then
+    echo "Launch subshell from $PWD/.rc.shell"
+    local TMPFILE="$(mktemp)"
+    cat > "$TMPFILE" <<EOF
+      trap -- '' SIGINT
+      rm "$TMPFILE"
+      export RC_SUBSHELL=1
+      export PS1="($(basename "$PWD")) $PS1"
+      source ~/.rc
+      $(env | sed -e 's/"/\\"/g ; s/^/export /; s/=/="/; s/$/"/')
+      source .rc.shell
+      trap - SIGINT
+EOF
+    bash -rcfile "$TMPFILE"
+  elif [ -r "$PWD/.rc.env" ] && command grep "$PWD/.rc.env" "${RC_LOCAL_DIR:-$HOME}/.rc.local.env" >/dev/null 2>&1; then
+    echo "Load local environement from $PWD/.rc.env"
+    source "$PWD/.rc.env"
+  fi
+  return $RET
+}
+
+rc_setup_hook() {
+  if [ -n "$BASH_VERSION" ] && [ "${PROMPT_COMMAND%%rc_hook*}" = "${PROMPT_COMMAND}" ]; then
+    PROMPT_COMMAND="rc_hook${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
+  fi
+}
+
+rc_remove_hook() {
+  if [ -n "$BASH_VERSION" ] && [ "${PROMPT_COMMAND%%rc_hook*}" != "$PROMPT_COMMAND" ]; then
+    PROMPT_COMMAND="${PROMPT_COMMAND%%rc_hook*}${PROMPT_COMMAND##*rc_hook}"
+  fi
+}
+
+################################
 # Global aliases
 alias rc='rc_source'
+
+# Setup hook
+rc_setup_hook
 
 # Do not autoload user env in non-interactive shells
 # This is also done in .bashrc
