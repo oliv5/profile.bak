@@ -144,4 +144,17 @@ ldlibpath_reset() { unset LD_LIBRARY_PATH; }
 # Cleanup environement from some dangerous lib hijacking technics
 # See https://repo.zenk-security.com/Techniques%20d.attaques%20%20.%20%20Failles/Quelques%20astuces%20avec%20LD_PRELOAD.pdf
 ld_cleanup() { unset LD_LIBRARY_PATH LD_PRELOAD LD_DEBUG; }
-ld_cleanup # clean now
+
+# Load common variables to make what is called a prefix.
+prefix_load() {
+  local REPLY="$(readlink -f "$1")"
+  #realpath.absolute "$1"
+  _path_append MANPATH "$REPLY/man"
+  _path_append MANPATH "$REPLY/share/man"
+  _path_append CPATH "$REPLY/include"
+  _path_append LD_LIBRARY_PATH "$REPLY/lib"
+  _path_append LIBRARY_PATH "$REPLY/lib"
+  _path_append PATH "$REPLY/bin"
+  _path_append PKG_CONFIG_PATH "$REPLY/lib/pkgconfig"
+}
+

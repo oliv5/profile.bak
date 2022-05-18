@@ -218,3 +218,19 @@ _fsed() {
 unset SFILES SEXCLUDE SNOCONFIRM
 alias   hh='FCASE=   FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed'
 alias  ihh='FCASE=-i FTYPE= FXTYPE= FOPTS= FARGS= SFILES= SEXCLUDE= _fsed'
+
+###########################################
+# Find highest version number in SemVer format (X.Y.Z).
+# Usage: find_version <directory> <folder_prefix> <partial_version>
+# Ex: semver_search "dir" "program-" "1.4"
+# From https://github.com/direnv/direnv/blob/master/stdlib.sh
+find_version() {
+    local VERSION_DIR=${1:-}
+    local PREFIX=${2:-}
+    local PARTIAL_VERSION=${3:-}
+    find "$VERSION_DIR" -maxdepth 1 -mindepth 1 -type d -name "${PREFIX}${PARTIAL_VERSION}*" \
+      | while IFS= read -r line; do echo "${line#${VERSION_DIR%/}/${PREFIX}}"; done \
+      | sort -t . -k 1,1rn -k 2,2rn -k 3,3rn \
+      | head -1
+
+}
