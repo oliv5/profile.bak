@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Quote all shell parameters
 arg_quote() {

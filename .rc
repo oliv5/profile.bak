@@ -21,6 +21,12 @@ rc_source() {
   # Prerequisites
   command -v grep >/dev/null || { echo "Grep is missing..." ; return 1; }
   command -v awk >/dev/null || { echo "Awk is missing..." ; return 1; }
+  command -v sed >/dev/null || { echo "Sed is missing..." ; return 1; }
+  command -v head >/dev/null || { echo "Head is missing..." ; return 1; }
+  command -v cut >/dev/null || { echo "Cut is missing..." ; return 1; }
+  command -v sort >/dev/null || { echo "Sort is missing..." ; return 1; }
+  unset -f grep awk sed head cut sort
+  unalias grep awk sed head cut sort 2>/dev/null
 
   ##############
   # Log function
@@ -33,6 +39,10 @@ rc_source() {
     local FILE FCT
     for FILE; do
       local MINIFIED="${FILE%.*}.min"
+      if [ -z "$BASH_VERSION" ] && head -c 40 "$FILE" | grep "bash" >/dev/null 2>&1; then
+        rc_log "Skip bash file $FILE"
+        continue
+      fi
       if [ -r "$MINIFIED" ]; then
         FILE="$MINIFIED"
       fi
