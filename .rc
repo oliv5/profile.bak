@@ -182,28 +182,33 @@ rc_source() {
 # Similar to direnv: https://direnv.net
 rc_hook() {
   local RET=$?
-  if [ -n "$BASH_VERSION" ] && [ -z "$RC_SUBSHELL" ] && [ -r "$PWD/.rc.shell" ] && command grep "$PWD/.rc.shell" "${RC_LOCAL_DIR:-$HOME}/.rc.local.shell" >/dev/null 2>&1; then
-    echo "Launch subshell from $PWD/.rc.shell"
-    local TMPFILE="$(mktemp)"
-    cat > "$TMPFILE" <<EOF
-      trap -- '' SIGINT
-      rm "$TMPFILE"
-      export RC_SUBSHELL=1
-      export PS1="($(basename "$PWD")) $PS1"
-      source ~/.rc
-      $(env | sed -e 's/"/\\"/g ; s/^/export /; s/=/="/; s/$/"/')
-      source .rc.shell
-      trap - SIGINT
+  if [ -r "$PWD/.rc.shell" -o -r "$PWD/.rc.env" ] && [ "$RC_SUBSHELL" != "$PWD" ] && command grep -e "^$PWD\$" "${RC_LOCAL_DIR:-$HOME}/.rc.local.dir" >/dev/null 2>&1; then
+    if [ -r "$PWD/.rc.shell" ] && [ -n "$BASH_VERSION" ]; then
+      local TMPFILE="$(mktemp)"
+      cat > "$TMPFILE" <<EOF
+trap -- '' SIGINT
+rm "$TMPFILE"
+source ~/.profile
+source ~/.bashrc
+$(env | sed -e 's/"/\\"/g ; s/^/export /; s/=/="/; s/$/"/')
+export RC_SUBSHELL="$PWD"
+export PS1="($(basename "$PWD")) $PS1"
+alias cdd='cd "$PWD"'
+source .rc.shell
+trap - SIGINT
 EOF
-    bash -rcfile "$TMPFILE"
-  elif [ -r "$PWD/.rc.env" ] && command grep "$PWD/.rc.env" "${RC_LOCAL_DIR:-$HOME}/.rc.local.env" >/dev/null 2>&1; then
-    echo "Load local environement from $PWD/.rc.env"
-    source "$PWD/.rc.env"
+      bash -rcfile "$TMPFILE"
+    elif [ -r "$PWD/.rc.env" ]; then
+      export RC_SUBSHELL="$PWD"
+      source "$PWD/.rc.env"
+    fi
   fi
   return $RET
 }
 
 rc_setup_hook() {
+  command -v grep >/dev/null || return 1
+  command -v mktemp >/dev/null || return 1
   if [ -n "$BASH_VERSION" ] && [ "${PROMPT_COMMAND%%rc_hook*}" = "${PROMPT_COMMAND}" ]; then
     PROMPT_COMMAND="rc_hook${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
   fi
