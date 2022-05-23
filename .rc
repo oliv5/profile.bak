@@ -141,7 +141,7 @@ rc_source() {
   for PATTERN in "${@:-*}"; do
     if [ -d "$PATTERN" ]; then # Load explicit directories (absolute path needed)
       RC_ALL=1 rc_sourcemod "$PATTERN/*.sh"
-    elif [ -f "$PATTERN" ]; then # Load explicit files (absolute path needed)
+    elif [ -f "$PATTERN" ] && echo "$PATTERN" | grep -e '\.sh$' >/dev/null; then # Load explicit files (absolute path needed)
       RC_ALL=1 rc_sourcemod "$PATTERN"
     elif [ -z "$RC_ALL" ] && [ -r "$RC_LIST" ]; then # Load from list
       rc_sourcelist "*$PATTERN*.sh"
