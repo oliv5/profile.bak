@@ -1,6 +1,10 @@
 #!/bin/sh
 # Main user profile script
 # It should be kept compatible with all shells (dash, bash,...)
+if [ -z "$HOME" ]; then
+  echo >&2 ".rc: \$HOME is not defined... Abort !"
+  return 1
+fi
 
 # Main source function
 rc_source() {
@@ -182,26 +186,36 @@ rc_source() {
 # Similar to direnv: https://direnv.net
 rc_hook() {
   local RET=$?
-  if [ -r "$PWD/.rc.shell" -o -r "$PWD/.rc.env" ] && [ "$RC_SUBSHELL" != "$PWD" ] && command grep -e "^$PWD\$" "${RC_LOCAL_DIR:-$HOME}/.rc.local.dir" >/dev/null 2>&1; then
-    if [ -r "$PWD/.rc.shell" ] && [ -n "$BASH_VERSION" ]; then
+  [ "$RC_SUBENV" = "$PWD" ] && return $RET
+  ! [ -r "$PWD/.rc.shell" ] && ! [ -r "$PWD/.rc.env" ] && return $RET
+  ! command grep -e "^$PWD\$" "${RC_LOCAL_DIR:-$HOME}/.rc.local.dir" >/dev/null 2>&1 && return $RET
+  if [ -r "$PWD/.rc.shell" ]; then
+    if [ -n "$BASH_VERSION" ]; then
       local TMPFILE="$(mktemp)"
+      chmod 700 "$TMPFILE"
       cat > "$TMPFILE" <<EOF
 trap -- '' SIGINT
 rm "$TMPFILE"
+export HOME="$HOME"
+export RC_SUBENV="$PWD"
+export TERM=xterm
+cd "$PWD"
+source /etc/profile
 source ~/.profile
+source /etc/bash.bashrc
 source ~/.bashrc
-$(env | sed -e 's/"/\\"/g ; s/^/export /; s/=/="/; s/$/"/')
-export RC_SUBSHELL="$PWD"
-export PS1="($(basename "$PWD")) $PS1"
-alias cdd='cd "$PWD"'
+source ~/.rc
+export PS1="($(basename "$PWD"))\$PS1"
 source .rc.shell
 trap - SIGINT
 EOF
-      bash -rcfile "$TMPFILE"
-    elif [ -r "$PWD/.rc.env" ]; then
-      export RC_SUBSHELL="$PWD"
-      source "$PWD/.rc.env"
+      exec -c bash --rcfile "$TMPFILE"
+    else
+      echo >&2 "Only bash is supported !"
     fi
+  elif [ -r "$PWD/.rc.env" ]; then
+    export RC_SUBENV="$PWD"
+    source "$PWD/.rc.env"
   fi
   return $RET
 }

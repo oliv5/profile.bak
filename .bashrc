@@ -16,9 +16,12 @@ case $- in
 esac
 
 # execute system wide bashrc
-if [ -f /etc/bashrc ]; then
-  . /etc/bashrc
-fi
+#~ if [ -f /etc/bashrc ]; then
+  #~ . /etc/bashrc
+#~ fi
+#~ if [ -f /etc/bash.bashrc ]; then
+  #~ . /etc/bash.bashrc
+#~ fi
 
 # don't put duplicate lines in the history. See bash(1) for more options
 # ... or force ignoredups and ignorespace
