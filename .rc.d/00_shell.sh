@@ -83,6 +83,11 @@ alias arg_restore='eval set -- "$__"'
 # https://stackoverflow.com/questions/18186929/differences-between-login-shell-and-interactive-shell
 # http://www.tldp.org/LDP/abs/html/intandnonint.html
 
+# Replace with a fresh shell
+shell_replace() {
+  exec -c "$0" -li
+}
+
 # Returns true for interactive shells
 shell_isinteractive() {
   # Test whether stdin exists

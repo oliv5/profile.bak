@@ -188,34 +188,33 @@ rc_hook() {
   local RET=$?
   [ "$RC_SUBENV" = "$PWD" ] && return $RET
   ! [ -r "$PWD/.rc.shell" ] && ! [ -r "$PWD/.rc.env" ] && return $RET
-  ! command grep -e "^$PWD\$" "${RC_LOCAL_DIR:-$HOME}/.rc.local.dir" >/dev/null 2>&1 && return $RET
-  if [ -r "$PWD/.rc.shell" ]; then
+  ! command grep -e "^$PWD\$" "${RC_LOCAL_DIR:-$HOME}/.rc.local.env" >/dev/null 2>&1 && return $RET
+  if [ -r "$PWD/.rc.env" ]; then
+    export RC_SUBENV="$PWD"
+    source "$PWD/.rc.env"
+  elif [ -r "$PWD/.rc.shell" ]; then
     if [ -n "$BASH_VERSION" ]; then
-      local TMPFILE="$(mktemp)"
-      chmod 700 "$TMPFILE"
-      cat > "$TMPFILE" <<EOF
+      exec 3<>-
+      cat >&3 <<EOF
+exec 3<&- 3>&-
 trap -- '' SIGINT
-rm "$TMPFILE"
-export HOME="$HOME"
 export RC_SUBENV="$PWD"
+export HOME="$HOME"
 export TERM=xterm
 cd "$PWD"
 source /etc/profile
 source ~/.profile
 source /etc/bash.bashrc
 source ~/.bashrc
-source ~/.rc
-export PS1="($(basename "$PWD"))\$PS1"
+export PS1="($(basename "$PWD")) \$PS1"
 source .rc.shell
 trap - SIGINT
 EOF
-      exec -c bash --rcfile "$TMPFILE"
+      exec -c bash --rcfile /proc/$$/fd/3
+      exec 3<&- 3>&-
     else
       echo >&2 "Only bash is supported !"
     fi
-  elif [ -r "$PWD/.rc.env" ]; then
-    export RC_SUBENV="$PWD"
-    source "$PWD/.rc.env"
   fi
   return $RET
 }
