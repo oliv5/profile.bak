@@ -188,37 +188,10 @@ rc_source() {
 rc_hook() {
   local RET=$?
   [ "$RC_SUBENV" = "$PWD" ] && return $RET
-  ! [ -r "$PWD/.rc.local.shell" ] && ! [ -r "$PWD/.rc.local.env" ] && return $RET
+  ! [ -r "$PWD/.rc.local" ] && return $RET
   ! command grep -e "^$PWD\$" "${RC_LOCAL_DIR:-$HOME}/.rc.local.allowed" >/dev/null 2>&1 && return $RET
-  if [ -r "$PWD/.rc.local.env" ]; then
-    export RC_SUBENV="$PWD"
-    source "$PWD/.rc.local.env"
-  elif [ -r "$PWD/.rc.local.shell" ]; then
-    if [ -n "$BASH_VERSION" ]; then
-      umask 077
-      local TMPFILE="$(mktemp)"
-      exec 3<>"$TMPFILE"
-      cat <&3 >/dev/null
-      cat >&3 <<EOF
-trap -- '' SIGINT
-rm "$TMPFILE"
-export RC_SUBENV="$PWD"
-export HOME="$HOME"
-export TERM=xterm
-cd "$PWD"
-source /etc/profile
-source ~/.profile
-source /etc/bash.bashrc
-source ~/.bashrc
-export PS1="($(basename "$PWD")) \$PS1"
-source .rc.local.shell
-trap - SIGINT
-EOF
-      exec -c bash --rcfile /proc/$$/fd/3
-    else
-      echo >&2 "Only bash is supported !"
-    fi
-  fi
+  export RC_SUBENV="$PWD"
+  source "$PWD/.rc.local"
   return $RET
 }
 
