@@ -14,7 +14,6 @@ rc_source() {
 
   # Local variables
   local RC_SHELLOPTS="$(set +o | grep noglob)" # shell options
-  local RC_LIST="$RC_DIR_LOCAL/.rc.tmp.list"
   local RC_VERBOSE="$RC_VERBOSE" # for recursive calls
   local RC_DRYRUN="$RC_DRYRUN" # for recursive calls
   local RC_ALL="$RC_ALL" # for recursive calls
@@ -67,21 +66,16 @@ rc_source() {
 
   # Source script from list
   rc_sourcelist() {
-    # Load files from "$RC_LIST" when they match pattern
-    # Look for them in $RC_DIR and $RC_DIR_LOCAL
-    local FILE PATTERN
-    for PATTERN; do
-      PATTERN="^${PATTERN##$RC_DIR/}|^${PATTERN##$RC_DIR_LOCAL/}"
-      PATTERN="$(echo $PATTERN | sed -e 's/\./\./g; s/\*/.*/g')"
-      for FILE in $(command grep -Ee "$PATTERN" "$RC_LIST" 2>/dev/null); do
-        if [ -r "$RC_DIR/$FILE" ]; then
-          rc_sourcefile "$RC_DIR/$FILE"
-        elif [ -r "$RC_DIR_LOCAL/$FILE" ]; then
-          rc_sourcefile "$RC_DIR_LOCAL/$FILE"
-        fi
-      done
+    local FILE
+    for FILE in $(cat "$@" 2>/dev/null | sort -u); do
+      if [ -r "$RC_DIR/$FILE" ]; then
+        rc_sourcefile "$RC_DIR/$FILE"
+      fi
+      if [ "$RC_DIR" != "$RC_DIR_LOCAL" ] && [ -r "$RC_DIR_LOCAL/$FILE" ]; then
+        rc_sourcefile "$RC_DIR_LOCAL/$FILE"
+      fi
     done
-  }
+}
 
   # Source module when executable (or all)
   rc_sourcemod() {
@@ -89,9 +83,9 @@ rc_source() {
     # Note: no double-quotes around $@ below !
     set -- $@
     for FILE; do
-      if [ -n "$RC_ALL" ] || [ -x "$FILE" ]; then
+      #~ if [ -n "$RC_ALL" ] || [ -x "$FILE" ]; then
         rc_sourcefile "$FILE"
-      fi
+      #~ fi
     done
   }
 
@@ -100,7 +94,7 @@ rc_source() {
   local FLAGS OPTIND OPTARG OPTERR=0
   while getopts 'asvdr:l:' FLAGS; do
     case "$FLAGS" in
-      a) RC_ALL="true";;
+      a) RC_ALL="*";;
       s) RC_VERBOSE=">/dev/null 2>&1";;
       v) RC_VERBOSE=">&1";;
       d) RC_DRYRUN="true";;
@@ -119,16 +113,6 @@ rc_source() {
   shift $(expr $OPTIND - 1)
   
   ##############
-  # Merge file lists
-  if [ "$RC_CNT" = "1" ]; then
-    cat "$RC_DIR/.rc.list" "$RC_DIR_LOCAL/.rc.local.list" 2>/dev/null | sort -u > "$RC_LIST"
-    # Strangely test -s "$RC_LIST" does not work (??)
-    if [ -z "$(head -c 1 "$RC_LIST")" ]; then
-      rm -I "$RC_LIST"
-    fi
-  fi
-
-  ##############
   # Startup scripts
   if [ $# -eq 0 ]; then
     export ENV_RC=$((ENV_RC+1))
@@ -143,13 +127,13 @@ rc_source() {
   # Main scripts
   set +f # Enable glob expansion
   local PATTERN
-  for PATTERN in "${@:-*}"; do
+  for PATTERN in "${RC_ALL:-${@:-*}}"; do
     if [ -d "$PATTERN" ]; then # Load explicit directories (absolute path needed)
-      RC_ALL=1 rc_sourcemod "$PATTERN/*.sh"
+      rc_sourcemod "$PATTERN/*.sh"
     elif [ -f "$PATTERN" ] && echo "$PATTERN" | grep -e '\.sh$' >/dev/null; then # Load explicit files (absolute path needed)
-      RC_ALL=1 rc_sourcemod "$PATTERN"
-    elif [ -z "$RC_ALL" ] && [ -r "$RC_LIST" ]; then # Load from list
-      rc_sourcelist "*$PATTERN*.sh"
+      rc_sourcefile "$PATTERN"
+    elif [ $# -eq 0 ] && [ -z "$RC_ALL" ] && [ -r "$RC_DIR/.rc.list" -o -r "$RC_DIR_LOCAL/.rc.local.list" ]; then # Load from list
+      rc_sourcelist "$RC_DIR/.rc.list" "$RC_DIR_LOCAL/.rc.local.list"
     else # Load scripts by pattern search
       rc_sourcemod "$RC_DIR/.rc.d/*$PATTERN*.sh"
       if [ -n "$BASH_VERSION" ]; then
@@ -160,7 +144,7 @@ rc_source() {
       fi
       rc_sourcemod "$RC_DIR_LOCAL/.rc.local.d/*$PATTERN*.sh"
       rc_sourcemod "$RC_DIR_LOCAL/.rc.local.d/*/*$PATTERN*.sh"
-    fi   
+    fi
   done
 
   ##############
@@ -175,7 +159,6 @@ rc_source() {
   # Cleanup at the last nested call
   if [ "$RC_CNT" = "1" ]; then
     unset -f rc_log rc_sourcemod rc_sourcelist rc_sourcefile
-    [ -f "$RC_LIST" ] && rm -I "$RC_LIST"
     # Restore shell options
     eval "$RC_SHELLOPTS"
   fi
