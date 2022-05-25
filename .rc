@@ -132,8 +132,8 @@ rc_source() {
       rc_sourcemod "$PATTERN/*.sh"
     elif [ -f "$PATTERN" ] && echo "$PATTERN" | grep -e '\.sh$' >/dev/null; then # Load explicit files (absolute path needed)
       rc_sourcefile "$PATTERN"
-    elif [ $# -eq 0 ] && [ -z "$RC_ALL" ] && [ -r "$RC_DIR/.rc.list" -o -r "$RC_DIR_LOCAL/.rc.local.list" ]; then # Load from list
-      rc_sourcelist "$RC_DIR/.rc.list" "$RC_DIR_LOCAL/.rc.local.list"
+    elif [ $# -eq 0 ] && [ -z "$RC_ALL" ] && [ -r "$RC_DIR/.rc.autoload" -o -r "$RC_DIR_LOCAL/.rc.local.autoload" ]; then # Load from list
+      rc_sourcelist "$RC_DIR/.rc.autoload" "$RC_DIR_LOCAL/.rc.local.autoload"
     else # Load scripts by pattern search
       rc_sourcemod "$RC_DIR/.rc.d/*$PATTERN*.sh"
       if [ -n "$BASH_VERSION" ]; then
@@ -172,7 +172,7 @@ rc_hook() {
   local RET=$?
   [ "$RC_SUBENV" = "$PWD" ] && return $RET
   ! [ -r "$PWD/.rc.local" ] && return $RET
-  ! command grep -e "^$PWD\$" "${RC_LOCAL_DIR:-$HOME}/.rc.local.allowed" >/dev/null 2>&1 && return $RET
+  ! command grep -e "^$PWD\$" "$RC_DIR_LOCAL/.rc.local.allowed" >/dev/null 2>&1 && return $RET
   export RC_SUBENV="$PWD"
   source "$PWD/.rc.local"
   return $RET
