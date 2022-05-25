@@ -172,7 +172,7 @@ rc_hook() {
   local RET=$?
   [ "$RC_SUBENV" = "$PWD" ] && return $RET
   ! [ -r "$PWD/.rc.local" ] && return $RET
-  ! command grep -e "^$PWD\$" "$RC_DIR_LOCAL/.rc.local.allowed" >/dev/null 2>&1 && return $RET
+  ! command grep -e "^$PWD\(/[^/]*\)\?\$" "$RC_DIR_LOCAL/.rc.local.allowed" >/dev/null 2>&1 && return $RET
   export RC_SUBENV="$PWD"
   source "$PWD/.rc.local"
   return $RET
