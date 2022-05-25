@@ -1,6 +1,12 @@
 #!/bin/sh
 
-################################
+# Set snap extra files access rights
+snap_allow_home() {
+  for SNAP; do
+    snap connect $SNAP:home
+  done
+}
+
 # Remove disabled snap
 # https://www.linuxuprising.com/2019/04/how-to-remove-old-snap-versions-to-free.html
 snap_rm_disabled() {
