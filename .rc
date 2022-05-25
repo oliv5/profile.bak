@@ -42,6 +42,7 @@ rc_source() {
   rc_sourcefile() {
     local FILE FCT
     for FILE; do
+      [ -r "$FILE" ] || continue
       local MINIFIED="${FILE%.*}.min"
       if [ -z "$BASH_VERSION" ] && head -c 40 "$FILE" | grep "bash" >/dev/null 2>&1; then
         rc_log "Skip bash file $FILE"
@@ -187,17 +188,20 @@ rc_source() {
 rc_hook() {
   local RET=$?
   [ "$RC_SUBENV" = "$PWD" ] && return $RET
-  ! [ -r "$PWD/.rc.shell" ] && ! [ -r "$PWD/.rc.env" ] && return $RET
-  ! command grep -e "^$PWD\$" "${RC_LOCAL_DIR:-$HOME}/.rc.local.env" >/dev/null 2>&1 && return $RET
-  if [ -r "$PWD/.rc.env" ]; then
+  ! [ -r "$PWD/.rc.local.shell" ] && ! [ -r "$PWD/.rc.local.env" ] && return $RET
+  ! command grep -e "^$PWD\$" "${RC_LOCAL_DIR:-$HOME}/.rc.local.allowed" >/dev/null 2>&1 && return $RET
+  if [ -r "$PWD/.rc.local.env" ]; then
     export RC_SUBENV="$PWD"
-    source "$PWD/.rc.env"
-  elif [ -r "$PWD/.rc.shell" ]; then
+    source "$PWD/.rc.local.env"
+  elif [ -r "$PWD/.rc.local.shell" ]; then
     if [ -n "$BASH_VERSION" ]; then
-      exec 3<>-
+      umask 077
+      local TMPFILE="$(mktemp)"
+      exec 3<>"$TMPFILE"
+      cat <&3 >/dev/null
       cat >&3 <<EOF
-exec 3<&- 3>&-
 trap -- '' SIGINT
+rm "$TMPFILE"
 export RC_SUBENV="$PWD"
 export HOME="$HOME"
 export TERM=xterm
@@ -207,11 +211,10 @@ source ~/.profile
 source /etc/bash.bashrc
 source ~/.bashrc
 export PS1="($(basename "$PWD")) \$PS1"
-source .rc.shell
+source .rc.local.shell
 trap - SIGINT
 EOF
       exec -c bash --rcfile /proc/$$/fd/3
-      exec 3<&- 3>&-
     else
       echo >&2 "Only bash is supported !"
     fi

@@ -12,7 +12,7 @@
 
 # Misc variables
 [ -z "$USER" ] && export USER="$({ id -un 2>/dev/null || id -u; } | awk '{print $1; exit}')"
-[ -z "$HOME" ] && export HOME="$(awk -F: '/'$USER'/ {print $6; exit}' /etc/passwd || echo "$PWD/$USER")"
+[ -z "$HOME" ] && export HOME="$(awk -F: '/'$USER'/ {print $6; exit}' /etc/passwd || echo "/home/$USER")"
 [ -z "$LOGNAME" ] && export LOGNAME="$USER"
 [ -z "$HOSTNAME" ] && export HOSTNAME="$({ hostname 2>/dev/null || uname -n; } | head -n 1)"
 [ -z "$DOMAIN" ] && export DOMAIN="$(hostname -d 2>/dev/null | head -n 1)"
@@ -23,7 +23,7 @@ export ENV_PROFILE=$((ENV_PROFILE+1))
 export RC_DIR="${RC_DIR:-$HOME}"
 export RC_DIR_LOCAL="${RC_DIR_LOCAL:-$HOME}"
 
-# Declare user script (dash-only)
+# Declare user script (posix shells only)
 export ENV="$RC_DIR/.dashrc"
 
 # Load local profile script

@@ -21,7 +21,7 @@ HISTSIZE=1000
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
 # set basic prompt
-export PS1='${USER}${HOSTNAME:+@$HOSTNAME}: $PWD\$ '
+export PS1='${USER:-$(id -un)}${HOSTNAME:+@$HOSTNAME}: $PWD\$ '
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
