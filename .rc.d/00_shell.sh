@@ -88,6 +88,30 @@ shell_replace() {
   exec -c "$0" -li
 }
 
+# Reload the shell entirely
+shell_reload() {
+  umask 077
+  local TMPFILE="$(mktemp)"
+  exec 3<>"$TMPFILE"
+  cat <&3 >/dev/null
+  cat > "$TMPFILE" <<EOF
+rm "$TMPFILE"
+unset ENV
+. "$HOME/.profile"
+if [ -n "$BASH_VERSION" ]; then
+  . "$HOME/.bashrc"
+else
+  . "$HOME/.dashrc"
+fi
+$@
+EOF
+  if [ -n "$BASH_VERSION" ]; then
+    exec -c env ENV=/proc/$$/fd/3 bash --posix -i
+  else
+    exec env ENV=/proc/$$/fd/3 dash -i
+  fi
+}
+
 # Returns true for interactive shells
 shell_isinteractive() {
   # Test whether stdin exists
