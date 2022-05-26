@@ -83,9 +83,9 @@ rc_source() {
     # Note: no double-quotes around $@ below !
     set -- $@
     for FILE; do
-      #~ if [ -n "$RC_ALL" ] || [ -x "$FILE" ]; then
+      if [ -n "$RC_ALL" ] || [ -x "$FILE" ]; then
         rc_sourcefile "$FILE"
-      #~ fi
+      fi
     done
   }
 
