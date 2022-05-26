@@ -44,7 +44,9 @@ set runtimepath+=$XDG_CONFIG_HOME/vim/after
 
 " Setup vim persistence config
 " see :help persistent-undo
-set viminfo='10,\"100,:20,n$XDG_CACHE_HOME/vim/viminfo
+if filewritable($XDG_CACHE_HOME . "/vim")
+	set viminfo='10,\"100,:20,n$XDG_CACHE_HOME/vim/viminfo
+endif
 set undofile
 
 " Double slash does not actually work for backupdir, here's a fix

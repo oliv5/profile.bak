@@ -92,7 +92,9 @@ silent !mkdir -p "$XDG_CACHE_HOME/vim/vimbackup" "$XDG_CACHE_HOME/vim/vimview" "
 "  :20  :  20 lines of command-line history
 "  %    :  buffer list
 "  n... :  viminfo file location
-set viminfo='10,\"100,:20,n$XDG_CACHE_HOME/vim/viminfo
+if filewritable($XDG_CACHE_HOME . "/vim")
+	set viminfo='10,\"100,:20,n$XDG_CACHE_HOME/vim/viminfo
+endif
 
 " Force write with sudo after opening the file
 cmap w!! w !sudo tee % >/dev/null
@@ -269,7 +271,7 @@ nnoremap <localleader>c  :set invlist<CR>
 " *******************************************************
 " Disable specific plugins entirely or configuration of plugins only
 "let g:loaded_bbye = 1
-"let g:loaded_project = 1
+let g:loaded_project = 1 " warning: has side effects with 'set nocompatible'
 "let g:loaded_taglist = 1
 "let g:loaded_tagbar = 1
 "let g:loaded_srcexpl = 1
