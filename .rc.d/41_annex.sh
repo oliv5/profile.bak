@@ -1008,6 +1008,54 @@ annex_preferred() {
 }
 
 ########################################
+# Configure the local repo
+annex_config() {
+  local PARAM="${1:?No parameter specified...}"
+  local BOOL="${2:-true}"
+  test "$BOOL" = "true" || BOOL=false
+  git config --replace-all "annex.$PARAM" "$BOOL"
+  echo -n annex.$PARAM=
+  git config --get "annex.$PARAM"
+}
+
+# Configure a remote
+annex_remote_config() {
+  local PARAM="${1:?No parameter specified...}"
+  local BOOL="${2:-true}"
+  test "$BOOL" = "true" || BOOL=false
+  for REMOTE in $(git_remotes "$3"); do
+    git config --replace-all "remote.$REMOTE.$PARAM" "$BOOL"
+    echo -n remote.$REMOTE.$PARAM=
+    git config --get "remote.$REMOTE.$PARAM"
+  done
+}
+
+# Limitations
+annex_autocommit() {
+  annex_config autocommit "$@"
+}
+
+annex_remote_push_enable() {
+  annex_remote_config annex-push "$@"
+}
+
+annex_remote_pull_enable() {
+  annex_remote_config annex-pull "$@"
+}
+
+annex_remote_sync_enable() {
+  annex_remote_config annex-sync "$@"
+}
+
+annex_remote_ignore() {
+  annex_remote_config annex-ignore "$@"
+}
+
+annex_remote_readonly() {
+  annex_remote_config annex-readonly "$@"
+}
+
+########################################
 # Fsck all
 annex_fsck() {
   local PARAM1="$1"

@@ -368,7 +368,7 @@ git_stx() {
 
 # Get remote names
 git_remotes() {
-  git ${1:+--git-dir="$1"} remote | xargs
+  git ${2:+--git-dir="$2"} remote | grep -E "$1" | xargs
 }
 
 # Check remote registration
