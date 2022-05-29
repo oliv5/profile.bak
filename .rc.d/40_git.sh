@@ -174,10 +174,10 @@ git_unlock() {
 
 # Refresh index
 git_update_index() {
-  git_stx | xargs -r0 -n1 git update-index -q --refresh
+  git_stx "" "$1" | xargs -r0 -n1 git update-index -q --refresh
 }
 git_update_index_all() {
-  git ls-files -z | xargs -r0 -n1 git update-index -q --refresh
+  git ls-files -z ${1:+"$1"} | xargs -r0 -n1 git update-index -q --refresh
 }
 
 # Find repos and execute commands in them
@@ -187,7 +187,7 @@ git_foreach() {
     for DIR; do
       (export GIT_DIR="$DIR"; echo "$DIR"; eval "${CMD}")
     done
-  ' _ "$@"
+  ' _ "$1"
 }
 
 ########################################
@@ -360,10 +360,10 @@ git_untracked() {
 git_st() {
   #git ${2:+--git-dir="$2"} status -s | awk '/^[\? ]?'$1'[\? ]?/ {print "\""$2"\""}'
   #git ${2:+--git-dir="$2"} status -s | awk '/'"^[\? ]?$1"'/{print substr($0,4)}'
-  git ${2:+--git-dir="$2"} status -s --porcelain --untracked | awk '/^^[\? ]?'$1'/{print $2}'
+  git ${3:+--git-dir="$3"} status -s --porcelain --untracked ${2:+"$2"} | awk '/^^[\? ]?'$1'/{print $2}'
 }
 git_stx() {
-  git ${2:+--git-dir="$2"} status -z | awk 'BEGIN{RS="\0"; ORS="\0"}/'"^[\? ]?$1"'/{print substr($0,4)}'
+  git ${3:+--git-dir="$3"} status -z ${2:+"$2"} | awk 'BEGIN{RS="\0"; ORS="\0"}/'"^[\? ]?$1"'/{print substr($0,4)}'
 }
 
 # Get remote names
@@ -872,6 +872,9 @@ git_ls() {
   #git ${3:+--git-dir="$3"} ls-tree -r ${1:-$(git_branch "" "$3")} --name-only ${2:+| grep -F "$2"}
   git ls-files "$@"
 }
+git_lsx() {
+  git ls-files -z "$@"
+}
 
 # List files in commit
 git_ls_commit() {
@@ -1238,6 +1241,16 @@ git_findb0() {
 }
 git_findb() {
   git_findb0 "$@" | xargs -r0
+}
+
+# Find binary files in repo
+git_find_bin() {
+  # Need gnu-sed with -r
+  git ${1:+--git-dir="$1"} log --all --numstat \
+    | grep '^-' \
+    | cut -f3 \
+    | sed -r 's|(.*)\{(.*) => (.*)\}(.*)|\1\2\4\n\1\3\4|g' \
+    | sort -u
 }
 
 ########################################

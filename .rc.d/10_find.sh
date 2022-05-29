@@ -234,3 +234,23 @@ find_version() {
       | head -1
 
 }
+
+###########################################
+# Return true when all files are binaries
+is_bin() {
+  for FILE; do
+    ! grep -IL . "$FILE" >/dev/null || return 1
+    # Other methods:
+    #file -bL --mime "$FILE" | grep -q '^text' >/dev/null || return 1
+    #echo "$FILE" | perl -lne 'print if -B' || return 1
+  done
+  return 0
+}
+
+# Find binary files
+find_bin() {
+  for DIR in "${@:-.}"; do
+    find "$DIR" -type f ! -size 0 -exec grep -IL . "{}" \;
+  done
+}
+alias ff_bin='find_bin'
