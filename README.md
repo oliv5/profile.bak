@@ -1,3 +1,7 @@
+# Repository archived
+
+This repository is an old copy of my [current working one](https://github.com/oliv5/profile.git). It is now **read-only**.
+
 ## Summary
 
 This is the core user profile I use on all my different setups (home laptop, nas, android cell phone through termux, work).
